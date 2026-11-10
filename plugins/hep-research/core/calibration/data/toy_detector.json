@@ -1,0 +1,508 @@
+{
+ "schema": "calibration-fixture/1",
+ "fixture": "toy_detector",
+ "description": "Toy detector of section 15.1: calorimeter branch (input, deposition, photon generation, PDE, gain with ENF, electronics; overlapping modules with an energy-ratio comparison node), track branch (input, momentum measurement; overlapping layers with a position-difference comparison node) and the E/p merge node. Graph structure only (phase 0): no simulation.",
+ "status": "synthetic",
+ "contract": {
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "input",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ]
+    },
+    {
+     "id": "deposition",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "photon_generation",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "2",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "pde",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4a",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "gain",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4b",
+     "mechanisms": [
+      "yield",
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "5",
+     "mechanisms": [
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "module_a",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "module_b",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "energy_ratio",
+     "kind": "comparison",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "track_input",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ]
+    },
+    {
+     "id": "momentum_measurement",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "7",
+     "mechanisms": [
+      "geometry-material",
+      "transport-diffusion"
+     ]
+    },
+    {
+     "id": "layer_a",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "layer_b",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "position_difference",
+     "kind": "comparison",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "momentum",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "e_over_p",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7"
+    }
+   ],
+   "edges": [
+    {
+     "from": "input",
+     "to": "deposition"
+    },
+    {
+     "from": "deposition",
+     "to": "photon_generation"
+    },
+    {
+     "from": "photon_generation",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "gain"
+    },
+    {
+     "from": "gain",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "module_a"
+    },
+    {
+     "from": "electronics",
+     "to": "module_b"
+    },
+    {
+     "from": "module_a",
+     "to": "energy_ratio"
+    },
+    {
+     "from": "module_b",
+     "to": "energy_ratio"
+    },
+    {
+     "from": "track_input",
+     "to": "momentum_measurement"
+    },
+    {
+     "from": "momentum_measurement",
+     "to": "momentum"
+    },
+    {
+     "from": "momentum_measurement",
+     "to": "layer_a"
+    },
+    {
+     "from": "momentum_measurement",
+     "to": "layer_b"
+    },
+    {
+     "from": "layer_a",
+     "to": "position_difference"
+    },
+    {
+     "from": "layer_b",
+     "to": "position_difference"
+    },
+    {
+     "from": "momentum",
+     "to": "e_over_p"
+    },
+    {
+     "from": "module_a",
+     "to": "e_over_p"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "light_yield",
+    "role": "theta",
+    "nodes": [
+     "photon_generation"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "pde",
+    "role": "theta",
+    "nodes": [
+     "pde"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "enf",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "fluctuation"
+   },
+   {
+    "name": "noise_width",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold"
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold"
+   },
+   {
+    "name": "material_thickness",
+    "role": "phi",
+    "nodes": [
+     "deposition"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "relative_gain_b",
+    "role": "theta",
+    "nodes": [
+     "module_b"
+    ],
+    "mechanism": "sharing-crosstalk"
+   },
+   {
+    "name": "momentum_scale",
+    "role": "theta",
+    "nodes": [
+     "momentum_measurement"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "sum_term_a",
+    "role": "theta",
+    "nodes": [
+     "momentum_measurement"
+    ],
+    "mechanism": "transport-diffusion"
+   },
+   {
+    "name": "sum_term_b",
+    "role": "theta",
+    "nodes": [
+     "layer_b"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "layer_b_offset",
+    "role": "theta",
+    "nodes": [
+     "layer_b"
+    ],
+    "mechanism": "geometry-material"
+   }
+  ],
+  "references": [
+   {
+    "id": "known_input",
+    "type": "known-input",
+    "edge": {
+     "into": "input"
+    },
+    "observation": "module_a",
+    "enabled": true
+   },
+   {
+    "id": "light_source",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "photon_generation",
+     "to": "pde"
+    },
+    "observation": "module_a",
+    "conversion": {
+     "relation": "known photon count",
+     "parameters": []
+    }
+   },
+   {
+    "id": "single_photoelectron",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "pde",
+     "to": "gain"
+    },
+    "observation": "module_a",
+    "conversion": {
+     "relation": "single photoelectron charge",
+     "parameters": []
+    }
+   },
+   {
+    "id": "module_overlap",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "energy_ratio"
+    },
+    "observation": "energy_ratio"
+   },
+   {
+    "id": "momentum_reference",
+    "type": "known-input",
+    "edge": {
+     "into": "track_input"
+    },
+    "observation": "e_over_p"
+   },
+   {
+    "id": "layer_overlap",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "position_difference"
+    },
+    "observation": "position_difference"
+   }
+  ]
+ },
+ "plan": {
+  "kernels": {
+   "input": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "deposition": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "photon_generation": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "pde": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "gain": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "electronics": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "energy_ratio": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "track_input": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "momentum_measurement": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "layer_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "layer_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "position_difference": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "momentum": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "e_over_p": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  }
+ }
+}
