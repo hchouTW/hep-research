@@ -43,6 +43,13 @@
    "registered_at": "2026-11-10T07:27:36Z",
    "card_commit": "d9b4f114",
    "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "34e2f7cdc48830da1cfff0f6a71cdc234a6ca5ab42fd945888a93a1931c5ea80",
+   "registered_at": "2026-11-10T07:28:59Z",
+   "card_commit": "a12bfff6",
+   "reason": "execution log only (D5/D11 material, blocked report); thresholds as at the first registration"
   }
  ]
 }

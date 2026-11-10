@@ -5,7 +5,7 @@
    "state": "blocked",
    "worktree": "../hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
-   "task_card_sha256": "a2641ceb0694cc111192a847477d7640ce03456ae549c10c78b2633113911925",
+   "task_card_sha256": "34e2f7cdc48830da1cfff0f6a71cdc234a6ca5ab42fd945888a93a1931c5ea80",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
    "blocked_on": [
     "E7 item 1: D5 (Part B line 4089) needs the author's explicit decision, recorded in simcal-approvals.md; reading in decision-sheet.md",
@@ -71,5 +71,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-10T07:27:36Z"
+ "updated": "2026-11-10T07:28:59Z"
 }
