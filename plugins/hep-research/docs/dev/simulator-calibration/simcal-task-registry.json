@@ -92,6 +92,13 @@
    "registered_at": "2026-11-10T07:58:57Z",
    "card_commit": "c4fa708f",
    "reason": "execution log only (worktree moved to ceph); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "2b6513dfdeb535cd2de9cfe0d1c57f31e30134e6fda0d111ba2bb6020611fb5e",
+   "registered_at": "2026-11-10T08:35:58Z",
+   "card_commit": "1206749a",
+   "reason": "gate test design registered before any gate run (exhaustive Appendix C scope in 68 shards: agree 32, invariants 32, lookup 4; mutants on the fixed slice; named cases; fixtures); D5/D11 settled by A6; execution-log decisions"
   }
  ]
 }
