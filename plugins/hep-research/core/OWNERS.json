@@ -289,7 +289,7 @@
   "calibration": {
    "steward": "hep-statistics",
    "status": "phase-0",
-   "purpose": "Simulator parameter calibration workflow (docs/dev/simulator-calibration/, Part B): the engine library of the calib_*.py scripts; each check of Part B section 14 is implemented once, in the module of its owning script (use: evidence grades, Appendix C; deps: dependencies, roles, version ids; chain: stage graph, candidate methods, P4; data: lineage, reads, failure records; contract: calib_contract check)",
+   "purpose": "Simulator parameter calibration workflow (docs/dev/simulator-calibration/, Part B): the engine library of the calib_*.py scripts; each check of Part B section 14 is implemented once, in the module of its owning script (use: evidence grades, Appendix C, rule-0 aggregation; deps: dependencies, roles, version ids; chain: stage graph, candidate methods, P4; data_release: releases, lineage, reads, failure records, opening conditions; contract: calib_contract check)",
    "consumers": [
     "skills/hep-statistics/scripts/calib_use.py",
     "skills/hep-statistics/scripts/calib_deps.py",
