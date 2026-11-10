@@ -13,7 +13,8 @@
   "k",
   "k0",
   "unused_observables",
-  "upstream"
+  "upstream",
+  "status"
  ],
  "additionalProperties": false,
  "properties": {
@@ -282,5 +283,48 @@
    }
   }
  },
- "$comment": "calibration-result/1 (section 10.1; D11, approval A6: k, k0 and the unused observables with their reasons are fields of the result). The own grade is null with a pending input; result_sha256 is computed after version_id (section 10.4)."
+ "$comment": "calibration-result/1 (section 10.1; D11, approval A6: k, k0 and the unused observables with their reasons are fields of the result). The own grade is null with a pending input; result_sha256 is computed after version_id (section 10.4). A result with a pending input has own_grade null, both resolutions and the records it waits for.",
+ "anyOf": [
+  {
+   "properties": {
+    "grade": {
+     "properties": {
+      "own_grade": {
+       "enum": [
+        "failed",
+        "projection",
+        "calibrated-unvalidated",
+        "validated-in-scope"
+       ]
+      }
+     },
+     "required": [
+      "own_grade"
+     ]
+    }
+   }
+  },
+  {
+   "required": [
+    "waiting_records"
+   ],
+   "properties": {
+    "grade": {
+     "required": [
+      "own_grade",
+      "resolutions"
+     ],
+     "properties": {
+      "own_grade": {
+       "type": "null"
+      },
+      "resolutions": {
+       "type": "array",
+       "minItems": 2
+      }
+     }
+    }
+   }
+  }
+ ]
 }

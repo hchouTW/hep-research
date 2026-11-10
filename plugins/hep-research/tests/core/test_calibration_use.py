@@ -32,8 +32,8 @@ REFERENCE_SHA256 = "c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a
 
 
 def load_reference():
-    data = REFERENCE.read_bytes()
-    got = hashlib.sha256(data).hexdigest()
+    reference_bytes = REFERENCE.read_bytes()
+    got = hashlib.sha256(reference_bytes).hexdigest()
     if got != REFERENCE_SHA256:
         raise AssertionError(f"reference decision table has SHA-256 {got}, not the v7.37.4 version")
     spec = importlib.util.spec_from_file_location("calib_use_decision_table_ref", REFERENCE)
@@ -77,13 +77,9 @@ class AgreesWithReference(unittest.TestCase):
         """Each mutant must be caught by the full scope (gate run); on the slice, the mutants known to be caught there
         must be, so a weakened invariant shows up in the unit suite too."""
         import calibration_exhaustive as ex
-        detail, _ = ex.run_mutants(REF, use, deps, 1, SLICE)
-        self.assertEqual(len(detail["mutants"]), 24)
-        missed = sorted(m for m, c in detail["mutants"].items() if not c and m not in MUTANTS_NOT_CAUGHT_ON_SLICE)
-        self.assertEqual(missed, [])
-
-
-MUTANTS_NOT_CAUGHT_ON_SLICE: frozenset = frozenset()
+        detail, ok = ex.run_mutants(REF, use, deps, 1, SLICE)
+        self.assertEqual(len(detail["mutants"]), ex.REFERENCE_MUTANTS)
+        self.assertTrue(ok, detail["not_caught"])
 
 
 # ------------------------------------------------------------------ outcome already determined (independent)
@@ -138,8 +134,8 @@ def lookup_scope():
     """Every own combination of Appendix C's scope with at least one undecided input, with and without a capped
     central upstream (section 15.3.12, last case)."""
     for c in REF.own_cases():
-        if c["incomplete"]:
-            continue                       # the undecided inputs below stand for the incomplete ones
+        if not c["incomplete"]:
+            continue                       # an undecided input is an incomplete one (consistency rule of the lookup)
         subsets = [("mandatory-gate",)] if c["vmode"] == "none" else [
             s for k in (1, 2, 3) for s in itertools.combinations(use.UNDECIDED, k)]
         for und in subsets:
@@ -168,34 +164,34 @@ def base(**kw):
 class NamedCases(unittest.TestCase):
     """Sections 15.3.12 (outcome already determined), 15.3.15 (grade rules), 15.3.17 (use)."""
 
-    def test_15_3_12(self):
+    def test_outcome_already_determined_cases(self):
         failed_up = [dict(usages={"phi-center"}, effective_grade="failed", flags=set())]
-        r = use.outcome_determined(base(), failed_up, ["mandatory-gate"])
+        r = use.outcome_determined(base(incomplete=True), failed_up, ["mandatory-gate"])
         self.assertTrue(r["determined"])
         self.assertEqual(r["effective_grade"], "failed")
-        self.assertFalse(use.outcome_determined(base(), [], ["mandatory-gate"])["determined"])
-        r = use.outcome_determined(base(real_data=False), [], ["mandatory-gate"])
+        self.assertFalse(use.outcome_determined(base(incomplete=True), [], ["mandatory-gate"])["determined"])
+        r = use.outcome_determined(base(incomplete=True, real_data=False), [], ["mandatory-gate"])
         self.assertFalse(r["determined"])                                   # failed versus projection
         self.assertEqual({g for g, _ in r["outcomes"]}, {"failed", "projection"})
-        r = use.outcome_determined(base(real_data=False), [], ["v"])
+        r = use.outcome_determined(base(incomplete=True, real_data=False), [], ["v"])
         self.assertEqual((r["determined"], r["effective_grade"]), (True, "projection"))   # not opened
-        r = use.outcome_determined(base(real_data=False), [], ["p7", "v"])
+        r = use.outcome_determined(base(incomplete=True, real_data=False), [], ["p7", "v"])
         self.assertEqual(r["effective_grade"], "projection")
         # k0 = 0 known before opening: P7 and V are no-testable-direction (decided, testable_ok False), so the
         # unconfirmed lineage leaves nothing undecided
         r = use.outcome_determined(base(testable_ok=False), [], [])
         self.assertTrue(r["determined"])
-        r = use.outcome_determined(base(own_flags={"closure-not-tested"}), [], ["v"])
+        r = use.outcome_determined(base(incomplete=True, own_flags={"closure-not-tested"}), [], ["v"])
         self.assertEqual((r["determined"], r["effective_grade"]), (True, "calibrated-unvalidated"))
-        r = use.outcome_determined(base(p7_failed=True), [], ["v"])      # P7 power insufficient (3b)
+        r = use.outcome_determined(base(incomplete=True, p7_failed=True), [], ["v"])      # P7 power insufficient (3b)
         self.assertEqual((r["determined"], r["effective_grade"]), (True, "calibrated-unvalidated"))
         # cross-validation k1 with power lower bound 0.6: not computed, no read; k2 on the same units is free
-        k1 = use.outcome_determined(base(vmode="cross-validation", p7_failed=True), [], ["v"])
+        k1 = use.outcome_determined(base(incomplete=True, vmode="cross-validation", p7_failed=True), [], ["v"])
         self.assertEqual(k1["effective_grade"], "calibrated-unvalidated")
         k2 = use.judge(base(vmode="cross-validation"), [])
         self.assertEqual(k2["effective_grade"], "validated-in-scope")
 
-    def test_15_3_15(self):
+    def test_grade_rule_cases(self):
         self.assertEqual(use.assign(base(v_pass=False)), "calibrated-unvalidated")
         self.assertEqual(use.assign(base(vmode="none", design_only=True)), "projection")
         self.assertEqual(use.assign(base(p7_failed=True)), "calibrated-unvalidated")
@@ -207,7 +203,7 @@ class NamedCases(unittest.TestCase):
         self.assertIn("provisional-thresholds", j["flags"])
         self.assertNotIn("publication", j["uses"])
 
-    def test_15_3_17_use(self):
+    def test_use_rule_cases(self):
         proj = use.judge(base(real_data=False), [])
         self.assertNotIn("production", proj["uses"])
         j = use.judge(base(mandatory_gate_failed=True, own_flags={"outside-validated-range"}), [])
@@ -222,6 +218,17 @@ class NamedCases(unittest.TestCase):
         prelim = dict(usages={"variation-set"}, effective_grade="validated-in-scope", flags={"preliminary"})
         self.assertNotIn("publication", use.judge(base(), [prelim])["uses"])
 
+    def test_lookup_refuses_inconsistent_undecided_inputs(self):
+        """F1 of the phase-0 review: the undecided list matches the incomplete input; mode none has only gates."""
+        with self.assertRaises(ValueError):
+            use.outcome_determined(base(incomplete=True), [], [])      # incomplete with nothing undecided
+        with self.assertRaises(ValueError):
+            use.outcome_determined(base(), [], ["v"])                    # undecided but not incomplete
+        with self.assertRaises(ValueError):
+            use.outcome_determined(base(vmode="none", incomplete=True), [], ["p7", "v"])
+        r = use.outcome_determined(base(incomplete=True, p7_failed=True), [], ["v"])
+        self.assertEqual(r["inputs_when_not_opened"], {"v_pass": False, "incomplete": False})
+
     def test_rejections(self):
         with self.assertRaises(ValueError):
             use.judge(base(), [dict(usages={"envelope"}, effective_grade="projection", flags=set())])
@@ -234,6 +241,60 @@ class NamedCases(unittest.TestCase):
         j = use.judge(base(vmode="cross-validation", earlier_failure_record="pending"), [])
         self.assertEqual((j["effective_grade"], j["own_grade"], j["uses"]), ("incomplete", None, []))
         self.assertEqual(len(j["resolutions"]), 2)
+
+
+class IncompleteAggregation(unittest.TestCase):
+    """Rule 0 aggregation (section 10.2; owner calib_use, section 15.3a 'incomplete aggregation')."""
+
+    def gates(self, **kw):
+        g = {x: "passed" for x in use.MANDATORY}
+        g.update({k.replace("_", "-"): v for k, v in kw.items()})
+        return g
+
+    def test_all_passed(self):
+        r = use.aggregate(self.gates(), "passed", "passed", "holdout")
+        self.assertEqual((r["inputs"]["incomplete"], r["inputs"]["mandatory_gate_failed"], r["undecided"]),
+                         (False, False, []))
+        self.assertEqual(use.judge(base(**r["inputs"]), [])["effective_grade"], "validated-in-scope")
+
+    def test_15_3_15_g8_fails_later_stages_not_applicable(self):
+        g = self.gates(G8="failed")
+        for x in use.STAGES["D"] + use.STAGES["E"]:
+            g[x] = "not-run"
+        r = use.aggregate(g, "not-applicable", "not-applicable", "holdout")
+        self.assertEqual((r["inputs"]["mandatory_gate_failed"], r["inputs"]["incomplete"]), (True, False))
+        self.assertEqual(use.judge(base(**r["inputs"]), [])["effective_grade"], "failed")
+
+    def test_not_applicable_not_counted_missing_counted(self):
+        r = use.aggregate(self.gates(P0="not-applicable", P6="not-applicable", G4="not-applicable"), "passed",
+                          "passed", "holdout")
+        self.assertFalse(r["inputs"]["incomplete"])
+        g = self.gates()
+        del g["G5"]                                                    # not executed: incomplete
+        r = use.aggregate(g, "passed", "passed", "holdout")
+        self.assertEqual((r["inputs"]["incomplete"], r["undecided"]), (True, ["mandatory-gate"]))
+        r = use.aggregate(self.gates(G1="incomplete"), "incomplete", "incomplete", "cross-validation")
+        self.assertEqual(r["undecided"], ["mandatory-gate", "p7", "v"])
+        self.assertEqual(use.judge(base(**r["inputs"], vmode="cross-validation"), [])["effective_grade"], "incomplete")
+
+    def test_v_and_p7_states(self):
+        self.assertFalse(use.aggregate(self.gates(), "passed", "failed", "holdout")["inputs"]["incomplete"])
+        r = use.aggregate(self.gates(), "passed", "no-testable-direction", "holdout")
+        self.assertEqual(use.judge(base(**r["inputs"]), [])["effective_grade"], "calibrated-unvalidated")
+        r = use.aggregate(self.gates(), "no-testable-direction", "no-testable-direction", "holdout")
+        self.assertEqual((r["inputs"]["incomplete"], r["inputs"]["testable_ok"]), (False, False))
+        r = use.aggregate(self.gates(), "passed", "insufficient-power", "holdout")
+        self.assertEqual(use.judge(base(**r["inputs"]), [])["effective_grade"], "calibrated-unvalidated")
+        r = use.aggregate(self.gates(G8="closure-not-tested"), "passed", "passed", "holdout")
+        self.assertEqual(r["flags"], ["closure-not-tested"])
+        self.assertFalse(r["inputs"]["incomplete"])
+        r = use.aggregate(self.gates(), "not-applicable", "not-applicable", "none")
+        self.assertEqual(use.judge(base(**r["inputs"], vmode="none", design_only=True), [])["effective_grade"],
+                         "projection")
+        with self.assertRaises(ValueError):
+            use.aggregate(self.gates(), "passed", "passed", "none")
+        with self.assertRaises(ValueError):
+            use.aggregate(self.gates(G99="passed"), "passed", "passed", "holdout")
 
 
 if __name__ == "__main__":

@@ -301,7 +301,7 @@
     "use",
     "deps",
     "chain",
-    "data",
+    "data_release",
     "contract",
     "io"
    ],

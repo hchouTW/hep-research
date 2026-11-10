@@ -15,11 +15,11 @@ sys.path.insert(0, str(ROOT))
 
 from core.calibration import chain  # noqa: E402
 
-DATA = ROOT / "core" / "calibration" / "data"
+FIXTURE_DIR = ROOT / "core" / "calibration" / "data"
 
 
 def load(name):
-    return json.loads((DATA / f"{name}.json").read_text())
+    return json.loads((FIXTURE_DIR / f"{name}.json").read_text())
 
 
 def only(c, *ids):
@@ -50,12 +50,22 @@ class Fixtures(unittest.TestCase):
             self.assertEqual(chain.node_index(g)[comp]["kind"], "comparison")
             self.assertEqual(len(chain.parents_of(g)[comp]), 2)
 
+    def test_15_3_18_p4_both_modules(self):
+        """Redundant measurements, P4 in phase 0 on the tracker and ECAL fixtures: with only the comparison-node
+        reference, the alignment and gain of both modules are decided as possibly constrained (a necessary condition;
+        the common mode is P3's, phase 2)."""
+        for name, ref in (("ecal", "crystal_overlap"), ("tracker", "layer_overlap")):
+            with self.subTest(name):
+                r = chain.p4(only(load(name)["contract"], ref))
+                for par in ("alignment_a", "alignment_b", "gain_a", "gain_b"):
+                    self.assertEqual(r["parameters"][par], [ref], par)
+
     def test_candidate_methods_follow_node_properties(self):
         d = load("ecal")
         m = chain.candidate_methods(d["contract"], d["plan"])["parameters"]
         self.assertEqual([x["method"] for x in m["pde"]], ["analytic-reweighting"])
         self.assertEqual([x["method"] for x in m["dead_material"]], ["resimulation", "surrogate-model"])
-        self.assertEqual([x["method"] for x in m["relative_gain_b"]], ["rerun"])
+        self.assertEqual([x["method"] for x in m["gain_b"]], ["rerun"])
         plan = json.loads(json.dumps(d["plan"]))
         plan["kernels"]["pde"]["support_declared"] = False
         self.assertEqual(chain.candidate_methods(d["contract"], plan)["parameters"]["pde"], [])

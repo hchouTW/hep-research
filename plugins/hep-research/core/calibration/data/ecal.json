@@ -203,11 +203,36 @@
     "mechanism": "noise-threshold"
    },
    {
-    "name": "relative_gain_b",
+    "name": "gain_a",
+    "role": "theta",
+    "nodes": [
+     "crystal_a"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain_b",
     "role": "theta",
     "nodes": [
      "crystal_b"
-    ]
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "alignment_a",
+    "role": "theta",
+    "nodes": [
+     "crystal_a"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "alignment_b",
+    "role": "theta",
+    "nodes": [
+     "crystal_b"
+    ],
+    "mechanism": "geometry-material"
    },
    {
     "name": "dead_material",

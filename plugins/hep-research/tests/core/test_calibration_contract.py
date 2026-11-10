@@ -28,6 +28,8 @@ def shape(name, role, K=3, **kw):
                      shape_class="free-omega", N_decl={"value": 50, "basis": "exposure times an external rate"})
     o.pop("value_conventions")
     o.update(kw)
+    if o["vector"].get("data_side") == "count" and "block" not in kw:
+        o["block"] = "poisson"                 # a count-likelihood shape is a Poisson block (section 2.1)
     return o
 
 
@@ -39,91 +41,91 @@ class Baseline(unittest.TestCase):
         self.assertEqual(len(cc.lock_hash(F.contract())), 64)
 
 
-class ContractRules_15_3_2(unittest.TestCase):
-    def assertRejected(self, c, code, rel=None, **kw):
+class ContractRulesSection15dot3dot2(unittest.TestCase):
+    def assert_rejected(self, c, code, rel=None, **kw):
         got = codes(c, rel, **kw)
         self.assertIn(code, got, got)
 
     def test_contains_data_values(self):
         c = F.contract()
         c["observables"][0]["observed_value"] = 1.234
-        self.assertRejected(c, "contract.data_values")
+        self.assert_rejected(c, "contract.data_values")
 
     def test_roles_overlap(self):
         c = F.contract()
         c["observables"].append(F.observable("energy_mean", "validation", "val_sample"))
-        self.assertRejected(c, "observables.role_overlap")
+        self.assert_rejected(c, "observables.role_overlap")
 
     def test_dependency_cycle(self):
         c = F.contract()
-        self.assertRejected(c, "upstream.cycle", series_graph={"toy-holdout": ["other"], "other": ["toy-holdout"]})
+        self.assert_rejected(c, "upstream.cycle", series_graph={"toy-holdout": ["other"], "other": ["toy-holdout"]})
         self.assertNotIn("upstream.cycle", codes(c, series_graph={"toy-holdout": ["other"], "other": []}))
 
     def test_stage_graph_cycle(self):
         c = F.contract()
         c["stage_graph"]["edges"].append({"from": "gain", "to": "photon_generation"})
-        self.assertRejected(c, "graph.cycle")
+        self.assert_rejected(c, "graph.cycle")
 
     def test_simulation_bins_by_true_value(self):
         c = F.contract()
         c["observables"][0]["binning"] = {"variable_level": "true"}
-        self.assertRejected(c, "observables.true_binning")
+        self.assert_rejected(c, "observables.true_binning")
 
     def test_model_enumerated_and_absorbed(self):
         c = F.contract()
         c["models"]["absorbed"] = [{"id": "nominal"}]
-        self.assertRejected(c, "models.enumerated_and_absorbed")
+        self.assert_rejected(c, "models.enumerated_and_absorbed")
 
     def test_inferred_form_without_holdout(self):
         c = F.contract()
         c["model_discrepancy"]["form"] = "inferred"
         self.assertNotIn("model_discrepancy.inferred_mode", codes(c))
         c["validation"]["mode"] = "cross-validation"
-        self.assertRejected(c, "model_discrepancy.inferred_mode")
+        self.assert_rejected(c, "model_discrepancy.inferred_mode")
 
     def test_kernel_not_positive_definite(self):
         c = F.contract()
         c["model_discrepancy"]["kernel"] = {"type": "matrix", "matrix": [[1.0, 2.0], [2.0, 1.0]]}
-        self.assertRejected(c, "model_discrepancy.kernel_not_pd")
+        self.assert_rejected(c, "model_discrepancy.kernel_not_pd")
         c["model_discrepancy"]["kernel"] = {"type": "matrix", "matrix": [[1.0, 0.5], [0.5, 1.0]]}
         self.assertNotIn("model_discrepancy.kernel_not_pd", codes(c))
         c["model_discrepancy"]["kernel"] = {"type": "cosine"}
-        self.assertRejected(c, "model_discrepancy.kernel_not_pd")
+        self.assert_rejected(c, "model_discrepancy.kernel_not_pd")
 
     def test_block_rule(self):
         c = F.contract()
         c["observables"][1]["block"] = "binomial"           # shares cal_sample with energy_mean
-        self.assertRejected(c, "observables.block_rule")
+        self.assert_rejected(c, "observables.block_rule")
 
     def test_injection_without_node_split(self):
         c = F.contract()
         c["references"][1]["edge"] = {"inside": "photon_generation"}
-        self.assertRejected(c, "reference.injection_not_split")
+        self.assert_rejected(c, "reference.injection_not_split")
         c = F.contract()
         c["references"][1]["edge"] = {"from": "input", "to": "pde"}       # not an edge of the graph
-        self.assertRejected(c, "reference.injection_not_split")
+        self.assert_rejected(c, "reference.injection_not_split")
 
     def test_link_range_mismatch(self):
         c = F.contract()
         c["observables"][0].update(range="unit-interval", link="log")    # log for a tail probability
-        self.assertRejected(c, "observables.link_range")
+        self.assert_rejected(c, "observables.link_range")
         c = F.contract()
         c["observables"][0].update(range="signed", link="log")           # log for a signed quantity
-        self.assertRejected(c, "observables.link_range")
+        self.assert_rejected(c, "observables.link_range")
 
     def test_shape_bins_as_scalars_or_k_minus_1(self):
         c = F.contract()
         c["observables"].append(F.observable("frac_b0", "calibration", "cal_sample", range="unit-interval",
                                              link="logit", bin_of="spectrum"))
-        self.assertRejected(c, "observables.shape_bin_as_scalar")
+        self.assert_rejected(c, "observables.shape_bin_as_scalar")
         c = F.contract()
         s = shape("spectrum", "calibration", sample=None)
         s["vector"]["bins"] = s["vector"]["bins"][:-1]                   # only K-1 bins
         c["observables"].append(s)
-        self.assertRejected(c, "observables.shape_bins")
+        self.assert_rejected(c, "observables.shape_bins")
         c = F.contract()
         c["observables"].append(shape("spectrum", "calibration", link="logit"))
-        self.assertRejected(c, "observables.shape_logit")
+        self.assert_rejected(c, "observables.shape_logit")
 
     def test_merging_rule(self):
         """n_min at the evaluation points is phase 2; phase 0 requires the merging rule, never by observed counts."""
@@ -131,37 +133,37 @@ class ContractRules_15_3_2(unittest.TestCase):
         s = shape("spectrum", "calibration", sample="cal_sample")
         s["vector"]["data_side"] = "gaussian-summary"
         c["observables"].append(s)
-        self.assertRejected(c, "observables.merging_rule")
+        self.assert_rejected(c, "observables.merging_rule")
         s["vector"]["merging_rule"] = {"defined_by": "observed-counts"}
-        self.assertRejected(c, "observables.merging_observed")
+        self.assert_rejected(c, "observables.merging_observed")
         s["vector"]["merging_rule"] = {"defined_by": "design-expectation", "n_min": 20}
         self.assertNotIn("observables.merging_rule", codes(c))
 
     def test_conversion_relation_missing(self):
         c = F.contract()
         del c["references"][1]["conversion"]
-        self.assertRejected(c, "references.conversion_missing")
+        self.assert_rejected(c, "references.conversion_missing")
         c = F.contract()
         c["references"][1]["conversion"]["parameters"] = ["led_alpha"]   # not listed as phi
-        self.assertRejected(c, "references.conversion_phi")
+        self.assert_rejected(c, "references.conversion_phi")
 
     def test_redundant_measurement_without_comparison_node(self):
         c = F.contract()
         c["references"][3]["edge"] = {"out_of": "module_a"}
         c["references"][3]["observation"] = "module_a"
-        self.assertRejected(c, "reference.redundant_without_comparison")
+        self.assert_rejected(c, "reference.redundant_without_comparison")
         c = F.contract()
         c["stage_graph"]["edges"].append({"from": "gain", "to": "energy_ratio"})   # three upstreams
-        self.assertRejected(c, "graph.comparison_upstream")
+        self.assert_rejected(c, "graph.comparison_upstream")
 
     def test_upstream_usage_and_role(self):
         c = F.contract()
         c["upstream"] = [{"result_sha256": F.h("up"), "usages": []}]
-        self.assertRejected(c, "upstream.usage")
+        self.assert_rejected(c, "upstream.usage")
         c["upstream"] = [{"result_sha256": F.h("up"), "usages": ["envelope", "nuisance-posterior"], "role": "variation"}]
-        self.assertRejected(c, "upstream.role_mismatch")
+        self.assert_rejected(c, "upstream.role_mismatch")
         c["upstream"] = [{"result_sha256": "0.97", "usages": ["xi"]}]
-        self.assertRejected(c, "upstream.not_hash")
+        self.assert_rejected(c, "upstream.not_hash")
 
 
 class OtherClauses(unittest.TestCase):
@@ -202,20 +204,42 @@ class OtherClauses(unittest.TestCase):
 
     def test_d5_subshape_after_exclusion(self):
         """A6 (D5): the sub-shape left after excluding a bin of a free-omega count shape is a new free-omega shape,
-        with its own N_decl and recorded basis, N_decl >= 10; a missing declaration rejects."""
-        c = F.contract()
-        sub = shape("spectrum_sub", "validation", K=2, sample=None, redeclared_from={"shape": "spectrum",
-                                                                                  "excluded_bins": ["b2"]})
-        c["observables"].append(sub)
-        c["validation"]["unused"].append({"observable": "spectrum.b2", "reason": "rank condition (c)",
-                                          "clause": "section 9.2"})
-        rel = F.releases()
-        rel[F.VAL]["observables"] += [{"name": "spectrum_sub"}, {"name": "spectrum.b2"}]
-        self.assertNotIn("observables.n_decl_basis", codes(c, rel))
+        with its own N_decl and recorded basis, N_decl >= 10; a missing declaration rejects. The sub-shape is a
+        consistent count shape (Poisson block, section 2.1); its class follows the parent (review F3)."""
+        def build(**sub_kw):
+            c = F.contract()
+            red = {"shape": "spectrum", "excluded_bins": ["b2"], "parent_shape_class": "free-omega",
+                   "parent_data_side": "count"}
+            sub = shape("spectrum_sub", "validation", K=2, sample=None, redeclared_from=red)
+            sub.update(sub_kw)
+            c["observables"].append(sub)
+            c["validation"]["unused"].append({"observable": "spectrum.b2", "reason": "rank condition (c)",
+                                              "clause": "section 9.2"})
+            rel = F.releases()
+            rel[F.VAL]["observables"] += [{"name": "spectrum_sub"}, {"name": "spectrum.b2"}]
+            return c, sub, rel
+        c, sub, rel = build()
+        got = codes(c, rel)
+        self.assertFalse(got & {"observables.n_decl_basis", "observables.n_decl_small", "observables.subshape_class",
+                                "observables.count_block"}, got)
+        self.assertIn("validation.block_unsupported", got)          # Poisson blocks need the phase-2 engine
         del sub["N_decl"]
         self.assertIn("observables.n_decl_basis", codes(c, rel))
         sub["N_decl"] = {"value": 9, "basis": "exposure times an external rate"}
         self.assertIn("observables.n_decl_small", codes(c, rel))
+        # bypasses found by the review: the sub-shape declares another class, or names no parent class
+        c, sub, rel = build(shape_class="conditioned")
+        del sub["N_decl"]
+        self.assertTrue({"observables.subshape_class", "observables.n_decl_basis"} <= codes(c, rel))
+        c, sub, rel = build()
+        del sub["redeclared_from"]["parent_shape_class"]
+        self.assertIn("observables.subshape_parent", codes(c, rel))
+        c, sub, rel = build(block="gaussian")
+        self.assertIn("observables.count_block", codes(c, rel))
+        # a declared parent decides the class; a contradicting statement is refused
+        c, sub, rel = build()
+        c["observables"].append(shape("spectrum", "calibration", shape_class="absolute"))
+        self.assertIn("observables.subshape_parent_mismatch", codes(c, rel))
 
     def test_d38_subshape_k1(self):
         c = F.contract()
@@ -295,6 +319,44 @@ class DataReleaseAndSharing(unittest.TestCase):
         c["validation"]["mode"] = "cross-validation"
         c["validation"]["unused"] = []
         self.assertNotIn("validation.holdout_shares_units", codes(c, rel))
+
+    def test_15_3_13_combined_efficiency(self):
+        """The holdout validation observable t (combined efficiency of two periods) shares events with the calibration
+        observables eps_1, eps_2: rejected at lock in holdout; accepted in cross-validation, with the cv flag."""
+        c = F.contract()
+        c["observables"] = [F.observable("eps_1", "calibration", "cal_sample", range="unit-interval", link="logit",
+                                         estimator="efficiency"),
+                            F.observable("eps_2", "calibration", "cal_sample", range="unit-interval", link="logit",
+                                         estimator="efficiency"),
+                            F.observable("t_combined", "validation", "cal_sample", range="unit-interval",
+                                         link="logit", estimator="efficiency")]
+        rel = F.releases()
+        rel[F.CAL]["observables"] = [{"name": n} for n in ("eps_1", "eps_2", "t_combined")]
+        rel[F.VAL]["lineage"]["raw_units"] = rel[F.CAL]["lineage"]["raw_units"]      # t is read from the same events
+        for n in ("eps_1", "eps_2", "t_combined"):
+            rel[F.CAL]["declarations"]["uncertainty_sources"][n] = {"statistical": "expected"}
+            rel[F.CAL]["declarations"]["has_value"][n] = True
+        self.assertIn("validation.holdout_shares_units", codes(c, rel))
+        c["validation"]["mode"], c["validation"]["unused"] = "cross-validation", []
+        r = cc.check(c, rel)
+        self.assertEqual((r["status"], r["result_flags"]), ("accepted", ["cv"]), r["findings"])
+
+    def test_15_3_13_1000_800_300_second_half(self):
+        """After the validation summary statistic is taken only from events of the calibration release, holdout is
+        still rejected (the releases share raw units); accepted in cross-validation with N_tot,s checked before lock."""
+        rel = F.releases()
+        rel[F.VAL]["lineage"]["raw_units"] = [f"evt-{i:04d}" for i in range(700, 1500)]   # 800 events, 300 shared
+        c = F.contract()
+        c["observables"][2]["sample"] = "cal_sample"                         # only calibration-release events
+        self.assertIn("validation.holdout_shares_units", codes(c, rel))
+        c["validation"]["mode"], c["validation"]["unused"] = "cross-validation", []
+        rel[F.CAL]["observables"].append({"name": "ratio_mean"})
+        rel[F.CAL]["declarations"]["uncertainty_sources"]["ratio_mean"] = {"statistical": "expected"}
+        rel[F.CAL]["declarations"]["has_value"]["ratio_mean"] = True
+        r = cc.check(c, rel)
+        self.assertEqual(r["status"], "accepted", r["findings"])
+        c["event_samples"][0]["components"][0]["N_decl"] = 999               # N_tot,s is 1000: checked before lock
+        self.assertIn("samples.n_decl_s_unequal", codes(c, rel))
 
     def test_15_3_13_mixed_sample(self):
         """A validation summary statistic sharing events with calibration observables, taken from a sample with

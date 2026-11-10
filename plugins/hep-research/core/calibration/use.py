@@ -178,6 +178,68 @@ def judge(c: dict, upstreams: list[dict]) -> dict:
     return out
 
 
+# ------------------------------------------------------------------ incomplete aggregation (rule 0)
+# Section 8.1 and 8.2: the mandatory gates are those of stages B to E except P7; P7 and V are validation-type gates.
+STAGES = {"B": ("P0", "P2", "P3", "P4", "P5", "P6", "P8"), "C": ("G8",), "D": ("G1", "G4", "G4-L", "G7"),
+          "E": ("G2", "G3", "G5", "G6", "G9")}
+MANDATORY = tuple(g for s in "BCDE" for g in STAGES[s])
+GATE_STATES = ("passed", "failed", "incomplete", "not-applicable", "not-run", "closure-not-tested")
+P7_STATES = ("passed", "failed", "incomplete", "no-testable-direction", "not-applicable")
+V_STATES = ("passed", "failed", "incomplete", "no-testable-direction", "insufficient-power", "not-applicable")
+
+
+def aggregate(gates: dict, p7: str, v: str, vmode: str) -> dict:
+    """The rule-0 inputs of Appendix C.1 from the recorded states of the gates (section 10.2 rules 0 and 1; section
+    8.1). A mandatory gate failed in the final version gives mandatory_gate_failed; the gates of later stages that were
+    not run after it, and P7 and V, are then not-applicable, not incomplete. Gates recorded not-applicable (their
+    applicability condition, section 8.1) are not counted. A mandatory gate absent from the record, not run (with no
+    failure before it) or incomplete makes the result incomplete; so do P7 or V incomplete. G8 without a decision is
+    closure-not-tested: a flag (rule 3c), not incomplete. Returns the C.1 fields it decides, the flags to add, the
+    undecided inputs (for outcome_determined) and the reasons."""
+    if vmode not in VMODES:
+        raise ValueError(f"validation mode must be one of {list(VMODES)}")
+    bad = {g: s for g, s in gates.items() if g not in MANDATORY or s not in GATE_STATES}
+    if bad:
+        raise ValueError(f"unknown mandatory gates or states {bad}; gates {list(MANDATORY)}, states {list(GATE_STATES)}")
+    if p7 not in P7_STATES or v not in V_STATES:
+        raise ValueError(f"P7 state must be one of {list(P7_STATES)}, V state one of {list(V_STATES)}")
+    if vmode == "none" and (p7 != "not-applicable" or v != "not-applicable"):
+        raise ValueError("in mode none P7 and V are not-applicable (section 8.1)")
+    failed_stage = next((s for s in "BCDE" if any(gates.get(g) == "failed" for g in STAGES[s])), None)
+    reasons, flags = [], set()
+    incomplete_gates = []
+    for s in "BCDE":
+        for g in STAGES[s]:
+            st = gates.get(g)
+            if failed_stage is not None and s > failed_stage and st in (None, "not-run", "not-applicable"):
+                continue                            # not run after a mandatory failure: not-applicable (rule 1)
+            if st in (None, "not-run", "incomplete"):
+                incomplete_gates.append(g)
+            elif st == "closure-not-tested":
+                flags.add("closure-not-tested")
+    out = {"mandatory_gate_failed": failed_stage is not None}
+    if failed_stage is not None:
+        reasons.append(f"a mandatory gate of stage {failed_stage} failed; later stages, P7 and V are not-applicable")
+        out.update(incomplete=False, p7_failed=False, v_pass=False, power_ok=True, testable_ok=True)
+        return {"inputs": out, "flags": sorted(flags), "undecided": [], "reasons": reasons}
+    undecided = []
+    if incomplete_gates:
+        undecided.append("mandatory-gate")
+        reasons.append(f"mandatory gates not decided: {incomplete_gates}")
+    if vmode != "none":
+        if p7 == "incomplete":
+            undecided.append("p7")
+            reasons.append("P7 incomplete")
+        if v == "incomplete":
+            undecided.append("v")
+            reasons.append("V incomplete (T_v not decided as failing)")
+    out.update(incomplete=bool(undecided), p7_failed=(p7 == "failed"),
+               v_pass=(v == "passed" or vmode == "none"),
+               power_ok=(v != "insufficient-power"),
+               testable_ok=(v != "no-testable-direction" and p7 != "no-testable-direction"))
+    return {"inputs": out, "flags": sorted(flags), "undecided": undecided, "reasons": reasons}
+
+
 # ------------------------------------------------------------------ outcome already determined (rule 0, D63)
 UNDECIDED = ("mandatory-gate", "p7", "v")
 # Possible outcomes of each undecided input, as the C.1 fields they set (section 10.2 rule 0):
@@ -215,12 +277,28 @@ def outcome_determined(c: dict, upstreams: list[dict], undecided) -> dict:
     effective()). Returns {"determined": bool, "outcomes": [(grade, uses)...]} and, when determined, the result: V is
     recorded not-applicable (input v_pass = False), the incomplete input does not count, and the data are not opened."""
     check_inputs(c)
+    undecided = list(dict.fromkeys(undecided))
+    if bool(undecided) != c["incomplete"]:
+        raise ValueError("the undecided inputs must be given exactly when the incomplete input is set (each "
+                         "incomplete mandatory gate, P7 or V is an undecided input; aggregate() derives them)")
+    if c["vmode"] == "none" and set(undecided) - {"mandatory-gate"}:
+        raise ValueError("in mode none P7 and V are not applicable and cannot be undecided")
     seen = set()
     for d in outcome_combinations(c, undecided):
         eff, flags = effective(d, upstreams)
         seen.add((eff, frozenset(allowed_uses(eff, flags))))
     out = {"determined": len(seen) == 1, "outcomes": sorted((g, sorted(u)) for g, u in seen)}
     if out["determined"]:
-        g, uses = next(iter(seen))
-        out["effective_grade"], out["uses"] = g, sorted(uses)
+        # Not opened: V is recorded not-applicable and enters as v_pass = False; the incomplete input does not count.
+        d = dict(c, incomplete=False, v_pass=False, mandatory_gate_failed=c["mandatory_gate_failed"])
+        if "mandatory-gate" in undecided:
+            d["mandatory_gate_failed"] = False
+        if "p7" in undecided:
+            d["p7_failed"] = False
+        eff, flags = effective(d, upstreams)
+        res = (eff, frozenset(allowed_uses(eff, flags)))
+        if res not in seen:
+            raise AssertionError("the not-opened result differs from the common outcome")
+        out["effective_grade"], out["uses"] = eff, sorted(res[1])
+        out["inputs_when_not_opened"] = {"v_pass": False, "incomplete": False}
     return out

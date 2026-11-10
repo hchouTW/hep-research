@@ -7,13 +7,18 @@
   calib_data.py units    --release FILE [--release FILE ...] --of HASH   raw units along the lineage
   calib_data.py draft    --ledger FILE --series NAME                register a contract draft (a read channel)
   calib_data.py fit-read --ledger FILE --release-hash H --units FILE --channel FILE [--kappa K]
-  calib_data.py open     --ledger FILE --kappa K --release-hash H --validation-units FILE --calibration-units FILE
-                         --channel FILE                             validation reads and pending failure records
+  calib_data.py open     --ledger FILE --kappa K --vmode holdout|cross-validation --release FILE ...
+                         --calibration H ... [--validation H ...] --channel FILE [--conditions FILE]
+                                                                    validation reads and pending failure records;
+                         the raw units come from the releases' lineage (unconfirmed lineage or a holdout sharing
+                         raw units is refused, nothing is recorded); --conditions holds the opening conditions
   calib_data.py decide   --ledger FILE --decision FILE             apply a decision record (phase 0: a stub)
   calib_data.py inputs   --ledger FILE --kappa K --vmode MODE --validation-units FILE --calibration-units FILE
                          [--no-validation-read]                    the reuse and failure-record inputs
 --units files hold a JSON list of raw-unit ids; --channel files hold {"contract_sha256": H} or {"series": S,
-"draft": N}. Ledger writes are atomic under an exclusive lock. Output: one JSON object; status ok/written (exit 0),
+"draft": N}. A release is identified by the canonical SHA-256 of its metadata (a declared release_sha256 must equal it).
+Ledger writes are atomic under an exclusive lock file LEDGER.lock; a lock left by a killed writer is removed by a
+person after checking that no calib_data.py runs (it is never broken automatically). Output: one JSON object; status ok/written (exit 0),
 failed (exit 1: ingestion findings), rejected (exit 2: bad input, or a refused read or record, e.g. lineage not
 confirmed). Phase 0 (section 17); the locking-stage checks that need model quantities come in phase 2.
 Standard library only.
@@ -37,8 +42,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from core.calibration import data, io
-from core.canonical import canonical_sha256
+from core.calibration import data_release as data
+from core.calibration import io
 
 
 def _units(path):
@@ -46,6 +51,16 @@ def _units(path):
     if not isinstance(u, list) or not all(isinstance(x, str) for x in u):
         raise io.InputError(f"{path}: a JSON list of raw-unit ids")
     return u
+
+
+def _releases(paths):
+    rels = {}
+    for p in paths:
+        r = io.load(p)
+        if not isinstance(r, dict):
+            raise io.InputError(f"{p}: a release is a JSON object")
+        rels[data.release_hash(r)] = r
+    return rels
 
 
 def _ledger(path):
@@ -68,14 +83,20 @@ def main(argv=None) -> int:
         f.add_argument(a, required=True)
     f.add_argument("--kappa")
     o = sub.add_parser("open")
-    for a in ("--ledger", "--kappa", "--release-hash", "--validation-units", "--calibration-units", "--channel"):
+    for a in ("--ledger", "--kappa", "--channel"):
         o.add_argument(a, required=True)
+    o.add_argument("--vmode", required=True, choices=("holdout", "cross-validation"))
+    o.add_argument("--release", action="append", required=True)
+    o.add_argument("--calibration", action="append", required=True)
+    o.add_argument("--validation", action="append", default=[])
+    o.add_argument("--conditions")
     de = sub.add_parser("decide")
     de.add_argument("--ledger", required=True)
     de.add_argument("--decision", required=True)
     i = sub.add_parser("inputs")
-    for a in ("--ledger", "--kappa", "--vmode", "--validation-units", "--calibration-units"):
+    for a in ("--ledger", "--kappa", "--validation-units", "--calibration-units"):
         i.add_argument(a, required=True)
+    i.add_argument("--vmode", required=True, choices=("none", "holdout", "cross-validation"))
     i.add_argument("--no-validation-read", action="store_true")
     args = ap.parse_args(argv)
 
@@ -98,10 +119,7 @@ def main(argv=None) -> int:
                 findings = data.ingestion_findings(r) if isinstance(r, dict) else [{"code": "ingestion.shape"}]
                 return {"status": "failed" if findings else "ok", "findings": findings}
             if args.cmd == "units":
-                rels = {}
-                for p in args.release:
-                    r = io.load(p)
-                    rels[r.get("release_sha256") or canonical_sha256(r)] = r
+                rels = _releases(args.release)
                 units = data.raw_units(args.of, rels)
                 return {"status": "ok", "lineage_confirmed": units is not None,
                         "raw_units": sorted(units) if units is not None else None}
@@ -111,8 +129,16 @@ def main(argv=None) -> int:
                 units, chan = _units(args.units), io.load(args.channel)
                 return write(lambda led: {"read_seq": led.fit_read(args.release_hash, units, chan, args.kappa)})
             if args.cmd == "open":
-                v, c, chan = _units(args.validation_units), _units(args.calibration_units), io.load(args.channel)
-                return write(lambda led: {"opening_seq": led.open_validation(args.kappa, args.release_hash, v, c, chan)})
+                rels, chan = _releases(args.release), io.load(args.channel)
+                cond = io.load(args.conditions) if args.conditions else None
+                if args.vmode == "holdout" and not args.validation:
+                    raise io.InputError("holdout opens its validation releases: give --validation")
+                u = data.opening_units(args.vmode, args.calibration, args.validation, rels)
+                read = args.validation if args.vmode == "holdout" else args.calibration
+                return write(lambda led: {"opening_seq": led.open_validation(
+                    args.kappa, read[0], u["validation_units"], u["calibration_units"], chan, cond),
+                    "validation_units": len(u["validation_units"] or ()),
+                    "calibration_units": len(u["calibration_units"] or ())})
             if args.cmd == "decide":
                 dec = io.load(args.decision)
                 return write(lambda led: {"record_status": led.apply_decision(dec)})

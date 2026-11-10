@@ -24,6 +24,17 @@ class DataError(ValueError):
         self.code = code
 
 
+def release_hash(release: dict) -> str:
+    """A release is identified by the canonical SHA-256 of its metadata without a `release_sha256` field; a release that
+    declares that field must declare its own hash (never trusted, review F12)."""
+    body = {k: v for k, v in release.items() if k != "release_sha256"}
+    h = canonical_sha256(body)
+    if "release_sha256" in release and release["release_sha256"] != h:
+        raise DataError("release.hash_mismatch", f"the release declares release_sha256 {str(release['release_sha256'])[:12]}"
+                        f" but its content hashes to {h[:12]}")
+    return h
+
+
 def kappa_id(contract_sha256: str, plan_sha256: str, engine_version: str) -> str:
     """The validation configuration kappa of section 9.5 as one identifier."""
     return canonical_sha256({"contract_sha256": contract_sha256, "plan_sha256": plan_sha256,
@@ -93,6 +104,31 @@ def totals_equal(declared: dict, release_totals: dict) -> list[str]:
     return sorted(k for k in set(declared) | set(release_totals) if declared.get(k) != release_totals.get(k))
 
 
+def n_decl_findings(n_decl, sub_shape: bool) -> list[str]:
+    """Section 2.1 (i): a free-omega count validation shape declares N_decl with a recorded basis and N_decl >= 10; a
+    sub-shape left after excluding bins of a free-omega count shape is a new free-omega shape with its own N_decl
+    (D5, approval A6). Returns finding codes (contract errors, section 5.2 clause 9 item 4)."""
+    nd = n_decl or {}
+    if not nd.get("basis"):
+        return ["observables.n_decl_basis"]
+    if not isinstance(nd.get("value"), (int, float)) or nd["value"] < 10:
+        return ["observables.n_decl_small"]
+    return []
+
+
+def untestable_findings(used, unused, has_value: dict) -> list[dict]:
+    """Section 5.2 clause 7 items 2 and 6: an observable without a value is excluded from validation; an unused
+    observable listed as untestable must not be one the release declares to have a value."""
+    out = []
+    for name in sorted(used):
+        if has_value.get(name) is False:
+            out.append({"code": "validation.untestable_used", "observable": name})
+    for j, u in enumerate(unused):
+        if u.get("reason") == "untestable" and has_value.get(u.get("observable")) is True:
+            out.append({"code": "validation.untestable_has_value", "observable": u.get("observable"), "index": j})
+    return out
+
+
 # ------------------------------------------------------------------ ingestion and sealing (sections 2.1, 5.1, 5.2)
 INGESTION_DECLARATIONS = ("representation_format", "derivation_relations", "uncertainty_sources",
                           "relative_systematic_correlation", "has_value")
@@ -148,6 +184,48 @@ def provide(release: dict, component: str, opened: bool, role: str) -> object:
     return release["content"][component]
 
 
+# ------------------------------------------------------------------ opening preconditions (sections 9.2, 9.4, 9.5)
+OPENING_PRECONDITIONS = (
+    "declaration_check_passed", "fit_point_recheck_passed", "p7_not_incomplete", "k0_positive",
+    "toy_replicas_ready", "real_calibration_data", "no_mandatory_gate_failed", "no_mandatory_gate_incomplete",
+    "no_shared_raw_units", "p7_power_sufficient", "pre_opening_ratio_test_passed", "lineage_confirmed",
+    "outcome_not_determined")
+
+
+def unmet_preconditions(conditions: dict) -> list[str]:
+    """The opening conditions of section 14 (calib_data, "Opening"): every one must hold, an absent one counts as not
+    holding. toy_replicas_ready is required only when k0 > 0 and T_v is calibrated with toys (the caller states it
+    true otherwise). outcome_not_determined is the lookup of calib_use (section 10.2 rule 0)."""
+    unknown = set(conditions) - set(OPENING_PRECONDITIONS)
+    if unknown:
+        raise DataError("open.unknown_condition", f"unknown opening conditions {sorted(unknown)}")
+    return [c for c in OPENING_PRECONDITIONS if conditions.get(c) is not True]
+
+
+def opening_units(mode: str, calibration: list[str], validation: list[str], releases: dict) -> dict:
+    """The raw units an opening reads and marks, derived from the releases by lineage (review F5): holdout reads the
+    validation releases and marks the calibration releases, and must share no unit with them (checked again before
+    opening, section 9.5); cross-validation reads and marks the calibration releases. Units None: lineage not
+    confirmed."""
+    if mode not in ("holdout", "cross-validation"):
+        raise DataError("open.mode", "only holdout and cross-validation open validation data")
+
+    def units(hashes):
+        out = set()
+        for h in hashes:
+            u = raw_units(h, releases)
+            if u is None:
+                return None
+            out |= u
+        return out
+    cal = units(calibration)
+    val = units(validation) if mode == "holdout" else cal
+    if mode == "holdout" and cal is not None and val is not None and cal & val:
+        raise DataError("open.holdout_shares_units", f"the holdout's calibration and validation releases share raw "
+                        f"units {sorted(cal & val)[:5]}: a contract error, the data are not opened")
+    return {"validation_units": val, "calibration_units": cal}
+
+
 # ------------------------------------------------------------------ the ledger (section 9.5)
 FAILURE_STATES = ("pending", "final", "withdrawn")
 DECISION_OUTCOMES = ("pass", "fail", "abandoned", "no-testable-direction")
@@ -192,16 +270,28 @@ class Ledger:
         return seq
 
     def open_validation(self, kappa: str, release_sha256: str, validation_units, calibration_units,
-                        channel: dict) -> int:
+                        channel: dict, conditions: dict | None = None) -> int:
         """At opening (holdout) or the first T_cv (cross-validation): at one sequence number, record the validation
         reads on the validation raw units and write pending failure records on every raw unit of the calibration
         data. Refused when the lineage is unconfirmed (units None): the data are not opened."""
         if validation_units is None or calibration_units is None:
             raise DataError("open.lineage_unconfirmed", "lineage not confirmed: the validation data are not opened, "
                             "no read and no record (section 9.5)")
-        if any(e["kappa"] == kappa and e["kind"] == "validation" for e in self.state["events"]):
-            raise DataError("open.already_opened", "this kappa has already opened its validation data")
-        ch, seq = self._channel(channel), self._next()
+        if conditions is not None:
+            unmet = unmet_preconditions(conditions)
+            if unmet:
+                raise DataError("open.precondition", f"not opened: {unmet} (section 14, calib_data 'Opening'); no "
+                                "read and no record")
+        ch = self._channel(channel)
+        if self.opening_seq(kappa) is not None:
+            # recomputation with the same kappa is not restricted (section 9.5): the read is recorded, the records
+            # written at the first opening stay (their sequence number is the opening's)
+            seq = self._next()
+            for u in sorted(validation_units):
+                self.state["events"].append({"unit": u, "release_sha256": release_sha256, "channel": ch,
+                                             "kappa": kappa, "kind": "validation", "seq": seq})
+            return seq
+        seq = self._next()
         for u in sorted(validation_units):
             self.state["events"].append({"unit": u, "release_sha256": release_sha256, "channel": ch, "kappa": kappa,
                                          "kind": "validation", "seq": seq})
@@ -218,7 +308,7 @@ class Ledger:
         if outcome not in DECISION_OUTCOMES:
             raise DataError("decision.outcome", f"decision outcome must be one of {list(DECISION_OUTCOMES)}")
         triggered = bool(decision.get("data_side_check_triggered"))
-        new = "final" if (outcome in ("fail", "abandoned") or triggered) else "withdrawn"
+        new_status = "final" if (outcome in ("fail", "abandoned") or triggered) else "withdrawn"
         recs = [r for r in self.state["failure_records"] if r["kappa"] == kappa]
         if not recs:
             raise DataError("decision.no_records", "no failure record for this kappa: it has not opened")
@@ -226,8 +316,8 @@ class Ledger:
             raise DataError("decision.not_pending", "the records of this kappa are no longer pending; their state does "
                             "not change again")
         for r in recs:
-            r["status"] = new
-        return new
+            r["status"] = new_status
+        return new_status
 
     # -- derived inputs of Appendix C.1
     def first_validation_read(self, unit: str) -> dict | None:

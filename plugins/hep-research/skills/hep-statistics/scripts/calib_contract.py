@@ -3,8 +3,8 @@
 
   calib_contract.py check --contract FILE [--release FILE ...] [--series-graph FILE]
 FILE is a calibration-contract/1; each --release is a calibration-data-release/1 metadata file (its lineage,
-samples, observables and declarations; the release hash is its file's canonical SHA-256 unless it carries
-"release_sha256"), read for the rules that look at metadata, lineage or totals, never at sealed values;
+samples, observables and declarations; the release hash is the canonical SHA-256 of its metadata, and a declared
+"release_sha256" must equal it), read for the rules that look at metadata, lineage or totals, never at sealed values;
 --series-graph maps contract series to the series of their upstream results (cycle check). Output: one JSON object
 with the findings and the rules deferred to later phases; status accepted (exit 0) or rejected (exit 2: a contract
 error, no result is produced). Phase 0 (section 17): the locking-stage checks that need model quantities are added
@@ -30,8 +30,8 @@ import sys
 
 from contracts.schema import validate
 from core.calibration import contract as cc
+from core.calibration import data_release as data
 from core.calibration import io
-from core.canonical import canonical_sha256
 
 
 def main(argv=None) -> int:
@@ -50,7 +50,10 @@ def main(argv=None) -> int:
             r = io.load(path)
             if not isinstance(r, dict):
                 raise io.InputError(f"{path}: a release is a JSON object")
-            rels[r.get("release_sha256") or canonical_sha256(r)] = r
+            try:
+                rels[data.release_hash(r)] = r
+            except data.DataError as exc:
+                raise io.InputError(f"{path}: {exc}") from None
         graph = io.load(args.series_graph) if args.series_graph else None
         shape = [f.as_dict() for f in validate(c, "calibration_contract.json").errors]
         if shape:

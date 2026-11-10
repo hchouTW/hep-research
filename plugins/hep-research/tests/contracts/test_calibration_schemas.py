@@ -14,7 +14,8 @@ sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 import calibration_fixtures as F  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from core.calibration import data, deps, use  # noqa: E402
+from core.calibration import data_release as data  # noqa: E402
+from core.calibration import deps, use  # noqa: E402
 
 SEVEN = ("calibration_stage_graph", "calibration_mechanism", "calibration_functional", "calibration_control_variable",
          "calibration_reference", "calibration_degeneracy_mode", "calibration_parameter_index")
@@ -86,7 +87,11 @@ class Schemas(unittest.TestCase):
         self.assertTrue(errors(bad, "calibration_result"))
         pend = json.loads(json.dumps(r))
         pend["grade"]["own_grade"] = None                       # a pending input records no own grade (section 10.1)
+        self.assertTrue(errors(pend, "calibration_result"))     # ... but then its resolutions and waits are required
+        pend["grade"]["resolutions"] = [{"earlier_failure_record": "final"}, {"earlier_failure_record": "none"}]
+        pend["waiting_records"] = [{"unit": "u1", "kappa": F.h("k1"), "seq": 1, "status": "pending"}]
         self.assertEqual(errors(pend, "calibration_result"), [])
+        self.assertTrue(errors({x: v for x, v in r.items() if x != "status"}, "calibration_result"))
 
 
 if __name__ == "__main__":

@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import math
 
-from core.calibration import chain, data, deps
+from core.calibration import data_release as data
+from core.calibration import chain, deps
 from core.canonical import canonical_sha256
 
 ROLES = ("calibration", "validation", "measurement")
@@ -209,19 +210,35 @@ def _vector(o, path, out, shapes):
         out.add("observables.merging_rule", path, "a Gaussian-summary shape declares its merging rule (section 2.1)")
     elif side == "gaussian-summary" and (v.get("merging_rule") or {}).get("defined_by") == "observed-counts":
         out.add("observables.merging_observed", path, "a merging rule is not defined by observed counts")
-    if red is not None and isinstance(k, int) and k < 2 and o.get("shape_class") != "absolute":
-        out.add("observables.subshape_k1", path, "a redeclared shape conditioned on the total or in alr/ilr with "
-                "K' = 1 has no link coordinate: leave the whole shape unused (D38)")
-    if o.get("role") == "validation" or red is not None:
-        cls = o.get("shape_class")
-        if cls == "free-omega" and side == "count":
-            nd = o.get("N_decl") or {}
-            if not nd.get("basis"):
-                out.add("observables.n_decl_basis", path, "a free-omega count shape declares N_decl with a recorded "
-                        "basis" + (" (a sub-shape after exclusion is a new free-omega shape, D5)" if red else ""))
-            elif not isinstance(nd.get("value"), (int, float)) or nd["value"] < 10:
-                out.add("observables.n_decl_small", path, "N_decl >= 10 is required (section 2.1; clause 9 item 4"
-                        + ("; D5" if red else "") + ")")
+    if side == "count" and o.get("block") != "poisson":
+        out.add("observables.count_block", path, "a shape entering through the count likelihood is a Poisson block "
+                "(section 2.1)")
+    cls = o.get("shape_class")
+    if red is not None:
+        # the sub-shape's class follows its parent (section 9.2, D5): resolve the parent declared in the contract, or
+        # the parent class the redeclaration states (the parent may be replaced by the sub-shape); the two must agree
+        parent = shapes.get(red.get("shape"))
+        p_cls = red.get("parent_shape_class") if parent is None else parent.get("shape_class")
+        p_side = red.get("parent_data_side") if parent is None else (parent.get("vector") or {}).get("data_side")
+        if parent is not None and red.get("parent_shape_class") not in (None, p_cls):
+            out.add("observables.subshape_parent_mismatch", path, "the redeclared parent class differs from the "
+                    "declared parent shape")
+        if p_cls is None:
+            out.add("observables.subshape_parent", path, "a redeclared sub-shape names its parent shape and the "
+                    "parent's class (declared, or stated in redeclared_from)")
+        elif p_cls == "free-omega" and p_side == "count":
+            if cls != "free-omega":
+                out.add("observables.subshape_class", path, "the sub-shape of a free-omega count shape is a new "
+                        "free-omega shape (D5, approval A6)")
+            cls = "free-omega"
+        if isinstance(k, int) and k < 2 and cls != "absolute":
+            out.add("observables.subshape_k1", path, "a redeclared shape conditioned on the total or in alr/ilr with "
+                    "K' = 1 has no link coordinate: leave the whole shape unused (D38)")
+    if (o.get("role") == "validation" or red is not None) and cls == "free-omega" and side == "count":
+        for code in data.n_decl_findings(o.get("N_decl"), sub_shape=red is not None):
+            out.add(code, path, "a free-omega count shape declares N_decl with a recorded basis and N_decl >= 10 "
+                    "(section 2.1; clause 9 item 4" + ("; a sub-shape after exclusion is a new free-omega shape, D5"
+                                                       if red is not None else "") + ")")
 
 
 def _samples(c, out, releases):
@@ -313,11 +330,14 @@ def _validation(c, out, releases):
     vroles = ("validation",) if mode == "holdout" else ("validation", "calibration")
     used_v = {o["name"] for o in c.get("observables", []) if o.get("role") in vroles}
     if mode != "none":
-        for name in sorted(used_v):
-            if has_value.get(name) is False:
-                out.add("validation.untestable_used", "$.observables", f"observable {name!r} has no value (untestable, "
-                        "section 9.5) and must be excluded from the observables used for validation (clause 7 item 2)")
         unused = v.get("unused")
+        for f in data.untestable_findings(used_v, unused if isinstance(unused, list) else [], has_value):
+            if f["code"] == "validation.untestable_used":
+                out.add(f["code"], "$.observables", f"observable {f['observable']!r} has no value (untestable, section "
+                        "9.5) and must be excluded from the observables used for validation (clause 7 item 2)")
+            else:
+                out.add(f["code"], f"$.validation.unused[{f['index']}]", f"{f['observable']!r} is declared to have a "
+                        "value in the release but listed as untestable")
         if not isinstance(unused, list):
             out.add("validation.unused_missing", "$.validation.unused", "the unused-observables list is declared "
                     "(clause 7 item 6)")
@@ -328,9 +348,6 @@ def _validation(c, out, releases):
                 if not u.get("reason") or not u.get("clause"):
                     out.add("validation.unused_reason", f"$.validation.unused[{j}]", "each unused observable states "
                             "its reason and the clause it relies on")
-                if u.get("reason") == "untestable" and has_value.get(u.get("observable")) is True:
-                    out.add("validation.untestable_has_value", f"$.validation.unused[{j}]", f"{u.get('observable')!r}"
-                            " is declared to have a value in the release but listed as untestable")
             if reg and listed != registered - used_v:
                 out.add("validation.unused_mismatch", "$.validation.unused", f"the list must be exactly the registered "
                         f"observables minus those used: missing {sorted(registered - used_v - listed)}, extra "
@@ -434,4 +451,13 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
     a0 = contract.get("a0_summary")
     if a0 is not None and set(a0) - {"unreachable_thresholds"}:
         out.add("contract.a0_values", "$.a0_summary", "the A0 summary records only which thresholds are unreachable")
-    return {"status": "rejected" if out else "accepted", "findings": list(out), "deferred": DEFERRED}
+    flags = []
+    if (contract.get("validation") or {}).get("mode") == "cross-validation":
+        roles: dict[str, set] = {}
+        for o in contract.get("observables", []):
+            if o.get("sample"):
+                roles.setdefault(o["sample"], set()).add(o.get("role"))
+        if any({"calibration", "validation"} <= r for r in roles.values()):
+            flags.append("cv")       # validation observables share events with calibration ones (section 2.1)
+    return {"status": "rejected" if out else "accepted", "findings": list(out), "deferred": DEFERRED,
+            "result_flags": flags}

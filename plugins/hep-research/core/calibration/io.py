@@ -49,15 +49,15 @@ def write_json(path: str, value) -> None:
     p = Path(path)
     if not p.parent.is_dir():
         raise InputError(f"output folder {p.parent} does not exist")
-    fd, tmp = tempfile.mkstemp(dir=p.parent, prefix=f".{p.name}.", suffix=".tmp")
+    fd, temporary_path = tempfile.mkstemp(dir=p.parent, prefix=f".{p.name}.", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             json.dump(value, fh, indent=1, ensure_ascii=False)
             fh.write("\n")
-        os.replace(tmp, p)
+        os.replace(temporary_path, p)
     except BaseException:
         with contextlib.suppress(OSError):
-            os.unlink(tmp)
+            os.unlink(temporary_path)
         raise
 
 

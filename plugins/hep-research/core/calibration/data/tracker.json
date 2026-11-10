@@ -187,12 +187,36 @@
     "mechanism": "noise-threshold"
    },
    {
-    "name": "layer_b_offset",
+    "name": "alignment_a",
+    "role": "theta",
+    "nodes": [
+     "hits_a"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "alignment_b",
     "role": "theta",
     "nodes": [
      "hits_b"
     ],
     "mechanism": "geometry-material"
+   },
+   {
+    "name": "gain_a",
+    "role": "theta",
+    "nodes": [
+     "hits_a"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain_b",
+    "role": "theta",
+    "nodes": [
+     "hits_b"
+    ],
+    "mechanism": "yield"
    }
   ],
   "references": [

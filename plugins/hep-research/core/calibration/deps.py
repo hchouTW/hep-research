@@ -136,12 +136,9 @@ def central_closure(result: str, upstreams: dict) -> set[str]:
 BACKFILLED = frozenset({"version_id", "result_sha256", "result_hash"})
 
 
-def _strip_backfilled(value):
-    if isinstance(value, dict):
-        return {k: _strip_backfilled(v) for k, v in value.items() if k not in BACKFILLED}
-    if isinstance(value, list):
-        return [_strip_backfilled(v) for v in value]
-    return value
+def _strip_backfilled(payload: dict) -> dict:
+    """The payload without its own top-level id and result-hash fields; nested values are content and stay."""
+    return {k: v for k, v in payload.items() if k not in BACKFILLED}
 
 
 def update_digest(payload: dict) -> str:

@@ -79,7 +79,8 @@ class Versions(unittest.TestCase):
         p = self.payload()
         v = deps.version_id(p)
         self.assertEqual(deps.version_id(dict(p, version_id="x", result_sha256=H[5])), v)
-        self.assertEqual(deps.version_id(dict(p, values={"zeta_hat": [0.1, -0.2], "result_sha256": H[6]})), v)
+        # a nested field of that name is content (review F7): a different payload, a different version
+        self.assertNotEqual(deps.version_id(dict(p, values={"zeta_hat": [0.1, -0.2], "result_sha256": H[6]})), v)
         self.assertNotEqual(deps.version_id(self.payload(values={"zeta_hat": [0.1, -0.3]})), v)  # new payload
         self.assertEqual(deps.version_id(self.payload(parents=[H[3], H[4]])),
                          deps.version_id(self.payload(parents=[H[4], H[3], H[3]])))          # normalized parents
