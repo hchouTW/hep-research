@@ -134,6 +134,13 @@
    "registered_at": "2026-11-10T15:13:20Z",
    "card_commit": "eee18408",
    "reason": "after the independent review, before repeating the gate runs at the fixed code (tightening only): gate-2 criterion (ii) with the paired covariance over the runs whose node kernel reads the case's parameters (F3); the electronics case's plan records its filtering as ignorable (F7); rerun streams per (seed, point) in gate 2 and calibration 1 (F4); thresholds unchanged; the first gate run and calibration run superseded"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "a3857419f2276b68027fcf048258514010d49dabb0bf8f83ce1d51847bad3d65",
+   "registered_at": "2026-11-10T16:16:01Z",
+   "card_commit": "103429aa",
+   "reason": "execution log only (repeated gate runs, checks, gates recorded, E8 report); thresholds and test design as registered ca717b11"
   }
  ]
 }
