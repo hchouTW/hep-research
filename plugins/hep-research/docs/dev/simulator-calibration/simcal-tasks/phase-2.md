@@ -2,7 +2,7 @@
 
 ## Background
 
-Phase 2 of the simulator parameter calibration workflow (Part B, `simulator-calibration-v7.37.4-clean-en.md`, §17, line 3580). This is a **draft** written with the task package of 2026-11-10: phase 0 refreshes it from Part B and `simcal-decision-index.md`, lints it and registers it before any run a threshold judges (`simcal-task.md`, Sections E4 and E9). The §17 text and the §8.7 rows below are copied verbatim from Part B; the lists marked **Inferred** are the drafter's reading of which scripts and test sections the content touches.
+Phase 2 of the simulator parameter calibration workflow (Part B, `simulator-calibration-v7.37.4-clean-en.md`, §17, line 3580). Refreshed at the start of phase 2 (2026-11-10) from Part B, `simcal-decision-index.md` and approval A8, before any run; the §17 text and the §8.7 rows are copied verbatim from Part B. Phase 2 starts on the unmerged `simcal/phase-1` on the user's word (Section E3, step 5).
 
 This card uses the headings `lint_task.py` requires, and carries the eight sections of `simcal-task.md` Section E5, in E5's order, as level-4 headings under them.
 
@@ -10,7 +10,7 @@ This card uses the headings `lint_task.py` requires, and carries the eight secti
 
 #### Goal
 
-Deliver the content of phase 2 of §17 so that its gate holds: The negative tests of P3, P7, G1–G8, V and propagation pass; segmented calibration and the joint fit agree (all of the above on the toy detector); the negative tests of P8, G9
+Deliver the content of phase 2 of §17 (the joint likelihood, the reference-point iteration and multi-start, intervals, P3, P7, G1–G8 except G4-L, locally linear toys and the linearity check, validation by holdout and cross-validation with power, toy replicas and their independence check, both modes of φ with P8 and G9, the V_model components, and propagation by the principal components of the joint posterior with ξ versions) on the toy detector, so that its gate holds: The negative tests of P3, P7, G1–G8, V and propagation pass; segmented calibration and the joint fit agree (all of the above on the toy detector); the negative tests of P8, G9.
 
 ## Scope
 
@@ -25,37 +25,31 @@ Deliver the content of phase 2 of §17 so that its gate holds: The negative test
 **Placement bullets of §17 (verbatim; they place work in phases 0 and 2)**
 
 - The cases in §15.3 that depend on `calib_validate.py` behavior (in §15.3.14, "submitting a decision record after abandonment is rejected" and "abandoning after the decision passes is rejected") are acceptance-tested in phase 2; phase 0 acceptance-tests only the grade function, using hand-written decision-record stubs.
-- Locking-stage checks that need quantities produced by the model are added in phase 2 (after the joint likelihood and the design-stage Asimov are delivered):
-  - the rounding-negligibility condition of §2.1, N_decl/N_exp of validation shapes, the n_min lower bound of shape summary statistics and the block-conversion condition are all computed by `calib_data.py` and called by `calib_contract.py check`;
-  - Σ_boot of P5 and the b_J item of P5 (§8.2 note 3; it needs K_l from the design-stage MC) are decided by `calib_design.py`.
-  - The phase-0 `calib_contract.py check` does not contain these rules; it only checks that the declarations exist.
+- Locking-stage checks that need quantities produced by the model are added in phase 2 (after the joint likelihood and the design-stage Asimov are delivered): the rounding-negligibility condition of §2.1, N_decl/N_exp of validation shapes, the n_min lower bound of shape summary statistics and the block-conversion condition are all computed by `calib_data.py` and called by `calib_contract.py check`; Σ_boot of P5 and the b_J item of P5 (§8.2 note 3; it needs K_l from the design-stage MC) are decided by `calib_design.py`. The phase-0 `calib_contract.py check` does not contain these rules; it only checks that the declarations exist.
 - In phase 0, the failure-record state transitions are tested with hand-written decision-record stubs; `calib_validate.py` is retested with real decision records after it is delivered in phase 2.
 
-**Scripts and homes (Inferred from §13, §14 and the content)**
+**Work packages, in delivery order (each item with its Part B home; each check in exactly one script, §14)**
 
-- [ ] `calib_likelihood.py`
-- [ ] `calib_fit.py` (G1, G2, G3, G6, G7; locally linear toys)
-- [ ] `calib_interval.py`
-- [ ] `calib_identify.py` (P3, G5)
-- [ ] `calib_closure.py` (G8)
-- [ ] `calib_reweight.py` (G4)
-- [ ] `calib_shift.py` (P8, G9)
-- [ ] `calib_validate.py`
-- [ ] `calib_propagate.py` (principal components of the joint posterior, ξ versions)
-- [ ] `calib_design.py` (P7; Σ_boot and b_J of P5, §17)
-- [ ] `calib_contract.py check` (calls the locking-stage checks of §17; the N_d,c recheck at θ̂, D21; the formal P7 check)
-- [ ] `calib_data.py` (the locking-stage checks of §17)
-- [ ] `core/calibration/`; reuses `core/stats/fit_diagnostics.py` and `core/stats/toy_ensemble.py` (§13)
+- [ ] WP1 likelihood, `core/calibration/likelihood.py` and new `calib_likelihood.py`: the blocks of §2.1 (Gaussian on N_d,c^⊥ with the projected inverse; Poisson with free ω or absolute counts; binomial), link functions log, identity, logit, Fisher z and alr/ilr with softmax (§2.1 "Link functions"), ν and η columns in link space, φ_P with its correlated constraint, BB-lite γ and the auxiliary binomial likelihood with the variance-matched n_eff, k_eff of weighted MC (§2.1 "Finite simulation statistics", D30), the +½ shape estimator and its prediction side (§2.1, §5.3), the event-level parametric bootstrap with common random numbers and B ≥ max(500, 50p), the reporting factor (B − p − 2)/(B − 1); V_model (§5.4): model-ensemble second moment, correlation kernel in clr coordinates mapped to alr/ilr, the D39 convolution cross-kernel (A8; ρ squared-exponential or Matérn), the principal components with conditions 1 and 2 (§19-3).
+- [ ] WP2 fit engine, `core/calibration/fit.py` and new `calib_fit.py`: §7.3 iteration (limit 30, 0.1σ_tot max-norm criterion D51, ln det diagnostic < 0.2σ_tot), §7.4 multi-start (max(2d, 16) scrambled Sobol starts, admission, segment separation at 19 points, ties, basins, `multimodal`), non-convergence classes, replacement, the ratio test k* from the exact NegBin/Bin distributions, w(ε) with ε̂ and ε̂⁺, counting for testing ensembles (D46, D49), D81; the frozen V̂ table of §7.3; G1, G2 (χ̄² weights from locally linear toys, D9), G3 (D47 (a), the box of the per-parameter total intervals), G6, G7 (rank, null space, K); locally linear toys with replica-difference MC noise (§6.6, §8.5) and the linearity check (D56); the fit-point recomputations through `calib_data.py`, `calib_validate.py` and `calib_contract.py` (exit 2 on a contract error, D10, D21).
+- [ ] WP3 `core/calibration/identify.py` and new `calib_identify.py` (P3, G5, §8.3, the fold P3); new `calib_shift.py` (P8, G9, §5.5 with t_lin = 0.06 and the 1.5c recomputation, d_l); new `calib_interval.py` (profile likelihood, Feldman–Cousins-style profile construction near a boundary, toy-calibrated construction with summed ratio test, the union for `multimodal`, MCMC labeling as credible intervals, the total half-width with D52 (b), inference flags of §15.3a).
+- [ ] WP4 validation, new `calib_validate.py`: C_r with cross terms and d_l (§9.2), N_d, standardization and C_r⁺, declaration checks (a)(b)(c), the toy path list (D58), Ĉ_r with n ≥ max(500, 10k) and its correction factor, T_v, cross-validation with T_cv, fold G5 conditioning and the 20% rule (D68 denominator, §19-14.1f), power on both paths with the cross product, its one-sided lower bound, Bonferroni and Clopper–Pearson (§9.4), s_a, decision records, `abandon`, `abandon-power` (§9.5), k, k₀ and unused observables; `calib_data.py` (extended): the locking-stage and fit-point checks (rounding with ρ_i, R and the generalized eigenvalue, σ_i⁽⁰⁾ > 0, N_exp, n_min, block conversion, merging), the data-side constraint check with guaranteed enclosures (D4: rejected at locking when a format admits an unbounded enclosure, A8), opening preconditions, status changes from decision records; `calib_contract.py check` (extended) calling them; `calib_design.py` (extended): Σ_boot by toys, b_J, P7 (calling `calib_validate.py`), the fold split rules, the rejected toy and bootstrap practices, the non-repeating-seed independence check of toy replicas.
+- [ ] WP5 G8, new `calib_closure.py`: injection points (interior ≥ 2σ_tot^design from a boundary; boundary point at 0.5σ_tot^design, D55 (i)), pseudo-data by event-level resampling with replacement following the data's sampling model (D55 (a)), the fit's own MC, the Holm family by strength level, N_c, c₀′ and p₁′, the bias rule, the summed ensemble of interval toys; remedy level contract when the pseudo-data θ̂ fall in a non-truth basin (D57 (2), A8).
+- [ ] WP6 propagation, new `calib_propagate.py`: ζ = (η, φ_shared), Σ_β + Σ_boot/w, the single joint regression G_ζ, ξ from the eigendecomposition of Σ_θ|ζ, G_s from the shift refits, versions with update_digest and lineage, atomic packages; `calib_deps.py` (extended): the conflict rules over packages (§10.4, §15.3a).
+- [ ] The toy detector of phase 1 extended (`core/calibration/toy.py`) with the material thickness φ, the common energy scale η and the evaluator outputs the engine needs, and fast linear-Gaussian and non-Gaussian configurations (`core/calibration/toys_linear.py`) for the §8.7 calibrations that Part B states on linear Gaussian configurations.
 
-**This phase's tests (Inferred; refresh from §15)**
+**Scripts and homes (§13, §14; folders per Open questions 1 and 6)**
 
-- [ ] §15.3.1 (P3, P7, G1–G8, P8, G9)
-- [ ] §15.3.4–§15.3.10
-- [ ] §15.3.13
-- [ ] §15.3.14 (retested with real decision records, §17)
-- [ ] §15.3.16 (the cases of phase-2 gates)
-- [ ] §15.3.17
-- [ ] §15.3a (phase-2 cases: inference flags, G7 rank, general response, power lower bound, propagation packages, pass/fail summaries of weighted MC)
+- [ ] `calib_likelihood.py`, `calib_fit.py`, `calib_interval.py`, `calib_identify.py`, `calib_closure.py`, `calib_shift.py`, `calib_validate.py`, `calib_propagate.py` (new, in `skills/hep-statistics/scripts/`, thin CLIs over `core/calibration/`)
+- [ ] `calib_reweight.py` (G4 added), `calib_design.py` (P7, Σ_boot, b_J, fold splits), `calib_contract.py check`, `calib_data.py`, `calib_deps.py` (extended)
+- [ ] `core/calibration/`; reuses `core/stats/fit_diagnostics.py` and `core/stats/toy_ensemble.py` where they fit (§13)
+
+**This phase's tests (§15)**
+
+- [ ] §15.2: the G8, segmented calibration, multiple basins, shift/profile rms, P3 with photon source, G6 linear vs full toys, G2 on the boundary, validation statistic with cross terms, shape conditioned on the total, logit near 1, normalized shapes, null space and rounding items (the g4sim items are phase 3)
+- [ ] §15.3.1 (P3, P7, P8, G1–G9 except G4-L, V)
+- [ ] §15.3.4–§15.3.10, §15.3.13, §15.3.14 (with real decision records), §15.3.16 (the phase-2 gates), §15.3.17, §15.3.18 (P3 on redundant measurements)
+- [ ] §15.3a phase-2 cases: inference flags, G7 rank, general response, power lower bound, propagation packages, pass/fail summaries of weighted MC
 
 **Common checks**
 
@@ -63,25 +57,26 @@ Deliver the content of phase 2 of §17 so that its gate holds: The negative test
 
 ### Out of Scope
 
-- G4-L (phase 5)
-- The g4sim event-interval check (phase 3, §17)
+- G4-L, partial pooling, learned density ratios, the inferred V_model form (phase 5); the surrogate model, ask/tell, P6, V_emu, the g4sim evaluator and the g4sim event-interval check of §6.6 (phase 3); upstream invalidation, conditions-database export, feedback into g4sim and `calib_contrib` (phase 4).
+- The P5 θ-noise item s_i, κ_i of the mode where the map varies with θ (phase 3, D28).
 
 ## Repository Context
 
-Confirmed in hep-research `main` at 5c2d1c7 (0.65.1): `contracts/` with `validate.py` and `schemas/`; `core/stats/fit_diagnostics.py` and `core/stats/toy_ensemble.py`; `core/simulation/` (`response.py`, `digitize.py`, `efficiency_map.py`, `rng.py`, `seeds.py`, `hits.py`); `core/partition/` (`states.py`, `campaign.py`); `adapters/batch-schedulers/batch_campaign.py`; `skills/hep-computing/scripts/lint_task.py`. Not present yet (to be created by this workflow): `core/calibration/`, every `calib_*.py` script, `adapters/geant4/assets/g4sim_calib_eval.py`, hep-detector `simulation-calibration/`, `docs/dev/simulator-calibration/`.
+On `simcal/phase-1` (707134fc, on `simcal/phase-0` from hep-research 0.65.1): `core/calibration/` with `toy.py` (toy detector and `ChainEvaluator`), `reweight.py`, `linear.py` (design-stage A, projected inverse, matrix condition), `design.py` (Sobol points, P2, P5, support, final methods), `kernel_check.py` (P0), `preflight.py` (A0), `emulator.py` (stub), `contract.py`, `data_release.py`, `chain.py`, `deps.py`, `use.py`, `io.py`, `evaluator.py`; the scripts `calib_chain.py`, `calib_contract.py`, `calib_data.py`, `calib_deps.py`, `calib_design.py`, `calib_emulator.py`, `calib_kernel_check.py`, `calib_reweight.py`, `calib_use.py` in `skills/hep-statistics/scripts/`; `core/stats/fit_diagnostics.py`, `core/stats/toy_ensemble.py`; `adapters/batch-schedulers/batch_campaign.py`; `skills/hep-computing/scripts/lint_task.py`.
 
 ## Technical Approach
 
 1. Run the phase loop of `simcal-task.md` Section E4 in worktree `simcal/phase-2`.
-2. Implement the §17 content through the scripts of §14, each check in exactly one script; follow §14's conventions (JSON output, exit codes 0–3, the standard library plus NumPy/SciPy).
-3. Add each test of this phase before the gate run, and show that each negative test is caught.
-4. Calibrate each §8.7 value of this phase as its row says, register it, then run the gates.
+2. Deliver the work packages WP1–WP6 in order, each with its unit tests (positive tests and the negative tests of its gates, each negative with a positive control) before the next; each check in exactly one script (§14), JSON output, exit codes 0–3, the standard library plus NumPy/SciPy.
+3. Before each §8.7 calibration run, re-register this card with its configuration fixed (tightening only); run each calibration as registered; register the calibrated value before the gate run that uses it; never reuse a calibration run as a gate run.
+4. Run the three gates as registered, then the independent review (Section E4, step 10), the common checks and the hand-over.
 
 ## Deliverables
 
 #### Deliverables
 
-- Create the scripts and modules listed in the scope checklist that do not exist yet (Repository Context), with their tests.
+- Create the new modules `core/calibration/likelihood.py`, `fit.py`, `identify.py`, `interval.py`, `shift.py`, `validate.py`, `closure.py`, `propagate.py`, `toys_linear.py` and the new scripts `calib_likelihood.py`, `calib_fit.py`, `calib_interval.py`, `calib_identify.py`, `calib_closure.py`, `calib_shift.py`, `calib_validate.py`, `calib_propagate.py`, with their tests (new `tests/core/test_calibration_<module>.py`, extended `tests/skills/test_calib_scripts.py`) and a new gate harness `tests/core/calibration_phase2_gates.py`.
+- Extend `core/calibration/toy.py`, `design.py`, `contract.py`, `data_release.py`, `deps.py`, `io.py`, the scripts `calib_design.py`, `calib_contract.py`, `calib_data.py`, `calib_deps.py`, `calib_reweight.py`, the calibration schemas (additively), and the registrations (`core/OWNERS.json`, `tools/skill_scripts.json`, `docs/reference-inventory.*`, `tools/module_timings.json`, `skills/hep-statistics/README.md`, the core-stats guide, `CHANGELOG.md`).
 - Add the gate record `docs/dev/simulator-calibration/simcal-gates/phase-2.md`, from the gate-record template of the task package.
 - Update the status file and the registry (`simcal-status.json`, `simcal-task-registry.json`) in `docs/dev/simulator-calibration/`.
 
@@ -89,33 +84,21 @@ Confirmed in hep-research `main` at 5c2d1c7 (0.65.1): `contracts/` with `validat
 
 #### Decisions this phase depends on
 
-Needs the author (each must be approved in `simcal-approvals.md` before the phase starts; Section E7, item 1):
+Needs the author, all settled by approval A8 (2026-11-10, `simcal-approvals.md`; not yet applied in Part B, implemented as recorded there):
 
-- D1 (line 4085; needs the author)
-- D2 (line 4086; needs the author)
-- D3 (line 4087; needs the author)
-- D4 (line 4088; needs the author (open part); the rest is implemented as written)
-- D8 (line 4092; needs the author)
-- D9 (line 4093; needs the author)
-- D10 (line 4094; needs the author)
-- D29 (line 4113; needs the author)
-- D34 (line 4118; needs the author)
-- D39 (line 4123; needs the author)
-- D40 (line 4124; needs the author)
-- D45 (line 4129; needs the author)
-- D46 (line 4130; needs the author)
-- D47 (line 4131; needs the author)
-- D48 (line 4132; needs the author)
-- D50 (line 4134; needs the author)
-- D51 (line 4135; needs the author)
-- D52 (line 4136; needs the author)
-- D55 (line 4139; needs the author)
-- D57 (line 4141; needs the author (open part); the rest is implemented as written)
-- D58 (line 4142; needs the author)
-- D67 (line 4151; needs the author)
-- D68 (line 4152; needs the author)
-- D73 (line 4157; needs the author (open part); the rest is implemented as written)
-- D81 (line 4165; needs the author)
+- D1 (line 4085), D2 (4086), D3 (4087), D8 (4092), D9 (4093), D10 (4094), D34 (4118), D40 (4124), D45 (4129), D48 (4132), D51 (4135), D58 (4142), D67 (4151): the readings of `decision-sheet.md` (c) (A8).
+- D29 (4113): replaced by the §19-2 rule, Δ_i ≤ t_lin = 0.06 (A8).
+- D4 open part (4088): a contract declaring a constraint over a derived quantity whose format admits an unbounded enclosure is rejected at locking (A8).
+- D39 (4123): the convolution (Paciorek–Schervish) cross-kernel for groups with different ℓ, ρ squared-exponential or Matérn; option (c) is the interim only until the form is written, so phase 2 implements (a) and keeps (c) selectable (A8).
+- D46 (4130): non-converged full G6/G2 toys count as T_toy < T_obs; each full toy regenerates its own bootstrap; the budget gains n_G6,full + n_G2,full (A8).
+- D47 (4131): the G3 region is the box of the per-parameter total intervals of §7.5 (A8).
+- D50 (4134) with §19-14.1a (3715): the difference is kept and stated; exceptions count as `not-converged` for Class 2 members and `incomplete` for Class 1 single fits (A8).
+- D52 (4136): max(|Δ+|, |Δ−|) for the interval widening, the symmetric difference for d_l and G_s; toy-calibrated intervals use the half-width in place of σ_q and no Σ_boot/w term (A8).
+- D55 (4139): resampling with replacement following the data's sampling model; boundary injection at 0.5σ_tot^design from the boundary (A8).
+- D57 open part (2) (4141): remedy level contract when the pseudo-data θ̂ fall in a non-truth basin (A8).
+- D68 (4152) with D3 and §19-14.1f (3720): the denominator is the toys with G5 decided; the earlier stop F_G5 > 0.25·Σ_a n_req (A8).
+- D73 (4157): the negative control of §15.3.5 as worded in D73 (A8).
+- D81 (4165): such a redo is not registered; the ensemble is `incomplete` under that κ (remedy level plan) (A8).
 
 Implemented as Part B writes them, the author confirming later (computation results; D19, D25 and the open §14.1 items, by front matter line 38), or settled by plugin source:
 
@@ -175,30 +158,74 @@ Accepted or decided items that this phase implements (their text in Part B is no
 - §8.7 line 2017: **one-sided lower bound of the cross product λ̂_a^cross (§9.4)** — design value: independent MC repetitions or a valid bootstrap, with the number of repetitions and the quantile method declared in the plan; level 1 − α_P/(2m) on the toy path, 1 − α_P/m on the analytic path — calibration: on alternative hypotheses of known λ_a, over a range of MC noise, confirm that the bound lies below the true λ_a with at least its nominal probability (D59) — phase column: 2
 - §8.7 line 2018: **basin admission, separation and tie tolerances, and number of starts (§7.4)** — design value: R_admit = 1; τ_bar = max(0.1, 4σ_noise) at 19 segment points; τ_tie = max(0.01, 4σ_noise); max(2d, 16) Sobol starts (settled by computation, en/compute-D57.md; to be confirmed by the author) — calibration: note 6 — phase column: 2 (3 for the RICH replica)
 
+
+**Values used by the phase's gates (from Part B; design values carry `provisional-thresholds` until the calibration of their row is registered)**: α of G6, G7 = 0.01 (G7: χ²_{r(K−1), 0.99}); G2 p ≥ 0.01; G8 α_G8 = 0.05 with Holm, N_c of §8.4 (standard d = 3: 99; full d = 3: 518), c₀′ = (c − 0.01)/0.99, p₁ = 0.50 (standard 68%), 0.58 (full 68%), 0.90 (full 95%), bias rule "Holm-significant and |b̄| > 0.2σ_tot^design"; P3 λ_min(R_corr) ≥ 0.1 and σ_post/σ_prior ≤ 0.4; G5 λ_min ≥ 0.05, σ_post/σ_prior ≤ 0.5, profile Δ(−2 ln L) ≥ 4; P7 and V: α = 0.05 (contract), power lower bound ≥ 0.8 at simultaneous 1 − α_P = 0.95; P8 c = 0.1, G9 1.5c and t_lin = 0.06; G1 EDM < max(0.002·tol·UP, 0.1σ_noise); ε_max = 1%, ε_max,cv = min(1 − 0.99^F, 2%), ratio-test level 10⁻³; τ_num = 10⁻¹⁰; rounding 1/25; n_min = 20; B ≥ max(500, 50p); N_t = 10, K_b = 6; Ĉ_r toys n ≥ max(500, 10k); reference toys ≥ 500; linearity check ≥ 50 toys, allowed fraction 5% with difference > 0.5; f = 0.1; b_J bound 0.15σ_tot^design; basins R_admit = 1, τ_bar = max(0.1, 4σ_noise), τ_tie = max(0.01, 4σ_noise), max(2d, 16) starts.
+
+**Calibrations of this phase (§8.7), registered before they run.** Each runs on the configuration named, with seeds `20261120 + 10⁵·c + r` for calibration c and repetition r (no stream shared between calibrations or repetitions), and is decided by the rule given; a calibration that fails its rule is a STOP and report (Section E7, item 4), the value is not loosened. The exact configuration of each (detector variant, d, observables, sizes) is fixed in a re-registration of this card before its run (tightening only). Runs that need more than an interactive session go to Slurm with the user's approval for each submission.
+
+1. *N_c and coverage targets of G8* (line 2000): 1000 repetitions of G8 at the standard level (d = 3, N_c = 99) and 1000 at the full level (N_c = 518) on the toy detector with a correct V_MC, effective-count approximation and evaluator, G8 truth the analytic truth (§8.7 note 4), profile intervals. Rule: false alarms ≤ 62 of 1000 at each level (§15.2). Power: with a method whose coverage under the actual procedure is p₁ (intervals scaled to that coverage), detections ≥ 775 of 1000 for 68% (both levels) and 95% (full).
+2. *Allowed fraction of the linearity check* (line 2001): three configurations (linear; nonlinear passing the check at a fraction ≤ 5%; nonlinear failing it), 2000 repetitions each, G6 with locally linear toys and with full toys on the same data. Rule: where the check passes, the G6 rejection rate with locally linear toys is ≤ 1.5α and the two p-value distributions agree (two-sample KS p ≥ 0.01); where it fails, the difference is reported. The coverage of the profile interval is reported for each.
+3. *λ estimate of P7* (line 2002): alternative hypotheses of known λ_a ∈ {5, 12.8, 30}, k = 5, 2000 repetitions each, V_Δ/C_r ∈ {0.03, 0.1, 0.3}. Rule: the mean of the cross product is within λ_a ± 2% (§15.3.10, for λ_a = 12.8 within 12.8 ± 2%) or within 3 standard errors of λ_a, whichever is larger; the single-set estimate is biased high by tr(C⁺V_Δ) within 3 standard errors; "single set minus tr(C⁺V_Δ)" is reported against the cross product.
+4. *c and t_lin of shift mode* (line 2003): the toy detector with the material thickness φ in shift mode, ≥ 1000 repetitions per configuration, true φ drawn from its constraint, over information λ ∈ {0.03, 0.1, 0.3} (P8), φ responses linear, quadratic and expansive cubic, refit noise 0 and 0.01 s_i. Rule: where P8 and G9 pass, the shift-mode 68% and 95% coverage is within 3 binomial standard errors of nominal (0.683 ± 0.044, 0.95 ± 0.021 at 1000); at λ = c = 0.1, the rms of the shift−profile central-value difference agrees with √(c/(1+c))·|∂θ̂/∂φ|·σ_φ within 10% (§15.2).
+5. *K of G7* (line 2005): d = 3, K = 10 (standard) and K = 5 (screening), 1000 repetitions each with V_MC correct, underestimated by 2 and by 3. Rule: false-alarm rate with a correct V_MC ≤ 2α (≤ 34 of 1000 refit sets at α = 0.01; §15.3.9); detection rate at K = 10, V_MC underestimated by 3, ≥ 0.9 (§15.3.1); the other rates reported against §8.2 ("0.29, 0.66, 0.91").
+6. *f in the ESS threshold* (line 2006): calibrations 1 and 5 repeated with Σ_MC = f·Σ_data, f = 0.1 (P5 saturated). Rule: the same rules as calibrations 1 and 5 at saturation (G7 false alarms ≤ 2α; G8 false alarms ≤ 62 of 1000).
+7. *b_J bound of P5* (line 2007): the linear Gaussian configuration of §8.7 note 4 with MC noise varying with θ, ≥ 10⁴ repetitions per point, at |b_J,i| ∈ {0.05, 0.10, 0.15, 0.25}σ_tot,i^design. Rule: at and below 0.15, the extra 68% and 95% undercoverage relative to the configuration with K_l = 0 is ≤ 0.01.
+8. *τ_num* (line 2011): the four confirmations of note 1 as unit tests on the toy detector (exact constraints: variance < 10⁻¹⁴ on C̃_r without rounding, nominal residual expectation < 10⁻⁷; a wrongly declared direction of standardized sd 10⁻³ caught; correlation 1 − 10⁻⁷ undeclared passes (c); diag(100, 10⁻⁶) and its correlation matrix give the same decision). Rule: all four hold.
+9. *Rounding negligibility* (line 2012): the five confirmations of note 2; the size items with ≥ 10⁴ repetitions per configuration (σ⁽⁰⁾/ρ from 0.1 to 10; |c| on either side of 1 − 25ρ̃², ρ̃ ∈ {0.02, 0.05, 0.1, 0.15, 0.2}, both signs; uniform true values). Rule: where the condition holds, T_v size within α ± 25%; the double-precision, rotation, vertex and m = 2 items hold as stated in note 2 (m = 2 shared difference 0.33% ± 0.01% of the smallest allowed variance).
+10. *n_min and B* (line 2013): the items of note 3 on shapes K = 3, 5, 50 at their worst evaluation point and shared-event summaries p = 10, 30, 50, each size item with ≥ 10⁴ repetitions. Rules as note 3 states: +½ residual mean 0 within 3 se (negative control "normalize then add ½" shifted); toy-calibrated T_v rejection within α ± 10%; with injected non-convergence ε = 0.5%, 1% rejection ≤ 1.1α; G6 rejection ≤ 1.5α; convergence fractions ≥ 99% (cross-validation ≥ 1 − ε_max,cv); G7 false alarms ≤ 2α under injected non-convergence; ratio-test trigger rate < 10⁻³ per ensemble at ε ≤ ε_max; variance after the w correction not underestimated by more than 1%, λ̂_a not overestimated by more than 1%; Σ_boot mean bias < 10%, relative sd of the trace ≤ 0.3, Asimov 0 (negative control); V̂ with common random numbers standardized difference < 0.05 against independent generation, reweighted carry-over caught. The G8 items of note 3 use calibration 1's rule.
+11. *G5-failure fraction in cross-validation toys* (line 2014): critical fold splits (P3 just passing) and scans of the θ̂ position, 2000 repetitions each. Rule: below 20% the size of the conditional reference distribution is within α ± 25% of the size of the true conditional distribution; above 20% the size bias is reported (Part B's statement "no longer negligible" is confirmed if it exceeds 25%).
+12. *Replica-difference construction* (line 2015): note 4 items: T_v size with V_MC/V_data ∈ {0.03, 0.1, 0.3, 1}, k ∈ {5, 20}, with correlated MC noise, small-count Poisson and BB-lite blocks, ≥ 10⁴ repetitions each. Rule: within α ± 25%; interval-toy coverage within nominal (3 se); G8 false alarms ≤ α_G8 × 1.25 (≤ 62 of 1000); the effective-count approximation pulls |μ| ≤ 0.1, sd in [0.9, 1.1], 68% coverage 0.683 ± 0.03 (≥ 2000 repetitions); power toys scaled with the cross-product lower bound claim ≥ 0.8 at true power 0.7–0.8 in ≤ 5% (including a 4-fold cross-validation with shared events); the negative controls of note 4 caught.
+13. *Number of toys for Ĉ_r* (line 2016): n = max(500, 10k) for k ∈ {5, 20, 60}, 2000 repetitions. Rule: the median of eᵀĈ_r⁺e·(n − k − 2)/(n − 1) / eᵀC_r⁺e within 1 ± 10%.
+14. *Lower bound of λ̂_a^cross* (line 2017): known λ_a ∈ {5, 12.8, 30}, MC noise V_Δ/C_r ∈ {0.03, 0.1, 0.3, 1}, R = 50 independent MC repetitions per bound and the empirical one-sided quantile with the normal approximation declared, 2000 repetitions per configuration. Rule: the bound lies below the true λ_a with frequency ≥ its nominal level minus 3 binomial standard errors, at levels 1 − α_P/(2m) and 1 − α_P/m (m = 1, 2).
+15. *Basins* (line 2018): the bimodal variant (exact degeneracy, weakly broken, near the bifurcation), ≥ 10³ toys each, 10 reseedings of the starts. Rule: the classification is unchanged in ≥ 99% of toys; σ_tot/σ_prior of admitted endpoints ≤ 1.00 and of non-admitted ≥ 1.02 reported and separated by R_admit = 1; with σ_noise > 0 (common random numbers and independent seeds) the same ≥ 99% stability; the toy-calibrated interval of a `multimodal` result has G8 coverage within the targets of §8.4 (calibration 1's rule).
+
+**Test design of gate 1, "the negative tests of P3, P7, G1–G8, V and propagation pass"** (each negative test shows its expected finding code; each has a positive control that passes; fixed seeds `20261130 + case index`; all on the toy detector or on the toy configurations of `toys_linear.py`):
+
+1. P3: width observables only, no photon-source injection → yield × PDE `p3.not_identifiable`; a free Fano factor without the single-photoelectron spectrum → Poisson × gain `p3.not_identifiable`; with the photon source → passes (§15.2). Redundant measurements: the common mode of the overlapping modules and layers → `p3.not_identifiable` with the hint "common mode of redundant measurements" (§15.3.18). A fold whose only constraining shape forms a fold by itself → the fold split rejected (`design.fold_p3`).
+2. P7: ν_k = 2 declared as an alternative → rejected by the contract checker (`contract.alternative_parameter_shift`); too few validation points → `p7.insufficient_power`; cross-validation power by toys; λ = 12.8 cross product within ± 2%, single set biased high; scaling by the point estimate at true power 0.75 claims ≥ 0.8 in > 5% (negative control) while the lower bound with Bonferroni does so in ≤ 5%; the ratio test of the P7 toys failing → P7 `incomplete`, redone with the next seed block.
+3. G1: iteration limit forced to 3 → `g1.not_converged`; with the limit 30 → passes; EDM per basin.
+4. G2: truth beyond the boundary → `g2.boundary_significant`; truth on the boundary → passes with `boundary-solution`; two parameters on the boundary use the χ̄² reference.
+5. G3: truth outside the feasible region (single-gate isolation mode) → `g3.outside_limits`; inside → passes.
+6. G4: a smoothed histogram density (single-gate isolation mode) → `g4.pareto_k` or `g4.ess`; the analytic density → passes.
+7. G5: two parameters appearing only as a product → `g5.not_identifiable`; profile scan points not converging → G5 fails with remedy level plan.
+8. G6: the simulation lacking one effect → `g6.p_value`; with a cross-term nonlinearity the linearity check requires a quadratic model or full toys (`g6.linearity_check_failed` then full toys); the correct model → passes.
+9. G7: V_MC underestimated by 3, K = 10, d = 3 → detection ≥ 0.9 over the test's ensemble; Poisson-only fit with BB-lite: Σ_MC from B_m passes, A V_MC Aᵀ alone (Σ_MC = 0) diverges; rank-one Σ_MC uses K − 1 degrees of freedom and a spread in the null space fails (`g7.null_space_spread`).
+10. G8: a fitter omitting ln det while V_MC changes with θ gives a 0.5σ bias detected with probability ≥ 0.8 over 50 repetitions (≥ 40 detections); the correct fitter passes; a plan whose pseudo-data share the fit MC → rejected (`design.g8_shared_mc`); counting non-converged pseudo-data as not covered (negative control) over-rejects.
+11. V: the formula without the cross terms over-rejects and the correct one does not (rejection over 2000 null toys within α ± 25% for the correct one, above α + 25% for the omission); shift-mode φ with only the indirect effect, and d_l with the minus sign, give a null rejection rate outside α ± 25%; a cross-validation fold failing the linearity check switches to full toys; the §15.3.4–§15.3.8, §15.3.13 and §15.3.14 cases (declaration checks, rounding, untestable and unused observables, shapes and event samples, cross-validation, validation reads, failure records with real decision records: abandonment then a passing decision rejected, abandonment after a passing decision rejected).
+12. Propagation: citing numbers instead of hashes rejected; two results updating the same shared nuisance with different versions → joint fit required; intersecting source sets for the four shapes (sibling, triangle, ξ and ξ, parent-child; the parent-child counterexample gives Var(θ₁ + θ₂) = 3 against the correct 1); exporting θ and ν separately rejected; the §15.3a propagation-package cases.
+
+**Test design of gate 2, "segmented calibration and the joint fit agree"** (one registered run, `tests/core/calibration_phase2_gates.py --gate segmented`, seed 20261140): the toy detector with the common energy scale η and the shared material thickness φ (profile mode) both constrained by two calibrations (calorimeter segment and track/E/p segment), whose posterior correlation is determined by the data. (i) Joint fit of both segments; (ii) segment 1 fitted, exported as the joint posterior (ζ̂, Σ_ζζ) with G_ζ, ξ (§10.4); segment 2 fitted with ξ ~ N(0, I) and ζ constrained by that version. Criteria: for every θ_i, |θ̂_i^seg − θ̂_i^joint| ≤ 0.1σ_tot,i^joint, |σ_i^seg/σ_i^joint − 1| ≤ 0.1, and every correlation coefficient within 0.1. Counterexamples, which must each violate at least one criterion: the prior N(0, 1) in place of the exported posterior (single η case), and two marginal regressions Σ_θηΣ_ηη⁻¹ and Σ_θφΣ_φφ⁻¹ each constraining independently (correlated η and φ case).
+
+**Test design of gate 3, "the negative tests of P8, G9"** (fixed seeds `20261150 + case index`): P8 with information c = 0.3 on the shift-mode φ → `p8.information`; c = 0.05 → passes. G9: Δθ̂ = b(φ + 0.3φ³/6) with |b| = 2σ_tot (Δ_i = 0.17) → `g9.linearity`; a quadratic response with Δ_i > 0.06 → `g9.linearity`; the compressive b(φ − 0.3φ³/6) → passes; condition 1 holding at θ_ref but not at θ̂ with 1.5c → `g9.information`; a non-converged refit → G9 fails; G9 is not decided when P8 failed.
+
 Rule: every value above is registered in this card before the run that it judges; it may be tightened, never loosened.
 
 ## Validation
 
 #### Environment
 
-- Python with the standard library plus NumPy/SciPy (§14). Batch work on Linux and Slurm through `core/partition/` and `batch_campaign.py` (§14.1), under the submission rules of `simcal-task.md` Section E7, item 3.
-- hep-research 0.65.1 or later; for g4sim items, the g4sim stages of §17 `merged` (`g4sim-status.json`).
+- Python 3.13.2 (`HEP_RESEARCH_PYTHON`: conda env `ml`; NumPy 2.2.2, SciPy 1.16.1); the standard library plus NumPy and SciPy (§14). Worktree, outputs (`.simcal-work/`) and `TMPDIR` on the private ceph folder `/ceph/work/AMS/hsinyichou/hep-research-simcal-private/`. Batch work on NSTCCore Slurm (partition `edr1-al9_short_serial`, account `ams`, interpreter `/ceph/work/AMS/hsinyichou/hep-detector-reco/env/py313/bin/python3.13`) through `batch_campaign.py`, under `simcal-task.md` Section E7, item 3: each submission approved by the user; the toy-detector calibrations of §8.7 are synthetic acceptance runs in a disposable test environment, not calibration studies of real data.
+- hep-research 0.65.1 plus `simcal/phase-0` and `simcal/phase-1`; g4sim not used (§17: phases 0–2 do not depend on g4sim).
 
 #### Risks and stop points
 
-- 25 Appendix D entries need the author before this phase (index); D68 is decided together with D3 and §19-14.1f (A1)
-- Most §8.7 rows belong to this phase: calibrate each before the gate run that uses it, never on the gate run itself
+- Size: phase 2 delivers the inference engine; it runs over several sessions. Each work package is committed with its tests before the next starts.
+- A calibration failing its rule, or a gate failing: STOP and report, no loosening (Section E7, item 4).
+- A reading needed beyond Part B and A8 that changes a decision: recorded in the execution log and reported; STOP if it would change Part B.
+- Calibrations stated by Part B on configurations of its computation reports (linear Gaussian, reduced calorimeter toy) run on `toys_linear.py` configurations and, where §8.7 asks for the toy detector, on the toy detector; each run says which.
+- Compute: several calibrations need ≥ 10⁴ repetitions; cost is estimated from a recorded pilot before any submission.
 
 #### Execution log
 
 - 2026-11-10: started on top of the unmerged `simcal/phase-1` (PR #386, stacked on PR #385) on the user's word ("auto continue"); worktree `hep-research-simcal-phase-2`, branch `simcal/phase-2` from 707134fc, verified per Section E2.
 - 2026-11-10: Section E4 step 2 collected against `simcal-decision-index.json`: the 25 "needs the author" items blocking phase 2 are exactly those listed above (D1, D2, D3, D4 open part, D8, D9, D10, D29, D34, D39, D40, D45, D46, D47, D48, D50, D51, D52, D55, D57 open part, D58, D67, D68, D73 open part, D81). None has an approval in `simcal-approvals.md` (records A1-A7 cover none of them; A1 excludes D68). STOP (Sections E4 step 2, E7 item 1).
 - E8 report, 2026-11-10: **phase 2 BLOCKED**. Worktree `/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2`, branch `simcal/phase-2`. No implementation, run or gate yet; no threshold calibrated. Blocking: the author's explicit decision on each of the 25 items, recorded in `simcal-approvals.md`. Of these, the following need the author's own content or choice, not only acceptance of a reading: D39 (cross-group kernel; sheet recommends option (a), interim (c)), D47 (G3 region; rec. (a)), D50 with §19-14.1a (rec. (a) with (iii)), D52 (rec. (b)), D55 (rec. size (a), distance (i), with replacement), D46 (counting direction, bootstrap, budget term; sheet reading given), D57 open part (2) (G8 remedy level under multimodality; rec. a §8.4 note giving remedy level contract), D4 open part (unbounded enclosure; rec. reject at locking), D73 (wording of the §15.3.5 negative control; rec. the D73 wording), D68 with D3 and §19-14.1f (rec. the decided-G5 denominator), D81 (Part B proposal: the redo is not registered, `incomplete` under that κ). The rest (D1, D2, D3, D8, D9, D10, D29 replaced by the §19-2 rule, D34, D40, D45, D48, D51, D58, D67) have a reading in `decision-sheet.md` (c) to accept or change. Next action when unblocked: record the approvals, refresh and register this card (thresholds and test designs) before any run, then implement.
+- 2026-11-10: approval A8 recorded (the 25 author items); phase 2 back to `in-progress`; card refreshed from Part B, the index and A8 before any run: work packages, the gate test designs, seeds and the designs of the fifteen §8.7 calibrations registered (configurations fixed in a re-registration before each run, tightening only).
 
 ## Open Questions
 
 - Settled by the maintainer (2026-11-10, phase 0, Open questions 1 and 6): the records live in `docs/dev/simulator-calibration/`; the `calib_*.py` scripts of §14 live in `skills/hep-statistics/scripts/`, as thin CLIs over the engine in `core/calibration/` (§13); `g4sim_calib_eval.py` stays in `adapters/geant4` (§13).
-- The decisions under "Needs the author" above.
+- The 25 author decisions are settled by approval A8 (2026-11-10); their application to Part B is the author's own change (a new part of Appendix E).
 
 ## References
 
