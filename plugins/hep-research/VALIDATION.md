@@ -8969,3 +8969,62 @@ The first CI run of PR #357 failed on `lint`, 15 `mypy` errors in `core/geometry
 Open: GB13, GB20 and GB21 were not tested on arm64; killed energy at 1 TeV is not detectable by the absolute conservation check; the pure-EM residual reaches 5e-5 MeV, within its limit, for a reason not established; the thin-layer comparison of Section 11 has not run. The custodian's re-evaluation of qualification follows this release and is not recorded here.
 
 Passing checks show software consistency, not physical validity.
+
+## ACTS-TRACKING-T07 — 2026-11-10 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Adapter 0.2.0 (`adapters/acts-tracking`, task T07 of the detector reconstruction plan v9.2), first record of this adapter: status
+`demonstrated-on-synthetic-data` and the tool's tested version. Job of record for adapter 0.2.0: job 7551619, the D1 stage 11 job, the build job of
+T07's close-out (`docs/dev/detector-reconstruction/t07-closeout.md`). It reruns every step below, with the A05 and A17 scenario module
+(`tests/adapters/test_acts_scenarios.py`), `examples/reconstruction-tracking` with its test, and an equality step against the run below.
+Job 7551619: hpa-wn34 (AMD EPYC 9645), 2026-11-10 05:45-06:02 UTC, 17 min 05 s, COMPLETED, JOB RESULT PASS; 36 steps, each exit 0; stderr
+empty; no built test skipped. It ran commit `b2c1219f` plus the uncommitted stage 11 change (receipt: `git diff HEAD` sha256 `d52967b2…`, untracked
+files list `4456b49d…`), build.sh `66f6e12f…`, SOURCES.sha256 `6a3b9479…` (241 files). A05: finder over 400 interleaved events and refit of
+1200 tracks forward and reversed, 0 defects. The example's recording equal in two live runs. Every earlier step's reading lines equal
+those of the run below. After the job, its ID was written into this section, `adapter.json` and the capability matrix, and the example's recording was
+copied from its evidence; these record files differ from the job's manifest, as stated in the commit.
+
+The run below is the latest before it: job 7548207 (adapter 0.1.0, proposed), T07 stage 10's build job, on the same native code (no C++
+changed in stage 11; stage 11 changes the refit's sidecar mapping, the claims test and the records). It ran commit `e4dabbc7` plus the
+uncommitted stage 10 change, whose `git diff HEAD` hash its receipt pins. Its code files are byte-equal to those of `b2c1219f`;
+`b2c1219f` also adds the coordinator's records (`STATE.md`, `decisions.md`, `deviations.md`), so its diff hash differs from the receipt's.
+
+Environment of that run: NSTCCore (ASGC/TWGrid), a worker of partition `edr2-al9_short_serial`, host hpa-wn34 (AMD EPYC 9645, glibc 2.34;
+the host, CPU and glibc are logged by the job, the node is not pinned; EL9 is read from the partition name and glibc, as the job does not
+log the OS release). ACTS 48.2.0 from the conda-forge package `acts-core`, one library `libActsCore.so`, in a project-local conda
+environment. Compiler: that environment's GCC 15.3.0 (`x86_64-conda-linux-gnu-g++`); CMake 4.4.5. Python 3.13.18 with NumPy 2.4.6 and
+SciPy 1.17.1. The driver's self-test asserts the ACTS version ("PASS ACTS is 48.2.0"), and every product header records it.
+
+Command: one Slurm job (script and source manifest of 236 files, both hashed, in the task's private job folder; no node pin). It
+configures and builds `adapters/acts-tracking/assets/native` with CMake. It then runs the driver and wrapper self-tests, the recorded
+CAI-T07-3 probes, the frozen generator check (small and full size), `tools/check_layering.py`, `tools/check_naming.py` and
+`python -m unittest tests.adapters.<module> -v` for each module below, with `HEP_ACTS_TRACKING_BUILD` naming the build. A skipped test
+fails the job. Of the adapter's declared test files, `tests/adapters/test_acts_truth_seeded_diagnosis.py` is not among them: it last ran
+in job 7512409 (stage 6b), and neither this run nor the D1 stage 11 job reruns it.
+
+| Step (module or check) | Result |
+|---|---|
+| configure, build (9 programs) | exit 0, 95 s |
+| finder links and symbols: no generator, seed or truth code in the finder, driver or check program | 25 checks pass, none fails |
+| driver self-test, wrapper self-test | 69 checks pass, ALL PASS; the wrapper's self-test status ok |
+| `test_acts_tracking` (contract, product format, data-file separation, generator checks, wrapper, straight-line case) | 137 run, OK |
+| `test_acts_refit_field` (refit of known hit sets at 1 T, truth-assisted, counted apart) | 35 run, OK |
+| `test_acts_track_outputs` (R33 outputs, CAI-T07-1, CAI-T07-2) | 45 run, OK |
+| `test_acts_cai_refit` (CAI-T07-3 payload refit and refusals, CAI-T07-4 weak mode, the wrapper's refit) | 20 run, OK |
+| `test_acts_finding_r33` (R33 outputs of found tracks, the wrapper's find) | 7 run, OK |
+| `test_acts_finding` (seeds, CKF, ambiguity resolution on block 1; negative cases: wrong hits, branch explosion, seed failure, search-truncated marking) | 64 run, OK |
+| `test_acts_finding_diagnosis`, `test_acts_truth_seeded`, `test_acts_truth_seeded_replica` (ACTS's removal order; the truth-seeded comparator, never finding; the exact replica check) | 10, 20, 26 run, OK |
+| `test_acts_vertexing` (AMVF on the delivered tracks) | 34 run, OK |
+| frozen generator check, full size; GOLDEN lines; frozen files | RESULT PASS, 0 FAIL lines; 32 GOLDEN lines equal the check of record (job 7492427); 31 frozen files unchanged |
+| byte equality with earlier jobs of record | finder lines (job 7502411), truth-seeded lines (7503215), replica lines (7515600), refit lines (7524096), and 97 output files and the reading lines of 26 logs (7546791) equal |
+| check-layering, check-naming | no layering violation; naming status pass, no new finding (992 violations, all known gaps) |
+
+Result of that run: JOB RESULT PASS, every step exit 0, 19 min 03 s (1,119 s of steps). 398 unit tests ran in the 10 modules (the 11
+straight-line tests are among the 137). Every input was synthetic: the frozen fixtures `t07-telescope-clean/1`, `-noise/1` and
+`-cai/1` on block 1 (tuning; block 6 only for the generator check), and hand-made events. The checks compare ACTS with independent
+replicas (a linear Kalman replica, closed-form least squares), closed forms and earlier jobs' outputs, and drive each judge with one
+defect. No reference output from outside the plugin was compared, so the tool is not raised to `tested-in-declared-environment`.
+
+Passing checks show software and interface consistency on synthetic data, not physical validity. No tracking, vertexing or alignment
+quality claim is made for any detector (R31). The development readings these jobs printed are not gates. T07's quality verdict waits
+for K09 at Freeze B. Open at this record: A01 (a second backend), material effects, the K04 schema items and the user items listed in
+the close-out.

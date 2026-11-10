@@ -1,0 +1,48 @@
+acts-tracking-finding-record/1
+recipe reco.track.acts-ckf-planar/1
+stage find-ckf
+evidence_class data-side
+product_id example-reconstruction-tracking-find
+data_sha256 e54e76d4d2030df311e58f144d5ca54c678ed011338fc037cdcf6128574075f4
+product_events 2
+configuration_sha256 2448d935fd8a20d8856be6772d7dfbaa774819f74a0a90d139cdc680531a3050
+configuration seed_plane_triples 1-2-3,1-2-4,3-4-5,6-7-8
+configuration seed_lowest_momentum_gev 1.5
+configuration seed_largest_slope_u 0.25
+configuration seed_largest_slope_v 0.16
+configuration seed_window_sigma 5
+configuration seed_prior_inflation 1.5
+configuration finding_chi2_cut 16
+configuration finding_least_measurements 6
+configuration finding_most_holes 2
+configuration finding_most_branches_per_surface 16
+configuration finding_most_branches_per_seed 32
+configuration finding_most_seeds_per_event 10000
+configuration finding_most_propagator_steps 10000
+configuration ambiguity_most_shared_hits 2
+configuration ambiguity_most_iterations 1000
+configuration finding_fit_passes 2
+configuration seed_derivative_step_sigma 0.050000000000000003
+configuration refit_start_x_mm -50
+configuration refit_prior_loc_sigma_mm 10
+configuration refit_prior_angle_sigma 0.10000000000000001
+configuration refit_prior_qop_sigma_per_gev 1
+configuration refit_prior_time_sigma 1
+configuration diagnostic_build none
+configuration seed_slope_along_v chord
+configuration seed_covariance_phi_term present
+event 0 48 24 6 18 0 0 0 0 0 6 6 none
+candidate event-0-candidate-0 0 1-2-3 selected none 0 8 0 5.4699020385742188 -0.61203219105778661 4.1798949241638184 16 0,6,12,18,24,30,36,42
+candidate event-0-candidate-1 0 1-2-3 selected none 0 8 0 11.484950065612793 -0.46501788562207885 9.4023580551147461 16 1,7,13,19,25,31,37,43
+candidate event-0-candidate-2 0 1-2-3 selected none 0 8 0 11.119265556335449 0.41806596746246499 10.501543045043945 16 2,8,14,20,26,32,38,44
+candidate event-0-candidate-3 0 1-2-3 selected none 0 8 0 10.469401359558105 0.463390553424887 9.7810487747192383 16 3,9,15,21,27,33,39,45
+candidate event-0-candidate-4 0 1-2-3 selected none 0 8 0 12.752285003662109 -0.41671278755222629 9.7318782806396484 16 4,10,16,22,28,34,40,46
+candidate event-0-candidate-5 0 1-2-3 selected none 0 8 0 13.520805358886719 0.38099874602816541 10.540952682495117 16 5,11,17,23,29,35,41,47
+event 1 48 24 6 18 0 0 0 0 0 6 6 none
+candidate event-1-candidate-0 1 1-2-3 selected none 0 8 0 13.393675804138184 0.48868285342549583 10.93419361114502 16 0,6,12,18,24,30,36,42
+candidate event-1-candidate-1 1 1-2-3 selected none 0 8 0 15.725396156311035 0.44453284514722308 14.46919059753418 16 1,7,13,19,25,31,37,43
+candidate event-1-candidate-2 1 1-2-3 selected none 0 8 0 5.0904293060302734 0.52668676467075748 4.7077450752258301 16 2,8,14,20,26,32,38,44
+candidate event-1-candidate-3 1 1-2-3 selected none 0 8 0 8.8647165298461914 -0.41475357378740801 7.4143285751342773 16 3,9,15,21,27,33,39,45
+candidate event-1-candidate-4 1 1-2-3 selected none 0 8 0 5.4618721008300781 -0.3588101264545594 5.3348326683044434 16 4,10,16,22,28,34,40,46
+candidate event-1-candidate-5 1 1-2-3 selected none 0 8 0 4.2834181785583496 -0.37492479016428859 3.7507271766662598 16 5,11,17,23,29,35,41,47
+end 2 12

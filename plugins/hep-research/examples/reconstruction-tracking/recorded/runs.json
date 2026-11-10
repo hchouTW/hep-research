@@ -1,0 +1,103 @@
+{
+ "block": 1,
+ "data_sha256": "e54e76d4d2030df311e58f144d5ca54c678ed011338fc037cdcf6128574075f4",
+ "events": 2,
+ "field_tesla": 1.0,
+ "first_event": 0,
+ "fixture": "t07-telescope-clean/1",
+ "runs": [
+  {
+   "command": [
+    "<build>/t07_fixture_generator",
+    "generate",
+    "--fixture",
+    "clean",
+    "--block",
+    "1",
+    "--stratum",
+    "0",
+    "--first-event",
+    "0",
+    "--count",
+    "2",
+    "--data-file",
+    "<work>/events.t07data",
+    "--truth-file",
+    "<work>/events.t07truth"
+   ],
+   "exit_code": 0,
+   "operation": "generate-fixture",
+   "program_exit": 0,
+   "program_stderr": "",
+   "program_stdout": {
+    "events": 2,
+    "generator": "t07-telescope-clean/1",
+    "status": "ok"
+   },
+   "reason": "",
+   "status": "ok"
+  },
+  {
+   "command": [
+    "<build>/acts_tracking_finder",
+    "--data-file",
+    "<work>/events.t07data",
+    "--product-id",
+    "example-reconstruction-tracking-find",
+    "--product-file",
+    "<work>/find.product",
+    "--record-file",
+    "<work>/find.record",
+    "--product-events",
+    "2"
+   ],
+   "exit_code": 0,
+   "operation": "find",
+   "program_exit": 0,
+   "program_stderr": "",
+   "program_stdout": {
+    "candidates": 12,
+    "events": 2,
+    "evidence_class": "data-side",
+    "failed": 0,
+    "search_truncated_events": 0,
+    "stage": "find-ckf",
+    "status": "ok",
+    "tracks": 12
+   },
+   "reason": "",
+   "status": "ok"
+  },
+  {
+   "command": [
+    "<build>/acts_tracking_driver",
+    "refit",
+    "--data-file",
+    "<work>/events.t07data",
+    "--hit-sets",
+    "<work>/refit.hitsets",
+    "--field-tesla",
+    "1.0",
+    "--product-id",
+    "example-reconstruction-tracking-refit",
+    "--product-file",
+    "<work>/refit.product"
+   ],
+   "exit_code": 0,
+   "operation": "refit",
+   "program_exit": 0,
+   "program_stderr": "",
+   "program_stdout": {
+    "evidence_class": "truth-assisted",
+    "failed": 0,
+    "stage": "refit-known-hit-set",
+    "status": "ok",
+    "tracks": 12
+   },
+   "reason": "",
+   "status": "ok"
+  }
+ ],
+ "stratum": 0,
+ "truth_sha256": "4407b515e2c46b9859e436e138b0e7f96bfb3eedf83048977366aab14f89e3a9"
+}

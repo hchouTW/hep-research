@@ -19,11 +19,16 @@ stops at anything it does not know, and refuses a failed track without its categ
 The map writes reconstruction-product/1 sidecars, with no new contract (contract-map.md, Existing schemas; K04). One
 collection per product id, as contracts.reconstruction.dereference reads them: `<id>.tracks` and `<id>.track-states`. A refit of
 a known hit set is truth-assisted (BP03; t04-values-v4.md section 8.1), so its sidecars carry role validation and never a
-data-side role. Standard library only.
+data-side role. D1 stage 11 (A17): their conditions_used names the alignment payload the refit applied, from that payload's R32 sidecar
+(conditions_used_of), and is empty only for a refit that applied none. version_one_of is a view for comparing records, not a product: it
+drops the alignment_payload line, so its result is never written or mapped as the refit's product. Standard library only, but
+conditions_used_of, which recomputes a payload sidecar's identity with contracts.conditions.
 """
 from __future__ import annotations
 
 import math
+import sys
+from pathlib import Path
 
 PRODUCT_FORMAT = "acts-tracking-product/1"
 PRODUCT_FORMAT_R33 = "acts-tracking-product/2"
@@ -36,6 +41,7 @@ R33_COLLECTIONS = ("track_outputs", "residuals", "measurement_outputs", "residua
 ALIGNMENT_PARAMETRIZATION = ["t07-plane-rigid/1", "local", "sensor"]  # name, frame, level (R32)
 R33_HEADER_FIELDS = ("r33_conventions", "alignment_parametrization")
 ALIGNMENT_PAYLOAD_FIELDS = ("content_sha256", "origin", "derived_against", "derived_from", "round")  # the optional header line alignment_payload (D1 stage 9)
+ALIGNMENT_SLOT = "alignment"  # the conditions_used slot of the payload a refit applied, in its reconstruction-product/1 sidecars (D1 stage 11, A17)
 # What R33 asks per measurement and per track, as r33_outputs returns it; every key must be there for every measurement of a /2 product.
 R33_MEASUREMENT_FIELDS = ("surface", "geometry_id", "measurement", "measurement_covariance", "residuals", "local_derivative", "reference_derivative", "alignment_derivative",
                           "local_slope", "incidence_rad", "sensitive_path_mm", "path_factor", "thickness_mm")
@@ -419,19 +425,56 @@ def measurement_view_id(header: dict) -> str:
     return f"{header['data_product']}.view.{header['product_id']}"
 
 
-def _sidecar_base(product_id: str, revision: int, collection: str, role: str, objects: list, native_location: str, native_type: str = PRODUCT_FORMAT) -> dict:
+def _sidecar_base(product_id: str, revision: int, collection: str, role: str, objects: list, native_location: str, native_type: str = PRODUCT_FORMAT,
+                  conditions_used: tuple | list = ()) -> dict:
     document = {"schema": "reconstruction-product/1", "product_id": product_id, "revision": revision, "collection": collection,
                 "native": {"type": native_type, "location": native_location}, "presence": "present" if objects else "valid-empty",
-                "role": role, "objects": objects, "conditions_used": [], "required_extensions": []}
+                "role": role, "objects": objects, "conditions_used": [dict(item) for item in conditions_used], "required_extensions": []}
     return document
 
 
-def sidecars_for_product(document: dict, native_location: str) -> list:
+def conditions_used_of(header: dict, payload_sidecar: dict | None) -> list:
+    """R32 for the sidecars of a refit (D1 stage 11, A17): the alignment payload it applied, by the identity of its R32 sidecar
+    (conditions-payload/1, t07_alignment_payload.payload_sidecar), or none. The product's header line alignment_payload names the payload's
+    content; the sidecar given must be that content's, with its origin, geometry and source, or the mapping is refused. A product that applied
+    a payload is never mapped as having consumed none, and one that applied none takes no payload sidecar."""
+    line = header.get("alignment_payload")
+    if line is None:
+        if payload_sidecar is not None:
+            raise ProductFormatError("the product applied no alignment payload, so no payload sidecar belongs to it")
+        return []
+    if payload_sidecar is None:
+        raise ProductFormatError("the product applied an alignment payload: its sidecars name that payload's R32 sidecar, or they would state that none was consumed")
+    if payload_sidecar.get("kind") != "alignment-parameters" or payload_sidecar.get("content_sha256") != line["content_sha256"]:
+        raise ProductFormatError("the payload sidecar is not the sidecar of the payload this product applied")
+    if payload_sidecar.get("origin") != line["origin"]:
+        raise ProductFormatError(f"the product applied a {line['origin']} payload; the sidecar says {payload_sidecar.get('origin')}")
+    if payload_sidecar.get("derived_against", {}).get("geometry_id") != line["derived_against"]:
+        raise ProductFormatError("the payload sidecar is derived against another nominal geometry than the payload this product applied")
+    if ("derived_from" in payload_sidecar) != (line["derived_from"] != "none"):
+        raise ProductFormatError("the payload sidecar and the product disagree on whether the payload was derived from another")
+    product_round = None if line["round"] == "none" else int(line["round"])
+    if product_round != payload_sidecar.get("loop", {}).get("round"):
+        raise ProductFormatError(f"the product consumed round {line['round']}; the payload sidecar is of round {payload_sidecar.get('loop', {}).get('round', 'none')}")
+    # The identity is recomputed, never read from the stored field (R32; contracts.conditions); adapters may import contracts (tools/check_layering.py).
+    root = Path(__file__).resolve().parents[4]
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
+    from contracts.conditions import payload_identity
+    if payload_sidecar.get("payload_id") != payload_identity(payload_sidecar):
+        raise ProductFormatError("the payload sidecar's payload_id is not the identity of its content")
+    return [{"slot": ALIGNMENT_SLOT, "tag": payload_sidecar["tag"], "payload_id": payload_sidecar["payload_id"], "origin": line["origin"],
+             "round": product_round}]
+
+
+def sidecars_for_product(document: dict, native_location: str, payload_sidecar: dict | None = None) -> list:
     """reconstruction-product/1 for the tracks and the per-surface states. Predicted, filtered and smoothed are separate objects,
-    told apart by state_type (BP03). A failed track stays an object. Role validation: truth-assisted, off the data side."""
+    told apart by state_type (BP03). A failed track stays an object. Role validation: truth-assisted, off the data side.
+    conditions_used names the alignment payload the refit applied, from its R32 sidecar (conditions_used_of); with none applied it is empty."""
     header = document["header"]
     if header["evidence_class"] != "truth-assisted" or header["stage"] != "refit-known-hit-set":
         raise ProductFormatError("this stage maps refits of known hit sets only")
+    conditions_used = conditions_used_of(header, payload_sidecar)
     revision, base_id = header["revision"], header["product_id"]
     ordinal_of = {track["key"]: track["event_ordinal"] for track in document["tracks"]}
     state_of = {(state["track_key"], state["index"]): state for state in document["states"]}
@@ -449,8 +492,8 @@ def sidecars_for_product(document: dict, native_location: str) -> list:
                                       "key": measurement_key(ordinal_of[item["track_key"]], state["hit_key"])}]
         state_objects.append(entry)
     native_type = document.get("format", PRODUCT_FORMAT)
-    return [_sidecar_base(f"{base_id}.tracks", revision, "tracks", "validation", track_objects, native_location, native_type),
-            _sidecar_base(f"{base_id}.track-states", revision, "track-states", "validation", state_objects, native_location, native_type)]
+    return [_sidecar_base(f"{base_id}.tracks", revision, "tracks", "validation", track_objects, native_location, native_type, conditions_used),
+            _sidecar_base(f"{base_id}.track-states", revision, "track-states", "validation", state_objects, native_location, native_type, conditions_used)]
 
 
 def measurement_sidecar(document: dict, native_location: str) -> dict:

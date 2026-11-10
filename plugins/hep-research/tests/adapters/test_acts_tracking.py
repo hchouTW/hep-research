@@ -1208,9 +1208,37 @@ class WrapperForwardsAndReports(unittest.TestCase):
         self.assertEqual(tool_contract.check(contract)["status"], "fail")
 
     def test_the_adapter_claims_nothing_it_has_not_run(self):
+        # D1 stage 11 (T07 close-out): the build jobs ran ACTS on synthetic fixtures only, so the claim is demonstrated-on-synthetic-data and no higher
+        # (docs/adapter-authoring.md, Honesty rules); the version is the one the driver's self-test asserts and every product header writes, and VALIDATION.md
+        # records the run under the adapter's version (Changing an adapter). Before stage 11 this test held the adapter at proposed with no version.
+        # Fix round 1 (review M3): adapter.json and VALIDATION.md name one and the same job of record for the declared version, "the D1 stage 11 job" until the
+        # coordinator writes its ID after it passes, then "job <ID>"; job 7548207, which ran 0.1.0 (proposed), is cited for that alone.
         declaration = json.loads((ADAPTER / "adapter.json").read_text(encoding="utf-8"))
-        self.assertEqual(declaration["status"], "proposed")
-        self.assertEqual(declaration["tools"][0]["tested_versions"], [])
+        self.assertEqual(declaration["status"], "demonstrated-on-synthetic-data")
+        self.assertEqual([tool["status"] for tool in declaration["tools"]], ["demonstrated-on-synthetic-data"])
+        versions = declaration["tools"][0]["tested_versions"]
+        self.assertEqual(len(versions), 1)
+        driver = (NATIVE / "acts_tracking_driver.cpp").read_text(encoding="utf-8")
+        self.assertIn('test.check("ACTS is 48.2.0", acts_version_text() == "48.2.0");', driver)
+        self.assertTrue(versions[0].startswith("acts-core 48.2.0 "), versions[0])
+        for word in ("GCC 15.3.0", "CMake 4.4.5", "Python 3.13.18"):
+            self.assertIn(word, versions[0])
+        self.assertTrue(declaration["status_rule"].split(";")[1].strip().startswith("demonstrated-on-synthetic-data:"), declaration["status_rule"])  # review minor 5
+        validation = (ROOT / "VALIDATION.md").read_text(encoding="utf-8")
+        section = validation[validation.index("\n## ACTS-TRACKING-T07 "):]
+        section = section[:section.index("\n## ", 1)] if "\n## " in section[1:] else section
+        version = declaration["version"]
+        record_pattern = rf"job of record for adapter {re.escape(version)}: (the D1 stage 11 job|job \d+)"
+        in_declaration = re.findall(record_pattern, declaration["environment"] + " " + declaration["status_rule"], flags=re.IGNORECASE)
+        in_validation = re.findall(record_pattern, section, flags=re.IGNORECASE)
+        self.assertTrue(in_declaration and in_validation, "adapter.json and VALIDATION.md each name the job of record of the declared version")
+        self.assertEqual(len(set(job.lower() for job in in_declaration + in_validation)), 1, (in_declaration, in_validation))
+        self.assertNotEqual(in_declaration[0].lower(), "job 7548207")
+        self.assertIn(f"Adapter {version} ", section)
+        for name, text in (("adapter.json", json.dumps(declaration)), ("VALIDATION.md", section)):
+            with self.subTest(record=name):
+                self.assertEqual(text.count("7548207"), text.count("job 7548207 (adapter 0.1.0, proposed"), f"{name} cites job 7548207 other than for 0.1.0")
+                self.assertIn("job 7548207 (adapter 0.1.0, proposed", text)
 
 
 # D1 stage 10: the wrapper, the manifest and the tool contract carry the driver interfaces of stages 8 and 9, --alignment-payload on refit and
