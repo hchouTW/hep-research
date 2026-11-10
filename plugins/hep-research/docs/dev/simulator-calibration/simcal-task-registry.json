@@ -113,6 +113,13 @@
    "registered_at": "2026-11-10T12:54:11Z",
    "card_commit": "37ffe4c0",
    "reason": "execution log only (campaign 2, final checks, gates recorded, E8 report); thresholds and test design as registered 06fb1860"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "32bc1e6d83ae4b327864dc31d17c7e37237ec1f907b4134fbe9732e4c3b3af0d",
+   "registered_at": "2026-11-10T13:40:54Z",
+   "card_commit": "2e8c1f91",
+   "reason": "refreshed at the start of phase 1 from Part B, the index and approval A7 (D37, D41, D42), before any run: gate test designs, seeds and the two section 8.7 calibrations of the phase registered"
   }
  ]
 }
