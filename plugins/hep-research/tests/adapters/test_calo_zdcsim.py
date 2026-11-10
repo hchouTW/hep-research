@@ -643,7 +643,9 @@ class T08GridPathsUnchanged(unittest.TestCase):
             d = Path(work)
             raw = numpy.zeros((1, 40, 40))
             raw[0, 20, 20] = 50.0
-            (d / "c.cells").write_bytes(cell_input.cells_bytes(raw, numpy.ones(raw.shape, bool), numpy.zeros(raw.shape, bool)))
+            # raw unit MeV, the identity payloads' unit: D2 stage 4 refuses an ADC readout with MeV payloads (A38)
+            (d / "c.cells").write_bytes(cell_input.cells_bytes(raw, numpy.ones(raw.shape, bool), numpy.zeros(raw.shape, bool),
+                                                               raw_unit=zc.RAW_UNIT))
             ped, gain = identity_payloads(1600)
             (d / "p.json").write_bytes(ped)
             (d / "g.json").write_bytes(gain)
@@ -750,7 +752,9 @@ class FixRound1OldReaders(unittest.TestCase):
             d = Path(work)
             raw = numpy.zeros((1, 40, 40))
             raw[0, 20, 20] = 50.0
-            (d / "c.cells").write_bytes(cell_input.cells_bytes(raw, numpy.ones(raw.shape, bool), numpy.zeros(raw.shape, bool)))
+            # raw unit MeV, the identity payloads' unit: D2 stage 4 refuses an ADC readout with MeV payloads (A38)
+            (d / "c.cells").write_bytes(cell_input.cells_bytes(raw, numpy.ones(raw.shape, bool), numpy.zeros(raw.shape, bool),
+                                                               raw_unit=zc.RAW_UNIT))
             ped, gain = identity_payloads(1600)
             (d / "p.json").write_bytes(ped)
             (d / "g.json").write_bytes(gain)

@@ -473,3 +473,19 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
   - The question the user answered stated this rule. The coordinator reads "exactly" as binding for t08-grid/1, where section 7.1 is defined. If the user holds it binding for the zdcsim format exercise too, a section 2.3 amendment or a sourced W, q and σ_n is needed (a user item).
 - **Environment.** uproot is read from S3's reduce venv. Its RECORD files and their contents are pinned before compute (ruling 3); installing into env/py313 would need the user. CAI-T08-1 and -2 do not apply to `/3` products.
 - **Readings.** Two bookkeeping predictions were refuted: cells with a deposit (median 11) and entries per event (median 127). S3's own 1-event file agrees with the job. No performance number.
+
+## T08, D2 stage 4: scenarios A15, A32, A38 and examples/reconstruction-calorimetry
+
+2026-11-10, coordinator. Job of record 7557963 (hpa-wn34, 14 min 03 s, PASS); 7557508 (PASS) superseded and 7557888 (FAIL, the coordinator's incomplete rename in build.sh) before it: the example product is named events.product, because the package forbids *.jsonl (packaging_scan).
+
+- **Defects found while showing the scenarios, fixed (A32, A38):**
+  - the readings scored a product of any configuration against job 7479146's constants;
+  - CAI-T08-1 took T_c from `--configuration` rather than refusing a product of another configuration;
+  - a readout already calibrated could be calibrated again with ADC payloads.
+
+  Payload units must now be the readout's raw unit. Two stage 3 tests now declare MeV readouts, with their intent unchanged. The product reader refuses an event whose kept, unclustered and dead cells do not account for the grid. Stage 1 to 3 products stay byte-equal (job 7557963, 233 comparisons).
+- **Statuses** (`t08-scenarios.md`, set after the PASS):
+  - **A15: open.** Variants are kept apart by configuration identity; rejecting one under fixed quality gates, or listing it as a working point, needs K09 and T12, or a format change.
+  - **A32: met, T08's part.**
+  - **A38: open, by part A38.3 (exposure).** t08-grid/1 has no live time or trigger. The plan says a missing implementation is never "not applicable", so the coordinator reworded the implementer's "not applicable". The other six parts are shown, three with readings: the reference-selection literals; no response histogram in T08; and a second correction whose unit matches, which units cannot show.
+- **The example** is met. The recording made by the job was copied by the coordinator after the PASS, as T07's was.

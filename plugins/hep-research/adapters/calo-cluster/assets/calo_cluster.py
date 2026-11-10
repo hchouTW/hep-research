@@ -14,7 +14,8 @@ Operations (contracts/tool_contracts/calo_cluster.json):
 A labelled readout, calo-cells/2 (D2 stage 3: another simulation's deposits, label simulated-unvalidated), needs a
 calo-cluster-configuration/2 written for its label, and a stage 1 gain payload; it makes calo-cluster-product/3, which carries
 the input's label and provenance. A labelled input with a /1 configuration, an unlabelled one with a /2 configuration, and a
-labelled one with a calo-gain-payload/1 gain are refused, with no product written.
+labelled one with a calo-gain-payload/1 gain are refused, with no product written. So are payloads whose units are not those of
+the readout's raw values (D2 stage 4, A38): a calibrated readout is never calibrated again.
 
 Output: one JSON object on stdout with the status and the reason. Exit 0 ok; 1 failed (check-product found a cell counted
 twice, or a component's sharing was undefined; the product is still written and records it). A component whose two-peak
@@ -76,6 +77,7 @@ def reconstruct(args) -> int:
             raise cell_input.InputError(f"readout grid {readout.header['nx']} x {readout.header['ny']} is not the configuration's")
         gain_payload.check_channel_map(gain, readout.header["nx"], readout.header["ny"], "gain payload")
         check_label(readout, cfg, gain)
+        cell_chain.check_units(readout.header["raw_unit"], pedestal, gain)
     except (configuration.ConfigurationError, cell_input.InputError) as exc:
         return report("reconstruct", "rejected", str(exc), EXIT_INVALID)
     header = product.header_document(args.product_id, cfg.cells_x, cfg.cells_y, readout.sha256, readout.events, cfg.sha256, chain,

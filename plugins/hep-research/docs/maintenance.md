@@ -322,6 +322,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/design-minimal-spectrometer/` (offline replay of the recorded J15 campaign; `live.py` reruns it) | J15 |
 | `examples/design-search-j16/` (searches on Examples A and B; offline replay of the recorded Example A confirmation; `live.py` reruns it) | J16 |
 | `examples/reconstruction-tracking/` (T07: generate, find and refit through the ACTS wrapper; offline replay of a recording made by the T07 build job on its Slurm node, not on E2, where ACTS is not installed; `--live` with the built programs reruns it) | - |
+| `examples/reconstruction-calorimetry/` (T08: generate a few t08-grid/1 events, reconstruct with the calo-cluster development binding, check the product; offline replay of a recording made by the T08 job, since the frozen generator is outside the repository; `--live --generator` reruns it; its expected readings are stated in `run.py`'s module text) | - |
 
 `tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and

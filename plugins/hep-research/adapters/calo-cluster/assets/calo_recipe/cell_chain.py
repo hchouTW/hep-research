@@ -11,6 +11,14 @@ here sets or clears it. A dead cell has no value at any step (NaN), and is never
 Both steps are linear and the gain step is multiplicative with no additive term, the case of plan R37's CAI-T08-1: no
 cell-level step follows the gain (the readout clips before it; T_c and T_s are clustering's selections, not cell steps).
 A calo-gain-payload/1 gain is refused against another channel map than the readout grid's (D2 stage 2).
+
+Units (D2 stage 4, scenario A38: a repeated correction cannot pass): each step is applied only to the values it was made for.
+The pedestal is in the readout's raw unit; a multiplying gain is in MeV per raw unit, a dividing gain in raw units per MeV. So an
+already-calibrated readout (raw unit MeV) is never given an ADC pedestal and gain again, and a gain made for calibrated values is
+never applied to ADC values. The identity readout of a labelled input (raw unit MeV, pedestal MeV, gain MeV/MeV) is consistent.
+Units cannot show a correction whose unit matches the values it is applied to again: a second gain in MeV/MeV on a readout that
+is already calibrated, or a second pedestal in adc on an ADC readout that is already pedestal-subtracted. Neither case is
+detectable from these files.
 """
 from __future__ import annotations
 
@@ -53,6 +61,21 @@ def gain_step(after_pedestal, gain, operation: str):
     """The gain step alone, E = c (ADC - pedestal) or (ADC - pedestal) / g. The chain and the fixed-membership re-evaluation
     (recalibration.py) both apply it, so they share one arithmetic. No cell-level step follows it in this chain."""
     return after_pedestal * gain if operation == "multiply" else after_pedestal / gain
+
+
+def gain_unit(operation: str, raw_unit: str) -> str:
+    return f"MeV/{raw_unit}" if operation == "multiply" else f"{raw_unit}/MeV"
+
+
+def check_units(raw_unit: str, pedestal: Payload, gain: Payload) -> None:
+    """Refuses payloads whose units are not those of the readout's raw values (see the module text)."""
+    if pedestal.document.get("unit") != raw_unit:
+        raise InputError(f"pedestal payload: unit {pedestal.document.get('unit')!r} is not the readout's raw unit {raw_unit!r}; a "
+                         "correction is applied only to the values it was made for, so a calibrated readout is never calibrated again")
+    expected = gain_unit(gain.operation, raw_unit)
+    if gain.document.get("unit") != expected:
+        raise InputError(f"gain payload: unit {gain.document.get('unit')!r} is not {expected!r}, the {gain.operation} role's unit for "
+                         f"a readout in {raw_unit!r}; a correction is applied only to the values it was made for")
 
 
 def check_chain(pedestal: Payload, gain: Payload) -> None:

@@ -24,6 +24,8 @@ Definitions, from t04-values-v4.md sections 4.2, 5.1, 7 and 7.1, with the scorin
 - Reported, not gated (v4 9.1, 9.2; fix round 1): position pulls of the largest object for edge (a truncated centroid is
   biased by design), dead and saturation; for near, per-shower energy, x and y pulls of each primary against E and the
   truth axis (no closure meaning: v4 9.1).
+- Same selection as the response (v4 9.2; scenarios A15, A32, A38): only a product made with the t08-grid/1 configuration file
+  (REFERENCE_CONFIGURATION_SHA256) is read; any other configuration, a cheaper variant included, is refused (exit 2).
 - Exit codes: 0 no double count; 1 a cell counted twice (the sheet's stop, GATE ... FAIL); 2 the readings refused their input
   (REFUSED line), which is not a double-count verdict.
 
@@ -41,6 +43,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REFERENCE_LOG_SHA256 = "325e070b5a929a8d77d2cb88d00767e2ab5daa985a2d567c096486249835d0c8"
+# The configuration whose selection job 7479146's constants b were made with (T_c 0.6, T_s 10 MeV, W 1, q and sigma_n 0.2 MeV,
+# 30 iterations: round5/calc-t08-reference.py, the same constants as t08-grid-1.configuration.json, compared in the stage 4 job).
+# A product of any other configuration file is refused: its selection is not the one the targets carry (v4 9.2, "same selection
+# as the response"; scenarios A15, A32 and A38, D2 stage 4).
+REFERENCE_CONFIGURATION_SHA256 = "5fbbea3b4ca81d962c5ca70fa024ddc82dd6e1d2f06e39b354fda56d26483723"
 GATED_FROM_MEV = 250.0
 CLIP_MEV = 400.0
 Q_MEV, SIGMA_N_MEV = 0.2, 0.2   # t04-values-v4.md section 4.2, for the saturation reading's unclipped-cell uncertainty
@@ -246,6 +253,10 @@ def readings(product, truth_header: dict, truth: dict, ref: dict, label: str) ->
         raise ReadingError("the product was not made from the cells file this truth file belongs to")
     if len(events) != truth_header["events"]:
         raise ReadingError("product and truth cover different event counts")
+    if product.header["configuration"]["sha256"] != REFERENCE_CONFIGURATION_SHA256:
+        raise ReadingError(f"the product was made with configuration {product.header['configuration']['sha256']}, not t08-grid/1's "
+                           f"{REFERENCE_CONFIGURATION_SHA256}, whose selection job 7479146's reference constants carry: a product of "
+                           "another configuration is never scored against them (v4 9.2, same selection as the response)")
     fixture, separation = truth_header["fixture"], truth_header["separation"]
     lines, first = [], []
     defects = 0

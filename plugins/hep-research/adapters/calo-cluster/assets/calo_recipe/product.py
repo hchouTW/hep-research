@@ -34,7 +34,8 @@ members as [channel, sharing fraction] (R34: sharing fractions kept per cluster)
 
 read_product refuses, with a named reason, a product that is malformed (unknown or missing key, wrong type, a non-finite
 number, an unknown energy kind, a cell row whose chain arithmetic does not reproduce its own values, a member outside its
-component, a fraction outside [0, 1]) or incomplete (no end line, a wrong count, an event out of order, text after the end).
+component, a fraction outside [0, 1], kept, unclustered and dead cells that do not add up to the grid's channels (D2 stage 4))
+or incomplete (no end line, a wrong count, an event out of order, text after the end).
 double_count_defects is the sheet's stop check: no cell counted twice.
 """
 from __future__ import annotations
@@ -323,6 +324,9 @@ def check_event(doc: dict, index: int, header: dict) -> None:
         if isinstance(comp, bool) or not isinstance(comp, int) or not 0 <= comp < len(comps):
             _refuse(f"{where}.cells[{channel}]", "component out of range")
         cell_component[channel], cell_saturated[channel], cell_energy[channel] = comp, sat, energy
+    if len(cells) + doc["unclustered_cells"] + len(dead) != channels:
+        _refuse(where, f"kept ({len(cells)}), unclustered ({doc['unclustered_cells']}) and dead ({len(dead)}) cells do not account for "
+                       f"the {channels} channels of the grid (hit and unhit, A38)")
     for j, comp in enumerate(comps):
         _keys(comp, COMPONENT_KEYS, f"{where}.components[{j}]")
         if comp["component"] != j:

@@ -34,7 +34,8 @@ Operations:
                     --plant-fraction-defect raises one asserted object's fraction by 1e-6 first: a control that must FAIL.
   rereco            CAI-T08-2 on the nominal product and the product re-reconstructed under the derived payload; writes
                     t08-cai-rereco/1 and reading lines, no numeric assertion; exit 0.
-Exit 2: an input refused (REFUSED line), including an output file that exists: a record is never overwritten.
+Exit 2: an input refused (REFUSED line), including an output file that exists: a record is never overwritten, and a product made
+with another configuration file than the one given (default t08-grid/1's), whose thresholds the checks would use (D2 stage 4).
 """
 from __future__ import annotations
 
@@ -223,6 +224,15 @@ def appeared(matches: list, changed: dict) -> list:
     return [j for j in range(len(changed["objects"])) if j not in taken]
 
 
+def check_configuration(header: dict, cfg) -> None:
+    """The thresholds these checks use (2 T_c, the well-above rule) are the configuration's given here: the product must have been
+    made with that configuration file, so a product of another working point is never checked with this one's cuts (D2 stage 4,
+    scenarios A15 and A32)."""
+    if header["configuration"]["sha256"] != cfg.sha256:
+        raise Refused(f"the product was made with configuration {header['configuration']['sha256']}, not the configuration given "
+                      f"here ({cfg.sha256}), whose thresholds these checks would use")
+
+
 def membership_changes(members_a, members_b) -> int:
     return len({c for c, _ in members_a} ^ {c for c, _ in members_b})
 
@@ -236,6 +246,7 @@ def rereco(nominal, changed, old_gain, new_gain, cfg, label: str):
         raise Refused("the nominal product must have consumed the old gain payload and the changed product the new one")
     if (hn["input"], hn["configuration"], hn["grid"], hn["chain"][0]) != (hc["input"], hc["configuration"], hc["grid"], hc["chain"][0]):
         raise Refused("the two products differ in input, configuration, grid or pedestal payload: not only the gain changed")
+    check_configuration(hn, cfg)
     operation = hn["chain"][1]["operation"]
     lattice = {c for c in range(new_gain.values.size) if new_gain.values[c] != old_gain.values[c]}
     histogram, histogram_changed = [0, 0, 0, 0], [0, 0, 0, 0]
@@ -423,6 +434,7 @@ def main(argv=None) -> int:
         common = {"label": args.label, "old_gain": payload_summary(old_gain), "new_gain": payload_summary(new_gain)}
         if args.operation == "fixed-membership":
             read = product.read_product(args.product)
+            check_configuration(read.header, cfg)
             outcome = assess(read, old_gain, new_gain, cfg, args.label, args.min_asserted, args.plant_fraction_defect)
             header = {"format": FIXED_FORMAT, **common,
                       "product": {"product_id": read.header["product_id"], "format": read.header["format"], "sha256": file_sha256(args.product),
