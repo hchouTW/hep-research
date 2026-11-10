@@ -1,0 +1,5 @@
+{
+ "schema": "simcal-task-registry/1",
+ "note": "One entry per registration, oldest first. The latest entry of a card is the one in force; gate records cite it. Phase 0 adds the first entries (simcal-task.md, Section E9).",
+ "registrations": []
+}

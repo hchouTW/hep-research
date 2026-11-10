@@ -1,0 +1,70 @@
+{
+ "schema": "simcal-status/1",
+ "phases": {
+  "phase-0": {
+   "state": "not-started",
+   "worktree": "../hep-research-simcal-phase-0",
+   "branch": "simcal/phase-0",
+   "task_card_sha256": null,
+   "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
+   "blocked_on": []
+  },
+  "phase-1": {
+   "state": "not-started",
+   "worktree": "../hep-research-simcal-phase-1",
+   "branch": "simcal/phase-1",
+   "task_card_sha256": null,
+   "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-1.md",
+   "blocked_on": []
+  },
+  "phase-2": {
+   "state": "not-started",
+   "worktree": "../hep-research-simcal-phase-2",
+   "branch": "simcal/phase-2",
+   "task_card_sha256": null,
+   "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
+   "blocked_on": []
+  },
+  "phase-3": {
+   "state": "not-started",
+   "worktree": "../hep-research-simcal-phase-3",
+   "branch": "simcal/phase-3",
+   "task_card_sha256": null,
+   "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-3.md",
+   "blocked_on": []
+  },
+  "phase-4": {
+   "state": "not-started",
+   "worktree": "../hep-research-simcal-phase-4",
+   "branch": "simcal/phase-4",
+   "task_card_sha256": null,
+   "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-4.md",
+   "blocked_on": []
+  },
+  "phase-5": {
+   "state": "not-started",
+   "worktree": "../hep-research-simcal-phase-5",
+   "branch": "simcal/phase-5",
+   "task_card_sha256": null,
+   "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-5.md",
+   "blocked_on": []
+  }
+ },
+ "g4sim_preconditions": {
+  "checked_at": null,
+  "g4sim_status_updated": "2026-11-09T06:37:23Z (as seen by the package, main 5c2d1c7)",
+  "stages": {
+   "S0": "merged",
+   "S1": "merged",
+   "S2": "merged",
+   "S3": "merged",
+   "S4": "merged",
+   "S5": "merged",
+   "S6": "merged",
+   "S7": "merged",
+   "S8": "merged",
+   "S9": "merged"
+  }
+ },
+ "updated": null
+}
