@@ -9028,3 +9028,73 @@ Passing checks show software and interface consistency on synthetic data, not ph
 quality claim is made for any detector (R31). The development readings these jobs printed are not gates. T07's quality verdict waits
 for K09 at Freeze B. Open at this record: A01 (a second backend), material effects, the K04 schema items and the user items listed in
 the close-out.
+
+## CALO-CLUSTER-T08 — 2026-11-10 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Adapter 0.2.0 (`adapters/calo-cluster`, task T08 of the detector reconstruction plan v9.2), first record of this adapter: status
+`demonstrated-on-synthetic-data` for both tools and the adapter, with the tested versions. Job of record for adapter 0.2.0: job 7557963,
+T08 stage 4's build job, which reran every step of the earlier T08 jobs (7552825, 7554028, 7555555). T08's close-out is
+`docs/dev/detector-reconstruction/t08-closeout.md`.
+
+**Date.** 2026-11-10. Job 7557963 ran on hpa-wn34 (AMD EPYC 9645) from 15:46:39 to 16:00:42 (sacct), 14 min 03 s, COMPLETED, JOB RESULT
+PASS; 44 steps, each exit 0; stderr empty; no test skipped.
+
+**Commit.** The job ran commit `4b2eb849` plus the uncommitted stage 4 change (receipt: `git diff HEAD` sha256 `47cc99e2…`, untracked files
+list `414cea10…`, contents `b12b68f4…`), build.sh `11a5bf19…`, SOURCES.sha256 `c176ffb4…` (820 files). The change was committed as
+`ed1d08e6`; `d589c61a` adds `*.cells binary` to `.gitattributes`. At `d589c61a` every file of the job's manifest is byte-equal to the
+manifest but `t08-scenarios.md`, whose statuses were set after the PASS; the example's recording equals the job's evidence byte for byte.
+The `adapter.json` the job ran declared 0.1.0, `proposed`. Version 0.2.0 changes records only: `adapter.json`, this section, the capability
+matrix row, `t08-closeout.md`, and `t08-scenarios.md`'s two pointer lines (its introduction and its last section) to the close-out and this record. It adds `tests/adapters/test_calo_records.py`, which reads those
+records and ran on the login node (D2 stage 5), in no job. No code file of the adapter changed after the job, so no job reruns it at 0.2.0.
+
+**Environment.** NSTCCore (ASGC/TWGrid), a worker of partition `edr2-al9_short_serial`, host hpa-wn34 (glibc 2.34; the host, CPU and glibc
+are logged by the job, the node is not pinned; EL9 is read from the partition name, as the job does not log the OS release).
+- The recipe, the scoring-side tools, the example and every unit module but one: Python 3.13.18 with NumPy 2.4.6 and SciPy 1.17.1, the
+  project's `env/py313`.
+- The zdcsim ROOT reader and `tests/adapters/test_calo_zdcsim_root.py`: S3's reduce venv, Python 3.13.2 (Anaconda build) with uproot 5.7.7,
+  awkward 2.14.0, awkward_cpp 57, NumPy 2.5.4, cramjam 2.14.0, xxhash 4.0.2 and fsspec 2026.9.0 (`pip freeze --all` in the receipt). Before
+  compute the job checked the dist-info RECORD hashes against values fixed in the script and 1,630 files against their RECORD entries:
+  0 differ.
+- zdcsim: the user-supplied `zdcsim.cc` (SHA-256 `28018224…`, read in place, never copied), built in the job with the system GCC 11.5.0
+  (Red Hat 11.5.0-11) through `geant4-config` against Geant4 11.4.3 (conda-forge environment; `geant4-config --version` and the datasets in
+  the receipt), and run for 1,000 events (e+ at 500 MeV, seed 930001, FTFP_BERT_EMZ, one thread).
+
+**Command.** One Slurm job (script and source manifest of 820 files, both hashed, in the task's private job folder; no node pin). It checks the
+frozen files and the generator (block 6) and its 61 GOLDEN lines, then runs `python -m unittest` on each module below (a skipped test fails
+the job), `tools/check_layering.py` and `tools/check_naming.py`, the 15 development strata of t08-grid/1 block 1 (harness, `reconstruct`,
+`check-product` with the double-count gate, readings), CAI-T08-1 and -2 on main E3 iso, far and near with both gain roles, the refusals, the
+zdcsim layout check, build, run, conversion and reconstruction, the scenario steps (`a38-accounting`, `reference-selection`,
+`scenario-variants`) and the example twice live, and compares the outputs of jobs 7552825, 7554028 and 7555555.
+
+| Step (module or check) | Result |
+|---|---|
+| `tests/adapters/test_calo_cluster.py` (cell chain, section 7.1 clustering, product format, harness, readings) | 58 run, OK |
+| `tests/adapters/test_calo_cai.py` (gain payload, CAI-T08-1, CAI-T08-2) | 31 run, OK |
+| `tests/adapters/test_calo_zdcsim.py` (converter, labelled readout, configuration, product `/3`) | 69 run, OK |
+| `tests/adapters/test_calo_zdcsim_root.py` (the ROOT reader, in the reduce venv) | 10 run, OK |
+| `tests/adapters/test_calo_scenarios.py` (A15, A32, A38) | 23 run, OK |
+| `tests/examples/test_reconstruction_calorimetry.py` (the example's replay and a live run) | 12 run, OK |
+| `test_adapter_declarations`, `test_tool_contract`, `test_cli_robustness` | 43 run, OK |
+| frozen files, generator check, GOLDEN lines | 8 frozen files unchanged; all 61 GOLDEN lines equal job 7477787's |
+| 15 development strata (block 1, 3,000 events each) | 15 double-count gates PASS, 0 cells counted twice; clustered plus unclustered equals the input to at most 8.6e-16 relative |
+| CAI-T08-1, CAI-T08-2 | 6 runs PASS, largest \|change − formula\| / scale 5.98e-16 against 1e-12; the 6 planted controls fail; 12 CAI products pass the double-count gate; 6 refusals exit 2, and the nominal product unchanged |
+| zdcsim (labelled simulated-unvalidated) | layout, build, run, conversion repeat byte-equal; label, events, double-count and conservation gates PASS; 5 refusals exit 2 |
+| scenarios | 15 of 15 selection-and-accounting gates PASS, 0 events with a defect; reference-selection PASS; 16 scenario-variant checks PASS |
+| example | 7 files equal in two live runs; no host path |
+| byte equality with earlier jobs | 127 comparisons equal job 7552825's, 223 equal job 7554028's, 233 equal job 7555555's |
+| check-layering, check-naming | no layering violation; naming status pass |
+
+Not in the job: `tests/adapters/test_calo_records.py` (D2 stage 5, the records test) ran on the login node only, in no job. It pins the SHA-256 that job 7557963's manifest gives each declared test module and each `adapter.json` asset, so a changed byte in any of them fails it until a new job of record runs them.
+
+**Result.** JOB RESULT PASS, every step exit 0, 14 min 03 s; 203 tests in the six adapter modules, and 43 in the affected modules. Every
+input was synthetic: the frozen fixture t08-grid/1 on block 1 (tuning; block 6 only for the generator check) and hand-made events, besides
+1,000 zdcsim events labelled `simulated-unvalidated`, which exercise the format and bookkeeping only. The checks compare the recipe with an
+independent coding of section 7.1 (job 7479146's reference clusterer and its constants), closed forms and earlier jobs' outputs, and drive
+each check with one defect. No reference output from outside the plugin was compared, so no tool is raised to
+`tested-in-declared-environment`.
+
+Passing checks show software and interface consistency on synthetic data, not physical validity. The adapter is a development binding, not
+a native backend (U12 A; the gap stays open). No calorimetry quality or performance claim is made (R31). The development readings these jobs
+printed are not gates; T08's quality verdict waits for K09 at Freeze B. Open at this record: the zdcsim thresholds (Unresolved, owner the
+user), the zdcsim clustering rule (a user item), failing-first for stage 1 (shown by mutation), A15, A38 (exposure) and the quality verdict,
+as the close-out lists them.

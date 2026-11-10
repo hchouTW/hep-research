@@ -3,7 +3,7 @@
 T08 is calorimetry (BP05), recipe `reco.calo.cell-cluster/1`, a development binding in Python on fixture t08-grid/1. Its sheet
 (`t07-t09-task-sheets.md`) names scenarios A15, A32 and A38 (plan section 13), and `t05-task-sheets.md` maps them: A15 to T08 and
 T12, A32 to T08, T12 and T11's design, A38 to T08. This file covers T08's part only. The full T08 close-out against its sheet
-comes in the next stage. Paths are relative to `plugins/hep-research/`.
+is `t08-closeout.md` (D2 stage 5). Paths are relative to `plugins/hep-research/`.
 
 **Not judged here.** No quality or performance claim. Whether a variant is worse is K09's question at Freeze B, and whether it
 is faster is K12's, which has no targets yet. Nothing here pre-judges either.
@@ -81,4 +81,4 @@ Summary: A15 open; A38 open (part A38.3, exposure), its other parts shown in job
 ## Also open, outside these rows
 
 - Job of record 7557963 (hpa-wn34, 14 min 03 s, PASS). Earlier runs: 7557508 PASS, superseded (the example recording then failed the packaging scan on its .jsonl name); 7557888 FAIL in the example step (a missed rename in build.sh).
-- The T08 close-out table and the adapter record (version, status, `VALIDATION.md`) come in the next stage.
+- The T08 close-out table is `t08-closeout.md`; the adapter record (0.2.0, `VALIDATION.md` CALO-CLUSTER-T08) is D2 stage 5's.

@@ -1,16 +1,26 @@
 {
  "id": "adapter:calo-cluster",
- "version": "0.1.0",
- "status": "proposed",
+ "version": "0.2.0",
+ "status": "demonstrated-on-synthetic-data",
  "purpose": "T08 calorimetry as a development binding in Python, recipe reco.calo.cell-cluster/1 (decisions.md, U12 A; not a native backend, whose gap stays open): the cell chain of a homogeneous analog grid (pedestal, then gain, which multiplies or divides as its payload states, each step with its payload identity in chain order, raw kept beside calibrated, the readout's saturation flag carried), the clustering of t04-values-v4.md section 7.1 (components, peaks, 30-iteration sharing with fractions kept per object, positions, the section 7.1 uncertainties), the product format calo-cluster-product/1, and /2 for a product made with a calo-gain-payload/1 gain, with a reader of both that refuses a malformed or incomplete product, the gain payload calo-gain-payload/1 with its channel map and derived payloads, the fixed-membership re-evaluation under another gain payload (CAI-T08-1), and on the scoring side the harness that hands out the frozen generator t08-grid/1's events as files, the development readings and the CAI-T08-1 and -2 checks; T08's second input (D2 stage 3), the user-supplied zdcsim program's crystal deposits converted to the labelled readout calo-cells/2 (label simulated-unvalidated, with its provenance; an identity readout: pedestal 0, gain 1, no noise or ADC model) and reconstructed with calo-cluster-configuration/2 (no profile and no response model: two kept peaks left unsplit, no uncertainty) into calo-cluster-product/3, which carries the label and provenance, with format and bookkeeping readings only, never a performance number; D2 stage 4, the scenario checks of A15, A32 and A38 (fixture_tools/t08_scenarios.py: section 7.1's selection and the hit and unhit accounting of a product against its input and its own configuration, and the reference clusterer's constants against the configuration's), with the readings and the CAI checks refusing a product of another configuration file and the recipe refusing payloads whose units are not the readout's, and examples/reconstruction-calorimetry, which generates, reconstructs and checks a few synthetic events; energy kind clustered deposited energy, never incident energy; optional, required by no skill",
  "tools": [
   {
    "name": "calo-cluster development binding (Python with NumPy and SciPy)",
-   "status": "proposed",
-   "tested_versions": []
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "Python 3.13.18 with NumPy 2.4.6 and SciPy 1.17.1 (the project's env/py313): the recipe, the scoring-side tools, the example and the unit modules but test_calo_zdcsim_root"
+   ]
+  },
+  {
+   "name": "zdcsim input path (uproot reader of the user-supplied zdcsim program's ROOT output; the program built with Geant4)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "uproot 5.7.7 with awkward 2.14.0, awkward_cpp 57 and NumPy 2.5.4 on Python 3.13.2, in S3's reduce venv (its dist-info RECORD files pinned and checked before compute): the converter's ROOT reader and test_calo_zdcsim_root",
+    "zdcsim (user-supplied zdcsim.cc, read in place, SHA-256 fixed) built in the job with the system GCC 11.5.0 through geant4-config against Geant4 11.4.3 (conda-forge), and run for 1,000 events, one thread"
+   ]
   }
  ],
- "environment": "none declared",
+ "environment": "NSTCCore (ASGC/TWGrid) Slurm, a worker of partition edr2-al9_short_serial (glibc 2.34; EL9 by the partition name, the OS release is not logged; the job is not pinned to a node). Job of record for adapter 0.2.0: job 7557963 (VALIDATION CALO-CLUSTER-T08), T08 stage 4's job on hpa-wn34 (AMD EPYC 9645), 2026-11-10, which reran every step of the T08 jobs 7552825, 7554028 and 7555555 with byte-equal outputs; it ran the adapter's code and tests as 0.2.0 ships them, while its adapter.json declared 0.1.0, proposed; 0.2.0 changes records only (this file, VALIDATION.md, the capability matrix, docs/dev/detector-reconstruction/t08-closeout.md, and the two pointer lines of docs/dev/detector-reconstruction/t08-scenarios.md) and adds tests/adapters/test_calo_records.py, which reads them and ran on the login node, in no job. As job 7557963 logged them: the recipe and its tests on Python 3.13.18 with NumPy 2.4.6 and SciPy 1.17.1 (the project's env/py313); the zdcsim ROOT reader on Python 3.13.2 with uproot 5.7.7, awkward 2.14.0 and NumPy 2.5.4 (S3's reduce venv, 1,630 files checked against their RECORD entries, 0 differ); zdcsim built with GCC 11.5.0 against Geant4 11.4.3. Inputs: the synthetic fixture t08-grid/1 (block 1, tuning; block 6 for the frozen generator check), hand-made events, and 1,000 zdcsim events labelled simulated-unvalidated (format and bookkeeping only)",
  "assets": [
   "assets/calo_cluster.py",
   "assets/calo_recipe/__init__.py",
@@ -33,10 +43,12 @@
  "tests": [
   "../../tests/adapters/test_calo_cai.py",
   "../../tests/adapters/test_calo_cluster.py",
+  "../../tests/adapters/test_calo_records.py",
   "../../tests/adapters/test_calo_scenarios.py",
   "../../tests/adapters/test_calo_zdcsim.py",
-  "../../tests/adapters/test_calo_zdcsim_root.py"
+  "../../tests/adapters/test_calo_zdcsim_root.py",
+  "../../tests/examples/test_reconstruction_calorimetry.py"
  ],
  "owner_skill": "hep-detector",
- "status_rule": "the adapter status is the lowest of its tools' statuses; proposed until a job of record runs it and VALIDATION.md records the run; hand-made events on the login node only so far; no calorimetry quality claim"
+ "status_rule": "the adapter status is the lowest of its tools' statuses; demonstrated-on-synthetic-data: the recipe, the scoring-side tools, the zdcsim converter and the example ran in the T08 jobs on the synthetic fixture t08-grid/1, hand-made events and the labelled simulated-unvalidated zdcsim input only, against an independent coding of section 7.1 (job 7479146's reference clusterer and its constants), closed forms and the plugin's own earlier outputs; job of record for adapter 0.2.0: job 7557963 (VALIDATION CALO-CLUSTER-T08); not tested-in-declared-environment, because no run read anything but synthetic or labelled simulated-unvalidated data and no reference output from outside the plugin was compared; a development binding, not a native backend, whose gap stays open (U12 A); no calorimetry quality or performance claim, and T08's quality verdict waits for K09 at Freeze B"
 }

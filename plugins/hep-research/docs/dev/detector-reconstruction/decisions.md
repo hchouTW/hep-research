@@ -489,3 +489,11 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
   - **A32: met, T08's part.**
   - **A38: open, by part A38.3 (exposure).** t08-grid/1 has no live time or trigger. The plan says a missing implementation is never "not applicable", so the coordinator reworded the implementer's "not applicable". The other six parts are shown, three with readings: the reference-selection literals; no response histogram in T08; and a second correction whose unit matches, which units cannot show.
 - **The example** is met. The recording made by the job was copied by the coordinator after the PASS, as T07's was.
+
+## T08, D2 stage 5: close-out and adapter record
+
+2026-11-10, coordinator. `t08-closeout.md` checks T08 against every line of its sheet. Of its 41 rows, 40 carry a status: 22 met, 11 met with readings, 6 open and 1 gap. The six open rows are the zdcsim thresholds, the zdcsim section 7.1 departure, stage 1's failing-first evidence (by mutation only; the user's waiver would close it), quality at K09, A15 and A38. The gap is the native backend (U12 A).
+
+`adapters/calo-cluster` is 0.2.0, `demonstrated-on-synthetic-data`, with section CALO-CLUSTER-T08 in `VALIDATION.md`. Its job of record is 7557963. That job ran the 0.2.0 code under `adapter.json` 0.1.0; only records changed after it (adapter.json, the matrix row, t08-scenarios.md), checked against its manifest c176ffb4. So no stage 5 job was run: T07's stage 11 needed one because its new code first ran there.
+
+`test_calo_records` pins the SHA-256 of every declared asset and test module to that manifest. A later code change therefore needs a new job of record.
