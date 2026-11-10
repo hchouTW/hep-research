@@ -99,6 +99,13 @@
    "registered_at": "2026-11-10T08:35:58Z",
    "card_commit": "1206749a",
    "reason": "gate test design registered before any gate run (exhaustive Appendix C scope in 68 shards: agree 32, invariants 32, lookup 4; mutants on the fixed slice; named cases; fixtures); D5/D11 settled by A6; execution-log decisions"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "06fb186030ea143b53c413514f81c35a69d97baf379e84e234f2c136fe47f5ee",
+   "registered_at": "2026-11-10T10:08:39Z",
+   "card_commit": "7c48394d",
+   "reason": "tightened after the independent review, before the gate run at the fixed code (tightening only): the named cases of §15.3 listed one by one with their tests or their later phase (F4); a mutant campaign item, provenance and total checks, variation flags compared (F6, F10, F11): 69 items; campaign 1 superseded"
   }
  ]
 }
