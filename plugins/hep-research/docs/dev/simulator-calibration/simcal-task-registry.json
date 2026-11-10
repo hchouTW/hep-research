@@ -120,6 +120,13 @@
    "registered_at": "2026-11-10T13:40:54Z",
    "card_commit": "2e8c1f91",
    "reason": "refreshed at the start of phase 1 from Part B, the index and approval A7 (D37, D41, D42), before any run: gate test designs, seeds and the two section 8.7 calibrations of the phase registered"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "fd133e3088497e27bda6fde9057530e6536c7eca1aa3285138dc152f0963a6c5",
+   "registered_at": "2026-11-10T14:27:38Z",
+   "card_commit": "618cf38a",
+   "reason": "before any gate run: gate-2 electronics case on the runs without zero suppression (threshold left out of that case), criterion (ii) over the observables of the runs the node acts in (tightening), s_k^2 as the bootstrap's limit, data errors per data sample; thresholds unchanged; execution log"
   }
  ]
 }
