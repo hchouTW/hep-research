@@ -302,7 +302,8 @@
     "deps",
     "chain",
     "data",
-    "contract"
+    "contract",
+    "io"
    ],
    "source": "new in this plugin (simulator calibration phase 0, 2026-11-10); use agrees with the reference decision table calib_use_decision_table.py (v7.37.4, SHA-256 c5279adf...)"
   }
