@@ -123,6 +123,7 @@ Cases R37's stated expectations do not cover (its last paragraph), recorded befo
 - **Objects with a changed member below the well-above-threshold rule.** R37 asks for cells well above threshold. With fixed membership the formula still holds by linearity; the expectation used is the same bound, reported, not asserted.
 - **The divide role on a fixture whose gain multiplies.** With g = 1 the two roles give the same E bit for bit; the expectation used is the divide formula `(g/g' − 1)` and event lines of the nominal products equal to job 7552825's.
 - **Clipped cells.** The readout clips before the gain, so a clipped member follows the multiplicative formula (hand-made test only; no saturation stratum in the job).
+- **The zdcsim input (D2 stage 3, job 7555555).** Products of the labelled `simulated-unvalidated` input are `calo-cluster-product/3`, read through an identity readout (no pedestal, gain 1, no noise). A labelled readout with a `calo-gain-payload/1` gain is refused, so CAI-T08-1 and -2 do not apply to `/3` products; they stay tested on t08-grid/1 only. The R34 chain records hold for `/3` as for `/1` and `/2`.
 
 ## Boundaries for the C&A plan
 

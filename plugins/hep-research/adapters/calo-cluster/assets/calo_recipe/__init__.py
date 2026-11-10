@@ -13,6 +13,11 @@ A development binding in Python, not a native backend: the native-integration ga
 - recalibration: a product's objects re-evaluated under another gain payload with the membership and fractions held
   fixed (CAI-T08-1), and the two-peak objects re-shared on the same cells and peaks.
 
+D2 stage 3 adds a labelled input: calo-cells/2 (cell_input), a readout converted from another simulation's deposits with its
+label (simulated-unvalidated) and provenance; calo-cluster-configuration/2 (configuration), its configuration, which may give
+no shower profile and no response model; and calo-cluster-product/3 (product), which carries the label and provenance. The
+converter of the user-supplied zdcsim program's deposits is fixture_tools/t08_zdcsim_cells.py, outside the recipe.
+
 Written from t04-values-v4.md sections 4.2 and 7.1 and skills/hep-detector/references/event-reconstruction.md#clustering. No
 code is shared with the reference clusterer or the fixture generator, and nothing here imports either (section 3.1).
 """

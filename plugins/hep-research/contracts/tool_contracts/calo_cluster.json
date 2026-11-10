@@ -42,7 +42,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a calo-cells/1 file, role reconstruction-input, readout kind analog: raw values, live and saturated flags only; a dead cell has no value (NaN)"
+     "constraint": "a calo-cells/1 file, role reconstruction-input, readout kind analog: raw values, live and saturated flags only; a dead cell has no value (NaN); or a calo-cells/2 file, the same with a label (simulated-unvalidated) and the provenance of the simulation it was converted from (D2 stage 3), which needs a calo-cluster-configuration/2 for its label and a calo-calibration-payload/1 gain"
     },
     {
      "name": "pedestal_payload",
@@ -63,7 +63,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "the product file to write: calo-cluster-product/1 for a calo-calibration-payload/1 gain, calo-cluster-product/2 for a calo-gain-payload/1 gain (its gain step names that payload's format, channel map and source); written only when the run finishes; an existing file is refused, never overwritten, so a product made with one payload is never replaced by another's"
+     "constraint": "the product file to write: calo-cluster-product/1 for a calo-calibration-payload/1 gain, calo-cluster-product/2 for a calo-gain-payload/1 gain (its gain step names that payload's format, channel map and source), calo-cluster-product/3 for a calo-cells/2 input (it carries the input's label and provenance); written only when the run finishes; an existing file is refused, never overwritten, so a product made with one payload is never replaced by another's"
     },
     {
      "name": "product_id",
@@ -77,7 +77,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": false,
-     "constraint": "a calo-cluster-configuration/1 file with exactly the written constants of t04-values-v4.md sections 4.2 and 7.1; default the t08-grid/1 configuration beside the script"
+     "constraint": "a calo-cluster-configuration/1 file with exactly the written constants of t04-values-v4.md sections 4.2 and 7.1; default the t08-grid/1 configuration beside the script; or, for a calo-cells/2 input only, a calo-cluster-configuration/2 written for its label, naming the source of each constant or null where it has none, with the profile width and the response model either all given or all null (null: two kept peaks are not split, no uncertainty is formed)"
     }
    ],
    "outputs": [
@@ -150,6 +150,11 @@
      "name": "seconds",
      "kind": "duration",
      "unit": "s"
+    },
+    {
+     "name": "label",
+     "kind": "label",
+     "unit": "n/a"
     }
    ],
    "failure_states": [
@@ -161,7 +166,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a gain payload for another channel map, a configuration key that is not version 4's, a product file that already exists); stdout carries status rejected (core/status.py) and the reason; no product is written"
+     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a gain payload for another channel map, a configuration key that is not version 4's, a product file that already exists, a labelled readout without a configuration for its label or with a calo-gain-payload/1 gain, an unlabelled readout with a calo-cluster-configuration/2); stdout carries status rejected (core/status.py) and the reason; no product is written"
     },
     {
      "exit_code": 3,
@@ -182,7 +187,7 @@
   },
   {
    "operation_id": "check-product",
-   "summary": "Read a calo-cluster-product/1 or /2 back, refusing a malformed or incomplete product, and check on every event that no cell is counted twice (the T08 sheet's stop)",
+   "summary": "Read a calo-cluster-product/1, /2 or /3 back, refusing a malformed or incomplete product, and check on every event that no cell is counted twice (the T08 sheet's stop)",
    "invocation": {
     "kind": "cli",
     "options": [
@@ -199,7 +204,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a calo-cluster-product/1 or calo-cluster-product/2 file"
+     "constraint": "a calo-cluster-product/1, /2 or /3 file; a /3 product without its label or provenance is refused"
     }
    ],
    "outputs": [

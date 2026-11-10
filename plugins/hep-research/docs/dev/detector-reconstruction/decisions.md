@@ -460,3 +460,16 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
   - the changed cells hold about 2 % of an object's energy, not 10–15 %.
   
   CAI-T08-2 has no numeric assertion (R37).
+
+## T08, D2 stage 3: zdcsim input, simulated-unvalidated
+
+2026-11-10, coordinator, with the user's decision. Job of record 7555555 (hpa-wn25, 12 min 10 s, PASS).
+
+- **Input.** zdcsim.cc, user-supplied (SHA-256 28018224…), is built in the job from the supplied file, never modified or copied. The build route is g++ with geant4-config, reconstructed from S3's binary, because S3 kept no build record and the supplied CMakeLists cannot configure on E5. The job ran 1,000 events, e+ at 500 MeV on crystal (4, 2) of prototype v2 (6 × 6 crystals), seed 930001, one thread. The converter sums edep over zbin per cell. Products are `calo-cluster-product/3`, labelled `simulated-unvalidated` (the T08 sheet), with the input's provenance. The readout is an identity readout of deposited energy: no pedestal, gain 1, no noise, no saturation.
+- **Thresholds (user, 2026-11-10: "Carry over, Unresolved (Recommended)").** T_c 0.6 and T_s 10 MeV are carried over from t08-grid/1 for this format exercise only. They are Unresolved per plan 1.1; the owner is the user, and the exit condition is a sourced ZDC prototype threshold before any physics use. The coordinator's question said "8×8"; the geometry is 6 × 6, which does not change the question.
+- **Departure from "clustering follows section 7.1 exactly" (review F6).**
+  - For this input W, q and σ_n are null: no source exists, and the brief forbids an invented noise model. Each kept component is one object, with fraction 1 and no uncertainty; two kept peaks give an `unsplit` object.
+  - Components, peaks and sums follow section 7.1.
+  - The question the user answered stated this rule. The coordinator reads "exactly" as binding for t08-grid/1, where section 7.1 is defined. If the user holds it binding for the zdcsim format exercise too, a section 2.3 amendment or a sourced W, q and σ_n is needed (a user item).
+- **Environment.** uproot is read from S3's reduce venv. Its RECORD files and their contents are pinned before compute (ruling 3); installing into env/py313 would need the user. CAI-T08-1 and -2 do not apply to `/3` products.
+- **Readings.** Two bookkeeping predictions were refuted: cells with a deposit (median 11) and entries per event (median 127). S3's own 1-event file agrees with the job. No performance number.

@@ -11,6 +11,11 @@ Operations (contracts/tool_contracts/calo_cluster.json):
                  product made with one payload is never replaced by another's.
   check-product  read a product back, refusing a malformed or incomplete one, and run the double-count check on every event.
 
+A labelled readout, calo-cells/2 (D2 stage 3: another simulation's deposits, label simulated-unvalidated), needs a
+calo-cluster-configuration/2 written for its label, and a stage 1 gain payload; it makes calo-cluster-product/3, which carries
+the input's label and provenance. A labelled input with a /1 configuration, an unlabelled one with a /2 configuration, and a
+labelled one with a calo-gain-payload/1 gain are refused, with no product written.
+
 Output: one JSON object on stdout with the status and the reason. Exit 0 ok; 1 failed (check-product found a cell counted
 twice, or a component's sharing was undefined; the product is still written and records it). A component whose two-peak
 uncertainty is undefined (singular Fisher matrix, non-positive variance) keeps no object, as section 7.1's reference does: a
@@ -70,9 +75,12 @@ def reconstruct(args) -> int:
         if (readout.header["nx"], readout.header["ny"]) != (cfg.cells_x, cfg.cells_y):
             raise cell_input.InputError(f"readout grid {readout.header['nx']} x {readout.header['ny']} is not the configuration's")
         gain_payload.check_channel_map(gain, readout.header["nx"], readout.header["ny"], "gain payload")
+        check_label(readout, cfg, gain)
     except (configuration.ConfigurationError, cell_input.InputError) as exc:
         return report("reconstruct", "rejected", str(exc), EXIT_INVALID)
-    header = product.header_document(args.product_id, cfg.cells_x, cfg.cells_y, readout.sha256, readout.events, cfg.sha256, chain)
+    header = product.header_document(args.product_id, cfg.cells_x, cfg.cells_y, readout.sha256, readout.events, cfg.sha256, chain,
+                                     label=readout.label, provenance=readout.header.get("provenance"),
+                                     unresolved=cfg.unresolved if readout.label is not None else None)
     partial = target.with_name(target.name + ".partial")
     objects = failures = fisher_failures = 0
     try:
@@ -96,9 +104,27 @@ def reconstruct(args) -> int:
     fields = {"events": readout.events, "objects": objects, "sharing_failures": failures, "uncertainty_failures": fisher_failures, "energy_kind": ENERGY_KIND,
               "product": str(target), "input_sha256": readout.sha256, "configuration_sha256": cfg.sha256,
               "chain": [step["payload_id"] for step in chain], "seconds": round(time.perf_counter() - started, 3)}
+    if readout.label is not None:      # only a labelled product reports it, so the fields of a t08-grid/1 run are unchanged
+        fields["label"] = readout.label
     if failures:
         return report("reconstruct", "failed", f"{failures} component(s) with undefined sharing (recorded in the product)", EXIT_FAILED, **fields)
     return report("reconstruct", "ok", "", 0, **fields)
+
+
+def check_label(readout, cfg, gain) -> None:
+    """A labelled input goes with a configuration written for its label and a stage 1 gain payload; an unlabelled one with a
+    /1 configuration. Raises cell_input.InputError otherwise."""
+    from calo_recipe import cell_input
+    if readout.label is not None:
+        if cfg.label != readout.label:
+            raise cell_input.InputError(f"readout labelled {readout.label!r}: it needs a calo-cluster-configuration/2 written for its "
+                                        f"label; this configuration is {cfg.format} for label {cfg.label!r} (t08-grid/1's constants "
+                                        "are not this input's)")
+        if gain.channel_map is not None:
+            raise cell_input.InputError("a labelled readout with a calo-gain-payload/1 gain is not supported in this stage: give its "
+                                        "gain as calo-calibration-payload/1")
+    elif cfg.label is not None:
+        raise cell_input.InputError(f"configuration {cfg.format} is for a labelled input ({cfg.label!r}); this readout has no label")
 
 
 def existing_gain(path: Path) -> str:

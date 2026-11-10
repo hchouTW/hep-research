@@ -4,6 +4,16 @@
 payload's format, channel map and source, all three. /1 is written for a stage 1 calo-calibration-payload/1 gain and never
 carries them, so job 7552825's products are unchanged byte for byte; both are read. The two differ in nothing else.
 
+/3 (D2 stage 3) is written exactly when the input is a labelled readout, calo-cells/2 (another simulation's deposits): its
+header adds `label` and `provenance`, copied from the input, and names the input as calo-cells/2 and the configuration as
+calo-cluster-configuration/2 (the configuration of a labelled input), with the configuration's `unresolved` record: the constants
+used without a source, each Unresolved (plan 1.1) with its decision, scope, owner and exit condition. Its gain step is stage 1's (a calo-gain-payload/1 gain
+with a labelled input is refused by reconstruct, so /3 never carries the gain payload keys). It also admits what a
+configuration without profile and response model produces: objects of kind "unsplit" (a component with two kept peaks kept
+whole, fractions 1) and the status "no-response-model" with every sigma null, the event sum's included; in an event, the
+event-sum sigma is null exactly when every object has that status. /1 and /2 admit neither, as before. A /3 product without
+its label or provenance, or with a label that is not one of cell_input.LABELS, is refused.
+
 JSON Lines, UTF-8, one object per line, keys sorted, numbers as Python writes them (shortest round-trip form, so the bytes
 read back to the same values), no NaN or infinity anywhere. Line 1 is the header (HEADER_KEYS), then one line per event in
 input order (EVENT_KEYS), then the end line {"end": <the header's format>, "events": N}. Nothing follows it.
@@ -36,14 +46,20 @@ from dataclasses import dataclass
 import numpy
 
 from . import ENERGY_KIND, RECIPE
+from .cell_input import CELLS_FORMAT, CELLS_FORMAT_LABELLED, InputError, check_label, check_provenance
+from .configuration import ConfigurationError, check_unresolved
 from .gain_payload import FORMAT as GAIN_FORMAT, channel_map_identity
 
 FORMAT = "calo-cluster-product/1"
 FORMAT_GAIN_PAYLOAD = "calo-cluster-product/2"     # the gain step consumed a calo-gain-payload/1
-FORMATS = (FORMAT, FORMAT_GAIN_PAYLOAD)
+FORMAT_LABELLED = "calo-cluster-product/3"         # the input is a labelled readout, calo-cells/2 (D2 stage 3)
+FORMATS = (FORMAT, FORMAT_GAIN_PAYLOAD, FORMAT_LABELLED)
+CONFIGURATION_FORMAT = "calo-cluster-configuration/1"
+CONFIGURATION_FORMAT_LABELLED = "calo-cluster-configuration/2"
 ENERGY_KINDS = {ENERGY_KIND}
 HEADER_KEYS = {"format", "recipe", "product_id", "energy_kind", "energy_unit", "position_unit", "frame", "grid", "input",
                "configuration", "chain", "retention", "cell_fields", "events"}
+LABELLED_HEADER_KEYS = HEADER_KEYS | {"label", "provenance"}
 EVENT_KEYS = {"event", "dead_channels", "input_sum", "clustered_sum", "unclustered_sum", "unclustered_cells", "event_sum", "cells",
               "components", "objects"}
 EVENT_SUM_KEYS = {"energy", "sigma", "cells", "saturated", "energy_bound"}
@@ -68,6 +84,8 @@ CHAIN_STEP_KEYS = {"pedestal": {"order", "step", "operation", "payload_id", "ori
 GAIN_PAYLOAD_KEYS = {"format", "channel_map", "derived_from"}
 KINDS = {"one-peak", "two-peak"}
 STATUSES = {"ok", "singular-fisher", "non-positive-variance"}
+KINDS_LABELLED = KINDS | {"unsplit"}                       # /3 only
+STATUSES_LABELLED = STATUSES | {"no-response-model"}       # /3 only
 FAILURES = {None, "sharing-undefined", "singular-fisher", "non-positive-variance"}
 BOUNDS = {"estimate", "lower-bound"}
 
@@ -86,13 +104,28 @@ def dumps(doc) -> str:
     return json.dumps(doc, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
-def header_document(product_id: str, nx: int, ny: int, input_sha256: str, events: int, configuration_sha256: str, chain: list) -> dict:
-    product_format = FORMAT_GAIN_PAYLOAD if "channel_map" in chain[1] else FORMAT
-    return {"format": product_format, "recipe": RECIPE, "product_id": product_id, "energy_kind": ENERGY_KIND, "energy_unit": "MeV",
-            "position_unit": "cell", "frame": FRAME, "grid": {"nx": nx, "ny": ny},
-            "input": {"format": "calo-cells/1", "role": "reconstruction-input", "sha256": input_sha256, "events": events},
-            "configuration": {"format": "calo-cluster-configuration/1", "sha256": configuration_sha256}, "chain": chain,
-            "retention": dict(RETENTION), "cell_fields": list(CELL_FIELDS), "events": events}
+def header_document(product_id: str, nx: int, ny: int, input_sha256: str, events: int, configuration_sha256: str, chain: list,
+                    label: str | None = None, provenance: dict | None = None, unresolved: dict | None = None) -> dict:
+    """The header. With a label (and its provenance, both or neither) the product is /3, of a calo-cells/2 input and a
+    calo-cluster-configuration/2; without, exactly as before (/1, or /2 for a calo-gain-payload/1 gain)."""
+    if (label is None) != (provenance is None):
+        raise ProductError("header: a label needs its provenance and a provenance its label")
+    labelled = label is not None
+    if labelled:
+        product_format = FORMAT_LABELLED
+    else:
+        product_format = FORMAT_GAIN_PAYLOAD if "channel_map" in chain[1] else FORMAT
+    header = {"format": product_format, "recipe": RECIPE, "product_id": product_id, "energy_kind": ENERGY_KIND, "energy_unit": "MeV",
+              "position_unit": "cell", "frame": FRAME, "grid": {"nx": nx, "ny": ny},
+              "input": {"format": CELLS_FORMAT_LABELLED if labelled else CELLS_FORMAT, "role": "reconstruction-input",
+                        "sha256": input_sha256, "events": events},
+              "configuration": {"format": CONFIGURATION_FORMAT_LABELLED if labelled else CONFIGURATION_FORMAT,
+                                "sha256": configuration_sha256}, "chain": chain,
+              "retention": dict(RETENTION), "cell_fields": list(CELL_FIELDS), "events": events}
+    if labelled:
+        header.update(label=label, provenance=provenance)
+        header["configuration"]["unresolved"] = dict(unresolved or {})
+    return header
 
 
 def event_document(index: int, chain, result, ny: int) -> dict:
@@ -182,7 +215,8 @@ def _hex64(value, where):
 
 
 def check_header(header: dict) -> None:
-    _keys(header, HEADER_KEYS, "header")
+    labelled = isinstance(header, dict) and header.get("format") == FORMAT_LABELLED
+    _keys(header, LABELLED_HEADER_KEYS if labelled else HEADER_KEYS, "header")
     if header["format"] not in FORMATS:
         _refuse("header.format", f"{header['format']!r} is not one of {FORMATS}")
     if header["recipe"] != RECIPE:
@@ -198,12 +232,25 @@ def check_header(header: dict) -> None:
     _count(header["grid"]["nx"], "header.grid.nx", 1)
     _count(header["grid"]["ny"], "header.grid.ny", 1)
     _keys(header["input"], INPUT_KEYS, "header.input")
-    if header["input"]["format"] != "calo-cells/1" or header["input"]["role"] != "reconstruction-input":
-        _refuse("header.input", "the input must be a calo-cells/1 reconstruction input")
+    input_format = CELLS_FORMAT_LABELLED if labelled else CELLS_FORMAT
+    if header["input"]["format"] != input_format or header["input"]["role"] != "reconstruction-input":
+        _refuse("header.input", f"the input must be a {input_format} reconstruction input")
     _hex64(header["input"]["sha256"], "header.input.sha256")
     _count(header["input"]["events"], "header.input.events")
-    _keys(header["configuration"], {"format", "sha256"}, "header.configuration")
+    _keys(header["configuration"], {"format", "sha256", "unresolved"} if labelled else {"format", "sha256"}, "header.configuration")
     _hex64(header["configuration"]["sha256"], "header.configuration.sha256")
+    if labelled:
+        if header["configuration"]["format"] != CONFIGURATION_FORMAT_LABELLED:
+            _refuse("header.configuration", f"a labelled input's configuration is {CONFIGURATION_FORMAT_LABELLED}")
+        try:
+            check_unresolved(header["configuration"]["unresolved"])
+        except ConfigurationError as exc:
+            _refuse("header.configuration", str(exc))
+        try:
+            check_label(header["label"], "header")
+            check_provenance(header["provenance"], header["input"]["events"], "header")
+        except InputError as exc:
+            _refuse("header", str(exc))
     chain = header["chain"]
     if not isinstance(chain, list) or [s.get("step") if isinstance(s, dict) else None for s in chain] != ["pedestal", "gain"]:
         _refuse("header.chain", "the chain must be pedestal then gain, in that order")
@@ -239,6 +286,8 @@ def check_event(doc: dict, index: int, header: dict) -> None:
     if doc["event"] != index:
         _refuse(where, f"out of order: it says {doc['event']!r}")
     channels = header["grid"]["nx"] * header["grid"]["ny"]
+    labelled = header["format"] == FORMAT_LABELLED
+    kinds, statuses = (KINDS_LABELLED, STATUSES_LABELLED) if labelled else (KINDS, STATUSES)
     multiply = header["chain"][1]["operation"] == "multiply"
     dead = doc["dead_channels"]
     if not isinstance(dead, list) or any(isinstance(c, bool) or not isinstance(c, int) or not 0 <= c < channels for c in dead) \
@@ -293,7 +342,8 @@ def check_event(doc: dict, index: int, header: dict) -> None:
     total = doc["clustered_sum"] + doc["unclustered_sum"]
     if abs(total - doc["input_sum"]) > 1e-9 * max(abs(doc["input_sum"]), 1.0):
         _refuse(f"{where}", "clustered plus unclustered energy does not equal the input within 1e-9 relative (v4 9.1)")
-    _number(doc["event_sum"]["sigma"], f"{where}.event_sum.sigma")
+    no_model = labelled and doc["event_sum"]["sigma"] is None
+    _number(doc["event_sum"]["sigma"], f"{where}.event_sum.sigma", allow_none=labelled)
     if _count(doc["event_sum"]["cells"], f"{where}.event_sum.cells") != len(cells):
         _refuse(f"{where}.event_sum.cells", "differs from the cells of the kept components")
     flagged = any(cell_saturated.values())
@@ -311,8 +361,13 @@ def check_event(doc: dict, index: int, header: dict) -> None:
             _refuse(at, "component out of range")
         if comps[cluster["component"]]["failure"] is not None:
             _refuse(at, "a failed component has no objects")
-        if cluster["kind"] not in KINDS or cluster["uncertainty_status"] not in STATUSES or cluster["energy_bound"] not in BOUNDS:
+        if cluster["kind"] not in kinds or cluster["uncertainty_status"] not in statuses or cluster["energy_bound"] not in BOUNDS:
             _refuse(at, "unknown kind, uncertainty status or energy bound")
+        if labelled and (cluster["uncertainty_status"] == "no-response-model") != no_model:
+            _refuse(at, "without a response model every object has status no-response-model and the event-sum sigma is null; "
+                        "with one, neither")
+        if cluster["kind"] == "unsplit" and len(comps[cluster["component"]]["peaks"]) < 2:
+            _refuse(at, "an unsplit object is a component with two kept peaks")
         for key in ("energy", "x", "y"):
             _number(cluster[key], f"{at}.{key}")
         sigmas = [_number(cluster[key], f"{at}.{key}", allow_none=True) for key in ("sigma_energy", "sigma_x", "sigma_y")]
@@ -334,8 +389,8 @@ def check_event(doc: dict, index: int, header: dict) -> None:
             if cell_component.get(channel) != cluster["component"]:
                 _refuse(f"{at}.members", f"channel {channel} is not a cell of component {cluster['component']}")
             fraction = _number(fraction, f"{at}.members[{channel}]")
-            if not 0.0 <= fraction <= 1.0 or (cluster["kind"] == "one-peak" and fraction != 1.0):
-                _refuse(f"{at}.members[{channel}]", "a sharing fraction lies in [0, 1], and is 1 in a one-peak object")
+            if not 0.0 <= fraction <= 1.0 or (cluster["kind"] in ("one-peak", "unsplit") and fraction != 1.0):
+                _refuse(f"{at}.members[{channel}]", "a sharing fraction lies in [0, 1], and is 1 in a one-peak or unsplit object")
             saturated = saturated or (fraction > 0.0 and cell_saturated[channel] == 1)
         if cluster["saturated"] is not saturated or cluster["energy_bound"] != ("lower-bound" if saturated else "estimate"):
             _refuse(at, "saturation flag or energy bound does not follow its members")

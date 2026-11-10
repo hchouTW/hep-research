@@ -34,6 +34,12 @@ report lists each one, for the coordinator's ruling; R37's last paragraph):
   an event sum with a clipped cell, are flagged and their energy is marked a lower bound (section 9.2).
 
 Which sum enters which gate (section 7.1, last row) is the scoring side's: this module returns every object and the event sum.
+
+A calo-cluster-configuration/2 without a profile and a response model (D2 stage 3, a labelled input from another simulation,
+whose grid section 4.2 does not describe) changes two steps and nothing else: a component with two kept peaks is not shared but
+kept as one object of kind "unsplit", with A, x and y as for one peak and every member at fraction 1; and no uncertainty is
+formed, for any object or for the event sum (status "no-response-model", every sigma None), because there is no q or sigma_n to
+form it from. Components, peaks, candidates, sums and saturation are as above. With a /1 configuration nothing changes.
 """
 from __future__ import annotations
 
@@ -53,7 +59,7 @@ INV_SQRT_2PI = 0.3989422804014327
 @dataclass
 class ClusterObject:
     component: int
-    kind: str                      # one-peak, two-peak
+    kind: str                      # one-peak, two-peak; unsplit without a profile (configuration /2)
     peak_channel: int
     energy: float                  # A, clustered deposited energy, MeV
     x: float
@@ -61,7 +67,7 @@ class ClusterObject:
     sigma_energy: float | None
     sigma_x: float | None
     sigma_y: float | None
-    uncertainty_status: str        # ok, singular-fisher, non-positive-variance
+    uncertainty_status: str        # ok, singular-fisher, non-positive-variance; no-response-model (configuration /2)
     members: list                  # [(channel, fraction)], ascending channel
     saturated: bool
     energy_bound: str              # estimate, lower-bound
@@ -84,7 +90,7 @@ class EventResult:
     clustered_sum: float = 0.0      # sum of e_c over the kept components = event sum S
     unclustered_sum: float = 0.0    # sum of e_c over live cells outside kept components
     unclustered_cells: int = 0
-    event_sum_sigma: float = 0.0
+    event_sum_sigma: float | None = 0.0   # None without a response model (configuration /2)
     event_sum_cells: int = 0
     event_sum_saturated: bool = False
 
@@ -134,6 +140,17 @@ def share_two_peaks(cells_ix, cells_iy, e, peaks_ix, peaks_iy, cfg: Configuratio
         cx = (f * e * xc).sum(axis=1) / amplitude
         cy = (f * e * yc).sum(axis=1) / amplitude
     return amplitude, cx, cy, f
+
+
+def centroid_object(component: int, kind: str, peak: int, cells, cells_ix, cells_iy, e, sat) -> ClusterObject:
+    """The whole component as one object with no uncertainty: no response model (and, for kind unsplit, no profile) is given.
+    A = sum e_c, x = sum e_c x_c / A, likewise y, as section 7.1's one-peak rule; every member at fraction 1."""
+    a = float(e.sum())
+    x = float((e * (cells_ix + 0.5)).sum() / a)
+    y = float((e * (cells_iy + 0.5)).sum() / a)
+    return ClusterObject(component=component, kind=kind, peak_channel=peak, energy=a, x=x, y=y, sigma_energy=None, sigma_x=None,
+                         sigma_y=None, uncertainty_status="no-response-model", members=[(int(c), 1.0) for c in cells],
+                         saturated=bool(sat.any()), energy_bound="lower-bound" if sat.any() else "estimate")
 
 
 def peak_values(e, cells_ix, cells_iy, peaks_ix, peaks_iy):
@@ -223,6 +240,12 @@ def cluster_event(energy: numpy.ndarray, live: numpy.ndarray, saturated: numpy.n
         cells_ix, cells_iy = numpy.divmod(cells, cfg.cells_y)
         e = flat_e[cells]
         sat = saturated.ravel()[cells]
+        if not cfg.response_model:
+            # configuration /2 with no profile and no response model: one object per kept component, never split
+            peak = peaks[0] if peaks else int(cells[numpy.argmax(e)])
+            result.objects.append(centroid_object(index, "unsplit" if len(peaks) >= 2 else "one-peak", peak, cells, cells_ix,
+                                                  cells_iy, e, sat))
+            continue
         if len(peaks) < 2:
             ring = ndimage.binary_dilation(comp_mask, structure=EIGHT) & ~comp_mask & valued
             ring_ix, ring_iy = numpy.nonzero(ring)
@@ -261,7 +284,10 @@ def cluster_event(energy: numpy.ndarray, live: numpy.ndarray, saturated: numpy.n
     result.unclustered_sum = float(flat_e[outside].sum())
     result.unclustered_cells = int(outside.sum())
     result.event_sum_cells = int(kept_flat.sum())
-    result.event_sum_sigma = float(numpy.sqrt(cfg.quantum * result.clustered_sum + result.event_sum_cells * cfg.noise_sigma ** 2)) \
-        if result.event_sum_cells else 0.0
+    if not cfg.response_model:
+        result.event_sum_sigma = None
+    else:
+        result.event_sum_sigma = float(numpy.sqrt(cfg.quantum * result.clustered_sum + result.event_sum_cells * cfg.noise_sigma ** 2)) \
+            if result.event_sum_cells else 0.0
     result.event_sum_saturated = bool((saturated.ravel() & kept_flat).any())
     return result
