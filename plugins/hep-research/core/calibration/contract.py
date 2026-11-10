@@ -405,10 +405,45 @@ def _references(c, out):
                                 "listed as phi with its source")
 
 
-def check(contract: dict, releases: dict | None = None, series_graph: dict | None = None) -> dict:
-    """Section 5.2 in phase-0 scope. releases maps release hashes to their metadata (calib_data's view: lineage,
-    samples, observables, declarations, totals); series_graph maps a contract series to the series of its upstream
-    results (calib_deps), for the cycle check."""
+PSI_BOUND = 0.1                                # D37 (approval A7): the class-discretization bound of section 5.4
+
+
+def psi_findings(contract: dict, design: dict) -> list[dict]:
+    """D37 (approval A7): a conditioning parameter psi whose effect on theta-hat, propagated via the design-stage A
+    (design['psi_effect'][psi] = A_theta (d mu / d psi) sigma_psi), exceeds 0.1 sigma_tot^design for some theta_i
+    must be listed as phi. A psi with no declared uncertainty (constraint sigma) cannot be judged."""
+    out = []
+    sig = design.get("sigma_tot") or []
+    names = design.get("theta") or []
+    effects = design.get("psi_effect") or {}
+    for i, p in enumerate(contract.get("parameters", [])):
+        if p.get("role") != "psi":
+            continue
+        path = f"$.parameters[{i}]"
+        if not (p.get("constraint") or {}).get("sigma"):
+            out.append({"code": "parameters.psi_sigma", "path": path, "message": f"psi {p['name']!r} declares no "
+                        "uncertainty (constraint.sigma): the D37 bound cannot be computed"})
+            continue
+        eff = effects.get(p["name"])
+        if eff is None:
+            out.append({"code": "parameters.psi_not_evaluated", "path": path, "message": f"the design gives no "
+                        f"effect of psi {p['name']!r} (calib_design.py linearize)"})
+            continue
+        ratios = [abs(float(e)) / float(s) for e, s in zip(eff, sig)]
+        worst = max(range(len(ratios)), key=ratios.__getitem__) if ratios else None
+        if worst is not None and ratios[worst] > PSI_BOUND:
+            out.append({"code": "parameters.psi_not_negligible", "path": path, "message": f"psi {p['name']!r} moves "
+                        f"{names[worst]} by {ratios[worst]:.3g} sigma_tot^design > {PSI_BOUND} via A: list it as phi "
+                        "(section 2.2; D37, approval A7)"})
+    return out
+
+
+def check(contract: dict, releases: dict | None = None, series_graph: dict | None = None,
+          design: dict | None = None) -> dict:
+    """Section 5.2 in phase-0 scope, and the D37 rule of phase 1 when the design-stage linearization is given
+    (design: theta, sigma_tot, psi_effect, from calib_design.py linearize). releases maps release hashes to their
+    metadata (calib_data's view: lineage, samples, observables, declarations, totals); series_graph maps a contract
+    series to the series of its upstream results (calib_deps), for the cycle check."""
     out = _Findings()
     releases = releases or {}
     if not isinstance(contract, dict):
@@ -459,5 +494,11 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
                 roles.setdefault(o["sample"], set()).add(o.get("role"))
         if any({"calibration", "validation"} <= r for r in roles.values()):
             flags.append("cv")       # validation observables share events with calibration ones (section 2.1)
-    return {"status": "rejected" if out else "accepted", "findings": list(out), "deferred": DEFERRED,
+    deferred = list(DEFERRED)
+    if design is not None:
+        out.extend(psi_findings(contract, design))
+    elif any(p.get("role") == "psi" for p in contract.get("parameters", [])):
+        deferred.append("D37: the psi bound needs the design-stage A (check --design, from calib_design.py "
+                        "linearize)")
+    return {"status": "rejected" if out else "accepted", "findings": list(out), "deferred": deferred,
             "result_flags": flags}

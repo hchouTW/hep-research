@@ -288,14 +288,18 @@
   },
   "calibration": {
    "steward": "hep-statistics",
-   "status": "phase-0",
-   "purpose": "Simulator parameter calibration workflow (docs/dev/simulator-calibration/, Part B): the engine library of the calib_*.py scripts; each check of Part B section 14 is implemented once, in the module of its owning script (use: evidence grades, Appendix C, rule-0 aggregation; deps: dependencies, roles, version ids; chain: stage graph, candidate methods, P4; data_release: releases, lineage, reads, failure records, opening conditions; contract: calib_contract check)",
+   "status": "phase-1",
+   "purpose": "Simulator parameter calibration workflow (docs/dev/simulator-calibration/, Part B): the engine library of the calib_*.py scripts; each check of Part B section 14 is implemented once, in the module of its owning script (use: evidence grades, Appendix C, rule-0 aggregation; deps: dependencies, roles, version ids; chain: stage graph, candidate methods, P4; data_release: releases, lineage, reads, failure records, opening conditions; contract: calib_contract check, D37; preflight: A0; reweight: the weight formula; design: Sobol points, P2, P5, feasibility and final method, support, applicability; kernel_check: P0; linear: the design-stage fit operator A; emulator: the P6 interface stub; evaluator: the section 7.1 interface; toy: the toy detector of section 15.1)",
    "consumers": [
     "skills/hep-statistics/scripts/calib_use.py",
     "skills/hep-statistics/scripts/calib_deps.py",
     "skills/hep-statistics/scripts/calib_chain.py",
     "skills/hep-statistics/scripts/calib_data.py",
-    "skills/hep-statistics/scripts/calib_contract.py"
+    "skills/hep-statistics/scripts/calib_contract.py",
+    "skills/hep-statistics/scripts/calib_design.py",
+    "skills/hep-statistics/scripts/calib_kernel_check.py",
+    "skills/hep-statistics/scripts/calib_reweight.py",
+    "skills/hep-statistics/scripts/calib_emulator.py"
    ],
    "files": [
     "use",
@@ -303,9 +307,17 @@
     "chain",
     "data_release",
     "contract",
-    "io"
+    "io",
+    "evaluator",
+    "toy",
+    "reweight",
+    "linear",
+    "design",
+    "kernel_check",
+    "preflight",
+    "emulator"
    ],
-   "source": "new in this plugin (simulator calibration phase 0, 2026-11-10); use agrees with the reference decision table calib_use_decision_table.py (v7.37.4, SHA-256 c5279adf...)"
+   "source": "new in this plugin (simulator calibration phase 0, 2026-11-10; phase 1, 2026-11-10); use agrees with the reference decision table calib_use_decision_table.py (v7.37.4, SHA-256 c5279adf...)"
   }
  }
 }

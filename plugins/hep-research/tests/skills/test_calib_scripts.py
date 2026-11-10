@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 import calibration_fixtures as F  # noqa: E402
+import calibration_phase1 as H  # noqa: E402
 
 sys.path.insert(0, str(ROOT))
 from core.calibration import data_release as data  # noqa: E402
@@ -151,6 +152,115 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["status"]), (2, "rejected"))                          # single writer
         rc, out = run("calib_data.py", "ingest", "--release", self.put("r.json", {"observables": []}))
         self.assertEqual(rc, 1)
+
+
+
+class Phase1Scripts(unittest.TestCase):
+    """The phase-1 scripts (section 17): JSON with a status and the section 14 exit codes."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def put(self, name, value):
+        p = self.d / name
+        p.write_text(json.dumps(value))
+        return p
+
+    def chain(self, case):
+        c, p = case
+        return self.put("c.json", c), self.put("p.json", p)
+
+    def test_calib_design(self):
+        fx = FIXTURE_DIR / "toy_detector_design.json"
+        rc, out = run("calib_design.py", "p2", "--contract", fx)
+        self.assertEqual((rc, out["status"], out["ndf"]), (0, "passed", 15))
+        rc, out = run("calib_design.py", "points", "--contract", fx, "--n", 8, "--seed", 1, "--held-back", 2)
+        self.assertEqual((rc, len(out["training"]), len(out["held_back"])), (0, 6, 2))
+        rc, out = run("calib_design.py", "applicability", "--plan", self.put("m.json", {"methods": {"a": "rerun"}}))
+        self.assertEqual((rc, out["gates"]["P0"], out["gates"]["G4"]), (0, "applicable", "not-applicable"))
+        c, p = self.chain(H.gaussian_chain())
+        rc, out = run("calib_design.py", "p5", "--contract", c, "--plan", p, "--items", "ess")
+        self.assertEqual((rc, out["status"], out["findings"][0]["code"]), (1, "failed", "p5.ess"))
+        rc, out = run("calib_design.py", "p5", "--contract", c, "--plan", p, "--items", "bogus")
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        c, p = self.chain(H.poisson_chain())
+        rc, out = run("calib_design.py", "methods", "--contract", c, "--plan", p)
+        self.assertEqual((rc, out["methods"]), (0, {"rate": "resimulation"}))
+        rc, out = run("calib_design.py", "support", "--contract", *self.chain(H.uniform_chain())[:1], "--plan",
+                      self.d / "p.json")
+        self.assertEqual((rc, out["findings"][0]["code"]), (1, "support.missing"))
+        cc, pp = H.gaussian_chain()
+        pp["evaluator"] = {"kind": "g4sim"}
+        rc, out = run("calib_design.py", "p5", "--contract", self.put("c2.json", cc), "--plan", self.put("p2.json", pp))
+        self.assertEqual((rc, out["status"]), (3, "incomplete"))
+
+    def test_calib_design_linearize_and_contract_design(self):
+        c, p = H.gaussian_chain(proposal={"nodes": ["x"], "components": [{"theta": {"sigma": 2.5}}]})
+        rc, out = run("calib_design.py", "linearize", "--contract", *self.chain((c, p))[:1], "--plan", self.d / "p.json")
+        self.assertEqual((rc, out["theta"]), (0, ["mu"]))
+        self.assertIn("provisional-thresholds", out["flags"])
+        rels = F.releases()
+        good = F.contract()
+        good["data"] = {"calibration_releases": [data.release_hash(rels[F.CAL])],
+                        "validation_releases": [data.release_hash(rels[F.VAL])]}
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("fc.json", good), "--release",
+                      self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL]), "--design",
+                      self.put("d.json", out))
+        self.assertEqual((rc, out["status"]), (0, "accepted"), out.get("findings"))
+
+    def test_calib_kernel_check(self):
+        pts = self.put("pts.json", [{"theta": 0.5}, {"theta": 0.25}, {"theta": 0.4}])
+        c, p = self.chain(H.uniform_chain())
+        rc, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points", pts, "--seed", 11)
+        self.assertEqual((rc, out["status"]), (1, "failed"))
+        c, p = self.chain(H.uniform_chain({"nodes": ["x"], "components": [{"theta": {"theta": v}} for v in
+                                                                           (0.0, 0.5, 1.0)]}))
+        rc, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points", pts, "--seed", 11)
+        self.assertEqual((rc, out["status"]), (0, "passed"))
+
+    def test_calib_reweight(self):
+        c, p = self.chain(H.gaussian_chain())
+        rc, out = run("calib_reweight.py", "weights", "--contract", c, "--plan", p, "--theta", self.put("t.json", {}))
+        self.assertEqual((rc, out["runs"]["run"]["max_abs_w_minus_1"]), (0, 0.0))
+        rc, out = run("calib_reweight.py", "weights", "--contract", c, "--plan", p, "--theta",
+                      self.put("t2.json", {"mu": 0.5}))
+        self.assertEqual(rc, 0)
+        self.assertLess(out["runs"]["run"]["kish"], 20_000)
+        rc, out = run("calib_reweight.py", "weights", "--contract", c, "--plan", p, "--theta",
+                      self.put("t3.json", {"nope": 1}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+
+    def test_calib_emulator_is_a_stub(self):
+        for cmd in ("train", "p6", "ask", "tell"):
+            rc, out = run("calib_emulator.py", cmd)
+            self.assertEqual((rc, out["status"]), (3, "incomplete"))
+
+    def test_calib_contract_preflight(self):
+        sys.path.insert(0, str(ROOT / "tests" / "core"))
+        from test_calibration_preflight import THRESHOLD, linearity_example
+        rel = F.release("calibration", ["u1", "u2"], [], {})
+        rel["content"] = {"values": linearity_example(0.035)}
+        draft = F.contract()
+        draft["thresholds"] = {"linearity": THRESHOLD}
+        draft["data"] = {"calibration_releases": [data.release_hash(rel)]}
+        led = self.d / "ledger.json"
+        self.assertEqual(run("calib_data.py", "init", "--ledger", led)[0], 0)
+        rc, out = run("calib_contract.py", "preflight", "--contract", self.put("draft.json", draft), "--release",
+                      self.put("rel.json", rel), "--ledger", led, "--write-draft", self.d / "draft2.json")
+        self.assertEqual((rc, out["a0_summary"]), (0, {"unreachable_thresholds": ["linearity"]}))
+        self.assertNotIn("_quantity", json.dumps(out))
+        state = json.loads(led.read_text())
+        self.assertEqual({e["kind"] for e in state["events"]}, {"fit"})
+        self.assertEqual(json.loads((self.d / "draft2.json").read_text())["a0_summary"],
+                         {"unreachable_thresholds": ["linearity"]})
+        other = dict(draft, data={"calibration_releases": [F.h("x")]})
+        rc, out = run("calib_contract.py", "preflight", "--contract", self.put("d3.json", other), "--release",
+                      self.d / "rel.json", "--ledger", led)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
 
 
 if __name__ == "__main__":

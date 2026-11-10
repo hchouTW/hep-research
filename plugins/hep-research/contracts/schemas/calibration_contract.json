@@ -100,6 +100,27 @@
      "spec_pointer": {
       "type": "string",
       "minLength": 1
+     },
+     "mode": {
+      "enum": [
+       "profile",
+       "shift"
+      ],
+      "$comment": "phi only: the two modes of section 5.5; default profile"
+     },
+     "constraint": {
+      "type": "object",
+      "required": [
+       "sigma"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "sigma": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       }
+      },
+      "$comment": "the external constraint of a phi (N(nominal, sigma^2)) or the uncertainty of a psi (D37)"
      }
     }
    },
@@ -627,6 +648,10 @@
   },
   "thresholds": {
    "type": "object"
+  },
+  "exposure": {
+   "type": "object",
+   "$comment": "expected number of data events per sample (design stage, section 6.7 and 8.2 note 5: metadata only, no data values)"
   }
  },
  "$comment": "calibration-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. calib_contract.py check applies the rules of section 5.2."

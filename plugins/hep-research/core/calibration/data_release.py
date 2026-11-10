@@ -269,6 +269,23 @@ class Ledger:
                                          "kind": "fit", "seq": seq})
         return seq
 
+    def provide_values(self, release: dict, channel: dict, calibration_releases, kappa: str | None = None
+                       ) -> tuple[dict, int]:
+        """The one provider of calibration values to a fit, a design, the A0 preflight or exploration (section 9.5):
+        only for a release the contract declares as calibration data; records the fit read on the release's raw
+        units through the channel (a locked contract's hash, or a contract draft, registered here on first
+        provision), then returns the values. Validation values are provided only by opening."""
+        h = release_hash(release)
+        if h not in set(calibration_releases or ()):
+            raise DataError("sealed.not_opened", "the release is not a calibration release of this contract: its "
+                            "values are provided only by opening (section 9.5)")
+        units = (release.get("lineage") or {}).get("raw_units")
+        if not units:
+            raise DataError("read.lineage", "the release has no raw-unit lineage: the read cannot be recorded")
+        values = provide(release, "values", opened=False, role="calibration")
+        seq = self.fit_read(h, units, channel, kappa)
+        return values, seq
+
     def open_validation(self, kappa: str, release_sha256: str, validation_units, calibration_units,
                         channel: dict, conditions: dict | None = None) -> int:
         """At opening (holdout) or the first T_cv (cross-validation): at one sequence number, record the validation

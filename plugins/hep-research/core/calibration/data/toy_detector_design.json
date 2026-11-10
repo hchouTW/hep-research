@@ -1,0 +1,1320 @@
+{
+ "schema": "calibration-fixture/1",
+ "fixture": "toy-detector-design",
+ "status": "synthetic",
+ "description": "Design-stage contract and plan of the toy detector of section 15.1 (phase 1): priors, exposure, the energy-scale systematic eta, a V_model kernel on the beam energy means, the plan's methods and seeds. All values synthetic.",
+ "contract": {
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "input",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "deposition",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "photon_generation",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "2",
+     "mechanisms": [
+      "yield"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "pde",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4a",
+     "mechanisms": [
+      "yield"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "gain",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4b",
+     "mechanisms": [
+      "yield",
+      "fluctuation"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "electronics",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "5",
+     "mechanisms": [
+      "noise-threshold"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "module_a",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "module_b",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "energy_ratio",
+     "kind": "comparison",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "track_input",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "momentum_measurement",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "7",
+     "mechanisms": [
+      "geometry-material",
+      "transport-diffusion"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "layer_a",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "layer_b",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "position_difference",
+     "kind": "comparison",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "momentum",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "e_over_p",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7"
+    }
+   ],
+   "edges": [
+    {
+     "from": "input",
+     "to": "deposition"
+    },
+    {
+     "from": "deposition",
+     "to": "photon_generation"
+    },
+    {
+     "from": "photon_generation",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "gain"
+    },
+    {
+     "from": "gain",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "module_a"
+    },
+    {
+     "from": "electronics",
+     "to": "module_b"
+    },
+    {
+     "from": "module_a",
+     "to": "energy_ratio"
+    },
+    {
+     "from": "module_b",
+     "to": "energy_ratio"
+    },
+    {
+     "from": "track_input",
+     "to": "momentum_measurement"
+    },
+    {
+     "from": "momentum_measurement",
+     "to": "momentum"
+    },
+    {
+     "from": "momentum_measurement",
+     "to": "layer_a"
+    },
+    {
+     "from": "momentum_measurement",
+     "to": "layer_b"
+    },
+    {
+     "from": "layer_a",
+     "to": "position_difference"
+    },
+    {
+     "from": "layer_b",
+     "to": "position_difference"
+    },
+    {
+     "from": "momentum",
+     "to": "e_over_p"
+    },
+    {
+     "from": "module_a",
+     "to": "e_over_p"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "light_yield",
+    "role": "theta",
+    "nodes": [
+     "photon_generation"
+    ],
+    "mechanism": "yield",
+    "sampling_bounds": [
+     97.0,
+     103.0
+    ],
+    "physical_bounds": [
+     85.0,
+     115.0
+    ]
+   },
+   {
+    "name": "pde",
+    "role": "theta",
+    "nodes": [
+     "pde"
+    ],
+    "mechanism": "yield",
+    "sampling_bounds": [
+     0.2425,
+     0.2575
+    ],
+    "physical_bounds": [
+     0.21249999999999997,
+     0.28750000000000003
+    ]
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "yield",
+    "sampling_bounds": [
+     9.7,
+     10.3
+    ],
+    "physical_bounds": [
+     8.499999999999996,
+     11.500000000000004
+    ]
+   },
+   {
+    "name": "enf",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "fluctuation",
+    "sampling_bounds": [
+     1.15,
+     1.25
+    ],
+    "physical_bounds": [
+     0.9499999999999997,
+     1.4500000000000002
+    ]
+   },
+   {
+    "name": "noise_width",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold",
+    "sampling_bounds": [
+     1.6,
+     2.4
+    ],
+    "physical_bounds": [
+     4.440892098500626e-16,
+     3.9999999999999996
+    ]
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold",
+    "sampling_bounds": [
+     4.5,
+     5.5
+    ],
+    "physical_bounds": [
+     2.5,
+     7.5
+    ]
+   },
+   {
+    "name": "material_thickness",
+    "role": "phi",
+    "nodes": [
+     "deposition"
+    ],
+    "mechanism": "geometry-material",
+    "mode": "profile",
+    "constraint": {
+     "sigma": 0.05
+    },
+    "physical_bounds": [
+     0.5,
+     1.5
+    ],
+    "source": "external measurement of the material thickness (synthetic)"
+   },
+   {
+    "name": "relative_gain_b",
+    "role": "theta",
+    "nodes": [
+     "module_b"
+    ],
+    "mechanism": "sharing-crosstalk",
+    "sampling_bounds": [
+     0.97,
+     1.03
+    ],
+    "physical_bounds": [
+     0.8499999999999999,
+     1.1500000000000001
+    ]
+   },
+   {
+    "name": "momentum_scale",
+    "role": "theta",
+    "nodes": [
+     "momentum_measurement"
+    ],
+    "mechanism": "geometry-material",
+    "sampling_bounds": [
+     0.99,
+     1.01
+    ],
+    "physical_bounds": [
+     0.95,
+     1.05
+    ]
+   },
+   {
+    "name": "sum_term_a",
+    "role": "theta",
+    "nodes": [
+     "momentum_measurement"
+    ],
+    "mechanism": "transport-diffusion",
+    "sampling_bounds": [
+     0.8,
+     1.2
+    ],
+    "physical_bounds": [
+     2.220446049250313e-16,
+     1.9999999999999998
+    ]
+   },
+   {
+    "name": "sum_term_b",
+    "role": "theta",
+    "nodes": [
+     "layer_b"
+    ],
+    "mechanism": "geometry-material",
+    "sampling_bounds": [
+     0.4,
+     0.6
+    ],
+    "physical_bounds": [
+     1.1102230246251565e-16,
+     0.9999999999999999
+    ]
+   },
+   {
+    "name": "layer_b_offset",
+    "role": "theta",
+    "nodes": [
+     "layer_b"
+    ],
+    "mechanism": "geometry-material",
+    "sampling_bounds": [
+     -0.2,
+     0.2
+    ],
+    "physical_bounds": [
+     -1.0,
+     1.0
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_input",
+    "type": "known-input",
+    "edge": {
+     "into": "input"
+    },
+    "observation": "module_a",
+    "enabled": true
+   },
+   {
+    "id": "light_source",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "photon_generation",
+     "to": "pde"
+    },
+    "observation": "module_a",
+    "conversion": {
+     "relation": "known photon count",
+     "parameters": []
+    }
+   },
+   {
+    "id": "single_photoelectron",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "pde",
+     "to": "gain"
+    },
+    "observation": "module_a",
+    "conversion": {
+     "relation": "single photoelectron charge",
+     "parameters": []
+    }
+   },
+   {
+    "id": "module_overlap",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "energy_ratio"
+    },
+    "observation": "energy_ratio"
+   },
+   {
+    "id": "momentum_reference",
+    "type": "known-input",
+    "edge": {
+     "into": "track_input"
+    },
+    "observation": "e_over_p"
+   },
+   {
+    "id": "layer_overlap",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "position_difference"
+    },
+    "observation": "position_difference"
+   }
+  ],
+  "schema": "calibration-contract/1",
+  "series": "toy-design",
+  "simulator": "toy-detector",
+  "observables": [
+   {
+    "name": "beam1_e_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam1"
+   },
+   {
+    "name": "beam1_e_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam1"
+   },
+   {
+    "name": "beam1_ratio_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam1"
+   },
+   {
+    "name": "beam2_e_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam2"
+   },
+   {
+    "name": "beam2_e_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam2"
+   },
+   {
+    "name": "beam2_ratio_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam2"
+   },
+   {
+    "name": "beam3_e_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam3"
+   },
+   {
+    "name": "beam3_e_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam3"
+   },
+   {
+    "name": "beam3_ratio_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam3"
+   },
+   {
+    "name": "beam4_e_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam4"
+   },
+   {
+    "name": "beam4_e_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam4"
+   },
+   {
+    "name": "beam4_ratio_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "beam4"
+   },
+   {
+    "name": "light_e_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "light"
+   },
+   {
+    "name": "light_e_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "light"
+   },
+   {
+    "name": "spe_e_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "spe"
+   },
+   {
+    "name": "spe_e_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "spe"
+   },
+   {
+    "name": "spe_efficiency",
+    "role": "calibration",
+    "functional": "efficiency",
+    "range": "unit-interval",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "spe"
+   },
+   {
+    "name": "track5_p_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track5"
+   },
+   {
+    "name": "track5_p_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track5"
+   },
+   {
+    "name": "track5_dx_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "signed",
+    "link": "identity",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track5"
+   },
+   {
+    "name": "track5_dx_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track5"
+   },
+   {
+    "name": "track2_p_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track2"
+   },
+   {
+    "name": "track2_p_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track2"
+   },
+   {
+    "name": "track2_dx_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "signed",
+    "link": "identity",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track2"
+   },
+   {
+    "name": "track2_dx_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "track2"
+   },
+   {
+    "name": "eop_mean",
+    "role": "calibration",
+    "functional": "location",
+    "range": "positive",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "eop"
+   }
+  ],
+  "exposure": {
+   "beam1": 2000,
+   "beam2": 2000,
+   "beam3": 2000,
+   "beam4": 2000,
+   "light": 2000,
+   "spe": 2000,
+   "track5": 2000,
+   "track2": 2000,
+   "eop": 2000
+  },
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal"
+    }
+   ],
+   "absorbed": []
+  },
+  "estimators": {
+   "shared_implementation": true,
+   "uses_truth": false
+  },
+  "model_discrepancy": {
+   "form": "fixed",
+   "components": [
+    {
+     "kind": "squared-exponential",
+     "observables": [
+      "beam1_e_mean",
+      "beam2_e_mean",
+      "beam3_e_mean",
+      "beam4_e_mean"
+     ],
+     "f": 0.002,
+     "length": 1.5,
+     "control": {
+      "beam1_e_mean": 1.0,
+      "beam2_e_mean": 2.0,
+      "beam3_e_mean": 3.0,
+      "beam4_e_mean": 4.0
+     }
+    }
+   ]
+  },
+  "upstream": [],
+  "validation": {
+   "mode": "none",
+   "N_dc": [],
+   "N_d": [],
+   "unused": []
+  },
+  "numerics": {
+   "precision": "double"
+  },
+  "acceptance": {
+   "strength": "standard"
+  },
+  "intended_use": [
+   "design-study"
+  ],
+  "scope": {
+   "beam_energy_gev": [
+    1,
+    4
+   ]
+  },
+  "event_samples": [],
+  "data": {
+   "calibration_releases": [
+    "4c63527c661a99cd3beb1bf3878ac402420a20942b048aeccf26fcac1dd34891"
+   ]
+  }
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {
+   "input": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "deposition": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "photon_generation": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "pde": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "gain": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "electronics": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "energy_ratio": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "track_input": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "momentum_measurement": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "layer_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "layer_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "position_difference": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "momentum": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "e_over_p": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  },
+  "evaluator": {
+   "kind": "toy-detector",
+   "events": 40000
+  },
+  "seeds": {
+   "nominal": 20261110,
+   "resample": 20261111
+  },
+  "methods": {
+   "light_yield": "analytic-reweighting",
+   "pde": "analytic-reweighting",
+   "gain": "analytic-reweighting",
+   "enf": "analytic-reweighting",
+   "noise_width": "resimulation",
+   "threshold": "resimulation",
+   "material_thickness": "resimulation",
+   "relative_gain_b": "rerun",
+   "sum_term_b": "rerun",
+   "layer_b_offset": "rerun",
+   "momentum_scale": "resimulation",
+   "sum_term_a": "resimulation"
+  },
+  "design": {
+   "fd_fraction": 0.05,
+   "n_scan": 64,
+   "scan_seed": 20261112,
+   "bootstrap": 0,
+   "bootstrap_seed": 20261113
+  }
+ },
+ "release": {
+  "schema": "calibration-data-release/1",
+  "status": [
+   "synthetic"
+  ],
+  "submitter": "toy detector design fixture",
+  "lineage": {
+   "raw_units": [
+    "toy-beam1",
+    "toy-beam2",
+    "toy-beam3",
+    "toy-beam4",
+    "toy-eop",
+    "toy-light",
+    "toy-spe",
+    "toy-track2",
+    "toy-track5"
+   ]
+  },
+  "observables": [
+   {
+    "name": "beam1_e_mean"
+   },
+   {
+    "name": "beam1_e_width"
+   },
+   {
+    "name": "beam1_ratio_mean"
+   },
+   {
+    "name": "beam2_e_mean"
+   },
+   {
+    "name": "beam2_e_width"
+   },
+   {
+    "name": "beam2_ratio_mean"
+   },
+   {
+    "name": "beam3_e_mean"
+   },
+   {
+    "name": "beam3_e_width"
+   },
+   {
+    "name": "beam3_ratio_mean"
+   },
+   {
+    "name": "beam4_e_mean"
+   },
+   {
+    "name": "beam4_e_width"
+   },
+   {
+    "name": "beam4_ratio_mean"
+   },
+   {
+    "name": "light_e_mean"
+   },
+   {
+    "name": "light_e_width"
+   },
+   {
+    "name": "spe_e_mean"
+   },
+   {
+    "name": "spe_e_width"
+   },
+   {
+    "name": "spe_efficiency"
+   },
+   {
+    "name": "track5_p_mean"
+   },
+   {
+    "name": "track5_p_width"
+   },
+   {
+    "name": "track5_dx_mean"
+   },
+   {
+    "name": "track5_dx_width"
+   },
+   {
+    "name": "track2_p_mean"
+   },
+   {
+    "name": "track2_p_width"
+   },
+   {
+    "name": "track2_dx_mean"
+   },
+   {
+    "name": "track2_dx_width"
+   },
+   {
+    "name": "eop_mean"
+   }
+  ],
+  "samples": {},
+  "declarations": {
+   "representation_format": "float64",
+   "derivation_relations": [],
+   "uncertainty_sources": {
+    "beam1_e_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam1_e_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam1_ratio_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam2_e_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam2_e_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam2_ratio_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam3_e_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam3_e_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam3_ratio_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam4_e_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam4_e_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "beam4_ratio_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "light_e_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "light_e_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "spe_e_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "spe_e_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "spe_efficiency": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track5_p_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track5_p_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track5_dx_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track5_dx_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track2_p_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track2_p_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track2_dx_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "track2_dx_width": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    },
+    "eop_mean": {
+     "statistical": "expected",
+     "systematic": "systematic"
+    }
+   },
+   "relative_systematic_correlation": "fully-correlated",
+   "has_value": {
+    "beam1_e_mean": true,
+    "beam1_e_width": true,
+    "beam1_ratio_mean": true,
+    "beam2_e_mean": true,
+    "beam2_e_width": true,
+    "beam2_ratio_mean": true,
+    "beam3_e_mean": true,
+    "beam3_e_width": true,
+    "beam3_ratio_mean": true,
+    "beam4_e_mean": true,
+    "beam4_e_width": true,
+    "beam4_ratio_mean": true,
+    "light_e_mean": true,
+    "light_e_width": true,
+    "spe_e_mean": true,
+    "spe_e_width": true,
+    "spe_efficiency": true,
+    "track5_p_mean": true,
+    "track5_p_width": true,
+    "track5_dx_mean": true,
+    "track5_dx_width": true,
+    "track2_p_mean": true,
+    "track2_p_width": true,
+    "track2_dx_mean": true,
+    "track2_dx_width": true,
+    "eop_mean": true
+   }
+  },
+  "content": {
+   "systematic": [
+    {
+     "name": "energy_scale",
+     "relative": {
+      "beam1_e_mean": 0.005,
+      "beam1_e_width": 0.005,
+      "beam2_e_mean": 0.005,
+      "beam2_e_width": 0.005,
+      "beam3_e_mean": 0.005,
+      "beam3_e_width": 0.005,
+      "beam4_e_mean": 0.005,
+      "beam4_e_width": 0.005,
+      "light_e_mean": 0.005,
+      "light_e_width": 0.005,
+      "spe_e_mean": 0.005,
+      "spe_e_width": 0.005,
+      "eop_mean": 0.005
+     }
+    }
+   ]
+  }
+ }
+}

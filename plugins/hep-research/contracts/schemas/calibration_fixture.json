@@ -25,103 +25,120 @@
    "const": "synthetic"
   },
   "contract": {
-   "type": "object",
-   "required": [
-    "stage_graph",
-    "parameters",
-    "references"
-   ],
-   "additionalProperties": false,
-   "properties": {
-    "stage_graph": {
-     "$ref": "calibration_stage_graph.json"
-    },
-    "parameters": {
-     "type": "array",
-     "items": {
-      "type": "object",
-      "required": [
-       "name",
-       "role",
-       "nodes"
-      ],
-      "additionalProperties": false,
-      "properties": {
-       "name": {
-        "type": "string",
-        "minLength": 1
-       },
-       "role": {
-        "enum": [
-         "theta",
-         "phi",
-         "psi"
-        ]
-       },
-       "nodes": {
-        "type": "array",
-        "items": {
-         "type": "string",
-         "minLength": 1
-        },
-        "minItems": 1
-       },
-       "mechanism": {
-        "$ref": "calibration_mechanism.json"
-       },
-       "physical_bounds": {
-        "type": "array",
-        "items": {
-         "type": "number"
+   "anyOf": [
+    {
+     "type": "object",
+     "required": [
+      "stage_graph",
+      "parameters",
+      "references"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "stage_graph": {
+       "$ref": "calibration_stage_graph.json"
+      },
+      "parameters": {
+       "type": "array",
+       "items": {
+        "type": "object",
+        "required": [
+         "name",
+         "role",
+         "nodes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "name": {
+          "type": "string",
+          "minLength": 1
+         },
+         "role": {
+          "enum": [
+           "theta",
+           "phi",
+           "psi"
+          ]
+         },
+         "nodes": {
+          "type": "array",
+          "items": {
+           "type": "string",
+           "minLength": 1
+          },
+          "minItems": 1
+         },
+         "mechanism": {
+          "$ref": "calibration_mechanism.json"
+         },
+         "physical_bounds": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          }
+         },
+         "sampling_bounds": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          }
+         },
+         "source": {
+          "type": "string",
+          "minLength": 1
+         },
+         "uncertainty": {
+          "enum": [
+           "negligible",
+           "non-negligible"
+          ]
+         },
+         "index": {
+          "$ref": "calibration_parameter_index.json"
+         },
+         "spec_pointer": {
+          "type": "string",
+          "minLength": 1
+         }
         }
        },
-       "sampling_bounds": {
-        "type": "array",
-        "items": {
-         "type": "number"
-        }
-       },
-       "source": {
-        "type": "string",
-        "minLength": 1
-       },
-       "uncertainty": {
-        "enum": [
-         "negligible",
-         "non-negligible"
-        ]
-       },
-       "index": {
-        "$ref": "calibration_parameter_index.json"
-       },
-       "spec_pointer": {
-        "type": "string",
-        "minLength": 1
+       "minItems": 1
+      },
+      "references": {
+       "type": "array",
+       "items": {
+        "$ref": "calibration_reference.json"
        }
       }
-     },
-     "minItems": 1
-    },
-    "references": {
-     "type": "array",
-     "items": {
-      "$ref": "calibration_reference.json"
      }
+    },
+    {
+     "$ref": "calibration_contract.json"
     }
-   }
+   ]
   },
   "plan": {
-   "type": "object",
-   "required": [
-    "kernels"
-   ],
-   "additionalProperties": false,
-   "properties": {
-    "kernels": {
-     "type": "object"
+   "anyOf": [
+    {
+     "type": "object",
+     "required": [
+      "kernels"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "kernels": {
+       "type": "object"
+      }
+     }
+    },
+    {
+     "$ref": "calibration_plan.json"
     }
-   }
+   ]
+  },
+  "release": {
+   "$ref": "calibration_data_release.json"
   }
  },
- "$comment": "calibration-fixture/1: a stage-graph fixture of phase 0 (section 17), graph structure only."
+ "$comment": "calibration-fixture/1: a stage-graph fixture of phase 0 (section 17), graph structure only. A design fixture (phase 1) holds a full calibration-contract/1 and calibration-plan/1 and the synthetic calibration release its contract declares."
 }

@@ -33,6 +33,27 @@
   },
   "proposal": {
    "type": "object"
+  },
+  "evaluator": {
+   "type": "object",
+   "required": [
+    "kind"
+   ],
+   "properties": {
+    "kind": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "$comment": "the evaluator the engine runs (section 7.1); phase 1 knows toy-detector, its variants and declared chains"
+  },
+  "methods": {
+   "type": "object",
+   "$comment": "the method per parameter (section 3.6): analytic-reweighting, step-level-reweighting, learned-density-ratio, rerun, resimulation, surrogate-model"
+  },
+  "design": {
+   "type": "object",
+   "$comment": "design-stage settings: fd_fraction, n_scan, scan_seed, bootstrap, bootstrap_seed"
   }
  },
  "$comment": "calibration-plan/1 (section 5.1): not locked; its hash enters kappa. kernels: {node: {stored: {inputs, outputs, steps}, support_declared, registration}}."
