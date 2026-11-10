@@ -5,10 +5,10 @@
    "state": "blocked",
    "worktree": "../hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
-   "task_card_sha256": "0c19448e7b00821275ef898ee200fa8f53d3815e11d3b4a598df3135f530fab7",
+   "task_card_sha256": "f4ce326516be95655d8563d8ba6a68caa68aa7c7af2d1598ca2118cfb428dc7d",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
    "blocked_on": [
-    "E7 item 2: the reference implementation calib_use_decision_table.py at SHA-256 c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3 (the version attached to v7.37.4) must be supplied by the author (Open question 2); the file supplied on 2026-11-10 (hep-research-tasks/calib_use_decision_table.py, 143aaa91…, v7.37.3) does not match, nor do ed0fa0df… and f8dfef10…"
+    "E7 item 2: the reference implementation calib_use_decision_table.py at SHA-256 c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3 (the version attached to v7.37.4) must be supplied by the author (Open question 2); the file supplied on 2026-11-10 (hep-research-tasks/calib_use_decision_table.py, 143aaa91…, v7.37.3) and calib_use_decision_table-v7.37.py (d7e1e25b…, v7.37) do not match, nor do ed0fa0df… and f8dfef10…"
    ]
   },
   "phase-1": {
@@ -69,5 +69,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-10T07:39:12Z"
+ "updated": "2026-11-10T07:40:18Z"
 }
