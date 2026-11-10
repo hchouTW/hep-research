@@ -222,6 +222,8 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
         at_hi = (b >= hi - 1e-12) & (g < 0)
         free &= ~(at_lo | at_hi)
         fi = np.flatnonzero(free)
+        if fi.size == 0:                              # every component fixed or at an active bound
+            return Minimum(b, D, g, F, 0.0, True, it, list(np.flatnonzero(~free)), calls, "")
         Ff, gf = F[np.ix_(fi, fi)], g[fi]
         try:
             sol = linalg.solve(Ff, gf, assume_a="pos")

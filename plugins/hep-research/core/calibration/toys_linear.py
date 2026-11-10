@@ -41,6 +41,9 @@ class Config:
     poisson: dict | None = None                    # {a: K, b: K, tau: K}
     names: list | None = None
     bimodal: bool = False                          # m depends on (theta0 - c)^2: two mirror basins
+    phi_cols: np.ndarray | None = None             # n x q: linear response to shift-mode phi (unit-normal units)
+    phi_resp: object = None                        # callable(phi[, tp]) -> n-vector: nonlinear part of the response
+    degeneracy_modes: list = field(default_factory=list)
 
 
 class LinearProblem:
@@ -68,6 +71,8 @@ class LinearProblem:
         self.data = data
         self.truth = truth
         self.V_depends_on_theta = cfg.count_c > 0
+        self.shift_names = [f"phi{l}" for l in range(cfg.phi_cols.shape[1])] if cfg.phi_cols is not None else []
+        self.degeneracy_modes = list(cfg.degeneracy_modes)
         if cfg.poisson is not None:
             K = len(cfg.poisson["a"])
             self.tau = np.asarray(cfg.poisson["tau"], float)
@@ -101,6 +106,19 @@ class LinearProblem:
         if self.cfg.poisson is not None:
             g = np.r_[g, np.log(self.counts_mean(tp) * self.mc_f_or_one())]
         return g + self.pert
+
+    def h_shift(self, tp, phis):
+        """The predictor with the shift-mode phi at `phis` (unit-normal coordinates)."""
+        g = self.h(tp)
+        n = self.cfg.J.shape[0]
+        phis = np.asarray(phis, float)
+        g[:n] = g[:n] + self.cfg.phi_cols @ phis
+        if self.cfg.phi_resp is not None:
+            try:
+                g[:n] = g[:n] + self.cfg.phi_resp(phis, np.asarray(tp, float))
+            except TypeError:
+                g[:n] = g[:n] + self.cfg.phi_resp(phis)
+        return g
 
     def mc_f_or_one(self):
         return np.where(self.tau > 0, self.mc_f, 1.0) if self.mc_f is not None else 1.0
