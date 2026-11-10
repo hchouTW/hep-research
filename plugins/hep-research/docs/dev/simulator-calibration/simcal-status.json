@@ -5,11 +5,9 @@
    "state": "blocked",
    "worktree": "../hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
-   "task_card_sha256": "34e2f7cdc48830da1cfff0f6a71cdc234a6ca5ab42fd945888a93a1931c5ea80",
+   "task_card_sha256": "24afbbaeea8407e2a03f173cb6e47bdb9658670b1f24e89ec5a1f61da252f1a1",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
    "blocked_on": [
-    "E7 item 1: D5 (Part B line 4089) needs the author's explicit decision, recorded in simcal-approvals.md; reading in decision-sheet.md",
-    "E7 item 1: D11 (Part B line 4095) needs the author's explicit decision, recorded in simcal-approvals.md; reading in decision-sheet.md",
     "E7 item 2: the reference implementation calib_use_decision_table.py at SHA-256 c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3 must be supplied by the author (Open question 2); not in the package, not found under /ceph/sharedfs/work/AMS/hsinyichou or the home folder"
    ]
   },
@@ -71,5 +69,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-10T07:28:59Z"
+ "updated": "2026-11-10T07:32:46Z"
 }
