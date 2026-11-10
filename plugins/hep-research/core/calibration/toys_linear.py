@@ -24,6 +24,12 @@ import numpy as np
 from . import likelihood as L
 
 
+def F_seed(seed):
+    if isinstance(seed, (tuple, list)):
+        return int(np.random.SeedSequence([int(s) for s in seed]).generate_state(1)[0])
+    return int(seed)
+
+
 @dataclass
 class Config:
     J: np.ndarray                                  # n x d
@@ -46,6 +52,8 @@ class Config:
     degeneracy_modes: list = field(default_factory=list)
     val: dict | None = None                        # validation rows: {J, m0, V_data, V_MC, U, S, constraints,
                                                    #  phi_cols} (identity link)
+    bootstrap_B: int = 0                           # > 0: V_data is estimated by an event-level bootstrap of B sets
+    e_scale: np.ndarray | None = None              # n x d: e_nom(theta) = e0 * (1 + e_scale theta) (K_l != 0)
 
 
 class LinearProblem:
@@ -72,6 +80,7 @@ class LinearProblem:
         self.edm_tol = 0.01
         self.data = data
         self.truth = truth
+        self.boot_seed = (mc_seed, 1)
         self.V_depends_on_theta = cfg.count_c > 0
         self.shift_names = [f"phi{l}" for l in range(cfg.phi_cols.shape[1])] if cfg.phi_cols is not None else []
         self.degeneracy_modes = list(cfg.degeneracy_modes)
@@ -94,6 +103,8 @@ class LinearProblem:
 
     def mc_noise(self, theta):
         e = self.e0.copy()
+        if self.cfg.e_scale is not None:
+            e = e * (1.0 + self.cfg.e_scale @ np.asarray(theta, float))
         if self.e1n is not None:
             e = e + self.e1n @ np.asarray(theta, float)
         return e
@@ -167,9 +178,29 @@ class LinearProblem:
             V = V + c.count_c * np.diag(np.maximum(self.mean(theta), 1e-3))
         return V
 
+    @property
+    def has_bootstrap(self):
+        return self.cfg.bootstrap_B > 0
+
+    def bootstrap_vhat(self, tp, seed) -> np.ndarray:
+        """One bootstrap realization of V_data at theta_ref: the sample covariance of B sets of the summary statistics
+        generated from the model at theta_ref with common random numbers (the same uniforms at every theta_ref,
+        section 2.1 (i)); never resampled from the observed data."""
+        V = self.V_data_at(tp)
+        n = V.shape[0]
+        B = max(self.cfg.bootstrap_B, L.bootstrap_size(n))
+        z = np.random.default_rng([F_seed(seed), 4242]).normal(size=(B, n))
+        X = z @ np.linalg.cholesky(V).T
+        return L.bootstrap_covariance(X)
+
     def reference(self, tp, beta, frozen=None, bootstrap_frozen=False, bootstrap_seed=None):
         c = self.cfg
-        Vd = self.V_data_at(tp)
+        if frozen is not None and self.has_bootstrap:
+            Vd = frozen.V_std
+        elif self.has_bootstrap:
+            Vd = self.bootstrap_vhat(tp, self.boot_seed if bootstrap_seed is None else bootstrap_seed)
+        else:
+            Vd = self.V_data_at(tp)
         n = c.J.shape[0]
         U = np.zeros((self.layout.n_link, self.layout.n_nu))
         S = np.zeros((self.layout.n_link, self.layout.n_eta))
