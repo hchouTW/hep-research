@@ -1,0 +1,32 @@
+{
+ "id": "adapter:calo-cluster",
+ "version": "0.1.0",
+ "status": "proposed",
+ "purpose": "T08 calorimetry as a development binding in Python, recipe reco.calo.cell-cluster/1 (decisions.md, U12 A; not a native backend, whose gap stays open): the cell chain of a homogeneous analog grid (pedestal, then gain, which multiplies or divides as its payload states, each step with its payload identity in chain order, raw kept beside calibrated, the readout's saturation flag carried), the clustering of t04-values-v4.md section 7.1 (components, peaks, 30-iteration sharing with fractions kept per object, positions, the section 7.1 uncertainties), the product format calo-cluster-product/1 with a reader that refuses a malformed or incomplete product, and on the scoring side the harness that hands out the frozen generator t08-grid/1's events as files and the development readings; energy kind clustered deposited energy, never incident energy; optional, required by no skill",
+ "tools": [
+  {
+   "name": "calo-cluster development binding (Python with NumPy and SciPy)",
+   "status": "proposed",
+   "tested_versions": []
+  }
+ ],
+ "environment": "none declared",
+ "assets": [
+  "assets/calo_cluster.py",
+  "assets/calo_recipe/__init__.py",
+  "assets/calo_recipe/cell_chain.py",
+  "assets/calo_recipe/cell_input.py",
+  "assets/calo_recipe/clustering.py",
+  "assets/calo_recipe/configuration.py",
+  "assets/calo_recipe/product.py",
+  "assets/calo_recipe/profile.py",
+  "assets/fixture_tools/t08_fixture_files.py",
+  "assets/fixture_tools/t08_readings.py",
+  "assets/t08-grid-1.configuration.json"
+ ],
+ "tests": [
+  "../../tests/adapters/test_calo_cluster.py"
+ ],
+ "owner_skill": "hep-detector",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; proposed until a job of record runs it and VALIDATION.md records the run; hand-made events on the login node only so far; no calorimetry quality claim"
+}

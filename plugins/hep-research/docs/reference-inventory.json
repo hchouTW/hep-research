@@ -1197,7 +1197,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d3ee1c15 2026-11-01"
+   "last_commit": "509ccca8 2026-11-07"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -2207,6 +2207,7 @@
    "lines": 331,
    "linked_from_skill_md": false,
    "cited_by": [
+    "adapters/calo-cluster/assets/calo_recipe/__init__.py",
     "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2222,7 +2223,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "5e3b104e 2026-10-29"
+   "last_commit": "509ccca8 2026-11-07"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",

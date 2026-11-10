@@ -41,6 +41,7 @@ def unique_missing(args):
         shutil.rmtree(base, ignore_errors=True)
 
 MISSING_FILE_ARGS = {
+    "adapters/calo-cluster/assets/calo_cluster.py": ["check-product", "--product", M],
     "adapters/acts-tracking/assets/acts_tracking.py": ["refit", "--data-file", M, "--hit-sets", M, "--field-tesla", "0", "--product-id", "missing",
                                                        "--product-file", OUT],
     "skills/hep-review/scripts/review.py": [["verify-export", M], ["r0", "--bundle", M]],
