@@ -106,6 +106,13 @@
    "registered_at": "2026-11-10T10:08:39Z",
    "card_commit": "7c48394d",
    "reason": "tightened after the independent review, before the gate run at the fixed code (tightening only): the named cases of §15.3 listed one by one with their tests or their later phase (F4); a mutant campaign item, provenance and total checks, variation flags compared (F6, F10, F11): 69 items; campaign 1 superseded"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "8bb5ff3cae5d88c7f1431c294afac431dcb17292e2ee2285b4b37e9eb6c544d8",
+   "registered_at": "2026-11-10T12:54:11Z",
+   "card_commit": "37ffe4c0",
+   "reason": "execution log only (campaign 2, final checks, gates recorded, E8 report); thresholds and test design as registered 06fb1860"
   }
  ]
 }
