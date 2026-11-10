@@ -26,14 +26,22 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
         _guard()
 
 import argparse
+import json
 import sys
 
-from core.calibration import evaluator, io, reweight
+try:
+    MISSING = None
+    from core.calibration import evaluator, io, reweight
+except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
+    MISSING = str(_exc)
 
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    if MISSING and "-h" not in (argv or sys.argv[1:]) and "--help" not in (argv or sys.argv[1:]):
+        print(json.dumps({"status": "rejected", "error": f"needs NumPy and SciPy ({MISSING})"}))
+        return 2
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("weights")
     p.add_argument("--contract", required=True)
@@ -50,9 +58,13 @@ def main(argv=None) -> int:
             ev = evaluator.make(plan, contract)
         except evaluator.EvaluatorUnavailable as exc:
             return {"status": "incomplete", "reason": str(exc)}
+        except (KeyError, TypeError, ValueError) as exc:
+            raise io.InputError(f"malformed plan: {exc!r}") from None
         unknown = set(theta) - set(ev.parameters)
         if unknown:
             raise io.InputError(f"unknown parameters {sorted(unknown)}")
+        if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in theta.values()):
+            raise io.InputError("--theta: every value is a number")
         target = {**ev.model.nominal, **theta}
         w = ev.weights(target, nodes=ev.reweighted_nodes(target))
         missing = w.pop("_missing_support", [])

@@ -6,6 +6,8 @@ import sys
 import unittest
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
@@ -84,6 +86,49 @@ class Rules(unittest.TestCase):
         r = kernel_check.p0(ev, c, p, linear.design(ev, c, p), POINTS, 1)
         from scipy.stats import norm
         self.assertAlmostEqual(r["z"], norm.ppf(1 - 0.01 / (2 * 3)))
+
+
+class ReviewFixes(unittest.TestCase):
+    """Regression tests of the independent review of phase 1 (review/phase-1-review.md, F1, F4, F11)."""
+
+    def test_f1_theta_ref_away_from_the_generation_point(self):
+        """A resimulated parameter upstream of the P0 node whose prior centre differs from the generation point: the
+        rerun reference is taken from the stored inputs at theta', so correct kernels pass."""
+        c, p = H.chain_case(
+            [{"id": "a", "kernel": "normal", "args": {"out": "a", "loc": "shift", "scale": "one"}},
+             {"id": "b", "kernel": "normal", "args": {"out": "b", "scale": "sb", "parent": "a"}, "parents": ["a"]}],
+            [{"name": "b_mean", "node": "b", "var": "b"},
+             {"name": "b_width", "node": "b", "var": "b", "functional": "std", "link": "log", "class": "core-width"},
+             {"name": "a_width", "node": "a", "var": "a", "functional": "std", "link": "log", "class": "core-width"}],
+            {"shift": 0.0, "one": 1.0, "sb": 1.0},
+            {"shift": {"nodes": ["a"], "bounds": [0.5, 1.5]}, "sb": {"nodes": ["b"], "bounds": [0.95, 1.05]}},
+            {"run": 2000}, methods={"shift": "resimulation", "sb": "analytic-reweighting"})
+        ev = E.make(p)
+        d = linear.design(ev, c, p)
+        self.assertEqual(d["theta_ref"]["shift"], 1.0)
+        r = kernel_check.p0(ev, c, p, d, [{"sb": 0.96}, {"sb": 1.04}, {"sb": 1.01}], seed=3)
+        self.assertEqual(r["status"], "passed", r["points"])
+
+    def test_f4_rerun_streams_per_point_are_distinct(self):
+        from core.calibration.toy import _streams
+        a = _streams((20261111, 2), 0, 3, 1, 50)
+        b = _streams((20261113, 0), 0, 3, 1, 50)
+        self.assertFalse(np.allclose(a, b))
+        np.testing.assert_array_equal(a, _streams((20261111, 2), 0, 3, 1, 50))
+
+    def test_f11_default_points_with_deterministic_rerun_only(self):
+        c, p = H.chain_case(
+            [{"id": "x", "kernel": "normal", "args": {"out": "x", "loc": "mu", "scale": "sigma"}},
+             {"id": "y", "kernel": "scale", "args": {"out": "y", "parent": "x", "gain": "g"}, "parents": ["x"],
+              "kind": "deterministic"}],
+            [{"name": "y_mean", "node": "y", "var": "y", "link": "log"},
+             {"name": "y_width", "node": "y", "var": "y", "functional": "std", "link": "log", "class": "core-width"}],
+            {"mu": 5.0, "sigma": 1.0, "g": 1.0}, {"g": {"nodes": ["y"], "bounds": [0.9, 1.1]}}, {"run": 500},
+            methods={"g": "rerun"})
+        ev = E.make(p)
+        pts = kernel_check.default_points(ev, c, p)
+        self.assertEqual(len(pts), 3)
+        self.assertEqual(kernel_check.p0(ev, c, p, linear.design(ev, c, p), pts, 1)["status"], "passed")
 
 
 if __name__ == "__main__":

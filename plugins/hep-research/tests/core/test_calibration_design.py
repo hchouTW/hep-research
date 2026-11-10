@@ -48,8 +48,10 @@ class P2(unittest.TestCase):
         self.assertIn("p2.insufficient_ndf", codes(r))
 
     def test_d77_counting(self):
-        obs = [{"name": "count_shape", "role": "calibration", "sample": "s", "vector": {"K": 5, "bins": ["b"],
-                                                                                         "data_side": "count"}},
+        obs = [{"name": "count_shape", "role": "calibration", "sample": "s", "shape_class": "free-omega",
+                "vector": {"K": 5, "bins": ["b"], "data_side": "count"}},
+               {"name": "absolute_shape", "role": "calibration", "sample": "s", "shape_class": "absolute",
+                "vector": {"K": 2, "bins": ["b"], "data_side": "count"}},
                {"name": "gauss_shape", "role": "calibration", "vector": {"K": 4, "bins": ["b"],
                                                                          "data_side": "gaussian-summary"}},
                {"name": "scalar", "role": "calibration"}, {"name": "dropped", "role": "calibration"},
@@ -60,7 +62,8 @@ class P2(unittest.TestCase):
              "parameters": [{"name": "t", "role": "theta"}, {"name": "f", "role": "phi", "mode": "profile"},
                             {"name": "g", "role": "phi", "mode": "profile", "constraint": {"sigma": 1.0}}]}
         r = design.p2(c)
-        self.assertEqual((r["n_c"], r["dim_N_dc"], r["d_free"], r["ndf"]), (5 + 3 + 1, 1, 3, 5))
+        # omega per free-omega shape (section 2.1), none for an absolute shape (review F2)
+        self.assertEqual((r["n_c"], r["dim_N_dc"], r["d_free"], r["ndf"]), (5 + 2 + 3 + 1, 1, 3, 7))
 
 
 class Applicability(unittest.TestCase):
@@ -183,6 +186,47 @@ class P5(unittest.TestCase):
         r = self.run_p5(c, p)
         self.assertIn("provisional-thresholds", r["flags"])
         self.assertTrue(any("b_J" in x for x in r["deferred"]) and any("sigma_boot" in x for x in r["deferred"]))
+
+
+
+class ReviewFixes(unittest.TestCase):
+    """Regression tests of the independent review of phase 1 (F5, F6, F7, F12)."""
+
+    def toy(self, runs=None, **methods):
+        fx = H.toy_design()
+        c, p = copy.deepcopy(fx["contract"]), copy.deepcopy(fx["plan"])
+        p["evaluator"] = {"kind": "toy-detector", "events": 2000, **({"runs": runs} if runs else {})}
+        if runs:
+            c["observables"] = [o for o in c["observables"] if o["sample"] in runs]
+        p["methods"].update(methods)
+        return c, p
+
+    def test_f6_missing_support_fails_p5(self):
+        c, p = self.toy(noise_width="analytic-reweighting")
+        r = design.p5(E.make(p), c, p, items=("ess",), n_scan=4, scan_parameters=["noise_width"])
+        self.assertIn("p5.missing_support", codes(r))
+
+    def test_f7_filtering_needs_the_plan_s_decision(self):
+        runs = ["beam1", "beam2", "beam3", "beam4"]
+        c, p = self.toy(runs, noise_width="analytic-reweighting")
+        self.assertIn("support.filtered", codes(design.support_check(E.make(p), c, p, ["noise_width"])))
+        p["kernels"]["electronics"]["filter_ignorable"] = True
+        self.assertEqual(design.support_check(E.make(p), c, p, ["noise_width"])["status"], "passed")
+
+    def test_f12_scan_covers_every_theta_by_default(self):
+        c, p = H.chain_case(
+            [{"id": "x", "kernel": "normal", "args": {"out": "x", "loc": "mu", "scale": "sigma"}}],
+            [{"name": "x_mean", "node": "x", "var": "x"}],
+            {"mu": 0.0, "sigma": 1.0}, {"mu": {"nodes": ["x"], "bounds": [-0.01, 0.01]},
+                                        "sigma": {"nodes": ["x"], "bounds": [0.99, 1.01]}}, {"run": 100},
+            methods={"mu": "analytic-reweighting", "sigma": "resimulation"})
+        r = design.p5(E.make(p), c, p, items=("ess",), n_scan=4)
+        self.assertEqual(sorted(r["scan"]["parameters"]), ["mu", "sigma"])
+
+    def test_f5_p5_with_the_final_method(self):
+        c, p = H.poisson_chain()
+        r = design.p5_with_final_methods(E.make(p), c, p, items=("ess", "v_mc_diagonal"))
+        self.assertEqual((r["status"], r["final_methods"]), ("passed", {"rate": "resimulation"}))
 
 
 if __name__ == "__main__":

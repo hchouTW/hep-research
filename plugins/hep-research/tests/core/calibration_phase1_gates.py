@@ -76,13 +76,14 @@ def toy_case(events=None, seed=None, runs=None, methods=None, proposal=None, dro
     return contract, plan, fx["release"]["content"]["systematic"]
 
 
-def chi2_affected(rw: dict, rr: dict, ev, node: str) -> tuple[float, int]:
-    """Gate 2 criterion (ii): chi2 of the difference over the observables of the runs in which the node acts, with the
-    covariance V_MC,reweighted + V_MC,rerun (as registered)."""
-    runs = {rid for rid, run in ev.model.runs.items() if node in run.kernels}
+def chi2_affected(rw: dict, rr: dict, ev, node: str, pars: list[str]) -> tuple[float, int]:
+    """Gate 2 criterion (ii): chi2 of the difference over the observables of the runs in which the node acts (its
+    kernel there reads the case's parameters; an injected reference does not), with the paired MC covariance of the
+    difference (tightened from V_MC,reweighted + V_MC,rerun after the review, F3, before the rerun of the gate)."""
+    runs = {rid for rid, run in ev.model.runs.items() if node in run.kernels and set(run.kernels[node].params) & set(pars)}
     keep = np.array([r in runs for r in rw["runs"]])
     d = (rw["pred"] - rr["pred"])[keep]
-    V = (rw["V_MC"] + rr["V_MC"])[np.ix_(keep, keep)]
+    V = kernel_check.paired_covariance(rw, rr, rr.get("independent_runs", ()))[np.ix_(keep, keep)]
     chi2 = float(d @ np.linalg.solve(V, d))
     return float(stats.chi2.sf(chi2, len(d))), int(len(d))
 
@@ -93,8 +94,9 @@ def agreement() -> dict:
     cases = []
     for node, pars in NODE_CASES:
         if node == "electronics":
-            cases.append((node, pars, toy_case(runs=NO_SUPPRESSION_RUNS, drop=("threshold",),
-                                               methods={"noise_width": "analytic-reweighting"})))
+            c = toy_case(runs=NO_SUPPRESSION_RUNS, drop=("threshold",), methods={"noise_width": "analytic-reweighting"})
+            c[1]["kernels"]["electronics"]["filter_ignorable"] = True   # the plan's recorded decision (section 6.1)
+            cases.append((node, pars, c))
         else:
             cases.append((node, pars, toy_case()))
     mix = {"nodes": ["pde"], "components": [{"theta": {"pde": v}} for v in (0.245, 0.25, 0.255)]}
@@ -107,9 +109,7 @@ def agreement() -> dict:
         sup = design.support_check(ev, contract, plan, pars)
         d = linear.design(ev, contract, plan, systematics=syst)
         # the worst-ESS point of 64 Sobol points over this case's parameters, and the next two Sobol points
-        held = dict(ev.methods)
-        ev.methods = {p: (m if p in pars else ("rerun" if m in design.REWEIGHTING else m)) for p, m in held.items()}
-        scan = design.p5(ev, contract, plan, items=("ess",), n_scan=N_SCAN, seed=SEED_SCAN)
+        scan = design.p5(ev, contract, plan, items=("ess",), n_scan=N_SCAN, seed=SEED_SCAN, scan_parameters=pars)
         pts = kernel_check.worst_ess_and_next(scan)
         p0 = kernel_check.p0(ev, contract, plan, d, pts, SEED_RERUN)
         rows = []
@@ -117,11 +117,10 @@ def agreement() -> dict:
             theta = {**d["theta_ref"], **pt}
             rw = ev.evaluate(theta, names=d["names"])
             rr = ev.rerun(sorted({n for p in pars for n in ev.model.param_nodes[p]}, key=ev.model.order.index),
-                          theta, SEED_RERUN + k, names=d["names"], params=pars)
-            pval, ndf = chi2_affected(rw, rr, ev, node)
+                          theta, (SEED_RERUN, k), names=d["names"], params=pars)
+            pval, ndf = chi2_affected(rw, rr, ev, node, pars)
             rows.append({"point": pt, "chi2_p": pval, "ndf": ndf, "chi2_pass": pval >= ALPHA / m2,
                          "methods": rw["methods"]})
-        ev.methods = held
         case_ok = (sup["status"] == "passed" and p0["status"] == "passed" and all(r["chi2_pass"] for r in rows))
         ok &= case_ok
         out_cases.append({"case": label, "parameters": pars, "support": sup["status"], "p0": p0["status"],
@@ -164,12 +163,9 @@ def p0_z(reps: range) -> dict:
         contract, plan, syst = toy_case(seed=SEED_NOMINAL + 2 * r)
         ev = E.make(plan)
         d = linear.design(ev, contract, plan, systematics=syst)
-        held = dict(ev.methods)
-        ev.methods = {p: (m if p in pars else ("rerun" if m in design.REWEIGHTING else m)) for p, m in held.items()}
-        scan = design.p5(ev, contract, plan, items=("ess",), n_scan=N_SCAN, seed=SEED_SCAN)
+        scan = design.p5(ev, contract, plan, items=("ess",), n_scan=N_SCAN, seed=SEED_SCAN, scan_parameters=pars)
         pts = kernel_check.worst_ess_and_next(scan)
         res = kernel_check.p0(ev, contract, plan, d, pts, SEED_NOMINAL + 2 * r + 1)
-        ev.methods = held
         rows.append({"rep": r, "status": res["status"], "max_ratio": max(x["max_ratio"] for x in res["points"]),
                      "seconds": round(time.time() - t, 1)})
     return {"calibration": "P0 z (phase 1)", "reps": [reps.start, reps.stop], "rows": rows,

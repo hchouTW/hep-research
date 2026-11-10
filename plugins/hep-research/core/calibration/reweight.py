@@ -36,6 +36,22 @@ def log_weights(log_target: np.ndarray, log_components: list[np.ndarray] | None,
     return lw
 
 
+def formula_log_weights(logpdf, density_nodes, s_theta, sq, fractions, components, target: dict, generation: dict,
+                        regenerated=frozenset()) -> np.ndarray:
+    """The section 3.6 formula over one sample, with its set bookkeeping: S_theta (the density nodes whose
+    parameters change) and S_q (the proposal's nodes), each without the nodes regenerated at theta' (drawn from the
+    target, they leave the formula) and without nodes that are not density kernels in this sample (an injected
+    reference). logpdf(node, params) -> log density per event is the evaluator's query; components are the mixture's
+    parameter overrides, fractions their realized c_j = n_j / N."""
+    s_theta = [s for s in s_theta if s in density_nodes and s not in regenerated]
+    sq = [s for s in sq if s in density_nodes and s not in regenerated]
+    num = sum((logpdf(s, target) for s in sorted(set(s_theta) | set(sq))), np.zeros(1))
+    comp_terms = [sum((logpdf(s, {**generation, **c}) for s in sq), np.zeros(1)) for c in components] if sq else []
+    outside = sum((logpdf(s, generation) for s in s_theta if s not in sq), np.zeros(1))
+    with np.errstate(invalid="ignore"):
+        return log_weights(num, comp_terms, fractions, outside)
+
+
 def step_log_density(step_logpdfs: np.ndarray) -> np.ndarray:
     """Step-level reweighting: the kernel density of an event is the product over its stored steps (rows: steps)."""
     return np.asarray(step_logpdfs, dtype=float).sum(axis=0)

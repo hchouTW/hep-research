@@ -9,12 +9,15 @@ and the applicability of the mandatory gates).
   calib_design.py linearize     --contract FILE [--plan FILE] [--release FILE]
   calib_design.py support       --contract FILE [--plan FILE] [--parameter P ...]
   calib_design.py p5            --contract FILE [--plan FILE] [--release FILE] [--items ess,v_mc_diagonal,...]
+                                [--declared-methods]
   calib_design.py methods       --contract FILE [--plan FILE]
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
 Output: one JSON object; status passed/ok (exit 0), failed (exit 1: P2, P5 or support failed, remedy level in the
 findings), rejected (exit 2: input error, e.g. a P5 request on a tail-type functional, approval A7), incomplete (exit
-3: phase-2 or phase-3 content, or no evaluator of the plan's kind). Results that use f = 0.1 or sigma_tot^design
+3: phase-2 or phase-3 content, or no evaluator of the plan's kind). p5 first decides the final method (section 3.6
+step 2: an infeasible reweighting moves to the next tier) and judges the P5 items with it; --declared-methods judges
+the plan's declared methods as they are. Results that use f = 0.1 or sigma_tot^design
 carry provisional-thresholds. The engine (core/calibration) needs NumPy and SciPy. Phase 1
 (section 17).
 """
@@ -34,9 +37,14 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
         _guard()
 
 import argparse
+import json
 import sys
 
-from core.calibration import design, evaluator, io, linear
+try:
+    MISSING = None
+    from core.calibration import design, evaluator, io, linear
+except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
+    MISSING = str(_exc)
 
 
 def linearization_summary(d):
@@ -48,6 +56,9 @@ def linearization_summary(d):
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    if MISSING and "-h" not in (argv or sys.argv[1:]) and "--help" not in (argv or sys.argv[1:]):
+        print(json.dumps({"status": "rejected", "error": f"needs NumPy and SciPy ({MISSING})"}))
+        return 2
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("points", "p2", "applicability", "linearize", "support", "p5", "methods"):
         p = sub.add_parser(name)
@@ -67,6 +78,7 @@ def main(argv=None) -> int:
             p.add_argument("--parameter", action="append", default=[])
         if name == "p5":
             p.add_argument("--items", default="ess,v_mc_diagonal,matrix_condition")
+            p.add_argument("--declared-methods", action="store_true")
     args = ap.parse_args(argv)
 
     def go():
@@ -97,7 +109,9 @@ def main(argv=None) -> int:
                 unknown = set(items) - {"ess", "v_mc_diagonal", "matrix_condition"}
                 if unknown:
                     raise io.InputError(f"unknown P5 items {sorted(unknown)}")
-                r = design.p5(ev, contract, plan, io.systematics(getattr(args, 'release', None), extras), items=items)
+                syst = io.systematics(getattr(args, 'release', None), extras)
+                r = (design.p5(ev, contract, plan, syst, items=items) if args.declared_methods else
+                     design.p5_with_final_methods(ev, contract, plan, syst, items=items))
                 r.pop("per_point", None)
                 return r
             if args.cmd == "methods":
@@ -105,6 +119,8 @@ def main(argv=None) -> int:
         except evaluator.EvaluatorUnavailable as exc:
             return {"status": "incomplete", "reason": str(exc)}
         except linear.DesignError as exc:
+            if exc.code == "linear.missing_support":
+                return {"status": "failed", "findings": [{"code": exc.code, "message": str(exc)}]}
             if exc.code in ("linear.incomplete", "linear.singular"):
                 return {"status": "incomplete", "code": exc.code, "reason": str(exc)}
             return {"status": "rejected", "code": exc.code, "error": str(exc)}

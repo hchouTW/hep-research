@@ -105,7 +105,8 @@ def contract_and_plan(contract_path: str, plan_path: str | None = None) -> tuple
 
 
 def jsonable(x):
-    """NumPy arrays and scalars to plain JSON values; keys starting with '_' (internal detail) dropped."""
+    """NumPy arrays and scalars to plain JSON values (NaN to null, +-inf to the strings "inf", "-inf"); keys starting
+    with '_' (internal detail) dropped."""
     import numpy as np
     if isinstance(x, dict):
         return {k: jsonable(v) for k, v in x.items() if not str(k).startswith("_")}
@@ -114,7 +115,9 @@ def jsonable(x):
     if isinstance(x, np.ndarray):
         return x.tolist()
     if isinstance(x, np.generic):
-        return x.item()
+        x = x.item()
+    if isinstance(x, float) and not np.isfinite(x):        # NaN / Infinity are not JSON (review F15)
+        return None if np.isnan(x) else ("inf" if x > 0 else "-inf")
     return x
 
 

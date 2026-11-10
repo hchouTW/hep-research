@@ -69,7 +69,7 @@ def p0(evaluator, contract: dict, plan: dict, design: dict, points: list[dict], 
         start = sorted({n for p in varied for n in evaluator.model.param_nodes.get(p, [])},
                        key=evaluator.model.order.index)
         r_m = evaluator.evaluate(theta, names=names)
-        r_r = evaluator.rerun(start, theta, seed + k, names=names, params=varied)
+        r_r = evaluator.rerun(start, theta, (seed, k), names=names, params=varied)   # streams per (seed, point)
         g = linear.to_link_delta(design["mu"], links)
         dm = g * (r_m["pred"] - r_r["pred"])
         Vd = paired_covariance(r_m, r_r, r_r.get("independent_runs", ())) * np.outer(g, g)
@@ -97,3 +97,12 @@ def worst_ess_and_next(p5_result: dict, n_more: int = 2) -> list[dict]:
     worst = p5_result["items"]["ess"]["worst_point"]
     others = [r["point"] for r in p5_result["per_point"] if r["point"] != worst]
     return [worst] + others[:n_more]
+
+
+def default_points(evaluator, contract: dict, plan: dict) -> list[dict]:
+    """The default theta' of P0 (section 8.2 note 1): the worst-ESS point of a P5 scan over the parameters the plan
+    evaluates by a P0 method, and the next two points of that scan (with only deterministic reruns, every point has
+    unit weights and the first three scan points are taken)."""
+    from core.calibration import design as d
+    pars = [p for p in evaluator.parameters if evaluator.default_method(p) in d.P0_METHODS]
+    return worst_ess_and_next(d.p5(evaluator, contract, plan, items=("ess",), scan_parameters=pars))

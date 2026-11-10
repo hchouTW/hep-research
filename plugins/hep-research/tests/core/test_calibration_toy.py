@@ -106,6 +106,32 @@ class ToyDetector(unittest.TestCase):
             E.make({"evaluator": {"kind": "g4sim"}})
 
 
+class ReviewFixes(unittest.TestCase):
+    """Regression tests of the independent review of phase 1 (F8, F15)."""
+
+    def test_f8_effects_off_and_seeds(self):
+        ev = small()
+        with self.assertRaises(ValueError):
+            ev.evaluate({}, effects_off=["ENF"])
+        other = ev.evaluate({}, seeds={"nominal": 77})
+        self.assertFalse(np.allclose(other["pred"], ev.evaluate({})["pred"]))
+        np.testing.assert_array_equal(other["pred"], small({"seeds": {"nominal": 77}}).evaluate({})["pred"])
+
+    def test_f15_plans_the_evaluator_cannot_honour(self):
+        with self.assertRaises(ValueError):
+            small({"seeds": {"nominal": 1}, "methods": {"pde": "rerun"}})
+        with self.assertRaises(ValueError):
+            small({"seeds": {"nominal": 1}, "proposal": {"nodes": ["deposition"],
+                                                         "components": [{"theta": {}}]}})
+
+    def test_f15_realized_fractions(self):
+        ev = small({"seeds": {"nominal": 1}, "proposal": {"nodes": ["pde"], "components": [
+            {"theta": {"pde": 0.245}, "fraction": 1}, {"theta": {"pde": 0.255}, "fraction": 2}]}})
+        fr = ev.nominal["runs"]["beam1"]["fractions"]
+        self.assertEqual(sum(fr), 1.0)
+        self.assertEqual(sorted(round(x * N) for x in fr), sorted([N // 3 + (N % 3 > 0), 2 * N // 3]))
+
+
 class DesignFixture(unittest.TestCase):
     def test_design_fixture_is_consistent(self):
         fx = H.toy_design()

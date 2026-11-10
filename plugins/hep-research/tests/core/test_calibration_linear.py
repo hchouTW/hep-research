@@ -49,6 +49,18 @@ class Operator(unittest.TestCase):
         np.testing.assert_allclose(W, np.diag([0.0, 0.5, 0.25]), atol=1e-12)
         np.testing.assert_allclose(linear.projected_inverse(V, []), np.linalg.inv(V))
 
+    def test_projected_inverse_standardized_by_the_data_errors(self):
+        """Review F14: S from V_data^unc (section 9.2), not from V_data + V_MC."""
+        V_std = np.diag([1.0, 4.0, 9.0])
+        V = V_std + np.array([[0.5, 0.2, 0.0], [0.2, 0.5, 0.0], [0.0, 0.0, 0.5]])
+        n = np.array([1.0, 1.0, 0.0])
+        s = np.sqrt(np.diag(V_std))
+        q, _ = np.linalg.qr((s * n)[:, None], mode="complete")
+        U = q[:, 1:]
+        Si = np.diag(1 / s)
+        expect = Si @ U @ np.linalg.inv(U.T @ Si @ V @ Si @ U) @ U.T @ Si
+        np.testing.assert_allclose(linear.projected_inverse(V, [n], V_std), expect)
+
     def test_matrix_condition(self):
         S = np.array([[2.0, 0.3], [0.3, 1.0]])
         self.assertAlmostEqual(linear.matrix_condition(0.07 * S, S), 0.07)

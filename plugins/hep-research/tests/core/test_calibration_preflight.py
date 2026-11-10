@@ -100,8 +100,8 @@ class D37(unittest.TestCase):
     def test_psi_without_uncertainty_or_design(self):
         r = cc.check(self.contract_with_psi(sigma=None), design=self.design(0.05))
         self.assertIn("parameters.psi_sigma", {f["code"] for f in r["findings"]})
-        r = cc.check(self.contract_with_psi())
-        self.assertTrue(any(d.startswith("D37") for d in r["deferred"]))
+        r = cc.check(self.contract_with_psi())                 # never accepted unchecked (review F9)
+        self.assertIn("parameters.psi_needs_design", {f["code"] for f in r["findings"]})
 
 
 if __name__ == "__main__":

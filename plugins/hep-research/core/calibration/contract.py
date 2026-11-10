@@ -413,9 +413,13 @@ def psi_findings(contract: dict, design: dict) -> list[dict]:
     (design['psi_effect'][psi] = A_theta (d mu / d psi) sigma_psi), exceeds 0.1 sigma_tot^design for some theta_i
     must be listed as phi. A psi with no declared uncertainty (constraint sigma) cannot be judged."""
     out = []
-    sig = design.get("sigma_tot") or []
-    names = design.get("theta") or []
+    if not isinstance(design, dict):
+        raise ValueError("the design is a JSON object (calib_design.py linearize output)")
+    sig = [float(x) for x in design.get("sigma_tot") or []]
+    names = list(design.get("theta") or [])
     effects = design.get("psi_effect") or {}
+    if not isinstance(effects, dict):
+        raise ValueError("design.psi_effect is an object {psi: [effect per theta]}")
     for i, p in enumerate(contract.get("parameters", [])):
         if p.get("role") != "psi":
             continue
@@ -429,6 +433,8 @@ def psi_findings(contract: dict, design: dict) -> list[dict]:
             out.append({"code": "parameters.psi_not_evaluated", "path": path, "message": f"the design gives no "
                         f"effect of psi {p['name']!r} (calib_design.py linearize)"})
             continue
+        if not isinstance(eff, list):
+            raise ValueError(f"design.psi_effect[{p['name']!r}] is a list, one effect per theta")
         ratios = [abs(float(e)) / float(s) for e, s in zip(eff, sig)]
         worst = max(range(len(ratios)), key=ratios.__getitem__) if ratios else None
         if worst is not None and ratios[worst] > PSI_BOUND:
@@ -497,8 +503,10 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
     deferred = list(DEFERRED)
     if design is not None:
         out.extend(psi_findings(contract, design))
-    elif any(p.get("role") == "psi" for p in contract.get("parameters", [])):
-        deferred.append("D37: the psi bound needs the design-stage A (check --design, from calib_design.py "
-                        "linearize)")
+    else:
+        for i, p in enumerate(contract.get("parameters", [])):
+            if p.get("role") == "psi":                 # D37 cannot be decided without A: never accepted unchecked
+                out.add("parameters.psi_needs_design", f"$.parameters[{i}]", f"psi {p['name']!r}: the D37 bound needs "
+                        "the design-stage A (check --design, from calib_design.py linearize; approval A7)")
     return {"status": "rejected" if out else "accepted", "findings": list(out), "deferred": deferred,
             "result_flags": flags}

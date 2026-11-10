@@ -48,10 +48,11 @@ def calibration_observables(contract: dict) -> list[dict]:
     return out
 
 
-def projected_inverse(V: np.ndarray, constraints: list[np.ndarray]) -> np.ndarray:
-    """S^-1 U_perp (U_perp^T V~ U_perp)^-1 U_perp^T S^-1 with S = diag(sqrt V_kk), V~ = S^-1 V S^-1 and U_perp an
-    orthonormal basis of the complement of the standardized constraint directions S n (sections 2.1, 9.2)."""
-    s = np.sqrt(np.diag(V))
+def projected_inverse(V: np.ndarray, constraints: list[np.ndarray], V_std: np.ndarray | None = None) -> np.ndarray:
+    """S^-1 U_perp (U_perp^T V~ U_perp)^-1 U_perp^T S^-1 with S = diag(sqrt V_std,kk) (V_std = V_data^unc, the
+    standardization of section 9.2; V when not given), V~ = S^-1 V S^-1 and U_perp an orthonormal basis of the
+    complement of the standardized constraint directions S n (sections 2.1, 9.2)."""
+    s = np.sqrt(np.diag(V if V_std is None else V_std))
     Si = np.diag(1.0 / s)
     Vt = Si @ V @ Si
     if not constraints:
@@ -78,7 +79,7 @@ def operator(J: np.ndarray, V_data: np.ndarray, V_MC: np.ndarray, nuisance: np.n
     X = np.concatenate(cols, axis=1)
     P = np.diag(np.concatenate(prior))
     V = V_data + V_MC
-    W = projected_inverse(V, constraints or [])
+    W = projected_inverse(V, constraints or [], V_data)
     F = X.T @ W @ X + P
     if not np.all(np.isfinite(F)) or np.linalg.cond(F) > 1e14:
         raise DesignError("linear.singular", "the design-stage information matrix is singular: some direction of beta "
@@ -189,6 +190,7 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
     frac = float((plan.get("design") or {}).get("fd_fraction", 0.05))
     r0 = evaluator.evaluate(theta_ref, names=names)
     _check_names(r0["names"], names)
+    _no_missing_support(r0, theta_ref)
     mu = r0["pred"]
 
     def column(p, step):
@@ -196,7 +198,10 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
         hi = dict(theta_ref)
         base = theta_ref.get(p, evaluator.model.nominal.get(p))
         lo[p], hi[p] = base - step, base + step
-        return (evaluator.evaluate(hi, names=names)["pred"] - evaluator.evaluate(lo, names=names)["pred"]) / (2 * step)
+        r_hi, r_lo = evaluator.evaluate(hi, names=names), evaluator.evaluate(lo, names=names)
+        _no_missing_support(r_hi, hi)
+        _no_missing_support(r_lo, lo)
+        return (r_hi["pred"] - r_lo["pred"]) / (2 * step)
 
     def step_of(p):
         sb = pars[p].get("sampling_bounds")
@@ -233,7 +238,9 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
     nuis = np.concatenate([U, S, Phi], axis=1)
     constraints = []
     for nd in (contract.get("validation") or {}).get("N_dc", []):
-        vec = np.array([float(nd["n"].get(nm, 0.0)) for nm in names])
+        # declared in the observables; in link space a log-link coordinate moves the observable by mu_k (review F14)
+        vec = np.array([float(nd["n"].get(nm, 0.0)) * (mu[k] if links[k] == "log" else 1.0)
+                        for k, nm in enumerate(names)])
         if vec.any():
             constraints.append(vec)
     op = operator(J_l, Vd_l, Vm_l, nuis, Free, constraints)
@@ -251,6 +258,13 @@ def _exposure(exposure: dict, obs: dict, run: str) -> float:
             return float(exposure[key])
     raise DesignError("linear.incomplete", f"observable {obs['name']}: no exposure declared for sample "
                       f"{obs.get('sample') or run} (contract `exposure`)")
+
+
+def _no_missing_support(r: dict, theta: dict):
+    if r.get("missing_support_runs"):
+        raise DesignError("linear.missing_support", f"events not recorded at a reweighted node in runs "
+                          f"{sorted(r['missing_support_runs'])} at {theta}: missing support (section 6.1), the "
+                          "design-stage prediction is not defined with this plan's methods")
 
 
 def _check_names(have, want):

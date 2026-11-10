@@ -263,6 +263,19 @@ class Function(Kernel):
         return self.fn(par, p)
 
 
+class Scale(Kernel):
+    """A deterministic kernel y = p[gain] x parent (a rerun-tier parameter in the declared chains)."""
+    kind = "deterministic"
+    n_u = 0
+
+    def __init__(self, out="y", parent="x", gain="gain"):
+        self.out, self.parent, self.gain = out, parent, gain
+        self.outputs, self.params = (out,), (gain,)
+
+    def sample(self, par, p, u, run):
+        return {self.out: p[self.gain] * par[self.parent]}
+
+
 # ------------------------------------------------------------------ model
 @dataclass
 class Run:
@@ -303,8 +316,10 @@ def descendants(run: Run, node: str) -> set:
     return out
 
 
-def _streams(seed: int, run_index: int, node_index: int, n_u: int, n: int) -> np.ndarray:
-    rng = np.random.default_rng(np.random.SeedSequence([int(seed), run_index, node_index]))
+def _streams(seed, run_index: int, node_index: int, n_u: int, n: int) -> np.ndarray:
+    """The uniform streams of one node in one run; seed an int or a tuple of ints (e.g. (seed, point index))."""
+    key = [int(x) for x in seed] if isinstance(seed, (tuple, list)) else [int(seed)]
+    rng = np.random.default_rng(np.random.SeedSequence([*key, run_index, node_index]))
     return rng.random((n_u, n)) if n_u else np.zeros((0, n))
 
 
@@ -404,6 +419,8 @@ class ChainEvaluator:
         self.parameters = list(model.param_nodes)
         self.observables = [o.name for o in model.observables]
         self._nominal = None
+        self._other = {}
+        self._validate()
 
     # ---- generation
     def default_method(self, par: str) -> str:
@@ -430,8 +447,24 @@ class ChainEvaluator:
         total = sum(float(c.get("fraction", 1.0)) for c in comps)
         return nodes, [dict(c, fraction=float(c.get("fraction", 1.0)) / total) for c in comps]
 
-    def generate(self, seed: int, params: dict | None = None) -> dict:
-        """Events of every run at the generation point; nodes of S_q drawn per mixture component (c_j = n_j / N)."""
+    def _validate(self):
+        """Refuse a plan the evaluator cannot honour: a proposal on a node that is not a density kernel, or `rerun`
+        (deterministic) for a parameter acting on a density kernel (review F15)."""
+        for node in self.proposal.get("nodes") or []:
+            kinds = {r.kernels[node].kind for r in self.model.runs.values()     # injected references read no
+                     if node in r.kernels and r.kernels[node].params}           # parameter and are not proposals
+            if kinds and kinds != {"density"}:
+                raise ValueError(f"proposal on node {node!r}, which is not a density kernel ({sorted(kinds)})")
+        for par, m in self.methods.items():
+            if m == "rerun" and any(par in r.kernels[n].params and r.kernels[n].kind != "deterministic"
+                                    for n in self.model.param_nodes.get(par, ()) for r in self.model.runs.values()
+                                    if n in r.kernels):
+                raise ValueError(f"method rerun for {par!r}, which acts on a stochastic kernel: rerun is for "
+                                 "deterministic kernels (section 3.6)")
+
+    def generate(self, seed, params: dict | None = None) -> dict:
+        """Events of every run at the generation point; nodes of S_q drawn per mixture component, c_j = n_j / N the
+        realized fractions of each run."""
         params = {**self.model.nominal, **(params or {})}
         sq, comps = self._components()
         sample = {}
@@ -446,7 +479,7 @@ class ChainEvaluator:
                     continue
                 u[node] = _streams(seed, ri, ni, kern.n_u, n)
                 events[node] = self._sample_node(run, node, kern, events, params, u[node], comp_index, comps, sq)
-            sample[rid] = {"events": events, "u": u, "comp": comp_index}
+            sample[rid] = {"events": events, "u": u, "comp": comp_index, "fractions": (sizes / n).tolist()}
         return {"runs": sample, "params": params, "seed": seed, "sq": sq, "comps": comps}
 
     def _sample_node(self, run, node, kern, events, params, u, comp_index, comps, sq):
@@ -471,228 +504,189 @@ class ChainEvaluator:
             self._nominal = self.generate(self.seeds["nominal"])
         return self._nominal
 
-    # ---- the weight formula of section 3.6
+    def _sample_for(self, seeds: dict | None):
+        """The nominal sample, or the one generated with seeds['nominal'] when another is asked for (section 7.1
+        `seeds`: G7, G8 and validation use new seeds)."""
+        s = (seeds or {}).get("nominal")
+        if s is None or s == self.seeds["nominal"]:
+            return self.nominal
+        if s not in self._other:
+            self._other[s] = self.generate(s)
+        return self._other[s]
+
+    # ---- the weight formula of section 3.6 (reweight.formula_log_weights)
     def weights(self, theta_target: dict, sample: dict | None = None, nodes=None, regenerated=()) -> dict:
-        """w_i per run: numerator prod_{s in S_theta u S_q} K_s(x; theta'), denominator
-        [sum_j c_j prod_{s in S_q} q_js] prod_{s in S_theta \\ S_q} K_s(x; theta_gen); nodes regenerated at theta' are
-        drawn from the target and leave the formula (`regenerated`: a set, or {run: set} since a node may be
-        regenerated in one run and not in another). `nodes` = S_theta (density nodes whose parameters change)."""
+        """w_i per run by the section 3.6 formula; `nodes` = S_theta (density nodes whose parameters change), nodes
+        regenerated at theta' leave it (`regenerated`: a set, or {run: set}). A NaN log weight (an output not recorded
+        at a reweighted node) is missing support: weight 0, the run listed under `_missing_support`."""
         sample = sample or self.nominal
         target = {**self.model.nominal, **theta_target}
         gen = sample["params"]
         comps = sample["comps"]
-        base_nodes = nodes if nodes is not None else self.reweighted_nodes(target)
+        base = nodes if nodes is not None else self.reweighted_nodes(target)
         out = {}
         for rid, run in self.model.runs.items():
             reg = regenerated.get(rid, set()) if isinstance(regenerated, dict) else set(regenerated)
-            sq = [s for s in sample["sq"] if s not in reg]
-            s_theta = [s for s in base_nodes if s not in reg]
             ev = sample["runs"][rid]["events"]
-            n = run.n
-            num = np.zeros(n)
-            for s in sorted(set(s_theta) | set(sq)):
-                kern = run.kernels.get(s)
-                if kern is None or kern.kind != "density":
-                    continue
-                num += kern.logpdf(ev[s], _parent_values(run, ev, s), target, run)
-            sq_run = [s for s in sq if run.kernels.get(s) is not None and run.kernels[s].kind == "density"]
-            comp_terms = []
-            for c in comps if sq_run else []:
-                lp = np.zeros(n)
-                for s in sq_run:
-                    lp += run.kernels[s].logpdf(ev[s], _parent_values(run, ev, s), {**gen, **c["theta"]}, run)
-                comp_terms.append(lp)
-            outside = np.zeros(n)
-            for s in s_theta:
-                kern = run.kernels.get(s)
-                if s in sq_run or kern is None or kern.kind != "density":
-                    continue
-                outside += kern.logpdf(ev[s], _parent_values(run, ev, s), gen, run)
-            with np.errstate(invalid="ignore"):
-                lw = reweight.log_weights(num, comp_terms, [c["fraction"] for c in comps], outside)
+            dens = {n for n, k in run.kernels.items() if k.kind == "density"}
+            fr = (sample["runs"][rid].get("fractions") or self.nominal["runs"][rid].get("fractions")
+                  or [c["fraction"] for c in comps])
+
+            def logpdf(node, params, run=run, ev=ev):
+                return run.kernels[node].logpdf(ev[node], _parent_values(run, ev, node), params, run)
+            lw = np.broadcast_to(reweight.formula_log_weights(logpdf, dens, base, sample["sq"], fr,
+                                                              [c["theta"] for c in comps], target, gen, reg),
+                                 (run.n,)).copy()
             miss = np.isnan(lw)
-            if miss.any():                                     # a suppressed or unrecorded output: missing support
+            if miss.any():
                 out.setdefault("_missing_support", []).append(rid)
-                lw = np.where(miss, -np.inf, lw)
+                lw[miss] = -np.inf
             out[rid] = np.exp(lw)
         return out
 
-    def reweighted_nodes(self, target: dict) -> list:
+    def reweighted_nodes(self, target: dict, sample: dict | None = None) -> list:
+        gen = (sample or self.nominal)["params"]
         nodes = set()
         for par, ns in self.model.param_nodes.items():
             if self.default_method(par) in ("analytic-reweighting", "step-level-reweighting") \
-                    and not _same(target.get(par), self.nominal["params"].get(par)):
+                    and not _same(target.get(par), gen.get(par)):
                 nodes |= set(ns)
         return sorted(nodes)
+
+    # ---- the plan's method at a target: resimulation (CRN), then rerun; reweighting in the weights
+    def _prepared(self, target: dict, nom: dict) -> tuple[dict, dict]:
+        """Per run, the events at the target before reweighting (section 6.5, outside to inside): every node downstream
+        of a resimulated parameter's kernel regenerated with the nominal streams (common random numbers), every
+        deterministic kernel rerun. Returns (events per run, regenerated nodes per run)."""
+        changed = [p for p in self.model.param_nodes if not _same(target.get(p), nom["params"].get(p))]
+        resim = [p for p in changed if self.default_method(p) in ("resimulation", "surrogate-model")]
+        run_events, regen_all = {}, {}
+        for rid, run in self.model.runs.items():
+            ev = dict(nom["runs"][rid]["events"])
+            regen = set()
+            for s0 in (n for n in self.model.order if n in run.kernels and set(run.kernels[n].params) & set(resim)):
+                regen |= descendants(run, s0)
+            for node in self.model.order:
+                kern = run.kernels.get(node)
+                if kern is not None and (node in regen or kern.kind == "deterministic"):
+                    ev[node] = kern.sample(_parent_values(run, ev, node), target, nom["runs"][rid]["u"][node], run)
+            run_events[rid], regen_all[rid] = ev, regen
+        return run_events, regen_all
+
+    def _observe(self, target, nom, run_events, regen, names):
+        sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
+                           for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
+        rw = self.reweighted_nodes(target, nom)
+        w = self.weights(target, sample, nodes=rw, regenerated=regen)
+        missing = w.pop("_missing_support", [])
+        out = observe(self.model, run_events, w, names)
+        out["missing_support_runs"] = missing
+        out["node_diag"] = {n: _node_diag(w) for n in rw}
+        return out
 
     # ---- section 7.1 interface
     def evaluate(self, theta: dict, phi: dict | None = None, psi: dict | None = None, model: str = "nominal",
                  effects_off=(), seeds: dict | None = None, names=None) -> dict:
         """Prediction at theta with the plan's methods, outside to inside (section 6.5): resimulation from the most
-        upstream resimulated node (common random numbers with the nominal events), rerun of deterministic kernels,
-        reweighting of the remaining density nodes."""
+        upstream resimulated node (common random numbers with the nominal events of seeds['nominal']), rerun of
+        deterministic kernels, reweighting of the remaining density nodes."""
         if model != "nominal":
             raise ValueError("alternative models of the toy detector are phase 2")
+        if effects_off:
+            raise ValueError("effects_off (the contribution decomposition of section 10.5) is phase 4")
         target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {})}
-        nom = self.nominal
+        nom = self._sample_for(seeds)
+        run_events, regen = self._prepared(target, nom)
+        out = self._observe(target, nom, run_events, regen, names)
         changed = [p for p in self.model.param_nodes if not _same(target.get(p), nom["params"].get(p))]
-        resim = [p for p in changed if self.default_method(p) in ("resimulation", "surrogate-model")]
-        rw_nodes = sorted({n for p in changed if self.default_method(p) in ("analytic-reweighting",
-                                                                             "step-level-reweighting")
-                           for n in self.model.param_nodes[p]})
-        run_events, regenerated_all = {}, {}
-        for ri, (rid, run) in enumerate(self.model.runs.items()):
-            ev = dict(nom["runs"][rid]["events"])
-            start = [n for n in self.model.order if n in run.kernels
-                     and set(run.kernels[n].params) & set(resim)]
-            regen = set()
-            for s0 in start:
-                regen |= descendants(run, s0)
-            for node in self.model.order:                      # one pass, outside to inside (section 6.5)
-                kern = run.kernels.get(node)
-                if kern is None:
-                    continue
-                if node in regen or kern.kind == "deterministic":   # resimulation (CRN) or rerun
-                    ev[node] = kern.sample(_parent_values(run, ev, node), target, nom["runs"][rid]["u"][node], run)
-            run_events[rid] = ev
-            regenerated_all[rid] = regen
-        sample = {"runs": {rid: {"events": run_events[rid]} for rid in run_events}, "params": nom["params"],
-                  "sq": nom["sq"], "comps": nom["comps"]}
-        w = self.weights(target, sample, nodes=rw_nodes, regenerated=regenerated_all)
-        missing = w.pop("_missing_support", [])
-        out = observe(self.model, run_events, w, names)
-        out["node_diag"] = {n: _node_diag(w) for n in rw_nodes}
-        out.update({"V_emu": None, "V_learn": None, "missing_support_runs": missing, "theta": target,
+        out.update({"V_emu": None, "V_learn": None, "theta": target,
                     "methods": {p: self.default_method(p) for p in changed}})
         return out
 
     def resample(self, node: str, theta: dict, phi: dict | None, psi: dict | None, model: str, inputs,
                  seeds: dict) -> dict:
-        """Direct sampling of `node` at theta from the given parent outputs (inputs: {run: events of the parents},
-        None for the stored nominal ones), with new random numbers (seeds['resample'])."""
+        """Direct sampling of `node` at theta from the given parent outputs (inputs: {run: events of the parents};
+        None: the stored inputs at theta, that is the nominal events after the plan's resimulation and rerun at theta),
+        with new random numbers (seeds['resample'])."""
         target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {})}
+        prepared = self._prepared(target, self.nominal)[0] if inputs is None else inputs
         out = {}
         for ri, (rid, run) in enumerate(self.model.runs.items()):
             kern = run.kernels.get(node)
             if kern is None:
                 continue
-            ev = inputs[rid] if inputs is not None else self.nominal["runs"][rid]["events"]
             u = _streams(seeds["resample"], ri, self.model.order.index(node) + 1000, kern.n_u, run.n)
-            out[rid] = kern.sample(_parent_values(run, ev, node), target, u, run)
+            out[rid] = kern.sample(_parent_values(run, prepared[rid], node), target, u, run)
         return out
 
     def evaluate_from(self, node: str, samples: dict, theta: dict, phi: dict | None, psi: dict | None, model: str,
                       seeds: dict, names=None) -> dict:
         """Observables from the given output of `node` (per run), propagating downstream at theta with new random
-        numbers (seeds['resample']); upstream events and their weights are the nominal ones (section 7.1, for P0)."""
-        target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {})}
-        nom = self.nominal
-        run_events = {}
-        for ri, (rid, run) in enumerate(self.model.runs.items()):
-            ev = dict(nom["runs"][rid]["events"])
-            down = descendants(run, node) - {node} if node in run.kernels else set()
-            for node2 in self.model.order:
-                k2 = run.kernels.get(node2)
-                if k2 is None:
-                    continue
-                if node2 == node:
-                    ev[node2] = samples[rid]
-                elif node2 in down:                            # downstream at theta with new random numbers
-                    u = _streams(seeds["resample"], ri, self.model.order.index(node2) + 2000, k2.n_u, run.n)
-                    ev[node2] = k2.sample(_parent_values(run, ev, node2), target, u, run)
-                elif k2.kind == "deterministic":
-                    ev[node2] = k2.sample(_parent_values(run, ev, node2), target, nom["runs"][rid]["u"][node2], run)
-            run_events[rid] = ev
-        regen = {rid: (descendants(run, node) if node in run.kernels else set()) for rid, run in self.model.runs.items()}
-        upstream = self.reweighted_nodes(target)
-        sample = {"runs": {rid: {"events": run_events[rid]} for rid in run_events}, "params": nom["params"],
-                  "sq": nom["sq"], "comps": nom["comps"]}
-        w = self.weights(target, sample, nodes=upstream, regenerated=regen)
-        missing = w.pop("_missing_support", [])
-        out = observe(self.model, run_events, w, names)
-        out["missing_support_runs"] = missing
-        return out
+        numbers (seeds['resample']); upstream events are those of the plan's method at theta, with their weights
+        (section 7.1, for P0)."""
+        return self._from_nodes([node], theta, seeds["resample"], names, None, given=samples)
 
-    def rerun(self, nodes, theta: dict, seed: int, names=None, params=None) -> dict:
-        """resample + evaluate_from from the stored inputs of `nodes` (one node or several, e.g. one per branch): the
-        reference prediction of P0 and of the reweighting-versus-rerun agreement (sections 8.2 note 1, 15.2). For one
-        node it equals evaluate_from(node, resample(node, ...)) with the same seed. With `params`, each run starts at
-        the most upstream of the given nodes whose kernel there reads one of the params (an injected reference
-        replaces a node's kernel in some runs). Runs whose regenerated part
-        starts at a generator node have new events: `independent_runs` (no pairing with the nominal events)."""
+    def rerun(self, nodes, theta: dict, seed, names=None, params=None) -> dict:
+        """resample + evaluate_from from the stored inputs of `nodes` at theta (one node or several, e.g. one per
+        branch): the reference prediction of P0 and of the reweighting-versus-rerun agreement (sections 8.2 note 1,
+        15.2). For one node it equals evaluate_from(node, resample(node, ...)) with the same seed. With `params`, each
+        run starts at the most upstream of the given nodes whose kernel there reads one of the params (an injected
+        reference replaces a node's kernel in some runs). Runs whose regenerated part starts at a generator node have
+        new events: `independent_runs` (no pairing with the nominal events). `seed` may be a tuple (seed, k)."""
         nodes = [nodes] if isinstance(nodes, str) else list(nodes)
+        return self._from_nodes(nodes, theta, seed, names, params)
+
+    def _from_nodes(self, nodes, theta, seed, names, params, given=None):
         target = {**self.model.nominal, **(theta or {})}
         nom = self.nominal
+        prepared, regen_m = self._prepared(target, nom)
         run_events, independent, regen_all = {}, [], {}
         for ri, (rid, run) in enumerate(self.model.runs.items()):
-            ev = dict(nom["runs"][rid]["events"])
+            ev = dict(prepared[rid])
             touched = [n for n in nodes if n in run.kernels
                        and (params is None or set(run.kernels[n].params) & set(params))]
             starts = [n for n in touched if not any(n in descendants(run, m) - {m} for m in touched)]
-            regen = set()
+            fresh = set()
             for n0 in starts:
-                regen |= descendants(run, n0)
+                fresh |= descendants(run, n0)
             for node in self.model.order:
                 kern = run.kernels.get(node)
-                if kern is None:
+                if kern is None or node not in fresh:
                     continue
-                if node in regen:
-                    offset = 1000 if node in starts else 2000
-                    u = _streams(seed, ri, self.model.order.index(node) + offset, kern.n_u, run.n)
-                    ev[node] = kern.sample(_parent_values(run, ev, node), target, u, run)
-                elif kern.kind == "deterministic":
-                    ev[node] = kern.sample(_parent_values(run, ev, node), target, nom["runs"][rid]["u"][node], run)
+                if given is not None and node in starts:
+                    ev[node] = given[rid]
+                    continue
+                offset = 1000 if node in starts else 2000
+                u = _streams(seed, ri, self.model.order.index(node) + offset, kern.n_u, run.n)
+                ev[node] = kern.sample(_parent_values(run, ev, node), target, u, run)
             if any(not run.parents.get(n) and run.kernels[n].kind != "deterministic" for n in starts):
                 independent.append(rid)
-            run_events[rid] = ev
-            regen_all[rid] = regen
-        upstream = self.reweighted_nodes(target)
-        sample = {"runs": {rid: {"events": run_events[rid]} for rid in run_events}, "params": nom["params"],
-                  "sq": nom["sq"], "comps": nom["comps"]}
-        w = self.weights(target, sample, nodes=upstream, regenerated=regen_all)
-        missing = w.pop("_missing_support", [])
-        out = observe(self.model, run_events, w, names)
-        out.update({"missing_support_runs": missing, "independent_runs": independent})
+            run_events[rid], regen_all[rid] = ev, regen_m[rid] | fresh
+        out = self._observe(target, nom, run_events, regen_all, names)
+        out["independent_runs"] = independent
         return out
 
-    def support_findings(self, par: str, points: list[dict], ignorable=()) -> list[dict]:
-        """Section 6.1 for one parameter evaluated by reweighting: it acts entirely through the density of each of
-        its nodes; no event of the nominal sample is filtered or zero-suppressed there (unless the plan records the
-        filtering as ignorable); the proposal's support (the union over its mixture components) contains the target
-        support at every point given (prior vertices and Sobol points)."""
-        out, seen = [], set()
+    # ---- queries for the support check of calib_design (section 6.1)
+    def support_query(self, par: str) -> list[dict]:
+        """For each (node, run) where `par` acts: the kernel's kind, whether `par` acts entirely through its density,
+        whether the kernel filters at generation, and the supports per event (a function of a parameter point; None
+        when unbounded), at the generation point's mixture components and at a target point."""
         nom = self.nominal
         sq, comps = nom["sq"], nom["comps"]
-
-        def add(code, node, rid, msg):
-            if (code, node) not in seen:
-                seen.add((code, node))
-                out.append({"code": code, "parameter": par, "node": node, "run": rid, "message": msg})
+        out = []
         for node in self.model.param_nodes.get(par, []):
             for rid, run in self.model.runs.items():
                 kern = run.kernels.get(node)
                 if kern is None or par not in kern.params:      # absent, or replaced by an injected reference
                     continue
-                if kern.kind != "density" or par not in kern.density_params:
-                    add("support.not_density_parameter", node, rid, f"{par} does not act entirely through the density "
-                        f"of {node} (section 6.1 item 3)")
-                    continue
                 ev = nom["runs"][rid]["events"]
-                if kern.filtered and node not in ignorable and any(np.isnan(ev[node][o]).any() for o in kern.outputs):
-                    add("support.filtered", node, rid, f"events zero-suppressed or filtered at {node} in run {rid}: "
-                        "missing support (section 6.1)")
                 par_vals = _parent_values(run, ev, node)
                 thetas = [c["theta"] for c in comps] if node in sq else [{}]
-                gen = [kern.support(par_vals, {**nom["params"], **t}, run) for t in thetas]
-                if gen[0] is None:
-                    continue
-                for pt in points:
-                    tgt = kern.support(par_vals, {**nom["params"], **pt}, run)
-                    for var, (lo, hi) in tgt.items():
-                        if not _covered(lo, hi, [g[var] for g in gen]).all():
-                            add("support.missing", node, rid, f"the proposal's support at {node} does not contain "
-                                f"the target support at {pt} (supp q must contain the union over the prior)")
-                            break
+                out.append({"node": node, "run": rid, "kind": kern.kind, "density_parameter":
+                            par in kern.density_params, "filtered": bool(kern.filtered),
+                            "proposal_supports": [kern.support(par_vals, {**nom["params"], **t}, run) for t in thetas],
+                            "target_support": (lambda pt, k=kern, pv=par_vals, r=run:
+                                               k.support(pv, {**nom["params"], **pt}, r))})
         return out
 
     def learned_closure(self, fold):
@@ -703,19 +697,6 @@ class ChainEvaluator:
 
     def tell(self, *args):
         raise NotImplementedError("ask/tell is phase 3")
-
-
-def _covered(lo, hi, intervals) -> np.ndarray:
-    """Per event: is [lo, hi] inside the union of the intervals [lo_j, hi_j]?"""
-    L = np.stack([np.broadcast_to(i[0], np.shape(lo)) for i in intervals])
-    H = np.stack([np.broadcast_to(i[1], np.shape(lo)) for i in intervals])
-    order = np.argsort(L, axis=0)
-    L, H = np.take_along_axis(L, order, 0), np.take_along_axis(H, order, 0)
-    cur = np.array(lo, dtype=float)
-    for j in range(L.shape[0]):
-        reach = L[j] <= cur + 1e-12
-        cur = np.where(reach, np.maximum(cur, H[j]), cur)
-    return cur >= np.asarray(hi) - 1e-12
 
 
 def _same(a, b):
@@ -933,7 +914,7 @@ def toy_detector_bimodal(spec: dict, plan: dict) -> ChainEvaluator:
 
 # ------------------------------------------------------------------ small declared chains (tests, single gates)
 CATALOG = {"normal": Normal, "uniform": Uniform, "poisson": Poisson, "binomial": Binomial, "gamma-sum": GammaSum,
-           "steps": Steps}
+           "steps": Steps, "scale": Scale}
 
 
 def chain_from_spec(spec: dict, plan: dict) -> ChainEvaluator:

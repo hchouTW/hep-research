@@ -58,7 +58,10 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     def preflight():
-        from core.calibration import preflight as a0
+        try:
+            from core.calibration import preflight as a0
+        except ImportError as exc:                # A0 needs NumPy
+            return {"status": "rejected", "error": f"preflight needs NumPy ({exc})"}
         c = io.load(args.contract)
         r = io.load(args.release)
         if not isinstance(c, dict) or not isinstance(r, dict) or not c.get("series"):
@@ -68,12 +71,16 @@ def main(argv=None) -> int:
             try:
                 values, seq = led.provide_values(r, {"series": c["series"]},
                                                  (c.get("data") or {}).get("calibration_releases"))
-                out = a0.preflight(c, values)
             except data.DataError as exc:
                 return {"status": "rejected", "code": exc.code, "error": str(exc)}
-            except a0.PreflightError as exc:
-                return {"status": "rejected", "code": exc.code, "error": str(exc)}
-            io.write_json(args.ledger, led.state)
+            io.write_json(args.ledger, led.state)       # the values were provided: the read is recorded (section 9.5)
+        try:
+            out = a0.preflight(c, values)
+        except a0.PreflightError as exc:
+            return {"status": "rejected", "code": exc.code, "error": str(exc), "read_seq": seq}
+        except (KeyError, TypeError, ValueError) as exc:
+            return {"status": "rejected", "code": "a0.declaration", "error": f"malformed threshold: {exc!r}",
+                    "read_seq": seq}
         if args.write_draft:
             io.write_json(args.write_draft, {**c, "a0_summary": out["a0_summary"]})
         return {"status": out["status"], "a0_summary": out["a0_summary"], "decisions": out["decisions"],
@@ -97,7 +104,10 @@ def main(argv=None) -> int:
         if shape:
             return {"status": "rejected", "findings": shape, "stage": "schema"}
         design = io.load(args.design) if args.design else None
-        r = cc.check(c, rels, graph, design)
+        try:
+            r = cc.check(c, rels, graph, design)
+        except (TypeError, ValueError) as exc:
+            raise io.InputError(f"--design: {exc}") from None
         return {"status": r["status"], "contract_sha256": cc.lock_hash(c), "findings": r["findings"],
                 "deferred": r["deferred"]}
     return io.run(go)

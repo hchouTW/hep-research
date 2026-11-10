@@ -61,10 +61,9 @@ def design_points(bounds: dict, n: int, seed: int, held_back: int = 0, spot_chec
 def p2(contract: dict) -> dict:
     """ndf = n_c - dim N_d,c - d_free >= max(3, d_free). n_c: K per count shape, K - 1 per Gaussian shape, 1 per scalar,
     unused observables excluded. d_free: the parameters of beta without an external constraint (theta, an
-    unconstrained profile phi, the free omega of a count shape); constrained nuisances add a constraint term and a
-    parameter and do not change ndf (execution-log reading)."""
+    unconstrained profile phi, one omega per free-omega count shape, section 2.1); constrained nuisances add a
+    constraint term and a parameter and do not change ndf (execution-log reading)."""
     unused = {u["observable"] for u in (contract.get("validation") or {}).get("unused", [])}
-    free_samples = {s["id"] for s in contract.get("event_samples", []) if s.get("normalization") == "free"}
     n_c, omega, counted = 0, 0, []
     for o in contract.get("observables", []):
         if o.get("role") != "calibration" or o["name"] in unused:
@@ -75,7 +74,7 @@ def p2(contract: dict) -> dict:
             if vec.get("data_side") == "count":
                 n_c += k
                 counted.append((o["name"], k))
-                if o.get("sample") in free_samples:
+                if o.get("shape_class") == "free-omega":      # its own omega in beta (section 2.1)
                     omega += 1
             else:
                 n_c += k - 1
@@ -117,18 +116,55 @@ def applicability(methods: dict, held_back: int = 0, shift_phi: bool = False) ->
 
 
 # ------------------------------------------------------------------ support (section 6.1)
+def covered(lo, hi, intervals) -> np.ndarray:
+    """Per event: is [lo, hi] inside the union of the intervals [lo_j, hi_j] (the mixture components' supports)?"""
+    L = np.stack([np.broadcast_to(i[0], np.shape(lo)) for i in intervals])
+    H = np.stack([np.broadcast_to(i[1], np.shape(lo)) for i in intervals])
+    order = np.argsort(L, axis=0)
+    L, H = np.take_along_axis(L, order, 0), np.take_along_axis(H, order, 0)
+    cur = np.array(lo, dtype=float)
+    for j in range(L.shape[0]):
+        reach = L[j] <= cur + 1e-12
+        cur = np.where(reach, np.maximum(cur, H[j]), cur)
+    return cur >= np.asarray(hi) - 1e-12
+
+
 def support_check(evaluator, contract: dict, plan: dict, params: list[str], n_scan: int = 16, seed: int = 1) -> dict:
-    """For each parameter evaluated by reweighting: it must act entirely through its kernel's density; no event of the
-    nominal sample may be filtered or zero-suppressed at its node (unless the plan records that the filtering cannot
-    change the observables for any theta' within the prior, to be confirmed by P0); and the proposal's support must
-    contain the union of the target supports over the prior (vertices and Sobol points)."""
+    """Section 6.1 for each parameter evaluated by reweighting: it must act entirely through its kernel's density
+    (item 3); a kernel that filters or zero-suppresses at generation is missing support unless the plan records that
+    the filtering cannot change the observables for any theta' within the prior (kernels[node].filter_ignorable,
+    to be confirmed by P0); and the proposal's support (the union over its mixture components) must contain the
+    target support at every prior vertex and Sobol point. The evaluator answers queries (support_query); the
+    decision is made here."""
     pars = {p["name"]: p for p in contract.get("parameters", [])}
-    findings = []
+    ignorable = {n for n, k in (plan.get("kernels") or {}).items() if k.get("filter_ignorable")}
+    findings, seen = [], set()
+
+    def add(code, par, node, rid, msg):
+        if (code, par, node) not in seen:
+            seen.add((code, par, node))
+            findings.append({"code": code, "parameter": par, "node": node, "run": rid, "message": msg})
     for p in params:
         bounds = pars[p].get("sampling_bounds")
         pts = [{p: bounds[0]}, {p: bounds[1]}] + (sobol_points({p: bounds}, n_scan, seed) if bounds else [])
-        ignorable = {n for n, k in (plan.get("kernels") or {}).items() if k.get("filter_ignorable")}
-        findings += evaluator.support_findings(p, pts, ignorable)
+        for q in evaluator.support_query(p):
+            node, rid = q["node"], q["run"]
+            if q["kind"] != "density" or not q["density_parameter"]:
+                add("support.not_density_parameter", p, node, rid, f"{p} does not act entirely through the density of "
+                    f"{node} (section 6.1 item 3)")
+                continue
+            if q["filtered"] and node not in ignorable:
+                add("support.filtered", p, node, rid, f"{node} filters or zero-suppresses at generation: missing "
+                    "support unless the plan records the filtering as ignorable for every theta' (section 6.1)")
+            gen = q["proposal_supports"]
+            if gen[0] is None:
+                continue
+            for pt in pts:
+                tgt = q["target_support"](pt)
+                if any(not covered(lo, hi, [g[var] for g in gen]).all() for var, (lo, hi) in tgt.items()):
+                    add("support.missing", p, node, rid, f"the proposal's support at {node} does not contain the "
+                        f"target support at {pt} (supp q must contain the union over the prior)")
+                    break
     return {"status": "passed" if not findings else "failed", "findings": findings}
 
 
@@ -160,12 +196,14 @@ def _tail_check(contract, names):
 
 
 def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v_mc_diagonal", "matrix_condition"),
-       f: float = F_DEFAULT, n_scan: int | None = None, seed: int | None = None) -> dict:
-    """P5 on the same Sobol points within the prior of the reweighted parameters (the others at theta_ref): the ESS
-    item (N_eff,k >= N_req,k = s_k^2 / (f V^unc_data,kk), N_eff over the events entering observable k, D41), the
-    per-observable item V_MC,kk <= f V^unc_data,kk for Gaussian blocks (D42), and the matrix condition
-    Sigma_MC <= f Sigma_data point by point with that point's Asimov; the worst point of each item decides.
-    Sigma_boot and b_J (phase 2) and the theta-noise item (phase 3) are listed under `deferred`."""
+       f: float = F_DEFAULT, n_scan: int | None = None, seed: int | None = None, scan_parameters=None) -> dict:
+    """P5 on one set of Sobol points within the prior (section 3.6: the prior range is scanned; by default every theta
+    with sampling bounds, or the `scan_parameters` given, the others at theta_ref): the ESS item (N_eff,k >= N_req,k =
+    s_k^2 / (f V^unc_data,kk), N_eff over the events entering observable k, D41), the per-observable item
+    V_MC,kk <= f V^unc_data,kk for Gaussian blocks (D42), and the matrix condition Sigma_MC <= f Sigma_data point by
+    point with that point's Asimov; the worst point of each item decides. Missing support at any point (an event not
+    recorded at a reweighted node) fails P5. Sigma_boot and b_J (phase 2) and the theta-noise item (phase 3) are listed
+    under `deferred`."""
     obs = linear.calibration_observables(contract)
     names = [o["name"] for o in obs]
     _tail_check(contract, names)
@@ -177,8 +215,11 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
     pars = {p["name"]: p for p in contract.get("parameters", [])}
     theta_ref = {p: 0.5 * sum(v["sampling_bounds"]) for p, v in pars.items()
                  if v["role"] == "theta" and v.get("sampling_bounds")}
-    rw = [p for p in evaluator.parameters if p in theta_ref and evaluator.default_method(p) in REWEIGHTING]
-    pts = sobol_points({p: pars[p]["sampling_bounds"] for p in rw}, n_scan, seed) if rw else [{}]
+    scan = [p for p in (scan_parameters if scan_parameters is not None else theta_ref) if p in theta_ref
+            and pars[p]["sampling_bounds"][1] > pars[p]["sampling_bounds"][0]]
+    pts = sobol_points({p: pars[p]["sampling_bounds"] for p in scan}, n_scan, seed) if scan else [{}]
+    rw = scan
+    missing = {}
     exposure = contract.get("exposure") or {}
     worst = {"ess": (math.inf, None, None), "v_mc_diagonal": (-math.inf, None, None),
              "matrix_condition": (-math.inf, None, None)}
@@ -186,6 +227,8 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
     for i, pt in enumerate(pts):
         theta = {**theta_ref, **pt}
         r = evaluator.evaluate(theta, names=names)
+        if r.get("missing_support_runs"):
+            missing.setdefault(i, sorted(r["missing_support_runs"]))
         n_data = np.array([linear._exposure(exposure, o, r["runs"][k]) for k, o in enumerate(obs)], dtype=float)
         v_data = np.diag(r["s2"]) / n_data
         row = {"point": pt}
@@ -195,18 +238,18 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
             else:                                              # its B -> infinity limit: weighted influence variance
                 s2k = np.asarray(r["per_event_var"], dtype=float)
             n_req = s2k / (f * v_data)
-            ratio = r["n_eff"] / n_req
-            k = int(np.nanargmin(ratio))
+            ratio = np.nan_to_num(r["n_eff"] / n_req, nan=0.0)        # an undefined ratio fails (review F6)
+            k = int(np.argmin(ratio))
             row["ess_ratio_min"] = float(ratio[k])
             if ratio[k] < worst["ess"][0]:
                 worst["ess"] = (float(ratio[k]), i, names[k])
         if "v_mc_diagonal" in items:
-            q = np.diag(r["V_MC"]) / (f * v_data)
-            k = int(np.nanargmax(q))
+            q = np.nan_to_num(np.diag(r["V_MC"]) / (f * v_data), nan=np.inf)
+            k = int(np.argmax(q))
             row["v_mc_ratio_max"] = float(q[k])
             if q[k] > worst["v_mc_diagonal"][0]:
                 worst["v_mc_diagonal"] = (float(q[k]), i, names[k])
-        if "matrix_condition" in items:
+        if "matrix_condition" in items and i not in missing:   # undefined where support is missing (finding below)
             d = linear.design(evaluator, contract, plan, theta_ref=theta, systematics=systematics, names=names)
             row["lambda_over_f"] = d["lambda_max"] / f
             if row["lambda_over_f"] > worst["matrix_condition"][0]:
@@ -237,6 +280,11 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
         if not ok:
             findings.append({"code": "p5.matrix_condition", "message": f"Sigma_MC is not <= f Sigma_data: largest "
                              f"generalized eigenvalue / f = {v:.3g} at {pts[i]} (remedy: plan)"})
+    if missing:
+        i0 = min(missing)
+        findings.append({"code": "p5.missing_support", "message": f"events not recorded at a reweighted node in runs "
+                         f"{missing[i0]} at {pts[i0]} (and {len(missing) - 1} more points): missing support, the "
+                         "reweighting cannot be used there (section 6.1; remedy: plan)"})
     status = "failed" if findings else "passed"
     return {"gate": "P5", "status": status, "items": result_items, "findings": findings, "f": f,
             "scan": {"n": len(pts), "seed": seed, "parameters": rw}, "per_point": per_point,
@@ -267,11 +315,9 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
                     log.append({"parameter": p, "method": m, "feasible": False, "reason": sup["findings"]})
                     continue
                 trial = dict(evaluator.methods)
-                # scan p alone: the other reweighting candidates are held at theta_ref (not reweighted)
-                evaluator.methods = {q: (m if q == p else ("rerun" if order[q][0] in REWEIGHTING else
-                                                           trial.get(q, order[q][0]))) for q in order}
+                evaluator.methods = {**trial, p: m}       # p scanned alone, the others at theta_ref
                 try:
-                    r = p5(evaluator, contract, plan, items=("ess",), f=f, n_scan=n_scan)
+                    r = p5(evaluator, contract, plan, items=("ess",), f=f, n_scan=n_scan, scan_parameters=[p])
                 finally:
                     evaluator.methods = trial
                 ok = r["items"]["ess"]["status"] == "passed"
@@ -299,11 +345,11 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
                     f"for {p} among {order[p]}"}], "log": log}
     # joint ESS with every reweighted parameter at once (event-level product weights)
     while True:
-        evaluator.methods = dict(chosen)
+        evaluator.methods = {**evaluator.methods, **chosen}
         rw = [p for p, m in chosen.items() if m in REWEIGHTING]
         if len(rw) <= 1:
             break
-        r = p5(evaluator, contract, plan, items=("ess",), f=f, n_scan=n_scan)
+        r = p5(evaluator, contract, plan, items=("ess",), f=f, n_scan=n_scan, scan_parameters=rw)
         if r["items"]["ess"]["status"] == "passed":
             break
         weakest = min(rw, key=lambda q: next(x["min_neff_over_nreq"] for x in log if x["parameter"] == q
@@ -318,3 +364,17 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
     return {"status": "ok", "methods": chosen, "moved_to_next_tier": changed, "log": log,
             "flags": ["provisional-thresholds"]}
 
+
+
+def p5_with_final_methods(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v_mc_diagonal",
+                          "matrix_condition"), f: float = F_DEFAULT) -> dict:
+    """P5 as section 3.6 step 2 has it: the final method first (an infeasible reweighting moves to the next tier
+    automatically), then the P5 items with the final methods (review F5)."""
+    m = final_methods(evaluator, contract, plan, f=f)
+    if m["status"] != "ok":
+        return {"gate": "P5", **m}
+    evaluator.methods = {**evaluator.methods, **m["methods"]}
+    r = p5(evaluator, contract, plan, systematics, items=items, f=f)
+    r["final_methods"] = m["methods"]
+    r["moved_to_next_tier"] = m["moved_to_next_tier"]
+    return r

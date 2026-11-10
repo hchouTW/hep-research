@@ -183,8 +183,10 @@ class Phase1Scripts(unittest.TestCase):
         rc, out = run("calib_design.py", "applicability", "--plan", self.put("m.json", {"methods": {"a": "rerun"}}))
         self.assertEqual((rc, out["gates"]["P0"], out["gates"]["G4"]), (0, "applicable", "not-applicable"))
         c, p = self.chain(H.gaussian_chain())
-        rc, out = run("calib_design.py", "p5", "--contract", c, "--plan", p, "--items", "ess")
+        rc, out = run("calib_design.py", "p5", "--contract", c, "--plan", p, "--items", "ess", "--declared-methods")
         self.assertEqual((rc, out["status"], out["findings"][0]["code"]), (1, "failed", "p5.ess"))
+        rc, out = run("calib_design.py", "p5", "--contract", c, "--plan", p, "--items", "ess")    # final method first
+        self.assertEqual((rc, out["status"], out["moved_to_next_tier"]), (0, "passed", {"mu": "resimulation"}))
         rc, out = run("calib_design.py", "p5", "--contract", c, "--plan", p, "--items", "bogus")
         self.assertEqual((rc, out["status"]), (2, "rejected"))
         c, p = self.chain(H.poisson_chain())
@@ -233,6 +235,9 @@ class Phase1Scripts(unittest.TestCase):
         rc, out = run("calib_reweight.py", "weights", "--contract", c, "--plan", p, "--theta",
                       self.put("t3.json", {"nope": 1}))
         self.assertEqual((rc, out["status"]), (2, "rejected"))
+        rc, out = run("calib_reweight.py", "weights", "--contract", c, "--plan", p, "--theta",
+                      self.put("t4.json", {"mu": "abc"}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))                       # review F10
 
     def test_calib_emulator_is_a_stub(self):
         for cmd in ("train", "p6", "ask", "tell"):
@@ -257,6 +262,15 @@ class Phase1Scripts(unittest.TestCase):
         self.assertEqual({e["kind"] for e in state["events"]}, {"fit"})
         self.assertEqual(json.loads((self.d / "draft2.json").read_text())["a0_summary"],
                          {"unreachable_thresholds": ["linearity"]})
+        bad = dict(draft, thresholds={"linearity": dict(THRESHOLD, observables=["absent"] * 8)})
+        before = len(json.loads(led.read_text())["events"])
+        rc, out = run("calib_contract.py", "preflight", "--contract", self.put("bad.json", bad), "--release",
+                      self.d / "rel.json", "--ledger", led)
+        self.assertEqual((rc, out["code"]), (2, "a0.no_value"))
+        self.assertGreater(len(json.loads(led.read_text())["events"]), before)    # the read is recorded (review F10)
+        rc, out = run("calib_contract.py", "check", "--contract", self.d / "draft.json", "--design",
+                      self.put("des.json", [1, 2]))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
         other = dict(draft, data={"calibration_releases": [F.h("x")]})
         rc, out = run("calib_contract.py", "preflight", "--contract", self.put("d3.json", other), "--release",
                       self.d / "rel.json", "--ledger", led)

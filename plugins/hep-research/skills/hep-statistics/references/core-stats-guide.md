@@ -107,8 +107,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 
 Helpers in `sc/` call the modules above, never replace them.
 
-Unmarked scripts need only the standard library; marked ones exit 2 with a JSON message without NumPy (and
-SciPy); all print `--help` without them.
+Marked scripts exit 2 with a JSON message without NumPy (and SciPy); all print `--help` without them.
 
 - `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
 - `look_elsewhere.py` (needs NumPy): global significance of a 1-D scan (brute-force toys or upcrossings).
@@ -130,7 +129,7 @@ SciPy); all print `--help` without them.
 - `periodicity_scan.py`: generalized Lomb-Scargle with a surrogate global p (white, AR(1), OU);
   `time_structure.py`: change points (toy-calibrated false alarms) and lags with surrogates. NumPy at run time.
 - `calib_chain.py`, `calib_contract.py`, `calib_data.py`, `calib_deps.py`, `calib_design.py`, `calib_emulator.py`,
-  `calib_kernel_check.py`, `calib_reweight.py`, `calib_use.py`: calibration.
+  `calib_kernel_check.py`, `calib_reweight.py`, `calib_use.py`: calibration (engine: NumPy, SciPy).
 - Inference scripts elsewhere (hep-measurement, pyhf/Combine, unbinned fit): [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 

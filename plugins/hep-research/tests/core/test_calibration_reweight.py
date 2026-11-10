@@ -36,6 +36,11 @@ class Formula(unittest.TestCase):
         den = 0.75 * np.array([0.4, 0.1]) + 0.25 * np.array([0.2, 0.3])
         np.testing.assert_allclose(np.exp(lw), np.array([0.5, 0.2]) / den / 0.5)
 
+    def test_json_output_has_no_nan(self):
+        from core.calibration import io
+        self.assertEqual(io.jsonable({"a": float("nan"), "b": np.float64("inf"), "c": [1.5]}),
+                         {"a": None, "b": "inf", "c": [1.5]})              # review F15
+
     def test_nan_term_is_missing_support(self):
         self.assertTrue(np.isnan(reweight.log_weights(np.array([np.nan]), None, None)).all())
 
