@@ -13,6 +13,7 @@ no result (exit 2). Standard library only.
 """
 from __future__ import annotations
 
+import json
 import math
 
 from core.calibration import data_release as data
@@ -445,7 +446,7 @@ def psi_findings(contract: dict, design: dict) -> list[dict]:
 
 
 def check(contract: dict, releases: dict | None = None, series_graph: dict | None = None,
-          design: dict | None = None) -> dict:
+          design: dict | None = None, locking: dict | None = None) -> dict:
     """Section 5.2 in phase-0 scope, and the D37 rule of phase 1 when the design-stage linearization is given
     (design: theta, sigma_tot, psi_effect, from calib_design.py linearize). releases maps release hashes to their
     metadata (calib_data's view: lineage, samples, observables, declarations, totals); series_graph maps a contract
@@ -501,6 +502,14 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
         if any({"calibration", "validation"} <= r for r in roles.values()):
             flags.append("cv")       # validation observables share events with calibration ones (section 2.1)
     deferred = list(DEFERRED)
+    if locking is not None:                     # the locking-stage decisions of calib_data.py (phase 2, section 17)
+        for f in locking.get("findings", []):
+            out.add(f["code"], "$.observables", json.dumps({k: v for k, v in f.items() if k != "code"},
+                                                           default=str)[:400])
+        decided = ("clause 9 item 2", "clause 9 item 8", "clause 9 item 13", "clause 6 item 2")
+        decided += ("clause 9 item 4", "clause 9 item 12") if set(locking.get("not_applicable", [])) >= {
+            "n_min", "block_conversion", "N_exp"} else ()
+        deferred = [d for d in deferred if not d.startswith(decided)]
     if design is not None:
         out.extend(psi_findings(contract, design))
     else:

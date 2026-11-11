@@ -512,6 +512,7 @@
   "tests.core.test_calibration_likelihood": 0.2,
   "tests.core.test_calibration_propagate": 0.1,
   "tests.core.test_calibration_toy_problem": 48.6,
-  "tests.core.test_calibration_validate": 24.0
+  "tests.core.test_calibration_validate": 24.0,
+  "tests.core.test_calibration_locking": 2.2
  }
 }

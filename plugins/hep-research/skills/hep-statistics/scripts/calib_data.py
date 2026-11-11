@@ -13,6 +13,8 @@
                          the raw units come from the releases' lineage (unconfirmed lineage or a holdout sharing
                          raw units is refused, nothing is recorded); --conditions holds the opening conditions
   calib_data.py decide   --ledger FILE --decision FILE             apply a decision record (calib_validate's)
+  calib_data.py locking  --contract FILE --plan FILE --release FILE --out FILE [--n-scan N]
+                         the locking-stage decisions at the evaluation points (rounding, sigma0, N_d,c, conventions)
   calib_data.py provide  --ledger FILE --release FILE --channel FILE --calibration HASH ... --out FILE [--kappa K]
                          the one provider of calibration values to a fit (records the fit read, section 9.5)
   calib_data.py inputs   --ledger FILE --kappa K --vmode MODE --validation-units FILE --calibration-units FILE
@@ -95,6 +97,12 @@ def main(argv=None) -> int:
     de = sub.add_parser("decide")
     de.add_argument("--ledger", required=True)
     de.add_argument("--decision", required=True)
+    lk = sub.add_parser("locking")
+    lk.add_argument("--contract", required=True)
+    lk.add_argument("--plan")
+    lk.add_argument("--release", required=True)
+    lk.add_argument("--n-scan", type=int, default=64)
+    lk.add_argument("--out", required=True)
     pv = sub.add_parser("provide")
     for a in ("--ledger", "--release", "--channel", "--out"):
         pv.add_argument(a, required=True)
@@ -147,6 +155,15 @@ def main(argv=None) -> int:
                     args.kappa, read[0], u["validation_units"], u["calibration_units"], chan, cond),
                     "validation_units": len(u["validation_units"] or ()),
                     "calibration_units": len(u["calibration_units"] or ())})
+            if args.cmd == "locking":
+                from core.calibration import data_checks, io as cio, problems
+                contract, plan, extras = cio.contract_and_plan(args.contract, args.plan)
+                rel = io.load(args.release)
+                p = problems.from_inputs(contract, plan)
+                rep = data_checks.locking_report(contract, rel.get("declarations") or {}, p, args.n_scan)
+                io.write_json(args.out, cio.jsonable(rep))
+                return {"status": "written", "report": args.out, "decision": rep["status"],
+                        "findings": len(rep["findings"])}
             if args.cmd == "provide":
                 rel, chan = io.load(args.release), io.load(args.channel)
 

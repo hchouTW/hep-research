@@ -300,3 +300,80 @@ def residual_identity_check(n: np.ndarray, r: np.ndarray) -> dict:
     lhs = abs(float(np.asarray(n) @ np.asarray(r)))
     tol = 64 * np.finfo(float).eps * (float(np.sum(np.abs(np.asarray(n) * np.asarray(r)))) + 1.0)
     return {"deviation": lhs, "tolerance": tol, "triggered": lhs > tol}
+
+
+# ------------------------------------------------------------------ the locking report (section 5.2 clause 9; 17)
+def _formats(decl: dict, names: list) -> dict:
+    f = decl.get("representation_format", "float64")
+    if isinstance(f, str):
+        return {n: {"kind": f} for n in names}
+    return {n: (f.get(n) if isinstance(f.get(n), dict) else {"kind": f.get(n, "float64")}) for n in names}
+
+
+def point_quantities(problem, params: dict) -> dict:
+    """mu, V_data^unc (natural units) of the calibration observables at one point: the model's per-event covariance
+    of the estimators divided by the exposure (the quantity the event-level bootstrap estimates; at the evaluation
+    points of locking the model value itself is used)."""
+    r = problem.ev.evaluate(params, names=problem.names)
+    by = {o.name: o for o in problem.model.observables}
+    runs = np.array([by[n].run for n in problem.names], dtype=object)
+    V = r["s2"] / problem.exposure * np.equal.outer(runs, runs)
+    return {"mu": r["pred"], "V": 0.5 * (V + V.T)}
+
+
+def locking_report(contract: dict, release_declarations: dict, problem, n_scan: int = 64, seed: int = 20261112,
+                   points: list | None = None) -> dict:
+    """The locking-stage decisions of calib_data for the calibration observables of the problem at the evaluation
+    points of section 2.1 (or at the given points, e.g. the fit point): rounding negligibility on N_d,c^perp with the
+    release's formats, sigma^(0) > 0, the N_d,c declaration check (a)(b)(c) in standardized coordinates, the value
+    conventions against the declared constraints; n_min, block conversion and N_exp where the contract has such blocks
+    (Gaussian summary statistics of scalar observables have none: recorded as not applicable)."""
+    from . import design as Dz
+    from . import validate as Vd
+    names = problem.names
+    fmts = _formats(release_declarations or {}, names)
+    val = contract.get("validation") or {}
+    cons = []
+    for nd in val.get("N_dc", []):
+        cons.append(np.array([float(nd["n"].get(n, 0.0)) for n in names]))
+    if points is None:
+        box = {t: v["prior"] for t, v in problem.theta_spec.items()}
+        scan = [np.array([pt[t] for t in box]) for pt in Dz.sobol_points(box, n_scan, seed)]
+        nus = {n: s for n, (_, s) in problem.phi_spec.items()}
+        pts = evaluation_points(list(box.values()), np.array(scan), nus)
+        thetas = list(box)
+        points = []
+        for th, nu in pts:
+            p = dict(zip(thetas, th))
+            p.update({n: c + nu.get(n, 0.0) for n, (c, _) in problem.phi_spec.items()})
+            points.append(p)
+    worst = {"ratio": 0.0, "point": None}
+    findings = []
+    for p in points:
+        q = point_quantities(problem, p)
+        s = np.sqrt(np.clip(np.diag(q["V"]), 0.0, None))
+        zero = [n for n, v in zip(names, s) if v <= 0]
+        if zero:
+            findings.append({"code": "data.sigma0_zero", "observables": zero, "point": p})
+            continue
+        rho = np.array([resolution(m, sg, fmts[n]) for m, sg, n in zip(q["mu"], s, names)])
+        rr = rounding_ratio(q["V"], rho, s, cons)
+        if rr["ratio"] > worst["ratio"]:
+            worst = {"ratio": rr["ratio"], "point": p}
+        if cons:
+            dc = Vd.declaration_check(q["V"], s, cons)
+            if dc["status"] != "passed":
+                findings.append({"code": "data.ndc_declaration", "failures": dc["failures"], "point": p})
+    if worst["ratio"] > ROUNDING_BOUND * (1 + 1e-12):
+        findings.append({"code": "data.rounding", "ratio": worst["ratio"], "point": worst["point"]})
+    conv = (contract.get("estimators") or {}).get("conventions") or {}
+    for j, nd in enumerate(val.get("N_d", []) + val.get("N_dc", [])):
+        obs = [n for n, v in nd["n"].items() if v]
+        if obs and all(o in conv and "zero_events" in conv[o] for o in obs):
+            lhs = sum(float(nd["n"][o]) * float(conv[o]["zero_events"]) for o in obs)
+            if abs(lhs - float(nd.get("c", 0.0))) > 1e-12:
+                findings.append({"code": "data.convention_violates_constraint", "observables": obs})
+    return {"status": "failed" if findings else "passed", "points": len(points), "rounding_worst": worst,
+            "findings": findings, "not_applicable": ["n_min", "block_conversion", "N_exp"]
+            if all(b.kind == "gaussian-scalar" for b in problem.layout.blocks) else [],
+            "reading": "V_data^unc at the evaluation points: the model's per-event covariance / exposure"}
