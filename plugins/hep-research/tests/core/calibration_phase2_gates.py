@@ -33,10 +33,12 @@ FILES = ["core/calibration/" + f for f in ("likelihood.py", "fit.py", "propagate
     ["tests/core/calibration_phase2_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-2.md"]
 
 # gate 2 (card): the calorimeter segment and the track / E-p segment of the toy detector
-CAL = [f"beam{e}_e_mean" for e in (1, 2, 3, 4)] + [f"beam{e}_e_width" for e in (1, 2, 3, 4)] + \
-    ["light_e_mean", "light_e_width", "spe_e_mean", "spe_e_width"]
-TRK = ["track5_p_mean", "track5_p_width", "track2_p_mean", "track2_p_width", "eop_mean"]
-THETA1 = ("light_yield", "pde", "gain")
+# the beam means measure exp(-t/lambda)(1 + eta) (pde and gain from the light-source and single-photoelectron runs), so
+# the data determine the eta-phi correlation; the momentum scale is measured only through E/p (the track widths measure
+# its product with the sum term), so theta2 depends on zeta and the regression choice of the export matters
+CAL = [f"beam{e}_e_mean" for e in (1, 2, 3, 4)] + ["light_e_mean", "light_e_width", "spe_e_mean", "spe_e_width"]
+TRK = ["track5_p_width", "track2_p_width", "eop_mean"]
+THETA1 = ("pde", "gain")      # the light yield is not calibrated here: it would absorb the thickness exactly
 THETA2 = ("momentum_scale", "sum_term_a")
 PHI = {"material_thickness": (1.0, 0.05)}
 ETA_R = 0.005                      # the fixture's common energy scale (relative), on the calorimeter energies and E/p
@@ -69,7 +71,10 @@ def build(n):
 
 
 def eta_spec(names):
-    energy = [n for n in names if n.startswith(("beam", "light", "spe")) or n == "eop_mean"]
+    """The common energy scale of the beam measurement: on the beam energy means and E/p (not on the light-source and
+    single-photoelectron charges, nor on the widths' photon statistics); with the thickness acting on the same means,
+    the data determine the eta-phi posterior correlation (section 15.1)."""
+    energy = [n for n in names if (n.startswith("beam") and n.endswith("_e_mean")) or n == "eop_mean"]
     return [{"relative": {n: ETA_R for n in energy}}]
 
 
@@ -106,39 +111,44 @@ class Segment2:
             params["material_thickness"] = z[1]
             return params, eta_rel * z[0]                      # log links: a relative shift r eta is r eta in link space
         self.problem = TP.ToyProblem(build, TRK, theta2_spec, exposure, mc, seeds[0], phi, None, None, B, seeds[1],
-                                     map_params=map_params)
+                                     map_params=map_params, thickness_by_yield=True)
         cov = np.zeros((nx + 2, nx + 2))
         cov[:nx, :nx] = np.eye(nx)
         cov[nx:, nx:] = Sz
         self.problem.phi_cov = lambda _c=cov: _c
 
 
-def gate_segmented(out: Path, smoke: bool):
+def gate_segmented(out: Path, smoke: bool, probe: bool = False):
+    """probe: the registered sizes with another seed (20262140), to design the configuration without the gate's data;
+    labeled `probe`, not evidence."""
     t0 = time.time()
     exposure, mc, B = (400, 2000, 500) if smoke else (2000, 20000, 500)
+    SEED = SEED_GATE2 + 1000 if probe else SEED_GATE2
     spec = bounds_from_fixture()
     th1 = {k: spec[k] for k in THETA1}
     th2 = {k: spec[k] for k in THETA2}
-    seeds = (SEED_GATE2, SEED_GATE2 + 1)
+    seeds = (SEED, SEED + 1)
     joint = TP.ToyProblem(build, CAL + TRK, {**th1, **th2}, exposure, mc, seeds[0], PHI, eta_spec(CAL + TRK), None, B,
-                          seeds[1])
+                          seeds[1], thickness_by_yield=True)
     truth = joint.initial_beta({**{k: toy.TOY_NOMINAL[k] for k in THETA1}, **{k: toy.TOY_NOMINAL[k] for k in THETA2}})
-    rng = np.random.default_rng(SEED_GATE2 + 2)
+    rng = np.random.default_rng(SEED + 2)
     data = joint.simulate(truth, rng)
     joint.data = data
     joint.sigma_noise = TP.estimate_sigma_noise(joint, truth)
-    fj = F.find_extremum(joint, (SEED_GATE2, 0), joint.initial_beta())
+    fj = F.find_extremum(joint, (SEED, 0), joint.initial_beta())
     # joint: theta order th1 + th2, then phi, then eta
-    ij = list(range(5))
+    ij = list(range(len(THETA1) + len(THETA2)))
     bj, Cj = fj.beta[ij], fj.Sigma_beta[np.ix_(ij, ij)]
     # segment 1
     rows1 = [joint.names.index(n) for n in CAL]
-    seg1 = TP.ToyProblem(build, CAL, th1, exposure, mc, seeds[0], PHI, eta_spec(CAL), None, B, seeds[1])
+    seg1 = TP.ToyProblem(build, CAL, th1, exposure, mc, seeds[0], PHI, eta_spec(CAL), None, B, seeds[1],
+                         thickness_by_yield=True)
     seg1.data = L.Data(y_gauss=data.y_gauss[rows1], phi0=data.phi0, phi_cov=seg1.phi_cov(), eta0=data.eta0)
     seg1.sigma_noise = TP.estimate_sigma_noise(seg1, seg1.initial_beta())
-    f1 = F.find_extremum(seg1, (SEED_GATE2, 1), seg1.initial_beta())
-    # beta of seg1: theta1 (3), phi (1), eta (1): zeta = (eta, phi)
-    i_th, i_z = [0, 1, 2], [4, 3]
+    f1 = F.find_extremum(seg1, (SEED, 1), seg1.initial_beta())
+    # beta of seg1: theta1, phi (1), eta (1): zeta = (eta, phi)
+    n1 = len(THETA1)
+    i_th, i_z = list(range(n1)), [n1 + 1, n1]
     pkg = P.export(f1.beta[i_th], f1.beta[i_z], f1.Sigma_beta, i_th, i_z, zeta_keys=["eta:energy_scale",
                                                                                      "phi:material_thickness"])
     rows2 = [joint.names.index(n) for n in TRK]
@@ -148,15 +158,16 @@ def gate_segmented(out: Path, smoke: bool):
         p2 = s2.problem
         p2.data = L.Data(y_gauss=data.y_gauss[rows2], phi0=np.r_[np.zeros(s2.nx), zmean], phi_cov=p2.phi_cov())
         p2.sigma_noise = TP.estimate_sigma_noise(p2, p2.initial_beta())
-        f2 = F.find_extremum(p2, (SEED_GATE2, 2, label), p2.initial_beta())
+        f2 = F.find_extremum(p2, (SEED, 2, label), p2.initial_beta())
         nx = s2.nx
         # (theta2 (2), xi (nx), zeta (2)) -> (theta1, theta2)
         idx = list(range(2 + nx + 2))
         S = f2.Sigma_beta[np.ix_(idx, idx)]
-        T = np.zeros((5, 2 + nx + 2))
-        T[:3, 2:2 + nx] = Gx
-        T[:3, 2 + nx:] = Gz
-        T[3, 0] = T[4, 1] = 1.0
+        n1 = len(THETA1)
+        T = np.zeros((n1 + 2, 2 + nx + 2))
+        T[:n1, 2:2 + nx] = Gx
+        T[:n1, 2 + nx:] = Gz
+        T[n1, 0] = T[n1 + 1, 1] = 1.0
         xi = f2.beta[2:2 + nx]
         z = f2.beta[2 + nx:2 + nx + 2]
         t1 = pkg["theta_hat"] + Gx @ xi + Gz @ (z - zmean)
@@ -166,17 +177,17 @@ def gate_segmented(out: Path, smoke: bool):
     sp, Cp, _ = seg2_fit(pkg["G_xi"], pkg["G_zeta"], np.zeros(2) + np.array([0.0, 1.0]), np.diag([1.0, 0.05 ** 2]),
                          1)
     res["counterexample_prior"] = agree(sp, Cp, bj, Cj)
-    Gm = P.marginal_regressions(f1.Sigma_beta, i_th, [4], [3])
-    D = np.diag(np.diag(f1.Sigma_beta)[[4, 3]])
+    Gm = P.marginal_regressions(f1.Sigma_beta, i_th, [i_z[0]], [i_z[1]])
+    D = np.diag(np.diag(f1.Sigma_beta)[i_z])
     sm, Cm, _ = seg2_fit(pkg["G_xi"], Gm, pkg["zeta_hat"], D, 2)
     res["counterexample_marginal"] = agree(sm, Cm, bj, Cj)
     passed = res["joint_posterior"]["agree"] and not res["counterexample_prior"]["agree"] and \
         not res["counterexample_marginal"]["agree"] and fj.converged and f1.converged and f2.converged
     rep = {"gate": "segmented calibration and the joint fit agree", "status": "passed" if passed else "failed",
-           "smoke": smoke, "label": "smoke (not evidence)" if smoke else "synthetic", "results": res,
+           "smoke": smoke, "probe": probe, "label": "smoke (not evidence)" if smoke else ("probe (not evidence)" if probe else "synthetic"), "results": res,
            "converged": {"joint": fj.converged, "segment1": f1.converged, "segment2": f2.converged},
            "joint": {"theta": bj.tolist(), "cov": Cj.tolist()}, "segmented": {"theta": seg.tolist(), "cov": Cs.tolist()},
-           "sizes": {"exposure": exposure, "mc_events": mc, "B": B}, "seed": SEED_GATE2,
+           "sizes": {"exposure": exposure, "mc_events": mc, "B": B}, "seed": SEED,
            "eta_phi_correlation": float(pkg["Sigma_zeta"][0, 1] / np.sqrt(pkg["Sigma_zeta"][0, 0] *
                                                                           pkg["Sigma_zeta"][1, 1])),
            "seconds": time.time() - t0, "provenance": provenance()}
@@ -360,9 +371,10 @@ def main(argv=None) -> int:
     ap.add_argument("--reps", type=int)
     ap.add_argument("--out", required=True)
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--probe", action="store_true")
     a = ap.parse_args(argv)
     if a.gate == "segmented":
-        r = gate_segmented(Path(a.out), a.smoke)
+        r = gate_segmented(Path(a.out), a.smoke, a.probe)
         print(json.dumps({"status": r["status"], "results": r["results"], "seconds": r["seconds"]}))
         return 0 if r["status"] == "passed" else 1
     if a.calibration:
