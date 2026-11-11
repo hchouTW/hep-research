@@ -12,7 +12,9 @@
                                                                     validation reads and pending failure records;
                          the raw units come from the releases' lineage (unconfirmed lineage or a holdout sharing
                          raw units is refused, nothing is recorded); --conditions holds the opening conditions
-  calib_data.py decide   --ledger FILE --decision FILE             apply a decision record (phase 0: a stub)
+  calib_data.py decide   --ledger FILE --decision FILE             apply a decision record (calib_validate's)
+  calib_data.py provide  --ledger FILE --release FILE --channel FILE --calibration HASH ... --out FILE [--kappa K]
+                         the one provider of calibration values to a fit (records the fit read, section 9.5)
   calib_data.py inputs   --ledger FILE --kappa K --vmode MODE --validation-units FILE --calibration-units FILE
                          [--no-validation-read]                    the reuse and failure-record inputs
 --units files hold a JSON list of raw-unit ids; --channel files hold {"contract_sha256": H} or {"series": S,
@@ -93,6 +95,12 @@ def main(argv=None) -> int:
     de = sub.add_parser("decide")
     de.add_argument("--ledger", required=True)
     de.add_argument("--decision", required=True)
+    pv = sub.add_parser("provide")
+    for a in ("--ledger", "--release", "--channel", "--out"):
+        pv.add_argument(a, required=True)
+    pv.add_argument("--calibration", action="append", required=True,
+                    help="hash of a calibration release declared by the contract")
+    pv.add_argument("--kappa")
     i = sub.add_parser("inputs")
     for a in ("--ledger", "--kappa", "--validation-units", "--calibration-units"):
         i.add_argument(a, required=True)
@@ -139,6 +147,14 @@ def main(argv=None) -> int:
                     args.kappa, read[0], u["validation_units"], u["calibration_units"], chan, cond),
                     "validation_units": len(u["validation_units"] or ()),
                     "calibration_units": len(u["calibration_units"] or ())})
+            if args.cmd == "provide":
+                rel, chan = io.load(args.release), io.load(args.channel)
+
+                def prov(led):
+                    values, seq = led.provide_values(rel, chan, args.calibration, args.kappa)
+                    io.write_json(args.out, values)
+                    return {"read_seq": seq, "values": args.out}
+                return write(prov)
             if args.cmd == "decide":
                 dec = io.load(args.decision)
                 return write(lambda led: {"record_status": led.apply_decision(dec)})

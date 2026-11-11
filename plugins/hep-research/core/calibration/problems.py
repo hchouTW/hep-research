@@ -41,7 +41,7 @@ def from_inputs(contract: dict, plan: dict, values: dict | None = None, systemat
     obs = linear.calibration_observables(contract)
     names = [o["name"] for o in obs]
     links = {o["name"]: o["link"] for o in obs}
-    theta, phi = {}, {}
+    theta, phi, shift = {}, {}, {}
     for p in contract.get("parameters", []):
         if p["role"] == "theta":
             theta[p["name"]] = {"bounds": tuple(p.get("physical_bounds", p["sampling_bounds"])),
@@ -51,6 +51,9 @@ def from_inputs(contract: dict, plan: dict, values: dict | None = None, systemat
             if "sigma" not in c:
                 raise ProblemError("problem.phi_constraint", f"profile phi {p['name']} needs a constraint")
             phi[p["name"]] = (float(c.get("center", toy.TOY_NOMINAL.get(p["name"], 0.0))), float(c["sigma"]))
+        elif p["role"] == "phi" and p.get("mode") == "shift":
+            c = p.get("constraint") or {}
+            shift[p["name"]] = (float(c.get("center", toy.TOY_NOMINAL.get(p["name"], 0.0))), float(c["sigma"]))
     exp = set((contract.get("exposure") or {}).values())
     if len(exp) != 1:
         raise ProblemError("problem.exposure", "phase 2's toy problem uses one exposure for every run")
@@ -60,7 +63,7 @@ def from_inputs(contract: dict, plan: dict, values: dict | None = None, systemat
            if any(n in s.get("relative", {}) for n in names)]
     p = ToyProblem(model_builder(plan), names, theta, int(exp.pop()), int(spec.get("events", 40_000)),
                    seeds.get("nominal", 20261120), phi, eta, links, (plan.get("design") or {}).get("bootstrap_B"),
-                   seeds.get("bootstrap", 20261121), plan=plan)
+                   seeds.get("bootstrap", 20261121), plan=plan, shift=shift)
     p.edm_tol = float((plan.get("numerics") or {}).get("tolerance", 0.1))
     if values is not None:
         missing = [n for n in names if n not in values]

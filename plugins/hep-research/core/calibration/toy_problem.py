@@ -59,7 +59,8 @@ class ToyProblem:
 
     def __init__(self, build, names: list, theta: dict, exposure: int, mc_events: int, mc_seed=20261120,
                  phi_P: dict | None = None, eta: list | None = None, links: dict | None = None, B: int | None = None,
-                 boot_seed=20261121, generation: dict | None = None, map_params=None, plan: dict | None = None):
+                 boot_seed=20261121, generation: dict | None = None, map_params=None, plan: dict | None = None,
+                 shift: dict | None = None):
         self.build = build
         self.names = list(names)
         self.theta_spec = dict(theta)
@@ -69,6 +70,8 @@ class ToyProblem:
         self.mc_seed, self.boot_seed = mc_seed, boot_seed
         self.plan = dict(plan or {})
         self.map_params = map_params
+        self.shift_spec = dict(shift or {})              # shift-mode phi: {name: (centre, sigma)}
+        self.shift_names = list(self.shift_spec)
         self.model = build(self.mc_events)
         self.ev = ChainEvaluator(self.model, {**self.plan, "seeds": {"nominal": _seed_int(mc_seed)}})
         by = {o.name: o for o in self.model.observables}
@@ -95,6 +98,7 @@ class ToyProblem:
         tp = np.asarray(tp, float)
         names = list(self.theta_spec) + list(self.phi_spec)
         d = dict(zip(names, tp))
+        d.update({n: c for n, (c, _) in self.shift_spec.items()})      # shift-mode phi fixed at nominal
         if self.map_params is not None:
             return self.map_params(d)
         return d, np.zeros(len(self.names))
@@ -132,6 +136,15 @@ class ToyProblem:
 
     def h(self, tp):
         params, shift = self.params_of(tp)
+        return self._to_link(self._predict(params)["pred"]) + shift + self.pert
+
+    def _shift_params(self, phis):
+        return {n: c + s * float(v) for (n, (c, s)), v in zip(self.shift_spec.items(), np.atleast_1d(phis))}
+
+    def h_shift(self, tp, phis):
+        """The predictor with the shift-mode phi at centre + sigma phi_s (unit-normal coordinates, section 5.5)."""
+        params, shift = self.params_of(tp)
+        params = {**params, **self._shift_params(phis)}
         return self._to_link(self._predict(params)["pred"]) + shift + self.pert
 
     def eta_columns(self, mu) -> np.ndarray:

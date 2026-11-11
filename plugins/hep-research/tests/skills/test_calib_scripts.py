@@ -280,5 +280,97 @@ class Phase1Scripts(unittest.TestCase):
         self.assertEqual((rc, out["status"]), (2, "rejected"))
 
 
+class Phase2Scripts(unittest.TestCase):
+    """The phase-2 scripts: JSON with a status and the section 14 exit codes; the decision-record flow through
+    calib_validate.py and calib_data.py with real decision records (section 17: retested in phase 2)."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, obj):
+        p = self.d / name
+        p.write_text(json.dumps(obj))
+        return p
+
+    def test_numeric_subcommands(self):
+        self.assertEqual(run("calib_fit.py", "kstar", "--n", 60), (0, {"status": "ok", "n": 60, "replacement": True,
+                                                                     "k_star": 5}))
+        code, out = run("calib_closure.py", "nc", "--d", 3, "--level", "standard")
+        self.assertEqual((code, out["N_c"]), (0, 99))
+        code, out = run("calib_validate.py", "required-lambda", "--k", 1)
+        self.assertAlmostEqual(out["lambda"], 7.849, places=3)
+        code, out = run("calib_likelihood.py", "bootstrap-size", "--p", 50)
+        self.assertEqual(out["B_min"], 2500)
+        code, out = run("calib_interval.py", "total", "--sigma-q", 1, "--shift", "0.3", "--sigma-boot", 0.02,
+                        "--w", 0.891)
+        self.assertAlmostEqual(out["half_width"], (1 + 0.09 + 0.02 / 0.891) ** 0.5, places=9)
+        code, out = run("calib_closure.py", "not-executed", "--reason", "costly")
+        self.assertIn("closure-not-tested", out["flags"])
+
+    def test_g7_and_g3(self):
+        th = self.write("th.json", [[0.0, 0.0], [0.1, -0.1], [-0.1, 0.05]])
+        S = self.write("s.json", [[0.01, 0.0], [0.0, 0.01]])
+        code, out = run("calib_fit.py", "g7", "--theta-hats", th, "--sigma-mc", S)
+        self.assertEqual((code, out["df"]), (0, 4))
+        region = self.write("r.json", {"t": [0.7, 1.3]})
+        lim = self.write("l.json", {"feasible": {"t": [0.0, 1.0]}})
+        code, out = run("calib_fit.py", "g3", "--region", region, "--limits", lim)
+        self.assertEqual((code, out["finding"]), (1, "g3.outside_limits"))
+
+    def test_statistic_and_declaration(self):
+        x = self.write("x.json", {"r": [1.0, 0.0], "C_r": [[1.0, 0.0], [0.0, 0.0]], "sigma0": [1.0, 1.0],
+                                  "constraints": [[0.0, 1.0]]})
+        code, out = run("calib_validate.py", "statistic", "--input", x)
+        self.assertEqual((code, out["k"], out["T_v"]), (0, 1, 1.0))
+        bad = self.write("b.json", {"C_r0": [[1.0, 1.0], [1.0, 1.0]], "sigma0": [1.0, 1.0], "constraints": []})
+        code, out = run("calib_validate.py", "declaration", "--input", bad)
+        self.assertEqual((code, out["code"]), (2, "validate.undeclared_exact_constraint"))
+
+    def test_decision_records_with_the_ledger(self):
+        """Abandonment makes the failure record final; a passing decision afterwards is rejected (section 15.3.14)."""
+        led, book = self.d / "ledger.json", self.d / "book.json"
+        self.assertEqual(run("calib_data.py", "init", "--ledger", led)[0], 0)
+        plan = self.write("plan.json", {"p": 1})
+        code, k = run("calib_validate.py", "kappa", "--contract-sha256", "a" * 64, "--plan", plan, "--engine", "p2",
+                      "--book", book)
+        self.assertEqual(code, 0)
+        state = json.loads(led.read_text())
+        L = data.Ledger(state)
+        L.open_validation(k["kappa"], "v" * 64, ["v1"], ["c1"], {"contract_sha256": "a" * 64})
+        led.write_text(json.dumps(L.state))
+        self.assertEqual(run("calib_validate.py", "abandon", "--book", book, "--ledger", led, "--kappa",
+                             k["kappa"])[0], 0)
+        code, out = run("calib_validate.py", "decide", "--book", book, "--ledger", led, "--kappa", k["kappa"],
+                        "--outcome", "pass")
+        self.assertEqual((code, out["code"]), (1, "validate.after_abandonment"))
+        self.assertEqual({r["status"] for r in json.loads(led.read_text())["failure_records"]}, {"final"})
+
+    def test_propagate_and_likelihood(self):
+        x = self.write("e.json", {"theta_hat": [0.1], "zeta_hat": [0.0], "Sigma": [[1.0, 0.5], [0.5, 1.0]],
+                                  "i_theta": [0], "i_zeta": [1]})
+        code, out = run("calib_propagate.py", "export", "--input", x)
+        self.assertEqual(code, 0)
+        self.assertAlmostEqual(out["G_zeta"][0][0], 0.5)
+        self.assertAlmostEqual(out["variance"][0][0], 1.0)
+        code, out = run("calib_likelihood.py", "layout", "--contract", FIXTURE_DIR / "toy_detector_design.json")
+        self.assertEqual(code, 0)
+        self.assertEqual(len(out["blocks"]), 26)
+        m = self.write("m.json", {"W_P": 30.0, "S_P": 30.0, "W_F": 70.0, "S_F": 70.0})
+        code, out = run("calib_likelihood.py", "binomial", "--moments", m)
+        self.assertAlmostEqual(out["n_eff"], 100.0)
+
+    def test_fit_scripts_reject_a_non_toy_evaluator(self):
+        c = self.write("c.json", {"observables": [], "parameters": [], "exposure": {"a": 1}})
+        p = self.write("p.json", {"evaluator": {"kind": "g4sim"}})
+        v = self.write("v.json", {})
+        for script, sub in (("calib_fit.py", "fit"), ("calib_identify.py", "g5"), ("calib_shift.py", "g9")):
+            code, out = run(script, sub, "--contract", c, "--plan", p, "--values", v)
+            self.assertEqual(code, 2, (script, out))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -502,6 +502,16 @@
   "tests.core.test_calibration_linear": 2.6,
   "tests.core.test_calibration_design": 5.5,
   "tests.core.test_calibration_kernel_check": 51.1,
-  "tests.core.test_calibration_preflight": 1.7
+  "tests.core.test_calibration_preflight": 1.7,
+  "tests.core.test_calibration_closure": 4.0,
+  "tests.core.test_calibration_data_checks": 0.8,
+  "tests.core.test_calibration_design_noise": 6.6,
+  "tests.core.test_calibration_fit": 8.5,
+  "tests.core.test_calibration_g4": 0.1,
+  "tests.core.test_calibration_identify_shift_interval": 9.9,
+  "tests.core.test_calibration_likelihood": 0.2,
+  "tests.core.test_calibration_propagate": 0.1,
+  "tests.core.test_calibration_toy_problem": 48.6,
+  "tests.core.test_calibration_validate": 24.0
  }
 }
