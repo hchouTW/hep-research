@@ -197,6 +197,13 @@
    "registered_at": "2026-11-11T01:47:31Z",
    "card_commit": "21987316",
    "reason": "execution log only (calibration 7 passes at the A9 bound, clean rerun); thresholds and configurations as registered 4a521280"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "baae4d51acd219a483203b1700df626c6e0e7398ad89c0b2ac28f96fd8e008e0",
+   "registered_at": "2026-11-11T03:20:55Z",
+   "card_commit": "ff45b424",
+   "reason": "before the gate-2 run: its configuration on the toy detector (gate_segmented at the card commit); criteria unchanged"
   }
  ]
 }
