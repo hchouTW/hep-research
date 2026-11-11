@@ -8,7 +8,8 @@ script from cited numbers. The profile tests and the configuration checker both 
 Algorithm (one line at a time):
 1. normalise: superscript runs become `^` plus ASCII (`10³³` -> `10^33`), then Unicode NFKC, then U+2212 -> `-`;
 2. protect configuration labels (`18x275` -> `18   275`);
-3. blank out ids, URLs/DOIs/arXiv ids, ISO dates, years, document references (Table 3.4, §3.2.1, Chapter 8.3, ...),
+3. blank out ids, URLs/DOIs/arXiv ids, ISO dates, years (1900-2099 unless followed by a unit or a count word such
+   as `channels` or `towers`), document references (Table 3.4, §3.2.1, Chapter 8.3, ...),
    unit exponents (`cm^-2`), exponents attached to a letter (`Q^2`), digits inside words that start with a letter
    (`B0`, `PbWO4`) and a leading list marker; each removal keeps the line length, so positions survive;
 4. tokenise numbers, with `10^34`, `1e34` and `2.0 x 10^33` read as single numbers.
@@ -24,6 +25,8 @@ PLUGIN_ROOT = PROFILE_ROOT.parents[2]
 SUPERSCRIPT_ASCII = {"⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8",
                      "⁹": "9", "⁺": "+", "⁻": "-"}
 UNIT_PATTERN = (r"(?:GeV|MeV|TeV|keV|eV|tesla|T|mrad|rad|μm|um|nm|mm|cm|m|ns|ps|fb|pb|nb|kHz|MHz|Hz|s|%|degrees|deg)")
+COUNT_WORDS = (r"(?:channels?|towers?|sensors?|pixels?|modules?|SiPMs?|cells?|crystals?|blocks?|tiles?|staves?"
+               r"|chips?|layers?|photosensors?|MAPS|readout\s+channels?)")
 PERFORMANCE_WORDS = ("resolution", "separation", "efficiency", "rejection", "purity", "acceptance", "precision",
                      "accuracy", "timing precision", "noise", "misidentification")
 NUMBER_KINDS = ("requirement", "design-target", "design-value", "proposal")
@@ -34,7 +37,7 @@ REMOVALS = (
     re.compile(r"eic:[SC]\d\d"),
     re.compile(r"https?://\S+|\b10\.\d{4,9}/\S+|arXiv:\s*\d{4}\.\d{4,5}(?:v\d+)?|\bv\d+\b"),
     re.compile(r"\b\d{4}-\d{2}-\d{2}\b"),
-    re.compile(r"(?<![\w.])(?:19|20)\d\d(?![\w.])(?!\s*" + UNIT_PATTERN + r"(?![A-Za-z]))"),
+    re.compile(r"(?<![\w.])(?:19|20)\d\d(?![\w.])(?!\s*(?:" + UNIT_PATTERN + "|" + COUNT_WORDS + r")(?![A-Za-z]))"),
     re.compile(r"(?:\b(?:Tables?|Sections?|Fig\.|Figs\.|Figures?|Eq\.|Eqs\.|Tier|Chapters?|p\.|pp\.|page|pages|Version)"
                r"|§)\s*\d+(?:\.\d+)*(?:\s*[-–]\s*\d+(?:\.\d+)*)?", re.IGNORECASE),
     re.compile(r"(?<![A-Za-z])(?:cm|m|s|mm|nm|μm|um|Hz|fb|pb|nb|GeV|MeV|TeV|keV|eV)(\^?-\d+)"),

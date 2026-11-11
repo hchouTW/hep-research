@@ -792,6 +792,8 @@ Final release gate G3 of the EIC profile expansion (milestone M3, configuration 
 
 Environment notes: both full runs used TMPDIR on a private local folder under `/var/tmp`. On this host, TMPDIR under `/tmp` fails the name-extraction tests (an empty `/tmp/.git` folder makes temporary folders look like a repository), and TMPDIR on the shared CephFS work area fails two revocation tests (ancestor folders are writable by other accounts through ACLs, which the revocation check correctly reports); neither involves code changed here. Software checks only; not physical validity.
 
+Follow-up (2026-11-11, open question Q12): `number_rules.py` keeps a number from 1900 to 2099 when a count word follows it (`2000 channels`); the profile suite then passed with 98 tests (new `test_years_and_counts_in_the_year_range`), every module still passed the per-number test unchanged (all 24 such numbers in the modules are dates), and `run_all_checks.py --part static` passed (32 pass, 0 fail, 0 skip). Q10 (`scope.number_kind` not shown by `render_index.py`) was accepted as is.
+
 ## EIC-EXPANSION-M2 (2026-11-11, E6, version 0.65.1): experiment:eic 0.5.0
 
 Release gate G2 of the EIC profile expansion (milestone M2, ePIC detector values), with `reference:detector-atlas` 0.3.1.

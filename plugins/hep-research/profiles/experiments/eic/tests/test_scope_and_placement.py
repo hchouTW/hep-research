@@ -176,6 +176,14 @@ class NumberRuleTests(unittest.TestCase):
         self.assertEqual(nr.tokens("CHEP 2023 proceedings"), [])
         self.assertEqual(nr.tokens("1.7T"), [1.7])
 
+    def test_years_and_counts_in_the_year_range(self):
+        """Q12: a 1900-2099 number is a year unless a unit or a count word follows it."""
+        self.assertEqual(nr.tokens("PDR draft, Dec 2024; in 2019; the 2021 Conceptual Design Report"), [])
+        self.assertEqual(nr.tokens("2000 channels and 1920 towers"), [2000.0, 1920.0])
+        self.assertEqual(nr.tokens("2024 SiPMs"), [2024.0])
+        self.assertEqual(nr.tokens("a 2000 mm long vessel"), [2000.0])
+        self.assertEqual(nr.unsourced_numbers("- read out by 2000 channels (eic:C90)", self.MAGNET), [2000.0])
+
     def test_scientific_notation(self):
         self.assertEqual(nr.tokens("2.0 x10^33"), [2e33])
         self.assertEqual(nr.tokens("2.0 x 10^33"), [2e33])
