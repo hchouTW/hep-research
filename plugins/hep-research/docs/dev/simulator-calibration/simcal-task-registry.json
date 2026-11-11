@@ -162,6 +162,13 @@
    "registered_at": "2026-11-10T22:34:05Z",
    "card_commit": "6cf90549",
    "reason": "execution log only (WP1 to WP4 part 1: readings implemented and engine checks); thresholds and test designs as registered 51facff0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "59c119033ef4319118838f6f68fa12f879e821df766753d56d1b1257bf3fb652",
+   "registered_at": "2026-11-11T00:17:44Z",
+   "card_commit": "036610b7",
+   "reason": "execution log only (WP4 part 2 to the toy-detector problem: readings implemented and engine checks); thresholds and test designs as registered 51facff0"
   }
  ]
 }
