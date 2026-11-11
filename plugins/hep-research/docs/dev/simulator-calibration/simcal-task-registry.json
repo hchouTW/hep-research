@@ -169,6 +169,13 @@
    "registered_at": "2026-11-11T00:17:44Z",
    "card_commit": "036610b7",
    "reason": "execution log only (WP4 part 2 to the toy-detector problem: readings implemented and engine checks); thresholds and test designs as registered 51facff0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "21bf05947eac9cfcae0a73417ccfbeb5c3d07271057f84948921ba1d52d67a25",
+   "registered_at": "2026-11-11T00:46:49Z",
+   "card_commit": "84e042e9",
+   "reason": "before their runs: the configurations of calibrations 3, 5, 7, 13, 14 (functions of calibration_phase2_gates.py at the card commit) and the user's scoping (linear-toy calibrations now, toy-detector ones re-registered at a reduced size later); thresholds unchanged"
   }
  ]
 }
