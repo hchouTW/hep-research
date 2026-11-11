@@ -166,6 +166,17 @@
    "triggers": ["particle identification"],
    "index_row_keyword": "Detector performance",
    "expected_eic_files": ["modules/working-rules.md"]
+  },
+  {
+   "id": "eic-spec-check",
+   "request": "Check the EIC-specific conventions in my measurement-spec.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["measurement"],
+   "index_row_keyword": "EIC spec check",
+   "expected_eic_files": ["modules/facility/beam-configurations.md"]
   }
  ]
 }

@@ -2,13 +2,13 @@
  "plugin_version": "0.65.1",
  "profile": {
   "id": "experiment:eic",
-  "version": "0.5.0"
+  "version": "0.6.0"
  },
  "project_config": {
   "experiments": [
    {
     "profile": "experiment:eic",
-    "version": "0.5.0"
+    "version": "0.6.0"
    }
   ],
   "theory": []
@@ -206,6 +206,19 @@
    ],
    "expected_files": [
     "modules/working-rules.md"
+   ],
+   "pass": true
+  },
+  {
+   "id": "eic-spec-check",
+   "request": "Check the EIC-specific conventions in my measurement-spec.",
+   "decision": "use",
+   "source": "request",
+   "files_read": [
+    "modules/facility/beam-configurations.md"
+   ],
+   "expected_files": [
+    "modules/facility/beam-configurations.md"
    ],
    "pass": true
   }

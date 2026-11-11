@@ -61,6 +61,11 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(by_name["facility-and-detector-context"]["status"], "documented")
         self.assertEqual(by_name["software-execution"]["status"], "unavailable")
         self.assertRegex(by_name["software-execution"]["scope"].lower(), r"\b(no|not|nothing)\b")
+        self.assertEqual(by_name["sourced-design-values"]["status"], "tested-in-declared-environment")
+        self.assertEqual(by_name["eic-conventions-check"]["status"], "tested-in-declared-environment")
+        self.assertIn("tests/test_eic_conventions.py", by_name["eic-conventions-check"]["tests"])
+        self.assertTrue((ROOT / "scripts" / "check_eic_conventions.py").is_file())
+        self.assertIn("runs no epic software", PROFILE["scope"].lower())
         for cap in PROFILE["capabilities"]:
             if cap["status"] in ("demonstrated-on-synthetic-data", "tested-in-declared-environment"):
                 for t in cap["tests"]:

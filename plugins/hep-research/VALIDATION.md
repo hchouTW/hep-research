@@ -775,6 +775,23 @@ as invoked when its `SKILL.md` is read; 54 runs read one SKILL.md and 7 read two
 hand). GitHub source: `codex plugin marketplace add hchouTW/hep-research` in a throwaway `CODEX_HOME` found the
 marketplace file and `codex plugin add` installed 0.2.0 with the seven skills; removal clean; no login or model call.
 
+## EIC-EXPANSION-M3 (2026-11-11, E6, version 0.65.1): experiment:eic 0.6.0
+
+Final release gate G3 of the EIC profile expansion (milestone M3, configuration checker), with the full aggregate and relocation checks (FULL_CHECK_AT final).
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 97 tests; `ledger.py --strict` exit 0 (38 sources, 93 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Configuration checker | two positive fixtures exit 0 and pass `contracts/validate.py`; nine negative cases each exit 1 with only their own code; deprecated keys reported as info; with `--profiles-from`, core keys such as `rapidity_frame` not reported; non-JSON and non-spec input exit 2 | `tests/test_eic_conventions.py` (14 tests) |
+| Registry, layering, budgets, capabilities | pass; registry 3007 B ≤ 3072, eic index 3369 B ≤ 4096; no `profile.unbacked_capability` | `contracts/registry.py`, `tools/check_layering.py` |
+| `detector_atlas.py audit --strict`; atlas and geometry-cases suites; frozen set | ok on every `facility/` and `detector/` module; suites pass; frozen records identical to the start commit | gate log |
+| Plugin scans | pass: `test_eic_profile_routing` (16 scenarios, 5 atlas queries), `test_evidence_query`, `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract`; `check_naming.py` no new finding | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | release gate |
+| `run_all_checks.py` (full, `--jobs 4`) | 34 pass, 0 fail, 0 skip; unit tests 7220 run, 0 failures, 0 errors, 385 skipped | check-run record of 2026-11-11T10:34:47Z |
+| `check_relocation.py` (`--jobs 4`) | 33 pass, 0 fail, 1 skip (`codex-plugin-load`: host CLI check, unverified, not passed) | relocation record of 2026-11-11T11:05:58Z |
+
+Environment notes: both full runs used TMPDIR on a private local folder under `/var/tmp`. On this host, TMPDIR under `/tmp` fails the name-extraction tests (an empty `/tmp/.git` folder makes temporary folders look like a repository), and TMPDIR on the shared CephFS work area fails two revocation tests (ancestor folders are writable by other accounts through ACLs, which the revocation check correctly reports); neither involves code changed here. Software checks only; not physical validity.
+
 ## EIC-EXPANSION-M2 (2026-11-11, E6, version 0.65.1): experiment:eic 0.5.0
 
 Release gate G2 of the EIC profile expansion (milestone M2, ePIC detector values), with `reference:detector-atlas` 0.3.1.

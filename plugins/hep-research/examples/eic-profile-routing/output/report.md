@@ -1,6 +1,6 @@
 # experiment:eic usage example
 
-Profile experiment:eic 0.5.0 selected through hep-research.project.json; wrong pin rejected: True.
+Profile experiment:eic 0.6.0 selected through hep-research.project.json; wrong pin rejected: True.
 
 | Scenario | Decision | Files read |
 |---|---|---|
@@ -19,6 +19,7 @@ Profile experiment:eic 0.5.0 selected through hep-research.project.json; wrong p
 | epic-readout | use | modules/detector/epic-readout-and-daq.md |
 | epic-early-running | use | modules/detector/epic-early-running.md |
 | epic-pi-k-separation | use | modules/working-rules.md |
+| eic-spec-check | use | modules/facility/beam-configurations.md |
 
 Project config alone (request names no profile): decision use, source project-config, experiments experiment:eic.
 

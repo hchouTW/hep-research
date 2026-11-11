@@ -7,6 +7,7 @@ Profile `experiment:eic` adds Electron-Ion Collider (EIC) facility context and e
 | Beam species and polarization overview, project stage, where EIC design values live (EIC facility) | `modules/facility/eic-facility-context.md` |
 | Beam configurations: species, beam energies, polarization, luminosity, derived center-of-mass energies, spec field format (EIC facility) | `modules/facility/beam-configurations.md` |
 | Crossing angle, crab crossing, space around the interaction point (EIC facility) | `modules/facility/interaction-region.md` |
+| EIC spec check: EIC-specific conventions and beam fields of a measurement- or theory-spec (field format; checker `scripts/check_eic_conventions.py`) | `modules/facility/beam-configurations.md` |
 | ePIC detector concept: magnet, tracking, calorimetry, PID, far-forward/backward, data acquisition | `modules/detector/epic-detector-context.md` |
 | ePIC tracking subsystems: silicon vertex tracker, MPGDs, tracking volume | `modules/detector/epic-tracking.md` |
 | ePIC particle identification detectors: pfRICH, hpDIRC, dRICH, time of flight | `modules/detector/epic-pid.md` |
