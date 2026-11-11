@@ -239,6 +239,13 @@
    "registered_at": "2026-11-11T05:23:03Z",
    "card_commit": "89ef3c99",
    "reason": "execution log only (gate 1 passes); as registered dc4eace0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "96460ab1f25e8caa62fbfec84f3f23ff6dfaddde20ad0fab6c0e3d52274d398f",
+   "registered_at": "2026-11-11T05:39:35Z",
+   "card_commit": "ed2f4736",
+   "reason": "before their runs: the configurations of calibrations 9 and 12 (functions at the card commit); thresholds unchanged"
   }
  ]
 }
