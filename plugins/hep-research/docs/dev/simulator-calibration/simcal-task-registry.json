@@ -190,6 +190,13 @@
    "registered_at": "2026-11-11T01:33:18Z",
    "card_commit": "4f56bf7e",
    "reason": "before the calibration-7 rerun: approval A9 (b_J bound tightened 0.15 -> 0.10, paired K_l = 0 reference); calibration 7 re-registered as a fresh run with V_MC at theta_ref (the first run superseded); tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6915665b097be2d5814df7f7d8758a39c80640ae8b3d9cad8987b5f054806d35",
+   "registered_at": "2026-11-11T01:47:31Z",
+   "card_commit": "21987316",
+   "reason": "execution log only (calibration 7 passes at the A9 bound, clean rerun); thresholds and configurations as registered 4a521280"
   }
  ]
 }
