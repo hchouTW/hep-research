@@ -9039,6 +9039,29 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.66.0 release check (2026-11-11, CI and E6)
+
+Release commit `5af131ad` on `release/0.66.0`, based on main `401f322f` (PR #387 merged). Minor release: the `experiment:eic` expansion, `experiment:eic` 0.3.0 -> 0.6.0 (evidence in EIC-EXPANSION-M1 to M3 above, and the Q12 follow-up in M3) and `reference:detector-atlas` 0.3.1. Contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- a CHANGELOG `0.66.0` section (the former `Unreleased` entries).
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #387 at `f3722217` | success (27 pass, 3 skipped) |
+| CI `tests.yml` on PR #390 at `5af131ad` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `5af131ad`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7220 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `5af131ad`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7220 tests, 0 failures, 402 skipped |
+
+Environment note: on E6, `TMPDIR` under `/tmp` or on the shared CephFS work area fails tests unrelated to this release (see the EIC-EXPANSION-M3 environment notes).
+
+**E2 and E5 were not run for this release.** The release changes no Geant4, g4sim or GPU path, so no real-hardware check applies.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.65.1 release check (2026-11-09, CI and E2)
 
 Release commit `b51f502f` on `release/0.65.1`, based on main `d85dde30` (PR #382 merged). Patch release: the `FTFP_BERT` entry of `contracts/rules/geant4_datasets.json`, its case in `probe_datasets.py` and its assertion in `tests/adapters/test_g4proto_reacquire.py`. Contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
