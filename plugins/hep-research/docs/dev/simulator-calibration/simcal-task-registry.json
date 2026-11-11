@@ -218,6 +218,13 @@
    "registered_at": "2026-11-11T04:03:22Z",
    "card_commit": "cf8d33a4",
    "reason": "before the gate-3 run: its implementation (gate_shift at the card commit), the cases and seeds as registered 51facff0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "387c795ab425495e5da2ed3d53826c7009ce418c4f5d7404d954f7605af5b001",
+   "registered_at": "2026-11-11T04:03:39Z",
+   "card_commit": "fb2e1404",
+   "reason": "execution log only (gate 3 passes); as registered 2b429ea1"
   }
  ]
 }
