@@ -183,6 +183,13 @@
    "registered_at": "2026-11-11T00:56:18Z",
    "card_commit": "b9d9d60d",
    "reason": "execution log only (results of calibrations 3, 5, 7, 13, 14; calibration 7 fails, blocked report); thresholds and configurations as registered 6e8842e9"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6661bff7780570c14da954397fe79624a8062fb885dfa0a7f69e6728ae7576b5",
+   "registered_at": "2026-11-11T01:33:18Z",
+   "card_commit": "4f56bf7e",
+   "reason": "before the calibration-7 rerun: approval A9 (b_J bound tightened 0.15 -> 0.10, paired K_l = 0 reference); calibration 7 re-registered as a fresh run with V_MC at theta_ref (the first run superseded); tightening only"
   }
  ]
 }
