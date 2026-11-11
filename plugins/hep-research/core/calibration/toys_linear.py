@@ -81,7 +81,7 @@ class LinearProblem:
         self.data = data
         self.truth = truth
         self.boot_seed = (mc_seed, 1)
-        self.V_depends_on_theta = cfg.count_c > 0
+        self.V_depends_on_theta = cfg.count_c > 0 or cfg.e_scale is not None
         self.shift_names = [f"phi{l}" for l in range(cfg.phi_cols.shape[1])] if cfg.phi_cols is not None else []
         self.degeneracy_modes = list(cfg.degeneracy_modes)
         if cfg.poisson is not None:
@@ -209,7 +209,17 @@ class LinearProblem:
         if c.S is not None:
             S[:n] = c.S
         tau = {"counts": self.tau * self.mc_f_or_one()} if c.poisson is not None else {}
-        return L.Reference(V_G=Vd + c.V_MC, V_std=Vd, U=U, S=S, tau=tau, constraints=list(c.constraints)).finalize()
+        return L.Reference(V_G=Vd + self.V_MC_at(tp), V_std=Vd, U=U, S=S, tau=tau,
+                           constraints=list(c.constraints)).finalize()
+
+    def V_MC_at(self, theta) -> np.ndarray:
+        """V_MC at theta_ref (section 7.3: recomputed at every reference point): with e(theta) = e0 (1 + g theta) the
+        noise covariance is D V_MC D, D = diag(1 + g theta)."""
+        c = self.cfg
+        if c.e_scale is None:
+            return c.V_MC
+        Dg = 1.0 + c.e_scale @ np.asarray(theta, float)[:self.d]
+        return c.V_MC * np.outer(Dg, Dg)
 
     def bounds(self):
         return list(self.cfg.bounds)
