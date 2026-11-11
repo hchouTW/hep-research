@@ -58,7 +58,8 @@ def hints(problem, direction, names) -> list:
     heavy = {n for n, v in zip(names, direction) if abs(v) >= 0.3}
     out = []
     for m in getattr(problem, "degeneracy_modes", []) or []:
-        if len(heavy & set(m["parameters"])) >= min(2, len(m["parameters"])):
+        par = set(m["parameters"])
+        if heavy & par and (heavy <= par or len(heavy & par) >= 2):     # the direction lies in the mode's parameters
             out.append({"mode": m["mode"], "parameters": m["parameters"], "signal": m.get("signal")})
     if not out:
         out.append({"mode": "unspecified", "parameters": sorted(heavy), "signal": None})
