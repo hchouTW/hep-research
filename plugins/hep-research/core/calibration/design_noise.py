@@ -18,7 +18,7 @@ from . import linear
 from . import validate as V
 
 F_DEFAULT = 0.1
-BJ_BOUND = 0.15
+BJ_BOUND = 0.10                    # approval A9 (2026-11-11): tightened from Part B's 0.15 after calibration 7
 
 
 class DesignError(ValueError):
@@ -96,8 +96,8 @@ def b_J(J: np.ndarray, W: np.ndarray, Ks: list) -> np.ndarray:
 
 
 def p5_b_J(points: list, bound: float = BJ_BOUND) -> dict:
-    """P5's b_J item over the scan points: each point {J, W, K: [K_l], sigma_tot}; |b_J,i| <= 0.15 sigma_tot,i^design
-    at every point, the worst deciding. K_l = 0 (noise not varying with theta) passes."""
+    """P5's b_J item over the scan points: each point {J, W, K: [K_l], sigma_tot}; |b_J,i| <= BJ_BOUND sigma_tot,i^design
+    at every point, the worst deciding (0.10 by approval A9; Part B's design value was 0.15). K_l = 0 passes."""
     worst = (0.0, None)
     for i, p in enumerate(points):
         if not any(np.any(K) for K in p["K"]):

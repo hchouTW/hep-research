@@ -19,14 +19,12 @@
    "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10"
   },
   "phase-2": {
-   "state": "blocked",
+   "state": "in-progress",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
    "task_card_sha256": "6361f17d463f64c2ed766f2a4fc5787e32f1bbc07640a559cc8d587e63cd30ea",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
-   "blocked_on": [
-    "calibration 7 (section 8.7 row 2007, b_J bound of P5): extra 68% undercoverage 0.0145 > 0.01 at 0.15 sigma_tot; author decision (section 19-13)"
-   ],
+   "blocked_on": [],
    "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10"
   },
   "phase-3": {
@@ -71,5 +69,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-11T00:56:18Z"
+ "updated": "2026-11-11T01:27:32Z"
 }

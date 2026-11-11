@@ -306,7 +306,7 @@ def cal7_bj(reps: int = 10_000) -> dict:
     """Calibration 7: the linear Gaussian configuration with MC noise varying with theta (e = e0 (1 + g theta)),
     scaled so that max_i |b_J,i| / sigma_tot,i = 0.05, 0.10, 0.15, 0.25; >= 10^4 repetitions per point; the extra
     68% and 95% undercoverage of the interval +-z sigma_tot relative to the same configuration with K_l = 0 is <= 0.01
-    at and below 0.15."""
+    at and below the bound (0.10 by approval A9)."""
     from core.calibration import design_noise as DN
     from core.calibration import toys_linear as T
     rng0 = np.random.default_rng(cal_seed(7, 0))
@@ -316,10 +316,13 @@ def cal7_bj(reps: int = 10_000) -> dict:
     W = np.linalg.inv(base.V_data + base.V_MC)
     st = np.sqrt(np.diag(np.linalg.inv(base.J.T @ W @ base.J)))
 
-    def bj_ratio(scale):
+    def bj_ratio(scale):                     # with V_MC at the truth (the toy recomputes it at theta_ref, e19bfc76)
         g = g0 * scale
-        Ks = [np.diag(g[:, l]) @ base.V_MC @ np.diag(1 + g @ truth) for l in range(2)]
-        return float(np.max(np.abs(DN.b_J(base.J, W, Ks)) / st))
+        Dg = 1 + g @ truth
+        Wt = np.linalg.inv(base.V_data + base.V_MC * np.outer(Dg, Dg))
+        stt = np.sqrt(np.diag(np.linalg.inv(base.J.T @ Wt @ base.J)))
+        Ks = [np.diag(g[:, l]) @ base.V_MC @ np.diag(Dg) for l in range(2)]
+        return float(np.max(np.abs(DN.b_J(base.J, Wt, Ks)) / stt))
 
     def coverage(scale, label):
         cfg = T.linear_config(n=20, d=2, mc_ratio=0.1, seed=int(cal_seed(7, 1) % 2 ** 31))
@@ -342,7 +345,7 @@ def cal7_bj(reps: int = 10_000) -> dict:
         d68, d95 = c0[0] - cv[0], c0[1] - cv[1]
         out[f"bJ={target}"] = {"scale": sc, "cover68": cv[0], "cover95": cv[1], "extra_under68": d68,
                               "extra_under95": d95}
-        if target <= 0.15 and (d68 > 0.01 or d95 > 0.01):
+        if target <= DN.BJ_BOUND + 1e-12 and (d68 > 0.01 or d95 > 0.01):
             ok = False
     return {"calibration": 7, "row": 2007, "results": out, "passed": ok, "reps": reps}
 
