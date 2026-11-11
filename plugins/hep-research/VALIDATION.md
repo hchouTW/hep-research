@@ -775,6 +775,24 @@ as invoked when its `SKILL.md` is read; 54 runs read one SKILL.md and 7 read two
 hand). GitHub source: `codex plugin marketplace add hchouTW/hep-research` in a throwaway `CODEX_HOME` found the
 marketplace file and `codex plugin add` installed 0.2.0 with the seven skills; removal clean; no login or model call.
 
+## EIC-EXPANSION-M2 (2026-11-11, E6, version 0.65.1): experiment:eic 0.5.0
+
+Release gate G2 of the EIC profile expansion (milestone M2, ePIC detector values), with `reference:detector-atlas` 0.3.1.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 83 tests; `ledger.py --strict` exit 0 (38 sources, 93 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Per-number sourcing, performance words, scope separation | every number in the six new detector modules and the rewritten overview is in a cited numeric claim with a `scope.number_kind`; no number near a performance word | `test_scope_and_placement.py` |
+| `detector_atlas.py audit --strict` | ok on every `facility/` and `detector/` module | gate log |
+| Registry, layering, budgets | pass; registry 3007 B ≤ 3072, eic index 3172 B ≤ 4096 | `contracts/registry.py`, `tools/check_layering.py` |
+| Atlas link | unbound queries for ePIC, EIC and "Electron-Ion Collider" return `see_profile: experiment:eic`; bound to `experiment:eic`, ePIC returns 20 and EIC 16 profile rows | `tests/examples/test_eic_profile_routing.py`; atlas suite pass |
+| Geometry cases; frozen set | pass; eic:S04, S05, S10, C08, C09, C10-C37 identical to the start commit | run helper `check-frozen` |
+| Example and plugin scans | pass: example (15 scenarios, 5 atlas queries), `test_evidence_query`, `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract` | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | check-run record of 2026-11-11T07:31:18Z |
+| Independent verification | 22 numeric claims (C58-C76, C82-C84) and the new non-numeric claims ending in 0 or 5 supported by three verifiers that wrote no content, after fixes (counts the PDR draft states inconsistently removed from C66, C72, C74; wording of C76, C80, C82, C84); none flagged as performance | run log of the expansion |
+
+ePIC values are design values (construction parameters) from a draft design report and subsystem papers, and proposals of the Early Science Report; none is a measured or performance value. Software checks only.
+
 ## EIC-EXPANSION-M1 (2026-11-11, E6, version 0.65.1): experiment:eic 0.4.0
 
 Release gate G1 of the EIC profile expansion (milestone M1, facility values) on the `eic-profile-expansion` branch, before the gate commit.

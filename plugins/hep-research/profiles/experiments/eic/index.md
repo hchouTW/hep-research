@@ -8,6 +8,12 @@ Profile `experiment:eic` adds Electron-Ion Collider (EIC) facility context and e
 | Beam configurations: species, beam energies, polarization, luminosity, derived center-of-mass energies, spec field format (EIC facility) | `modules/facility/beam-configurations.md` |
 | Crossing angle, crab crossing, space around the interaction point (EIC facility) | `modules/facility/interaction-region.md` |
 | ePIC detector concept: magnet, tracking, calorimetry, PID, far-forward/backward, data acquisition | `modules/detector/epic-detector-context.md` |
+| ePIC tracking subsystems: silicon vertex tracker, MPGDs, tracking volume | `modules/detector/epic-tracking.md` |
+| ePIC particle identification detectors: pfRICH, hpDIRC, dRICH, time of flight | `modules/detector/epic-pid.md` |
+| ePIC calorimeters, electromagnetic and hadronic, by region | `modules/detector/epic-calorimetry.md` |
+| ePIC far-forward and far-backward: B0, Roman pots, ZDC, luminosity monitor, low-Q2 tagger | `modules/detector/epic-far-forward-backward.md` |
+| ePIC readout and data acquisition: streaming readout, front-end ASICs | `modules/detector/epic-readout-and-daq.md` |
+| ePIC early running: proposed configurations (not facility values) | `modules/detector/epic-early-running.md` |
 | ePIC software and data formats: eic-shell, EICrecon, epic geometry, EDM4hep/EDM4eic | `modules/detector/epic-software-entry-points.md` |
 | What is general method, what is EIC, what is ePIC, what belongs to the project | `modules/placement-inventory.md` |
 | Which sources count, how to quote them, "latest" | `modules/sources/source-policy.md`, then `evidence/index.md` |

@@ -1,6 +1,6 @@
 # EIC profile
 
-Profile `experiment:eic`, version 0.4.0. It adds Electron-Ion Collider facility context and ePIC experiment context
+Profile `experiment:eic`, version 0.5.0. It adds Electron-Ion Collider facility context and ePIC experiment context
 to the core skills (`hep-measurement`, `hep-detector`, `hep-theory`, `hep-computing`), from public documents only.
 It is never an entry point. Not endorsed by the EIC project, BNL, Jefferson Lab or the ePIC Collaboration.
 
@@ -47,7 +47,7 @@ Name the EIC or ePIC in a request, or pin the profile in `hep-research.project.j
 
 ```json
 {"schema_version": "1.0.0", "plugin_version": ">=0.1,<1.0",
- "experiments": [{"profile": "experiment:eic", "version": "0.4.0"}]}
+ "experiments": [{"profile": "experiment:eic", "version": "0.5.0"}]}
 ```
 
 Generic DIS kinematics and QCD go to `hep-theory` with no experiment profile. Detector performance is not shipped:
