@@ -28,6 +28,7 @@ from core.calibration import likelihood as L  # noqa: E402
 from core.calibration import propagate as P  # noqa: E402
 from core.calibration import toy  # noqa: E402
 from core.calibration import toy_problem as TP  # noqa: E402
+from core.calibration import validate as V  # noqa: E402
 from scipy import stats  # noqa: E402
 
 FILES = ["core/calibration/" + f for f in ("likelihood.py", "fit.py", "propagate.py", "toy_problem.py", "toy.py",
@@ -893,6 +894,710 @@ def gate1_shape_total(reps: int = 2000, seed: int = SEED_GATE1 + 110) -> dict:
 
 
 # ------------------------------------------------------------------ gate 1 assembly
+# ------------------------------------------------------------------ gate 1 on the toy detector (review F1, F2)
+TRACK_THETA = {"momentum_scale": {"bounds": (0.5, 1.5), "prior": (0.98, 1.02)},
+               "sum_term_a": {"bounds": (0.2, 3.0), "prior": (0.8, 1.2)}}
+TRACK_TRUTH = np.array([1.004, 1.05])          # inside the prior box, away from its centre (the fits start there)
+SEED_T1 = 20261200
+
+
+def track_build(n):
+    return toy.build_toy(n, "full", 1.0, ["track5", "track2"])
+
+
+def track_problem(r, cal, val, mc=4000, exposure=400, val_exposure=4000, shift=None, seed=SEED_T1):
+    """The track branch of the toy detector as a fit problem (theta = momentum scale and sum term a; P3 at the prior
+    centre passes with lambda_min 0.95), its validation observables from a separate sample of the same detector;
+    repetition r has its own nominal MC, bootstrap and validation MC (the size is averaged over the MC noise)."""
+    return TP.ToyProblem(track_build, cal, TRACK_THETA, exposure=exposure, mc_events=mc, mc_seed=(seed, r, 1),
+                         boot_seed=(seed, r, 2), val_names=val, val_mc_seed=(seed, r, 3), val_exposure=val_exposure,
+                         shift=shift)
+
+
+def _size_judge(rate, alpha=0.05):
+    return abs(rate - alpha) <= 0.25 * alpha
+
+
+def t1_v_cross_terms(reps: int = 2000, seed: int = SEED_T1 + 10, r0: int = 0) -> dict:
+    """Item 11 (V), on the toy detector: T_v with the analytic C_r (V_vv plus the propagation term J_v Sigma J_v^T)
+    against chi2_k over `reps` repetitions of actual data (fresh calibration and validation events at the truth, a
+    fresh nominal MC): rejection within alpha +- 25%; the formula omitting the propagation term rejects above
+    alpha + 25%. Non-converged fits are counted and must stay <= 1%."""
+    cal = ["track5_p_mean", "track5_p_width", "track2_p_mean", "track2_p_width"]
+    val = ["track2_p_mean", "track5_p_width", "track2_p_width"]
+    rej, rej0, X, n = 0, 0, 0, 0
+    for r in range(r0, r0 + reps):
+        p = track_problem(r, cal, val, seed=seed)
+        rng = np.random.default_rng([seed, r])
+        truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
+        p.data = p.simulate(truth, rng, nominal=False)
+        yv = p.simulate_val(truth, rng, nominal=False)
+        f = F.iterate(p, p.initial_beta())
+        if not f.converged:
+            X += 1
+            continue
+        n += 1
+        p.set_val_point(f.beta[:2])
+        pc = V.holdout_pieces(p, f, yv)
+        Cp, k = V.c_r_plus(pc["C_r"], pc["s"], [])
+        rej += V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, k)
+        pc0 = V.holdout_pieces(p, f, yv, omit=("propagation",))
+        Cp0, k0 = V.c_r_plus(pc0["C_r"], pc0["s"], [])
+        rej0 += V.t_v(pc0["r"], Cp0) > stats.chi2.ppf(0.95, k0)
+    return _judge_cross({"item": "11 V cross terms (toy detector)", "rej": int(rej), "rej_omitted": int(rej0), "n": n,
+                         "X": X, "reps": reps})
+
+
+def _judge_cross(c):
+    size, size0 = c["rej"] / max(c["n"], 1), c["rej_omitted"] / max(c["n"], 1)
+    ok = _size_judge(size) and size0 > 0.0625 and c["X"] <= 0.01 * c["reps"]
+    return {**c, "size_correct": size, "size_omitted": size0, "ok": bool(ok),
+            "criterion": "correct within 0.05 +- 0.0125, omitted > 0.0625, X <= 1%"}
+
+
+SHIFT_SIGMA = 0.07
+
+
+def t1_v_shift(reps: int = 2000, seed: int = SEED_T1 + 20, r0: int = 0) -> dict:
+    """Item 11 (V), shift-mode phi on the toy detector: sum_term_b in shift mode (centre 0.5, sigma 0.07; exposures 2000 and 16000 for validation, so that
+    the phi-induced residual dominates C_r), its true
+    value drawn from its prior in each repetition and fixed at nominal in the fit; C_r with sum d_l d_l^T (the
+    symmetric +-1 sigma refits) gives a rejection rate within alpha +- 25%; only the indirect effect, and the refit
+    derivative with a minus sign, give a rate outside alpha +- 25%."""
+    from core.calibration import shift as Sh
+    cal = ["track5_p_mean", "track5_p_width", "track2_p_width", "track5_dx_width"]
+    val = ["track5_dx_width", "track2_dx_width", "track2_p_width"]
+    res = {"ok": 0, "minus": 0, "indirect": 0}
+    X, X2, n = 0, 0, 0
+    for r in range(r0, r0 + reps):
+        p = track_problem(r, cal, val, seed=seed, shift={"sum_term_b": (0.5, SHIFT_SIGMA)}, exposure=2000,
+                          val_exposure=16000)
+        rng = np.random.default_rng([seed, r])
+        truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
+        phi = rng.normal(size=1)
+        p.data = p.simulate(truth, rng, phi, nominal=False)
+        yv = p.simulate_val(truth, rng, phi, nominal=False)
+        f = F.iterate(p, p.initial_beta())
+        if not f.converged:
+            X += 1
+            continue
+        rf = Sh.refits(p, f, multistart=False)
+        if not (rf[(0, 1)]["converged"] and rf[(0, -1)]["converged"]):     # the refits d_l uses (D52 (b))
+            X += 1
+            continue
+        X2 += not (rf[(0, 2)]["converged"] and rf[(0, -2)]["converged"])  # G9's +-2 refits: recorded only
+        n += 1
+        p.set_val_point(f.beta[:2])
+
+        def mu_v(beta, phis, p=p):
+            return p.h_val(beta[:2], phis)
+        for lab, kw in (("ok", {}), ("minus", {"sign": -1.0}), ("indirect", {"direct": False})):
+            pc = V.holdout_pieces(p, f, yv, d_cols=Sh.d_columns(p, f, rf, mu_v, **kw))
+            Cp, k = V.c_r_plus(pc["C_r"], pc["s"], [])
+            res[lab] += int(V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, k))
+    return _judge_shift({"item": "11 V shift-mode phi (toy detector)", "rejections": res, "n": n, "X": X,
+                         "X_pm2_refits": X2, "reps": reps})
+
+
+def _judge_shift(c):
+    rate = {k: v / max(c["n"], 1) for k, v in c["rejections"].items()}
+    ok = _size_judge(rate["ok"]) and not _size_judge(rate["minus"]) and not _size_judge(rate["indirect"]) and \
+        c["X"] <= 0.05 * c["reps"]  # repetitions whose +-1 sigma refits do not converge (G9 would fail) are excluded
+    return {**c, "rates": rate, "ok": bool(ok),
+            "criterion": "correct within 0.05 +- 0.0125; minus sign and indirect only outside; X <= 5% (+-1 refits)"}
+
+
+TRACK_CAL = ["track5_p_mean", "track5_p_width", "track2_p_mean", "track2_p_width"]
+
+
+def _track_fit(r, seed, cal=None, truth=TRACK_TRUTH, theta=None, links=None, data_params=None, **kw):
+    """A toy-detector track fit on actual data at the truth (fresh events, `data_params` overriding simulator
+    settings in the data only, i.e. an effect the simulation lacks)."""
+    p = TP.ToyProblem(track_build, cal or TRACK_CAL, theta or TRACK_THETA, exposure=kw.get("exposure", 400),
+                      mc_events=kw.get("mc", 4000), mc_seed=(seed, r, 1), boot_seed=(seed, r, 2), links=links)
+    b = np.r_[truth, np.zeros(p.layout.n_beta - len(truth))]
+    rng = np.random.default_rng([seed, r])
+    if data_params:
+        params, _ = p.params_of(b[:len(truth)])
+        y = p.observe_at({**params, **data_params}, int(rng.integers(2 ** 62)))
+        p.data = L.Data(y_gauss=y)
+    else:
+        p.data = p.simulate(b, rng, nominal=False)
+    p.sigma_noise = TP.estimate_sigma_noise(p, p.initial_beta()) if kw.get("sigma_noise", True) else 0.0
+    return p
+
+
+def t1_g1(seed: int = SEED_T1 + 30) -> dict:
+    """Item 3 (G1), toy detector: the iteration limit forced to 1 -> g1.not_converged; the limit 30 -> passes, with
+    the EDM per basin below the G1 threshold."""
+    p = _track_fit(0, seed)
+    bad = F.g1(F.iterate(p, p.initial_beta(), limit=1), p)
+    good_fit = F.find_extremum(p, (seed, 1), p.initial_beta())
+    good = F.g1(good_fit, p)
+    ok = bad.get("finding") == "g1.not_converged" and good["status"] == "passed"
+    return {"item": "3 G1 (toy detector)", "forced": bad.get("finding"), "limit_30": good["status"], "ok": bool(ok)}
+
+
+def t1_g2(seed: int = SEED_T1 + 40, n_toys: int = 500, tries: int = 10) -> dict:
+    """Item 4 (G2), toy detector, lower bounds at 1.0: truth sum_term_a = 0.85 (about 5 sigma beyond) ->
+    g2.boundary_significant; truth on the bound -> passes (with boundary-solution whenever the bound is active);
+    truths 1 sigma beyond both bounds -> the first of up to `tries` repetitions with both bounds active uses the
+    chi-bar^2 weights over j = 0, 1, 2 (locally linear toys, one bootstrap per toy)."""
+    out = {}
+    cases = (("beyond", [1.004, 0.85], {"sum_term_a": 1.0}), ("on", [1.004, 1.0], {"sum_term_a": 1.0}),
+             ("two", [0.9996, 0.97], {"momentum_scale": 1.0, "sum_term_a": 1.0}))
+    for lab, truth, lo in cases:
+        th = {k: {"bounds": (lo.get(k, v["bounds"][0]), v["bounds"][1]),
+                  "prior": (max(lo.get(k, -9.0), v["prior"][0]), v["prior"][1])} for k, v in TRACK_THETA.items()}
+        for k in range(tries if lab == "two" else 1):
+            r = hash_free(lab) + 1000 * k
+            p = _track_fit(r, seed, truth=np.array(truth), theta=th)
+            f = F.find_extremum(p, (seed, r), p.initial_beta())
+            g = F.g2(p, f, F.null_toys(p, f, n_toys, (seed, r, 9)))
+            if lab != "two" or len(g.get("active") or []) == 2:
+                break
+        out[lab] = {k_: g.get(k_) for k_ in ("status", "finding", "flags", "weights", "p", "active")}
+        out[lab]["repetition"] = k
+    on = out["on"]
+    ok = out["beyond"]["finding"] == "g2.boundary_significant" and on["status"] == "passed" and \
+        (not on["active"] or "boundary-solution" in on["flags"]) and len(out["two"]["weights"] or []) == 3 and \
+        out["two"]["status"] in ("passed", "failed")
+    return {"item": "4 G2 (toy detector)", "cases": out, "ok": bool(ok)}
+
+
+def hash_free(label: str) -> int:
+    return zlib.crc32(label.encode()) % 1000
+
+
+def t1_g5(seed: int = SEED_T1 + 50) -> dict:
+    """Item 7 (G5), toy detector: with only the momentum widths, momentum scale and sum term enter as the product
+    a s (sigma_p = kappa a s p) -> g5.not_identifiable; with the momentum means added -> passes."""
+    from core.calibration import identify as I
+    res = {}
+    for lab, cal in (("product", ["track5_p_width", "track2_p_width"]), ("means", TRACK_CAL)):
+        p = _track_fit(hash_free(lab), seed, cal=cal)
+        f = F.find_extremum(p, (seed, hash_free(lab)), p.initial_beta())
+        res[lab] = I.g5(p, f, seed=(seed, 2))
+    ok = res["product"].get("finding") == "g5.not_identifiable" and res["means"]["status"] == "passed"
+    return {"item": "7 G5 (toy detector)", "product": res["product"].get("finding"),
+            "product_lambda_min": res["product"].get("lambda_min"), "means": res["means"]["status"], "ok": bool(ok)}
+
+
+def t1_g6(seed: int = SEED_T1 + 60, n_toys: int = 500) -> dict:
+    """Item 8 (G6), toy detector: the track position offset of layer b (0.3, absent from the simulation) in the data
+    with the position-difference mean among the observables -> g6.p_value; without it -> passes (linear and full
+    toys). The missing effect also fails the linearity check of the locally linear toys, which switches to full toys
+    (D56, D46); the full toys must then decide g6.p_value."""
+    cal = TRACK_CAL + ["track5_dx_mean"]
+    links = {"track5_dx_mean": "identity"}
+    out = {}
+    for lab, dp in (("correct", None), ("missing", {"layer_b_offset": 0.3})):
+        p = _track_fit(hash_free(lab), seed, cal=cal, links=links, data_params=dp)
+        f = F.find_extremum(p, (seed, hash_free(lab)), p.initial_beta())
+        lin = F.g6(p, f, F.null_toys(p, f, n_toys, (seed, hash_free(lab), 1)))
+        full = F.g6_full(p, f, n_toys, (seed, hash_free(lab), 2))
+        out[lab] = {"linear": [lin["status"], lin.get("finding"), lin["p"], lin["linearity_ok"]],
+                    "full": [full["status"], full.get("finding"), full["p"], full["X"]]}
+    ok = out["correct"]["linear"][0] == "passed" and out["correct"]["full"][0] == "passed" and \
+        out["missing"]["linear"][1] in ("g6.p_value", "g6.linearity_check_failed") and \
+        out["missing"]["full"][1] == "g6.p_value"         # a failed linearity check switches to full toys (D56)
+    return {"item": "8 G6 (toy detector)", "cases": out, "ok": bool(ok)}
+
+
+def t1_g7(reps: int = 40, K: int = 10, seed: int = SEED_T1 + 70) -> dict:
+    """Item 9 (G7), toy detector, d = 3 (momentum scale, sum terms a and b): K = 10 fits of the same data with independent nominal MC samples, Sigma_MC =
+    A V_MC A^T from the first; with Sigma_MC as computed G7 fails in <= 10% of `reps` sets, with Sigma_MC / 3 (V_MC
+    underestimated by 3) in >= 90%."""
+    from scipy import linalg
+    fails = {"correct": 0, "under3": 0}
+    th3 = {**TRACK_THETA, "sum_term_b": {"bounds": (0.05, 2.0), "prior": (0.4, 0.6)}}
+    cal = TRACK_CAL + ["track5_dx_width", "track2_dx_width"]
+    for r in range(reps):
+        p = _track_fit(r, seed, cal=cal, truth=np.r_[TRACK_TRUTH, 0.52], theta=th3, sigma_noise=False)
+        th, Smc = [], None
+        for k in range(K):
+            q = p.with_data(p.data, mc_seed=(seed, r, 100 + k))
+            f = F.iterate(q, q.initial_beta())
+            if Smc is None:
+                J = F.jacobian(q, f.beta[:3], F.fd_steps(q))
+                W = linalg.inv(f.ref.V_G)
+                S = linalg.inv(J.T @ W @ J)
+                A = S @ J.T @ W
+                Smc = A @ f.ref.V_MC @ A.T
+            th.append(f.beta[:3])
+        th = np.array(th)
+        fails["correct"] += F.g7(th, Smc)["status"] == "failed"
+        fails["under3"] += F.g7(th, Smc / 3.0)["status"] == "failed"
+    ok = fails["correct"] <= 0.1 * reps and fails["under3"] >= 0.9 * reps
+    return {"item": "9 G7 (toy detector)", "failures": fails, "reps": reps, "ok": bool(ok)}
+
+
+# G8's injection points sit at the physical bounds (D55): the momentum scale is bounded at 0.995, close to the
+# nominal MC, so that the boundary point stays within the reweighting range of the nominal sample
+G8_THETA = {"momentum_scale": {"bounds": (0.995, 1.5), "prior": (0.995, 1.02)},
+            "sum_term_a": {"bounds": (0.2, 3.0), "prior": (0.8, 1.2)}}
+G8_CAL = ["track5_p_width", "track2_p_width", "track5_dx_width", "track2_dx_width", "track5_p_mean", "track2_p_mean"]
+G8_LINKS = {n: "identity" for n in G8_CAL}
+
+
+def _g8_problem(truth, seed_tuple, exposure=100, mc=100):
+    """The G8 configuration: identity links (V of a width grows with theta), exposure 100, MC 100 per run, so that a
+    fitter omitting ln det is biased by about 0.7 sigma in sum_term_a (pilot). Each pseudo-data set has its own
+    nominal-size MC and its own bootstrap (section 8.4: misestimation of V_MC then enters G8's bias and coverage);
+    the pseudo-data are fresh events at the injection point."""
+    st = [TP._seed_int(x) for x in seed_tuple]
+    p = TP.ToyProblem(track_build, G8_CAL, G8_THETA, exposure=exposure, mc_events=mc, mc_seed=(*st, 1),
+                      boot_seed=(*st, 2), links=G8_LINKS)
+    b = np.r_[truth, np.zeros(p.layout.n_beta - len(truth))]
+    p.data = p.simulate(b, np.random.default_rng([*st, 3]), nominal=False)
+    p.truth = b
+    return p
+
+
+def _nolndet_fit(p, start):
+    """The negative-control fitter: -2 ln L minimized with V recomputed at every theta and no ln det term."""
+    from scipy import optimize
+    from core.calibration import likelihood as Lk
+
+    def chi2(x):
+        rf = p.reference(np.asarray(x), None)
+        return Lk.Likelihood(p.layout, p.data, rf).deviance(np.asarray(x), p.h(np.asarray(x)))
+    m = optimize.minimize(chi2, start, method="Nelder-Mead", options={"xatol": 1e-7, "fatol": 1e-7, "maxiter": 2000})
+    return bool(m.success), m.x
+
+
+def t1_g8_lndet(reps: int = 50, seed: int = SEED_T1 + 80, r0: int = 0) -> dict:
+    """Item 10 (G8), toy detector, standard level, d = 2: the fitter omitting ln det is caught in >= 40 of `reps`
+    repetitions; the correct fitter (section 7.3 iteration with the ln det diagnostic) as the positive control."""
+    from core.calibration import closure as C
+    N = C.n_c(2, "standard")["N_c"]
+    p0 = _g8_problem(TRACK_TRUTH, (seed, 0))
+    sd = F.iterate(p0, p0.initial_beta()).sigma_tot
+    box = [v["prior"] for v in G8_THETA.values()]
+    bounds = [v["bounds"] for v in G8_THETA.values()]
+    interior, boundary = C.injection_points(box, bounds, sd, TRACK_TRUTH)
+    det = {"good": 0, "bad": 0}
+    for r in range(r0, r0 + reps):
+        for kind in ("good", "bad"):
+            def maker(truth, off, r=r):
+                return lambda s: _g8_problem(truth, (seed, r, off, s))
+
+            def fit_and_cover(p, s, kind=kind):
+                f = F.iterate(p, p.initial_beta())
+                th = f.beta[:2]
+                ok = f.converged
+                if kind == "bad":
+                    ok2, th = _nolndet_fit(p, f.beta[:2])
+                    ok = ok and ok2
+                err = th - p.truth[:2]
+                return ok, err, np.abs(err) <= f.sigma_tot, np.abs(err) <= 1.96 * f.sigma_tot, {"n": 0, "X": 0}, True
+            ri = C.run_point(maker(interior, 0), fit_and_cover, N, range(100_000))
+            rb = C.run_point(maker(boundary, 1), fit_and_cover, N, range(100_000))
+            det[kind] += C.g8("standard", list(G8_THETA), sd, ri, rb)["status"] == "failed"
+    return _judge_g8({"item": "10 G8 ln det (toy detector)", "detections_bad": det["bad"],
+                      "false_alarms_good": det["good"], "reps": reps, "N_c": N})
+
+
+def _judge_g8(c):
+    return {**c, "ok": bool(c["detections_bad"] >= 0.8 * c["reps"])}
+
+
+def t1_g8_counting(reps: int = 1000, pool: int = 3000, seed: int = SEED_T1 + 90, exposure: int = 400) -> dict:
+    """Item 10 (G8 counting), toy detector, full level, d = 3: a pool of `pool` real pseudo-data fits per injection
+    point, each with its own MC and bootstrap (coverage by the total Gaussian intervals); each repetition draws N_c with replacement from the pool; the
+    eps = 1% non-convergence concentrated in covered pseudo-data: replacing them keeps false alarms <= 62 in 1000,
+    counting them as not covered (negative control) gives > 62."""
+    from core.calibration import closure as C
+    # the third parameter enters linearly (the position-difference mean is the layer-b offset, identity link), so the
+    # correct fits are unbiased at G8's full-level resolution (a b^2 term would leave a ~0.2 sigma nonlinear bias)
+    th3 = {**G8_THETA, "layer_b_offset": {"bounds": (-1.0, 1.0), "prior": (-0.05, 0.05)}}
+    cal = TRACK_CAL + ["track5_dx_mean", "track2_dx_mean"]
+    links = {"track5_dx_mean": "identity", "track2_dx_mean": "identity"}
+    truth3 = np.r_[TRACK_TRUTH, 0.01]
+    p0 = _track_fit(0, seed, cal=cal, truth=truth3, theta=th3, sigma_noise=False, links=links, exposure=exposure,
+                    mc=10 * exposure)
+    sd = F.iterate(p0, p0.initial_beta()).sigma_tot
+    interior, boundary = C.injection_points([v["prior"] for v in th3.values()], [v["bounds"] for v in th3.values()],
+                                            sd, truth3)
+    pools, Xpool = {}, {}
+    for k, pt in enumerate((interior, boundary)):
+        errs, c68, c95, X = [], [], [], 0
+        for s in range(pool):                     # each pseudo-data set: its own MC and bootstrap (section 8.4)
+            q = _track_fit(10 ** 5 * (k + 1) + s, seed, cal=cal, truth=pt, theta=th3, sigma_noise=False, links=links,
+                           exposure=exposure, mc=10 * exposure)
+            f = F.iterate(q, q.initial_beta())
+            if not f.converged:
+                X += 1
+                continue
+            e = f.beta[:3] - pt
+            errs.append(e)
+            c68.append(np.abs(e) <= f.sigma_tot)
+            c95.append(np.abs(e) <= 1.96 * f.sigma_tot)
+        pools[k] = (np.array(errs), np.array(c68), np.array(c95))
+        Xpool[k] = X
+    N = C.n_c(3, "full")["N_c"]
+    fa = {"replace": 0, "count": 0}
+    for r in range(reps):
+        rng = np.random.default_rng([seed, r])
+        for kind in fa:
+            res = {}
+            for k, name in enumerate(("interior", "boundary")):
+                E, A68, A95 = pools[k]
+                idx = rng.integers(len(E), size=N)
+                e, c68, c95 = E[idx], A68[idx].copy(), A95[idx].copy()
+                if kind == "count":                   # 1% non-converged, concentrated in covered pseudo-data
+                    cov = np.flatnonzero(c68.all(1))
+                    nc = rng.choice(cov, size=min(len(cov), int(round(0.01 * N))), replace=False)
+                    c68[nc] = False
+                    c95[nc] = False
+                res[name] = {"errors": e, "cover68": c68, "cover95": c95, "nontruth_basin": np.zeros(N, bool),
+                             "X": 0, "interval_toys": {"X": 0, "n": 0}}
+            fa[kind] += C.g8("full", list(th3), sd, res["interior"], res["boundary"])["status"] == "failed"
+    return {"item": "10 G8 counting (toy detector)", "false_alarms": fa, "reps": reps, "pool": pool,
+            "pool_nonconverged": Xpool, "N_c": N, "ok": fa["replace"] <= 62 and fa["count"] > 62}
+
+
+P7_VAL = ["track5_p_width", "track2_p_width", "track5_dx_width", "track2_dx_width", "track2_p_mean"]
+
+
+def _p7_problem(mc=4000, seed=SEED_T1 + 100):
+    """P7 on the toy detector: the track calibration, k = 5 validation observables from a separate sample; C_r^+ at
+    the design stage (Asimov at the truth); the alternative a declared simulation setting the model does not contain
+    (the layer-b sum term moved by delta: not theta, nu, eta or phi here)."""
+    p = track_problem(0, TRACK_CAL, P7_VAL, mc=mc, seed=seed)
+    b = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
+    p.data = p.asimov(b)
+    f = F.iterate(p, b)
+    p.set_val_point(f.beta[:2])
+    pc = V.holdout_pieces(p, f, p.h_val(f.beta[:2]))
+    Cp, k = V.c_r_plus(pc["C_r"], pc["s"], [])
+    return p, f, Cp, k
+
+
+def _alt_effect(p, f, delta, seed_pair):
+    """e = h_v^alt - h_v^nom from one independent pair of validation MC samples (section 9.4: the difference of
+    two predictions with their own MC noise); the calibration rows do not depend on the setting, so the refit
+    absorbs nothing."""
+    params, _ = p.params_of(f.beta[:2])
+    s_alt, s_nom = (TP._seed_int(x) for x in seed_pair)
+    out = []
+    for s, extra in ((s_alt, {"sum_term_b": 0.5 + delta}), (s_nom, {})):
+        r = p.val_ev.evaluate({**params, **extra}, names=p.val_names, seeds={"nominal": s})
+        p.val_ev._other.pop(s, None)
+        out.append(p._val_link(r["pred"]))
+    return out[0] - out[1]
+
+
+def _true_lambda(delta, Cp, mc_big=400_000, seed=SEED_T1 + 101):
+    """lambda of the alternative from one very large MC sample (common random numbers for alt and nominal)."""
+    q = track_problem(0, TRACK_CAL, P7_VAL, mc=mc_big, seed=seed)
+    params, _ = q.params_of(TRACK_TRUTH)
+    a = q._val_link(q.val_ev.evaluate({**params, "sum_term_b": 0.5 + delta}, names=q.val_names)["pred"])
+    n = q._val_link(q.val_ev.evaluate(params, names=q.val_names)["pred"])
+    e = a - n
+    return float(e @ Cp @ e)
+
+
+def _delta_for(lam_target, Cp, lo=0.005, hi=0.5):
+    from scipy import optimize as so
+    return float(so.brentq(lambda d: _true_lambda(d, Cp) - lam_target, lo, hi, xtol=1e-4))
+
+
+def _cross_pool(p, f, Cp, delta, n_sets, seed):
+    E = np.array([_alt_effect(p, f, delta, ((seed, i, 0), (seed, i, 1))) for i in range(n_sets)])
+    return E
+
+
+def t1_p7_cross(pool: int = 16000, seed: int = SEED_T1 + 102) -> dict:
+    """Item 2 (P7), toy detector: at the delta whose true lambda is 12.8 (k = 5), the cross product of two
+    independent MC sets is unbiased (pool mean within +-2% of the true lambda, the true value from 400000 events),
+    while the single-set estimate is biased high (> +2%); with k = 1 (only the momentum mean of track 2, blind to the
+    setting) P7 fails with p7.insufficient_power, with k = 5 at a delta of 4x the lambda-12.8 delta it passes."""
+    from core.calibration import design_noise as DN
+    p, f, Cp, k = _p7_problem()
+    d128 = _delta_for(12.8, Cp)
+    lam = _true_lambda(d128, Cp)
+    E = _cross_pool(p, f, Cp, d128, pool, seed)
+    cross = np.einsum("ri,ij,rj->r", E[0::2], Cp, E[1::2])
+    single = np.einsum("ri,ij,rj->r", E, Cp, E)
+    rel_c, rel_s = float(cross.mean() / lam - 1), float(single.mean() / lam - 1)
+    # insufficient power: k = 1 blind to the alternative; sufficient: k = 5 at 4 delta_12.8, R = 50 repetitions
+    E4 = _cross_pool(p, f, Cp, 4 * d128, 100, seed + 1)
+    big = DN.p7("holdout", 5, {"a": np.einsum("ri,ij,rj->r", E4[0::2], Cp, E4[1::2])}, "analytic", 5)
+    p1 = track_problem(0, TRACK_CAL, ["track2_p_mean"], seed=SEED_T1 + 100)
+    b = np.r_[TRACK_TRUTH, np.zeros(p1.layout.n_beta - 2)]
+    p1.data = p1.asimov(b)
+    f1 = F.iterate(p1, b)
+    p1.set_val_point(f1.beta[:2])
+    pc1 = V.holdout_pieces(p1, f1, p1.h_val(f1.beta[:2]))
+    Cp1, _ = V.c_r_plus(pc1["C_r"], pc1["s"], [])
+    E1 = np.array([_alt_effect(p1, f1, 4 * d128, ((seed + 2, i, 0), (seed + 2, i, 1))) for i in range(100)])
+    small = DN.p7("holdout", 1, {"a": np.einsum("ri,ij,rj->r", E1[0::2], Cp1, E1[1::2])}, "analytic", 1)
+    ok = abs(rel_c) <= 0.02 and rel_s > 0.02 and small.get("finding") == "p7.insufficient_power" and \
+        big["status"] == "passed"
+    return {"item": "2 P7 cross product and power (toy detector)", "delta_12_8": d128, "true_lambda": lam,
+            "cross_rel_bias": rel_c, "single_rel_bias": rel_s, "pool": pool, "k1": small.get("finding"),
+            "k5_4delta": big["status"], "ok": bool(ok)}
+
+
+def t1_p7_point_estimate(reps: int = 2000, pool: int = 4000, R: int = 50, n_toys: int = 1000,
+                         seed: int = SEED_T1 + 103) -> dict:
+    """Item 2 (P7), toy detector: at the delta whose true power is 0.75 (k = 5), cross products drawn from a pool of
+    `pool` toy-detector MC pairs; the power from the point estimate (one cross product) claims a lower bound >= 0.8
+    in > 5% of `reps` repetitions (negative control); the one-sided lower bound over R = 50 cross products with the
+    Bonferroni split (0.975) in <= 5% (section 15.3.10)."""
+    from scipy import optimize as so
+    p, f, Cp, k = _p7_problem()
+    crit = stats.chi2.ppf(0.95, k)
+    lam75 = so.brentq(lambda x: stats.ncx2.sf(crit, k, x) - 0.75, 0.1, 100)
+    d75 = _delta_for(lam75, Cp)
+    E = _cross_pool(p, f, Cp, d75, pool, seed)
+    cr_pool = np.einsum("ri,ij,rj->r", E[0::2], Cp, E[1::2])
+    claims = {"point": 0, "lower": 0}
+    for r in range(reps):
+        rng = np.random.default_rng([seed, r])
+        cr = cr_pool[rng.integers(cr_pool.size, size=R)]
+        for kind, lv in (("point", float(cr[0])), ("lower", V.lambda_lower_bound(cr, 0.975))):
+            pw = stats.ncx2.sf(crit, k, max(lv, 1e-9))
+            rej = rng.binomial(n_toys, pw)
+            claims[kind] += V.clopper_pearson_lower(int(rej), n_toys, 0.975) >= 0.8
+    ok = claims["point"] / reps > 0.05 and claims["lower"] / reps <= 0.05
+    return {"item": "2 P7 point estimate (toy detector)", "claims": claims, "reps": reps, "lambda_075": lam75,
+            "delta_075": d75, "pool_pairs": int(cr_pool.size), "ok": bool(ok)}
+
+
+def t1_cv(seed: int = SEED_T1 + 110, n_ref: int = 500) -> dict:
+    """Item 11 (V, cross-validation) and item 1 (fold P3), toy detector: T_cv with C-hat_{r,f} from complete
+    cross-validation toys (every fold refitted; the engine never uses locally linear toys for cross-validation, so a
+    fold failing the linearity check is covered by construction, section 9.3, 8.5) and its toy reference gives a
+    p-value on actual data at the truth; a split whose training fold keeps only the momentum widths (theta enters as
+    a product there) is rejected by design.fold_p3, a split keeping a mean in every training fold passes."""
+    from core.calibration import design_noise as DN
+    cal = ["track5_p_mean", "track5_p_width", "track2_p_mean", "track2_p_width", "track5_dx_width",
+           "track2_dx_width"]
+    p = _track_fit(0, seed, cal=cal)
+    folds = [[0, 1, 4], [2, 3, 5]]                       # each fold keeps a momentum mean in its training set
+    ev = V.cv_evidence(p, folds, "k" * 64, 0.05, (seed, 1), n_ref=n_ref, n_start=0)
+    b = p.initial_beta()
+    asimov = p.with_data(p.asimov(b))
+    bad = DN.fold_p3(asimov, [np.array([0, 2])], b)      # training rows: the widths only
+    good = DN.fold_p3(asimov, [np.array(r) for r in folds], b)
+    ok = ev["status"] == "ok" and ev["p"] is not None and [f["code"] for f in bad] == ["design.fold_p3"] and \
+        good == []
+    return {"item": "11 V cross-validation and 1 fold P3 (toy detector)", "T_cv": ev.get("T"), "k": ev.get("k"),
+            "p": ev.get("p"), "status": ev["status"], "reference": ev.get("reference"),
+            "fold_p3_bad": [f["code"] for f in bad], "fold_p3_good": good, "ok": bool(ok)}
+
+
+def t1_propagation(seed: int = SEED_T1 + 120) -> dict:
+    """Item 12 (propagation), toy detector: a joint track fit exports R1 (the momentum scale) and R2 (the sum term,
+    with R1's theta as its central input zeta); combining the two packages as independent misstates Var(theta_1 +
+    theta_2) against the joint value from Sigma (the parent-child counterexample on real fits); the package checks
+    on these two results find the source overlap, and a theta/nu split export is rejected."""
+    from core.calibration import deps
+    p = _track_fit(0, seed, sigma_noise=False)
+    f = F.iterate(p, p.initial_beta())
+    S = f.Sigma_beta[:2, :2]
+    th = f.beta[:2]
+    p1 = P.export(th[[0]], np.zeros(0), S, [0], [])
+    p2 = P.export(th[[1]], th[[0]], S, [1], [0])
+    # scale to unit sigma so the variances are comparable
+    D = np.diag(1 / np.sqrt(np.diag(S)))
+    Sz = D @ S @ D
+    joint = float(np.ones(2) @ Sz @ np.ones(2))
+    q1 = P.export(np.zeros(1), np.zeros(0), Sz, [0], [])
+    q2 = P.export(np.zeros(1), np.zeros(1), Sz, [1], [0])
+    indep = float(P.variance(q1)[0, 0] + P.variance(q2)[0, 0])
+    h1, h2 = (hashlib.sha256(f"toy-track-R{i}-{seed}".encode()).hexdigest() for i in (1, 2))
+    ups = {h2: [{"result_sha256": h1, "usages": ["xi"]}]}
+    pc = deps.check_packages([{"id": "R1", "upstream": h1}, {"id": "R2", "upstream": h2}], ups)
+    split = deps.check_packages([{"id": "R1", "upstream": h1, "exports": ["theta", "nu"]}], {})
+    rho = float(Sz[0, 1])
+    ok = abs(indep - joint) > 0.1 and [x["code"] for x in pc] == ["deps.source_overlap"] and \
+        [x["code"] for x in split] == ["deps.theta_nu_split"] and abs(P.variance(p1)[0, 0] - S[0, 0]) < 1e-15
+    return {"item": "12 propagation (toy detector)", "correlation": rho, "var_sum_joint": joint,
+            "var_sum_independent": indep, "package_findings": [x["code"] for x in pc],
+            "split": [x["code"] for x in split], "ok": bool(ok)}
+
+
+P5_EDGES = np.linspace(4.86, 5.14, 11)          # the momentum histogram of track 5: every bin populated (+-2.8 sigma)
+P2_EDGES = np.linspace(1.944, 2.056, 6)          # the track-2 momentum shape, K = 5
+
+
+def t1_g7_bblite(reps: int = 40, K: int = 10, seed: int = SEED_T1 + 130) -> dict:
+    """Item 9 (G7), toy detector, a fit with only Poisson blocks and BB-lite: the track-5 momentum histogram (10 bins,
+    absolute counts, exposure 2000, MC 20000); K = 10 fits of the same data with independent MC samples; Sigma_MC
+    from the auxiliary measurements (B_m, section 6.7) fails G7 in <= 10% of `reps` sets, A V_MC A^T alone
+    (Sigma_MC = 0: no Gaussian rows) in >= 90%."""
+    counts = {"p5_hist": {"source": "track5_p_mean", "edges": P5_EDGES, "kind": "absolute", "bb": True}}
+    fails = {"bb": 0, "zero": 0}
+    for r in range(reps):
+        p = TP.ToyProblem(track_build, [], TRACK_THETA, exposure=2000, mc_events=20000, mc_seed=(seed, r, 1),
+                          boot_seed=(seed, r, 2), counts=counts)
+        b = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
+        p.data = p.simulate(b, np.random.default_rng([seed, r]), nominal=False)
+        th, S, st = [], None, None
+        for k in range(K):
+            q = p.with_data(p.data, mc_seed=(seed, r, 100 + k))
+            f = F.iterate(q, q.initial_beta())
+            if S is None:
+                S = F.sigma_mc(q, f, None)[:2, :2]
+                st = f.sigma_tot
+            th.append(f.beta[:2])
+        th = np.array(th)
+        fails["bb"] += F.g7(th, S)["status"] == "failed"
+        fails["zero"] += F.g7(th, np.zeros((2, 2)), sigma_tot_ref=st)["status"] == "failed"
+    ok = fails["bb"] <= 0.1 * reps and fails["zero"] >= 0.9 * reps
+    return {"item": "9 G7 BB-lite (toy detector)", "failures": fails, "reps": reps, "ok": bool(ok)}
+
+
+def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200, 1500, 3000)) -> dict:
+    """Item 11 (V, a shape conditioned on its total), toy detector: the track calibration (exposure 400); the
+    validation shape is the track-2 momentum histogram (K = 5) of a separate sample with N_obs events, conditioned on
+    its observed total: r = n - N_obs p(beta-hat), C = N_obs (diag p - p p^T) + N_obs^2 G Sigma_beta G^T with p and
+    G = dp/dbeta from a validation MC of 200000 events (its noise adds about N_obs / 200000 <= 1.5% to the variance);
+    the size of T_v against chi2_(K-1) at N_obs in {300, 1200, 1500, 3000} within alpha +- 25%."""
+    shape = {"p2_shape": {"source": "track2_p_mean", "edges": P2_EDGES, "kind": "shape"}}
+    vp = TP.ToyProblem(track_build, [], TRACK_THETA, exposure=1000, mc_events=200_000, mc_seed=(seed, 1),
+                       boot_seed=(seed, 2), counts=shape)
+
+    def pshape(tp):
+        mu = vp.counts_pred(vp.params_of(tp)[0])["p2_shape"]["mu"]
+        return mu / mu.sum()
+    data_model = track_build(4000)
+    sizes = {}
+    for Nobs in nobs:
+        rej, X = 0, 0
+        for r in range(reps):
+            p = track_problem(0, TRACK_CAL, [], seed=seed + 1)
+            rng = np.random.default_rng([seed, Nobs, r])
+            truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
+            p.data = p.simulate(truth, rng, nominal=False)
+            f = F.iterate(p, p.initial_beta())
+            if not f.converged:
+                X += 1
+                continue
+            th = f.beta[:2]
+            ev = toy.ChainEvaluator(data_model, {"seeds": {"nominal": 1}})
+            params, _ = p.params_of(truth[:2])
+            gen = ev.generate(int(rng.integers(2 ** 62)), params={**data_model.nominal, **params})
+            evs = {"track2": {nd: {k: np.asarray(v)[:Nobs] for k, v in o.items()}
+                              for nd, o in gen["runs"]["track2"]["events"].items()}}
+            n = vp._hist(data_model, evs, "p2_shape")[0]
+            steps = np.array([1e-5, 1e-3])
+            Gm = np.stack([(pshape(th + e) - pshape(th - e)) / (2 * s) for e, s in zip(np.diag(steps), steps)], 1)
+            Gb = np.zeros((len(n), f.Sigma_beta.shape[0]))
+            Gb[:, :2] = Gm
+            pc = V.shape_holdout_pieces(n, pshape(th), Gb, f.Sigma_beta)
+            Cp, kk = V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
+            rej += V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, kk)
+        sizes[str(Nobs)] = {"rej": int(rej), "X": X, "size": rej / max(reps - X, 1)}
+    return _judge_shape({"item": "11 V shape conditioned on its total (toy detector)", "sizes": sizes, "reps": reps})
+
+
+def _judge_shape(c):
+    ok = all(_size_judge(v["size"]) and v["X"] <= 0.01 * c["reps"] for v in c["sizes"].values())
+    return {**c, "ok": bool(ok)}
+
+
+def _p_pool(run: str, n: int, seed) -> np.ndarray:
+    """Reconstructed momenta of n toy-detector events of `run` generated at the truth (an event pool: the
+    model's parametric bootstrap draws from it, the data from a pool of its own)."""
+    m = track_build(n)
+    ev = toy.ChainEvaluator(m, {"seeds": {"nominal": 1}})
+    params = dict(zip(TRACK_THETA, TRACK_TRUTH))
+    gen = ev.generate(TP._seed_int(seed), params={**m.nominal, **params})
+    return np.asarray(gen["runs"][run]["events"]["momentum"]["p_rec"], float)
+
+
+def t1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: int = SEED_T1 + 150) -> list:
+    """Item 11 (V, section 15.3.7 event samples), toy detector: event samples of the track runs with their summary
+    statistics, the parametric bootstrap and the reference toys drawn by the engine's conditioned_sets (exactly
+    n_j events per component) from toy-detector event pools generated at the truth; data from a separate pool.
+    (i) particle gun (track 5, |p - 5| < 0.05, K = 3 shape of the selected momenta + efficiency), N_tot,s = 400 while
+    N_decl = 800: conditioned on the observed 400, size within alpha +- 25%; the omega = 1 procedure (sets and toys
+    conditioned on N_decl) > alpha + 25%. (ii) the gun's power at a 3.2 sigma efficiency loss (events lost at random,
+    the shape unchanged) >= 0.6; conditioned on the shape's own N_pass the efficiency drops out: power <= 0.10.
+    (iii) two periods (track 5 and track 2, efficiencies about 0.6 and 0.8; true fraction 0.5, model 0.45):
+    conditioned on (N1, N2) size within alpha +- 25%; conditioned on N1 + N2 with the model fraction > alpha + 25%."""
+    pool5, pool2 = _p_pool("track5", 200_000, (seed, 1)), _p_pool("track2", 200_000, (seed, 2))
+    data5, data2 = _p_pool("track5", 200_000, (seed, 3)), _p_pool("track2", 200_000, (seed, 4))
+    W5, W2 = 0.044, 0.0269
+    edges = np.linspace(4.95, 5.05, 4)
+
+    def gun_summary(p, keep=None):
+        sel = np.abs(p - 5.0) < 0.05
+        if keep is not None:
+            sel &= keep
+        k, _ = np.histogram(p[sel], edges)
+        return np.r_[_alr(k), sel.mean() if p.size else 0.0]
+
+    def draw(pool, n, rng):
+        return pool[rng.integers(pool.size, size=n)]
+
+    def gun(n, rng):
+        return gun_summary(draw(pool5, int(sum(n)), rng))
+
+    def pval(y, summary, n_c, r, tag, drop_last=False):
+        sets = V.conditioned_sets(summary, n_c, B, (seed, tag, r, 1))
+        toys = V.conditioned_sets(summary, n_c, n_toys, (seed, tag, r, 2))
+        if drop_last:
+            sets, toys, y = sets[:, :-1], toys[:, :-1], y[:-1]
+        return V.toy_calibrated_pvalue(y, sets.mean(0), np.cov(sets, rowvar=False), toys)
+    out = []
+    pv_ok, pv_om = [], []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 10, r])
+        y = gun_summary(draw(data5, 400, rng))
+        pv_ok.append(pval(y, gun, [400], r, 11))
+        pv_om.append(pval(y, gun, [800], r, 12))
+    a, c = _rate(pv_ok), _rate(pv_om)
+    out.append({"case": "particle gun, omega = 0.5: conditioned on N_tot,s = 400", "size": a, "ok": _size_judge(a),
+                "control_omega1": c, "control_ok": c > 0.0625})
+    eps = float(np.mean(np.abs(pool5 - 5.0) < 0.05))
+    q = 3.2 * np.sqrt(eps * (1 - eps) / 400) / eps            # random loss giving a 3.2 sigma efficiency bias
+    pw, pw_np = [], []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 20, r])
+        pd = draw(data5, 400, rng)
+        keep = rng.random(400) >= q
+        y = gun_summary(pd, keep)
+        pw.append(pval(y, gun, [400], r, 21))
+        n_pass = int(round(y[-1] * 400))
+        sel = np.abs(pool5 - 5.0) < 0.05
+        P_in, P_out = pool5[sel], pool5[~sel]
+
+        def gun_npass(n, rng, n_pass=n_pass):
+            return gun_summary(np.r_[draw(P_in, n_pass, rng), draw(P_out, int(sum(n)) - n_pass, rng)])
+        pw_np.append(pval(y, gun_npass, [400], r, 22, drop_last=True))
+    a, c = _rate(pw), _rate(pw_np)
+    out.append({"case": "particle gun power at a 3.2 sigma efficiency loss", "power": a, "ok": a >= 0.6,
+                "control_N_pass_power": c, "control_ok": c <= 0.10, "efficiency": eps, "loss": q})
+
+    def periods_summary(n, rng):
+        a5, a2 = draw(pool5, int(n[0]), rng), draw(pool2, int(n[1]), rng)
+        k1, k2 = int(np.sum(np.abs(a5 - 5.0) < W5)), int(np.sum(np.abs(a2 - 2.0) < W2))
+        return np.array([k1 / max(n[0], 1), k2 / max(n[1], 1), (k1 + k2) / max(n[0] + n[1], 1)])
+
+    def periods_sum(n, rng):
+        N = int(sum(n))
+        n1 = int(rng.binomial(N, 0.45))
+        return periods_summary([n1, N - n1], rng)
+    pv_c, pv_s = [], []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 30, r])
+        n1 = int(rng.binomial(800, 0.5))
+        a5, a2 = draw(data5, n1, rng), draw(data2, 800 - n1, rng)
+        k1, k2 = int(np.sum(np.abs(a5 - 5.0) < W5)), int(np.sum(np.abs(a2 - 2.0) < W2))
+        y = np.array([k1 / n1, k2 / (800 - n1), (k1 + k2) / 800])
+        pv_c.append(pval(y, periods_summary, [n1, 800 - n1], r, 31))
+        pv_s.append(pval(y, periods_sum, [n1, 800 - n1], r, 32))
+    a, c = _rate(pv_c), _rate(pv_s)
+    out.append({"case": "two periods: conditioned on (N1, N2)", "size": a, "ok": _size_judge(a),
+                "control_conditioned_on_sum": c, "control_ok": c > 0.0625})
+    return out
+
+
 GATE1_EVIDENCE = {
     "1 P3": ["harness gate1_toy_p3 (toy detector)", "test_calibration_identify_shift_interval.Identifiability",
              "test_calibration_design_noise.Folds.test_fold_p3"],
@@ -953,6 +1658,92 @@ def gate_negatives(out: Path, smoke: bool = False) -> dict:
     return rep
 
 
+# ------------------------------------------------------------------ gate 1 on the toy detector: array tasks and merge
+def _units() -> dict:
+    mods = sorted(p.name for p in (ROOT / "tests" / "core").glob("test_calibration_*.py"))
+    units = {}
+    for m in mods:
+        r = subprocess.run([sys.executable, "-I", str(ROOT / "tests" / "core" / m)], capture_output=True, text=True,
+                           timeout=10800, cwd=ROOT)
+        units[m] = {"exit": r.returncode, "summary": (r.stderr or "").strip().splitlines()[-3:]}
+    r = subprocess.run([sys.executable, "-m", "unittest", "tests.skills.test_calib_scripts"], capture_output=True,
+                       text=True, timeout=10800, cwd=ROOT)
+    units["tests.skills.test_calib_scripts"] = {"exit": r.returncode,
+                                                "summary": (r.stderr or "").strip().splitlines()[-3:]}
+    return {"item": "unit tests", "units": units, "ok": all(u["exit"] == 0 for u in units.values())}
+
+
+GATE1T_TASKS = [("units", "_units", {}), ("toy_p3", "gate1_toy_p3", {}), ("g1", "t1_g1", {}), ("g2", "t1_g2", {}),
+                ("g5", "t1_g5", {}), ("g6", "t1_g6", {}), ("g7", "t1_g7", {}), ("g7_bblite", "t1_g7_bblite", {}),
+                ("cv", "t1_cv", {}), ("propagation", "t1_propagation", {}), ("p7_cross", "t1_p7_cross", {}),
+                ("p7_point", "t1_p7_point_estimate", {}), ("g8_counting", "t1_g8_counting", {}),
+                ("event_samples", "t1_event_samples", {})]
+GATE1T_TASKS += [("v_cross", "t1_v_cross_terms", {"reps": 1000, "r0": 1000 * i}) for i in range(2)]
+GATE1T_TASKS += [("v_shift", "t1_v_shift", {"reps": 200, "r0": 200 * i}) for i in range(10)]
+GATE1T_TASKS += [("shape_total", "t1_shape_total", {"nobs": (n,)}) for n in (300, 1200, 1500, 3000)]
+GATE1T_TASKS += [("g8_lndet", "t1_g8_lndet", {"reps": 5, "r0": 5 * i}) for i in range(10)]
+
+
+def gate1_toy_task(i: int, out_dir: Path) -> dict:
+    """One task of the gate-1 array on the toy detector (registered sizes; seeds fixed per item and repetition)."""
+    key, fn, kw = GATE1T_TASKS[i]
+    t0 = time.time()
+    res = globals()[fn](**kw)
+    rec = {"task": i, "item": key, "function": fn, "kwargs": kw, "result": res, "seconds": time.time() - t0,
+           "provenance": provenance(), "label": "synthetic"}
+    out_dir.mkdir(parents=True, exist_ok=True)
+    io.write_json(str(out_dir / f"task_{i:02d}.json"), io.jsonable(rec))
+    return rec
+
+
+def _ok(x):
+    if isinstance(x, list):
+        return all(c.get("ok") and c.get("control_ok", True) for c in x)
+    return bool(x.get("ok")) and x.get("control_ok", True)
+
+
+def gate1_toy_merge(out_dir: Path, out: Path) -> dict:
+    """Merge the array: every task present and from one clean commit; blocks summed per item, then judged."""
+    recs = {}
+    for i in range(len(GATE1T_TASKS)):
+        f = out_dir / f"task_{i:02d}.json"
+        recs[i] = json.loads(f.read_text()) if f.exists() else None
+    missing = [i for i, r in recs.items() if r is None]
+    commits = {r["provenance"]["commit"] for r in recs.values() if r}
+    dirty = any(r["provenance"].get("dirty") for r in recs.values() if r)
+    items = {}
+    by = {}
+    for i, r in recs.items():
+        if r:
+            by.setdefault(r["item"], []).append(r["result"])
+    for key, rs in by.items():
+        if key == "v_cross":
+            items[key] = _judge_cross({"item": rs[0]["item"], **{k: sum(x[k] for x in rs) for k in
+                                                                  ("rej", "rej_omitted", "n", "X", "reps")}})
+        elif key == "v_shift":
+            rej = {k: sum(x["rejections"][k] for x in rs) for k in rs[0]["rejections"]}
+            items[key] = _judge_shift({"item": rs[0]["item"], "rejections": rej,
+                                       **{k: sum(x[k] for x in rs) for k in ("n", "X", "X_pm2_refits", "reps")}})
+        elif key == "g8_lndet":
+            items[key] = _judge_g8({"item": rs[0]["item"], "N_c": rs[0]["N_c"],
+                                    **{k: sum(x[k] for x in rs) for k in ("detections_bad", "false_alarms_good",
+                                                                          "reps")}})
+        elif key == "shape_total":
+            items[key] = _judge_shape({"item": rs[0]["item"], "reps": rs[0]["reps"],
+                                       "sizes": {k: v for x in rs for k, v in x["sizes"].items()}})
+        else:
+            items[key] = rs[0]
+    items_ok = {k: _ok(v) for k, v in items.items()}
+    passed = not missing and len(commits) == 1 and not dirty and all(items_ok.values())
+    rep = {"gate": "the negative tests of P3, P7, G1-G8, V and propagation (on the toy detector)",
+           "status": "passed" if passed else "failed", "missing_tasks": missing, "commits": sorted(commits),
+           "dirty": dirty, "items": items, "items_ok": items_ok,
+           "task_seconds": {i: r["seconds"] for i, r in recs.items() if r}, "provenance": provenance(),
+           "label": "synthetic"}
+    io.write_json(str(out), io.jsonable(rep))
+    return rep
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--gate", choices=("segmented", "shift", "negatives"))
@@ -961,7 +1752,17 @@ def main(argv=None) -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--probe", action="store_true")
+    ap.add_argument("--gate1-toy-task", type=int, help="one task of the gate-1 array on the toy detector")
+    ap.add_argument("--gate1-toy-merge", help="the folder of the array's task files")
     a = ap.parse_args(argv)
+    if a.gate1_toy_task is not None:
+        r = gate1_toy_task(a.gate1_toy_task, Path(a.out))
+        print(json.dumps({"task": r["task"], "item": r["item"], "ok": _ok(r["result"]), "seconds": r["seconds"]}))
+        return 0
+    if a.gate1_toy_merge:
+        r = gate1_toy_merge(Path(a.gate1_toy_merge), Path(a.out))
+        print(json.dumps({"status": r["status"], "items_ok": r["items_ok"], "missing": r["missing_tasks"]}))
+        return 0 if r["status"] == "passed" else 1
     if a.gate == "segmented":
         r = gate_segmented(Path(a.out), a.smoke, a.probe)
         print(json.dumps({"status": r["status"], "results": r["results"], "seconds": r["seconds"]}))

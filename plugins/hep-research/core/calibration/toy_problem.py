@@ -25,8 +25,8 @@ LINK_BY_FUNCTIONAL = {"mean": "log", "std": "log", "fraction": "logit"}
 
 
 def _seed_int(seed):
-    if isinstance(seed, (tuple, list)):
-        return int(np.random.SeedSequence([int(s) for s in seed]).generate_state(1)[0])
+    if isinstance(seed, (tuple, list)):           # nested seed tuples are flattened through their own integers
+        return int(np.random.SeedSequence([_seed_int(s) for s in seed]).generate_state(1)[0])
     return int(seed)
 
 
@@ -47,9 +47,9 @@ def per_set_summaries(model, events: dict, names: list, n_sets: int) -> np.ndarr
         mean = np.where(cnt > 0, (X * M).sum(1) / np.maximum(cnt, 1), np.nan)
         if o.functional in ("mean", "fraction"):
             out[:, j] = mean
-        else:
-            var = ((X - mean[:, None]) ** 2 * M).sum(1) / np.maximum(cnt, 1)
-            out[:, j] = np.sqrt(var)
+        else:                                # the estimator of toy.functional with unit weights (unbiased width)
+            var = ((X - mean[:, None]) ** 2 * M).sum(1) / np.maximum(cnt - 1, 1)
+            out[:, j] = np.sqrt(var) / np.array([toy.c4(float(c)) for c in cnt])
     return out
 
 
@@ -62,7 +62,8 @@ class ToyProblem:
                  phi_P: dict | None = None, eta: list | None = None, links: dict | None = None, B: int | None = None,
                  boot_seed=20261121, generation: dict | None = None, map_params=None, plan: dict | None = None,
                  shift: dict | None = None, thickness_by_yield: bool = False, val_names: list | None = None,
-                 val_build=None, val_mc_seed=20261123, val_exposure: int | None = None):
+                 val_build=None, val_mc_seed=20261123, val_exposure: int | None = None, counts: dict | None = None,
+                 boot_exposure: int | None = None):
         self.build = build
         self.names = list(names)
         self.theta_spec = dict(theta)
@@ -84,11 +85,24 @@ class ToyProblem:
         self.ev = ChainEvaluator(self.model, {**self.plan, "seeds": {"nominal": _seed_int(mc_seed)}})
         by = {o.name: o for o in self.model.observables}
         self.links = {n: (links or {}).get(n, LINK_BY_FUNCTIONAL[by[n].functional]) for n in self.names}
+        # count observables (section 2.1 block rules): a histogram of a model observable's per-event variable over
+        # the events passing its mask; "absolute" Poisson counts (optionally BB-lite) or a free-omega "shape"
+        self.count_spec = {n: dict(c) for n, c in (counts or {}).items()}
+        for n, c in self.count_spec.items():
+            if c["source"] not in by:
+                raise ValueError(f"count observable {n}: unknown source {c['source']!r}")
+            c["edges"] = np.asarray(c["edges"], float)
+            c["run"] = by[c["source"]].run
         obs = [{"name": n, "block": "gaussian", "link": self.links[n]} for n in self.names]
+        obs += [{"name": n, "block": "poisson", "bins": len(c["edges"]) - 1, "free_omega": c.get("kind") == "shape",
+                 "bb": bool(c.get("bb", False))} for n, c in self.count_spec.items()]
         self.layout = L.build_layout(obs, list(self.theta_spec), list(self.phi_spec), 0, len(self.eta_spec))
+        self._count_blocks = {b.name: b for b in self.layout.blocks if b.kind == "poisson"}
+        self.poisson_total = any(c.get("kind", "absolute") == "absolute" for c in self.count_spec.values())
         runs = {by[n].run for n in self.names}
-        p_max = max(sum(1 for n in self.names if by[n].run == r) for r in runs)
+        p_max = max([sum(1 for n in self.names if by[n].run == r) for r in runs] or [1])
         self.B = max(int(B or 0), L.bootstrap_size(p_max))
+        self.boot_exposure = int(boot_exposure or exposure)  # != exposure only in a negative control (omega = 1)
         self.generation = dict(generation or {})
         self.data = None
         self.truth = None
@@ -97,8 +111,10 @@ class ToyProblem:
         self.edm_tol = 0.1
         self.has_bootstrap = True
         self.V_depends_on_theta = True
-        self._data_model = build(self.exposure)
-        self._boot_model = build(self.exposure * self.B)
+        # actual data with absolute counts: the event total is Poisson(exposure) (a generous fixed-size sample is cut)
+        self._data_model = build(self.exposure if not self.poisson_total else
+                                 int(self.exposure + 8 * math.sqrt(self.exposure) + 20))
+        self._boot_model = build(self.boot_exposure * self.B)
         self._cache = {}
         # validation observables (holdout, section 9.2): a separate event sample of the same detector (its own nominal
         # MC and its own data), so that validation data share no events with the calibration data
@@ -176,7 +192,59 @@ class ToyProblem:
 
     def h(self, tp):
         params, shift = self.params_of(tp)
-        return self._to_link(self._predict(params)["pred"]) + shift + self.pert
+        g = (self._to_link(self._predict(params)["pred"]) + shift + self.pert) if self.names else np.zeros(0)
+        return np.r_[g, self._count_link(params)] if self.count_spec else g
+
+    # -- count observables
+    def _weighted_events(self, params: dict, ev=None, model=None):
+        """The nominal MC events of each run and their weights to `params` (reweighting or regeneration with common
+        random numbers, as the evaluator's methods decide)."""
+        ev, model = ev or self.ev, model or self.model
+        target = {**model.nominal, **self._equivalent(params)}
+        nom = ev.nominal
+        run_events, regen = ev._prepared(target, nom)
+        sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
+                           for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
+        w = ev.weights(target, sample, nodes=ev.reweighted_nodes(target, nom), regenerated=regen)
+        w.pop("_missing_support", None)
+        return run_events, w
+
+    def _hist(self, model, events: dict, name: str, weights=None):
+        c = self.count_spec[name]
+        o = {x.name: x for x in model.observables}[c["source"]]
+        ev = events[c["run"]]
+        x = np.asarray(o.var(ev), float)
+        m = np.ones(x.size, bool) if o.mask is None else np.asarray(o.mask(ev), bool)
+        m &= np.isfinite(x)
+        w = np.ones(x.size) if weights is None else np.asarray(weights, float)
+        sw, _ = np.histogram(x[m], c["edges"], weights=w[m])
+        sw2, _ = np.histogram(x[m], c["edges"], weights=w[m] ** 2)
+        return sw, sw2
+
+    def counts_pred(self, params: dict) -> dict:
+        """Per count observable: the expected counts at the data's exposure (absolute) or the model shape (any
+        normalization), with sum w and sum w^2 of the nominal MC per bin (BB-lite tau)."""
+        key = ("counts",) + tuple(sorted((k, round(float(v), 14)) for k, v in self._equivalent(params).items()))
+        if key not in self._cache:
+            run_events, w = self._weighted_events(params)
+            out = {}
+            for n, c in self.count_spec.items():
+                sw, sw2 = self._hist(self.model, run_events, n, w[c["run"]])
+                scale = self.exposure / self.model.runs[c["run"]].n
+                out[n] = {"mu": sw * scale, "sumw": sw, "sumw2": sw2}
+            self._cache[key] = out
+        return self._cache[key]
+
+    def _count_link(self, params: dict) -> np.ndarray:
+        pr = self.counts_pred(params)
+        rows = []
+        for n, b in self._count_blocks.items():
+            mu = np.maximum(pr[n]["mu"], 1e-300)
+            rows.append(b.L @ np.log(mu) if b.free_omega else np.log(mu))
+        return np.concatenate(rows)
+
+    def _n_gauss(self):
+        return len(self.names)
 
     def _shift_params(self, phis):
         return {n: c + s * float(v) for (n, (c, s)), v in zip(self.shift_spec.items(), np.atleast_1d(phis))}
@@ -185,7 +253,8 @@ class ToyProblem:
         """The predictor with the shift-mode phi at centre + sigma phi_s (unit-normal coordinates, section 5.5)."""
         params, shift = self.params_of(tp)
         params = {**params, **self._shift_params(phis)}
-        return self._to_link(self._predict(params)["pred"]) + shift + self.pert
+        g = self._to_link(self._predict(params)["pred"]) + shift + self.pert
+        return np.r_[g, self._count_link(params)] if self.count_spec else g
 
     def eta_columns(self, mu) -> np.ndarray:
         cols = []
@@ -201,6 +270,8 @@ class ToyProblem:
     def bootstrap_vhat(self, params: dict, seed) -> np.ndarray:
         """The bootstrap covariance of the link-space summary statistics at theta_ref (same uniforms for a given
         seed at every theta_ref: common random numbers)."""
+        if not self.names:
+            return np.zeros((0, 0))
         ev = ChainEvaluator(self._boot_model, {"seeds": {"nominal": 1}})
         gen = ev.generate(_seed_int(seed), params={**self.model.nominal, **self._equivalent(params)})
         sets = per_set_summaries(self._boot_model, {r: v["events"] for r, v in gen["runs"].items()}, self.names,
@@ -216,6 +287,14 @@ class ToyProblem:
 
     def reference(self, tp, beta, frozen=None, bootstrap_frozen=False, bootstrap_seed=None):
         params, _ = self.params_of(tp)
+        if not self.names:                                # a fit of count observables only (e.g. BB-lite)
+            pr = self.counts_pred(params)
+            tau = {n: L.bb_tau(pr[n]["sumw"], pr[n]["sumw2"]) for n, c in self.count_spec.items() if c.get("bb")}
+            nl = self.layout.n_link
+            ref = L.Reference(V_G=np.zeros((0, 0)), V_std=np.zeros((0, 0)), U=np.zeros((nl, 0)),
+                              S=np.zeros((nl, len(self.eta_spec))), tau=tau)
+            ref.V_MC = np.zeros((0, 0))
+            return ref.finalize()
         r = self._predict(params)
         mu = r["pred"]
         D = self._dlink(mu)
@@ -225,8 +304,15 @@ class ToyProblem:
         else:
             Vd = self.bootstrap_vhat(params, self.boot_seed if bootstrap_seed is None else bootstrap_seed)
         S = self.eta_columns(mu)
-        U = np.zeros((len(self.names), 0))
-        ref = L.Reference(V_G=Vd + V_mc, V_std=Vd, U=U, S=S)
+        nl = self.layout.n_link
+        if nl > S.shape[0]:                               # count rows: no eta columns (link-space shifts of scalars)
+            S = np.vstack([S, np.zeros((nl - S.shape[0], S.shape[1]))])
+        U = np.zeros((nl, 0))
+        tau = {}
+        if self.count_spec:
+            pr = self.counts_pred(params)
+            tau = {n: L.bb_tau(pr[n]["sumw"], pr[n]["sumw2"]) for n, c in self.count_spec.items() if c.get("bb")}
+        ref = L.Reference(V_G=Vd + V_mc, V_std=Vd, U=U, S=S, tau=tau)
         ref.V_MC = V_mc
         return ref.finalize()
 
@@ -261,7 +347,13 @@ class ToyProblem:
         sl = lay.slices()
         n0 = len(lay.theta) + len(lay.phi_P)
         params, shift = self.params_of(beta_truth[:n0])
-        y = self.observe_nominal(params, rng) if nominal else self.observe_at(params, int(rng.integers(2 ** 62)))
+        if phis is not None and self.shift_spec:          # the true shift-mode phi (section 6.6 item 1)
+            params = {**params, **self._shift_params(phis)}
+        counts = {}
+        if self.count_spec:
+            y, counts = self._observe_with_counts(params, rng, nominal)
+        else:
+            y = self.observe_nominal(params, rng) if nominal else self.observe_at(params, int(rng.integers(2 ** 62)))
         eta = beta_truth[sl["eta"]]
         if lay.n_eta:
             y = y + self.eta_columns(self._predict(params)["pred"]) @ eta
@@ -270,8 +362,37 @@ class ToyProblem:
         if lay.phi_P:                            # constraint centres sampled around the true phi (section 6.6)
             sig = np.array([s for _, s in self.phi_spec.values()])
             phi0 = rng.normal(beta_truth[sl["phi_P"]], sig)
-        return L.Data(y_gauss=y, phi0=phi0, phi_cov=self.phi_cov(),
+        return L.Data(y_gauss=y, counts=counts, phi0=phi0, phi_cov=self.phi_cov(),
                       eta0=rng.normal(eta, 1.0) if lay.n_eta else None)
+
+    def _observe_with_counts(self, params: dict, rng, nominal: bool):
+        """Gaussian summaries and count observables of the same data events: runs hosting an absolute count observable
+        have a Poisson(exposure) event total (an absolute count is Poisson), the others the fixed exposure."""
+        by = {o.name: o for o in self.model.observables}
+        runs = sorted({by[n].run for n in self.names} | {c["run"] for c in self.count_spec.values()})
+        absolute = {c["run"] for c in self.count_spec.values() if c.get("kind", "absolute") == "absolute"}
+        sizes = {r: (int(rng.poisson(self.exposure)) if r in absolute else self.exposure) for r in runs}
+        picked = {}
+        if nominal:
+            run_events, w = self._weighted_events(params)
+            for rid in runs:
+                ww = np.asarray(w[rid], float)
+                idx = rng.choice(ww.size, size=sizes[rid], replace=True, p=ww / ww.sum())
+                picked[rid] = {nd: {k: np.asarray(v)[idx] for k, v in outs.items()} for nd, outs in run_events[rid].items()}
+        else:
+            ev = ChainEvaluator(self._data_model, {"seeds": {"nominal": 1}})
+            gen = ev.generate(int(rng.integers(2 ** 62)), params={**self.model.nominal, **params})
+            for rid in runs:
+                evs = gen["runs"][rid]["events"]
+                if sizes[rid] > self._data_model.runs[rid].n:
+                    raise ValueError("the Poisson event total exceeds the generated data sample")
+                picked[rid] = {nd: {k: np.asarray(v)[:sizes[rid]] for k, v in outs.items()} for nd, outs in evs.items()}
+        y = np.zeros(0)
+        if self.names:
+            o = observe(self.model, picked, {r: np.ones(sizes[r]) for r in picked}, self.names)
+            y = self._to_link(o["pred"])
+        counts = {n: self._hist(self.model, picked, n)[0] for n in self.count_spec}
+        return y, counts
 
     def phi_cov(self):
         if not self.phi_spec:
@@ -452,9 +573,10 @@ class ToyProblem:
         lay = self.layout
         n0 = len(lay.theta) + len(lay.phi_P)
         params, shift = self.params_of(beta[:n0])
-        y = self._to_link(self._predict(params)["pred"]) + shift
+        y = (self._to_link(self._predict(params)["pred"]) + shift) if self.names else np.zeros(0)
         cen = np.array([c for c, _ in self.phi_spec.values()]) if self.phi_spec else None
-        return L.Data(y_gauss=y, phi0=cen, phi_cov=self.phi_cov(),
+        counts = {n: v["mu"] for n, v in self.counts_pred(params).items()} if self.count_spec else {}
+        return L.Data(y_gauss=y, counts=counts, phi0=cen, phi_cov=self.phi_cov(),
                       eta0=np.zeros(lay.n_eta) if lay.n_eta else None)
 
     def initial_beta(self, theta0: dict | None = None) -> np.ndarray:
@@ -465,6 +587,13 @@ class ToyProblem:
             b[i] = (theta0 or {}).get(n, 0.5 * sum(v["prior"]))
         if lay.phi_P:
             b[sl["phi_P"]] = [c for c, _ in self.phi_spec.values()]
+        if lay.omega:                                     # free totals: the observed (or expected) total
+            for i, n in enumerate(lay.omega):
+                tot = float(np.sum(self.data.counts[n])) if self.data is not None and n in self.data.counts else \
+                    float(self.exposure)
+                b[sl["omega"].start + i] = max(tot, 1.0)
+        if lay.gamma:
+            b[sl["gamma"]] = 1.0
         return b
 
 
