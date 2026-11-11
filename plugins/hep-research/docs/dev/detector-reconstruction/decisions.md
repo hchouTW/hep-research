@@ -497,3 +497,21 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
 `adapters/calo-cluster` is 0.2.0, `demonstrated-on-synthetic-data`, with section CALO-CLUSTER-T08 in `VALIDATION.md`. Its job of record is 7557963. That job ran the 0.2.0 code under `adapter.json` 0.1.0; only records changed after it (adapter.json, the matrix row, t08-scenarios.md), checked against its manifest c176ffb4. So no stage 5 job was run: T07's stage 11 needed one because its new code first ran there.
 
 `test_calo_records` pins the SHA-256 of every declared asset and test module to that manifest. A later code change therefore needs a new job of record.
+
+## T09, D3 stage 1: charge-only all-channel likelihood
+
+2026-11-11, coordinator. Job of record 7565328 (hpa-wn25, 14 min 31 s, PASS).
+
+- **adapters/photon-likelihood** is a development binding (U12 A), `proposed`, labelled shared-model closure. Live, dead and unhit are three explicit channel states; dead channels contribute nothing.
+- **Open cases ruled before any job.** The frozen reference fit (calc-t09-lowmu.py) is "simplified against the fixture" and cannot settle them.
+  - Charge: exact compound Poisson-Gaussian of signal plus dark 0.002, with each photon Gaussian(1, 0.3), as v4 4.3's readout.
+  - Threshold: one sharp threshold at 0.25 for both the hit and the no-hit term.
+  - Saturation: censored at 5.
+  - Seed: a single charge-centroid seed, reading no truth.
+  - Uncertainty: the inverse observed Hessian.
+  - Direction covariance: projected to v4's frame on the scoring side.
+- **Optimizer.** Convergence is decided by the Newton decrement (at most 1e-8). Outside the domain the objective returns -inf, so trust-exact rejects the step.
+- **Domain.** The domain margin is 5 mm and the total expected yield is capped at 1e5. Neither touches the fixture's range.
+- **Probability-sum tolerance.** 64 eps (1 + m|ln m|), set from floating-point arithmetic before the job.
+- **Exit codes (core/status.py).** The probability-sum stop exits 1 with its record. An error exits 2 with status "error". The coordinator's earlier ruling for a separate code was withdrawn, because the plugin convention allows no other code.
+- **Readings.** 6 of 7,000 fits did not converge. Pull tails come from the single seed. These are readings only.

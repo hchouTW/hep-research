@@ -231,7 +231,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `nuclear-interactions-in-detector-material.md` | hep-detector | 4.2 | yes | 4 | hep-theory | c398d5e0 2026-10-29 |
 | `particle-identification.md` | hep-detector | 18.7 | yes | 25 | hep-measurement | fcc1034c 2026-10-22 |
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 19.8 | no | 11 | - | e03c0396 2026-10-22 |
-| `photon-likelihood-reconstruction.md` | hep-detector | 17.7 | yes | 7 | - | 7cfaea3d 2026-11-06 |
+| `photon-likelihood-reconstruction.md` | hep-detector | 17.7 | yes | 8 | - | 7cfaea3d 2026-11-06 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `readout-digitization-and-overlay.md` | hep-detector | 9.6 | no | 3 | - | e2957da1 2026-10-25 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 11.6 | yes | 13 | hep-computing | 5e3b104e 2026-10-29 |

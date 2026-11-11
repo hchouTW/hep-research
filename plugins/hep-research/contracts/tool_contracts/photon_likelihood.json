@@ -1,0 +1,264 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "photon_likelihood",
+ "entry": "adapters/photon-likelihood/assets/photon_likelihood.py",
+ "operations": [
+  {
+   "operation_id": "fit",
+   "summary": "reco.light.channel-likelihood/1 stage 1, a development binding: the charge-only all-channel photon likelihood (every live channel; hit and no-hit terms on one threshold model, so their probabilities sum to one per channel; saturated channels censored; dead and disabled channels excluded, never unhit) on the stated analytic light model of t04-values-v4.md section 4.3, fitted from one seed for vertex, direction and E_vis, written as light-likelihood-product/1 with the per-channel probability check; labelled shared-model closure; t0 not estimated",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--readout",
+      "input": "readout"
+     },
+     {
+      "flag": "--product",
+      "input": "product"
+     },
+     {
+      "flag": "--product-id",
+      "input": "product_id"
+     },
+     {
+      "flag": "--configuration",
+      "input": "configuration"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "readout",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a light-readout/1 file, role reconstruction-input: per channel the state (live-hit, live-unhit, dead, disabled), the charge, the first time and the readout's saturated flag; its threshold must be the configuration's (one threshold model); a dead or disabled channel has no value (NaN)"
+    },
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the light-likelihood-product/1 file to write, only when the run finishes; an existing file is refused, never overwritten"
+    },
+    {
+     "name": "product_id",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a non-empty identity, recorded in the product header"
+    },
+    {
+     "name": "configuration",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "events",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "converged",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "fit_failures",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "probability_failures",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "label",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "product",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "input_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "configuration_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "seconds",
+     "kind": "duration",
+     "unit": "s"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "a live channel's hit and no-hit probabilities do not sum to one within 64 eps (1 + m |ln m|) at its reported point (the T09 sheet's stop, and nothing else: stdout carries status failed with probability_failures above 0); the product is written and records it. A fit failure (no hit channel, iteration budget, not converged, non-finite, no finite covariance; a trial point outside the fit's domain is rejected, never raised) is a recorded outcome with exit 0, counted in fit_failures"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an input is refused (missing, malformed, a header key that is not the format's, a threshold other than the configuration's, a channel count other than the geometry's, a dead channel with a value, a saturated flag without a saturation value, a configuration key that is not section 4.3's, a product file that already exists); stdout carries status rejected (core/status.py) and the reason; no product is written; or an internal error (an unexpected exception, a defect of the recipe or reader, never the probability-sum stop): stdout carries status error (core/status.py maps error to 2) and the reason, and no product or partial file is written. The JSON status, rejected or error, tells the two apart"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy or scipy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "check-product",
+   "summary": "Read a light-likelihood-product/1 back, refusing a malformed or incomplete product, and recompute ln L and the per-channel probability check of every event from the product alone (the T09 sheet's stop)",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--product",
+      "input": "product"
+     },
+     {
+      "flag": "--configuration",
+      "input": "configuration"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a light-likelihood-product/1 file made with the configuration given"
+    },
+    {
+     "name": "configuration",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "events",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "converged",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "label",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "probability_failures",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "first_failures",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "a live channel's hit and no-hit probabilities do not sum to one in at least one event; the first events are listed"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "the product is refused (missing, malformed, incomplete, made with another configuration, or its ln L or probability check does not recompute); stdout carries status rejected (core/status.py) and the reason; or an internal error (an unexpected exception, a defect of the recipe or reader, never the probability-sum stop): stdout carries status error (core/status.py maps error to 2) and the reason, and no product or partial file is written. The JSON status, rejected or error, tells the two apart"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy or scipy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

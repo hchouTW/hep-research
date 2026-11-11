@@ -2558,6 +2558,7 @@
    "lines": 265,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/photon-likelihood/assets/light_recipe/__init__.py",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
