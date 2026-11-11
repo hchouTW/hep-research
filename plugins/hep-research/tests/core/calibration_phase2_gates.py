@@ -364,9 +364,88 @@ def cal7_bj(reps: int = 10_000) -> dict:
 CALS = {"chat": cal13_chat, "lambda-bound": cal14_lower_bound, "lambda": cal3_lambda, "g7": cal5_g7, "bj": cal7_bj}
 
 
+# ------------------------------------------------------------------ gate 3: the negative tests of P8 and G9 (card)
+SEED_GATE3 = 20261150
+
+
+def gate_shift(out: Path) -> dict:
+    """Gate 3 as registered: each case with seeds 20261150 + case index (data) and + 100 (MC); linear toy n = 20,
+    d = 3, truth (0.5, -0.3, 1.0); the shift phi orthogonal to the theta columns with information as stated."""
+    from core.calibration import shift as Sh
+    from core.calibration import toys_linear as T
+    truth = [0.5, -0.3, 1.0]
+
+    def orth(J, seed):
+        Q, _ = np.linalg.qr(np.c_[J, np.random.default_rng(seed).normal(size=(J.shape[0], 1))])
+        return Q[:, J.shape[1]]
+
+    def cfg(i, info, resp=None, dep=False):
+        c = T.linear_config(n=20, d=3, seed=SEED_GATE3 + i)
+        o = orth(c.J, SEED_GATE3 + 50 + i)
+        c.phi_cols = (np.sqrt(info) * o)[:, None]
+        if dep:
+            c.phi_resp = lambda ph, tp, _o=o, _s=np.sqrt(info): _o * _s * 0.6 * tp[0] * ph[0]
+        elif resp is not None:
+            c.phi_resp = resp(c)
+        return c
+
+    def make(c, i, th=truth):
+        return T.make(c, th, data_seed=SEED_GATE3 + i, mc_seed=SEED_GATE3 + 100 + i)
+
+    cases = []
+    for i, (info, want) in enumerate(((0.3, "failed"), (0.05, "passed"))):
+        p = make(cfg(i, info), i)
+        r = Sh.p8(p, T.initial_beta(p))
+        cases.append({"case": f"P8 information {info}", "expected": want, "observed": r["status"],
+                      "lambda_max": r["lambda_max"], "ok": r["status"] == want})
+
+    def response(kind):
+        def build(c):
+            p0 = T.make(c, truth, data_seed=1, mc_seed=1)
+            b = 2.0 * F.iterate(p0, T.initial_beta(p0)).sigma_tot[0]
+            J0 = c.J[:, 0].copy()
+            f = {"expansive": lambda ph: -J0 * b * (ph[0] + 0.3 * ph[0] ** 3 / 6),
+                 "quadratic": lambda ph: -J0 * b * (ph[0] + 0.25 * ph[0] ** 2),
+                 "compressive": lambda ph: -J0 * b * (ph[0] - 0.3 * ph[0] ** 3 / 6)}[kind]
+            return f
+        return build
+    for j, (kind, want, code) in enumerate((("expansive", "failed", "g9.linearity"),
+                                            ("quadratic", "failed", "g9.linearity"),
+                                            ("compressive", "passed", None))):
+        i = 2 + j
+        p = make(cfg(i, 0.05, response(kind)), i)
+        r = Sh.g9(p, F.iterate(p, T.initial_beta(p)), Sh.p8(p, T.initial_beta(p)), seed=SEED_GATE3 + i)
+        cases.append({"case": f"G9 {kind} response", "expected": want, "observed": r["status"], "Delta": r.get("Delta"),
+                      "ok": r["status"] == want and (code is None or code in r.get("findings", []))})
+    i = 5
+    p = make(cfg(i, 0.09, dep=True), i, [1.0, -0.3, 1.0])
+    p8 = Sh.p8(p, T.initial_beta(p))
+    r = Sh.g9(p, F.iterate(p, T.initial_beta(p)), p8, seed=SEED_GATE3 + i)
+    cases.append({"case": "G9 condition 1 at theta-hat (1.5c)", "expected": "failed", "p8": p8["status"],
+                  "observed": r["status"], "lambda_at_fit": r.get("lambda_max_at_fit"),
+                  "ok": p8["status"] == "passed" and "g9.information" in r.get("findings", [])})
+    i = 6
+    q = make(cfg(i, 0.05), i)
+    fq = F.iterate(q, T.initial_beta(q))
+    base = q.h_shift
+    q.h_shift = lambda tp, ph: base(tp, ph) if abs(ph[0]) < 1.5 else np.full_like(base(tp, ph), np.nan)
+    r = Sh.g9(q, fq, Sh.p8(q, T.initial_beta(q)), seed=SEED_GATE3 + i)
+    cases.append({"case": "G9 refit not converged", "expected": "failed", "observed": r["status"],
+                  "ok": r.get("finding") == "g9.refit_not_converged"})
+    p = make(cfg(0, 0.3), 0)
+    r = Sh.g9(p, F.iterate(p, T.initial_beta(p)), Sh.p8(p, T.initial_beta(p)))
+    cases.append({"case": "G9 not decided after P8 failed", "expected": "not-decided", "observed": r["status"],
+                  "ok": r["status"] == "not-decided"})
+    passed = all(c["ok"] for c in cases)
+    rep = {"gate": "the negative tests of P8, G9", "status": "passed" if passed else "failed", "cases": cases,
+           "provenance": provenance(), "label": "synthetic"}
+    io.write_json(str(out), io.jsonable(rep))
+    return rep
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--gate", choices=("segmented",))
+    ap.add_argument("--gate", choices=("segmented", "shift"))
     ap.add_argument("--calibration", choices=sorted(CALS))
     ap.add_argument("--reps", type=int)
     ap.add_argument("--out", required=True)
@@ -376,6 +455,10 @@ def main(argv=None) -> int:
     if a.gate == "segmented":
         r = gate_segmented(Path(a.out), a.smoke, a.probe)
         print(json.dumps({"status": r["status"], "results": r["results"], "seconds": r["seconds"]}))
+        return 0 if r["status"] == "passed" else 1
+    if a.gate == "shift":
+        r = gate_shift(Path(a.out))
+        print(json.dumps({"status": r["status"], "cases": [(c["case"], c["ok"]) for c in r["cases"]]}))
         return 0 if r["status"] == "passed" else 1
     if a.calibration:
         t0 = time.time()
