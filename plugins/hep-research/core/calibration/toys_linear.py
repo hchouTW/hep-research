@@ -73,7 +73,7 @@ class LinearProblem:
         n_eta = 0 if cfg.S is None else cfg.S.shape[1]
         self.layout = L.build_layout(obs, self.theta_names, [], n_nu, n_eta)
         rng = np.random.default_rng(mc_seed)
-        self.e0 = rng.multivariate_normal(np.zeros(n), cfg.V_MC) * mc_scale if cfg.V_MC.any() else np.zeros(n)
+        self.e0 = rng.multivariate_normal(np.zeros(n), cfg.V_MC) * mc_scale if (n and cfg.V_MC.any()) else np.zeros(n)
         self.e1n = (rng.normal(size=(n, d)) * cfg.e1) if cfg.e1 is not None else None
         self.pert = np.zeros(self.layout.n_link)
         self.sigma_noise = 0.0
@@ -266,7 +266,7 @@ class LinearProblem:
                     mu = mu + c.phi_resp(np.asarray(phis, float), np.asarray(th, float))
                 except TypeError:
                     mu = mu + c.phi_resp(np.asarray(phis, float))
-        y = rng.multivariate_normal(mu, self.V_data_at(th))
+        y = rng.multivariate_normal(mu, self.V_data_at(th)) if mu.size else np.zeros(0)
         out = L.Data(y_gauss=y, nu0=rng.normal(nu, 1.0) if lay.n_nu else None,
                      eta0=rng.normal(eta, 1.0) if lay.n_eta else None)
         if c.poisson is not None:

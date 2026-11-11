@@ -27,6 +27,7 @@ from core.calibration import likelihood as L  # noqa: E402
 from core.calibration import propagate as P  # noqa: E402
 from core.calibration import toy  # noqa: E402
 from core.calibration import toy_problem as TP  # noqa: E402
+from scipy import stats  # noqa: E402
 
 FILES = ["core/calibration/" + f for f in ("likelihood.py", "fit.py", "propagate.py", "toy_problem.py", "toy.py",
                                             "reweight.py", "data/toy_detector_design.json")] + \
@@ -443,9 +444,406 @@ def gate_shift(out: Path) -> dict:
     return rep
 
 
+# ------------------------------------------------------------------ gate 1: toy-detector negatives (card item 1)
+SEED_GATE1 = 20261130
+
+
+def _toy_p3(names, theta_names, i, modes=None, exposure=2000, mc=20000):
+    from core.calibration import identify as I
+    spec = bounds_from_fixture()
+    th = {k: spec[k] for k in theta_names}
+    p = TP.ToyProblem(build, names, th, exposure, mc, SEED_GATE1 + i, None, None, None, None, SEED_GATE1 + 100 + i)
+    p.degeneracy_modes = modes or []
+    b = p.initial_beta()
+    p.data = p.asimov(b)
+    return I.p3(p, b)
+
+
+def gate1_toy_p3() -> list:
+    """P3 on the toy detector at Asimov data, prior centre (section 15.3.1, 15.2, 15.3.18)."""
+    widths = [f"beam{e}_e_width" for e in (1, 2, 3, 4)]
+    means = [f"beam{e}_e_mean" for e in (1, 2, 3, 4)]
+    thin = [{"mode": "binomial thinning chain", "parameters": ["light_yield", "pde"],
+             "signal": "inject a reference with a known photon count between photon generation and PDE"}]
+    gain = [{"mode": "Poisson stage x subsequent gain", "parameters": ["light_yield", "gain", "enf"],
+             "signal": "the single-photoelectron spectrum"}]
+    common = [{"mode": "common mode of redundant measurements", "parameters": ["relative_gain_b", "gain"],
+               "signal": "another reference acting on a single branch"}]
+    out = []
+    r = _toy_p3(widths + means, ("light_yield", "pde"), 1, thin)
+    out.append({"case": "P3 yield x PDE, widths and means, no photon source", "expected": "failed", "observed": r["status"],
+                "hint": [h["mode"] for h in r.get("hints", [])], "ok": r["status"] == "failed"})
+    r = _toy_p3(widths + means + ["light_e_mean", "light_e_width"], ("light_yield", "pde"), 2, thin)
+    out.append({"case": "P3 yield x PDE with the photon source", "expected": "passed", "observed": r["status"],
+                "ok": r["status"] == "passed"})
+    r = _toy_p3(widths + means, ("light_yield", "gain", "enf"), 3, gain)
+    out.append({"case": "P3 Poisson x gain, free fluctuation (ENF), no single-photoelectron spectrum",
+                "expected": "failed", "observed": r["status"], "hint": [h["mode"] for h in r.get("hints", [])],
+                "ok": r["status"] == "failed"})
+    r = _toy_p3(widths + means + ["spe_e_mean", "spe_e_width", "light_e_mean", "light_e_width"],
+                ("light_yield", "gain", "enf"), 4, gain)
+    out.append({"case": "P3 Poisson x gain with the single-photoelectron spectrum and the light source (the light source "
+                        "fixes the gain to the precision of 400 photons; the spectrum alone measures it to ~1.4%, "
+                        "leaving the yield-gain correlation near -0.99)", "expected": "passed",
+                "observed": r["status"], "ok": r["status"] == "passed"})
+    ratios = [f"beam{e}_ratio_mean" for e in (1, 2, 3, 4)]
+    r = _toy_p3(ratios, ("relative_gain_b", "gain"), 5, common)
+    out.append({"case": "P3 redundant modules: the energy ratio, common gain scale", "expected": "failed",
+                "observed": r["status"], "hint": [h["mode"] for h in r.get("hints", [])],
+                "ok": r["status"] == "failed" and any(h["mode"] == "common mode of redundant measurements"
+                                                      for h in r.get("hints", []))})
+    return out
+
+
+# ------------------------------------------------------------------ gate 1: event samples conditioned on N_tot,s (item 11)
+def _alr(counts):
+    from core.calibration import likelihood as Lk
+    return Lk.shape_summary(counts, Lk.logratio_matrix(len(counts), "alr"))
+
+
+def _rate(pvals, alpha=0.05):
+    return float(np.mean(np.asarray(pvals) <= alpha))
+
+
+def gate1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: int = SEED_GATE1 + 60) -> list:
+    """The section 15.3.7 size cases with a bootstrap conditioned on N_tot,s; each with its negative control."""
+    from core.calibration import validate as V
+    out = []
+    # (i) true normalization omega = 0.5: N_tot,s observed = 400 while N_decl = 800; K = 3 shape + efficiency
+    P_BIN, EPS = np.array([0.5, 0.3, 0.2]), 0.7
+
+    def gun(n, rng):
+        N = int(sum(n))
+        passed = rng.random(N) < EPS
+        k = rng.multinomial(int(passed.sum()), P_BIN)
+        return np.r_[_alr(k), passed.mean() if N else 0.0]
+
+    def size_case(cond_n, data_n, label, reps_):
+        pv = []
+        for r in range(reps_):
+            rng = np.random.default_rng([seed, hash(label) % 2 ** 31, r])
+            y = gun(data_n(rng), rng)
+            n_c = cond_n(y, rng)
+            sets = V.conditioned_sets(gun, n_c, B, (seed, r, 1))
+            toys = V.conditioned_sets(gun, n_c, n_toys, (seed, r, 2))
+            pv.append(V.toy_calibrated_pvalue(y, sets.mean(0), np.cov(sets, rowvar=False), toys))
+        return _rate(pv)
+    ok_rate = size_case(lambda y, rng: [400], lambda rng: [400], "omega-ok", reps)
+    # negative control: the bootstrap generated with N_decl = 800 events (omega = 1) while the toys follow the data
+    pv = []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 7, r])
+        y = gun([400], rng)
+        sets = V.conditioned_sets(gun, [800], B, (seed, r, 3))
+        toys = V.conditioned_sets(gun, [400], n_toys, (seed, r, 4))
+        Ci = np.linalg.pinv(np.cov(sets, rowvar=False))
+        c = sets.mean(0)
+        T = lambda v: float((v - c) @ Ci @ (v - c))  # noqa: E731
+        pv.append(float(stats.chi2.sf(T(y), 3)))      # the omega = 1 covariance used as if it were the data's
+    out.append({"case": "omega = 0.5: bootstrap conditioned on N_tot,s", "size": ok_rate,
+                "ok": abs(ok_rate - 0.05) <= 0.0125, "control_size_omega1": _rate(pv),
+                "control_ok": _rate(pv) > 0.0625})
+
+    # (ii) particle gun: the shape and the efficiency of the same events, conditioned on N_tot,s; the negative control
+    # conditions the toys on the shape's own passing count N_pass (the efficiency direction then has no variance)
+    def gun_npass(n_pass, n_tot):
+        def f(_n, rng):
+            k = rng.multinomial(n_pass, P_BIN)
+            return np.r_[_alr(k), n_pass / n_tot]
+        return f
+    pv_ok, pv_np = [], []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 11, r])
+        y = gun([400], rng)
+        n_pass = int(round(y[-1] * 400))
+        sets = V.conditioned_sets(gun, [400], B, (seed, r, 5))
+        toys = V.conditioned_sets(gun, [400], n_toys, (seed, r, 6))
+        pv_ok.append(V.toy_calibrated_pvalue(y, sets.mean(0), np.cov(sets, rowvar=False), toys))
+        sets2 = V.conditioned_sets(gun_npass(n_pass, 400), [400], B, (seed, r, 7))[:, :-1]
+        toys2 = V.conditioned_sets(gun_npass(n_pass, 400), [400], n_toys, (seed, r, 8))[:, :-1]
+        pv_np.append(V.toy_calibrated_pvalue(y[:-1], sets2.mean(0), np.cov(sets2, rowvar=False), toys2))
+    a = _rate(pv_ok)
+    # power at an efficiency bias of 3.2 sigma (section 15.3.7: >= 0.6 conditioned on N_tot,s); conditioned on N_pass the
+    # efficiency direction has no variance in the toys and drops out, so the bias is not seen (negative control)
+    eps_b = EPS + 3.2 * np.sqrt(EPS * (1 - EPS) / 400)
+    pw_ok, pw_np = [], []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 12, r])
+        passed = rng.random(400) < eps_b
+        y = np.r_[_alr(rng.multinomial(int(passed.sum()), P_BIN)), passed.mean()]
+        n_pass = int(passed.sum())
+        sets = V.conditioned_sets(gun, [400], B, (seed, r, 13))
+        toys = V.conditioned_sets(gun, [400], n_toys, (seed, r, 14))
+        pw_ok.append(V.toy_calibrated_pvalue(y, sets.mean(0), np.cov(sets, rowvar=False), toys))
+        sets2 = V.conditioned_sets(gun_npass(n_pass, 400), [400], B, (seed, r, 15))[:, :-1]
+        toys2 = V.conditioned_sets(gun_npass(n_pass, 400), [400], n_toys, (seed, r, 16))[:, :-1]
+        pw_np.append(V.toy_calibrated_pvalue(y[:-1], sets2.mean(0), np.cov(sets2, rowvar=False), toys2))
+    out.append({"case": "particle gun: K = 3 shape + efficiency conditioned on N_tot,s", "size": a,
+                "power_at_3.2_sigma": _rate(pw_ok), "ok": abs(a - 0.05) <= 0.0125 and _rate(pw_ok) >= 0.6,
+                "control_N_pass_size": _rate(pv_np), "control_N_pass_power": _rate(pw_np),
+                "control_ok": _rate(pw_np) <= 0.10})          # no power beyond about 2 alpha
+
+    # (iii) two run periods, model fraction 0.45, true 0.5, efficiencies 0.6 and 0.8: eps1, eps2 and the combined t
+    E1, E2 = 0.6, 0.8
+
+    def periods(n, rng):
+        n1, n2 = int(n[0]), int(n[1])
+        k1, k2 = rng.binomial(n1, E1), rng.binomial(n2, E2)
+        return np.array([k1 / n1, k2 / n2, (k1 + k2) / (n1 + n2)])
+
+    def periods_sum(n, rng):
+        N = int(sum(n))
+        n1 = rng.binomial(N, 0.45)
+        return periods([n1, N - n1], rng)
+    pv_c, pv_s = [], []
+    for r in range(reps):
+        rng = np.random.default_rng([seed, 13, r])
+        n1 = rng.binomial(800, 0.5)
+        y = periods([n1, 800 - n1], rng)
+        sets = V.conditioned_sets(periods, [n1, 800 - n1], B, (seed, r, 9))
+        toys = V.conditioned_sets(periods, [n1, 800 - n1], n_toys, (seed, r, 10))
+        pv_c.append(V.toy_calibrated_pvalue(y, sets.mean(0), np.cov(sets, rowvar=False), toys))
+        sets = V.conditioned_sets(periods_sum, [n1, 800 - n1], B, (seed, r, 11))
+        toys = V.conditioned_sets(periods_sum, [n1, 800 - n1], n_toys, (seed, r, 12))
+        pv_s.append(V.toy_calibrated_pvalue(y, sets.mean(0), np.cov(sets, rowvar=False), toys))
+    a, b = _rate(pv_c), _rate(pv_s)
+    out.append({"case": "two periods (model fraction 0.45, true 0.5): conditioned on (N1, N2)", "size": a,
+                "ok": abs(a - 0.05) <= 0.0125, "control_conditioned_on_sum": b, "control_ok": b > 0.0625})
+    return out
+
+
+# ------------------------------------------------------------------ gate 1: the remaining heavy items (card items 2, 9-11)
+def gate1_g7_bblite(reps: int = 40, seed: int = SEED_GATE1 + 70) -> dict:
+    """G7 for a fit with only Poisson blocks and BB-lite: Sigma_MC from the auxiliary measurements (B_m of section 6.7)
+    passes; A V_MC A^T alone (Sigma_MC = 0) diverges (section 15.3.1)."""
+    from core.calibration import toys_linear as T
+    rng = np.random.default_rng(seed)
+    K = 12
+    pois = {"a": rng.uniform(20, 80, K), "b": rng.normal(0, 0.4, K), "tau": np.full(K, 200.0)}
+    cfg = T.linear_config(n=0, d=1, poisson=pois, prior=[(-1, 1)], bounds=[(-3, 3)])
+    p = T.make(cfg, [0.2], data_seed=seed, mc_seed=seed + 1)
+    f = F.iterate(p, T.initial_beta(p), lndet=False)
+    S = F.sigma_mc(p, f, None)
+    bb = zero = 0
+    for r in range(reps):
+        th = np.array([F.iterate(q, T.initial_beta(q), lndet=False).beta[:1] for q in
+                       (T.LinearProblem(cfg, mc_seed=seed + 10_000 + 100 * r + k, data=p.data) for k in range(10))])
+        bb += F.g7(th, S)["status"] == "failed"
+        zero += F.g7(th, np.zeros((1, 1)), sigma_tot_ref=f.sigma_tot)["status"] == "failed"
+    return {"case": "G7 Poisson-only with BB-lite", "fail_rate_bb": bb / reps, "fail_rate_zero": zero / reps,
+            "ok": bb / reps <= 0.1 and zero / reps >= 0.9}
+
+
+def gate1_g8_lndet(reps: int = 50, seed: int = SEED_GATE1 + 80) -> dict:
+    """G8 detects a fitter that omits ln det while V changes with theta (bias ~0.5 sigma) with probability >= 0.8:
+    >= 40 detections in 50 repetitions at the standard level; the correct fitter as the positive control."""
+    from scipy import optimize
+    from core.calibration import closure as C
+    from core.calibration import likelihood as Lk
+    from core.calibration import toys_linear as T
+    cfg = T.linear_config(n=20, d=1, count_c=1.0, sd=0.5, bounds=[(-2.0, 10.0)], prior=[(-2.0, 3.0)])
+    cfg.J[:, 0] = np.abs(cfg.J[:, 0]) + 0.5
+    N = C.n_c(1, "standard")["N_c"]
+    p0 = T.make(cfg, [0.5], 1, 2)
+    sd = F.iterate(p0, T.initial_beta(p0)).sigma_tot
+    interior, boundary = C.injection_points(cfg.prior, cfg.bounds, sd, np.array([0.5]))
+    det = {"good": 0, "bad": 0}
+    for r in range(reps):
+        for kind in ("good", "bad"):
+            def maker(truth, off):
+                return lambda s: T.make(cfg, truth, data_seed=seed + 10 ** 6 * r + off + s, mc_seed=seed + 7 + s + 10 ** 6 * r)
+
+            def fit_and_cover(p, s):
+                f = F.iterate(p, T.initial_beta(p), lndet=False)
+                th = f.beta[0]
+                if kind == "bad":
+                    def chi2(x):
+                        rf = p.reference(np.array([x]), None)
+                        return Lk.Likelihood(p.layout, p.data, rf).deviance(np.r_[x], p.h(np.array([x])))
+                    th = optimize.minimize_scalar(chi2, bounds=(-2, 10), method="bounded").x
+                err = np.array([th - p.truth[0]])
+                return f.converged, err, np.abs(err) <= f.sigma_tot, np.abs(err) <= 1.96 * f.sigma_tot, {"n": 0, "X": 0}, True
+            ri = C.run_point(maker(interior, 0), fit_and_cover, N, range(100_000))
+            rb = C.run_point(maker(boundary, 500_000), fit_and_cover, N, range(100_000))
+            det[kind] += C.g8("standard", ["t0"], sd, ri, rb)["status"] == "failed"
+    return {"case": "G8 detects a fitter without ln det", "detections_bad": det["bad"], "false_alarms_good": det["good"],
+            "reps": reps, "ok": det["bad"] >= 40}
+
+
+def gate1_g8_counting(reps: int = 1000, seed: int = SEED_GATE1 + 90) -> dict:
+    """Counting non-converged pseudo-data as not covered (negative control) over-rejects at the full level, d = 3,
+    eps = 1% concentrated in covered pseudo-data, against replacement (section 7.3, 15.3.1, 15.3.9)."""
+    from core.calibration import closure as C
+    N = C.n_c(3, "full")["N_c"]
+    fa = {"replace": 0, "count": 0}
+    for r in range(reps):
+        rng = np.random.default_rng([seed, r])
+        pts = {}
+        for kind in ("replace", "count"):
+            res = {}
+            for k, pt in enumerate(("interior", "boundary")):
+                err = rng.normal(size=(N, 3)) if kind == "replace" else None
+                if kind == "count":
+                    err = rng.normal(size=(N, 3))
+                    nc = rng.random(N) < 0.01
+                c68 = np.abs(err) <= 1.0
+                c95 = np.abs(err) <= 1.96
+                if kind == "count":
+                    c68[nc] = False
+                    c95[nc] = False
+                res[pt] = {"errors": err, "cover68": c68, "cover95": c95, "nontruth_basin": np.zeros(N, bool), "X": 0,
+                           "interval_toys": {"X": 0, "n": 0}}
+            fa[kind] += C.g8("full", ["a", "b", "c"], np.ones(3), res["interior"], res["boundary"])["status"] == "failed"
+    return {"case": "G8: non-converged pseudo-data counted as not covered (negative control)", "false_alarms": fa,
+            "reps": reps, "ok": fa["replace"] <= 62 and fa["count"] > 62}
+
+
+def gate1_power_point_estimate(reps: int = 2000, seed: int = SEED_GATE1 + 100, k: int = 5, R: int = 50,
+                               n_toys: int = 1000, MC_SD: float = 1.0) -> dict:
+    """Power toys scaled by the point estimate of lambda-hat_cross while the true power is 0.75 claim a lower bound
+    >= 0.8 in more than 5% of repetitions (negative control); with the one-sided lower bound and the Bonferroni split
+    (m = 1: 0.975 each) in at most 5% (section 15.3.10)."""
+    from scipy import optimize as so
+    from core.calibration import validate as V
+    crit = stats.chi2.ppf(0.95, k)
+    lam = so.brentq(lambda x: stats.ncx2.sf(crit, k, x) - 0.75, 0.1, 100)
+    e = np.zeros(k)
+    e[0] = np.sqrt(lam)
+    claims = {"point": 0, "lower": 0}
+    for r in range(reps):
+        rng = np.random.default_rng([seed, r])
+        cr = np.einsum("ri,ri->r", e + rng.normal(size=(R, k)) * MC_SD, e + rng.normal(size=(R, k)) * MC_SD)
+        # the point estimate: one cross product of two MC sets; the lower bound: over R independent repetitions
+        for kind, lv in (("point", float(cr[0])), ("lower", V.lambda_lower_bound(cr, 0.975))):
+            pw = stats.ncx2.sf(crit, k, max(lv, 1e-9))
+            rej = rng.binomial(n_toys, pw)
+            claims[kind] += V.clopper_pearson_lower(int(rej), n_toys, 0.975) >= 0.8
+    return {"case": "P7: power toys scaled by the point estimate (negative control)", "claims": claims, "reps": reps,
+            "true_power": 0.75, "ok": claims["point"] / reps > 0.05 and claims["lower"] / reps <= 0.05}
+
+
+def gate1_shape_total(reps: int = 2000, seed: int = SEED_GATE1 + 110) -> dict:
+    """A shape conditioned on its total (K = 5, calibration total 500): the size of T_v at N_obs = 300, 1200, 1500,
+    3000 is alpha (within alpha +- 25%) with the multinomial and propagation terms scaled per section 2.1 (15.2)."""
+    from core.calibration import likelihood as Lk
+    from core.calibration import validate as V
+    K = 5
+    rng0 = np.random.default_rng(seed)
+    A = rng0.normal(size=(K - 1, 2)) * 0.5
+    Lm = Lk.logratio_matrix(K, "alr")
+    a0 = np.log(np.array([0.3, 0.25, 0.2, 0.15]) / 0.1)
+
+    class Shape:
+        def __init__(s, counts):
+            s.layout = Lk.build_layout([{"name": "c", "block": "poisson", "bins": K, "free_omega": True}], ["t0", "t1"],
+                                       [], 0, 0)
+            s.data = Lk.Data(y_gauss=np.zeros(0), counts={"c": counts})
+            s.sigma_noise, s.edm_tol = 0.0, 0.01
+
+        def h(s, tp):
+            return a0 + A @ np.asarray(tp)[:2]
+
+        def p(s, tp):
+            return Lk.logratio_inverse(s.h(tp), Lm)
+
+        def reference(s, tp, beta, frozen=None, bootstrap_frozen=False, bootstrap_seed=None):
+            return Lk.Reference(V_G=np.zeros((0, 0)), V_std=np.zeros((0, 0)), U=np.zeros((K - 1, 0)),
+                                S=np.zeros((K - 1, 0))).finalize()
+
+        def bounds(s):
+            return [(-10, 10)] * 2
+
+        def prior_box(s):
+            return [(-3, 3)] * 2
+
+        def sigma_prior(s):
+            return [6 / 12 ** 0.5] * 2
+    truth = np.array([0.3, -0.2])
+    p0 = Lk.logratio_inverse(a0 + A @ truth, Lm)
+    sizes = {}
+    for Nobs in (300, 1200, 1500, 3000):
+        rej = 0
+        for r in range(reps):
+            rng = np.random.default_rng([seed, Nobs, r])
+            sh = Shape(rng.multinomial(500, p0))
+            lk = Lk.Likelihood(sh.layout, sh.data, sh.reference(None, None))
+            f = F.iterate(sh, lk.initial_beta({"t0": 0, "t1": 0}), lndet=False)
+            th = f.beta[:2]
+            Gm = np.stack([(sh.p(th + e_) - sh.p(th - e_)) / 2e-5 for e_ in np.eye(2) * 1e-5], axis=1)
+            Gb = np.zeros((K, f.Sigma_beta.shape[0]))
+            Gb[:, :2] = Gm
+            pc = V.shape_holdout_pieces(rng.multinomial(Nobs, p0), sh.p(th), Gb, f.Sigma_beta)
+            Cp, kk = V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
+            rej += V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, kk)
+        sizes[Nobs] = rej / reps
+    return {"case": "shape conditioned on its total (K = 5, calibration total 500)", "sizes": sizes, "reps": reps,
+            "ok": all(abs(s - 0.05) <= 0.0125 for s in sizes.values())}
+
+
+# ------------------------------------------------------------------ gate 1 assembly
+GATE1_EVIDENCE = {
+    "1 P3": ["harness gate1_toy_p3 (toy detector)", "test_calibration_identify_shift_interval.Identifiability",
+             "test_calibration_design_noise.Folds.test_fold_p3"],
+    "2 P7": ["test_calibration_contract (validation.alternative_shift: nu_k = 2 rejected)",
+             "test_calibration_design_noise.P7", "test_calibration_validate.Power",
+             "test_calibration_validate.CrossValidation (power by toys: cv_ensemble)", "harness gate1_power_point_estimate"],
+    "3 G1": ["test_calibration_fit.Iteration.test_g1_iteration_limit", "test_calibration_fit.Basins"],
+    "4 G2": ["test_calibration_fit.G2G3 (beyond, on, two parameters with chi-bar^2)"],
+    "5 G3": ["test_calibration_fit.G2G3.test_g3_isolation_mode"],
+    "6 G4": ["test_calibration_g4"],
+    "7 G5": ["test_calibration_identify_shift_interval.Identifiability (product; non-converged scan points: plan)"],
+    "8 G6": ["test_calibration_fit.G6 (missing effect; cross-term nonlinearity -> full toys)"],
+    "9 G7": ["test_calibration_fit.G7 (factor 3 detection, rank one, null space)", "harness gate1_g7_bblite"],
+    "10 G8": ["test_calibration_closure", "harness gate1_g8_lndet (50 repetitions)", "harness gate1_g8_counting",
+              "test_calibration_design_noise.Practices (pseudo-data sharing the fit MC rejected)"],
+    "11 V": ["test_calibration_validate (NullSpace, Holdout, ShiftModeResidual, ToyPath, CrossValidation, Records)",
+             "test_calibration_data_checks", "test_calibration_locking", "test_calibration_data (phase 0: reads, failure "
+             "records)", "test_calibration_contract (phase 0 rules of sections 15.3.4-15.3.8)", "harness gate1_event_samples",
+             "harness gate1_shape_total", "cross-validation toys are always complete toys, so a fold failing the "
+             "linearity check uses full toys by construction"],
+    "12 propagation": ["test_calibration_propagate"],
+}
+
+
+def gate_negatives(out: Path, smoke: bool = False) -> dict:
+    """Gate 1 as registered: the calibration unit-test modules and the script tests at the commit, and the harness
+    items at their registered sizes (smoke: tiny sizes, not evidence)."""
+    t0 = time.time()
+    mods = sorted(p.name for p in (ROOT / "tests" / "core").glob("test_calibration_*.py"))
+    units = {}
+    for m in mods:
+        r = subprocess.run([sys.executable, "-I", str(ROOT / "tests" / "core" / m)], capture_output=True, text=True,
+                           timeout=7200, cwd=ROOT)
+        tail = (r.stderr or "").strip().splitlines()[-3:]
+        units[m] = {"exit": r.returncode, "summary": tail}
+    r = subprocess.run([sys.executable, "-m", "unittest", "tests.skills.test_calib_scripts"], capture_output=True,
+                       text=True, timeout=7200, cwd=ROOT)
+    units["tests.skills.test_calib_scripts"] = {"exit": r.returncode, "summary": (r.stderr or "").strip().splitlines()[-3:]}
+    s = 0.1 if smoke else 1.0
+    items = {"toy_p3": gate1_toy_p3(),
+             "event_samples": gate1_event_samples(reps=int(2000 * s)),
+             "g7_bblite": gate1_g7_bblite(reps=int(40 * s) or 2),
+             "g8_lndet": gate1_g8_lndet(reps=int(50 * s) or 2),
+             "g8_counting": gate1_g8_counting(reps=int(1000 * s)),
+             "power_point_estimate": gate1_power_point_estimate(reps=int(2000 * s)),
+             "shape_total": gate1_shape_total(reps=int(2000 * s))}
+    def ok(x):
+        if isinstance(x, list):
+            return all(c.get("ok") and c.get("control_ok", True) for c in x)
+        return bool(x.get("ok")) and x.get("control_ok", True)
+    units_ok = all(u["exit"] == 0 for u in units.values())
+    items_ok = {k: ok(v) for k, v in items.items()}
+    passed = units_ok and all(items_ok.values())
+    rep = {"gate": "the negative tests of P3, P7, G1-G8, V and propagation", "status": "passed" if passed else "failed",
+           "smoke": smoke, "units": units, "items": items, "items_ok": items_ok, "evidence": GATE1_EVIDENCE,
+           "seconds": time.time() - t0, "provenance": provenance(), "label": "smoke (not evidence)" if smoke else "synthetic"}
+    io.write_json(str(out), io.jsonable(rep))
+    return rep
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--gate", choices=("segmented", "shift"))
+    ap.add_argument("--gate", choices=("segmented", "shift", "negatives"))
     ap.add_argument("--calibration", choices=sorted(CALS))
     ap.add_argument("--reps", type=int)
     ap.add_argument("--out", required=True)
@@ -455,6 +853,11 @@ def main(argv=None) -> int:
     if a.gate == "segmented":
         r = gate_segmented(Path(a.out), a.smoke, a.probe)
         print(json.dumps({"status": r["status"], "results": r["results"], "seconds": r["seconds"]}))
+        return 0 if r["status"] == "passed" else 1
+    if a.gate == "negatives":
+        r = gate_negatives(Path(a.out), a.smoke)
+        print(json.dumps({"status": r["status"], "items_ok": r["items_ok"],
+                          "units_failed": [m for m, u in r["units"].items() if u["exit"] != 0]}))
         return 0 if r["status"] == "passed" else 1
     if a.gate == "shift":
         r = gate_shift(Path(a.out))

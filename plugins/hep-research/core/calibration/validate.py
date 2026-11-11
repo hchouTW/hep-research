@@ -579,3 +579,53 @@ def cv_ensemble(problem, folds, truth, n_req: int, seed, n_start=None, g5=None, 
         return {"status": "incomplete", "finding": "validate.ratio_test", "X": X, "k_star": kst, "eps_max": eps}
     return {"status": "ok", "values": [v for v in vals if v is not None], "X": X, "g5_failed": g5f,
             "proportion": prop, "eps_max": eps}
+
+
+# ------------------------------------------------------------------ shapes conditioned on the total (section 2.1)
+def shape_holdout_pieces(counts, p_hat, G, Sigma_beta, other=None) -> dict:
+    """The holdout residual of a free-omega validation shape conditioned on its observed total N_obs (section 2.1 "C_r
+    and the observed total in holdout"): r = n - N_obs p(beta-hat), C = N_obs (diag p - p p^T) + N_obs^2 G Sigma_beta
+    G^T (G = dp/dbeta); with another validation observable o (`other` = {r, V, J}): the cross term N_obs G Sigma_beta
+    J_o^T and o's own V_oo + J_o Sigma_beta J_o^T. The sum of the shape's residuals is 0 by construction and is declared
+    in N_d (the returned constraint). N_obs = 0 removes the shape's K - 1 directions (the fallback of section 2.1):
+    the caller passes such a shape to `remove_directions`."""
+    n = np.asarray(counts, float)
+    p = np.asarray(p_hat, float)
+    N = float(n.sum())
+    G = np.asarray(G, float)
+    K = n.size
+    r = n - N * p
+    C = N * (np.diag(p) - np.outer(p, p)) + N * N * G @ Sigma_beta @ G.T
+    s = np.sqrt(np.maximum(N, 1.0) * p * (1 - p))
+    cons = [np.r_[np.ones(K), np.zeros(0)]]
+    if other is not None:
+        ro, Vo, Jo = (np.asarray(other[k], float) for k in ("r", "V", "J"))
+        m = ro.size
+        X = N * G @ Sigma_beta @ Jo.T
+        C = np.block([[C, X], [X.T, Vo + Jo @ Sigma_beta @ Jo.T]])
+        r = np.r_[r, ro]
+        s = np.r_[s, np.sqrt(np.diag(Vo))]
+        cons = [np.r_[np.ones(K), np.zeros(m)]]
+    return {"r": r, "C_r": 0.5 * (C + C.T), "s": s, "constraints": cons, "N_obs": N}
+
+
+# ------------------------------------------------------------------ event samples conditioned on N_tot,s (section 2.1)
+def conditioned_sets(summary, n_by_component, B: int, seed) -> np.ndarray:
+    """B sets of an event sample's summary statistics, each drawing exactly n_by_component[j] events in component j
+    from the model (`summary(n_by_component, rng)` -> summary vector): the bootstrap of section 2.1 (c) conditioned on the
+    vector of component totals (not on their sum, not on a shape's own passing count). Seeds (seed, b)."""
+    out = []
+    for b in range(B):
+        rng = np.random.default_rng([int(np.random.SeedSequence(
+            [int(x) for x in (seed if isinstance(seed, (list, tuple)) else [seed])]).generate_state(1)[0]), b])
+        out.append(np.asarray(summary(list(n_by_component), rng), float))
+    return np.array(out)
+
+
+def toy_calibrated_pvalue(observed: np.ndarray, center: np.ndarray, C: np.ndarray, toys: np.ndarray) -> float:
+    """p of T = (y - c)^T C^+ (y - c) against toys drawn by the same conditioning (the toy path of section 9.2:
+    a bootstrap covariance always calibrates T_v with toys)."""
+    Ci = np.linalg.pinv(C)
+    t = lambda y: float((y - center) @ Ci @ (y - center))  # noqa: E731
+    T = np.array([t(y) for y in toys])
+    return F.testing_pvalue(t(observed), T, 0)
