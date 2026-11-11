@@ -12,7 +12,8 @@ Two gates, each a property the T09 sheet requires of every channel, not a qualit
 Readings: fit counts by failure kind; pulls of the converged fits with an ok covariance, centre (10 % trimmed mean, as
 t04-values-v4.md section 5 uses) and width (half the 15.87 % to 84.13 % quantile range), for x, y, z, E_vis and the two
 direction components. Direction: residual (d_fit - d_true) . e_k at the truth frame (section 7), its variance from the fitted
-tangent covariance projected with J_kj = e_k(truth) . e_j(fit) (case O-direction of the D3 stage 1 report).
+tangent covariance projected with J_kj = e_k(truth) . e_j(fit) (case O-direction of the D3 stage 1 report). For a
+light-likelihood-product/2 (the joint charge-time fit, D3 stage 2) the t0 pull too, (t0_fit - t0_true) / sigma(t0).
 Usage: t09_readings.py --product P --truth T --label L. Exit 0 both gates pass, 1 a gate fails, 2 refused input.
 """
 from __future__ import annotations
@@ -33,6 +34,7 @@ from light_recipe.likelihood import frame  # noqa: E402
 import t09_fixture_files  # noqa: E402
 
 PULL_NAMES = ("x", "y", "z", "u1", "u2", "e_vis")
+PULL_NAMES_JOINT = PULL_NAMES + ("t0",)
 QUANTILES = (0.158655, 0.841345)
 
 
@@ -47,7 +49,7 @@ def width(values) -> float:
     return float((hi - lo) / 2)
 
 
-def event_pulls(fit_doc: dict, truth_vertex, truth_direction, truth_e_vis) -> dict:
+def event_pulls(fit_doc: dict, truth_vertex, truth_direction, truth_e_vis, truth_t0=None) -> dict:
     cov = numpy.array(fit_doc["covariance"], float)
     sigma = numpy.sqrt(numpy.diag(cov))
     vertex = numpy.array(fit_doc["vertex"], float)
@@ -60,6 +62,8 @@ def event_pulls(fit_doc: dict, truth_vertex, truth_direction, truth_e_vis) -> di
     tangent = jac @ cov[3:5, 3:5] @ jac.T
     for name, axis, k in (("u1", t1, 0), ("u2", t2, 1)):
         out[name] = float((d_fit - truth_direction) @ axis / math.sqrt(tangent[k, k]))
+    if truth_t0 is not None:
+        out["t0"] = float((fit_doc["t0"] - truth_t0) / sigma[6])
     return out
 
 
@@ -97,21 +101,25 @@ def main(argv=None) -> int:
         print(f"REFUSED {label}: the truth file belongs to another readout")
         return 2
     events = read.events
+    timed = read.header["format"] == product.FORMAT_JOINT
+    names = PULL_NAMES_JOINT if timed else PULL_NAMES
+    print(f"READING {label} format {read.header['format']}")
     print(f"READING {label} label {LABEL}; development reading, no gate of t04-values-v4.md, no quality verdict")
     failures: dict = {}
-    pulls = {name: [] for name in PULL_NAMES}
+    pulls = {name: [] for name in names}
     for doc in events:
         fit_doc = doc["fit"]
         if fit_doc["status"] != "converged":
             failures[fit_doc["failure"]] = failures.get(fit_doc["failure"], 0) + 1
             continue
         i = doc["event"]
-        for name, value in event_pulls(fit_doc, truth["vertex"][i], truth["direction"][i], truth["e_vis"][i]).items():
+        for name, value in event_pulls(fit_doc, truth["vertex"][i], truth["direction"][i], truth["e_vis"][i],
+                                       float(truth["t0"][i]) if timed else None).items():
             pulls[name].append(value)
     converged = len(events) - sum(failures.values())
     print(f"READING {label} fits events {len(events)} converged {converged} failed {sum(failures.values())} "
           f"by kind {dict(sorted(failures.items()))}")
-    for name in PULL_NAMES:
+    for name in names:
         v = numpy.array(pulls[name])
         if v.size:
             print(f"READING {label} pull {name} centre {centre(v):+.4f} width {width(v):.4f} n {v.size} "

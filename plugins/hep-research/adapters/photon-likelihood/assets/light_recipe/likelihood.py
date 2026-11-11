@@ -24,6 +24,10 @@ The per-channel sum check's tolerance (fix round 1, F5) follows the arithmetic: 
 absolute rounding error of order eps m |ln m|, which becomes the absolute error of P(hit) and P(no hit); the tolerance is
 64 eps (1 + m |ln m|) per channel, eps = 2^-52 (1.4e-14 at m <= 1; 1.1e-10 at m = 1,101, the largest m at the fixture's truth;
 1.6e-8 at m = 1e5, the most one channel can hold inside the yield domain).
+
+A hit charge above CHARGE_DOMAIN (the yield domain's 1e5) is refused as outside the model's domain (D3 stage 2, re-review N5):
+the charge sets the width of the sums over the photon count, so an absurd but finite charge (1e9) would otherwise exhaust memory.
+The fixture's charges stay below a few thousand.
 """
 from __future__ import annotations
 
@@ -33,6 +37,7 @@ from dataclasses import dataclass
 import numpy
 
 from . import light_model, readout
+from .arrival_response import ArrivalResponse
 from .charge_response import ChargeResponse
 from .configuration import Configuration, Geometry, fibonacci_geometry
 
@@ -42,6 +47,7 @@ TOLERANCE_RULE = "64 eps (1 + m |ln m|) per channel, eps = 2^-52"
 HESSIAN_STEPS = {"vertex_m": 1e-5, "direction": 1e-6}
 DOMAIN_MARGIN = 1e-3          # a vertex must satisfy |x| < R_s (1 - DOMAIN_MARGIN), 5 mm inside the sensors
 YIELD_DOMAIN = 1e5           # sum_i mu_i at most fifty times section 4.3's largest N_exp
+CHARGE_DOMAIN = 1e5          # a hit charge at most the yield domain (D3 stage 2, N5)
 
 
 def sum_tolerance(m):
@@ -64,6 +70,7 @@ class Model:
         self.response = ChargeResponse(cfg.charge_threshold, cfg.photon_charge_mean, cfg.photon_charge_sigma)
         self.dark = cfg.dark_mean_per_window
         self.scale = cfg.sensors          # the 1000 of E_vis = N_exp / (1000 S), section 4.3
+        self.arrival = ArrivalResponse(self.response, cfg.time_spread_ns, cfg.dark_mean_per_window, cfg.window_ns)
 
 
 @dataclass(frozen=True)
@@ -83,6 +90,8 @@ class EventData:
             readout.check_arrays(self.state, self.charge, None, self.saturated, self.threshold, self.saturation_charge)
         except readout.ReadoutError as exc:
             raise EventError(str(exc)) from None
+        if numpy.any(self.charge[self.state == readout.LIVE_HIT] > CHARGE_DOMAIN):
+            raise EventError(f"a hit charge above {CHARGE_DOMAIN:g} is outside the model's domain")
 
     @classmethod
     def from_readout(cls, rd, index: int) -> "EventData":
@@ -209,6 +218,11 @@ class Objective:
 
     def _m_gradient(self, p):
         """m (C,) and dm/dp (C, 6) at p."""
+        mu, gradient = self._mu_gradient(p)
+        return mu + self.model.dark, gradient
+
+    def _mu_gradient(self, p):
+        """mu (C,), the expected signal photons without the dark mean, and dmu/dp = dm/dp (C, 6) at p."""
         model = self.model
         vertex = p[:3]
         v = self.d_ref + p[3] * self.e1 + p[4] * self.e2
@@ -218,7 +232,7 @@ class Objective:
         s, d_x, d_dir = light_model.shape_log_gradient(model, vertex, d)
         mu = model.scale * p[5] * s
         gradient = numpy.column_stack((mu[:, None] * d_x, mu[:, None] * (d_dir @ jac_dir), model.scale * s))
-        return mu + model.dark, gradient
+        return mu, gradient
 
     def value(self, p) -> float:
         p = numpy.asarray(p, float)
@@ -247,7 +261,19 @@ class Objective:
         if not in_domain(self.model, p[:3], p[5], m):
             return outside
         l0, l1, l2 = channel_terms(self.model, self.event, m)
-        second = numpy.zeros((m.size, 6, 6))
+        second = self.second_derivatives(p, grad_m)
+        gradient = grad_m.T @ l1
+        hessian = (grad_m * l2[:, None]).T @ grad_m + numpy.einsum("i,ijk->jk", l1, second)
+        hessian = 0.5 * (hessian + hessian.T)
+        out = (float(l0.sum()), gradient, hessian)
+        self._full_cache = (key, out)
+        self._value_cache = (key, out[0])
+        return out
+
+    def second_derivatives(self, p, grad_m):
+        """d2 m / dp dp (C, 6, 6) at p: central differences of the analytic first derivatives in (x, a, b) with HESSIAN_STEPS,
+        the E_vis rows exact (case O-uncertainty)."""
+        second = numpy.zeros((grad_m.shape[0], 6, 6))
         steps = (HESSIAN_STEPS["vertex_m"],) * 3 + (HESSIAN_STEPS["direction"],) * 2
         for k, h in enumerate(steps):
             e = numpy.zeros(6)
@@ -256,10 +282,4 @@ class Objective:
             second[:, k, 5] = grad_m[:, k] / p[5]          # d2 m / d q_k d E = 1000 ds/dq_k, exact
         second[:, :5, :5] = 0.5 * (second[:, :5, :5] + second[:, :5, :5].transpose(0, 2, 1))
         second[:, 5, :5] = second[:, :5, 5]
-        gradient = grad_m.T @ l1
-        hessian = (grad_m * l2[:, None]).T @ grad_m + numpy.einsum("i,ijk->jk", l1, second)
-        hessian = 0.5 * (hessian + hessian.T)
-        out = (float(l0.sum()), gradient, hessian)
-        self._full_cache = (key, out)
-        self._value_cache = (key, out[0])
-        return out
+        return second

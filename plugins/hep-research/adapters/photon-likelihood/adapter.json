@@ -2,7 +2,7 @@
  "id": "adapter:photon-likelihood",
  "version": "0.1.0",
  "status": "proposed",
- "purpose": "T09 photon likelihood as a development binding in Python, recipe reco.light.channel-likelihood/1 (decisions.md, U12 A; not a native backend, whose gap stays open), stage 1: the readout light-readout/1 (per channel the state live-hit, live-unhit, dead or disabled, the charge, the first time and the readout's saturated flag, side by side), the charge-only all-channel likelihood of the hep-detector photon-likelihood reference on the stated analytic light model of t04-values-v4.md section 4.3 (every live channel; hit and no-hit terms on one threshold model, so their probabilities sum to one per channel, checked at the reported point; saturated channels censored; dead and disabled channels excluded, never unhit), a fit from one seed for vertex, direction and visible energy with the inverse observed Hessian as its uncertainty, the product light-likelihood-product/1 with a reader that refuses a malformed or incomplete product and recomputes ln L and the probability check, and on the scoring side the harness that hands out the frozen generator t09-sphere/1's events as files and the development readings; every result labelled shared-model closure; optional, required by no skill",
+ "purpose": "T09 photon likelihood as a development binding in Python, recipe reco.light.channel-likelihood/1 (decisions.md, U12 A; not a native backend, whose gap stays open), stage 1: the readout light-readout/1 (per channel the state live-hit, live-unhit, dead or disabled, the charge, the first time and the readout's saturated flag, side by side), the charge-only all-channel likelihood of the hep-detector photon-likelihood reference on the stated analytic light model of t04-values-v4.md section 4.3 (every live channel; hit and no-hit terms on one threshold model, so their probabilities sum to one per channel, checked at the reported point; saturated channels censored; dead and disabled channels excluded, never unhit), a fit from one seed for vertex, direction and visible energy with the inverse observed Hessian as its uncertainty, the product light-likelihood-product/1; stage 2: the time term (the first-arrival density with the noise rate included, joint with the charge, so charge and time are never assumed independent), the fit's seventh parameter t0 seeded from the data after the charge-only fit, the product light-likelihood-product/2 (charge-only kept as the default option, unchanged), and on the scoring side t04-values-v4.md section 9.3's two deterministic checks at the 50 fixed likelihood points against an independently written evaluation that shares no code with the recipe with a reader that refuses a malformed or incomplete product and recomputes ln L and the probability check, and on the scoring side the harness that hands out the frozen generator t09-sphere/1's events as files and the development readings; every result labelled shared-model closure; optional, required by no skill",
  "tools": [
   {
    "name": "photon-likelihood development binding (Python with NumPy and SciPy)",
@@ -14,19 +14,24 @@
  "assets": [
   "assets/photon_likelihood.py",
   "assets/light_recipe/__init__.py",
+  "assets/light_recipe/arrival_response.py",
   "assets/light_recipe/charge_response.py",
   "assets/light_recipe/configuration.py",
   "assets/light_recipe/fit.py",
+  "assets/light_recipe/joint.py",
   "assets/light_recipe/light_model.py",
   "assets/light_recipe/likelihood.py",
   "assets/light_recipe/product.py",
   "assets/light_recipe/readout.py",
+  "assets/fixture_tools/t09_fixed_points.py",
   "assets/fixture_tools/t09_fixture_files.py",
+  "assets/fixture_tools/t09_independent_likelihood.py",
   "assets/fixture_tools/t09_readings.py",
   "assets/t09-sphere-1.configuration.json"
  ],
  "tests": [
-  "../../tests/adapters/test_photon_likelihood.py"
+  "../../tests/adapters/test_photon_likelihood.py",
+  "../../tests/adapters/test_photon_likelihood_time.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; proposed until a job of record runs it and VALIDATION.md records the run; hand-made events on the login node only so far; shared-model closure, which tests the code, not the light model; no photon-likelihood quality claim"

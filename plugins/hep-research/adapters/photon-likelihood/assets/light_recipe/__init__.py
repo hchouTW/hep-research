@@ -9,6 +9,10 @@ one seed, and the product light-likelihood-product/1. The time term, multistart 
 per-channel states and the threshold model are built so that the time term can use them (charge and time of one sensor will be
 modelled jointly, never assumed independent: plan section 8.2).
 
+Stage 2 (D3 stage 2 brief): the time term, the first-arrival density with the noise rate included, joint with the charge
+(arrival_response, joint); the fit's seventh parameter t0 (fit.fit_joint_event); the product light-likelihood-product/2. The
+charge-only path of stage 1 is kept as an option, unchanged.
+
 Every result is labelled shared-model closure: the events and the fit share the light model, so it tests the code, not the model
 (plan section 11.1).
 """
@@ -21,3 +25,6 @@ LIKELIHOOD = "charge-only, all live channels (stage 1)"
 PARAMETERS = ("x", "y", "z", "u1", "u2", "e_vis")
 PARAMETER_UNITS = {"x": "m", "y": "m", "z": "m", "u1": "1 (tangent component at the fitted direction)",
                    "u2": "1 (tangent component at the fitted direction)", "e_vis": "1 (E_vis = N_exp / (1000 S), section 4.3)"}
+LIKELIHOOD_JOINT = "charge and first-arrival time jointly, all live channels (stage 2)"
+PARAMETERS_JOINT = PARAMETERS + ("t0",)
+PARAMETER_UNITS = {**PARAMETER_UNITS, "t0": "ns (emission time; arrival at sensor i is t0 + d_i / v)"}

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""reco.light.channel-likelihood/1, the T09 development binding (decisions.md, U12 A): the charge-only all-channel photon
-likelihood and its fit on a light-readout/1 readout, written as light-likelihood-product/1, labelled shared-model closure. A
-development binding in Python, not a native backend.
+"""reco.light.channel-likelihood/1, the T09 development binding (decisions.md, U12 A): the all-channel photon likelihood and its
+fit on a light-readout/1 readout, labelled shared-model closure. --likelihood charge-only (the default: stage 1's charge-only
+likelihood, light-likelihood-product/1, unchanged) or charge-time (stage 2's joint charge and first-arrival-time likelihood with
+t0, light-likelihood-product/2). A development binding in Python, not a native backend.
 
 Operations (contracts/tool_contracts/photon_likelihood.json):
   fit            readout -> product. Data side: it reads no truth and imports no generator.
@@ -43,19 +44,22 @@ def report(operation: str, status: str, reason: str, **fields) -> int:
 def parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="operation", required=True)
-    rec = sub.add_parser("fit", help="charge-only all-channel likelihood fit of every event of a readout")
+    rec = sub.add_parser("fit", help="all-channel likelihood fit of every event of a readout")
     rec.add_argument("--readout", required=True, help="light-readout/1 file, role reconstruction-input")
-    rec.add_argument("--product", required=True, help="light-likelihood-product/1 to write; not written on refusal, never overwritten")
+    rec.add_argument("--product", required=True, help="light-likelihood-product/1 (charge-only) or /2 (charge-time) to write; not written on refusal, never overwritten")
     rec.add_argument("--product-id", required=True, help="the product's identity")
     rec.add_argument("--configuration", help="light-likelihood-configuration/1; default the t09-sphere/1 configuration beside this script")
+    rec.add_argument("--likelihood", choices=("charge-only", "charge-time"), default="charge-only",
+                     help="charge-only (default; light-likelihood-product/1) or charge-time (joint with the first-arrival time, t0 "
+                          "fitted; light-likelihood-product/2)")
     chk = sub.add_parser("check-product", help="read a product back and recompute ln L and the per-channel probability check")
-    chk.add_argument("--product", required=True, help="light-likelihood-product/1 to read")
+    chk.add_argument("--product", required=True, help="light-likelihood-product/1 or /2 to read")
     chk.add_argument("--configuration", help="the configuration the product was made with; default as for fit")
     return ap
 
 
 def fit_readout(args) -> int:
-    from light_recipe import LABEL, configuration, fit, likelihood, product, readout
+    from light_recipe import LABEL, configuration, fit, joint, likelihood, product, readout
     started = time.perf_counter()
     if not Path(args.readout).is_file():
         return report("fit", "rejected", f"no such input file: readout {args.readout}")
@@ -73,6 +77,11 @@ def fit_readout(args) -> int:
                                        f"{cfg.charge_threshold}: hit flag and likelihood must share one threshold model")
         if rd.channels != model.geometry.channels:
             raise readout.ReadoutError(f"{rd.channels} channels in the readout, {model.geometry.channels} in the configuration")
+        hit = rd.state == readout.LIVE_HIT
+        if (rd.charge[hit] > likelihood.CHARGE_DOMAIN).any():
+            raise readout.ReadoutError(f"a hit charge above {likelihood.CHARGE_DOMAIN:g} is outside the model's domain")
+        if args.likelihood == "charge-time" and (abs(rd.time[hit]) > joint.TIME_DOMAIN).any():
+            raise readout.ReadoutError(f"a hit time beyond +-{joint.TIME_DOMAIN:g} ns is outside the model's domain")
     except (configuration.ConfigurationError, readout.ReadoutError) as exc:
         return report("fit", "rejected", str(exc))
     partial = target.with_name(target.name + ".partial")
@@ -80,17 +89,25 @@ def fit_readout(args) -> int:
     failures: dict = {}
     try:
         with open(partial, "w", encoding="utf-8") as stream:
-            writer = product.Writer(stream, product.header_document(args.product_id, rd, cfg))
+            writer = product.Writer(stream, product.header_document(args.product_id, rd, cfg, likelihood=args.likelihood))
             for i in range(rd.events):
-                event = likelihood.EventData.from_readout(rd, i)
-                start = fit.seed(model, event)
-                res = fit.fit_event(model, event, start)
-                check = product.check_at(model, event, start, res)
+                if args.likelihood == "charge-only":
+                    event = likelihood.EventData.from_readout(rd, i)
+                    start = fit.seed(model, event)
+                    res = fit.fit_event(model, event, start)
+                    check = product.check_at(model, event, start, res)
+                    doc = product.event_document(i, event, start, res, check)
+                else:
+                    tev = joint.TimedEvent.from_readout(rd, i)
+                    start, prefit, origin = fit.joint_seed(model, tev)
+                    res = fit.fit_joint_event(model, tev, start)
+                    check = product.check_at(model, tev.event, start, res)
+                    doc = product.joint_event_document(i, tev, start, origin, prefit, res, check)
                 converged += res.status == "converged"
                 if res.failure:
                     failures[res.failure] = failures.get(res.failure, 0) + 1
                 probability_failures += check["failures"] > 0
-                writer.event(product.event_document(i, event, start, res, check))
+                writer.event(doc)
             writer.finish()
         os.replace(partial, target)
     except OSError as exc:
@@ -99,7 +116,7 @@ def fit_readout(args) -> int:
     except Exception as exc:  # noqa: BLE001 - a defect of the recipe: status error, never the stop
         partial.unlink(missing_ok=True)
         return report("fit", "error", f"unexpected {type(exc).__name__}: {exc}")
-    fields = {"events": rd.events, "converged": converged, "fit_failures": dict(sorted(failures.items())),
+    fields = {"likelihood": args.likelihood, "events": rd.events, "converged": converged, "fit_failures": dict(sorted(failures.items())),
               "probability_failures": probability_failures, "label": LABEL, "product": str(target), "input_sha256": rd.sha256,
               "configuration_sha256": cfg.sha256, "seconds": round(time.perf_counter() - started, 3)}
     if probability_failures:
@@ -118,7 +135,7 @@ def check_product(args) -> int:
     except (configuration.ConfigurationError, product.ProductError) as exc:
         return report("check-product", "rejected", str(exc))
     bad = [doc["event"] for doc in read.events if doc["probability_check"]["failures"] > 0]
-    fields = {"events": len(read.events), "converged": sum(doc["fit"]["status"] == "converged" for doc in read.events),
+    fields = {"format": read.header["format"], "events": len(read.events), "converged": sum(doc["fit"]["status"] == "converged" for doc in read.events),
               "label": read.header["label"], "probability_failures": len(bad), "first_failures": bad[:10]}
     if bad:
         return report("check-product", "failed", "a live channel's hit and no-hit probabilities do not sum to one "

@@ -515,3 +515,20 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
 - **Probability-sum tolerance.** 64 eps (1 + m|ln m|), set from floating-point arithmetic before the job.
 - **Exit codes (core/status.py).** The probability-sum stop exits 1 with its record. An error exits 2 with status "error". The coordinator's earlier ruling for a separate code was withdrawn, because the plugin convention allows no other code.
 - **Readings.** 6 of 7,000 fits did not converge. Pull tails come from the single seed. These are readings only.
+
+## T09, D3 stage 2: time term and v4 9.3's fixed-point checks
+
+2026-11-11, coordinator. Job of record 7566770 (hpa-wn34, 33 min 29 s, PASS).
+
+- **Time term.** The first-arrival density of signal (Gaussian 1.5 ns about t0 + d / 0.22 m/ns) and dark hits (uniform over the 200 ns window) is conditioned on the channel's charge. Charge and time are modelled jointly, exactly for this fixture.
+- **t0** is the seventh parameter. Its seed comes from the charge-only prefit and the median of t_i - d_i/v; no truth is read. Its domain is (-200, 400) ns.
+- **Fit safeguards** found before the job:
+  - a chart exit at a 45 degree direction step (status 99, never convergence);
+  - log-space products;
+  - charge and time domain bounds refused as rejected.
+- **Products.** Charge-only stays the default, and its products are byte-equal to stage 1's. The joint fit writes light-likelihood-product/2.
+- **v4 9.3.** The likelihood check is an independent harness-side evaluation, sharing no code with the recipe. It runs at 150 evaluations: block 6, each fixed point's own stratum, plus the dead and saturation controls. The limit is 1e-9 absolute. The per-channel sum is also checked at the fixed points.
+- **Tool contract.** contract_version stays 1.0.0: it is the schema's version, as in T08.
+- **Readings.**
+  - Pull widths: 0.92 to 1.11.
+  - Failures: 23 of 7,000; the prediction of at most 5 per stratum was refuted in two B1 strata (7 each).
