@@ -1,0 +1,132 @@
+{
+ "block": 1,
+ "checks": [
+  {
+   "check": "every operation is ok with exit 0",
+   "passed": true
+  },
+  {
+   "check": "the recipe's commands name no truth file",
+   "passed": true
+  },
+  {
+   "check": "each product names the recorded readout, and the topology product the recorded multistart product",
+   "passed": true
+  },
+  {
+   "check": "the products were made with the configuration and budgets beside the recipe",
+   "passed": true
+  },
+  {
+   "check": "the products read back whole as the recipe's /3 and /4, label shared-model closure, ln L and the per-channel check recomputed",
+   "passed": true
+  },
+  {
+   "check": "the topology product carries its multistart product unchanged",
+   "passed": true
+  },
+  {
+   "check": "no live channel's hit and no-hit probabilities miss one, at H1's or H2's point (the T09 stop)",
+   "passed": true
+  },
+  {
+   "check": "the topology choice is the frozen rule: H2 if and only if 2 (lnL_2 - lnL_1) >= 30",
+   "passed": true
+  },
+  {
+   "check": "the recipe run again on the recorded readouts reproduces the recorded products: byte for byte on the recording's platform, else within the stated tolerances",
+   "passed": true,
+   "run": true
+  }
+ ],
+ "configuration_sha256": "ce4f430756f8ea0be1ab1b08eb638f9c38bf305968aa2d6d4e743d5fc68a1508",
+ "data": "synthetic",
+ "events": [
+  {
+   "choice": "H1",
+   "converged_h1_starts": 8,
+   "dead_channels": 0,
+   "event": 0,
+   "fit_status": "converged",
+   "hit_channels": 136,
+   "ln_likelihood_1": -650.321747,
+   "ln_likelihood_2": -643.380057,
+   "ln_likelihood_2_from": "h2",
+   "sample": "main",
+   "saturated_channels": 0,
+   "statistic": 13.88338
+  },
+  {
+   "choice": "H1",
+   "converged_h1_starts": 8,
+   "dead_channels": 0,
+   "event": 1,
+   "fit_status": "converged",
+   "hit_channels": 228,
+   "ln_likelihood_1": -981.698823,
+   "ln_likelihood_2": -981.698823,
+   "ln_likelihood_2_from": "h1 boundary",
+   "sample": "main",
+   "saturated_channels": 0,
+   "statistic": 0.0
+  },
+  {
+   "choice": "H2",
+   "converged_h1_starts": 8,
+   "dead_channels": 0,
+   "event": 0,
+   "fit_status": "converged",
+   "hit_channels": 384,
+   "ln_likelihood_1": -2426.154626,
+   "ln_likelihood_2": -1709.220167,
+   "ln_likelihood_2_from": "h2",
+   "sample": "two-source",
+   "saturated_channels": 0,
+   "statistic": 1433.868919
+  }
+ ],
+ "example": "reconstruction-photon-likelihood",
+ "files_sha256": {
+  "main": {
+   "readout": "5c7f64623b7a420e11e94973de555e3ef991fa86c1e893500bb98063c97ff975",
+   "truth": "43c4b209db9266b4e36e0da159200012f05bc73e6d4eb23ff784fe633809a90f"
+  },
+  "two-source": {
+   "readout": "4e5bf7b28264215595b1bbc87e0b86a5fe7bb9064179bb3597c7b02ef06ca39c",
+   "truth": "8f4a25ee72e5240c5a23426b822a936db48ed356becb7bc32639441d7e51dcbf"
+  }
+ },
+ "generator": "t09-sphere/1",
+ "generator_sha256": "2657f56bfc1fc7f68a93e205b2c66f80b52018494a78346bcd4e955a9be7da76",
+ "label": "shared-model closure",
+ "multistart_budget_sha256": "70220b7ddf1679d01d4a9c5397d1fdf124c6f0bd8ed4dca562d9c18e04180307",
+ "penalty": 30.0,
+ "product_format": "light-likelihood-product/4",
+ "product_refused": {},
+ "quality_claim": "none: fits the programs wrote, not a resolution, a wrong-minimum rate or a mis-ID rate (K09 at Freeze B)",
+ "recipe": "reco.light.channel-likelihood/1",
+ "recorded_sha256": {
+  "main.multistart.product": "9d44ae712dc4b758cc9cbd4311c17fd1e31568cccd6377250c65aeaa60eee6b1",
+  "main.readout": "5c7f64623b7a420e11e94973de555e3ef991fa86c1e893500bb98063c97ff975",
+  "main.topology.product": "b42cb36ace58a8a31c24fb8b8af0d0502d188dd8fad91e8598ee5b2ef1133150",
+  "runs.json": "a417547b4d659a602991b90ae589b34f5be3028b067e55b67e956179e1b8c2fe",
+  "two-source.multistart.product": "f1dcfe9d5918e71e4a4d9377e94843607a8e6a8298e7c0da1ce52ccee4014395",
+  "two-source.readout": "4e5bf7b28264215595b1bbc87e0b86a5fe7bb9064179bb3597c7b02ef06ca39c",
+  "two-source.topology.product": "88f588fcbe6355d4f38618496ad969fb2f57f8212d82beb3127ce218f5c110e9"
+ },
+ "samples": [
+  {
+   "events": 2,
+   "fixture": "main",
+   "sample": "main",
+   "stratum": 7
+  },
+  {
+   "events": 1,
+   "fixture": "two-source",
+   "sample": "two-source",
+   "stratum": 0
+  }
+ ],
+ "topology_budget_sha256": "104262a1bfb0f5403a075884d9acd5f5ccbf1fc012d5237b578297f4d98ed7df"
+}

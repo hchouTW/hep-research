@@ -7,3 +7,4 @@
 *.dat binary
 *.npz binary
 *.cells binary
+*.readout binary

@@ -579,3 +579,17 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
 **Script fix.** The first array failed before any compute: an apostrophe inside `${1:?...}` swallowed the variable assignments. The coordinator fixed the usage lines and resubmitted. No code changed.
 
 **For K09 (user item).** Whether an undecided two-source event counts as a miss.
+
+## T09, D3 stage 5: example, close-out and adapter record
+
+2026-11-11, coordinator. Job of record: 7578442, PASS (10 min 02 s).
+
+**Built.** `examples/reconstruction-photon-likelihood/` (2 main events and 1 two-source event through fit, topology and check-product, offline replay with 9 checks), `t09-closeout.md` (38 rows: 20 met, 13 met with readings, 4 open, 1 gap), adapter 0.2.0 `demonstrated-on-synthetic-data` (lowest tool status; no reference output from outside the plugin, so not `tested-in-declared-environment`), VALIDATION PHOTON-LIKELIHOOD-T09, the matrix row, and `test_photon_likelihood_records.py` pinning the declared files to the jobs of record.
+
+**Cite, not rerun.** The job cites the stage 1-4 strata, fixed points and H2 array (T08 stage 5's rule): it shows 820 of 822 files of job 7575617's manifest unchanged, the 2 changed being records no code reads; it runs the new code and the unit modules (T07 stage 11's rule for new code).
+
+**Replay across platforms (review I1).** Byte equality on the recording's platform; elsewhere ln L 1e-6, the statistic 4e-6, parameters 1e-3 sigma, discrete values exact, fixed before any run. The committed tests also run in CI (ubuntu-latest, macOS arm64), where nothing has run yet: a failure there needs a new decision, the tolerances do not move.
+
+**Version gate (review M2).** The job exits 2 unless Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1 and the interpreter hash of job 7575617.
+
+**Open, for Freeze B.** v4 9.4's two negative checks (dead read as unhit; single-photon density for the first arrival) have no recipe variant: to be written failing first and run after Freeze B. BP06's original method sources stay `source-unverified` (no network approval for a literature check). Quality, the topology score's calibration and the undecided two-source rule go to K09. The native-backend gap stays open (U12 A).
