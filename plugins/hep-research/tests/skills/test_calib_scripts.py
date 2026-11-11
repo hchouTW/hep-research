@@ -23,9 +23,9 @@ S = ROOT / "skills" / "hep-statistics" / "scripts"
 FIXTURE_DIR = ROOT / "core" / "calibration" / "data"
 
 
-def run(script, *args):
+def run(script, *args, timeout=120):
     res = subprocess.run([sys.executable, "-I", str(S / script), *map(str, args)], capture_output=True, text=True,
-                         timeout=120)
+                         timeout=timeout)
     return res.returncode, json.loads(res.stdout)
 
 
@@ -110,6 +110,7 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["stage"]), (2, "schema"))
 
     def test_calib_data_flow(self):
+        from core.calibration import validate as V
         led = self.d / "ledger.json"
         self.assertEqual(run("calib_data.py", "init", "--ledger", led)[0], 0)
         self.assertEqual(run("calib_data.py", "init", "--ledger", led)[0], 2)          # never reset
@@ -129,8 +130,17 @@ class Scripts(unittest.TestCase):
         rc, out = run("calib_data.py", "inputs", "--ledger", led, "--kappa", k2, "--vmode", "cross-validation",
                       "--validation-units", x, "--calibration-units", x)
         self.assertEqual((rc, out["earlier_failure_record"]), (0, "pending"))
-        stub = self.put("dec.json", {"kappa": k1, "outcome": "fail"})                 # hand-written stub (phase 0)
-        self.assertEqual(run("calib_data.py", "decide", "--ledger", led, "--decision", stub)[1]["record_status"], "final")
+        hand = self.put("hand.json", {"decisions": [{"kappa": k1, "outcome": "pass"}]})   # a hand-written outcome
+        self.assertEqual(run("calib_data.py", "decide", "--ledger", led, "--book", hand, "--kappa", k1)[0], 2)
+        bk = V.DecisionBook()
+        bk.register({"kappa": k1, "alpha": 0.05})
+        ev = V._seal({"kind": "holdout", "kappa": k1, "alpha": 0.05, "T": 20.0, "k": 2, "p": 4.5e-5, "path": "analytic",
+                      "status": "ok", "reference": {"kind": "chi2", "k": 2, "sha256": None, "ratio_failed": False},
+                      "data_side_check_triggered": False})
+        self.assertEqual(bk.decide_computed(ev)["outcome"], "fail")                  # computed from T_v (F4)
+        book = self.put("book.json", bk.state)
+        self.assertEqual(run("calib_data.py", "decide", "--ledger", led, "--book", book, "--kappa", k1)[1]
+                         ["record_status"], "final")
         rc, out = run("calib_data.py", "inputs", "--ledger", led, "--kappa", k2, "--vmode", "cross-validation",
                       "--validation-units", x, "--calibration-units", x)
         self.assertEqual(out["earlier_failure_record"], "final")
@@ -332,6 +342,7 @@ class Phase2Scripts(unittest.TestCase):
 
     def test_decision_records_with_the_ledger(self):
         """Abandonment makes the failure record final; a passing decision afterwards is rejected (section 15.3.14)."""
+        from core.calibration import validate as V
         led, book = self.d / "ledger.json", self.d / "book.json"
         self.assertEqual(run("calib_data.py", "init", "--ledger", led)[0], 0)
         plan = self.write("plan.json", {"p": 1})
@@ -344,9 +355,16 @@ class Phase2Scripts(unittest.TestCase):
         led.write_text(json.dumps(L.state))
         self.assertEqual(run("calib_validate.py", "abandon", "--book", book, "--ledger", led, "--kappa",
                              k["kappa"])[0], 0)
-        code, out = run("calib_validate.py", "decide", "--book", book, "--ledger", led, "--kappa", k["kappa"],
-                        "--outcome", "pass")
-        self.assertEqual((code, out["code"]), (1, "validate.after_abandonment"))
+        bk = V.DecisionBook(json.loads(book.read_text()))
+        ev = V._seal({"kind": "holdout", "kappa": k["kappa"], "alpha": 0.05, "T": 1.0, "k": 2, "p": 0.6,
+                      "path": "analytic", "status": "ok", "reference": {"ratio_failed": False}})
+        with self.assertRaises(V.ValidationError) as cm:
+            bk.decide_computed(ev)
+        self.assertEqual(cm.exception.code, "validate.after_abandonment")
+        tampered = dict(ev, p=0.001)                                                  # evidence edited after the fact
+        with self.assertRaises(V.ValidationError) as cm:
+            bk.decide_computed(tampered)
+        self.assertEqual(cm.exception.code, "validate.evidence")
         self.assertEqual({r["status"] for r in json.loads(led.read_text())["failure_records"]}, {"final"})
 
     def test_propagate_and_likelihood(self):
@@ -428,6 +446,41 @@ class Phase2Wiring(unittest.TestCase):
             x = self.write("p7.json", {"mode": "none" if k0 else "holdout", "k0": k0, "path": "analytic"})
             code, out = run("calib_design.py", "p7", "--input", x)
             self.assertEqual((code, out["status"]), (0, st))
+
+    def test_holdout_decision_is_computed(self):
+        """calib_validate.py holdout on the toy detector: the fit, T_v with C_r^+ against chi2_k, and a decision
+        record carrying the statistic (no outcome given by hand, review F4)."""
+        import numpy as np
+        from core.calibration import toy, toy_problem as TP
+        cal = ["beam1_e_mean", "beam2_e_mean", "beam4_e_mean", "light_e_mean", "light_e_width", "spe_e_mean"]
+        val = ["beam2_e_width", "beam4_e_width"]
+        obs = [{"name": n, "role": "calibration", "block": "gaussian", "link": "log"} for n in cal] + \
+              [{"name": n, "role": "validation", "block": "gaussian", "link": "log"} for n in val]
+        contract = {"observables": obs, "exposure": {"all": 400},
+                    "parameters": [{"name": "pde", "role": "theta", "sampling_bounds": [0.2, 0.3],
+                                    "physical_bounds": [0.01, 0.99]},
+                                   {"name": "gain", "role": "theta", "sampling_bounds": [8, 12],
+                                    "physical_bounds": [1, 100]}]}
+        plan = {"evaluator": {"kind": "toy-detector-subgraph", "events": 4000}}
+        p = TP.ToyProblem(lambda n: toy.build_toy(n, "subgraph"), cal, {"pde": {"bounds": (0.01, 0.99), "prior": (0.2,
+                          0.3)}, "gain": {"bounds": (1, 100), "prior": (8, 12)}}, 400, 4000, val_names=val)
+        rng = np.random.default_rng(3)
+        y = np.exp(p.simulate(np.array([0.25, 10.0]), rng, nominal=False).y_gauss)
+        yv = np.exp(p.simulate_val(np.array([0.25, 10.0]), rng, nominal=False))
+        c, pl = self.write("c.json", contract), self.write("p.json", plan)
+        v, vv = self.write("v.json", dict(zip(cal, y.tolist()))), self.write("vv.json", dict(zip(val, yv.tolist())))
+        led, book = self.d / "ledger.json", self.d / "book.json"
+        run("calib_data.py", "init", "--ledger", led)
+        code, k = run("calib_validate.py", "kappa", "--contract-sha256", "a" * 64, "--plan", pl, "--engine", "p2",
+                      "--book", book)
+        code, out = run("calib_validate.py", "holdout", "--contract", c, "--plan", pl, "--values", v,
+                        "--validation-values", vv, "--kappa", k["kappa"], "--book", book, "--ledger", led,
+                        timeout=900)
+        self.assertEqual((code, out["status"]), (0, "written"), out)
+        rec = out["record"]
+        self.assertTrue(rec["computed"])
+        self.assertEqual(rec["statistic"]["k"], 2)
+        self.assertEqual(rec["outcome"], "pass" if out["evidence"]["p"] > 0.05 else "fail")
 
     def test_fit_toys_lower_bound(self):
         c = self.write("c.json", {})

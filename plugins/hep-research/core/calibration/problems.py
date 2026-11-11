@@ -61,9 +61,14 @@ def from_inputs(contract: dict, plan: dict, values: dict | None = None, systemat
     seeds = plan.get("seeds") or {}
     eta = [{"relative": dict(s.get("relative", {}))} for s in (systematics or [])
            if any(n in s.get("relative", {}) for n in names)]
+    unused = {u["observable"] for u in (contract.get("validation") or {}).get("unused", [])}
+    vobs = [o for o in contract.get("observables", []) if o.get("role") == "validation" and o["name"] not in unused
+            and o.get("block", "gaussian") == "gaussian"]
+    links.update({o["name"]: o["link"] for o in vobs if o.get("link")})
     p = ToyProblem(model_builder(plan), names, theta, int(exp.pop()), int(spec.get("events", 40_000)),
                    seeds.get("nominal", 20261120), phi, eta, links, (plan.get("design") or {}).get("bootstrap_B"),
-                   seeds.get("bootstrap", 20261121), plan=plan, shift=shift)
+                   seeds.get("bootstrap", 20261121), plan=plan, shift=shift,
+                   val_names=[o["name"] for o in vobs], val_mc_seed=seeds.get("validation_nominal", 20261123))
     p.edm_tol = float((plan.get("numerics") or {}).get("tolerance", 0.1))
     if values is not None:
         missing = [n for n in names if n not in values]

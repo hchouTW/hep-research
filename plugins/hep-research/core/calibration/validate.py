@@ -299,7 +299,25 @@ def kappa_record(contract_sha256: str, plan: dict, engine_version: str) -> dict:
     that time binds the statistic."""
     ph = hashlib.sha256(json.dumps(plan, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     kid = hashlib.sha256(f"{contract_sha256}|{ph}|{engine_version}".encode()).hexdigest()
-    return {"kappa": kid, "contract_sha256": contract_sha256, "plan_sha256": ph, "engine_version": engine_version}
+    alpha = float(((plan or {}).get("validation") or {}).get("alpha", 0.05))
+    return {"kappa": kid, "contract_sha256": contract_sha256, "plan_sha256": ph, "engine_version": engine_version,
+            "alpha": alpha}
+
+
+def evidence_sha256(ev: dict) -> str:
+    body = {k: v for k, v in ev.items() if k != "evidence_sha256"}
+    return hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":"), default=float).encode()).hexdigest()
+
+
+def outcome_of(ev: dict) -> str | None:
+    """The decision implied by a computed statistic (section 9.5, review F4): k = 0 -> no-testable-direction; a failed
+    ratio test or an incomplete reference -> no decision (None, V incomplete); p <= alpha -> fail; else pass."""
+    if int(ev["k"]) == 0:
+        return "no-testable-direction"
+    ref = ev.get("reference") or {}
+    if ev.get("status") == "incomplete" or ref.get("ratio_failed"):
+        return None
+    return "fail" if float(ev["p"]) <= float(ev["alpha"]) else "pass"
 
 
 class DecisionBook:
@@ -311,6 +329,28 @@ class DecisionBook:
 
     def register(self, kappa: dict) -> None:
         self.state["kappas"].setdefault(kappa["kappa"], kappa)
+
+    def decide_computed(self, ev: dict, ledger=None) -> dict:
+        """The only decision path of calib_validate.py: the outcome follows from the evidence of a computed statistic
+        (T_v or T_cv with its reference, or k = 0), bound to the registered kappa and its alpha; the record stores the
+        statistic, k, p, the reference's hash and its ratio-test state."""
+        kap = self.state["kappas"].get(ev.get("kappa"))
+        if kap is None:
+            raise ValidationError("validate.kappa_unregistered", "write kappa before computing any statistic")
+        if ev.get("evidence_sha256") != evidence_sha256(ev):
+            raise ValidationError("validate.evidence", "the evidence does not match its hash")
+        if abs(float(ev["alpha"]) - float(kap.get("alpha", 0.05))) > 1e-15:
+            raise ValidationError("validate.alpha", "the statistic used another alpha than kappa registered")
+        out = outcome_of(ev)
+        if out is None:
+            raise ValidationError("validate.incomplete", "no decision: the reference is incomplete (ratio test)")
+        ref = ev.get("reference") or {}
+        return self.decide(ev["kappa"], out, ledger, bool(ev.get("data_side_check_triggered")),
+                           statistic={"kind": ev["kind"], "T": ev.get("T"), "k": ev["k"], "p": ev.get("p"),
+                                      "path": ev.get("path")},
+                           reference={"sha256": ref.get("sha256"), "n": ref.get("n"), "X": ref.get("X"),
+                                      "k_star": ref.get("k_star"), "ratio_failed": ref.get("ratio_failed")},
+                           evidence_sha256=ev["evidence_sha256"], computed=True)
 
     def _decision(self, kappa):
         d = [x for x in self.state["decisions"] if x["kappa"] == kappa]
@@ -594,6 +634,80 @@ def cv_ensemble(problem, folds, truth, n_req: int, seed, n_start=None, g5=None, 
         return {"status": "incomplete", "finding": "validate.ratio_test", "X": X, "k_star": kst, "eps_max": eps}
     return {"status": "ok", "values": [v for v in vals if v is not None], "X": X, "g5_failed": g5f,
             "proportion": prop, "eps_max": eps}
+
+
+# ------------------------------------------------------------------ computed evidence (section 9.5, review F4)
+def _ref_sha(T, X, n) -> str:
+    return hashlib.sha256(json.dumps({"T": [float(x) for x in T], "X": int(X), "n": int(n)}).encode()).hexdigest()
+
+
+def _seal(ev: dict) -> dict:
+    ev["evidence_sha256"] = evidence_sha256(ev)
+    return ev
+
+
+def holdout_evidence(problem, fit, y_v, kappa: str, alpha: float, path: str = "analytic", n_toys: int = 500,
+                     seed=20261170, n_start=None, data_side_check_triggered: bool = False) -> dict:
+    """T_v on the opened validation values with C_r^+ on N_d (section 9.2) and its reference: chi2_k on the analytic
+    path, complete null toys on the toy path (section 9.4, D58; >= 500 toys, the ratio test before any p-value). The
+    evidence that DecisionBook.decide_computed turns into a decision record."""
+    if hasattr(problem, "set_val_point"):
+        problem.set_val_point(fit.beta[:len(problem.layout.theta) + len(problem.layout.phi_P)])
+    pc = holdout_pieces(problem, fit, y_v)
+    Cp, k = c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
+    T = t_v(pc["r"], Cp)
+    ev = {"kind": "holdout", "kappa": kappa, "alpha": float(alpha), "T": T, "k": int(k), "path": path,
+          "data_side_check_triggered": bool(data_side_check_triggered)}
+    if k == 0:
+        return _seal({**ev, "status": "ok", "p": None, "reference": None})
+    if path == "analytic":
+        return _seal({**ev, "status": "ok", "p": float(stats.chi2.sf(T, k)),
+                      "reference": {"kind": "chi2", "k": int(k), "sha256": None, "ratio_failed": False}})
+    if n_toys < 500:
+        raise ValidationError("validate.toys", "the toy path needs at least 500 reference toys")
+    ref = reference_distribution(problem, fit, Cp, n_toys, seed, n_start=n_start)
+    tp = toy_pvalue(T, ref)
+    refrec = {"kind": "toys", "n": n_toys, "X": ref["X"], "k_star": ref["k_star"], "ratio_failed": ref["ratio_failed"],
+              "sha256": _ref_sha(ref["T"], ref["X"], n_toys)}
+    if tp["status"] != "ok":
+        return _seal({**ev, "status": "incomplete", "p": None, "reference": refrec, "finding": tp["finding"]})
+    return _seal({**ev, "status": "ok", "p": tp["p"], "reference": refrec})
+
+
+def cv_evidence(problem, folds, kappa: str, alpha: float, seed=20261171, n_chat: int | None = None,
+                n_ref: int = 500, n_start=None, g5=None) -> dict:
+    """T_cv (section 9.3): C-hat_{r,f} per fold from a cross-validation toy ensemble with replacement (n >= max(500,
+    10 k_f)), T_cv on the data, and its reference from a separate ensemble without replacement; the G5 and ratio-test
+    rules of cv_ensemble decide whether a p-value exists."""
+    n0 = len(problem.layout.theta) + len(problem.layout.phi_P)
+    sub0, f0 = fold_fit(problem, np.arange(0), (F._seed_int(seed), 99), n_start=n_start)
+    truth = f0.beta
+    kmax = max(len(r) for r in folds)
+    est = cv_ensemble(problem, folds, truth, n_chat or chat_min_toys(kmax), (F._seed_int(seed), 1), n_start, g5)
+    ev = {"kind": "cross-validation", "kappa": kappa, "alpha": float(alpha), "path": "toys"}
+    if est["status"] != "ok":
+        return _seal({**ev, "status": "incomplete", "T": None, "k": sum(len(r) for r in folds), "p": None,
+                      "reference": {"ratio_failed": True}, "finding": est["finding"]})
+    Cplus, factors, k = {}, {}, 0
+    for fi, rows in enumerate(folds):
+        R = np.array([v[fi] for v in est["values"]])
+        Cf = np.cov(R, rowvar=False).reshape(len(rows), len(rows))
+        Cplus[fi], kf = c_r_plus(Cf, np.sqrt(np.clip(np.diag(Cf), 1e-300, None)), [])
+        factors[fi] = chat_factor(R.shape[0], kf)
+        k += kf
+    obs = cv_statistic(problem, folds, (F._seed_int(seed), 2), Cplus, factors, n_start, g5)
+    if obs["status"] != "ok":
+        return _seal({**ev, "status": "incomplete", "T": None, "k": k, "p": None,
+                      "reference": {"ratio_failed": False}, "finding": obs["finding"]})
+    ref = cv_ensemble(problem, folds, truth, n_ref, (F._seed_int(seed), 3), n_start, g5, replacement=False)
+    if ref["status"] != "ok":
+        return _seal({**ev, "status": "incomplete", "T": obs["T_cv"], "k": k, "p": None,
+                      "reference": {"ratio_failed": True}, "finding": ref["finding"]})
+    Tr = [sum(float(r[fi] @ Cplus[fi] @ r[fi]) * factors[fi] for fi in range(len(folds))) for r in ref["values"]]
+    p = F.testing_pvalue(obs["T_cv"], Tr, ref["X"])
+    return _seal({**ev, "status": "ok", "T": obs["T_cv"], "k": k, "p": p,
+                  "reference": {"kind": "toys", "n": n_ref, "X": ref["X"], "ratio_failed": False,
+                                "sha256": _ref_sha(Tr, ref["X"], n_ref)}})
 
 
 # ------------------------------------------------------------------ shapes conditioned on the total (section 2.1)

@@ -12,7 +12,8 @@
                                                                     validation reads and pending failure records;
                          the raw units come from the releases' lineage (unconfirmed lineage or a holdout sharing
                          raw units is refused, nothing is recorded); --conditions holds the opening conditions
-  calib_data.py decide   --ledger FILE --decision FILE             apply a decision record (calib_validate's)
+  calib_data.py decide   --ledger FILE --book FILE --kappa K       apply kappa's decision record from calib_validate's
+                                                                   book (computed records and abandonment only, F4)
   calib_data.py locking  --contract FILE --plan FILE --release FILE --out FILE [--n-scan N]
                          the locking-stage decisions at the evaluation points (rounding, sigma0, N_d,c, conventions)
   calib_data.py provide  --ledger FILE --release FILE --channel FILE --calibration HASH ... --out FILE [--kappa K]
@@ -96,7 +97,8 @@ def main(argv=None) -> int:
     o.add_argument("--conditions")
     de = sub.add_parser("decide")
     de.add_argument("--ledger", required=True)
-    de.add_argument("--decision", required=True)
+    de.add_argument("--book", required=True)
+    de.add_argument("--kappa", required=True)
     lk = sub.add_parser("locking")
     lk.add_argument("--contract", required=True)
     lk.add_argument("--plan")
@@ -176,7 +178,12 @@ def main(argv=None) -> int:
                     return {"read_seq": seq, "values": args.out}
                 return write(prov)
             if args.cmd == "decide":
-                dec = io.load(args.decision)
+                book = io.load(args.book)
+                recs = [d for d in (book.get("decisions") or []) if d.get("kappa") == args.kappa]
+                dec = recs[-1] if recs else None
+                if dec is None or not (dec.get("computed") or dec.get("outcome") == "abandoned"):
+                    raise io.InputError("no decision record of calib_validate for this kappa (a decision comes only "
+                                        "from a computed statistic or an abandonment)")
                 return write(lambda led: {"record_status": led.apply_decision(dec)})
             led = _ledger(args.ledger)
             v, c = _units(args.validation_units), _units(args.calibration_units)
