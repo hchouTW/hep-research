@@ -226,12 +226,37 @@ class ToyProblem:
         o = observe(self._data_model, {r: v["events"] for r, v in gen["runs"].items()}, w, self.names)
         return self._to_link(o["pred"])
 
-    def simulate(self, beta_truth, rng, phis=None) -> L.Data:
+    def observe_nominal(self, params: dict, rng) -> np.ndarray:
+        """Summary statistics (link space) of one data-size event set drawn with replacement from the nominal MC sample
+        weighted to `params`: its expectation is the nominal MC prediction at that point (section 6.6: a toy's true
+        value is m_nom(truth) = mu* + e_nom) and its noise is the data's event-level noise."""
+        ev = self.ev
+        target = {**self.model.nominal, **self._equivalent(params)}
+        nom = ev.nominal
+        run_events, regen = ev._prepared(target, nom)
+        sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
+                           for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
+        w = ev.weights(target, sample, nodes=ev.reweighted_nodes(target, nom), regenerated=regen)
+        w.pop("_missing_support", None)
+        by = {o.name: o for o in self.model.observables}
+        runs = {by[n].run for n in self.names}
+        picked = {}
+        for rid in runs:
+            ww = np.asarray(w[rid], float)
+            idx = rng.choice(ww.size, size=self.exposure, replace=True, p=ww / ww.sum())
+            picked[rid] = {node: {k: np.asarray(v)[idx] for k, v in outs.items()} for node, outs in run_events[rid].items()}
+        o = observe(self.model, picked, {r: np.ones(self.exposure) for r in picked}, self.names)
+        return self._to_link(o["pred"])
+
+    def simulate(self, beta_truth, rng, phis=None, nominal: bool = True) -> L.Data:
+        """Toy data at the truth. nominal=True (toys under the null hypothesis, section 6.6): drawn from the nominal MC
+        weighted to the truth; nominal=False (actual data, G8 pseudo-data with an analytic truth): a fresh event sample
+        generated at the truth."""
         lay = self.layout
         sl = lay.slices()
         n0 = len(lay.theta) + len(lay.phi_P)
         params, shift = self.params_of(beta_truth[:n0])
-        y = self.observe_at(params, int(rng.integers(2 ** 62)))
+        y = self.observe_nominal(params, rng) if nominal else self.observe_at(params, int(rng.integers(2 ** 62)))
         eta = beta_truth[sl["eta"]]
         if lay.n_eta:
             y = y + self.eta_columns(self._predict(params)["pred"]) @ eta

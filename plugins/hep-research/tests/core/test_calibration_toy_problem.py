@@ -63,7 +63,7 @@ class Fit(unittest.TestCase):
     def test_fit_converges_with_sigma_noise(self):
         p = calorimeter()
         truth = p.initial_beta({"light_yield": 100, "pde": 0.25, "gain": 10.0})
-        p.data = p.simulate(truth, np.random.default_rng(5))
+        p.data = p.simulate(truth, np.random.default_rng(5), nominal=False)
         p.sigma_noise = TP.estimate_sigma_noise(p, truth)
         self.assertGreater(p.sigma_noise, 0.0)
         f = F.iterate(p, p.initial_beta(), lndet=False)
@@ -79,7 +79,7 @@ class Fit(unittest.TestCase):
         is evaluated by its equivalent yield (smooth); resimulated, the objective is a staircase below ~0.01 in t."""
         p = calorimeter(thickness_by_yield=True)
         truth = p.initial_beta({"light_yield": 100, "pde": 0.25, "gain": 10.0})
-        p.data = p.simulate(truth, np.random.default_rng(5))
+        p.data = p.simulate(truth, np.random.default_rng(5), nominal=False)
         p.sigma_noise = TP.estimate_sigma_noise(p, truth)
         a = F.iterate(p, p.initial_beta({"light_yield": 85, "pde": 0.21, "gain": 8.5}), lndet=False)
         b = F.iterate(p, p.initial_beta({"light_yield": 115, "pde": 0.29, "gain": 11.5}), lndet=False)
@@ -95,6 +95,16 @@ class Fit(unittest.TestCase):
         ra = a._predict(a.params_of(tp)[0])
         rb = b._predict(b.params_of(tp)[0])
         z = (ra["pred"] - rb["pred"]) / np.sqrt(np.diag(ra["V_MC"]) + np.diag(rb["V_MC"]))
+        self.assertLess(float(np.max(np.abs(z))), 4.0)
+
+    def test_null_toys_centre_on_the_nominal_prediction(self):
+        """Toys under the null hypothesis draw from the nominal MC weighted to the truth: their mean is the nominal MC
+        prediction (section 6.6), within the toys' standard error."""
+        p = calorimeter(mc=4000, thickness_by_yield=True)
+        tp = np.array([100.0, 0.25, 10.0, 1.0])
+        nom = p._to_link(p._predict(p.params_of(tp)[0])["pred"])
+        ys = np.array([p.observe_nominal(p.params_of(tp)[0], np.random.default_rng([9, i])) for i in range(200)])
+        z = (ys.mean(0) - nom) / (ys.std(0, ddof=1) / np.sqrt(len(ys)))
         self.assertLess(float(np.max(np.abs(z))), 4.0)
 
     def test_factory_needs_a_toy_evaluator_and_one_exposure(self):

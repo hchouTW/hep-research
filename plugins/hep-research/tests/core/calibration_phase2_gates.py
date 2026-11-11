@@ -133,7 +133,7 @@ def gate_segmented(out: Path, smoke: bool, probe: bool = False):
                           seeds[1], thickness_by_yield=True)
     truth = joint.initial_beta({**{k: toy.TOY_NOMINAL[k] for k in THETA1}, **{k: toy.TOY_NOMINAL[k] for k in THETA2}})
     rng = np.random.default_rng(SEED + 2)
-    data = joint.simulate(truth, rng)
+    data = joint.simulate(truth, rng, nominal=False)          # the actual data: the analytic truth
     joint.data = data
     joint.sigma_noise = TP.estimate_sigma_noise(joint, truth)
     fj = F.find_extremum(joint, (SEED, 0), joint.initial_beta())
