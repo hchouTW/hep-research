@@ -118,7 +118,7 @@ class Holdout(unittest.TestCase):
         out = []
         for s in range(reps):
             p = T.make(cfg, [0.5, -0.3, 1.0], data_seed=10 + s, mc_seed=1)
-            yv = p.simulate_val(p.truth, np.random.default_rng([s, 5]))
+            yv = p.simulate_val(p.truth, np.random.default_rng([s, 5]), nominal=False)
             f = F.iterate(p, T.initial_beta(p), lndet=False)
             pc = V.holdout_pieces(p, f, yv, omit=omit)
             out.append(V.t_v(pc["r"], V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])[0]))
@@ -288,8 +288,8 @@ class ShiftModeResidual(unittest.TestCase):
             p = T.make(cfg, [0.5, -0.3], data_seed=10 + s, mc_seed=1)
             rng = np.random.default_rng([s, 9])
             phi = rng.normal(size=1)
-            p.data = p.simulate(p.truth, rng, phi)
-            yv = p.simulate_val(p.truth, rng, phi)
+            p.data = p.simulate(p.truth, rng, phi, nominal=False)
+            yv = p.simulate_val(p.truth, rng, phi, nominal=False)
             f = F.iterate(p, T.initial_beta(p), lndet=False)
             rf = Sh.refits(p, f, multistart=False)
 
@@ -316,7 +316,7 @@ def small_holdout():
 class ToyPath(unittest.TestCase):
     def test_reference_distribution_and_ratio_gate(self):
         p = T.make(small_holdout(), [0.5, -0.3], 3, 4)
-        yv = p.simulate_val(p.truth, np.random.default_rng(1))
+        yv = p.simulate_val(p.truth, np.random.default_rng(1), nominal=False)
         f = F.iterate(p, T.initial_beta(p))
         pc = V.holdout_pieces(p, f, yv)
         Cp, k = V.c_r_plus(pc["C_r"], pc["s"], [])

@@ -159,11 +159,13 @@ class LinearProblem:
         S = v.get("S") if v.get("S") is not None else np.zeros((nv, self.layout.n_eta))
         return U, S
 
-    def simulate_val(self, beta_truth, rng, phis=None):
+    def simulate_val(self, beta_truth, rng, phis=None, nominal: bool = True):
         v = self.cfg.val
         sl = self.layout.slices()
         U, S = self.val_columns()
         mu = v["m0"] + v["J"] @ beta_truth[:self.d] + U @ beta_truth[sl["nu"]] + S @ beta_truth[sl["eta"]]
+        if nominal:                                  # a toy's true value is the nominal MC prediction (section 6.6)
+            mu = mu + self.val_noise
         if phis is not None and v.get("phi_cols") is not None:
             mu = mu + v["phi_cols"] @ np.asarray(phis, float)
         return rng.multivariate_normal(mu, v["V_data"])
@@ -238,7 +240,7 @@ class LinearProblem:
         return V
 
     # -- toys
-    def simulate(self, beta_truth: np.ndarray, rng: np.random.Generator, phis=None) -> L.Data:
+    def simulate(self, beta_truth: np.ndarray, rng: np.random.Generator, phis=None, nominal: bool = True) -> L.Data:
         """Event-level data at the truth (Gaussian rows with the data covariance at the truth, counts as Poisson), the
         constraint centres of nu and eta sampled around their true values (the profile construction, section 6.6).
         The truth carries no MC noise (the analytic truth of section 8.7 note 4)."""
@@ -250,6 +252,8 @@ class LinearProblem:
         nu = beta_truth[sl["nu"]]
         eta = beta_truth[sl["eta"]]
         mu = self.mean(th)
+        if nominal:            # toys: the true value is the nominal MC prediction at the truth point, m_nom = mu* + e_nom
+            mu = mu + self.mc_noise(th)                    # (section 6.6); actual data and G8 use the analytic truth
         n = c.J.shape[0]
         if c.U is not None:
             mu = mu + c.U @ nu
@@ -333,7 +337,7 @@ def make(cfg: Config, truth_theta, data_seed: int, mc_seed: int, nu=None, eta=No
     if lay.n_eta:
         beta[sl["eta"]] = 0.0 if eta is None else eta
     beta[sl["gamma"]] = 1.0
-    p.data = p.simulate(beta, np.random.default_rng(data_seed))
+    p.data = p.simulate(beta, np.random.default_rng(data_seed), nominal=False)
     p.truth = beta
     return p
 
