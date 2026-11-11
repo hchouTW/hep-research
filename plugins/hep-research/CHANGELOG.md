@@ -3,6 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **EIC routing cases follow the profile** (#388): `th19-sat-1` (a dipole-model saturation prediction for e-Au at the EIC) binds `experiment:eic`, because its e-Au beam settings come from the profile's facility module, so the behavior harness expects the profile's index to be read instead of no experiment profile; the `eic-facility-1` note no longer says that no number is shipped. `tests/routing/cases.json` regenerated; a live routing run is a separate step.
+
 ## 0.66.0 (2026-11-11)
 
 Minor release; contracts 3.27.0 and `adapters/geant4` 0.15.0 unchanged, `CORE_VERSION` 1.13.1. Ships the `experiment:eic` expansion (PR #387): `experiment:eic` 0.3.0 -> 0.6.0 (sourced EIC facility and ePIC detector design values, the EIC configuration checker) and `reference:detector-atlas` 0.3.1.
