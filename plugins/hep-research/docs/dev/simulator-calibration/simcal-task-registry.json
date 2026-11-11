@@ -246,6 +246,13 @@
    "registered_at": "2026-11-11T05:39:35Z",
    "card_commit": "ed2f4736",
    "reason": "before their runs: the configurations of calibrations 9 and 12 (functions at the card commit); thresholds unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "1ff2555405b74878e55feb39513220efaed3bf80115d79ec1170daaedee785e1",
+   "registered_at": "2026-11-11T05:53:35Z",
+   "card_commit": "53028a37",
+   "reason": "execution log only (calibrations 9 and 12 pass); as registered 771c1b9a"
   }
  ]
 }
