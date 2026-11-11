@@ -2206,6 +2206,7 @@
    "lines": 330,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/modules/facility/interaction-region.md",
     "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -4592,6 +4593,8 @@
    "lines": 79,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/facility/beam-configurations.md",
+    "profiles/experiments/eic/modules/facility/interaction-region.md",
     "profiles/experiments/eic/modules/placement-inventory.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
@@ -4708,6 +4711,8 @@
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/facility/beam-configurations.md",
+    "profiles/experiments/eic/modules/facility/eic-facility-context.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-kinematics.md",
@@ -4899,6 +4904,7 @@
    "lines": 120,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/conventions.json",
     "skills/hep-theory/references/hadron-structure-essentials.md"
    ],
    "cited_by_other_skills": [],
@@ -4957,6 +4963,7 @@
    "lines": 152,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/conventions.json",
     "skills/hep-theory/references/exclusive-and-gpd.md",
     "skills/hep-theory/references/fragmentation-functions.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",

@@ -4,7 +4,9 @@ Profile `experiment:eic` adds Electron-Ion Collider (EIC) facility context and e
 
 | Request | Read |
 |---|---|
-| Beam species, polarization, collision configurations, interaction region (EIC facility) | `modules/facility/eic-facility-context.md` |
+| Beam species and polarization overview, project stage, where EIC design values live (EIC facility) | `modules/facility/eic-facility-context.md` |
+| Beam configurations: species, beam energies, polarization, luminosity, derived center-of-mass energies, spec field format (EIC facility) | `modules/facility/beam-configurations.md` |
+| Crossing angle, crab crossing, space around the interaction point (EIC facility) | `modules/facility/interaction-region.md` |
 | ePIC detector concept: magnet, tracking, calorimetry, PID, far-forward/backward, data acquisition | `modules/detector/epic-detector-context.md` |
 | ePIC software and data formats: eic-shell, EICrecon, epic geometry, EDM4hep/EDM4eic | `modules/detector/epic-software-entry-points.md` |
 | What is general method, what is EIC, what is ePIC, what belongs to the project | `modules/placement-inventory.md` |

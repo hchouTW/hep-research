@@ -2,13 +2,13 @@
  "plugin_version": "0.65.1",
  "profile": {
   "id": "experiment:eic",
-  "version": "0.3.0"
+  "version": "0.4.0"
  },
  "project_config": {
   "experiments": [
    {
     "profile": "experiment:eic",
-    "version": "0.3.0"
+    "version": "0.4.0"
    }
   ],
   "theory": []
@@ -78,6 +78,45 @@
    "files_read": [],
    "expected_files": [],
    "pass": true
+  },
+  {
+   "id": "eic-beam-configuration",
+   "request": "List the EIC beam species and energy configurations I can use in a measurement design, with their sources.",
+   "decision": "use",
+   "source": "request",
+   "files_read": [
+    "modules/facility/beam-configurations.md"
+   ],
+   "expected_files": [
+    "modules/facility/beam-configurations.md"
+   ],
+   "pass": true
+  },
+  {
+   "id": "eic-crossing-angle",
+   "request": "What crossing angle does the EIC interaction region use, and what does it mean for the boost to the head-on frame?",
+   "decision": "use",
+   "source": "request",
+   "files_read": [
+    "modules/facility/interaction-region.md"
+   ],
+   "expected_files": [
+    "modules/facility/interaction-region.md"
+   ],
+   "pass": true
+  },
+  {
+   "id": "eic-theory-settings",
+   "request": "Predict F2 for the EIC 18x275 configuration, taking the beam settings from the EIC profile.",
+   "decision": "use",
+   "source": "request",
+   "files_read": [
+    "modules/facility/beam-configurations.md"
+   ],
+   "expected_files": [
+    "modules/facility/beam-configurations.md"
+   ],
+   "pass": true
   }
  ],
  "profile_files_read": [
@@ -85,7 +124,9 @@
   "profiles/experiments/eic/benchmarks/routing-scenarios.json",
   "profiles/experiments/eic/index.md",
   "profiles/experiments/eic/modules/detector/epic-detector-context.md",
+  "profiles/experiments/eic/modules/facility/beam-configurations.md",
   "profiles/experiments/eic/modules/facility/eic-facility-context.md",
+  "profiles/experiments/eic/modules/facility/interaction-region.md",
   "profiles/experiments/eic/profile.json",
   "profiles/experiments/synthetic-collider/profile.json",
   "profiles/reference/detector-atlas/profile.json",

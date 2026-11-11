@@ -71,7 +71,7 @@ class ConventionTests(unittest.TestCase):
     CONV = json.loads((ROOT / "conventions.json").read_text(encoding="utf-8"))
 
     def test_keys_are_core_or_namespaced(self):
-        core = {"unit_system", "energy_variable", "frame"}
+        core = set(json.loads((ROOT.parents[2] / "contracts" / "vocab" / "core.json").read_text(encoding="utf-8"))["vocabularies"]["convention_keys"])
         for k in self.CONV:
             self.assertTrue(k in core or k.startswith("eic:"), k)
         self.assertEqual(sorted(k for k in self.CONV if k.startswith("eic:")), sorted(PROFILE["vocabulary_extensions"]["conventions"]))
@@ -83,7 +83,7 @@ class ConventionTests(unittest.TestCase):
         self.assertNotIn("lab = cm", frame)
 
     def test_unknown_conventions_say_so(self):
-        for k in ("eic:hadron_beam_direction", "eic:polarization_sign"):
+        for k in ("rapidity_frame", "polarization_convention"):
             self.assertIn("unknown", self.CONV[k].lower(), k)
             self.assertIn("not fix", self.CONV[k].lower(), k)
 

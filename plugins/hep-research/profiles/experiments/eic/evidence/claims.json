@@ -167,7 +167,7 @@
  },
  {
   "id": "eic:C07",
-  "claim": "The EIC Conceptual Design Report is described on its OSTI record as the technical reference design for the EIC, demonstrating the capability to meet the performance goals of the recommended scientific program; this profile has not read its body and quotes none of its design parameters",
+  "claim": "The EIC Conceptual Design Report is described on its OSTI record as the technical reference design for the EIC, demonstrating the capability to meet the performance goals of the recommended scientific program",
   "claim_types": [
    "detector_fact"
   ],
@@ -184,10 +184,10 @@
    "data_period": null,
    "analysis": "none"
   },
-  "limitations": "Abstract and metadata only; a reader needing a value must open the report and add a claim at the level read",
+  "limitations": "Abstract and metadata only for this pointer claim; design parameters read from the report body are separate numeric claims",
   "verification_strength": "abstract+metadata",
   "numeric_quotation_allowed": false,
-  "last_reviewed": "2026-10-04",
+  "last_reviewed": "2026-11-11",
   "evidence_status": "public-fact"
  },
  {
@@ -963,5 +963,681 @@
   "last_reviewed": "2026-11-08",
   "evidence_status": "public-fact",
   "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
+ },
+ {
+  "id": "eic:C38",
+  "claim": "The EIC CDR design covers electron-proton center-of-mass energies E_CM from 20 to 140 GeV",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 3 (PDF p. 13); \u00a71.4, printed p. 11",
+  "scope": {
+   "text": "EIC facility: design target, center-of-mass energy range (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design target of the 2021 CDR; \u00a73.1.1 writes the upper end as 141 GeV, the overview as 140 GeV",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron-proton center-of-mass energy range",
+   "value": "20-140",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C39",
+  "claim": "The EIC CDR design reaches its highest luminosity, 10^34 cm^-2 s^-1, with 10 GeV electrons colliding with 275 GeV protons (E_CM 105 GeV)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 6 (PDF p. 16); Table 1.1, printed p. 7",
+  "scope": {
+   "text": "EIC facility: design target, peak electron-proton luminosity (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Peak design luminosity at one configuration; other configurations are lower (Table 3.3); a design target, not an achieved value",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "peak electron-proton luminosity",
+   "value": "10^34",
+   "unit": "cm^-2 s^-1",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.2 and Table 1.1",
+   "conditions": "10 GeV electrons on 275 GeV protons"
+  }
+ },
+ {
+  "id": "eic:C40",
+  "claim": "In the EIC CDR design the electron storage ring has beam energies up to 18 GeV, and the hadron storage ring operates between 41 and 275 GeV for protons and 41 to 110 GeV per nucleon for ions",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1.1, printed p. 93 (PDF p. 103)",
+  "scope": {
+   "text": "EIC facility: design target, beam energy ranges (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design ranges of the 2021 CDR; the configurations actually listed are in Tables 3.3 to 3.5",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "beam energy ranges (electron maximum; proton; ion per nucleon)",
+   "value": "18; 41-275; 41-110",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a73.1.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C41",
+  "claim": "The EIC CDR interaction region design uses a total crossing angle of 25 mrad between the electron and hadron beams, compensated by crab cavities (197 MHz) in each beam",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 6; \u00a73.1 printed p. 101 (PDF p. 111); \u00a73.2.1, printed p. 107 (PDF p. 117)",
+  "scope": {
+   "text": "EIC facility: design target, crossing angle (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design value of the 2021 CDR for the project interaction region; a second interaction region is not part of the project",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "total crossing angle",
+   "value": "25",
+   "unit": "mrad",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a73.2.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C42",
+  "claim": "The EIC CDR design keeps a region of \u00b14.5 m around the interaction point free of accelerator elements",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.4, printed p. 13 (PDF p. 23)",
+  "scope": {
+   "text": "EIC facility: design target, interaction-region free space (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design layout of the 2021 CDR; the detector's actual extent is set by the ePIC design, not by this claim",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "region around the interaction point kept free of accelerator elements",
+   "value": "4.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.4",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C43",
+  "claim": "The EIC CDR plans highly polarized (about 70%) electron, proton and light-ion (deuteron and \u00b3He) beams; heavy ion beams will be unpolarized",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 3-4 (PDF pp. 13-14); \u00a71.4, printed p. 14 (PDF p. 24); \u00a75.1, printed p. 427",
+  "scope": {
+   "text": "EIC facility: design target, beam polarization (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "An approximate design level for the polarized beams, stated for the facility as a whole rather than per configuration; not an achieved polarization",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "planned beam polarization (electrons, protons, light ions)",
+   "value": "70",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C44",
+  "claim": "The EIC CDR lists electron-proton beam energy configurations (electron x proton, GeV) 18 x 275, 10 x 275, 10 x 100, 5 x 100 and 5 x 41, at center-of-mass energies 140.7, 104.9, 63.2, 44.7 and 28.6 GeV",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1.1, Tables 3.3 and 3.4, printed pp. 102-103 (PDF pp. 112-113)",
+  "scope": {
+   "text": "EIC facility: design target, electron-proton configurations (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Configurations as listed in the 2021 CDR tables; the project may run others",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron x proton beam energies",
+   "value": "18x275, 10x275, 10x100, 5x100, 5x41",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), Tables 3.3 and 3.4",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C45",
+  "claim": "In the EIC CDR Table 3.3 setting, the electron-proton luminosities for 18 x 275, 10 x 275, 10 x 100, 5 x 100 and 5 x 41 GeV are 1.54, 10.00, 4.48, 3.68 and 0.44 in units of 10^33 cm^-2 s^-1",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1.1, Table 3.3, printed p. 102 (PDF p. 112; values read from the rendered page)",
+  "scope": {
+   "text": "EIC facility: design target, electron-proton luminosity per configuration (CDR 2021, Table 3.3 setting)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design luminosities with strong hadron cooling in one of two interaction-region settings (Table 3.3); the other setting (Table 3.4) gives lower values at the higher energies",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron-proton luminosity per configuration",
+   "value": "1.54, 10.00, 4.48, 3.68, 0.44",
+   "unit": "10^33 cm^-2 s^-1",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), Table 3.3",
+   "conditions": "Table 3.3 setting, with strong hadron cooling"
+  }
+ },
+ {
+  "id": "eic:C46",
+  "claim": "The EIC CDR lists collisions of electrons with fully stripped gold ions (Z = 79, A = 197) at electron x gold-ion beam energies 18 x 110, 10 x 110, 5 x 110 and 5 x 41 GeV, ion energies per nucleon, at center-of-mass energies 89.0, 66.3, 46.9 and 28.6 GeV",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1 printed p. 101 and Table 3.5, printed p. 104 (PDF pp. 111, 114); per nucleon from \u00a73.1.1, printed p. 93",
+  "scope": {
+   "text": "EIC facility: design target, electron-gold configurations (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Configurations as listed in the 2021 CDR; Table 3.5 itself does not label the ion energy as per nucleon (\u00a73.1.1 does); center-of-mass energies are per nucleon pair",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron x gold-ion beam energies (ion energy per nucleon)",
+   "value": "18x110, 10x110, 5x110, 5x41",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), Table 3.5",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C47",
+  "claim": "The EIC project requirements set a 25 mrad crossing angle for the colliding beams and require the crossing angle to be compensated with crab cavities in both the electron and hadron beams",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project requirement on the interaction region; a requirement, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S18"
+  ],
+  "location": "F-IR-HSR.08 (updated 2026-09-21) and F-IR-RF.01 (updated 2025-09-30), approved",
+  "scope": {
+   "text": "EIC facility: design requirement, crossing angle (project requirements page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "requirement"
+  },
+  "limitations": "A live requirements page; requirement wording and dates as read on the verification date",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "crossing angle of the colliding beams",
+   "value": "25",
+   "unit": "mrad",
+   "kind": "design",
+   "valid_for": "EIC project requirements page IR.html, read 2026-11-11, F-IR-HSR.08 (updated 2026-09-21) and F-IR-RF.01 (updated 2025-09-30)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C48",
+  "claim": "The EIC project requirements set a stay-clear volume around the IP that extends -4.5 m along Z in the electron direction and +5 m in the hadron direction, with an additional 0.5 m on either side, a total stay-clear length of 10.5 m",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project requirement on the interaction region; a requirement, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S18"
+  ],
+  "location": "F-IR.05 (updated 2025-08-20), approved",
+  "scope": {
+   "text": "EIC facility: design requirement, stay-clear volume around the interaction point (project requirements page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "requirement"
+  },
+  "limitations": "Requirement on the space left for the detector, not the detector's dimensions; differs from the symmetric \u00b14.5 m of the 2021 CDR",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "stay-clear length along Z around the IP (electron side; hadron side; margin; total)",
+   "value": "-4.5; 5; 0.5; 10.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC project requirements page IR.html, read 2026-11-11, F-IR.05 (updated 2025-08-20)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C49",
+  "claim": "The EIC project requirements place the first EIC interaction-region detector system at the IP of IR6, with at least one interaction region and detector system and the feasibility of adding a second",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project requirement on the interaction-region location",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S18"
+  ],
+  "location": "F-IR.01 (updated 2025-08-20) and G-IR.02 (updated 2026-09-21), approved",
+  "scope": {
+   "text": "EIC facility: design requirement, interaction-region location (project requirements page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Location requirement only; which experiment occupies it is not stated on this page",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C50",
+  "claim": "DOE approved Critical Decision 3B for the Electron-Ion Collider, the second phase of long-lead procurements of accelerator and detector components as the EIC transitions into construction, after a first phase announced in April 2024; the EIC is built at Brookhaven National Laboratory in partnership with Jefferson Lab",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project stage and site, not a design parameter",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S19"
+  ],
+  "location": "article dated 2026-02-06, paragraphs 1 and 6",
+  "scope": {
+   "text": "EIC facility: project stage as of February 2026 (laboratory news page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Project stage as announced on 2026-02-06; later decisions are unverified, not nonexistent",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C51",
+  "claim": "The 2023 NSAC Long Range Plan recommends the expeditious completion of the EIC as the highest priority for facility construction, and records that the EIC was launched as a DOE project in 2019 and its conceptual design approved in 2021",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "programme standing, not a design parameter",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S20"
+  ],
+  "location": "Executive Summary, Recommendation 3 (PDF p. 12)",
+  "scope": {
+   "text": "EIC facility: programme standing (advisory report, 2023)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Advisory recommendation as of 2023; not a project decision",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C52",
+  "claim": "The 2023 NSAC Long Range Plan states that the competitive review led to the ePIC collaboration, which is finalizing the designs of the detector subsystems at IR6, and that a second detector would turn on several years after ePIC",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "programme standing, not a design parameter",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S20"
+  ],
+  "location": "Chapter 9 Facilities, EIC (PDF p. 74)",
+  "scope": {
+   "text": "ePIC: identity and site as described in an advisory report (2023)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Advisory report as of 2023; design status has moved on since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C53",
+  "claim": "The EIC Yellow Report states the machine requirements as a luminosity of 10^33 to 10^34 cm^-2 s^-1 over center-of-mass energies between 20 and 140 GeV, electron and light-ion beam polarizations above 70%, and ion beams from deuterium to the heaviest nuclei",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.1, report p. 406-407",
+  "scope": {
+   "text": "EIC facility: design target, machine requirements as stated in the Yellow Report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Requirements of the 2021 report; the same section gives the then-current design as 29 to 141 GeV",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "required center-of-mass energy range",
+   "value": "20-140",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C54",
+  "claim": "In the EIC Yellow Report machine description the two beams collide at a crossing angle of 25 mrad, and the luminosity loss from the crossing angle is compensated by crab cavities in each beam",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.1, report p. 407",
+  "scope": {
+   "text": "EIC facility: design target, crossing angle (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design of the 2021 report; agrees with the CDR",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "crossing angle",
+   "value": "25",
+   "unit": "mrad",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C55",
+  "claim": "The EIC Yellow Report states that both the electron and the proton beam will reach 70% polarization, with the same level expected for \u00b3He beams; electron polarization is longitudinal, while protons and light ions are required in both longitudinal and transverse polarization",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.1, report p. 407",
+  "scope": {
+   "text": "EIC facility: design target, beam polarization (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design level of the 2021 report, not an achieved polarization",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "beam polarization (electron, proton)",
+   "value": "70",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C56",
+  "claim": "The EIC Yellow Report gives the reference space kept free of machine elements around the IP as [-4.5, 5.0] m along the beam line",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Ch. 9, Sec. 9.2, item 5, report p. 405",
+  "scope": {
+   "text": "EIC facility: design target, space kept free of machine elements around the IP (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Reference figure of the 2021 report for the first interaction region; the detector's actual extent is an ePIC design matter",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "interval along the beam line kept free of machine elements around the IP (IP at zero)",
+   "value": "-4.5; 5.0",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 9.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C57",
+  "claim": "The EIC Yellow Report describes the detector integration in the interaction region as extending over \u00b1 40 m beyond the main detector, with a far-forward detector region downstream of the ion beam covering about 30 m and a far-backward region along the outgoing lepton beam for luminosity monitoring and low-Q\u00b2 coverage",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.2, report p. 411-412",
+  "scope": {
+   "text": "EIC facility: design target, extent of the far-forward and far-backward regions (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Layout description of the 2021 report; the detectors placed there are ePIC design matters",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "extent along the beam lines of the integrated detector region (overall; far-forward)",
+   "value": "40; 30",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.2",
+   "conditions": null
+  }
  }
 ]

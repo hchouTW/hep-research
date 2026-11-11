@@ -215,7 +215,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-principles-summary.md` | hep-detector | 15.1 | yes | 5 | - | 485e96cb 2026-10-17 |
 | `detector-simulation.md` | hep-detector | 15.0 | yes | 14 | hep-ml, hep-theory | d3ee1c15 2026-11-01 |
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 14 | hep-measurement | 9257d7b5 2026-10-15 |
-| `event-reconstruction.md` | hep-detector | 24.3 | no | 11 | hep-computing | 5e3b104e 2026-10-29 |
+| `event-reconstruction.md` | hep-detector | 24.3 | no | 12 | hep-computing | 5e3b104e 2026-10-29 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
 | `front-end-calibration.md` | hep-detector | 6.0 | no | 3 | - | e2957da1 2026-10-25 |
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 23.1 | yes | 16 | - | 9c12f2b6 2026-10-26 |
@@ -326,14 +326,14 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cosmic-ray-phenomenology.md` | hep-theory | 24.6 | yes | 9 | - | afebe106 2026-10-29 |
 | `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 930ba0b2 2026-10-23 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
-| `dis-kinematics.md` | hep-theory | 6.1 | yes | 6 | - | f046cc69 2026-10-23 |
+| `dis-kinematics.md` | hep-theory | 6.1 | yes | 8 | - | f046cc69 2026-10-23 |
 | `dis-structure-functions.md` | hep-theory | 13.1 | no | 11 | - | 9648218d 2026-10-23 |
 | `drell-yan.md` | hep-theory | 10.9 | no | 5 | - | 9648218d 2026-10-23 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b5 2026-10-15 |
 | `exclusive-and-gpd.md` | hep-theory | 6.9 | no | 3 | - | 2414de9a 2026-10-23 |
 | `fragmentation-functions.md` | hep-theory | 3.9 | no | 3 | - | bd9d753e 2026-10-23 |
 | `global-fits-theory-inputs.md` | hep-theory | 4.9 | no | 2 | hep-statistics | 6c7b8ea3 2026-10-23 |
-| `hadron-structure-essentials.md` | hep-theory | 6.8 | yes | 14 | - | 6c7b8ea3 2026-10-23 |
+| `hadron-structure-essentials.md` | hep-theory | 6.8 | yes | 16 | - | 6c7b8ea3 2026-10-23 |
 | `higher-order-predictions.md` | hep-theory | 4.4 | yes | 7 | - | bb6cb81e 2026-10-23 |
 | `light-nuclei-coalescence.md` | hep-theory | 4.0 | yes | 5 | - | 7321e6dc 2026-10-17 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.1 | yes | 8 | hep-authoring, hep-citations, hep-statistics | ebb58136 2026-10-19 |
@@ -343,11 +343,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `nuclear-physics-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 87421c11 2026-10-17 |
 | `particle-physics-essentials.md` | hep-theory | 4.4 | yes | 4 | - | c0b6b6d8 2026-10-17 |
 | `pdfs-and-lhapdf.md` | hep-theory | 6.5 | yes | 8 | - | f046cc69 2026-10-23 |
-| `polarized-dis.md` | hep-theory | 7.6 | no | 1 | - | 9648218d 2026-10-23 |
+| `polarized-dis.md` | hep-theory | 7.6 | no | 2 | - | 9648218d 2026-10-23 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | 9257d7b5 2026-10-15 |
 | `regularization-and-schemes.md` | hep-theory | 8.8 | yes | 6 | hep-computing | 16214af1 2026-10-26 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 3 | - | 195e4d1e 2026-10-13 |
-| `sidis-and-tmd.md` | hep-theory | 9.2 | no | 6 | - | bd9d753e 2026-10-23 |
+| `sidis-and-tmd.md` | hep-theory | 9.2 | no | 7 | - | bd9d753e 2026-10-23 |
 | `small-x-and-saturation.md` | hep-theory | 6.9 | no | 3 | - | 2414de9a 2026-10-23 |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 3 | - | fa29fcf3 2026-10-13 |
 | `solar-modulation-models.md` | hep-theory | 6.4 | no | 6 | - | e70b1a84 2026-10-23 |

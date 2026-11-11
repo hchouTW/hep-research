@@ -3,6 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **`experiment:eic` 0.4.0: EIC facility design values** (profile only; plugin version unchanged). Modules cite claims in the full form `eic:Cnn`. Every number in a `facility/` or `detector/` module must appear in a cited numeric claim that carries a `scope.number_kind` (`requirement`, `design-target`, `design-value` or `proposal`), checked by `profiles/experiments/eic/scripts/number_rules.py` and the profile tests; derived values are `derived:` lines with the exact plugin command, recomputed by the tests; no number may stand near a performance word. eic:S03 (CDR 2021) and eic:S02 (Yellow Report, Nucl. Phys. A 1026 (2022) 122447) were read at full text; new sources: the EIC interaction-region requirements page, a BNL news page on the project stage, and the 2023 NSAC Long Range Plan. New modules `facility/beam-configurations.md` (configurations, luminosities, derived center-of-mass energies, spec field format) and `facility/interaction-region.md`; numeric facility claims carry atlas blocks (experiment "EIC"). The frozen geometry-case claims (eic:C10 to eic:C37, eic:S10) are unchanged.
+- **Convention keys aligned with the core vocabulary** (`experiment:eic` 0.4.0): `eic:hadron_beam_direction` is replaced by `rapidity_frame` and `eic:polarization_sign` by `polarization_convention`; `target_normalization`, `azimuth_convention` and `eic:crossing_angle_treatment` are added. The configuration checker planned for a later release reports either old key as `eic.deprecated_key`.
+
 ## 0.65.1 (2026-11-09)
 
 Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.

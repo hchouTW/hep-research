@@ -1,7 +1,7 @@
 {
  "id": "experiment:eic",
  "kind": "experiment",
- "version": "0.3.0",
+ "version": "0.4.0",
  "scope": "Electron-Ion Collider (EIC) facility context and the ePIC experiment, from public documents only. Facility material (beam species, polarization, collision configurations as design targets, interaction region) and experiment material (ePIC detector concept, software and data-format entry points) are kept in separate modules with separate scopes. Documentation only: no performance numbers beyond the cited claims, no datasets, no calibration constants, no runnable experiment software.",
  "exclusions": [
   "Other EIC detector concepts and proposals (a second-IR detector, earlier proposals) unless a module names them with a source",
@@ -41,8 +41,7 @@
  "vocabulary_extensions": {
   "conventions": [
    "eic:beam_energy_configuration",
-   "eic:hadron_beam_direction",
-   "eic:polarization_sign",
+   "eic:crossing_angle_treatment",
    "eic:ion_energy_normalization"
   ]
  },
@@ -70,7 +69,7 @@
   {
    "name": "routing-scenarios",
    "status": "tested-in-declared-environment",
-   "scope": "Generic-DIS, EIC-facility, ePIC-detector, ambiguous-detector and unrelated-experiment requests resolve to the expected decision and resource files through contracts/project.py and index.md; static, no model call",
+   "scope": "Generic-DIS, EIC-facility, ePIC-detector, ambiguous-detector, unrelated-experiment, EIC beam-configuration, EIC crossing-angle and EIC theory-settings requests resolve to the expected decision and resource files through contracts/project.py and index.md; static, no model call",
    "tests": [
     "tests/test_routing_scenarios.py",
     "../../../tests/examples/test_eic_profile_routing.py"

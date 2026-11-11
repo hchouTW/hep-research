@@ -24,6 +24,7 @@ earlier run's totals included them ("since removed") the totals are quoted as th
 | E3 | Linux (EL9) shared cluster node (AlmaLinux 9, Linux 5.14.0 x86_64), plugin tree on a network file system, Python 3.11.13 in a venv on local disk; system ROOT 6.40.04 (C++17, g++ 11.5.0; PyROOT through the system Python 3.9), cmake 3.31.8, Graphviz 2.44.0, HTCondor 25.0.14; Claude Code 2.1.287, Codex CLI 0.160.0 |
 | E4 | Linux cloud container (Claude Code cloud, Linux x86_64), Python 3.13.16 in `.venv-hep` with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0, pyhf 0.7.6; no ROOT, PyTorch, Combine or Codex; Claude Code 2.1.292 |
 | E-crprop | The E2 host (macOS 26.5 arm64; Python 3.13.2 in the E2 venv with numpy 2.5.3, scipy 1.18.1) plus the external cosmic-ray propagation codes of the cr-propagation campaign: DRAGON2 (cosmicrays/DRAGON2-Beta_version commit cd588707, configure.ac DRAGON 3.1.0; serial build of 2026-10-15, binary sha256 d26dbb85…, data directory = the checkout's `data/`), built with Homebrew GCC 15.2.0_1 (g++-15, gfortran-15), GSL 2.8, CFITSIO 4.6.4, Autoconf 2.72, libtool 2.6.2; on the host also ROOT 6.38.04, cmake 4.3.2, Apple clang 21.0.0 (not used by DRAGON2). From 2026-10-28 (host now macOS 27.2, Darwin 27.2.0): USINE V3.5 (gitlab.com/dmaurin/USINE tag V3.5, tag object 7197ddc1, commit fb53006d; GPL-2.0; decision A1.1), built with cmake 4.3.2 and Apple clang 21.0.0 (`-O0`, C++17) against Homebrew ROOT 6.38.04 (GSL 2.8 through ROOT MathMore; CFITSIO not used), binary sha256 1d444720…, data directory = the checkout's `inputs/` (run with `USINE` set to the checkout). GALPROP v57 absent (no source, D5, A1.2). No batch client: local `local_partition.py` only (D6). Located through `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`, `HEP_USINE_BIN`, `HEP_USINE_DATA`; records in `tests/adapters/fixtures/cr_propagation/env/` |
+| E6 | Linux (EL9) shared cluster node (AlmaLinux 9.5, Linux 5.14.0 x86_64), plugin tree in a git worktree on a CephFS network file system, Python 3.13.18 (conda environment; standard library only for the eic profile checks); Claude Code 2.1.322 and Codex CLI present |
 
 Aggregate command: `python3 tools/run_all_checks.py --out <dir>` from the plugin root (`--help` runs nothing). Seeds
 and tolerances of every example are in its `results.json`.
@@ -773,6 +774,23 @@ Relocation passes (`codex-plugin-load` skips in the copy). Detection note: Codex
 as invoked when its `SKILL.md` is read; 54 runs read one SKILL.md and 7 read two (`j02`, `an-direct-2` checked by
 hand). GitHub source: `codex plugin marketplace add hchouTW/hep-research` in a throwaway `CODEX_HOME` found the
 marketplace file and `codex plugin add` installed 0.2.0 with the seven skills; removal clean; no login or model call.
+
+## EIC-EXPANSION-M1 (2026-11-11, E6, version 0.65.1): experiment:eic 0.4.0
+
+Release gate G1 of the EIC profile expansion (milestone M1, facility values) on the `eic-profile-expansion` branch, before the gate commit.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 83 tests; `ledger.py --strict` exit 0 (20 sources, 57 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Per-number sourcing; derived values | every number in the three facility modules is in a cited numeric claim with a `scope.number_kind`; 8 derived center-of-mass energies recomputed by `dis_kinematics.py` and equal to the CDR values to the digits written | `test_scope_and_placement.py` |
+| `detector_atlas.py audit --strict` | ok on every `facility/` and `detector/` module | gate log |
+| Registry, layering, budgets | pass; registry 3007 B ≤ 3072, eic index 2462 B ≤ 4096 | `contracts/registry.py`, `tools/check_layering.py` |
+| Atlas and geometry-cases profile tests; frozen set | pass; eic:S04, S05, S10, C08, C09, C10-C37 identical to the start commit | profile suites; run helper `check-frozen` |
+| Example and plugin scans | pass: `tests.examples.test_eic_profile_routing`, `tests.core.test_evidence_query` (`TODAY` 2026-11-11), `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract` | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | check-run record of 2026-11-11T07:04:43Z |
+| Independent verification | 18 numeric claims (C03, C38-C48, C53-C57) supported by two verifiers that wrote no content; none flagged as performance; derived lines reproduced twice | run log of the expansion |
+
+Facility values are design targets (CDR 2021, Yellow Report) and project requirements as read on 2026-11-11; none is an achieved value. Software checks only.
 
 ## EIC-PROFILE (2026-10-04, E2, version 0.2.0): experiment:eic 0.1.0, with EIC-FOLLOWUPS and EIC-TODO
 

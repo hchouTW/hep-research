@@ -56,6 +56,39 @@
    "triggers": ["resolution"],
    "index_row_keyword": "",
    "expected_eic_files": []
+  },
+  {
+   "id": "eic-beam-configuration",
+   "request": "List the EIC beam species and energy configurations I can use in a measurement design, with their sources.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["beams"],
+   "index_row_keyword": "Beam configurations",
+   "expected_eic_files": ["modules/facility/beam-configurations.md"]
+  },
+  {
+   "id": "eic-crossing-angle",
+   "request": "What crossing angle does the EIC interaction region use, and what does it mean for the boost to the head-on frame?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["beams"],
+   "index_row_keyword": "Crossing angle",
+   "expected_eic_files": ["modules/facility/interaction-region.md"]
+  },
+  {
+   "id": "eic-theory-settings",
+   "request": "Predict F2 for the EIC 18x275 configuration, taking the beam settings from the EIC profile.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-theory",
+   "triggers": ["hadron structure"],
+   "index_row_keyword": "Beam configurations",
+   "expected_eic_files": ["modules/facility/beam-configurations.md"]
   }
  ]
 }
