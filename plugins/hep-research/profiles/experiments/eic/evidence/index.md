@@ -1,6 +1,6 @@
 # EIC Evidence Index and Claim-to-Source Map
 
-Profile-qualified ids (`eic:S01`) in the tables; modules use the short form (`S01`, `C01`). Rules: [source policy](../modules/sources/source-policy.md). The two tables are **generated** from `sources.json` and `claims.json`: edit those files, then from the plugin root run `python3 core/evidence/ledger.py --sources S --claims C --namespace eic` and `python3 core/evidence/render_index.py --sources S --claims C --index I --write`. Each row carries its own `verification_date`; state that date, never today's, when you give a source's level.
+Profile-qualified ids (`eic:S01`) in the tables; modules use the same form. Rules: [source policy](../modules/sources/source-policy.md). The two tables are **generated** from `sources.json` and `claims.json`: edit those files, then from the plugin root run `python3 core/evidence/ledger.py --sources S --claims C --namespace eic` and `python3 core/evidence/render_index.py --sources S --claims C --index I --write`. Each row carries its own `verification_date`; state that date, never today's, when you give a source's level.
 
 ## Verification levels
 

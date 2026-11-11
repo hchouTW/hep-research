@@ -70,13 +70,24 @@
    "species": [],
    "range": null,
    "data_period": null,
-   "analysis": "none"
+   "analysis": "none",
+   "number_kind": "design-value"
   },
   "limitations": "Design value from an undated web page; the page does not say which design release it describes",
   "verification_strength": "page",
   "numeric_quotation_allowed": true,
   "last_reviewed": "2026-10-04",
-  "evidence_status": "public-fact"
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "magnet",
+   "quantity": "magnet field",
+   "value": "1.7",
+   "unit": "T",
+   "kind": "design",
+   "valid_for": "ePIC: magnet design value on a laboratory web page; design, not a measured field map",
+   "conditions": null
+  }
  },
  {
   "id": "eic:C04",

@@ -1,5 +1,5 @@
 {
- "plugin_version": "0.63.0",
+ "plugin_version": "0.65.1",
  "profile": {
   "id": "experiment:eic",
   "version": "0.3.0"
