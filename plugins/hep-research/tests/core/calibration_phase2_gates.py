@@ -362,7 +362,116 @@ def cal7_bj(reps: int = 10_000) -> dict:
     return {"calibration": 7, "row": 2007, "results": out, "passed": ok, "reps": reps}
 
 
-CALS = {"chat": cal13_chat, "lambda-bound": cal14_lower_bound, "lambda": cal3_lambda, "g7": cal5_g7, "bj": cal7_bj}
+def cal9_rounding(reps: int = 10_000) -> dict:
+    """Calibration 9 (section 8.7 note 2): validation pairs with correlation |c| = 1 - 25 r^2 (both signs) for
+    r = rho / sigma in {0.02, 0.05, 0.1, 0.15, 0.2}, the release rounding the data to its grid with the true values
+    uniform on the grid, C_r = C + diag(rho^2 / 12), T_v against chi2_2: size within alpha +- 25%; and a single observable
+    with sigma / rho from 0.1 to 10: sizes reported, judged where the condition holds (sigma / rho >= 5). The
+    deterministic items of note 2 are unit tests (test_calibration_data_checks.Rounding)."""
+    from core.calibration import validate as V
+    alpha = 0.05
+    out, ok = {}, True
+    crit2, crit1 = stats.chi2.ppf(1 - alpha, 2), stats.chi2.ppf(1 - alpha, 1)
+    for r in (0.02, 0.05, 0.1, 0.15, 0.2):
+        for sgn in (1, -1):
+            c = sgn * (1 - 25 * r * r)
+            C = np.array([[1.0, c], [c, 1.0]])
+            rho = r
+            Cr = C + np.eye(2) * rho * rho / 12
+            Cp, _ = V.c_r_plus(Cr, np.ones(2), [])
+            rng = np.random.default_rng([cal_seed(9, 1), int(r * 1000), sgn + 1])
+            mu = rng.uniform(0, rho, size=(reps, 2))                 # true values uniform on the grid
+            y = mu + rng.multivariate_normal(np.zeros(2), C, size=reps)
+            yr = np.round(y / rho) * rho
+            res = yr - mu
+            size = float(np.mean(np.einsum("ni,ij,nj->n", res, Cp, res) > crit2))
+            good = abs(size - alpha) <= 0.25 * alpha
+            ok &= good
+            out[f"pair r={r},c={c:+.4f}"] = {"size": size, "ok": good}
+    for ratio in (0.1, 0.3, 1.0, 3.0, 5.0, 10.0):
+        rho = 1.0 / ratio
+        rng = np.random.default_rng([cal_seed(9, 2), int(ratio * 100)])
+        mu = rng.uniform(0, rho, reps)
+        y = np.round((mu + rng.normal(size=reps)) / rho) * rho
+        size = float(np.mean((y - mu) ** 2 / (1 + rho * rho / 12) > crit1))
+        holds = rho <= 0.2 + 1e-12
+        good = (abs(size - alpha) <= 0.25 * alpha) if holds else None
+        if holds:
+            ok &= good
+        out[f"single sigma/rho={ratio}"] = {"size": size, "condition_holds": holds, "ok": good}
+    return {"calibration": 9, "row": 2012, "results": out, "passed": bool(ok), "reps": reps}
+
+
+def cal12_replica(reps: int = 10_000, n_ref: int = 20_000) -> dict:
+    """Calibration 12 (section 8.7 note 4, size of T_v): holdout on the linear toy, V_MC / V_data in {0.03, 0.1, 0.3, 1},
+    k in {5, 20}, d = 2, the truth without MC noise; T_v with the analytic C_r (V_vv incl. V_MC, propagation) calibrated
+    by replica-difference toys (truth = the nominal MC prediction at the fit point, the toy's own replica difference
+    (m_a - m_b)/sqrt(2) on both predictions). In the linear Gaussian configuration the toy residual's law does not
+    depend on the data or on e_nom, so one reference of n_ref toys per configuration is used for every repetition
+    (equivalent in law to regenerating 500 per repetition). Rule: size within alpha +- 25%. Negative control: nominal as
+    truth with a single replica as prediction (size too small, about 0.025)."""
+    from core.calibration import toys_linear as T
+    from core.calibration import validate as V
+    alpha = 0.05
+    out, ok = {}, True
+    for k in (5, 20):
+        for ratio in (0.03, 0.1, 0.3, 1.0):
+            rng0 = np.random.default_rng([cal_seed(12, 0), k, int(ratio * 100)])
+            n, d = 12, 2
+            J = rng0.normal(size=(n, d))
+            Jv = rng0.normal(size=(k, d))
+            Vd, Vdv = np.eye(n), np.eye(k)
+            Vm, Vmv = Vd * ratio, Vdv * ratio
+            W = np.linalg.inv(Vd + Vm)
+            Sig = np.linalg.inv(J.T @ W @ J)
+            A = Sig @ J.T @ W
+            Cr = Vdv + Vmv + Jv @ Sig @ Jv.T
+            Cp, _ = V.c_r_plus(Cr, np.sqrt(np.diag(Vdv)), [])
+
+            def residual(rng, single=False):
+                # data from the truth (toys: the nominal MC prediction at the truth point); prediction = nominal + pert
+                e_c = rng.multivariate_normal(np.zeros(n), Vm)
+                e_v = rng.multivariate_normal(np.zeros(k), Vmv)
+                yc = rng.multivariate_normal(np.zeros(n), Vd)
+                yv = rng.multivariate_normal(np.zeros(k), Vdv)
+                return yc, yv, e_c, e_v
+
+            def tv(rv):
+                return float(rv @ Cp @ rv)
+            # reference: replica-difference toys (true value m_nom, prediction m_nom + (m_a - m_b)/sqrt 2)
+            ref, ref_single = [], []
+            rng = np.random.default_rng([cal_seed(12, 1), k, int(ratio * 100)])
+            for _ in range(n_ref):
+                yc, yv, _, _ = residual(rng)
+                pc = (rng.multivariate_normal(np.zeros(n), Vm) - rng.multivariate_normal(np.zeros(n), Vm)) / np.sqrt(2)
+                pv = (rng.multivariate_normal(np.zeros(k), Vmv) - rng.multivariate_normal(np.zeros(k), Vmv)) / np.sqrt(2)
+                th = A @ (yc - pc)
+                ref.append(tv(yv - pv - Jv @ th))
+                sc = rng.multivariate_normal(np.zeros(n), Vm)        # single replica as prediction, nominal as truth
+                sv = rng.multivariate_normal(np.zeros(k), Vmv)
+                en_c = rng.multivariate_normal(np.zeros(n), Vm)
+                en_v = rng.multivariate_normal(np.zeros(k), Vmv)
+                th2 = A @ (yc + en_c - sc)
+                ref_single.append(tv(yv + en_v - sv - Jv @ th2))
+            ref, ref_single = np.sort(ref), np.sort(ref_single)
+            rej = rej_s = 0
+            rng = np.random.default_rng([cal_seed(12, 2), k, int(ratio * 100)])
+            for _ in range(reps):
+                yc, yv, e_c, e_v = residual(rng)            # actual data: analytic truth; nominal MC noise e_nom
+                th = A @ (yc - e_c)
+                T_obs = tv(yv - e_v - Jv @ th)
+                p = (np.sum(ref >= T_obs) + 1) / (ref.size + 1)
+                ps = (np.sum(ref_single >= T_obs) + 1) / (ref_single.size + 1)
+                rej += p <= alpha
+                rej_s += ps <= alpha
+            size, size_s = rej / reps, rej_s / reps
+            good = abs(size - alpha) <= 0.25 * alpha
+            ok &= good
+            out[f"k={k},VMC/Vdata={ratio}"] = {"size": size, "ok": good, "control_single_replica": size_s}
+    return {"calibration": 12, "row": 2015, "results": out, "passed": bool(ok), "reps": reps, "n_ref": n_ref}
+
+
+CALS = {"rounding": cal9_rounding, "replica": cal12_replica, "chat": cal13_chat, "lambda-bound": cal14_lower_bound, "lambda": cal3_lambda, "g7": cal5_g7, "bj": cal7_bj}
 
 
 # ------------------------------------------------------------------ gate 3: the negative tests of P8 and G9 (card)
