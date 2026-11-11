@@ -9039,6 +9039,42 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## SCIFIX-HEX-WORDS (2026-11-11, E6 and CI; branch `release/0.66.0`)
+
+sci-fix BLINDING-HEX-WORDS (S2: a wrong verdict, a false alarm that fails the scan). Found by CI on PR #390:
+`tests.examples.test_ams_flux_ratio.PathATests.test_blinding_audit_with_synthetic_sentinel` failed after the 0.66.0
+release manifest was added, locally as well (3 of 3 runs). Every example artifact records `versions.plugin_release`
+with the release digest `fe310bac...9082c936a853`; `scan_text` tokenized the `936` inside it, which matched the
+example's sealed synthetic count 936.24 at 3 significant digits. The fix: a digit run inside a hexadecimal word of 16
+or more characters with at least one letter (a SHA-256 digest, a git commit id) is not a token. Hexadecimal was
+already in `OUT_OF_SCOPE_RENDERINGS`. Shorter hex words, all-digit runs, words with another letter and values joined by
+`_` are scanned as before. `CORE_VERSION` 1.13.0 -> 1.13.1.
+
+**Correctness (C4, exhaustive):** `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively`
+writes every sealed n = 100 to 999 (sealed n + 0.25) at every position of a 64-, a 16- and a 15-character hex word, lower
+and upper case (205,200 scans): no hit at 64 and 16 characters, a hit at 15 (the boundary). The expected values come
+from the domain's definition, not from the scanner. `test_release_digest_is_not_a_printed_number` is the CI case.
+Negative control `test_numbers_beside_hex_words_still_hit`: a number before or after a digest, `c936a`, an all-digit
+16-character run, a word with `g` to `j`, `count_936.24` are hits on the parent and on the fix.
+
+**Discrimination (D3):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively` | exhaustive | fail (assertion): n=100 at position 0 of a 64-character word is a hit | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_release_digest_is_not_a_printed_number` | behavioral | fail (assertion): token `936` on line 5 | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_numbers_beside_hex_words_still_hit` | behavioral (negative control) | pass | pass | no | E6 |
+
+Parent: `b3974460` (release branch) with this commit's test file copied in. Local mutants of the filter in
+`scan_text`, killed by `HexWordTests`: the revert, a length floor of 8, a length floor of 17, no letter required. One
+mutant survives: treating `_` as a word boundary (a value joined to a hex word by `_` is then skipped as part of no
+word, and the tests contain no such case). Blinding suites (`test_blinding`, `test_blinding_regressions`,
+`test_blinding_residual`, `test_blinding_u11`, `test_r5_blinding`) and `test_ams_flux_ratio`: 122 tests pass on the fix.
+
+**Advisory waiver:** the fix only removes false alarms on a rendering already out of scope; no released number
+changes and no sealed value printed as a decimal is missed. Decided 2026-11-11 with the maintainer's choice of
+this fix in the session.
+
 ## 0.66.0 release check (2026-11-11, CI and E6)
 
 Release commit `5af131ad` on `release/0.66.0`, based on main `401f322f` (PR #387 merged). Minor release: the `experiment:eic` expansion, `experiment:eic` 0.3.0 -> 0.6.0 (evidence in EIC-EXPANSION-M1 to M3 above, and the Q12 follow-up in M3) and `reference:detector-atlas` 0.3.1. Contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
