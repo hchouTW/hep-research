@@ -253,6 +253,13 @@
    "registered_at": "2026-11-11T05:53:35Z",
    "card_commit": "53028a37",
    "reason": "execution log only (calibrations 9 and 12 pass); as registered 771c1b9a"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "c6a826a51db849ed146346a2761a73ca070ee0b5673d2d72085b3f56ebfa2818",
+   "registered_at": "2026-11-11T23:09:12Z",
+   "card_commit": "f662646a",
+   "reason": "before its run: gate 1 on the toy detector (review F1, F2; approval A10 for two G8 controls), implementation gate1_toy_task/GATE1T_TASKS at 95b4191c; tightening only"
   }
  ]
 }
