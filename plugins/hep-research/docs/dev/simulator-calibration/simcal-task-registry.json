@@ -204,6 +204,13 @@
    "registered_at": "2026-11-11T03:20:55Z",
    "card_commit": "ff45b424",
    "reason": "before the gate-2 run: its configuration on the toy detector (gate_segmented at the card commit); criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "23e85de4582968418889589f93cedb5be506d5479182a6f7cbb16438d36ce505",
+   "registered_at": "2026-11-11T04:02:28Z",
+   "card_commit": "534331ab",
+   "reason": "execution log only (gate 2 passes); thresholds, configurations and test designs as registered ffcab887"
   }
  ]
 }
