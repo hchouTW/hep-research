@@ -1487,14 +1487,16 @@ def t1_g7_bblite(reps: int = 40, K: int = 10, seed: int = SEED_T1 + 130) -> dict
     return {"item": "9 G7 BB-lite (toy detector)", "failures": fails, "reps": reps, "ok": bool(ok)}
 
 
-def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200, 1500, 3000)) -> dict:
+def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200, 1500, 3000), r0: int = 0) -> dict:
     """Item 11 (V, a shape conditioned on its total), toy detector: the track calibration (exposure 400); the
     validation shape is the track-2 momentum histogram (K = 5) of a separate sample with N_obs events, conditioned on
     its observed total: r = n - N_obs p(beta-hat), C = N_obs (diag p - p p^T) + N_obs^2 G Sigma_beta G^T with p and
-    G = dp/dbeta from a validation MC of 200000 events (its noise adds about N_obs / 200000 <= 1.5% to the variance);
-    the size of T_v against chi2_(K-1) at N_obs in {300, 1200, 1500, 3000} within alpha +- 25%."""
+    G = dp/dbeta from a validation MC of 2000000 events (shape_holdout_pieces has no MC term; reweighted to theta-hat the
+    MC's effective size is about a third, so its noise adds about N_obs / 700000 <= 0.5% to the variance);
+    the size of T_v against chi2_(K-1) at N_obs in {300, 1200, 1500, 3000} within alpha +- 25%. Each repetition has
+    its own calibration MC (the size averages over the MC noise, which the propagation term carries)."""
     shape = {"p2_shape": {"source": "track2_p_mean", "edges": P2_EDGES, "kind": "shape"}}
-    vp = TP.ToyProblem(track_build, [], TRACK_THETA, exposure=1000, mc_events=200_000, mc_seed=(seed, 1),
+    vp = TP.ToyProblem(track_build, [], TRACK_THETA, exposure=1000, mc_events=2_000_000, mc_seed=(seed, 1),
                        boot_seed=(seed, 2), counts=shape)
 
     def pshape(tp):
@@ -1504,8 +1506,8 @@ def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200,
     sizes = {}
     for Nobs in nobs:
         rej, X = 0, 0
-        for r in range(reps):
-            p = track_problem(0, TRACK_CAL, [], seed=seed + 1)
+        for r in range(r0, r0 + reps):
+            p = track_problem(r, TRACK_CAL, [], seed=seed + 1)     # each repetition its own calibration MC
             rng = np.random.default_rng([seed, Nobs, r])
             truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
             p.data = p.simulate(truth, rng, nominal=False)
@@ -1527,12 +1529,12 @@ def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200,
             pc = V.shape_holdout_pieces(n, pshape(th), Gb, f.Sigma_beta)
             Cp, kk = V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
             rej += V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, kk)
-        sizes[str(Nobs)] = {"rej": int(rej), "X": X, "size": rej / max(reps - X, 1)}
+        sizes[str(Nobs)] = {"rej": int(rej), "X": X, "reps": reps, "size": rej / max(reps - X, 1)}
     return _judge_shape({"item": "11 V shape conditioned on its total (toy detector)", "sizes": sizes, "reps": reps})
 
 
 def _judge_shape(c):
-    ok = all(_size_judge(v["size"]) and v["X"] <= 0.01 * c["reps"] for v in c["sizes"].values())
+    ok = all(_size_judge(v["size"]) and v["X"] <= 0.01 * v["reps"] for v in c["sizes"].values())
     return {**c, "ok": bool(ok)}
 
 
@@ -1717,7 +1719,8 @@ GATE1T_TASKS = [("units", "_units", {}), ("toy_p3", "gate1_toy_p3", {}), ("g1", 
                 ("g8_lndet", "gate1_g8_lndet", {}), ("g8_counting", "gate1_g8_counting", {})]
 GATE1T_TASKS += [("v_cross", "t1_v_cross_terms", {"reps": 1000, "r0": 1000 * i}) for i in range(2)]
 GATE1T_TASKS += [("v_shift", "t1_v_shift", {"reps": 250, "r0": 250 * i}) for i in range(8)]
-GATE1T_TASKS += [("shape_total", "t1_shape_total", {"nobs": (n,)}) for n in (300, 1200, 1500, 3000)]
+GATE1T_TASKS += [("shape_total", "t1_shape_total", {"nobs": (n,), "reps": 1000, "r0": 1000 * h})
+                 for n in (300, 1200, 1500, 3000) for h in range(2)]
 
 
 def gate1_toy_task(i: int, out_dir: Path) -> dict:
@@ -1761,8 +1764,15 @@ def gate1_toy_merge(out_dir: Path, out: Path) -> dict:
             items[key] = _judge_shift({"item": rs[0]["item"], "rejections": rej,
                                        **{k: sum(x[k] for x in rs) for k in ("n", "X", "X_pm2_refits", "reps")}})
         elif key == "shape_total":
-            items[key] = _judge_shape({"item": rs[0]["item"], "reps": rs[0]["reps"],
-                                       "sizes": {k: v for x in rs for k, v in x["sizes"].items()}})
+            sizes = {}
+            for x in rs:
+                for k, v in x["sizes"].items():
+                    s = sizes.setdefault(k, {"rej": 0, "X": 0, "reps": 0})
+                    for f in ("rej", "X", "reps"):
+                        s[f] += v[f]
+            for s in sizes.values():
+                s["size"] = s["rej"] / max(s["reps"] - s["X"], 1)
+            items[key] = _judge_shape({"item": rs[0]["item"], "sizes": sizes})
         else:
             items[key] = rs[0]
     items_ok = {k: _ok(v) for k, v in items.items()}
