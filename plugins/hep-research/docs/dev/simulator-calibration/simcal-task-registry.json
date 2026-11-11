@@ -176,6 +176,13 @@
    "registered_at": "2026-11-11T00:46:49Z",
    "card_commit": "84e042e9",
    "reason": "before their runs: the configurations of calibrations 3, 5, 7, 13, 14 (functions of calibration_phase2_gates.py at the card commit) and the user's scoping (linear-toy calibrations now, toy-detector ones re-registered at a reduced size later); thresholds unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6361f17d463f64c2ed766f2a4fc5787e32f1bbc07640a559cc8d587e63cd30ea",
+   "registered_at": "2026-11-11T00:56:18Z",
+   "card_commit": "b9d9d60d",
+   "reason": "execution log only (results of calibrations 3, 5, 7, 13, 14; calibration 7 fails, blocked report); thresholds and configurations as registered 6e8842e9"
   }
  ]
 }
