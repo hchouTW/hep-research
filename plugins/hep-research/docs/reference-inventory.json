@@ -1906,6 +1906,8 @@
    "lines": 253,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-calorimetry.md",
+    "profiles/experiments/eic/modules/detector/epic-far-forward-backward.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -1946,6 +1948,7 @@
    "lines": 162,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-pid.md",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2180,6 +2183,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
+    "profiles/experiments/eic/modules/detector/epic-detector-context.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2206,6 +2210,7 @@
    "lines": 330,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/modules/facility/interaction-region.md",
     "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2268,6 +2273,7 @@
    "lines": 331,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-readout-and-daq.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2314,6 +2320,7 @@
    "lines": 324,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-tracking.md",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2497,6 +2504,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
+    "profiles/experiments/eic/modules/detector/epic-pid.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -2594,6 +2602,7 @@
    "lines": 142,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-readout-and-daq.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/front-end-calibration.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
@@ -2751,6 +2760,7 @@
    "lines": 140,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-pid.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2770,6 +2780,8 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
+    "profiles/experiments/eic/modules/detector/epic-far-forward-backward.md",
+    "profiles/experiments/eic/modules/detector/epic-tracking.md",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.json",
@@ -2803,6 +2815,7 @@
    "lines": 241,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-far-forward-backward.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
@@ -4592,6 +4605,8 @@
    "lines": 79,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/facility/beam-configurations.md",
+    "profiles/experiments/eic/modules/facility/interaction-region.md",
     "profiles/experiments/eic/modules/placement-inventory.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
@@ -4708,6 +4723,9 @@
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/eic/modules/detector/epic-early-running.md",
+    "profiles/experiments/eic/modules/facility/beam-configurations.md",
+    "profiles/experiments/eic/modules/facility/eic-facility-context.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-kinematics.md",
@@ -4899,6 +4917,7 @@
    "lines": 120,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/conventions.json",
     "skills/hep-theory/references/hadron-structure-essentials.md"
    ],
    "cited_by_other_skills": [],
@@ -4957,6 +4976,7 @@
    "lines": 152,
    "linked_from_skill_md": false,
    "cited_by": [
+    "profiles/experiments/eic/conventions.json",
     "skills/hep-theory/references/exclusive-and-gpd.md",
     "skills/hep-theory/references/fragmentation-functions.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",

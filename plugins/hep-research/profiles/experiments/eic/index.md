@@ -4,8 +4,17 @@ Profile `experiment:eic` adds Electron-Ion Collider (EIC) facility context and e
 
 | Request | Read |
 |---|---|
-| Beam species, polarization, collision configurations, interaction region (EIC facility) | `modules/facility/eic-facility-context.md` |
+| Beam species and polarization overview, project stage, where EIC design values live (EIC facility) | `modules/facility/eic-facility-context.md` |
+| Beam configurations: species, beam energies, polarization, luminosity, derived center-of-mass energies, spec field format (EIC facility) | `modules/facility/beam-configurations.md` |
+| Crossing angle, crab crossing, space around the interaction point (EIC facility) | `modules/facility/interaction-region.md` |
+| EIC spec check: EIC-specific conventions and beam fields of a measurement- or theory-spec (field format; checker `scripts/check_eic_conventions.py`) | `modules/facility/beam-configurations.md` |
 | ePIC detector concept: magnet, tracking, calorimetry, PID, far-forward/backward, data acquisition | `modules/detector/epic-detector-context.md` |
+| ePIC tracking subsystems: silicon vertex tracker, MPGDs, tracking volume | `modules/detector/epic-tracking.md` |
+| ePIC particle identification detectors: pfRICH, hpDIRC, dRICH, time of flight | `modules/detector/epic-pid.md` |
+| ePIC calorimeters, electromagnetic and hadronic, by region | `modules/detector/epic-calorimetry.md` |
+| ePIC far-forward and far-backward: B0, Roman pots, ZDC, luminosity monitor, low-Q2 tagger | `modules/detector/epic-far-forward-backward.md` |
+| ePIC readout and data acquisition: streaming readout, front-end ASICs | `modules/detector/epic-readout-and-daq.md` |
+| ePIC early running: proposed configurations (not facility values) | `modules/detector/epic-early-running.md` |
 | ePIC software and data formats: eic-shell, EICrecon, epic geometry, EDM4hep/EDM4eic | `modules/detector/epic-software-entry-points.md` |
 | What is general method, what is EIC, what is ePIC, what belongs to the project | `modules/placement-inventory.md` |
 | Which sources count, how to quote them, "latest" | `modules/sources/source-policy.md`, then `evidence/index.md` |
@@ -13,4 +22,4 @@ Profile `experiment:eic` adds Electron-Ion Collider (EIC) facility context and e
 | Generic DIS kinematics, QCD, cross sections | not this profile: `hep-theory` with no experiment profile |
 | Selection, backgrounds, corrections, systematics for an EIC measurement | `hep-measurement` general method plus the facility module for configuration facts; cuts and samples come from the project |
 
-Conventions: `conventions.json` (asymmetric beams, lab is not CM, per-nucleon ion energies, beam-direction and polarization signs unknown until a release or analysis states them). Evidence: `evidence/sources.json`, `evidence/claims.json` (ids `eic:S01`, `eic:C01`; prose uses `S01`, `C01`), `evidence/index.md` (generated). Datasets: none (`datasets/README.md`). Routing scenarios used by the tests: `benchmarks/routing-scenarios.json`.
+Conventions: `conventions.json` (asymmetric beams, lab is not CM, per-nucleon ion energies, beam-direction and polarization signs unknown until a release or analysis states them). Evidence: `evidence/sources.json`, `evidence/claims.json` (ids `eic:S01`, `eic:C01`; modules cite the same full form), `evidence/index.md` (generated). Datasets: none (`datasets/README.md`). Routing scenarios used by the tests: `benchmarks/routing-scenarios.json`.

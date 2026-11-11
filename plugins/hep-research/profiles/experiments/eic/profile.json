@@ -1,8 +1,8 @@
 {
  "id": "experiment:eic",
  "kind": "experiment",
- "version": "0.3.0",
- "scope": "Electron-Ion Collider (EIC) facility context and the ePIC experiment, from public documents only. Facility material (beam species, polarization, collision configurations as design targets, interaction region) and experiment material (ePIC detector concept, software and data-format entry points) are kept in separate modules with separate scopes. Documentation only: no performance numbers beyond the cited claims, no datasets, no calibration constants, no runnable experiment software.",
+ "version": "0.6.0",
+ "scope": "Electron-Ion Collider (EIC) facility context and the ePIC experiment, from public documents only. Facility material (beam species, polarization, collision configurations, interaction region) and experiment material (ePIC detector subsystems, early-running proposals, software and data-format entry points) are kept in separate modules with separate scopes. The profile provides sourced design values (EIC facility design targets and requirements, ePIC construction parameters), each quoted from a cited claim, and a configuration checker for measurement- and theory-specs. It runs no ePIC software and ships no performance numbers, datasets or calibration constants.",
  "exclusions": [
   "Other EIC detector concepts and proposals (a second-IR detector, earlier proposals) unless a module names them with a source",
   "ePIC internal documents, unpublished performance numbers, calibration constants, production campaigns, analysis cuts and generated samples: project configuration or a local profile, never this profile",
@@ -33,7 +33,11 @@
   "evidence": "evidence/",
   "evidence_index": "evidence/index.md",
   "routing_scenarios": "benchmarks/routing-scenarios.json",
-  "datasets": "datasets/"
+  "datasets": "datasets/",
+  "beam_configurations": "modules/facility/beam-configurations.md",
+  "interaction_region": "modules/facility/interaction-region.md",
+  "detector_modules": "modules/detector/",
+  "conventions_checker": "scripts/check_eic_conventions.py"
  },
  "vocabulary_namespaces": [
   "eic"
@@ -41,8 +45,7 @@
  "vocabulary_extensions": {
   "conventions": [
    "eic:beam_energy_configuration",
-   "eic:hadron_beam_direction",
-   "eic:polarization_sign",
+   "eic:crossing_angle_treatment",
    "eic:ion_energy_normalization"
   ]
  },
@@ -70,10 +73,28 @@
   {
    "name": "routing-scenarios",
    "status": "tested-in-declared-environment",
-   "scope": "Generic-DIS, EIC-facility, ePIC-detector, ambiguous-detector and unrelated-experiment requests resolve to the expected decision and resource files through contracts/project.py and index.md; static, no model call",
+   "scope": "Generic-DIS, EIC-facility, ePIC-detector, ambiguous-detector, unrelated-experiment, EIC beam-configuration, EIC crossing-angle, EIC theory-settings, ePIC tracking, PID, calorimetry, far-forward, readout, early-running, pi/K-separation and EIC spec-check requests resolve to the expected decision and resource files through contracts/project.py and index.md; static, no model call",
    "tests": [
     "tests/test_routing_scenarios.py",
     "../../../tests/examples/test_eic_profile_routing.py"
+   ]
+  },
+  {
+   "name": "sourced-design-values",
+   "status": "tested-in-declared-environment",
+   "scope": "Every number in the facility and detector modules is quoted from a cited numeric claim with a scope.number_kind (requirement, design-target, design-value, proposal), derived values are recomputed from the stated command, no number stands near a performance word, and numeric claims carry atlas blocks that the hep-detector atlas returns for a project bound to experiment:eic; structural checks, not the truth of any value",
+   "tests": [
+    "tests/test_evidence_ledger.py",
+    "tests/test_scope_and_placement.py",
+    "../../../tests/examples/test_eic_profile_routing.py"
+   ]
+  },
+  {
+   "name": "eic-conventions-check",
+   "status": "tested-in-declared-environment",
+   "scope": "scripts/check_eic_conventions.py checks the EIC-specific parts of a measurement-spec or theory-spec (configuration, frames, ion normalization, polarization and azimuth conventions, crossing-angle treatment, beam values sourced from numeric claims, projection labels, facility/experiment scope); nine rule codes and info hints; it does not judge the physics",
+   "tests": [
+    "tests/test_eic_conventions.py"
    ]
   },
   {

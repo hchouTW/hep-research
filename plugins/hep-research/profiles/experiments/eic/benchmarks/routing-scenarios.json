@@ -56,6 +56,127 @@
    "triggers": ["resolution"],
    "index_row_keyword": "",
    "expected_eic_files": []
+  },
+  {
+   "id": "eic-beam-configuration",
+   "request": "List the EIC beam species and energy configurations I can use in a measurement design, with their sources.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["beams"],
+   "index_row_keyword": "Beam configurations",
+   "expected_eic_files": ["modules/facility/beam-configurations.md"]
+  },
+  {
+   "id": "eic-crossing-angle",
+   "request": "What crossing angle does the EIC interaction region use, and what does it mean for the boost to the head-on frame?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["beams"],
+   "index_row_keyword": "Crossing angle",
+   "expected_eic_files": ["modules/facility/interaction-region.md"]
+  },
+  {
+   "id": "eic-theory-settings",
+   "request": "Predict F2 for the EIC 18x275 configuration, taking the beam settings from the EIC profile.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-theory",
+   "triggers": ["hadron structure"],
+   "index_row_keyword": "Beam configurations",
+   "expected_eic_files": ["modules/facility/beam-configurations.md"]
+  },
+  {
+   "id": "epic-tracking",
+   "request": "Describe the ePIC tracking subsystems and their technologies.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-detector",
+   "triggers": ["tracking"],
+   "index_row_keyword": "ePIC tracking subsystems",
+   "expected_eic_files": ["modules/detector/epic-tracking.md"]
+  },
+  {
+   "id": "epic-pid",
+   "request": "Which particle identification detectors does ePIC use in each region?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-detector",
+   "triggers": ["particle identification"],
+   "index_row_keyword": "ePIC particle identification detectors",
+   "expected_eic_files": ["modules/detector/epic-pid.md"]
+  },
+  {
+   "id": "epic-calorimetry",
+   "request": "Describe the ePIC calorimeters by region.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-detector",
+   "triggers": ["calorimetry"],
+   "index_row_keyword": "ePIC calorimeters",
+   "expected_eic_files": ["modules/detector/epic-calorimetry.md"]
+  },
+  {
+   "id": "epic-far-forward",
+   "request": "Describe the ePIC far-forward and far-backward detectors.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-detector",
+   "triggers": ["tracking"],
+   "index_row_keyword": "ePIC far-forward and far-backward",
+   "expected_eic_files": ["modules/detector/epic-far-forward-backward.md"]
+  },
+  {
+   "id": "epic-readout",
+   "request": "How does ePIC read out its detectors without a hardware trigger?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-detector",
+   "triggers": ["readout"],
+   "index_row_keyword": "ePIC readout and data acquisition",
+   "expected_eic_files": ["modules/detector/epic-readout-and-daq.md"]
+  },
+  {
+   "id": "epic-early-running",
+   "request": "Which beam configurations does ePIC propose for early running?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["run conditions"],
+   "index_row_keyword": "ePIC early running",
+   "expected_eic_files": ["modules/detector/epic-early-running.md"]
+  },
+  {
+   "id": "epic-pi-k-separation",
+   "request": "What is the pi/K separation of the ePIC dRICH?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-detector",
+   "triggers": ["particle identification"],
+   "index_row_keyword": "Detector performance",
+   "expected_eic_files": ["modules/working-rules.md"]
+  },
+  {
+   "id": "eic-spec-check",
+   "request": "Check the EIC-specific conventions in my measurement-spec.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-measurement",
+   "triggers": ["measurement"],
+   "index_row_keyword": "EIC spec check",
+   "expected_eic_files": ["modules/facility/beam-configurations.md"]
   }
  ]
 }
