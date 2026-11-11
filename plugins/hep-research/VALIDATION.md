@@ -9039,6 +9039,67 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## SCIFIX-HEX-WORDS (2026-11-11, E6 and CI; branch `release/0.66.0`)
+
+sci-fix BLINDING-HEX-WORDS (S2: a wrong verdict, a false alarm that fails the scan). Found by CI on PR #390:
+`tests.examples.test_ams_flux_ratio.PathATests.test_blinding_audit_with_synthetic_sentinel` failed after the 0.66.0
+release manifest was added, locally as well (3 of 3 runs). Every example artifact records `versions.plugin_release`
+with the release digest `fe310bac...9082c936a853`; `scan_text` tokenized the `936` inside it, which matched the
+example's sealed synthetic count 936.24 at 3 significant digits. The fix: a digit run inside a hexadecimal word of 16
+or more characters with at least one letter (a SHA-256 digest, a git commit id) is not a token. Hexadecimal was
+already in `OUT_OF_SCOPE_RENDERINGS`. Shorter hex words, all-digit runs, words with another letter and values joined by
+`_` are scanned as before. `CORE_VERSION` 1.13.0 -> 1.13.1.
+
+**Correctness (C4, exhaustive):** `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively`
+writes every sealed n = 100 to 999 (sealed n + 0.25) at every position of a 64-, a 16- and a 15-character hex word, lower
+and upper case (205,200 scans): no hit at 64 and 16 characters, a hit at 15 (the boundary). The expected values come
+from the domain's definition, not from the scanner. `test_release_digest_is_not_a_printed_number` is the CI case.
+Negative control `test_numbers_beside_hex_words_still_hit`: a number before or after a digest, `c936a`, an all-digit
+16-character run, a word with `g` to `j`, `count_936.24` are hits on the parent and on the fix.
+
+**Discrimination (D3):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively` | exhaustive | fail (assertion): n=100 at position 0 of a 64-character word is a hit | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_release_digest_is_not_a_printed_number` | behavioral | fail (assertion): token `936` on line 5 | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_numbers_beside_hex_words_still_hit` | behavioral (negative control) | pass | pass | no | E6 |
+
+Parent: `b3974460` (release branch) with this commit's test file copied in. Local mutants of the filter in
+`scan_text`, killed by `HexWordTests`: the revert, a length floor of 8, a length floor of 17, no letter required. One
+mutant survives: treating `_` as a word boundary (a value joined to a hex word by `_` is then skipped as part of no
+word, and the tests contain no such case). Blinding suites (`test_blinding`, `test_blinding_regressions`,
+`test_blinding_residual`, `test_blinding_u11`, `test_r5_blinding`) and `test_ams_flux_ratio`: 122 tests pass on the fix.
+
+**Advisory waiver:** the fix only removes false alarms on a rendering already out of scope; no released number
+changes and no sealed value printed as a decimal is missed. Decided 2026-11-11 with the maintainer's choice of
+this fix in the session.
+
+## 0.66.0 release check (2026-11-11, CI and E6)
+
+Release branch `release/0.66.0`, based on main `401f322f` (PR #387 merged); checks at `054dcc22`. Minor release: the `experiment:eic` expansion, `experiment:eic` 0.3.0 -> 0.6.0 (evidence in EIC-EXPANSION-M1 to M3 above, and the Q12 follow-up in M3) and `reference:detector-atlas` 0.3.1; the sci-fix BLINDING-HEX-WORDS (SCIFIX-HEX-WORDS above), `CORE_VERSION` 1.13.0 -> 1.13.1. Contracts 3.27.0 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py` (`5af131ad`);
+- a CHANGELOG `0.66.0` section (the former `Unreleased` entries and the sci-fix);
+- the sci-fix `1f97a1c6` and its evidence `f43507bd`. CI on `b3974460`, the first commit with a 0.66.0 release manifest, failed `test_blinding_audit_with_synthetic_sentinel` (units 1/3 and hostile-paths units 1/3): the release digest in the example artifacts matched a sealed synthetic count. That manifest was dropped (`054dcc22`) and is regenerated last.
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #387 at `f3722217` | success (27 pass, 3 skipped) |
+| CI `tests.yml` on PR #390 at `b3974460` | failure: the two unit shards 1/3 (one test, the case above); the other jobs pass |
+| CI `tests.yml` on PR #390 at `054dcc22` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `054dcc22`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7223 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `054dcc22`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7223 tests, 0 failures, 402 skipped |
+
+Environment note: on E6, `TMPDIR` under `/tmp` or on the shared CephFS work area fails tests unrelated to this release (see the EIC-EXPANSION-M3 environment notes).
+
+**E2 and E5 were not run for this release.** The release changes no Geant4, g4sim or GPU path, so no real-hardware check applies.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.65.1 release check (2026-11-09, CI and E2)
 
 Release commit `b51f502f` on `release/0.65.1`, based on main `d85dde30` (PR #382 merged). Patch release: the `FTFP_BERT` entry of `contracts/rules/geant4_datasets.json`, its case in `probe_datasets.py` and its assertion in `tests/adapters/test_g4proto_reacquire.py`. Contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
