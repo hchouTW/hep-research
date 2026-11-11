@@ -21,10 +21,10 @@ THETA = {"light_yield": {"bounds": (20, 400), "prior": (80, 120)}, "pde": {"boun
          "gain": {"bounds": (1, 100), "prior": (8, 12)}}
 
 
-def calorimeter(exposure=400, mc=4000):
+def calorimeter(exposure=400, mc=4000, thickness_by_yield=False):
     return TP.ToyProblem(lambda n: toy.build_toy(n, "subgraph"), NAMES, THETA, exposure=exposure, mc_events=mc,
                          phi_P={"material_thickness": (1.0, 0.05)},
-                         eta=[{"relative": {n: 0.01 for n in NAMES if "mean" in n}}])
+                         eta=[{"relative": {n: 0.01 for n in NAMES if "mean" in n}}], thickness_by_yield=thickness_by_yield)
 
 
 class Bootstrap(unittest.TestCase):
@@ -72,6 +72,30 @@ class Fit(unittest.TestCase):
         self.assertLess(abs(f.beta[1] - 0.25) / f.sigma_tot[1], 4.0)
         self.assertLess(abs(f.beta[2] - 10.0) / f.sigma_tot[2], 4.0)
         self.assertAlmostEqual(f.beta[0] * np.exp(-f.beta[3] / 10.0) / (100 * np.exp(-0.1)), 1.0, delta=0.03)
+
+    def test_noisy_objective_does_not_stop_early(self):
+        """With sigma_noise > 0 the G1 threshold is loose (0.1 sigma_noise); the minimizer still pursues 0.002 tol, so
+        fits from distant starts agree within 0.05 sigma (a precise minimum, needed by the gate-2 comparison). The thickness
+        is evaluated by its equivalent yield (smooth); resimulated, the objective is a staircase below ~0.01 in t."""
+        p = calorimeter(thickness_by_yield=True)
+        truth = p.initial_beta({"light_yield": 100, "pde": 0.25, "gain": 10.0})
+        p.data = p.simulate(truth, np.random.default_rng(5))
+        p.sigma_noise = TP.estimate_sigma_noise(p, truth)
+        a = F.iterate(p, p.initial_beta({"light_yield": 85, "pde": 0.21, "gain": 8.5}), lndet=False)
+        b = F.iterate(p, p.initial_beta({"light_yield": 115, "pde": 0.29, "gain": 11.5}), lndet=False)
+        self.assertTrue(a.converged and b.converged)
+        self.assertLess(float(np.max(np.abs(a.beta[:3] - b.beta[:3]) / a.sigma_tot)), 0.05)
+
+    def test_thickness_by_yield_agrees_with_resimulation(self):
+        """The equivalent-yield evaluation of the thickness agrees with its resimulation within the MC error (both
+        estimate the same law; section 3.6)."""
+        a = calorimeter(mc=20000)
+        b = calorimeter(mc=20000, thickness_by_yield=True)
+        tp = np.array([100.0, 0.25, 10.0, 1.05])
+        ra = a._predict(a.params_of(tp)[0])
+        rb = b._predict(b.params_of(tp)[0])
+        z = (ra["pred"] - rb["pred"]) / np.sqrt(np.diag(ra["V_MC"]) + np.diag(rb["V_MC"]))
+        self.assertLess(float(np.max(np.abs(z))), 4.0)
 
     def test_factory_needs_a_toy_evaluator_and_one_exposure(self):
         with self.assertRaises(problems.ProblemError):

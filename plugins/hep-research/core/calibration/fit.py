@@ -199,8 +199,9 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
     for i, v in fixed.items():
         b[i] = v
     calls = 0
-    edm_tol = edm_threshold(problem)
-    lam = 1e-3
+    edm_g1 = edm_threshold(problem)                      # the G1 criterion (with 0.1 sigma_noise)
+    edm_tol = 0.002 * float(getattr(problem, "edm_tol", 0.1))   # pursued first: a noisy objective must not stop the
+    lam = 1e-3                                           # minimizer early; G1's threshold accepts a stall
     D = None
     for it in range(max_steps):
         tp = b[tpi]
@@ -261,10 +262,12 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
             lam *= 10
         if not improved:
             pd = _pd(Ff)
-            ok = edm < 10 * edm_tol and pd
+            ok = edm < max(10 * edm_tol, edm_g1) and pd
             return Minimum(b, D, g, F, edm, ok, it, list(np.flatnonzero(~free)), calls,
                            "" if ok else "no descent step")
-    return Minimum(b, D, g, F, edm, False, max_steps, [], calls, "step limit")
+    pd = _pd(Ff) if fi.size else True
+    ok = edm < edm_g1 and pd
+    return Minimum(b, D, g, F, edm, ok, max_steps, [], calls, "" if ok else "step limit")
 
 
 def _fd(hfun, tp, steps):

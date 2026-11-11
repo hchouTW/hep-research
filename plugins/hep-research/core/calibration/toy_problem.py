@@ -18,6 +18,7 @@ import math
 import numpy as np
 
 from . import likelihood as L
+from . import toy
 from .toy import ChainEvaluator, observe
 
 LINK_BY_FUNCTIONAL = {"mean": "log", "std": "log", "fraction": "logit"}
@@ -60,7 +61,7 @@ class ToyProblem:
     def __init__(self, build, names: list, theta: dict, exposure: int, mc_events: int, mc_seed=20261120,
                  phi_P: dict | None = None, eta: list | None = None, links: dict | None = None, B: int | None = None,
                  boot_seed=20261121, generation: dict | None = None, map_params=None, plan: dict | None = None,
-                 shift: dict | None = None):
+                 shift: dict | None = None, thickness_by_yield: bool = False):
         self.build = build
         self.names = list(names)
         self.theta_spec = dict(theta)
@@ -72,6 +73,12 @@ class ToyProblem:
         self.map_params = map_params
         self.shift_spec = dict(shift or {})              # shift-mode phi: {name: (centre, sigma)}
         self.shift_names = list(self.shift_spec)
+        # the material thickness evaluated as its equivalent light-yield factor: the deposition only rescales d by
+        # exp(-(t - t0)/lambda) (event by event with the same uniforms), so the photon count depends on (LY, t) only
+        # through LY exp(-(t - t0)/lambda); this is the section 3.6 rerun of the deterministic deposition with the
+        # photon-generation density reweighted, smooth in t, where resimulation with common random numbers is a
+        # staircase on discrete counts (toy detector only; data are still generated with the resimulated thickness)
+        self.thickness_by_yield = bool(thickness_by_yield)
         self.model = build(self.mc_events)
         self.ev = ChainEvaluator(self.model, {**self.plan, "seeds": {"nominal": _seed_int(mc_seed)}})
         by = {o.name: o for o in self.model.observables}
@@ -115,11 +122,23 @@ class ToyProblem:
     @property
     def fd_steps(self):
         st = [1e-3 * (b - a) for a, b in self.prior_box()]
-        st += [0.2 * float(s) for _, s in self.phi_spec.values()]     # resimulated phi: steps above the CRN jitter
+        k = 0.01 if self.thickness_by_yield else 0.2      # resimulated phi: steps above the CRN jitter
+        st += [k * float(s) for _, s in self.phi_spec.values()]
         return np.asarray(st, float)
 
     # -- model
+    def _equivalent(self, params: dict) -> dict:
+        if not self.thickness_by_yield or "material_thickness" not in params:
+            return params
+        p = dict(params)
+        t0 = toy.TOY_NOMINAL["material_thickness"]
+        ly = p.get("light_yield", toy.TOY_NOMINAL["light_yield"])
+        p["light_yield"] = ly * math.exp(-(p["material_thickness"] - t0) / toy.LAMBDA)
+        p["material_thickness"] = t0
+        return p
+
     def _predict(self, params: dict, seeds=None) -> dict:
+        params = self._equivalent(params)
         key = (tuple(sorted((k, round(float(v), 14)) for k, v in params.items())), None if seeds is None else
                tuple(sorted(seeds.items())))
         if key not in self._cache:
@@ -162,7 +181,7 @@ class ToyProblem:
         """The bootstrap covariance of the link-space summary statistics at theta_ref (same uniforms for a given
         seed at every theta_ref: common random numbers)."""
         ev = ChainEvaluator(self._boot_model, {"seeds": {"nominal": 1}})
-        gen = ev.generate(_seed_int(seed), params={**self.model.nominal, **params})
+        gen = ev.generate(_seed_int(seed), params={**self.model.nominal, **self._equivalent(params)})
         sets = per_set_summaries(self._boot_model, {r: v["events"] for r, v in gen["runs"].items()}, self.names,
                                  self.B)
         Z = np.stack([L.link(sets[:, k], self.links[n]) for k, n in enumerate(self.names)], axis=1)
