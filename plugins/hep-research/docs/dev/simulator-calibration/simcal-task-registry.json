@@ -225,6 +225,13 @@
    "registered_at": "2026-11-11T04:03:39Z",
    "card_commit": "fb2e1404",
    "reason": "execution log only (gate 3 passes); as registered 2b429ea1"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "7d1e153c8ac72707a0e53ddfbe6a423d0a4bd86ee80424084b910146f59e3dc7",
+   "registered_at": "2026-11-11T04:43:21Z",
+   "card_commit": "0fb9a121",
+   "reason": "before the gate-1 run: its implementation (gate_negatives and the harness items at the card commit) with their configurations and criteria; registered items and criteria unchanged"
   }
  ]
 }
