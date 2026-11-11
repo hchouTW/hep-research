@@ -14,6 +14,7 @@ import json
 import subprocess
 import sys
 import time
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -175,18 +176,20 @@ def gate_segmented(out: Path, smoke: bool, probe: bool = False):
         return np.r_[t1, f2.beta[:2]], T @ S @ T.T, f2
     seg, Cs, f2 = seg2_fit(pkg["G_xi"], pkg["G_zeta"], pkg["zeta_hat"], pkg["Sigma_zeta"], 0)
     res = {"joint_posterior": agree(seg, Cs, bj, Cj)}
-    sp, Cp, _ = seg2_fit(pkg["G_xi"], pkg["G_zeta"], np.zeros(2) + np.array([0.0, 1.0]), np.diag([1.0, 0.05 ** 2]),
+    sp, Cp, fp = seg2_fit(pkg["G_xi"], pkg["G_zeta"], np.zeros(2) + np.array([0.0, 1.0]), np.diag([1.0, 0.05 ** 2]),
                          1)
     res["counterexample_prior"] = agree(sp, Cp, bj, Cj)
     Gm = P.marginal_regressions(f1.Sigma_beta, i_th, [i_z[0]], [i_z[1]])
     D = np.diag(np.diag(f1.Sigma_beta)[i_z])
-    sm, Cm, _ = seg2_fit(pkg["G_xi"], Gm, pkg["zeta_hat"], D, 2)
+    sm, Cm, fm = seg2_fit(pkg["G_xi"], Gm, pkg["zeta_hat"], D, 2)
     res["counterexample_marginal"] = agree(sm, Cm, bj, Cj)
     passed = res["joint_posterior"]["agree"] and not res["counterexample_prior"]["agree"] and \
-        not res["counterexample_marginal"]["agree"] and fj.converged and f1.converged and f2.converged
+        not res["counterexample_marginal"]["agree"] and fj.converged and f1.converged and f2.converged and \
+        fp.converged and fm.converged            # a counterexample violates only through a converged fit (F12)
     rep = {"gate": "segmented calibration and the joint fit agree", "status": "passed" if passed else "failed",
            "smoke": smoke, "probe": probe, "label": "smoke (not evidence)" if smoke else ("probe (not evidence)" if probe else "synthetic"), "results": res,
-           "converged": {"joint": fj.converged, "segment1": f1.converged, "segment2": f2.converged},
+           "converged": {"joint": fj.converged, "segment1": f1.converged, "segment2": f2.converged,
+                         "counterexample_prior": fp.converged, "counterexample_marginal": fm.converged},
            "joint": {"theta": bj.tolist(), "cov": Cj.tolist()}, "segmented": {"theta": seg.tolist(), "cov": Cs.tolist()},
            "sizes": {"exposure": exposure, "mc_events": mc, "B": B}, "seed": SEED,
            "eta_phi_correlation": float(pkg["Sigma_zeta"][0, 1] / np.sqrt(pkg["Sigma_zeta"][0, 0] *
@@ -630,7 +633,7 @@ def gate1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed:
     def size_case(cond_n, data_n, label, reps_):
         pv = []
         for r in range(reps_):
-            rng = np.random.default_rng([seed, hash(label) % 2 ** 31, r])
+            rng = np.random.default_rng([seed, zlib.crc32(label.encode()), r])   # deterministic per label (F9)
             y = gun(data_n(rng), rng)
             n_c = cond_n(y, rng)
             sets = V.conditioned_sets(gun, n_c, B, (seed, r, 1))

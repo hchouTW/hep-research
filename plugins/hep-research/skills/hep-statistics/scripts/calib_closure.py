@@ -59,13 +59,19 @@ def main(argv=None) -> int:
         if args.cmd == "nc":
             return {"status": "ok", **closure.n_c(args.d, args.level)}
         if args.cmd == "not-executed":
-            return {"status": "ok", **closure.not_executed(args.reason)}
+            return closure.not_executed(args.reason)                    # status not-decided (exit 3)
         r = io.load(args.results)
         pts = {}
         for k in ("interior", "boundary"):
-            x = r[k]
+            x = r.get(k)
+            if not isinstance(x, dict):
+                raise io.InputError(f"the results need the {k} point")
+            missing = [f for f in ("errors", "cover68") + (("cover95",) if r.get("level") == "full" else ())
+                       if f not in x]
+            if missing:                                       # never substitute one coverage level for another
+                raise io.InputError(f"{k}: missing {', '.join(missing)}")
             pts[k] = {"errors": np.asarray(x["errors"], float), "cover68": np.asarray(x["cover68"], bool),
-                      "cover95": np.asarray(x.get("cover95", x["cover68"]), bool),
+                      "cover95": np.asarray(x["cover95"] if "cover95" in x else x["cover68"], bool),
                       "nontruth_basin": np.asarray(x.get("nontruth_basin", [False]), bool), "X": int(x.get("X", 0)),
                       "interval_toys": x.get("interval_toys", {"X": 0, "n": 0})}
         return io.jsonable(closure.g8(r["level"], r["names"], r["sigma_design"], pts["interior"], pts["boundary"]))

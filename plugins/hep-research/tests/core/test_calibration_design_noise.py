@@ -100,13 +100,6 @@ class P7(unittest.TestCase):
                                                                        "finding": "validate.ratio_test"}})
         self.assertEqual((rt["status"], rt["finding"]), ("incomplete", "p7.ratio_test"))
 
-    def test_parameter_shift_alternative(self):
-        """nu_k = 2 declared as an alternative hypothesis is rejected (section 15.3.1 P7)."""
-        self.assertTrue(DN.alternative_is_parameter_shift({"form": "parameter-shift", "shift": {"nu_0": 2}}))
-        self.assertFalse(DN.alternative_is_parameter_shift({"form": "discrete-model", "model": "FTFP"}))
-
-
-class Folds(unittest.TestCase):
     def test_rules(self):
         contract = {"observables": [{"name": "t", "derived_from": ["p1", "p2"]}, {"name": "p1"}, {"name": "p2"}],
                     "validation": {"N_dc": [{"n": {"a": 1, "b": -1}}]}}

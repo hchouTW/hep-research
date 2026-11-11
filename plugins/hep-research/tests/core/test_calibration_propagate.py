@@ -135,24 +135,46 @@ def ups(edges):
 
 class Conflicts(unittest.TestCase):
     def test_four_shapes_require_a_joint_fit(self):
-        A, B, C = H["A"], H["B"], H["C"]
+        """The four shapes of section 10.4 on four distinct dependency graphs (review F11), each a source overlap."""
+        A, B, C, D, E = (H[k] for k in "ABCDE")
         u = {H[k]: v for k, v in ups({"B": ["A"], "C": ["A"]}).items()}
-        # sibling: the zeta versions of B and C both take xi_A as central input
-        sib = deps.check_packages([{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C}], u)
-        self.assertEqual(sib[0]["code"], "deps.source_overlap")
-        # triangle: xi_A and the version updated by B, which has A as central upstream
-        tri = deps.check_packages([{"id": "p1", "upstream": A}, {"id": "p2", "upstream": B}], u)
-        self.assertEqual(tri[0]["code"], "deps.source_overlap")
-        # xi and xi of two results with the same central upstream: same as sibling
-        self.assertTrue(deps.check_packages([{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C}], u))
-        # parent-child: xi of R1 and of R2 with R1 central
+        # sibling: two shared-nuisance versions, updated by B and by C, both with xi_A as central input
+        sib = deps.check_packages([{"id": "p1", "upstream": D, "zeta_updaters": {"eta1": B}},
+                                   {"id": "p2", "upstream": E, "zeta_updaters": {"eta2": C}}], u)
+        self.assertEqual([f["code"] for f in sib], ["deps.source_overlap"])
+        # triangle: xi_A together with the version updated by B, which has A as central upstream
+        tri = deps.check_packages([{"id": "p1", "upstream": A},
+                                   {"id": "p2", "upstream": D, "zeta_updaters": {"eta": B}}], u)
+        self.assertEqual([f["code"] for f in tri], ["deps.source_overlap"])
+        # xi and xi: the xi packages of two results with the same central upstream
+        xx = deps.check_packages([{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C}], u)
+        self.assertEqual([f["code"] for f in xx], ["deps.source_overlap"])
+        # parent-child: xi of R1 = A and of R2 = B with A central
         pc = deps.check_packages([{"id": "p1", "upstream": A}, {"id": "p2", "upstream": B}], u)
-        self.assertTrue(pc)
-        # independent treatment of the parent-child counterexample: Var(theta1 + theta2) = 3, correct 1
-        corr = -0.70710678
-        cov = corr * np.sqrt(1.0 * 2.0)
-        self.assertAlmostEqual(1.0 + 2.0, 3.0)
-        self.assertAlmostEqual(1.0 + 2.0 + 2 * cov, 1.0, places=6)
+        self.assertEqual([f["code"] for f in pc], ["deps.source_overlap"])
+        # the same graphs without the shared upstream: no finding
+        u0 = {H[k]: v for k, v in ups({"B": ["D"], "C": ["E"]}).items()}
+        self.assertEqual(deps.check_packages([{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C}], u0), [])
+
+    def test_parent_child_counterexample_from_exported_packages(self):
+        """The parent-child counterexample through the engine's exports: R2 calibrated with R1's theta_1 as a
+        central input, joint covariance [[1, -1], [-1, 2]]. Combining the two packages as if independent gives
+        Var(theta_1 + theta_2) = 3; the joint treatment (R2's zeta set to R1's theta_1) gives the correct 1."""
+        Sigma = np.array([[1.0, -1.0], [-1.0, 2.0]])
+        th = np.array([0.3, 0.7])
+        p1 = P.export(th[[0]], np.zeros(0), Sigma, [0], [])
+        p2 = P.export(th[[1]], th[[0]], Sigma, [1], [0])
+        rng = np.random.default_rng(20261111)
+        n = 200_000
+        x1 = rng.normal(size=(n, p1["G_xi"].shape[1]))
+        x2 = rng.normal(size=(n, p2["G_xi"].shape[1]))
+        t1 = np.array([P.theta_of(p1, a, [])[0] for a in x1[:20000]])
+        joint = np.array([P.theta_of(p2, b, [a])[0] for a, b in zip(t1, x2[:20000])]) + t1
+        z_ind = rng.normal(p2["zeta_hat"][0], np.sqrt(p2["Sigma_zeta"][0, 0]), 20000)
+        indep = np.array([P.theta_of(p2, b, [z])[0] for z, b in zip(z_ind, x2[:20000])]) + t1
+        self.assertAlmostEqual(float(np.var(joint)), 1.0, delta=0.05)
+        self.assertAlmostEqual(float(np.var(indep)), 3.0, delta=0.15)
+        self.assertAlmostEqual(float(P.variance(p1)[0, 0] + P.variance(p2)[0, 0]), 3.0, places=12)
 
     def test_disjoint_sources_need_more_than_lineage_of_results(self):
         u = {}

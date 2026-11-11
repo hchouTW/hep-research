@@ -58,6 +58,8 @@ class RatioTest(unittest.TestCase):
         T_toy < T_obs (D46, A8)."""
         self.assertAlmostEqual(F.testing_pvalue(5.0, [1, 2, 6, 7], 2), (2 + 2 + 1) / 7)
         self.assertAlmostEqual(F.fullfit_gof_pvalue(5.0, [1, 2, 6, 7], 2), (2 + 1) / 7)
+        with self.assertRaises(F.FitError):                         # never fewer toys than n silently (F8)
+            F.run_testing_ensemble(lambda s: (True, s, {}), 100, range(50))
         r = F.run_testing_ensemble(lambda s: (s % 10 != 0, s, {}), 100, range(100))
         self.assertEqual(r.X, 10)
         self.assertTrue(r.ratio_failed)
@@ -214,6 +216,20 @@ class G6(unittest.TestCase):
         r = F.g6(p, f, F.null_toys(p, f, 200, 99))
         self.assertEqual(r["finding"], "g6.linearity_check_failed")
         self.assertGreater(r["linearity_fraction"], 0.05)
+
+    def test_full_toys_after_the_linearity_check(self):
+        """G6 with full toys (D46): the correct quadratic model passes where the linear toys could not decide; the
+        missing effect still fails."""
+        q = np.zeros((20, 3, 3))
+        q[:, 0, 1] = np.random.default_rng(2).normal(size=20) * 3.0
+        cfg = T.linear_config(n=20, d=3, quad=q)
+        p = T.make(cfg, TRUTH, data_seed=3, mc_seed=4)
+        f = F.iterate(p, T.initial_beta(p))
+        r = F.g6_full(p, f, 200, 98)
+        self.assertEqual((r["status"], r["construction"]), ("passed", "full-toys"))
+        p.data.y_gauss = p.data.y_gauss + np.r_[np.zeros(10), np.full(10, 1.5)]
+        f = F.iterate(p, T.initial_beta(p))
+        self.assertEqual(F.g6_full(p, f, 200, 98)["finding"], "g6.p_value")
 
 
 class G2G3(unittest.TestCase):

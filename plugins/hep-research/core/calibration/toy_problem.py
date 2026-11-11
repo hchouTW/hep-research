@@ -61,7 +61,8 @@ class ToyProblem:
     def __init__(self, build, names: list, theta: dict, exposure: int, mc_events: int, mc_seed=20261120,
                  phi_P: dict | None = None, eta: list | None = None, links: dict | None = None, B: int | None = None,
                  boot_seed=20261121, generation: dict | None = None, map_params=None, plan: dict | None = None,
-                 shift: dict | None = None, thickness_by_yield: bool = False):
+                 shift: dict | None = None, thickness_by_yield: bool = False, val_names: list | None = None,
+                 val_build=None, val_mc_seed=20261123, val_exposure: int | None = None):
         self.build = build
         self.names = list(names)
         self.theta_spec = dict(theta)
@@ -99,6 +100,26 @@ class ToyProblem:
         self._data_model = build(self.exposure)
         self._boot_model = build(self.exposure * self.B)
         self._cache = {}
+        # validation observables (holdout, section 9.2): a separate event sample of the same detector (its own nominal
+        # MC and its own data), so that validation data share no events with the calibration data
+        self.val_names = list(val_names or [])
+        self.val_exposure = int(val_exposure or exposure)
+        self.val_mc_seed = val_mc_seed
+        self.pert_val = np.zeros(len(self.val_names))
+        self._val_cache = {}
+        self._val_point = None
+        if self.val_names:
+            vb = val_build or build
+            self._val_build = vb
+            self._val_model = vb(self.mc_events)
+            vby = {o.name: o for o in self._val_model.observables}
+            self.val_links = {n: (links or {}).get(n, LINK_BY_FUNCTIONAL[vby[n].functional]) for n in self.val_names}
+            self.val_ev = ChainEvaluator(self._val_model, {**self.plan, "seeds": {"nominal": _seed_int(val_mc_seed)}})
+            self._val_data_model = vb(self.val_exposure)
+            vruns = {vby[n].run for n in self.val_names}
+            self.B_val = max(self.B, L.bootstrap_size(max(sum(1 for n in self.val_names if vby[n].run == r)
+                                                          for r in vruns)))
+            self._val_boot_model = vb(self.val_exposure * self.B_val)
 
     # -- parameters
     def params_of(self, tp) -> tuple[dict, np.ndarray]:
@@ -230,23 +251,7 @@ class ToyProblem:
         """Summary statistics (link space) of one data-size event set drawn with replacement from the nominal MC sample
         weighted to `params`: its expectation is the nominal MC prediction at that point (section 6.6: a toy's true
         value is m_nom(truth) = mu* + e_nom) and its noise is the data's event-level noise."""
-        ev = self.ev
-        target = {**self.model.nominal, **self._equivalent(params)}
-        nom = ev.nominal
-        run_events, regen = ev._prepared(target, nom)
-        sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
-                           for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
-        w = ev.weights(target, sample, nodes=ev.reweighted_nodes(target, nom), regenerated=regen)
-        w.pop("_missing_support", None)
-        by = {o.name: o for o in self.model.observables}
-        runs = {by[n].run for n in self.names}
-        picked = {}
-        for rid in runs:
-            ww = np.asarray(w[rid], float)
-            idx = rng.choice(ww.size, size=self.exposure, replace=True, p=ww / ww.sum())
-            picked[rid] = {node: {k: np.asarray(v)[idx] for k, v in outs.items()} for node, outs in run_events[rid].items()}
-        o = observe(self.model, picked, {r: np.ones(self.exposure) for r in picked}, self.names)
-        return self._to_link(o["pred"])
+        return self._observe_weighted(self.ev, self.model, params, rng, self.names, self.exposure, self._to_link)
 
     def simulate(self, beta_truth, rng, phis=None, nominal: bool = True) -> L.Data:
         """Toy data at the truth. nominal=True (toys under the null hypothesis, section 6.6): drawn from the nominal MC
@@ -283,11 +288,159 @@ class ToyProblem:
         self.ev._other.pop(sb, None)
         return (ma - mb) / math.sqrt(2.0)
 
+    # -- validation observables (holdout and its toys, section 9.2)
+    def _val_link(self, pred, names=None):
+        names = names or self.val_names
+        return np.array([L.link(np.array([v]), self.val_links[n])[0] for v, n in zip(pred, names)])
+
+    def _val_dlink(self, pred):
+        return np.array([L.dlink(np.array([v]), self.val_links[n])[0] for v, n in zip(pred, self.val_names)])
+
+    def _val_predict(self, params: dict, ev=None) -> dict:
+        params = self._equivalent(params)
+        ev = ev or self.val_ev
+        key = (id(ev), tuple(sorted((k, round(float(v), 14)) for k, v in params.items())))
+        if key not in self._val_cache:
+            if len(self._val_cache) > 4096:
+                self._val_cache.clear()
+            self._val_cache[key] = ev.evaluate(params, names=self.val_names)
+        return self._val_cache[key]
+
+    def h_val(self, tp, phis=None):
+        """The validation predictor (link space) at theta, phi_P: the validation nominal MC plus its toy perturbation."""
+        params, _ = self.params_of(tp)
+        if phis is not None and self.shift_spec:
+            params = {**params, **self._shift_params(phis)}
+        return self._val_link(self._val_predict(params)["pred"]) + self.pert_val
+
+    def _val_eta(self, mu) -> np.ndarray:
+        cols = []
+        for sj in self.eta_spec:
+            col = np.zeros(len(self.val_names))
+            for k, n in enumerate(self.val_names):
+                r = float(sj.get("relative", {}).get(n, 0.0))
+                if r:
+                    col[k] = r if self.val_links[n] == "log" else r * mu[k] * self._val_dlink(np.array([mu[k]]))[0]
+            cols.append(col)
+        return np.stack(cols, axis=1) if cols else np.zeros((len(self.val_names), 0))
+
+    def val_columns(self):
+        """(U_v, S_v): the validation rows' nu columns (none: phi_P act through the evaluator) and eta columns."""
+        params, _ = self.params_of(self._val_tp())
+        return np.zeros((len(self.val_names), 0)), self._val_eta(self._val_predict(params)["pred"])
+
+    def _val_tp(self):
+        if self._val_point is not None:
+            return self._val_point
+        return np.r_[[0.5 * sum(v["prior"]) for v in self.theta_spec.values()], [c for c, _ in self.phi_spec.values()]]
+
+    def set_val_point(self, tp):
+        """The point at which the validation V_data and V_MC are evaluated (the nominal fit's theta-hat)."""
+        self._val_point = np.asarray(tp, float).copy()
+        self.__dict__.pop("_val_block", None)
+
+    @property
+    def val(self) -> dict:
+        """Validation V_data (the event-level bootstrap of the validation sample at the validation point, per run),
+        V_MC (link space) and constraints (none declared on the toy detector)."""
+        if "_val_block" not in self.__dict__:
+            params, _ = self.params_of(self._val_tp())
+            r = self._val_predict(params)
+            D = self._val_dlink(r["pred"])
+            ev = ChainEvaluator(self._val_boot_model, {"seeds": {"nominal": 1}})
+            gen = ev.generate(_seed_int((self.boot_seed, 7)), params={**self.model.nominal, **self._equivalent(params)})
+            sets = per_set_summaries(self._val_boot_model, {k: v["events"] for k, v in gen["runs"].items()},
+                                     self.val_names, self.B_val)
+            Z = np.stack([L.link(sets[:, k], self.val_links[n]) for k, n in enumerate(self.val_names)], axis=1)
+            vby = {o.name: o for o in self._val_model.observables}
+            runs = [vby[n].run for n in self.val_names]
+            Vd = np.zeros((len(runs), len(runs)))
+            for rr in dict.fromkeys(runs):
+                idx = [k for k, x in enumerate(runs) if x == rr]
+                Vd[np.ix_(idx, idx)] = L.bootstrap_covariance(Z[:, idx])
+            self.__dict__["_val_block"] = {"V_data": Vd, "V_MC": r["V_MC"] * np.outer(D, D), "constraints": []}
+        return self.__dict__["_val_block"]
+
+    def simulate_val(self, beta_truth, rng, phis=None, nominal: bool = True) -> np.ndarray:
+        """Validation data at the truth: nominal=True draws from the validation nominal MC weighted to the truth (the
+        toys' true value, section 6.6); nominal=False generates a fresh validation event sample (actual data)."""
+        n0 = len(self.layout.theta) + len(self.layout.phi_P)
+        params, _ = self.params_of(beta_truth[:n0])
+        if phis is not None and self.shift_spec:
+            params = {**params, **self._shift_params(phis)}
+        if nominal:
+            y = self._observe_weighted(self.val_ev, self._val_model, params, rng, self.val_names, self.val_exposure,
+                                       self._val_link)
+        else:
+            ev = ChainEvaluator(self._val_data_model, {"seeds": {"nominal": 1}})
+            gen = ev.generate(int(rng.integers(2 ** 62)), params={**self.model.nominal, **self._equivalent(params)})
+            w = {k: np.ones(self._val_data_model.runs[k].n) for k in gen["runs"]}
+            o = observe(self._val_data_model, {k: v["events"] for k, v in gen["runs"].items()}, w, self.val_names)
+            y = self._val_link(o["pred"])
+        lay = self.layout
+        if lay.n_eta:
+            eta = beta_truth[lay.slices()["eta"]]
+            y = y + self._val_eta(self._val_predict(params)["pred"]) @ eta
+        return y
+
+    def replica_pert_val(self, rng) -> np.ndarray:
+        """(m_a - m_b) / sqrt(2) of two independent validation nominal-MC samples at the generation point."""
+        gen = {**self.model.nominal, **self.generation}
+        sa, sb = int(rng.integers(2 ** 62)), int(rng.integers(2 ** 62))
+        ma = self._val_link(self.val_ev.evaluate(gen, names=self.val_names, seeds={"nominal": sa})["pred"])
+        mb = self._val_link(self.val_ev.evaluate(gen, names=self.val_names, seeds={"nominal": sb})["pred"])
+        self.val_ev._other.pop(sa, None)
+        self.val_ev._other.pop(sb, None)
+        return (ma - mb) / math.sqrt(2.0)
+
+    def _observe_weighted(self, ev, model, params, rng, names, exposure, to_link):
+        target = {**model.nominal, **self._equivalent(params)}
+        nom = ev.nominal
+        run_events, regen = ev._prepared(target, nom)
+        sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
+                           for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
+        w = ev.weights(target, sample, nodes=ev.reweighted_nodes(target, nom), regenerated=regen)
+        w.pop("_missing_support", None)
+        by = {o.name: o for o in model.observables}
+        picked = {}
+        for rid in sorted({by[n].run for n in names}):          # a fixed order of the draws (determinism)
+            ww = np.asarray(w[rid], float)
+            idx = rng.choice(ww.size, size=exposure, replace=True, p=ww / ww.sum())
+            picked[rid] = {node: {k: np.asarray(v)[idx] for k, v in outs.items()} for node, outs in run_events[rid].items()}
+        o = observe(model, picked, {r: np.ones(exposure) for r in picked}, names)
+        return to_link(o["pred"])
+
+    # -- cross-validation (section 9.3)
+    def subset(self, rows):
+        """The problem on the calibration rows `rows` (a training fold): the same detector, MC and bootstrap, the
+        layout and data restricted to those rows."""
+        rows = [int(r) for r in rows]
+        p = ToyProblem.__new__(ToyProblem)
+        p.__dict__.update(self.__dict__)
+        p.names = [self.names[r] for r in rows]
+        p.links = {n: self.links[n] for n in p.names}
+        p.eta_spec = [{"relative": {n: v for n, v in sj.get("relative", {}).items() if n in p.names}}
+                      for sj in self.eta_spec]
+        obs = [{"name": n, "block": "gaussian", "link": p.links[n]} for n in p.names]
+        p.layout = L.build_layout(obs, list(self.theta_spec), list(self.phi_spec), 0, len(self.eta_spec))
+        p.pert = (np.asarray(self.pert)[rows] if np.ndim(self.pert) else self.pert)
+        if self.data is not None:
+            p.data = L.Data(y_gauss=np.asarray(self.data.y_gauss)[rows], phi0=self.data.phi0,
+                            phi_cov=self.data.phi_cov, eta0=self.data.eta0)
+        p._cache = {}
+        p._parent_rows = rows
+        return p
+
+    @property
+    def d(self):
+        return len(self.layout.theta)
+
     def with_data(self, data: L.Data, mc_seed=None):
         p = ToyProblem.__new__(ToyProblem)
         p.__dict__.update(self.__dict__)
         p.data = data
         p.pert = np.zeros(len(self.names))
+        p.pert_val = np.zeros(len(self.val_names))
         if mc_seed is not None and mc_seed != self.mc_seed:
             p.mc_seed = mc_seed
             p.ev = ChainEvaluator(self.model, {**self.plan, "seeds": {"nominal": _seed_int(mc_seed)}})

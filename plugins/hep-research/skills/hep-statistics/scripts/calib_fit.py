@@ -3,13 +3,19 @@
 multi-start, G1, G2, G3, G6, G7, locally linear toys and the linearity check, the non-convergence rules and the k* of
 the ratio test; phase 2).
 
-  calib_fit.py fit  --contract FILE --plan FILE --values FILE [--release FILE] [--seed S] [--sigma-noise X]
-  calib_fit.py g6   --contract FILE --plan FILE --values FILE [--toys N]
+  calib_fit.py fit  --contract FILE --plan FILE --values FILE --release FILE [--seed S] [--sigma-noise X]
+  calib_fit.py g6   --contract FILE --plan FILE --values FILE [--toys N] [--full]
+  calib_fit.py g2   --contract FILE --plan FILE --values FILE [--toys N]
   calib_fit.py g7   --theta-hats FILE --sigma-mc FILE [--alpha A]
   calib_fit.py g3   --region FILE --limits FILE
   calib_fit.py kstar --n N [--no-replacement]
 The fit runs section 7.4 (max(2d, 16) Sobol starts, basins, ties, `multimodal`) and the section 7.3 iteration with
-the ln det diagnostic; G1 per basin. Output: one JSON object; passed (exit 0), failed (exit 1), rejected (exit 2),
+the ln det diagnostic; G1 per basin; then the fit-point recomputation (D10, D21): the locking-stage checks of
+calib_data at theta-hat with the release's declarations, decided by calib_contract's rules; a contract error there is
+`rejected` (exit 2). Without --release the recomputation cannot run and the fit is `incomplete`. g6 uses locally
+linear toys with the linearity check, --full the full toys (D46); g2 the chi-bar^2 weights from locally linear toys.
+--toys >= 500 (card reading). --sigma-noise overrides the estimate of section 8.1 and is flagged
+`sigma-noise-user-supplied`. Output: one JSON object; passed (exit 0), failed (exit 1), rejected (exit 2),
 incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 2 (section 17).
 """
 from __future__ import annotations
@@ -34,7 +40,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, fit as F, problems, toy_problem
+    from core.calibration import io, fit as F, problems, toy_problem, data_checks, contract as cc
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -80,6 +86,10 @@ def main(argv=None) -> int:
     g6 = sub.add_parser("g6")
     _common(g6)
     g6.add_argument("--toys", type=int, default=1000)
+    g6.add_argument("--full", action="store_true", help="full toys (after the linearity check failed)")
+    g2 = sub.add_parser("g2")
+    _common(g2)
+    g2.add_argument("--toys", type=int, default=1000)
     g7 = sub.add_parser("g7")
     g7.add_argument("--theta-hats", required=True)
     g7.add_argument("--sigma-mc", required=True)
@@ -101,15 +111,41 @@ def main(argv=None) -> int:
                                                                                              float), alpha=args.alpha))
         if args.cmd == "g3":
             return F.g3(io.load(args.region), io.load(args.limits))
+        if getattr(args, "toys", 1000) < 500:
+            raise io.InputError("--toys: at least 500 (card reading of sections 8.2, 8.5)")
         try:
-            _, _, p = _problem(args)
+            contract, _, p = _problem(args)
+            flags = ["provisional-thresholds", "synthetic"]
+            if args.sigma_noise is not None:
+                flags.append("sigma-noise-user-supplied")
             fit = F.find_extremum(p, args.seed, p.initial_beta())
             if args.cmd == "fit":
                 g1 = F.g1(fit, p)
-                return io.jsonable({"status": g1["status"], "fit": fit.record(), "G1": g1,
-                                    "sigma_noise": p.sigma_noise, "flags": ["provisional-thresholds", "synthetic"]})
-            return io.jsonable(F.g6(p, fit, F.null_toys(p, fit, args.toys, args.seed + 1)))
-        except (problems.ProblemError, F.FitError) as exc:
+                out = {"status": g1["status"], "fit": fit.record(), "G1": g1, "sigma_noise": p.sigma_noise,
+                       "flags": flags}
+                if not args.release:
+                    out.update(status="incomplete" if g1["status"] == "passed" else g1["status"],
+                               fit_point_checks={"status": "not-run", "reason": "no --release"})
+                    return io.jsonable(out)
+                rel = io.load(args.release)
+                n0 = len(p.layout.theta) + len(p.layout.phi_P)
+                params, _ = p.params_of(fit.beta[:n0])
+                rep = data_checks.locking_report(contract, rel.get("declarations") or {}, p, points=[params],
+                                                 hashes={"contract": cc.lock_hash(contract)})
+                chk = cc.check(contract, locking=rep)
+                errs = [f for f in chk.get("findings", []) if f["code"].startswith("data.")
+                        or f["code"] == "contract.locking_stale"]
+                out["fit_point_checks"] = {"status": "failed" if errs else rep["status"], "findings": errs,
+                                           "rounding_worst": rep["rounding_worst"]}
+                if errs:                                     # a contract error at theta-hat (D10, D21)
+                    out.update(status="rejected", code=errs[0]["code"])
+                return io.jsonable(out)
+            if args.cmd == "g2":
+                return io.jsonable({**F.g2(p, fit, F.null_toys(p, fit, args.toys, args.seed + 2)), "flags": flags})
+            if args.full:
+                return io.jsonable({**F.g6_full(p, fit, args.toys, args.seed + 3), "flags": flags})
+            return io.jsonable({**F.g6(p, fit, F.null_toys(p, fit, args.toys, args.seed + 1)), "flags": flags})
+        except (problems.ProblemError, F.FitError, data_checks.CheckError) as exc:
             return {"status": "rejected", "code": exc.code, "error": str(exc)}
     return io.run(go)
 

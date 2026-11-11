@@ -12,8 +12,11 @@ from pathlib import Path
 
 from core.canonical import load_json_strict
 
-EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "not-applicable": 0, "failed": 1, "refused": 1,
-        "rejected": 2, "incomplete": 3}
+EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "not-applicable": 0, "synthetic": 0,
+        "no-testable-direction": 0,                     # a decision: no direction to test (section 9.4)
+        "failed": 1, "refused": 1, "insufficient": 1,   # insufficient power is a negative verdict (section 9.4)
+        "rejected": 2,
+        "incomplete": 3, "not-decided": 3, "pending": 3}  # no decision reached (e.g. G9 after P8 failed, G8 not run)
 
 
 class InputError(ValueError):

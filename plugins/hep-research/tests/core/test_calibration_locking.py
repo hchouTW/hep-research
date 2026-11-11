@@ -15,6 +15,7 @@ from core.calibration import toy  # noqa: E402
 from core.calibration import toy_problem as TP  # noqa: E402
 
 NAMES = ["beam2_e_mean", "beam2_e_width", "light_e_mean", "spe_e_mean"]
+HASHES = {"contract": cc.lock_hash({})}         # the report of calib_data is bound to the contract it checked (F18)
 
 
 def problem():
@@ -34,7 +35,7 @@ class Locking(unittest.TestCase):
         """Values released with one decimal where sigma^(0) is far smaller: rounding not negligible, the contract is
         rejected (section 15.3.5)."""
         r = D.locking_report({}, {"representation_format": {n: {"kind": "fixed", "decimals": 1} for n in NAMES}},
-                             problem(), points=[{}])
+                             problem(), points=[{}], hashes=HASHES)
         self.assertEqual(r["status"], "failed")
         self.assertEqual(r["findings"][0]["code"], "data.rounding")
         out = cc.check({}, locking=json.loads(json.dumps(r, default=str)))
@@ -55,10 +56,39 @@ class Locking(unittest.TestCase):
         self.assertEqual(r["status"], "passed")
 
     def test_decided_rules_leave_deferred(self):
-        r = D.locking_report({}, {"representation_format": "float64"}, problem(), points=[{}])
+        r = D.locking_report({}, {"representation_format": "float64"}, problem(), points=[{}], hashes=HASHES)
         out = cc.check({}, locking=r)
         self.assertFalse(any(d.startswith("clause 9 item 2") for d in out["deferred"]))
         self.assertTrue(any(d.startswith("clause 9 item 3") for d in out["deferred"]))
+
+    def test_a_stale_report_is_not_applied(self):
+        """A locking report computed for another contract (or with no contract hash) removes nothing from deferred
+        and is itself a finding (F18)."""
+        r = D.locking_report({}, {"representation_format": "float64"}, problem(), points=[{}],
+                             hashes={"contract": cc.lock_hash({"other": 1})})
+        out = cc.check({}, locking=r)
+        self.assertIn("contract.locking_stale", [f["code"] for f in out["findings"]])
+        self.assertTrue(any(d.startswith("clause 9 item 2") for d in out["deferred"]))
+
+    def test_eta_axes_enter_the_evaluation_points(self):
+        p = TP.ToyProblem(lambda n: toy.build_toy(n, "subgraph"), NAMES,
+                          {"light_yield": {"bounds": (20, 400), "prior": (95, 105)}}, exposure=2000, mc_events=4000,
+                          eta=[{"relative": {"beam2_e_mean": 0.01}}])
+        r = D.locking_report({}, {"representation_format": "float64"}, p, n_scan=4)
+        self.assertEqual(r["points"], (4 + 2) * 3)
+
+    def test_unbounded_enclosure_rejected_at_locking(self):
+        """D4 (A8): a constraint over a derived quantity whose relation divides by a difference that can straddle 0
+        within the declared ranges, in the declared format, is rejected at locking."""
+        c = {"validation": {"N_dc": [{"n": {"beam2_e_mean": 1.0}, "c": 0.0}]}}
+        decl = {"representation_format": {"a": {"kind": "fixed", "decimals": 2}, "b": {"kind": "fixed", "decimals": 2},
+                                          "c": {"kind": "fixed", "decimals": 2}},
+                "derivation_relations": [{"quantity": "beam2_e_mean", "inputs": ["a", "b", "c"],
+                                          "expression": "a / (b - 2 * c)", "ranges": [[1, 2], [1, 3], [0.2, 0.8]]}]}
+        codes = [f["code"] for f in D.unbounded_relations(decl, {"beam2_e_mean"})]
+        self.assertEqual(codes, ["data.enclosure_unbounded"])
+        decl["derivation_relations"][0]["ranges"] = [[1, 2], [2, 3], [0.2, 0.4]]       # b - 2c >= 1.2: bounded
+        self.assertEqual(D.unbounded_relations(decl, {"beam2_e_mean"}), [])
 
 
 if __name__ == "__main__":

@@ -502,13 +502,17 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
         if any({"calibration", "validation"} <= r for r in roles.values()):
             flags.append("cv")       # validation observables share events with calibration ones (section 2.1)
     deferred = list(DEFERRED)
+    if locking is not None and (locking.get("hashes") or {}).get("contract") != canonical_sha256(contract):
+        out.add("contract.locking_stale", "$", "the locking report was not computed for this contract (its contract "
+                "hash differs or is missing): its decisions are not applied")
+        locking = None
     if locking is not None:                     # the locking-stage decisions of calib_data.py (phase 2, section 17)
         for f in locking.get("findings", []):
             out.add(f["code"], "$.observables", json.dumps({k: v for k, v in f.items() if k != "code"},
                                                            default=str)[:400])
         decided = ("clause 9 item 2", "clause 9 item 8", "clause 9 item 13", "clause 6 item 2")
-        decided += ("clause 9 item 4", "clause 9 item 12") if set(locking.get("not_applicable", [])) >= {
-            "n_min", "block_conversion", "N_exp"} else ()
+        decided += ("clause 9 item 4", "clause 9 item 12") if (set(locking.get("not_applicable", [])) >= {
+            "n_min", "block_conversion", "N_exp"} or (locking.get("counts") or {}).get("blocks")) else ()
         deferred = [d for d in deferred if not d.startswith(decided)]
     if design is not None:
         out.extend(psi_findings(contract, design))

@@ -160,7 +160,10 @@ def main(argv=None) -> int:
                 contract, plan, extras = cio.contract_and_plan(args.contract, args.plan)
                 rel = io.load(args.release)
                 p = problems.from_inputs(contract, plan)
-                rep = data_checks.locking_report(contract, rel.get("declarations") or {}, p, args.n_scan)
+                from core.canonical import canonical_sha256
+                hs = {"contract": canonical_sha256(contract), "plan": canonical_sha256(plan) if plan else None,
+                      "release": canonical_sha256(rel)}
+                rep = data_checks.locking_report(contract, rel.get("declarations") or {}, p, args.n_scan, hashes=hs)
                 io.write_json(args.out, cio.jsonable(rep))
                 return {"status": "written", "report": args.out, "decision": rep["status"],
                         "findings": len(rep["findings"])}

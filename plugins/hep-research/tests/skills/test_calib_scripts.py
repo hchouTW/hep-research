@@ -372,5 +372,68 @@ class Phase2Scripts(unittest.TestCase):
             self.assertEqual(code, 2, (script, out))
 
 
+class Phase2Wiring(unittest.TestCase):
+    """The phase-2 checks reachable from their owning scripts (section 14, review F3) and the exit codes of
+    not-decided outcomes (review F6, F7)."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, obj):
+        p = self.d / name
+        p.write_text(json.dumps(obj))
+        return p
+
+    def test_not_decided_exits_3(self):
+        code, out = run("calib_closure.py", "not-executed", "--reason", "declared in the plan")
+        self.assertEqual((code, out["status"]), (3, "not-decided"))
+
+    def test_g8_full_level_needs_the_95_flags(self):
+        pt = {"errors": [[0.1, 0.0]] * 4, "cover68": [[True, True]] * 4}
+        r = self.write("r.json", {"level": "full", "names": ["a", "b"], "sigma_design": [1.0, 1.0],
+                                  "interior": pt, "boundary": pt})
+        code, out = run("calib_closure.py", "decide", "--results", r)
+        self.assertEqual((code, out["status"]), (2, "rejected"))
+        self.assertIn("cover95", out["error"])
+
+    def test_package_conflicts(self):
+        x = self.write("x.json", {"packages": [{"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
+                                               {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v2"}}],
+                                  "upstreams": {}})
+        code, out = run("calib_deps.py", "packages", "--input", x)
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "deps.version_conflict"))
+        x = self.write("y.json", {"packages": [{"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
+                                               {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v1"}}],
+                                  "upstreams": {}})
+        self.assertEqual(run("calib_deps.py", "packages", "--input", x)[0], 0)
+
+    def test_design_noise_checks(self):
+        plan = self.write("plan.json", {"toys": {"construction": "philox-only"}})
+        code, out = run("calib_design.py", "practices", "--plan", plan)
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.toy_philox_only"))
+        uses = self.write("u.json", {"toy_replicas": [[1, 2]], "bootstrap": [[1, 2]]})
+        code, out = run("calib_design.py", "seeds", "--uses", uses)
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.seed_overlap"))
+        J, W = [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], [[1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]]
+        zero = [[[0.0] * 3] * 3] * 2
+        pts = self.write("pts.json", [{"J": J, "W": W, "K": zero, "sigma_tot": [1.0, 1.0]}])
+        self.assertEqual(run("calib_design.py", "bj", "--points", pts)[0], 0)
+        code, out = run("calib_design.py", "bj", "--points", pts, "--bound", 0.2)
+        self.assertEqual((code, out["status"]), (2, "rejected"))                 # only tightening (A9)
+        for k0, st in ((3, "not-applicable"), (0, "no-testable-direction")):
+            x = self.write("p7.json", {"mode": "none" if k0 else "holdout", "k0": k0, "path": "analytic"})
+            code, out = run("calib_design.py", "p7", "--input", x)
+            self.assertEqual((code, out["status"]), (0, st))
+
+    def test_fit_toys_lower_bound(self):
+        c = self.write("c.json", {})
+        code, out = run("calib_fit.py", "g6", "--contract", c, "--values", c, "--toys", 100)
+        self.assertEqual((code, out["status"]), (2, "rejected"))
+
+
 if __name__ == "__main__":
     unittest.main()

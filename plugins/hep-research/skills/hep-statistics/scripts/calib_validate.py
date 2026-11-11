@@ -99,8 +99,8 @@ def main(argv=None) -> int:
                 if res["status"] == "failed":
                     return {**res, "status": "rejected", "code": res["failures"][0]}
                 return res
-            book = _book(args.book)
             with io.locked(args.book):
+                book = _book(args.book)                          # read inside the lock (single writer, F21)
                 if args.cmd == "kappa":
                     rec = V.kappa_record(args.contract_sha256, io.load(args.plan), args.engine)
                     book.register(rec)

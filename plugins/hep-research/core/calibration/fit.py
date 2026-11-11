@@ -134,7 +134,12 @@ def run_testing_ensemble(member, n: int, seeds, eps_max: float = EPS_MAX, carrie
     the ratio test on X summed over attempts with Bin(attempts x n) (section 7.3)."""
     kst = k_star(n + carried_n, False, eps_max)
     values, bad, used = [], [], []
-    for _, s in zip(range(n), seeds):
+    it = iter(seeds)
+    for _ in range(n):
+        try:
+            s = next(it)
+        except StopIteration:
+            raise FitError("fit.seeds", "the seed block is exhausted before the testing ensemble completed")
         used.append(s)
         ok, val, rec = member(s)
         (values.append(val) if ok else bad.append({"seed": s, **(rec or {})}))
@@ -262,7 +267,7 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
             lam *= 10
         if not improved:
             pd = _pd(Ff)
-            ok = edm < max(10 * edm_tol, edm_g1) and pd
+            ok = edm < edm_g1 and pd                                  # the G1 criterion exactly (section 7.4)
             return Minimum(b, D, g, F, edm, ok, it, list(np.flatnonzero(~free)), calls,
                            "" if ok else "no descent step")
     pd = _pd(Ff) if fi.size else True
@@ -538,6 +543,18 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_bo
             continue
         st = sigma_tot(covariance(m.F), d, Sigma_boot, w_boot)
         endpoints.append({"beta": m.beta, "D": m.D, "sigma_tot": st, "admitted": bool(np.all(st <= R_ADMIT * sp))})
+    if not endpoints:                                   # D45 (A8): one further multi-start round before giving up
+        for s in sobol_starts(problem, n_start or n_starts(d), (_seed_int(seed), 45)):
+            b0 = beta_nominal.copy()
+            b0[:d] = s
+            m = minimize(problem, ref0, b0, fixed=fixed)
+            calls += m.calls
+            if not m.converged:
+                nonconv.append({"start": s.tolist(), "reason": m.reason, "round": 2})
+                continue
+            st = sigma_tot(covariance(m.F), d, Sigma_boot, w_boot)
+            endpoints.append({"beta": m.beta, "D": m.D, "sigma_tot": st,
+                              "admitted": bool(np.all(st <= R_ADMIT * sp))})
     if not endpoints:
         return Fit(beta_nominal, _theta(problem, beta_nominal), np.full((lay.n_beta,) * 2, np.nan),
                    np.full(d, np.nan), math.inf, math.inf, False, 0, "no converged endpoint (section 7.4, D45)",
@@ -554,8 +571,9 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_bo
         fit.calls += calls
         return fit
     reps = []
-    for e in admitted:
-        if not any(not separated(problem, ref0, r["beta"], e["beta"], tau_bar) for r in reps):
+    for e in admitted:                                  # the segment with V fixed at the representative (section 7.4)
+        if not any(not separated(problem, r["ref"], r["beta"], e["beta"], tau_bar) for r in reps):
+            e["ref"] = problem.reference(e["beta"][_tp_index_layout(lay)], e["beta"], frozen)
             reps.append(e)
     fits = []
     for r in reps:
@@ -778,6 +796,32 @@ def g6(problem, fit: Fit, toys, n_lin_check: int = 50, alpha: float = 0.01, allo
     else:
         res.update(status="passed" if p > alpha else "failed", finding=None if p > alpha else "g6.p_value")
     return res
+
+
+def g6_full(problem, fit: Fit, n: int, seed, alpha: float = 0.01) -> dict:
+    """G6 with full toys (section 8.5, after the linearity check fails, D56): each toy draws data from the nominal MC at
+    the fit point (section 6.6), adds its own replica-difference MC perturbation and regenerates its own bootstrap
+    (D46, A8), and is refitted by the section 7.3 iteration from the fit point; non-converged toys count as
+    T_toy < T_obs (`fullfit_gof_pvalue`). p > alpha passes."""
+    T, X, bad = [], 0, []
+    for s in range(n):
+        rng = np.random.default_rng([_seed_int(seed), s])
+        toy = problem.with_data(problem.simulate(fit.beta, rng))
+        toy.pert = np.asarray(problem.replica_pert(rng), float)
+        bs = (_seed_int(seed), s, 1)
+        v = view(toy, reference=lambda tp, b, frozen, bf, _bs=bs, _t=toy:
+                 _t.reference(tp, b, frozen if bf else None, bootstrap_seed=_bs))
+        f = iterate(v, fit.beta)
+        if f.converged:
+            T.append(f.D)
+        else:
+            X += 1
+            bad.append(s)
+    p = fullfit_gof_pvalue(fit.D, T, X)
+    ok = p > alpha
+    return {"gate": "G6", "construction": "full-toys", "T_obs": fit.D, "n_toys": n, "X": X, "p": p,
+            "status": "passed" if ok else "failed", "finding": None if ok else "g6.p_value", "remedy": "contract",
+            "nonconverged_toys": bad}
 
 
 def chibar_pvalue(t: float, weights) -> float:

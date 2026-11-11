@@ -30,7 +30,7 @@ def export(theta_hat: np.ndarray, zeta_hat: np.ndarray, Sigma: np.ndarray, i_the
     S = np.array(Sigma, float, copy=True)
     if Sigma_boot is not None:
         S = S + np.asarray(Sigma_boot, float) / w
-    it, iz = np.asarray(i_theta), np.asarray(i_zeta)
+    it, iz = np.asarray(i_theta, dtype=int), np.asarray(i_zeta, dtype=int)       # an empty zeta stays an index
     Stt, Stz, Szz = S[np.ix_(it, it)], S[np.ix_(it, iz)], S[np.ix_(iz, iz)]
     Gz = Stz @ linalg.inv(Szz) if iz.size else np.zeros((it.size, 0))
     cond = Stt - Gz @ Stz.T

@@ -143,12 +143,6 @@ def p7(mode: str, k0: int, alternatives: dict, path: str, k: int | None = None, 
             "finding": {"failed": "p7.insufficient_power", "incomplete": "p7.power_not_computed"}.get(st)}
 
 
-def alternative_is_parameter_shift(alt: dict) -> bool:
-    """Alternatives must be simulation settings (a discrete model neither chosen nor absorbed, or a declared physical
-    effect absent from the model); a shift of theta, nu, eta or phi is rejected by the contract checker (section 9.4)."""
-    return alt.get("form") not in ("discrete-model", "physical-effect") or bool(alt.get("parameter_shift"))
-
-
 # ------------------------------------------------------------------ cross-validation fold split (section 9.3)
 def fold_split_check(contract: dict, folds: dict) -> list:
     """The fold-split rules: a shape (all its bins) and a derived quantity with its components in one fold; the
@@ -183,11 +177,14 @@ def fold_split_check(contract: dict, folds: dict) -> list:
 def fold_p3(problem, folds_rows: list, beta_ref: np.ndarray) -> list:
     """P3 of each training fold with its Asimov Fisher (calling identify.p3): any failing fold rejects the split."""
     out = []
-    n = problem.cfg.J.shape[0]
+    n = V._n_rows(problem)
     for fi, rows in enumerate(folds_rows):
         sub = problem.subset(np.setdiff1d(np.arange(n), rows))
-        lk = L.Likelihood(sub.layout, sub.data, sub.reference(beta_ref[:sub.d], None))
-        b = lk.initial_beta(dict(zip(sub.layout.theta, beta_ref[:sub.d])))
+        if hasattr(sub, "cfg"):
+            lk = L.Likelihood(sub.layout, sub.data, sub.reference(beta_ref[:sub.d], None))
+            b = lk.initial_beta(dict(zip(sub.layout.theta, beta_ref[:sub.d])))
+        else:                                        # the toy detector: beta_ref restricted to the fold's layout
+            b = np.asarray(beta_ref, float)[:sub.layout.n_beta]
         r = I.p3(sub, b)
         if r["status"] != "passed":
             out.append({"code": "design.fold_p3", "fold": fi, "p3": r["finding"], "remedy": "plan"})

@@ -107,6 +107,33 @@ class Fit(unittest.TestCase):
         z = (ys.mean(0) - nom) / (ys.std(0, ddof=1) / np.sqrt(len(ys)))
         self.assertLess(float(np.max(np.abs(z))), 4.0)
 
+    def test_validation_observables_are_a_separate_sample(self):
+        """Holdout on the toy detector (section 9.2, review F1): the validation rows come from their own nominal MC
+        and their own data; their null toys centre on the validation nominal prediction; V_data from their bootstrap."""
+        val = ["beam2_e_width", "beam4_e_width"]
+        p = TP.ToyProblem(lambda n: toy.build_toy(n, "subgraph"), NAMES, THETA, exposure=400, mc_events=4000,
+                          val_names=val, thickness_by_yield=True)
+        tp = np.array([100.0, 0.25, 10.0])
+        nom = p.h_val(tp)
+        ys = np.array([p.simulate_val(np.r_[tp, np.zeros(p.layout.n_beta - 3)], np.random.default_rng([8, i]))
+                       for i in range(150)])
+        z = (ys.mean(0) - nom) / (ys.std(0, ddof=1) / np.sqrt(len(ys)))
+        self.assertLess(float(np.max(np.abs(z))), 4.0)
+        p.set_val_point(tp)
+        v = p.val
+        self.assertEqual(v["V_data"].shape, (2, 2))
+        ratio = np.diag(v["V_data"]) / ys.var(0, ddof=1)
+        self.assertTrue(np.all(np.abs(ratio - 1) < 0.35), ratio)        # bootstrap vs toy spread (150 toys)
+        self.assertFalse(np.allclose(p.replica_pert_val(np.random.default_rng(1)), 0))
+
+    def test_subset_restricts_the_rows(self):
+        p = calorimeter()
+        p.data = p.asimov(p.initial_beta())
+        s = p.subset([0, 2, 9])
+        self.assertEqual(s.names, [NAMES[0], NAMES[2], NAMES[9]])
+        np.testing.assert_allclose(s.data.y_gauss, p.data.y_gauss[[0, 2, 9]])
+        np.testing.assert_allclose(s.h(p.initial_beta()[:4]), p.h(p.initial_beta()[:4])[[0, 2, 9]])
+
     def test_factory_needs_a_toy_evaluator_and_one_exposure(self):
         with self.assertRaises(problems.ProblemError):
             problems.model_builder({"evaluator": {"kind": "g4sim"}})

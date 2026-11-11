@@ -481,22 +481,37 @@ def power_toys(problem, fit, Cp, ref: dict, alt: dict, n: int, seed, alpha: floa
 def fold_fit(problem, rows, seed, frozen=None, n_start=None):
     """The training fit of one fold (the calibration rows not in the fold): section 7.4 with multi-start; the fold's
     own V-hat at convergence."""
-    sub = problem.subset(np.setdiff1d(np.arange(problem.cfg.J.shape[0]), rows))
+    sub = problem.subset(np.setdiff1d(np.arange(_n_rows(problem)), rows))
     b0 = sub_initial(sub)
     f = F.find_extremum(sub, seed, b0, frozen=frozen, n_start=n_start) if n_start != 0 else F.iterate(sub, b0,
                                                                                                     frozen=frozen)
     return sub, f
 
 
+def _n_rows(problem) -> int:
+    return problem.cfg.J.shape[0] if hasattr(problem, "cfg") else len(problem.names)
+
+
 def sub_initial(sub):
+    if not hasattr(sub, "cfg"):                      # a toy-detector fold: its own initial point
+        return sub.initial_beta()
     lk = L.Likelihood(sub.layout, sub.data, sub.reference(np.zeros(len(sub.layout.theta)), None))
     return lk.initial_beta(dict(zip(sub.layout.theta, np.zeros(len(sub.layout.theta)))))
 
 
 def out_of_fold_residual(problem, sub, f, rows):
     """r_f = y_f - (h_f(beta-hat_f) + U_f nu-hat + S_f eta-hat): the out-of-fold residual of the fold's rows."""
-    c = problem.cfg
     sl = sub.layout.slices()
+    if not hasattr(problem, "cfg"):                  # the toy detector: the full predictor at the fold's fit
+        n0 = len(sub.layout.theta) + len(sub.layout.phi_P)
+        mu_all = problem.h(f.beta[:n0])
+        mu = mu_all[rows]
+        if sub.layout.n_eta:
+            params, _ = problem.params_of(f.beta[:n0])
+            S = problem.eta_columns(problem._predict(params)["pred"])
+            mu = mu + S[rows] @ f.beta[sl["eta"]]
+        return problem.data.y_gauss[rows] - mu
+    c = problem.cfg
     th = f.beta[:sub.d]
     mu = c.m0[rows] + c.J[rows] @ th + problem.e0[rows] + (problem.pert[rows] if np.ndim(problem.pert) else 0.0)
     if c.U is not None:

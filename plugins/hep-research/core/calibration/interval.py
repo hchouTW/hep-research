@@ -56,7 +56,7 @@ def profile_interval(problem, fit: F.Fit, i: int, level: float = 0.68, seed=None
             return -math.inf                      # stays inside (section 7.3)
         return D - fit.D - thr
 
-    ends = []
+    ends, reached = [], []
     for sgn, bound in ((-1, lo_b), (1, hi_b)):
         prev, prev_q = x0, -thr
         end = None
@@ -74,11 +74,15 @@ def profile_interval(problem, fit: F.Fit, i: int, level: float = 0.68, seed=None
             if hit_bound:
                 end = bound                       # the interval reaches the physical bound
                 break
+        reached.append(end is not None)
         ends.append(end if end is not None else x0 + sgn * max_sigma * s0)
     lo, hi = ends
-    return {"theta": problem.layout.theta[i], "level": level, "lo": lo, "hi": hi, "center": x0,
-            "half_width": 0.5 * (hi - lo), "method": "profile-likelihood", "nonconverged_scan_points": nonconv,
-            "label": "confidence-interval"}
+    out = {"theta": problem.layout.theta[i], "level": level, "lo": lo, "hi": hi, "center": x0,
+           "half_width": 0.5 * (hi - lo), "method": "profile-likelihood", "nonconverged_scan_points": nonconv,
+           "endpoints_reached": reached, "label": "confidence-interval"}
+    if not all(reached):                          # never report the scan limit as an endpoint (F19)
+        out.update(status="incomplete", label="incomplete", flags=["endpoint-not-reached"])
+    return out
 
 
 def total_halfwidth(sigma_q: float, level: float, shift_widening=None, Sigma_boot_ii: float = 0.0, w: float = 1.0,

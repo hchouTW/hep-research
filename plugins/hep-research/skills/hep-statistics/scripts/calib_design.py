@@ -11,6 +11,15 @@ and the applicability of the mandatory gates).
   calib_design.py p5            --contract FILE [--plan FILE] [--release FILE] [--items ess,v_mc_diagonal,...]
                                 [--declared-methods]
   calib_design.py methods       --contract FILE [--plan FILE]
+Phase 2 (sections 2.1 (iii), 6.6, 8.2 notes 3 and 5, 9.3, 9.4; the engine in core/calibration/design_noise.py):
+  calib_design.py sigma-boot    --contract FILE --plan FILE --values FILE [--release FILE] [--n-t 10] [--k-b 6]
+                                [--seed S] [--sigma-data FILE]   Sigma_boot by toys; with --sigma-data its P5 item
+  calib_design.py bj            --points FILE [--bound B]          P5's b_J item ({J, W, K: [K_l], sigma_tot} per point)
+  calib_design.py p7            --input FILE                       P7 at the design stage (analytic or toy path)
+  calib_design.py folds         --contract FILE --folds FILE [--plan FILE --values FILE]
+                                                                   the fold-split rules, and P3 of each training fold
+  calib_design.py practices     --plan FILE                        rejected toy, bootstrap and G8 practices
+  calib_design.py seeds         --uses FILE                        independence of seeds across uses
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
 Output: one JSON object; status passed/ok (exit 0), failed (exit 1: P2, P5 or support failed, remedy level in the
@@ -42,7 +51,8 @@ import sys
 
 try:
     MISSING = None
-    from core.calibration import design, evaluator, io, linear
+    import numpy as np
+    from core.calibration import design, design_noise as DN, evaluator, io, linear, problems
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -60,6 +70,25 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "rejected", "error": f"needs NumPy and SciPy ({MISSING})"}))
         return 2
     sub = ap.add_subparsers(dest="cmd", required=True)
+    sb = sub.add_parser("sigma-boot")
+    for a in ("--contract", "--plan", "--values"):
+        sb.add_argument(a, required=True)
+    sb.add_argument("--release")
+    sb.add_argument("--n-t", type=int, default=10)
+    sb.add_argument("--k-b", type=int, default=6)
+    sb.add_argument("--seed", type=int, default=20261160)
+    sb.add_argument("--sigma-data")
+    bj = sub.add_parser("bj")
+    bj.add_argument("--points", required=True)
+    bj.add_argument("--bound", type=float, default=None)
+    sub.add_parser("p7").add_argument("--input", required=True)
+    fo = sub.add_parser("folds")
+    fo.add_argument("--contract", required=True)
+    fo.add_argument("--folds", required=True)
+    fo.add_argument("--plan")
+    fo.add_argument("--values")
+    sub.add_parser("practices").add_argument("--plan", required=True)
+    sub.add_parser("seeds").add_argument("--uses", required=True)
     for name in ("points", "p2", "applicability", "linearize", "support", "p5", "methods"):
         p = sub.add_parser(name)
         if name != "applicability":
@@ -81,7 +110,69 @@ def main(argv=None) -> int:
             p.add_argument("--declared-methods", action="store_true")
     args = ap.parse_args(argv)
 
+    def phase2():
+        try:
+            if args.cmd == "bj":
+                pts = io.load(args.points)
+                if not isinstance(pts, list):
+                    raise io.InputError("--points: a list of {J, W, K, sigma_tot}")
+                arr = [{"J": np.asarray(p["J"], float), "W": np.asarray(p["W"], float),
+                        "K": [np.asarray(k, float) for k in p["K"]], "sigma_tot": np.asarray(p["sigma_tot"], float)}
+                       for p in pts]
+                if args.bound is not None and args.bound > DN.BJ_BOUND:
+                    raise io.InputError(f"--bound may only tighten {DN.BJ_BOUND} (approval A9)")
+                r = DN.p5_b_J(arr, **({} if args.bound is None else {"bound": args.bound}))
+                return {"status": "passed" if r["passed"] else "failed", **r}
+            if args.cmd == "p7":
+                x = io.load(args.input)
+                if not isinstance(x, dict) or "mode" not in x or "path" not in x:
+                    raise io.InputError("--input: {mode, k0, path, alternatives | toy_results, k?, alpha?}")
+                alts = {a: (None if v is None else np.asarray(v, float)) for a, v in (x.get("alternatives") or {}).items()}
+                return DN.p7(x["mode"], int(x.get("k0", 0)), alts, x["path"], x.get("k"), float(x.get("alpha", 0.05)),
+                             x.get("toy_results"))
+            if args.cmd == "practices":
+                f = DN.practice_findings(io.load(args.plan))
+                return {"status": "failed" if f else "ok", "findings": f}
+            if args.cmd == "seeds":
+                f = DN.seed_independence(io.load(args.uses))
+                return {"status": "failed" if f else "ok", "findings": f}
+            contract, plan, extras = io.contract_and_plan(args.contract, args.plan)
+            if args.cmd == "folds":
+                folds = io.load(args.folds)
+                if not isinstance(folds, dict):
+                    raise io.InputError("--folds: {observable: fold}")
+                f = DN.fold_split_check(contract, folds)
+                if args.values:
+                    p = problems.from_inputs(contract, plan, io.load(args.values), None)
+                    names = p.names if hasattr(p, "names") else list(folds)
+                    by = {}
+                    for o, fi in folds.items():
+                        if o in names:
+                            by.setdefault(fi, []).append(names.index(o))
+                    f += DN.fold_p3(p, [np.array(v) for _, v in sorted(by.items())], p.initial_beta())
+                return {"status": "failed" if f else "ok", "findings": f}
+            # sigma-boot
+            p = problems.from_inputs(contract, plan, io.load(args.values), io.systematics(args.release, extras))
+            r = DN.sigma_boot(p, p.initial_beta(), args.seed, N_t=args.n_t, K_b=args.k_b)
+            if r["status"] == "ok":
+                d = len(p.layout.theta)
+                r["Sigma_boot_theta"] = np.asarray(r["Sigma_boot"])[:d, :d]
+                if args.sigma_data:
+                    it = DN.p5_sigma_boot(r["Sigma_boot_theta"], r["w"], np.asarray(io.load(args.sigma_data), float))
+                    r.update(status="passed" if it["passed"] else "failed", p5=it)
+                else:
+                    r["p5"] = {"item": "sigma_boot", "status": "not-decided", "reason": "no --sigma-data"}
+            return {**r, "flags": ["provisional-thresholds"]}
+        except DN.DesignError as exc:
+            return {"status": "rejected", "code": exc.code, "error": str(exc)}
+        except problems.ProblemError as exc:
+            return {"status": "rejected", "code": exc.code, "error": str(exc)}
+        except (KeyError, TypeError, ValueError) as exc:
+            raise io.InputError(f"malformed input: {exc!r}") from None
+
     def go():
+        if args.cmd in ("sigma-boot", "bj", "p7", "folds", "practices", "seeds"):
+            return phase2()
         if args.cmd == "applicability":
             plan = io.load(args.plan) if args.plan else None
             if not isinstance(plan, dict):
