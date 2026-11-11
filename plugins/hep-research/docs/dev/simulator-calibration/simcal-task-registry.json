@@ -211,6 +211,13 @@
    "registered_at": "2026-11-11T04:02:28Z",
    "card_commit": "534331ab",
    "reason": "execution log only (gate 2 passes); thresholds, configurations and test designs as registered ffcab887"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "f2b7be4489274fddd3350bd60b742737c50b5fe57c5966c41f426f7221dad741",
+   "registered_at": "2026-11-11T04:03:22Z",
+   "card_commit": "cf8d33a4",
+   "reason": "before the gate-3 run: its implementation (gate_shift at the card commit), the cases and seeds as registered 51facff0"
   }
  ]
 }
