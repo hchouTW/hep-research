@@ -217,6 +217,22 @@ class G6(unittest.TestCase):
         self.assertEqual(r["finding"], "g6.linearity_check_failed")
         self.assertGreater(r["linearity_fraction"], 0.05)
 
+    def test_lndet_diagnostic_rejects_points_it_cannot_evaluate(self):
+        """A trial point of the ln det diagnostic where the reference quantities cannot be computed is rejected like a
+        worse point (found 2026-11-11: a non-identifiable toy-detector fit stepped where a width was not finite)."""
+        p = T.make(self.cfg, TRUTH, data_seed=3, mc_seed=4)
+        f = F.iterate(p, T.initial_beta(p))
+        base = p.reference
+
+        def fragile(tp, beta, frozen=None, bootstrap_frozen=False, bootstrap_seed=None):
+            if abs(tp[0] - f.beta[0]) > 1e-12:              # every point off the fit point fails
+                raise ValueError("array must not contain infs or NaNs")
+            return base(tp, beta, frozen, bootstrap_frozen, bootstrap_seed)
+        v = F.view(p, reference=lambda tp, b, frozen, bf: fragile(tp, b, frozen, bf))
+        v.V_depends_on_theta = True                       # run the diagnostic (the linear toy's V is constant)
+        shift, _ = F.lndet_diagnostic(v, f)
+        self.assertTrue(np.isfinite(shift))
+
     def test_full_toys_after_the_linearity_check(self):
         """G6 with full toys (D46): the correct quadratic model passes where the linear toys could not decide; the
         missing effect still fails."""

@@ -386,7 +386,13 @@ def iterate(problem, beta0: np.ndarray, frozen=None, Sigma_boot=None, w_boot: fl
                     fit.reason = f"ln det diagnostic {shift:.3g} >= 0.2 sigma_tot"
             return fit
         prev = b[:d].copy()
-        ref = problem.reference(b[tpi], b, frozen)
+        try:
+            ref = problem.reference(b[tpi], b, frozen)
+        except (ValueError, linalg.LinAlgError, FloatingPointError, ZeroDivisionError) as exc:
+            # the reference quantities at the new theta_ref cannot be computed: not converged (D50 reading, A8)
+            return Fit(b, _theta(problem, b), S, st, m.D, m.edm, False, it,
+                       f"reference quantities not computable at theta_ref: {type(exc).__name__}", ref, history=hist,
+                       calls=calls, F=m.F)
     return Fit(b, _theta(problem, b), covariance(m.F), sigma_tot(covariance(m.F), d, Sigma_boot, w_boot), m.D,
                m.edm, False, limit, f"no convergence within {limit} iterations", ref, history=hist, calls=calls,
                F=m.F)
@@ -427,8 +433,14 @@ def lndet_diagnostic(problem, fit: Fit, frozen=None, rounds: int = 30) -> tuple[
         return problem.reference(bb[tpi], bb, vhat, bootstrap_frozen=True)
 
     def full(bb, r=None):
-        r = r or ref_at(bb)
-        return L.Likelihood(problem.layout, problem.data, r).deviance(bb, problem.h(bb[tpi])) + r.ln_det
+        """The full objective; a trial point where the reference quantities or the prediction cannot be computed
+        (e.g. a width that is not finite) is rejected like a worse point, never an exception."""
+        try:
+            r = r or ref_at(bb)
+            v = L.Likelihood(problem.layout, problem.data, r).deviance(bb, problem.h(bb[tpi])) + r.ln_det
+        except (ValueError, linalg.LinAlgError, FloatingPointError, ZeroDivisionError):
+            return math.inf
+        return v if np.isfinite(v) else math.inf
 
     b = fit.beta.copy()
     fb = full(b)
@@ -446,6 +458,8 @@ def lndet_diagnostic(problem, fit: Fit, frozen=None, rounds: int = 30) -> tuple[
             fc = full(c) - lk.deviance(c, problem.h(c[tpi]))
             g[i] += (fa - fc) / (2 * steps[j])
             calls += 4
+        if not np.all(np.isfinite(g)):                 # the V-dependence cannot be differenced here: stop
+            break
         try:
             step = -linalg.solve(F, g, assume_a="pos")
         except (linalg.LinAlgError, ValueError):
