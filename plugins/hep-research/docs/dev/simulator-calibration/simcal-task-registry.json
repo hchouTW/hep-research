@@ -260,6 +260,13 @@
    "registered_at": "2026-11-11T23:09:12Z",
    "card_commit": "f662646a",
    "reason": "before its run: gate 1 on the toy detector (review F1, F2; approval A10 for two G8 controls), implementation gate1_toy_task/GATE1T_TASKS at 95b4191c; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "2182d365c14817ba11a2a35a1dead6bdb340a8b4133da639a4125d68feb47a0c",
+   "registered_at": "2026-11-11T23:26:22Z",
+   "card_commit": "af16b7c7",
+   "reason": "before its run: gate 1 on the toy detector re-registered with the engine at 518c0d6d (array 7584035 cancelled); items and criteria unchanged"
   }
  ]
 }
