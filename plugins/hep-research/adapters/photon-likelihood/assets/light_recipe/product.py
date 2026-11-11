@@ -21,6 +21,14 @@ e_vis, t0, from} and the charge-only prefit {status, failure, iterations, point,
 agreeing with the prefit. Its reader recomputes the
 joint ln L. /1 is unchanged.
 
+light-likelihood-product/3 (D3 stage 3) is the multistart joint product: /2's lines, the header's budget {format, sha256,
+starts, tie_tolerance} (the multistart budget file, K10), and per event the record of every start (name, start point, status,
+failure, ln L, end point, iterations, rounds) and the choice {chosen, rule}; fit is the chosen start's fit, or for all starts
+failed the kind all-starts-failed with start 0's last point (multistart.py). Its reader checks the start names against the
+budget, start 0 against the seed, the choice against the rule recomputed from the recorded outcomes, and the reported fit
+against the chosen start; given the model it recomputes every start point from the anchor and the data, and every start's
+ln L at its end point. /1 and /2 are unchanged.
+
 Any structural exception while the reader checks a field (KeyError, TypeError, IndexError, AttributeError, ValueError,
 OverflowError) is a ProductError: a malformed field is refused (status rejected), never an internal error (re-review N5). The
 recomputation keeps its own rule (a ValueError there is a ProductError; anything else is a defect of the recipe).
@@ -35,7 +43,7 @@ from pathlib import Path
 
 import numpy
 
-from . import LABEL, LABEL_MEANING, LIKELIHOOD, LIKELIHOOD_JOINT, PARAMETERS, PARAMETERS_JOINT, PARAMETER_UNITS, RECIPE, joint, readout
+from . import LABEL, LABEL_MEANING, LIKELIHOOD, LIKELIHOOD_JOINT, PARAMETERS, PARAMETERS_JOINT, PARAMETER_UNITS, RECIPE, joint, multistart, readout
 from .fit import CALLBACK_STOP, FAILURES, JOINT_CHART_RADIUS, JOINT_ORIGINS, SETTINGS, FitResult, JointSeed, Seed
 from .likelihood import (EPSILON, HESSIAN_STEPS, TOLERANCE_FACTOR, TOLERANCE_RULE, EventData, frame, log_likelihood,
                          probability_check)
@@ -82,6 +90,14 @@ SETTINGS_JOINT = {**SETTINGS, "t0_domain_windows": list(joint.T0_DOMAIN_WINDOWS)
 RETENTION_JOINT = {"states": "every channel of every event",
                    "charges": "every hit channel's charge, saturated flag and first-arrival time",
                    "times": "every hit channel's first-arrival time (unhit, dead and disabled channels have none)", "truth": "none"}
+FORMAT_MULTISTART = "light-likelihood-product/3"
+SETTINGS_MULTISTART = {**SETTINGS_JOINT, "seeds": "multistart: the budget's starts, in its order (header budget)",
+                       "start_rules": multistart.RULES, "start_values_rule": multistart.VALUES_RULE,
+                       "choice_rule": multistart.CHOICE_TEXT}
+BUDGET_KEYS = {"format", "sha256", "starts", "tie_tolerance"}
+START_KEYS = {"name", "start", "status", "failure", "ln_likelihood", "end", "iterations", "rounds"}
+POINT_KEYS = {"vertex", "direction", "e_vis", "t0"}
+START_TOLERANCE = 1e-12        # a start point recomputed from the anchor and the data, relative
 STRUCTURAL = (KeyError, TypeError, IndexError, AttributeError, ValueError, OverflowError, RecursionError)
 LN_L_TOLERANCE = 1e-9
 DEVIATION_TOLERANCE = 1e-14
@@ -103,6 +119,12 @@ class Variant:
     settings: dict
     retention: dict
     timed: bool
+    multistart: bool = False
+    failures: tuple = FAILURES
+
+    @property
+    def header_keys(self) -> set:
+        return HEADER_KEYS | {"budget"} if self.multistart else HEADER_KEYS
 
     @property
     def size(self) -> int:
@@ -131,10 +153,14 @@ def _vec(v):
     return None if v is None else [float(c) for c in v]
 
 
-def header_document(product_id: str, rd, cfg, likelihood: str = "charge-only") -> dict:
-    """The header line; likelihood charge-only (light-likelihood-product/1, stage 1's) or charge-time (/2)."""
-    variant = BY_LIKELIHOOD[likelihood]
-    return {**copy.deepcopy(variant.fixed_header()), "product_id": product_id,
+def header_document(product_id: str, rd, cfg, likelihood: str = "charge-only", budget=None) -> dict:
+    """The header line; likelihood charge-only (light-likelihood-product/1, stage 1's) or charge-time (/2); charge-time with a
+    multistart budget gives /3, whose header records the budget."""
+    if budget is not None and likelihood != "charge-time":
+        raise ValueError("multistart needs the charge-time likelihood")
+    variant = MULTISTART if budget is not None else BY_LIKELIHOOD[likelihood]
+    extra = {} if budget is None else {"budget": budget.header()}
+    return {**copy.deepcopy(variant.fixed_header()), **extra, "product_id": product_id,
             "input": {"format": rd.header["format"], "role": rd.header["role"], "sha256": rd.sha256, "events": rd.events,
                       "channels": rd.channels, "threshold": rd.header["threshold"], "saturation_charge": rd.header["saturation_charge"]},
             "configuration": {"format": cfg.format, "sha256": cfg.sha256}, "events": rd.events}
@@ -173,6 +199,24 @@ def joint_event_document(index: int, tev, start: JointSeed | None, origin: str |
                                                    "point": prefit.vertex is not None,
                                                    "ln_likelihood": None if prefit.ln_likelihood is None else float(prefit.ln_likelihood)},
             "fit": _fit_document(res, None if res.t0 is None else float(res.t0)), "probability_check": check}
+
+
+def _point_document(vertex, direction, e_vis, t0) -> dict:
+    return {"vertex": _vec(vertex), "direction": _vec(direction), "e_vis": float(e_vis), "t0": float(t0)}
+
+
+def multistart_event_document(index: int, tev, ms, check: dict) -> dict:
+    """An event line of light-likelihood-product/3: /2's line of the reported fit, every start's record and the choice."""
+    doc = joint_event_document(index, tev, ms.anchor, ms.origin, ms.prefit, ms.result, check)
+    starts = []
+    for rec in ms.starts:
+        res = rec.result
+        starts.append({"name": rec.name, "start": _point_document(rec.start.vertex, rec.start.direction, rec.start.e_vis, rec.start.t0),
+                       "status": res.status, "failure": res.failure,
+                       "ln_likelihood": None if res.ln_likelihood is None else float(res.ln_likelihood),
+                       "end": None if res.vertex is None else _point_document(res.vertex, res.direction, res.e_vis, res.t0),
+                       "iterations": int(res.iterations), "rounds": int(res.rounds)})
+    return {**doc, "starts": starts, "choice": {"chosen": ms.chosen, "rule": ms.choice}}
 
 
 def _fit_document(res: FitResult, t0) -> dict:
@@ -237,12 +281,14 @@ def _unit(value, where):
     return v
 
 
-def _check_header(header: dict, cfg) -> Variant:
-    if not isinstance(header, dict) or set(header) != HEADER_KEYS:
+def _check_header(header: dict, cfg, budget=None) -> Variant:
+    if not isinstance(header, dict) or "format" not in header:
         raise ProductError(f"header keys must be exactly {sorted(HEADER_KEYS)}")
     variant = VARIANTS.get(header["format"]) if isinstance(header["format"], str) else None
     if variant is None:
         raise ProductError(f"header format must be one of {sorted(VARIANTS)}")
+    if set(header) != variant.header_keys:
+        raise ProductError(f"header keys must be exactly {sorted(variant.header_keys)}")
     for key, value in variant.fixed_header().items():
         if header[key] != value:
             raise ProductError(f"header {key} is not this recipe's ({value!r})")
@@ -262,7 +308,22 @@ def _check_header(header: dict, cfg) -> Variant:
         raise ProductError("header configuration must have exactly format and sha256")
     if cfg is not None and (conf["format"] != cfg.format or conf["sha256"] != cfg.sha256):
         raise ProductError("the product was made with another configuration than the one given")
+    if variant.multistart:
+        _check_budget_header(header["budget"], budget)
     return variant
+
+
+def _check_budget_header(doc, budget) -> None:
+    if not isinstance(doc, dict) or set(doc) != BUDGET_KEYS or doc["format"] != multistart.FORMAT:
+        raise ProductError(f"header budget must have exactly {sorted(BUDGET_KEYS)}, format {multistart.FORMAT}")
+    starts, tie = doc["starts"], doc["tie_tolerance"]
+    if not (isinstance(starts, list) and starts and all(isinstance(s, str) and s in multistart.RULES for s in starts)
+            and len(set(starts)) == len(starts) and starts[0] == multistart.FIRST):
+        raise ProductError("header budget starts must be distinct known start names, the first prefit")
+    if not (_number(tie) and tie > 0) or not isinstance(doc["sha256"], str) or len(doc["sha256"]) != 64:
+        raise ProductError("header budget tie_tolerance or sha256 malformed")
+    if budget is not None and doc != budget.header():
+        raise ProductError("the product was made with another multistart budget than the one given")
 
 
 def _event_arrays(doc: dict, source: dict, where: str, variant: Variant):
@@ -312,7 +373,7 @@ def _check_fit(fit_doc, event: EventData, source: dict, where: str, variant: Var
     if variant.timed and not (_number(fit_doc["t0"]) if has_point else fit_doc["t0"] is None):
         raise ProductError(f"{where}: t0 must be a finite number where the fit has a point, null otherwise")
     status, failure = fit_doc["status"], fit_doc["failure"]
-    if status not in ("converged", "failed") or (status == "converged") != (failure is None) or (failure is not None and failure not in FAILURES):
+    if status not in ("converged", "failed") or (status == "converged") != (failure is None) or (failure is not None and failure not in variant.failures):
         raise ProductError(f"{where}: status {status!r} and failure {failure!r} do not agree")
     if not (_count(fit_doc["iterations"]) and _count(fit_doc["rounds"])):
         raise ProductError(f"{where}: iterations and rounds must be counts")
@@ -384,7 +445,89 @@ def _check_seed(doc, where: str, variant: Variant) -> None:
             raise ProductError(f"{where}: prefit malformed")
 
 
-def _verify(doc, event, tev, model, where: str) -> None:
+def _point_of(doc, where):
+    if not isinstance(doc, dict) or set(doc) != POINT_KEYS:
+        raise ProductError(f"{where}: a point must have exactly {sorted(POINT_KEYS)}")
+    vertex = _vector(doc["vertex"], where)
+    direction = _unit(doc["direction"], where)
+    if not (_number(doc["e_vis"]) and _number(doc["t0"])):
+        raise ProductError(f"{where}: e_vis and t0 must be finite numbers")
+    return vertex, direction, doc["e_vis"], doc["t0"]
+
+
+def _check_starts(doc, budget_doc, where: str) -> None:
+    """Product /3's per-start records against the budget, the seed, the choice rule and the reported fit (no model needed)."""
+    starts, choice, fit_doc, seed_doc = doc["starts"], doc["choice"], doc["fit"], doc["seed"]
+    if not isinstance(starts, list) or not isinstance(choice, dict) or set(choice) != {"chosen", "rule"}:
+        raise ProductError(f"{where}: starts must be a list and choice exactly chosen and rule")
+    names = budget_doc["starts"] if seed_doc is not None else []
+    if [s.get("name") if isinstance(s, dict) else None for s in starts] != names:
+        raise ProductError(f"{where}: the starts must be the budget's {names}, in its order")
+    outcomes = []
+    for k, s in enumerate(starts):
+        at = f"{where}: start {k}"
+        if set(s) != START_KEYS:
+            raise ProductError(f"{at}: keys must be exactly {sorted(START_KEYS)}")
+        _point_of(s["start"], at)
+        status, failure = s["status"], s["failure"]
+        if status not in ("converged", "failed") or (status == "converged") != (failure is None) or \
+                (failure is not None and failure not in FAILURES):
+            raise ProductError(f"{at}: status {status!r} and failure {failure!r} do not agree")
+        if not (_count(s["iterations"]) and _count(s["rounds"])):
+            raise ProductError(f"{at}: iterations and rounds must be counts")
+        if s["ln_likelihood"] is not None and not _number(s["ln_likelihood"]):
+            raise ProductError(f"{at}: ln_likelihood must be null or finite")
+        if s["end"] is not None:
+            _point_of(s["end"], at)
+        elif s["ln_likelihood"] is not None:
+            raise ProductError(f"{at}: an ln L without an end point")
+        if status == "converged" and (s["end"] is None or s["ln_likelihood"] is None):
+            raise ProductError(f"{at}: a converged start needs its end point and ln L")
+        outcomes.append((status, s["ln_likelihood"]))
+    if starts and starts[0]["start"] != {k: seed_doc[k] for k in POINT_KEYS}:
+        raise ProductError(f"{where}: start 0 is not the seed")
+    chosen, rule = multistart.choose(outcomes, budget_doc["tie_tolerance"])
+    if choice != {"chosen": chosen, "rule": rule}:
+        raise ProductError(f"{where}: choice {choice!r} is not the rule's ({chosen!r}, {rule!r})")
+    point = None if fit_doc["vertex"] is None else {"vertex": fit_doc["vertex"], "direction": fit_doc["direction"],
+                                                     "e_vis": fit_doc["e_vis"], "t0": fit_doc["t0"]}
+    if chosen is not None:
+        s = starts[chosen]
+        want = (s["status"], s["failure"], s["ln_likelihood"], s["iterations"], s["rounds"], s["end"])
+    elif starts:
+        s = starts[0]
+        want = ("failed", multistart.ALL_FAILED, s["ln_likelihood"], s["iterations"], s["rounds"], s["end"])
+    else:
+        want = ("failed", "no-hit-channel", None, 0, 0, None)
+    got = (fit_doc["status"], fit_doc["failure"], fit_doc["ln_likelihood"], fit_doc["iterations"], fit_doc["rounds"], point)
+    if got != want:
+        raise ProductError(f"{where}: the reported fit is not the {'chosen start' if chosen is not None else 'rule'}'s")
+
+
+def _verify_starts(doc, tev, model, header, where: str) -> None:
+    """Every start point recomputed from the anchor and the data, and every start's ln L at its end point (product /3)."""
+    starts = doc["starts"]
+    if not starts:
+        return
+    b = header["budget"]
+    seed_doc = doc["seed"]
+    anchor = JointSeed(numpy.array(seed_doc["vertex"], float), numpy.array(seed_doc["direction"], float), seed_doc["e_vis"],
+                       seed_doc["t0"])
+    budget = multistart.Budget(b["format"], tuple(b["starts"]), b["tie_tolerance"], b["sha256"])
+    for k, ((name, start), s) in enumerate(zip(multistart.start_points(model, tev, budget, anchor), starts)):
+        stored = s["start"]
+        again = numpy.r_[start.vertex, start.direction, start.e_vis, start.t0]
+        kept = numpy.r_[stored["vertex"], stored["direction"], stored["e_vis"], stored["t0"]]
+        if not numpy.all(numpy.abs(again - kept) <= START_TOLERANCE * numpy.maximum(1.0, numpy.abs(again))):
+            raise ProductError(f"{where}: start {k} ({name}) does not recompute from the anchor and the data")
+        if s["ln_likelihood"] is not None:
+            end = s["end"]
+            value = joint.log_likelihood(model, tev, numpy.array(end["vertex"]), numpy.array(end["direction"]), end["e_vis"], end["t0"])
+            if not abs(value - s["ln_likelihood"]) <= LN_L_TOLERANCE * max(1.0, abs(value)):
+                raise ProductError(f"{where}: start {k} ln L {s['ln_likelihood']} does not recompute ({value})")
+
+
+def _verify(doc, event, tev, model, where: str, header=None) -> None:
     """Recompute ln L (the joint ln L for /2) and the probability check from the product; any defect is a ProductError (fix
     round 1, F2). A stored point outside the fit's domain is refused by the probability check (EventError), turned into a
     ProductError here."""
@@ -399,6 +542,8 @@ def _verify(doc, event, tev, model, where: str) -> None:
                     raise ProductError(f"{where}: ln L {fit_doc['ln_likelihood']} does not recompute ({value})")
         else:
             again = {"point": check["point"], **probability_check(model, event)}
+        if header is not None and "starts" in doc:
+            _verify_starts(doc, tev, model, header, where)
     except ValueError as exc:
         if isinstance(exc, ProductError):
             raise
@@ -413,6 +558,8 @@ def _check_event(doc, index: int, header: dict, variant: Variant):
     """Every structural rule of one event line; returns (EventData, TimedEvent or None) for the recomputation."""
     where = f"event line {index + 2}"
     keys = EVENT_KEYS | {"prefit"} if variant.timed else EVENT_KEYS
+    if variant.multistart:
+        keys = keys | {"starts", "choice"}
     if not isinstance(doc, dict) or set(doc) != keys:
         raise ProductError(f"{where}: keys must be exactly {sorted(keys)}")
     if doc["event"] != index or isinstance(doc["event"], bool):
@@ -421,6 +568,8 @@ def _check_event(doc, index: int, header: dict, variant: Variant):
     event, tev = _event_arrays(doc, source, where, variant)
     _check_seed(doc, where, variant)
     _check_fit(doc["fit"], event, source, where, variant)
+    if variant.multistart:
+        _check_starts(doc, header["budget"], where)
     check = doc["probability_check"]
     if not isinstance(check, dict) or set(check) != CHECK_KEYS:
         raise ProductError(f"{where}: probability_check keys must be exactly {sorted(CHECK_KEYS)}")
@@ -441,8 +590,9 @@ def _structural(where: str, action, *args):
         raise ProductError(f"{where}: malformed field ({type(exc).__name__}: {exc})") from None
 
 
-def read_text(text: str, model=None, cfg=None) -> Product:
-    """Read and check a product (/1 or /2). model (and cfg) given: ln L and the probability check are recomputed per event."""
+def read_text(text: str, model=None, cfg=None, budget=None) -> Product:
+    """Read and check a product (/1, /2 or /3). model (and cfg) given: ln L and the probability check are recomputed per event
+    (for /3 every start too); budget given: a /3 product must have been made with it."""
     if not text.endswith("\n"):
         raise ProductError("the last line is unfinished")
     lines = text[:-1].split("\n")
@@ -453,7 +603,7 @@ def read_text(text: str, model=None, cfg=None) -> Product:
     if len(docs) < 2:
         raise ProductError("a product needs a header and an end line")
     header = docs[0]
-    variant = _structural("header", _check_header, header, cfg)
+    variant = _structural("header", _check_header, header, cfg, budget)
     if model is not None and header["input"]["channels"] != model.geometry.channels:
         raise ProductError("the product's channels are not the model's")
     end = docs[-1]
@@ -469,20 +619,32 @@ def read_text(text: str, model=None, cfg=None) -> Product:
     for i, doc in enumerate(events):
         event, tev = _structural(f"event line {i + 2}", _check_event, doc, i, header, variant)
         if model is not None:
-            _verify(doc, event, tev, model, f"event line {i + 2}")
+            _verify(doc, event, tev, model, f"event line {i + 2}", header)
     return Product(header, events)
 
 
-def read_product(path, model=None, cfg=None) -> Product:
+def format_of(path) -> str | None:
+    """The format named by a product's first line, or None when it cannot be told (the reader then refuses the file)."""
+    try:
+        with open(path, encoding="utf-8") as stream:
+            doc = json.loads(stream.readline())
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError):
+        return None
+    return doc.get("format") if isinstance(doc, dict) and isinstance(doc.get("format"), str) else None
+
+
+def read_product(path, model=None, cfg=None, budget=None) -> Product:
     try:
         text = Path(path).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         raise ProductError(f"product cannot be read: {exc}") from None
-    return read_text(text, model, cfg)
+    return read_text(text, model, cfg, budget)
 
 
 CHARGE_ONLY = Variant(FORMAT, LIKELIHOOD, PARAMETERS, NOT_ESTIMATED, UNCERTAINTY_TEXT, SETTINGS, RETENTION, False)
 CHARGE_TIME = Variant(FORMAT_JOINT, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_ESTIMATED_JOINT, UNCERTAINTY_JOINT, SETTINGS_JOINT,
                       RETENTION_JOINT, True)
-VARIANTS = {v.format: v for v in (CHARGE_ONLY, CHARGE_TIME)}
+MULTISTART = Variant(FORMAT_MULTISTART, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_ESTIMATED_JOINT, UNCERTAINTY_JOINT, SETTINGS_MULTISTART,
+                     RETENTION_JOINT, True, True, multistart.FAILURES)
+VARIANTS = {v.format: v for v in (CHARGE_ONLY, CHARGE_TIME, MULTISTART)}
 BY_LIKELIHOOD = {"charge-only": CHARGE_ONLY, "charge-time": CHARGE_TIME}

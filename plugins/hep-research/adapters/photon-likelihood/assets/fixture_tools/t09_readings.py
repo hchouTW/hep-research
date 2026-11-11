@@ -13,7 +13,8 @@ Readings: fit counts by failure kind; pulls of the converged fits with an ok cov
 t04-values-v4.md section 5 uses) and width (half the 15.87 % to 84.13 % quantile range), for x, y, z, E_vis and the two
 direction components. Direction: residual (d_fit - d_true) . e_k at the truth frame (section 7), its variance from the fitted
 tangent covariance projected with J_kj = e_k(truth) . e_j(fit) (case O-direction of the D3 stage 1 report). For a
-light-likelihood-product/2 (the joint charge-time fit, D3 stage 2) the t0 pull too, (t0_fit - t0_true) / sigma(t0).
+light-likelihood-product/2 (the joint charge-time fit, D3 stage 2) or /3 (its multistart fit, D3 stage 3) the t0 pull too,
+(t0_fit - t0_true) / sigma(t0).
 Usage: t09_readings.py --product P --truth T --label L. Exit 0 both gates pass, 1 a gate fails, 2 refused input.
 """
 from __future__ import annotations
@@ -101,7 +102,7 @@ def main(argv=None) -> int:
         print(f"REFUSED {label}: the truth file belongs to another readout")
         return 2
     events = read.events
-    timed = read.header["format"] == product.FORMAT_JOINT
+    timed = read.header["format"] in (product.FORMAT_JOINT, product.FORMAT_MULTISTART)
     names = PULL_NAMES_JOINT if timed else PULL_NAMES
     print(f"READING {label} format {read.header['format']}")
     print(f"READING {label} label {LABEL}; development reading, no gate of t04-values-v4.md, no quality verdict")

@@ -13,6 +13,11 @@ Stage 2 (D3 stage 2 brief): the time term, the first-arrival density with the no
 (arrival_response, joint); the fit's seventh parameter t0 (fit.fit_joint_event); the product light-likelihood-product/2. The
 charge-only path of stage 1 is kept as an option, unchanged.
 
+Stage 3 (D3 stage 3 brief): multistart seeds of the joint fit, all from the data (multistart), their count and choice rule in a
+budget file recorded by hash (t04-values-v4.md section 2.2, K10), every start recorded in light-likelihood-product/3. The one-seed
+path of stage 2 stays the default, unchanged. The truth-start fit and the wrong-minimum readings live on the scoring side
+(the fixture tools), which this package never imports.
+
 Every result is labelled shared-model closure: the events and the fit share the light model, so it tests the code, not the model
 (plan section 11.1).
 """

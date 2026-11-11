@@ -2,7 +2,9 @@
 """reco.light.channel-likelihood/1, the T09 development binding (decisions.md, U12 A): the all-channel photon likelihood and its
 fit on a light-readout/1 readout, labelled shared-model closure. --likelihood charge-only (the default: stage 1's charge-only
 likelihood, light-likelihood-product/1, unchanged) or charge-time (stage 2's joint charge and first-arrival-time likelihood with
-t0, light-likelihood-product/2). A development binding in Python, not a native backend.
+t0, light-likelihood-product/2). --starts one (the default: stage 2's one joint start) or multistart (charge-time only, D3
+stage 3: the budget file's starts, the best converged one reported, every start recorded, light-likelihood-product/3; --budget,
+default the t09-multistart-1 budget beside this script). A development binding in Python, not a native backend.
 
 Operations (contracts/tool_contracts/photon_likelihood.json):
   fit            readout -> product. Data side: it reads no truth and imports no generator.
@@ -52,14 +54,20 @@ def parser() -> argparse.ArgumentParser:
     rec.add_argument("--likelihood", choices=("charge-only", "charge-time"), default="charge-only",
                      help="charge-only (default; light-likelihood-product/1) or charge-time (joint with the first-arrival time, t0 "
                           "fitted; light-likelihood-product/2)")
+    rec.add_argument("--starts", choices=("one", "multistart"), default="one",
+                     help="one (default; stage 2's one joint start) or multistart (charge-time only: the budget's starts, every one "
+                          "recorded; light-likelihood-product/3)")
+    rec.add_argument("--budget", help="light-likelihood-multistart/1 budget for --starts multistart; default the t09-multistart-1 "
+                                      "budget beside this script")
     chk = sub.add_parser("check-product", help="read a product back and recompute ln L and the per-channel probability check")
-    chk.add_argument("--product", required=True, help="light-likelihood-product/1 or /2 to read")
+    chk.add_argument("--product", required=True, help="light-likelihood-product/1, /2 or /3 to read")
     chk.add_argument("--configuration", help="the configuration the product was made with; default as for fit")
+    chk.add_argument("--budget", help="the multistart budget a /3 product was made with (read for /3 only); default as for fit")
     return ap
 
 
 def fit_readout(args) -> int:
-    from light_recipe import LABEL, configuration, fit, joint, likelihood, product, readout
+    from light_recipe import LABEL, configuration, fit, joint, likelihood, multistart, product, readout
     started = time.perf_counter()
     if not Path(args.readout).is_file():
         return report("fit", "rejected", f"no such input file: readout {args.readout}")
@@ -68,8 +76,11 @@ def fit_readout(args) -> int:
     target = Path(args.product)
     if target.exists():
         return report("fit", "rejected", f"product file already exists, never overwritten: {target}")
+    if args.starts == "multistart" and args.likelihood != "charge-time":
+        return report("fit", "rejected", "--starts multistart needs --likelihood charge-time")
     try:
         cfg = configuration.load(args.configuration)
+        budget = multistart.load(args.budget) if args.starts == "multistart" else None
         rd = readout.read_file(args.readout)
         model = likelihood.Model(cfg)
         if rd.header["threshold"] != cfg.charge_threshold:
@@ -82,14 +93,14 @@ def fit_readout(args) -> int:
             raise readout.ReadoutError(f"a hit charge above {likelihood.CHARGE_DOMAIN:g} is outside the model's domain")
         if args.likelihood == "charge-time" and (abs(rd.time[hit]) > joint.TIME_DOMAIN).any():
             raise readout.ReadoutError(f"a hit time beyond +-{joint.TIME_DOMAIN:g} ns is outside the model's domain")
-    except (configuration.ConfigurationError, readout.ReadoutError) as exc:
+    except (configuration.ConfigurationError, multistart.BudgetError, readout.ReadoutError) as exc:
         return report("fit", "rejected", str(exc))
     partial = target.with_name(target.name + ".partial")
     converged = probability_failures = 0
     failures: dict = {}
     try:
         with open(partial, "w", encoding="utf-8") as stream:
-            writer = product.Writer(stream, product.header_document(args.product_id, rd, cfg, likelihood=args.likelihood))
+            writer = product.Writer(stream, product.header_document(args.product_id, rd, cfg, likelihood=args.likelihood, budget=budget))
             for i in range(rd.events):
                 if args.likelihood == "charge-only":
                     event = likelihood.EventData.from_readout(rd, i)
@@ -97,6 +108,12 @@ def fit_readout(args) -> int:
                     res = fit.fit_event(model, event, start)
                     check = product.check_at(model, event, start, res)
                     doc = product.event_document(i, event, start, res, check)
+                elif budget is not None:
+                    tev = joint.TimedEvent.from_readout(rd, i)
+                    ms = multistart.fit_multistart(model, tev, budget)
+                    res = ms.result
+                    check = product.check_at(model, tev.event, ms.anchor, res)
+                    doc = product.multistart_event_document(i, tev, ms, check)
                 else:
                     tev = joint.TimedEvent.from_readout(rd, i)
                     start, prefit, origin = fit.joint_seed(model, tev)
@@ -116,7 +133,8 @@ def fit_readout(args) -> int:
     except Exception as exc:  # noqa: BLE001 - a defect of the recipe: status error, never the stop
         partial.unlink(missing_ok=True)
         return report("fit", "error", f"unexpected {type(exc).__name__}: {exc}")
-    fields = {"likelihood": args.likelihood, "events": rd.events, "converged": converged, "fit_failures": dict(sorted(failures.items())),
+    fields = {"likelihood": args.likelihood, "starts": args.starts, "budget_sha256": None if budget is None else budget.sha256,
+              "events": rd.events, "converged": converged, "fit_failures": dict(sorted(failures.items())),
               "probability_failures": probability_failures, "label": LABEL, "product": str(target), "input_sha256": rd.sha256,
               "configuration_sha256": cfg.sha256, "seconds": round(time.perf_counter() - started, 3)}
     if probability_failures:
@@ -126,13 +144,14 @@ def fit_readout(args) -> int:
 
 
 def check_product(args) -> int:
-    from light_recipe import configuration, likelihood, product
+    from light_recipe import configuration, likelihood, multistart, product
     if not Path(args.product).is_file():
         return report("check-product", "rejected", f"no such input file: {args.product}")
     try:
         cfg = configuration.load(args.configuration)
-        read = product.read_product(args.product, likelihood.Model(cfg), cfg)
-    except (configuration.ConfigurationError, product.ProductError) as exc:
+        budget = multistart.load(args.budget) if product.format_of(args.product) == product.FORMAT_MULTISTART else None
+        read = product.read_product(args.product, likelihood.Model(cfg), cfg, budget)
+    except (configuration.ConfigurationError, multistart.BudgetError, product.ProductError) as exc:
         return report("check-product", "rejected", str(exc))
     bad = [doc["event"] for doc in read.events if doc["probability_check"]["failures"] > 0]
     fields = {"format": read.header["format"], "events": len(read.events), "converged": sum(doc["fit"]["status"] == "converged" for doc in read.events),

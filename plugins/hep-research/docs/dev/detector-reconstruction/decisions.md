@@ -532,3 +532,17 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
 - **Readings.**
   - Pull widths: 0.92 to 1.11.
   - Failures: 23 of 7,000; the prediction of at most 5 per stratum was refuted in two B1 strata (7 each).
+
+## T09, D3 stage 3: multistart seeds and the truth-start comparator
+
+2026-11-11, coordinator. Job of record 7571207 (hpa-wn26, 1 h 21 min 37 s, PASS).
+
+- **Data-side starts.** There are eight, all from the data only: stage 2's start, reversed, turned plus and minus e1 and e2, mirrored, and the charge seed. Their count and rule are in `t09-multistart-1.budget.json`, recorded by hash (K10), so products /1 and /2 stay byte-equal.
+- **Choosing the result.** The highest ln L among the converged starts is reported. A tie within 1e-6 goes to the lowest index. If every start fails, the fit fails as `all-starts-failed`. Every start is recorded in product /3.
+- **Truth-start fit.** It runs on the scoring side only, with the same recipe started at truth, and is never written into a data-side product.
+- **Wrong-minimum clauses**, as v4 section 7:
+  - clause (b) divides by the truth-start fit's sigmas;
+  - in B1, clause (b) is reported but not counted;
+  - a failed truth-start fit is counted as "comparator unavailable", and the subset whose last point already proves clause (a) is reported separately.
+- **Event counts.** The multistart and truth-start runs use the first 250 events of each stratum, from a second harness run tied to the first 250 events of the 500-event run. This keeps the job well inside the partition's 4 h.
+- **Readings.** On 3,500 events, one seed gave 11 failures and 21 clause (a) wrong minima; multistart gave 0 of each. No rate test runs before K09.

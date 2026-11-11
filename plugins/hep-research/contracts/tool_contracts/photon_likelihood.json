@@ -5,7 +5,7 @@
  "operations": [
   {
    "operation_id": "fit",
-   "summary": "reco.light.channel-likelihood/1, a development binding: the all-channel photon likelihood (every live channel; hit and no-hit terms on one threshold model, so their probabilities sum to one per channel; saturated channels censored; dead and disabled channels excluded, never unhit) on the stated analytic light model of t04-values-v4.md section 4.3, fitted from one seed; --likelihood charge-only (default, stage 1: vertex, direction and E_vis, light-likelihood-product/1, t0 not estimated) or charge-time (stage 2: the joint charge and first-arrival-time likelihood with the noise rate, t0 fitted too, light-likelihood-product/2); with the per-channel probability check; labelled shared-model closure",
+   "summary": "reco.light.channel-likelihood/1, a development binding: the all-channel photon likelihood (every live channel; hit and no-hit terms on one threshold model, so their probabilities sum to one per channel; saturated channels censored; dead and disabled channels excluded, never unhit) on the stated analytic light model of t04-values-v4.md section 4.3, fitted from one seed or, with --starts multistart, from the budget's starts; --likelihood charge-only (default, stage 1: vertex, direction and E_vis, light-likelihood-product/1, t0 not estimated) or charge-time (stage 2: the joint charge and first-arrival-time likelihood with the noise rate, t0 fitted too, light-likelihood-product/2); with the per-channel probability check; labelled shared-model closure; --starts one (default: stage 2's one joint start) or multistart (charge-time only, stage 3: the starts of the budget file, derived from the data alone, the best converged start reported and every start recorded, light-likelihood-product/3)",
    "invocation": {
     "kind": "cli",
     "options": [
@@ -28,6 +28,14 @@
      {
       "flag": "--likelihood",
       "input": "likelihood"
+     },
+     {
+      "flag": "--starts",
+      "input": "starts"
+     },
+     {
+      "flag": "--budget",
+      "input": "budget"
      }
     ],
     "output": "json-stdout"
@@ -45,7 +53,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "the light-likelihood-product/1 (charge-only) or /2 (charge-time) file to write, only when the run finishes; an existing file is refused, never overwritten"
+     "constraint": "the light-likelihood-product/1 (charge-only), /2 (charge-time) or /3 (charge-time, multistart) file to write, only when the run finishes; an existing file is refused, never overwritten"
     },
     {
      "name": "product_id",
@@ -67,6 +75,20 @@
      "unit": "n/a",
      "required": false,
      "constraint": "charge-only (default; stage 1's likelihood and product, unchanged) or charge-time (the joint charge and first-arrival-time likelihood of stage 2 with t0 in the fit; light-likelihood-product/2)"
+    },
+    {
+     "name": "starts",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one (default; stage 2's one joint start, its products unchanged) or multistart (needs --likelihood charge-time, refused otherwise: the budget's starts in its order, start 0 stage 2's start; the converged start with the highest ln L is reported, ties within the budget's tolerance to the lowest index, all failed as the kind all-starts-failed; light-likelihood-product/3)"
+    },
+    {
+     "name": "budget",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a light-likelihood-multistart/1 file (exact keys format, starts, tie_tolerance; start 0 prefit; known start names), recorded by SHA-256 in product /3's header; default the t09-multistart-1 budget beside the script"
     }
    ],
    "outputs": [
@@ -92,6 +114,16 @@
     },
     {
      "name": "likelihood",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "starts",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "budget_sha256",
      "kind": "label",
      "unit": "n/a"
     },
@@ -171,7 +203,7 @@
   },
   {
    "operation_id": "check-product",
-   "summary": "Read a light-likelihood-product/1 or /2 back, refusing a malformed or incomplete product (any malformed field is refused, never an internal error), and recompute ln L (the joint ln L for /2) and the per-channel probability check of every event from the product alone (the T09 sheet's stop)",
+   "summary": "Read a light-likelihood-product/1, /2 or /3 back, refusing a malformed or incomplete product (any malformed field is refused, never an internal error), and recompute ln L (the joint ln L for /2) and the per-channel probability check of every event from the product alone (the T09 sheet's stop); for /3 also every start's record, its start point and ln L, the choice and the reported fit against the chosen start",
    "invocation": {
     "kind": "cli",
     "options": [
@@ -182,6 +214,10 @@
      {
       "flag": "--configuration",
       "input": "configuration"
+     },
+     {
+      "flag": "--budget",
+      "input": "budget"
      }
     ],
     "output": "json-stdout"
@@ -192,7 +228,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a light-likelihood-product/1 or /2 file made with the configuration given"
+     "constraint": "a light-likelihood-product/1, /2 or /3 file made with the configuration (and for /3 the budget) given"
     },
     {
      "name": "configuration",
@@ -200,6 +236,13 @@
      "unit": "n/a",
      "required": false,
      "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+    },
+    {
+     "name": "budget",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "the light-likelihood-multistart/1 budget a /3 product was made with, read for a /3 product only; default the t09-multistart-1 budget beside the script"
     }
    ],
    "outputs": [
