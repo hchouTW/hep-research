@@ -18,6 +18,12 @@ budget file recorded by hash (t04-values-v4.md section 2.2, K10), every start re
 path of stage 2 stays the default, unchanged. The truth-start fit and the wrong-minimum readings live on the scoring side
 (the fixture tools), which this package never imports.
 
+Stage 4 (D3 stage 4 brief): the topology step (topology), the two-hypothesis check the sheet requires: H2, two point sources with
+each source its own t0, on the joint likelihood with both sources' light summed per channel, its starts from the data and H1's fit in a
+topology budget recorded by hash, and the choice of t04-values-v4.md section 7 (H2 if and only if 2 (lnL_2 - lnL_1) >= 30, the
+frozen penalty), in light-likelihood-product/4, made from the stage 3 product /3 without refitting H1. Products /1 to /3 are
+unchanged. The mis-ID, mirrored, reversed and D_bar readings live on the scoring side.
+
 Every result is labelled shared-model closure: the events and the fit share the light model, so it tests the code, not the model
 (plan section 11.1).
 """

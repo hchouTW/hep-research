@@ -30,7 +30,9 @@ compare: per stratum, for the one-seed fit (light-likelihood-product/2) and the 
 Usage: t09_truth_start.py fit --readout R --truth T --out F
        t09_truth_start.py compare --one-seed P2 --multistart P3 --truth T --truth-start F --label L
 Exit codes are core/status.py's: 0 ok (compare: both gates pass), 1 a gate fails, 2 refused input or an unexpected error (an
-ERROR line).
+ERROR line). Re-review N-A (D3 stage 4): the last stdout line of every run this tool controls is RESULT {json} with the
+operation, the run status (ok, failed, rejected, error) and its exit code, so a job tells a failed gate (exit 1, status failed)
+from a crash (no RESULT line: a bare traceback also exits 1). The READING and GATE lines are unchanged.
 """
 from __future__ import annotations
 
@@ -115,7 +117,7 @@ def run_fit(args) -> int:
     out = Path(args.out)
     if out.exists():
         print(f"REFUSED truth-start: {out} exists, never overwritten")
-        return exit_code("rejected")
+        return "rejected"
     try:
         cfg = configuration.load()
         model = likelihood.Model(cfg)
@@ -123,10 +125,10 @@ def run_fit(args) -> int:
         head, truth = t09_fixture_files.read_truth(args.truth)
     except (configuration.ConfigurationError, readout.ReadoutError, t09_fixture_files.FixtureError) as exc:
         print(f"REFUSED truth-start: {exc}")
-        return exit_code("rejected")
+        return "rejected"
     if head["readout_sha256"] != rd.sha256 or head["events"] != rd.events:
         print("REFUSED truth-start: the truth file belongs to another readout")
-        return exit_code("rejected")
+        return "rejected"
     header = {"format": FORMAT, "role": ROLE, "label": LABEL, "rule": RULE, "readout_sha256": rd.sha256,
               "truth_sha256": hashlib.sha256(Path(args.truth).read_bytes()).hexdigest(), "configuration_sha256": cfg.sha256,
               "events": rd.events}
@@ -146,7 +148,7 @@ def run_fit(args) -> int:
         partial.unlink(missing_ok=True)
         raise
     print(f"READING truth-start fits events {rd.events} by outcome {dict(sorted(counts.items()))} (scoring side, never a result)")
-    return exit_code("ok")
+    return "ok"
 
 
 # --- the clauses -------------------------------------------------------------------------------------------------------
@@ -267,18 +269,18 @@ def run_compare(args) -> int:
     except (configuration.ConfigurationError, multistart.BudgetError, product.ProductError, t09_fixture_files.FixtureError,
             TruthStartError) as exc:
         print(f"REFUSED {label}: {exc}")
-        return exit_code("rejected")
+        return "rejected"
     if one.header["format"] != product.FORMAT_JOINT or many.header["format"] != product.FORMAT_MULTISTART:
         print(f"REFUSED {label}: --one-seed must be light-likelihood-product/2 and --multistart /3")
-        return exit_code("rejected")
+        return "rejected"
     sha = {one.header["input"]["sha256"], many.header["input"]["sha256"], head["readout_sha256"], ts_head["readout_sha256"]}
     if len(sha) != 1 or not (len(one.events) == len(many.events) == head["events"] == len(ts_docs)):
         print(f"REFUSED {label}: the products, the truth file and the truth-start file do not belong to one readout")
-        return exit_code("rejected")
+        return "rejected"
     if ts_head["truth_sha256"] != hashlib.sha256(Path(args.truth).read_bytes()).hexdigest() or \
             {ts_head["configuration_sha256"], one.header["configuration"]["sha256"], many.header["configuration"]["sha256"]} != {cfg.sha256}:
         print(f"REFUSED {label}: the truth-start file was made from another truth file or configuration (review N5)")
-        return exit_code("rejected")
+        return "rejected"
     counted = clause_b_counts(head)
     bin_ = bin_of(head)
     print(f"READING {label} label {LABEL}; development reading, no rate test and no gate of t04-values-v4.md before K09")
@@ -324,7 +326,18 @@ def run_compare(args) -> int:
              and not (b["fit"]["status"] == "converged" and b["fit"]["ln_likelihood"] >= a["fit"]["ln_likelihood"] - tie)]
     print(f"GATE {label} multistart ln L at least the one-seed ln L where the one-seed fit converged (tie tolerance {tie:g}), "
           f"events {tallies['one-seed']['converged']}, below {len(lower)}: {'PASS' if not lower else 'FAIL'}")
-    return exit_code("ok" if not defects and not lower else "failed")
+    return "ok" if not defects and not lower else "failed"
+
+
+REASONS = {"ok": "", "failed": "a gate failed (its GATE line ends FAIL)", "rejected": "an input was refused (its REFUSED line)"}
+
+
+def result_line(operation: str, status: str, reason: str) -> int:
+    """Print the RESULT line (re-review N-A) and return the exit code, core/status.py's for the status."""
+    code = exit_code(status)
+    print("RESULT " + json.dumps({"operation": operation, "status": status, "exit_code": code, "reason": reason}, sort_keys=True),
+          flush=True)
+    return code
 
 
 def main(argv=None) -> int:
@@ -342,10 +355,13 @@ def main(argv=None) -> int:
     c.add_argument("--label", required=True)
     args = ap.parse_args(argv)
     try:
-        return run_fit(args) if args.operation == "fit" else run_compare(args)
+        status = run_fit(args) if args.operation == "fit" else run_compare(args)
     except Exception as exc:  # noqa: BLE001 - a defect of the tool or the recipe: status error, never a gate failing
         print(f"ERROR truth-start {args.operation}: unexpected {type(exc).__name__}: {exc}", flush=True)
-        return exit_code("error")
+        return result_line(args.operation, "error", f"unexpected {type(exc).__name__}: {exc}")
+    # Review N5: run_fit and run_compare return a run status, never an exit code, so an "error" a later change returns stays an
+    # error (exit 2, status error) and is never read as "rejected".
+    return result_line(args.operation, status, REASONS.get(status, f"status {status!r}"))
 
 
 if __name__ == "__main__":

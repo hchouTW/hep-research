@@ -12,7 +12,10 @@ the one freeze-a.md records (FROZEN_GENERATOR_SHA256), and it is loaded from tha
 - <stem>.truth.npz: role truth: per event N_exp, vertex, direction, t0 and E_vis, the fixture's dead channels (the generator's
   DEAD_CHANNELS in the dead control, none otherwise), and the SHA-256 of the readout it belongs to.
 
-The main fixture and the dead and saturation controls only: the two-source control waits for the topology stage.
+The two-source control (D3 stage 4, case O-two-source-harness): the readout is built the same way; its truth goes to a file of
+its own format, t09-truth-two-source/1 (role truth): per event both sources' N_exp, vertex, direction and E_vis, the shared t0
+and the separation. read_truth (t09-truth/1) refuses it, read_truth_two_source reads it, so a one-source reader never misreads
+it. The main fixture and the dead and saturation controls are written exactly as before.
 Usage: t09_fixture_files.py --generator GEN --fixture F --block B --stratum S --count N --out-dir DIR --stem STEM
 Exit 0 written, 2 refused input (a wrong generator hash included), 3 numpy missing.
 """
@@ -29,7 +32,8 @@ HERE = Path(__file__).resolve().parent
 FROZEN_GENERATOR_SHA256 = "2657f56bfc1fc7f68a93e205b2c66f80b52018494a78346bcd4e955a9be7da76"
 TRUTH_FORMAT = "t09-truth/1"
 TRUTH_ROLE = "truth"
-FIXTURES = ("main", "dead", "saturation")
+TRUTH_TWO_FORMAT = "t09-truth-two-source/1"
+FIXTURES = ("main", "dead", "saturation", "two-source")
 DATA_FIELDS = {"state", "charge", "time", "saturated"}
 
 
@@ -63,25 +67,35 @@ def stratum_files(generator, fixture: str, block: int, stratum: int, count: int,
     if count < 1:
         raise FixtureError("count must be at least 1")
     channels = generator.N_SENSORS
+    two = fixture == "two-source"
+    sources = 2 if two else 1
     state = numpy.empty((count, channels), numpy.int8)
     charge = numpy.empty((count, channels))
     time_ = numpy.empty((count, channels))
     saturated = numpy.empty((count, channels), bool)
-    truth = {"n_exp": numpy.empty(count), "vertex": numpy.empty((count, 3)), "direction": numpy.empty((count, 3)),
-             "t0": numpy.empty(count), "e_vis": numpy.empty(count)}
+    if two:
+        truth = {"n_exp": numpy.empty((count, 2)), "vertex": numpy.empty((count, 2, 3)), "direction": numpy.empty((count, 2, 3)),
+                 "t0": numpy.empty(count), "e_vis": numpy.empty((count, 2)), "separation": numpy.empty(count)}
+    else:
+        truth = {"n_exp": numpy.empty(count), "vertex": numpy.empty((count, 3)), "direction": numpy.empty((count, 3)),
+                 "t0": numpy.empty(count), "e_vis": numpy.empty(count)}
     for i in range(count):
         ev = generator.event(fixture, block, stratum, i)
         fields, tr = ev["data"], ev["truth"]
         if set(fields) != DATA_FIELDS:
             raise FixtureError(f"event {i}: data fields {sorted(fields)} are not the four this harness hands out")
-        if len(tr["n_exp"]) != 1:
-            raise FixtureError(f"event {i}: {len(tr['n_exp'])} sources; one source is handed out in this stage")
+        if len(tr["n_exp"]) != sources:
+            raise FixtureError(f"event {i}: {len(tr['n_exp'])} sources; the {fixture} fixture has {sources}")
         # The generator's state codes (UNHIT 0, HIT 1, DEAD 2) are the format's LIVE_UNHIT, LIVE_HIT, DEAD.
         state[i] = numpy.select([fields["state"] == generator.UNHIT, fields["state"] == generator.HIT, fields["state"] == generator.DEAD],
                                 [readout.LIVE_UNHIT, readout.LIVE_HIT, readout.DEAD], -1)
         charge[i], time_[i], saturated[i] = fields["charge"], fields["time"], fields["saturated"]
-        truth["n_exp"][i], truth["vertex"][i], truth["direction"][i] = tr["n_exp"][0], tr["vertex"][0], tr["direction"][0]
-        truth["t0"][i], truth["e_vis"][i] = tr["t0"], tr["e_vis"][0]
+        if two:
+            truth["n_exp"][i], truth["vertex"][i], truth["direction"][i] = tr["n_exp"], tr["vertex"], tr["direction"]
+            truth["t0"][i], truth["e_vis"][i], truth["separation"][i] = tr["t0"], tr["e_vis"], tr["separation"]
+        else:
+            truth["n_exp"][i], truth["vertex"][i], truth["direction"][i] = tr["n_exp"][0], tr["vertex"][0], tr["direction"][0]
+            truth["t0"][i], truth["e_vis"][i] = tr["t0"], tr["e_vis"][0]
     clip = float(generator.CLIP) if fixture == "saturation" else None
     try:
         content = readout.readout_bytes(state, charge, time_, saturated, float(generator.THRESHOLD), clip)
@@ -92,7 +106,7 @@ def stratum_files(generator, fixture: str, block: int, stratum: int, count: int,
     readout_path = out_dir / f"{stem}.readout"
     readout_path.write_bytes(content)
     dead = numpy.asarray(generator.DEAD_CHANNELS, numpy.int64) if fixture == "dead" else numpy.zeros(0, numpy.int64)
-    header = {"format": TRUTH_FORMAT, "role": TRUTH_ROLE, "generator": generator.GENERATOR, "fixture": fixture, "block": block,
+    header = {"format": TRUTH_TWO_FORMAT if two else TRUTH_FORMAT, "role": TRUTH_ROLE, "generator": generator.GENERATOR, "fixture": fixture, "block": block,
               "stratum": stratum, "events": count, "readout_sha256": hashlib.sha256(content).hexdigest()}
     truth_path = out_dir / f"{stem}.truth.npz"
     with open(truth_path, "wb") as stream:
@@ -101,8 +115,9 @@ def stratum_files(generator, fixture: str, block: int, stratum: int, count: int,
             for name, p in (("readout", readout_path), ("truth", truth_path))}
 
 
-def read_truth(path) -> tuple[dict, dict]:
-    """A t09-truth/1 file: (header, arrays). Refuses any other role, so a data file is never read as truth or the reverse."""
+def read_truth(path, truth_format=TRUTH_FORMAT) -> tuple[dict, dict]:
+    """A t09-truth/1 file: (header, arrays). Refuses any other format or role, so a data file is never read as truth or the
+    reverse, and a two-source truth file is never read as one source's."""
     import numpy
     try:
         with numpy.load(path, allow_pickle=False) as npz:
@@ -110,9 +125,14 @@ def read_truth(path) -> tuple[dict, dict]:
     except (OSError, ValueError) as exc:
         raise FixtureError(f"truth file cannot be read: {exc}") from None
     header = json.loads(str(arrays.pop("header")))
-    if header.get("format") != TRUTH_FORMAT or header.get("role") != TRUTH_ROLE:
-        raise FixtureError("not a t09-truth/1 file of role truth")
+    if header.get("format") != truth_format or header.get("role") != TRUTH_ROLE:
+        raise FixtureError(f"not a {truth_format} file of role truth")
     return header, arrays
+
+
+def read_truth_two_source(path) -> tuple[dict, dict]:
+    """A t09-truth-two-source/1 file: (header, arrays); refuses a one-source truth file."""
+    return read_truth(path, TRUTH_TWO_FORMAT)
 
 
 def main(argv=None) -> int:

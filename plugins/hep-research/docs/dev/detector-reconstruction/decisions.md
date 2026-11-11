@@ -546,3 +546,36 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
   - a failed truth-start fit is counted as "comparator unavailable", and the subset whose last point already proves clause (a) is reported separately.
 - **Event counts.** The multistart and truth-start runs use the first 250 events of each stratum, from a second harness run tied to the first 250 events of the 500-event run. This keeps the job well inside the partition's 4 h.
 - **Readings.** On 3,500 events, one seed gave 11 failures and 21 clause (a) wrong minima; multistart gave 0 of each. No rate test runs before K09.
+
+## T09, D3 stage 4: topology and the controls
+
+2026-11-11, coordinator. Job chain of record: main 7575617, H2 array 7576269 (13 tasks) and collection 7576270, all PASS.
+
+**H2 model.** H2 has 14 parameters, 7 per source, each source with its own t0, exactly as the frozen calc-t09-null-h2.py that set v4's penalty. The coordinator ruled against the implementer's 13-parameter shared-t0 H2. A smaller H2, or a weaker search, lowers 2(lnL_2 - lnL_1) under H1 truth, which is the unsafe direction for the mis-ID test.
+
+**H2 search.**
+- 8 data-side starts, in `t09-topology-2.budget.json` by hash (K10).
+- The reported H2 point is the highest ln L among the starts, with H1 as the boundary.
+- Where H1 failed there is no H2 fit; such events are counted.
+
+**Choice.** H2 is chosen if and only if 2(lnL_2 - lnL_1) >= 30. The penalty is frozen from v4 section 7, and the reader refuses any other value.
+
+**Readings.**
+- Mis-ID with H1 truth in the main strata, and with H2 truth in the two-source control.
+- Mirrored and reversed, by v4's definitions, pooled over B2-B4.
+- D_bar, as v4 defines it: charge-only, on expected data, 8 starts, reported only.
+
+**Results.** All readings only:
+
+| Reading | Result |
+| --- | --- |
+| H1-truth mis-ID | 6 of 3,000 |
+| H2-truth mis-ID | 0 of 500 (smallest statistic 586) |
+| Reversed and mirrored | 0 |
+| D_bar median | 38 |
+
+**Job layout.** The H2 work runs as a Slurm array behind the main job (afterok), with a collection step that runs only when every task has passed.
+
+**Script fix.** The first array failed before any compute: an apostrophe inside `${1:?...}` swallowed the variable assignments. The coordinator fixed the usage lines and resubmitted. No code changed.
+
+**For K09 (user item).** Whether an undecided two-source event counts as a miss.

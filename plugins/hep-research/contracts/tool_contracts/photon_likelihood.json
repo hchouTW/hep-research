@@ -218,6 +218,10 @@
      {
       "flag": "--budget",
       "input": "budget"
+     },
+     {
+      "flag": "--topology-budget",
+      "input": "topology_budget"
      }
     ],
     "output": "json-stdout"
@@ -228,7 +232,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a light-likelihood-product/1, /2 or /3 file made with the configuration (and for /3 the budget) given"
+     "constraint": "a light-likelihood-product/1, /2, /3 or /4 file made with the configuration (and for /3 and /4 the budget, for /4 the topology budget) given"
     },
     {
      "name": "configuration",
@@ -242,7 +246,14 @@
      "kind": "path",
      "unit": "n/a",
      "required": false,
-     "constraint": "the light-likelihood-multistart/1 budget a /3 product was made with, read for a /3 product only; default the t09-multistart-1 budget beside the script"
+     "constraint": "the light-likelihood-multistart/1 budget a /3 or /4 product was made with, read for /3 and /4 only; default the t09-multistart-1 budget beside the script"
+    },
+    {
+     "name": "topology_budget",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "the light-likelihood-topology/1 budget a /4 product was made with, read for /4 only; default the t09-topology-2 budget beside the script"
     }
    ],
    "outputs": [
@@ -320,6 +331,204 @@
    ],
    "side_effects": {
     "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "topology",
+   "summary": "reco.light.channel-likelihood/1, D3 stage 4: from a light-readout/1 readout and its multistart product light-likelihood-product/3 (H1, read, never refitted), the two-source hypothesis H2 on the joint charge-time likelihood with both sources' light summed per channel and each source its own t0 (14 coordinates, 7 per source; the per-channel hit and no-hit probabilities at H2's mean counts checked, the T09 stop), fitted from the starts of the topology budget (from the data and H1's fit alone), and the choice of t04-values-v4.md section 7: H2 if and only if 2 (lnL_2 - lnL_1) >= 30, the frozen penalty; writes light-likelihood-product/4 (the /3 event lines unchanged plus the topology record); labelled shared-model closure",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--readout",
+      "input": "readout"
+     },
+     {
+      "flag": "--h1-product",
+      "input": "h1_product"
+     },
+     {
+      "flag": "--product",
+      "input": "product"
+     },
+     {
+      "flag": "--product-id",
+      "input": "product_id"
+     },
+     {
+      "flag": "--configuration",
+      "input": "configuration"
+     },
+     {
+      "flag": "--budget",
+      "input": "budget"
+     },
+     {
+      "flag": "--topology-budget",
+      "input": "topology_budget"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "readout",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the light-readout/1 file, role reconstruction-input, the H1 product was made from (its SHA-256 must be the /3's input); its threshold must be the configuration's"
+    },
+    {
+     "name": "h1_product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the light-likelihood-product/3 (multistart) of that readout, made with the configuration and budget given; read and checked in full (ln L recomputed) before use"
+    },
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the light-likelihood-product/4 file to write, only when the run finishes; an existing file is refused, never overwritten"
+    },
+    {
+     "name": "product_id",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a non-empty identity, recorded in the product header"
+    },
+    {
+     "name": "configuration",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+    },
+    {
+     "name": "budget",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "the light-likelihood-multistart/1 budget the /3 was made with; default the t09-multistart-1 budget beside the script"
+    },
+    {
+     "name": "topology_budget",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a light-likelihood-topology/1 budget of H2's starts (exact keys format, starts, tie_tolerance); default the t09-topology-2 budget beside the script"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "events",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "choices",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "h2_starts",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "penalty",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "topology_budget_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "h1_product_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "probability_failures",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "label",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "product",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "input_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "configuration_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "seconds",
+     "kind": "duration",
+     "unit": "s"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "a live channel's hit and no-hit probabilities do not sum to one within 64 eps (1 + m |ln m|) at an event's H1 point or at its H2 point (H2's mean counts m_1 + m_2 + dark): the T09 sheet's stop; the product is written and records it"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an input is refused (missing, malformed, a header key that is not the format's, a threshold other than the configuration's, a channel count other than the geometry's, a dead channel with a value, a saturated flag without a saturation value, a configuration key that is not section 4.3's, a product file that already exists); stdout carries status rejected (core/status.py) and the reason; no product is written; or an internal error (an unexpected exception, a defect of the recipe or reader, never the probability-sum stop): stdout carries status error (core/status.py maps error to 2) and the reason, and no product or partial file is written. The JSON status, rejected or error, tells the two apart"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy or scipy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
     "network": false,
     "subprocess": false
    }

@@ -29,6 +29,16 @@ budget, start 0 against the seed, the choice against the rule recomputed from th
 against the chosen start; given the model it recomputes every start point from the anchor and the data, and every start's
 ln L at its end point. /1 and /2 are unchanged.
 
+light-likelihood-product/4 (D3 stage 4) is the topology product: /3's header (format /4, a hypothesis text naming H1 and H2)
+with the topology budget {format, sha256, starts, tie_tolerance}, the frozen penalty 30 and the rules, and the SHA-256 and
+product id of the /3 it was made from; each event line is the /3 event line unchanged plus `topology`: H2's starts (name, start
+point, status, failure, ln L, end point, iterations, rounds), its reported point and rule, its fit (both sources, each its own t0, the 14 x 14
+covariance where it converged), lnL_1, lnL_2 and where it comes from, the statistic 2 (lnL_2 - lnL_1), the penalty, the choice
+and the per-channel check at H2's point (topology.py). Its reader checks every /3 rule, then the topology record: the starts
+against the topology budget and H1's fit, the reported point against the rule, the H2 fit against the reported start, the
+statistic, lnL_2 and the choice recomputed from the recorded values, the penalty; given the model it recomputes every H2 start
+point from H1's fit and the data, every H2 start's ln L at its end point, and the check at H2's point. /1 to /3 are unchanged.
+
 Any structural exception while the reader checks a field (KeyError, TypeError, IndexError, AttributeError, ValueError,
 OverflowError) is a ProductError: a malformed field is refused (status rejected), never an internal error (re-review N5). The
 recomputation keeps its own rule (a ValueError there is a ProductError; anything else is a defect of the recipe).
@@ -43,7 +53,7 @@ from pathlib import Path
 
 import numpy
 
-from . import LABEL, LABEL_MEANING, LIKELIHOOD, LIKELIHOOD_JOINT, PARAMETERS, PARAMETERS_JOINT, PARAMETER_UNITS, RECIPE, joint, multistart, readout
+from . import LABEL, LABEL_MEANING, LIKELIHOOD, LIKELIHOOD_JOINT, PARAMETERS, PARAMETERS_JOINT, PARAMETER_UNITS, RECIPE, joint, multistart, readout, topology
 from .fit import CALLBACK_STOP, FAILURES, JOINT_CHART_RADIUS, JOINT_ORIGINS, SETTINGS, FitResult, JointSeed, Seed
 from .likelihood import (EPSILON, HESSIAN_STEPS, TOLERANCE_FACTOR, TOLERANCE_RULE, EventData, frame, log_likelihood,
                          probability_check)
@@ -102,6 +112,16 @@ STRUCTURAL = (KeyError, TypeError, IndexError, AttributeError, ValueError, Overf
 LN_L_TOLERANCE = 1e-9
 DEVIATION_TOLERANCE = 1e-14
 RATIO_TOLERANCE = 1e-3          # the ratio's recomputation, relative: its numerator is a rounding residue
+FORMAT_TOPOLOGY = "light-likelihood-product/4"
+HYPOTHESIS_TOPOLOGY = ("H1: one point source (the multistart fit); H2: two point sources, each with its own t0; the choice of "
+                       "t04-values-v4.md section 7 (the topology record)")
+TOPOLOGY_HEADER_KEYS = {"format", "sha256", "starts", "tie_tolerance", "penalty", "rule", "start_rules", "report_rule", "fit"}
+TOPOLOGY_KEYS = {"h2", "ln_likelihood_1", "ln_likelihood_2", "ln_likelihood_2_from", "statistic", "penalty", "choice", "rule",
+                 "probability_check"}
+H2_KEYS = {"starts", "reported", "fit"}
+H2_START_KEYS = {"name", "start", "status", "failure", "ln_likelihood", "end", "iterations", "rounds"}
+H2_FIT_KEYS = {"status", "failure", "sources", "covariance", "uncertainty_status", "ln_likelihood", "gradient_norm",
+               "newton_decrement", "iterations", "rounds"}
 
 
 class ProductError(ValueError):
@@ -121,10 +141,13 @@ class Variant:
     timed: bool
     multistart: bool = False
     failures: tuple = FAILURES
+    hypothesis: str = HYPOTHESIS
+    topology: bool = False
 
     @property
     def header_keys(self) -> set:
-        return HEADER_KEYS | {"budget"} if self.multistart else HEADER_KEYS
+        keys = HEADER_KEYS | {"budget"} if self.multistart else HEADER_KEYS
+        return keys | {"topology", "h1_product"} if self.topology else keys
 
     @property
     def size(self) -> int:
@@ -132,7 +155,7 @@ class Variant:
 
     def fixed_header(self) -> dict:
         return {"format": self.format, "recipe": RECIPE, "label": LABEL, "label_meaning": LABEL_MEANING, "likelihood": self.likelihood,
-                "hypothesis": HYPOTHESIS, "frame": FRAME_TEXT, "uncertainty": self.uncertainty, "not_estimated": self.not_estimated,
+                "hypothesis": self.hypothesis, "frame": FRAME_TEXT, "uncertainty": self.uncertainty, "not_estimated": self.not_estimated,
                 "fit_settings": self.settings, "hessian_steps": HESSIAN_STEPS, "retention": self.retention,
                 "probability_check": {**CHECK_HEADER, "rule": CHECK_RULE},
                 "parameters": [{"name": n, "unit": PARAMETER_UNITS[n]} for n in self.parameters],
@@ -219,6 +242,74 @@ def multistart_event_document(index: int, tev, ms, check: dict) -> dict:
     return {**doc, "starts": starts, "choice": {"chosen": ms.chosen, "rule": ms.choice}}
 
 
+def topology_header_document(h1_header: dict, h1_sha256: str, product_id: str, topology_budget) -> dict:
+    """The header of light-likelihood-product/4: the /3 header it was made from, with format /4, the hypothesis text, the
+    topology budget, the penalty and the rules, and the /3's SHA-256 and product id."""
+    if h1_header.get("format") != FORMAT_MULTISTART:
+        raise ValueError("the topology product is made from a light-likelihood-product/3")
+    return {**copy.deepcopy(h1_header), "format": FORMAT_TOPOLOGY, "hypothesis": HYPOTHESIS_TOPOLOGY, "product_id": product_id,
+            "topology": {**topology_budget.header(), "penalty": topology.PENALTY, "rule": topology.CHOICE_RULE,
+                         "start_rules": {name: topology.RULES[name] for name in topology_budget.starts},
+                         "report_rule": topology.REPORT_TEXT, "fit": topology.FIT_TEXT},
+            "h1_product": {"sha256": h1_sha256, "product_id": h1_header["product_id"]}}
+
+
+def fit_result_of(fit_doc: dict) -> FitResult:
+    """H1's FitResult from a /3 event line's fit, as the topology step reads it."""
+    arr = (lambda v: None if v is None else numpy.array(v, float))  # noqa: E731
+    frm = fit_doc["frame"]
+    return FitResult(fit_doc["status"], fit_doc["failure"], arr(fit_doc["vertex"]), arr(fit_doc["direction"]), fit_doc["e_vis"],
+                     arr(fit_doc["covariance"]), fit_doc["uncertainty_status"], fit_doc["ln_likelihood"], fit_doc["gradient_norm"],
+                     fit_doc["newton_decrement"], fit_doc["iterations"], fit_doc["rounds"], None if frm is None else arr(frm["e1"]),
+                     None if frm is None else arr(frm["e2"]), fit_doc["t0"])
+
+
+def _two_point_document(point) -> dict:
+    return {"sources": [{"vertex": _vec(point.vertices[j]), "direction": _vec(point.directions[j]), "e_vis": float(point.e_vis[j]),
+                         "t0": float(point.t0[j])} for j in range(2)]}
+
+
+def _two_fit_document(res) -> dict:
+    sources = None
+    if res.point is not None:
+        sources = []
+        for j in range(2):
+            e1, e2 = frame(res.point.directions[j])
+            sources.append({"vertex": _vec(res.point.vertices[j]), "direction": _vec(res.point.directions[j]),
+                            "e_vis": float(res.point.e_vis[j]), "t0": float(res.point.t0[j]), "frame": {"e1": _vec(e1), "e2": _vec(e2)}})
+    return {"status": res.status, "failure": res.failure, "sources": sources,
+            "covariance": None if res.covariance is None else [[float(x) for x in row] for row in res.covariance],
+            "uncertainty_status": res.uncertainty_status,
+            "ln_likelihood": None if res.ln_likelihood is None else float(res.ln_likelihood),
+            "gradient_norm": None if res.gradient_norm is None else float(res.gradient_norm),
+            "newton_decrement": None if res.newton_decrement is None else float(res.newton_decrement),
+            "iterations": int(res.iterations), "rounds": int(res.rounds)}
+
+
+def topology_document(topo, check) -> dict:
+    """The `topology` record of an event line of /4."""
+    if topo.choice is None:
+        return {"h2": None, "ln_likelihood_1": None, "ln_likelihood_2": None, "ln_likelihood_2_from": None, "statistic": None,
+                "penalty": topology.PENALTY, "choice": None, "rule": topo.rule, "probability_check": None}
+    starts = []
+    for rec in topo.records:
+        res = rec.result
+        starts.append({"name": rec.name, "start": None if rec.start is None else _two_point_document(rec.start), "status": res.status,
+                       "failure": res.failure, "ln_likelihood": None if res.ln_likelihood is None else float(res.ln_likelihood),
+                       "end": None if res.point is None else _two_point_document(res.point), "iterations": int(res.iterations),
+                       "rounds": int(res.rounds)})
+    return {"h2": {"starts": starts, "reported": {"index": topo.reported, "rule": topo.report_rule},
+                   "fit": None if topo.result is None else _two_fit_document(topo.result)},
+            "ln_likelihood_1": float(topo.ln_likelihood_1), "ln_likelihood_2": float(topo.ln_likelihood_2),
+            "ln_likelihood_2_from": topo.ln_likelihood_2_from, "statistic": float(topo.statistic), "penalty": topology.PENALTY,
+            "choice": topo.choice, "rule": topo.rule, "probability_check": check}
+
+
+def topology_event_document(h1_doc: dict, topo, check) -> dict:
+    """An event line of /4: the /3 event line unchanged, plus the topology record."""
+    return {**copy.deepcopy(h1_doc), "topology": topology_document(topo, check)}
+
+
 def _fit_document(res: FitResult, t0) -> dict:
     return {"status": res.status, "failure": res.failure, "vertex": _vec(res.vertex), "direction": _vec(res.direction),
                "e_vis": None if res.e_vis is None else float(res.e_vis), "t0": t0,
@@ -281,7 +372,7 @@ def _unit(value, where):
     return v
 
 
-def _check_header(header: dict, cfg, budget=None) -> Variant:
+def _check_header(header: dict, cfg, budget=None, topology_budget=None) -> Variant:
     if not isinstance(header, dict) or "format" not in header:
         raise ProductError(f"header keys must be exactly {sorted(HEADER_KEYS)}")
     variant = VARIANTS.get(header["format"]) if isinstance(header["format"], str) else None
@@ -310,7 +401,30 @@ def _check_header(header: dict, cfg, budget=None) -> Variant:
         raise ProductError("the product was made with another configuration than the one given")
     if variant.multistart:
         _check_budget_header(header["budget"], budget)
+    if variant.topology:
+        _check_topology_header(header["topology"], header["h1_product"], topology_budget)
     return variant
+
+
+def _check_topology_header(doc, h1_product, topology_budget) -> None:
+    if not isinstance(doc, dict) or set(doc) != TOPOLOGY_HEADER_KEYS or doc["format"] != topology.FORMAT:
+        raise ProductError(f"header topology must have exactly {sorted(TOPOLOGY_HEADER_KEYS)}, format {topology.FORMAT}")
+    starts, tie = doc["starts"], doc["tie_tolerance"]
+    if not (isinstance(starts, list) and starts and all(isinstance(s, str) and s in topology.RULES for s in starts)
+            and len(set(starts)) == len(starts)):
+        raise ProductError("header topology starts must be distinct known start names")
+    if not (_number(tie) and tie > 0) or not isinstance(doc["sha256"], str) or len(doc["sha256"]) != 64:
+        raise ProductError("header topology tie_tolerance or sha256 malformed")
+    want = {"penalty": topology.PENALTY, "rule": topology.CHOICE_RULE, "start_rules": {n: topology.RULES[n] for n in starts},
+            "report_rule": topology.REPORT_TEXT, "fit": topology.FIT_TEXT}
+    for key, value in want.items():
+        if doc[key] != value or (key == "penalty" and isinstance(doc[key], bool)):
+            raise ProductError(f"header topology {key} is not this recipe's ({value!r}; the penalty is t04-values-v4.md section 7's)")
+    if topology_budget is not None and {k: doc[k] for k in ("format", "sha256", "starts", "tie_tolerance")} != topology_budget.header():
+        raise ProductError("the product was made with another topology budget than the one given")
+    if not (isinstance(h1_product, dict) and set(h1_product) == {"sha256", "product_id"} and isinstance(h1_product["sha256"], str)
+            and len(h1_product["sha256"]) == 64 and isinstance(h1_product["product_id"], str) and h1_product["product_id"]):
+        raise ProductError("header h1_product must have exactly sha256 (64 hex digits) and a non-empty product_id")
 
 
 def _check_budget_header(doc, budget) -> None:
@@ -527,6 +641,205 @@ def _verify_starts(doc, tev, model, header, where: str) -> None:
                 raise ProductError(f"{where}: start {k} ln L {s['ln_likelihood']} does not recompute ({value})")
 
 
+SOURCE_KEYS = {"vertex", "direction", "e_vis", "t0"}
+
+
+def _two_point_of(doc, where):
+    if not isinstance(doc, dict) or set(doc) != {"sources"} or not isinstance(doc["sources"], list) or len(doc["sources"]) != 2:
+        raise ProductError(f"{where}: a two-source point must have exactly sources (two)")
+    vertices, directions, e_vis, t0 = [], [], [], []
+    for s in doc["sources"]:
+        if not isinstance(s, dict) or set(s) != SOURCE_KEYS:
+            raise ProductError(f"{where}: a source must have exactly {sorted(SOURCE_KEYS)}")
+        vertices.append(_vector(s["vertex"], where))
+        directions.append(_unit(s["direction"], where))
+        if not (_number(s["e_vis"]) and s["e_vis"] > 0):
+            raise ProductError(f"{where}: a source's e_vis must be a positive finite number")
+        if not _number(s["t0"]):
+            raise ProductError(f"{where}: a source's t0 must be a finite number")
+        e_vis.append(s["e_vis"])
+        t0.append(s["t0"])
+    return topology.Point(numpy.array(vertices), numpy.array(directions), numpy.array(e_vis, float), numpy.array(t0, float))
+
+
+def _fit_point_doc(two):
+    """The point of an H2 fit document, in the start records' form (the frames left out)."""
+    return {"sources": [{k: src[k] for k in SOURCE_KEYS} for src in two["sources"]]}
+
+
+def _check_two_fit(fit_doc, where: str) -> None:
+    if not isinstance(fit_doc, dict) or set(fit_doc) != H2_FIT_KEYS:
+        raise ProductError(f"{where}: H2 fit keys must be exactly {sorted(H2_FIT_KEYS)}")
+    status, failure = fit_doc["status"], fit_doc["failure"]
+    if status not in ("converged", "failed") or (status == "converged") != (failure is None) or \
+            (failure is not None and failure not in topology.FAILURES):
+        raise ProductError(f"{where}: H2 status {status!r} and failure {failure!r} do not agree")
+    if not (_count(fit_doc["iterations"]) and _count(fit_doc["rounds"])):
+        raise ProductError(f"{where}: H2 iterations and rounds must be counts")
+    for key in ("ln_likelihood", "gradient_norm", "newton_decrement"):
+        if fit_doc[key] is not None and not _number(fit_doc[key]):
+            raise ProductError(f"{where}: H2 {key} must be null or finite")
+    sources = fit_doc["sources"]
+    if sources is None:
+        if any(fit_doc[k] is not None for k in ("ln_likelihood", "gradient_norm", "newton_decrement", "covariance")):
+            raise ProductError(f"{where}: an H2 fit without a point carries values")
+    else:
+        if not (isinstance(sources, list) and len(sources) == 2):
+            raise ProductError(f"{where}: H2 sources must be two")
+        for s in sources:
+            if not isinstance(s, dict) or set(s) != SOURCE_KEYS | {"frame"}:
+                raise ProductError(f"{where}: an H2 source must have exactly vertex, direction, e_vis, t0 and frame")
+            if not _number(s["t0"]):
+                raise ProductError(f"{where}: an H2 source's t0 must be a finite number")
+            _vector(s["vertex"], where)
+            d = _unit(s["direction"], where)
+            if not (_number(s["e_vis"]) and s["e_vis"] > 0):
+                raise ProductError(f"{where}: an H2 source's e_vis must be positive")
+            frm = s["frame"]
+            if not isinstance(frm, dict) or set(frm) != {"e1", "e2"}:
+                raise ProductError(f"{where}: an H2 source's frame must have e1 and e2")
+            e1, e2 = frame(d)
+            if numpy.abs(_vector(frm["e1"], where) - e1).max() > 1e-12 or numpy.abs(_vector(frm["e2"], where) - e2).max() > 1e-12:
+                raise ProductError(f"{where}: an H2 source's frame is not section 7's at its direction")
+        if fit_doc["ln_likelihood"] is None:
+            raise ProductError(f"{where}: an H2 fit with a point has its ln L")
+    cov = fit_doc["covariance"]
+    if status == "converged":
+        if fit_doc["uncertainty_status"] != "ok" or fit_doc["gradient_norm"] is None or fit_doc["newton_decrement"] is None \
+                or not fit_doc["newton_decrement"] <= SETTINGS["newton_decrement_tolerance"] or sources is None:
+            raise ProductError(f"{where}: a converged H2 fit needs a point, status ok, the gradient norm and a Newton decrement "
+                               "within the tolerance")
+        size = topology.SIZE
+        if not (isinstance(cov, list) and len(cov) == size and all(isinstance(r, list) and len(r) == size and all(_number(x) for x in r)
+                                                                   for r in cov)):
+            raise ProductError(f"{where}: the H2 covariance must be {size} x {size} finite numbers")
+        c = numpy.array(cov, float)
+        if not numpy.array_equal(c, c.T):
+            raise ProductError(f"{where}: the H2 covariance is not symmetric")
+        try:
+            numpy.linalg.cholesky(c)
+        except numpy.linalg.LinAlgError:
+            raise ProductError(f"{where}: the H2 covariance is not positive definite") from None
+    elif cov is not None or fit_doc["uncertainty_status"] not in ("not-positive-definite", "non-finite", "not-formed"):
+        raise ProductError(f"{where}: a failed H2 fit has no covariance and a status other than ok")
+
+
+def _check_topology(doc, head: dict, where: str, event: EventData) -> None:
+    """The topology record of a /4 event line (structure; no model needed)."""
+    topo, fit_doc = doc["topology"], doc["fit"]
+    if not isinstance(topo, dict) or set(topo) != TOPOLOGY_KEYS:
+        raise ProductError(f"{where}: topology keys must be exactly {sorted(TOPOLOGY_KEYS)}")
+    if topo["penalty"] != topology.PENALTY or isinstance(topo["penalty"], bool):
+        raise ProductError(f"{where}: the penalty is t04-values-v4.md section 7's {topology.PENALTY}")
+    if fit_doc["status"] != "converged":
+        if any(topo[k] is not None for k in TOPOLOGY_KEYS - {"penalty", "rule"}) or topo["rule"] != topology.CHOICE_H1_FAILED:
+            raise ProductError(f"{where}: where H1 failed there is no H2 fit and no choice")
+        return
+    if topo["rule"] != topology.CHOICE_RULE:
+        raise ProductError(f"{where}: the choice rule is not this recipe's")
+    h2 = topo["h2"]
+    if not isinstance(h2, dict) or set(h2) != H2_KEYS:
+        raise ProductError(f"{where}: h2 keys must be exactly {sorted(H2_KEYS)}")
+    starts, reported = h2["starts"], h2["reported"]
+    if not isinstance(starts, list) or [s.get("name") if isinstance(s, dict) else None for s in starts] != head["starts"]:
+        raise ProductError(f"{where}: the H2 starts must be the topology budget's {head['starts']}, in its order")
+    h1_source = {"vertex": fit_doc["vertex"], "direction": fit_doc["direction"], "e_vis": fit_doc["e_vis"], "t0": fit_doc["t0"]}
+    ln_ls = []
+    for k, s in enumerate(starts):
+        at = f"{where}: H2 start {k}"
+        if set(s) != H2_START_KEYS:
+            raise ProductError(f"{at}: keys must be exactly {sorted(H2_START_KEYS)}")
+        status, failure = s["status"], s["failure"]
+        if status not in ("converged", "failed") or (status == "converged") != (failure is None) or \
+                (failure is not None and failure not in topology.FAILURES):
+            raise ProductError(f"{at}: status {status!r} and failure {failure!r} do not agree")
+        if not (_count(s["iterations"]) and _count(s["rounds"])):
+            raise ProductError(f"{at}: iterations and rounds must be counts")
+        if s["start"] is None:
+            if (status, failure, s["end"], s["ln_likelihood"], s["iterations"], s["rounds"]) != ("failed", topology.NO_START, None, None, 0, 0):
+                raise ProductError(f"{at}: a start that was not formed is failed, {topology.NO_START}, with nothing else")
+        else:
+            if failure == topology.NO_START:
+                raise ProductError(f"{at}: {topology.NO_START} with a start point")
+            _two_point_of(s["start"], at)
+            if s["name"] in topology.H1_ANCHORED and s["start"]["sources"][0] != h1_source:
+                raise ProductError(f"{at}: source 1 of the start {s['name']!r} is not H1's fit")
+        if (s["end"] is None) != (s["ln_likelihood"] is None):
+            raise ProductError(f"{at}: an end point comes with its ln L, and only then")
+        if s["end"] is not None:
+            _two_point_of(s["end"], at)
+            if not _number(s["ln_likelihood"]):
+                raise ProductError(f"{at}: ln_likelihood must be finite")
+        if status == "converged" and s["end"] is None:
+            raise ProductError(f"{at}: a converged start needs its end point")
+        ln_ls.append(s["ln_likelihood"] if s["end"] is not None else None)
+    index, rule = topology.report_choice(ln_ls, head["tie_tolerance"])
+    if reported != {"index": index, "rule": rule}:
+        raise ProductError(f"{where}: the reported H2 point {reported!r} is not the rule's ({index!r}, {rule!r})")
+    two = h2["fit"]
+    if index is None:
+        if two is not None:
+            raise ProductError(f"{where}: no H2 point, but an H2 fit")
+    else:
+        _check_two_fit(two, where)
+        s = starts[index]
+        point = None if two["sources"] is None else _fit_point_doc(two)
+        if (two["status"], two["failure"], two["ln_likelihood"], two["iterations"], two["rounds"], point) != \
+                (s["status"], s["failure"], s["ln_likelihood"], s["iterations"], s["rounds"], s["end"]):
+            raise ProductError(f"{where}: the H2 fit is not the reported start's")
+    ln_l1 = topo["ln_likelihood_1"]
+    if ln_l1 != fit_doc["ln_likelihood"] or not _number(ln_l1):
+        raise ProductError(f"{where}: ln_likelihood_1 is not H1's")
+    want = topology.statistic(ln_l1, None if two is None else two["ln_likelihood"])
+    if (topo["ln_likelihood_2"], topo["ln_likelihood_2_from"], topo["statistic"]) != want or isinstance(topo["statistic"], bool):
+        raise ProductError(f"{where}: lnL_2, its origin or the statistic does not recompute ({want!r})")
+    if topo["choice"] != topology.choose(want[2]):
+        raise ProductError(f"{where}: the choice {topo['choice']!r} is not the rule's ({topology.choose(want[2])!r})")
+    check = topo["probability_check"]
+    if two is None or two["sources"] is None:
+        if check is not None:
+            raise ProductError(f"{where}: a check at H2's point without one")
+        return
+    if not isinstance(check, dict) or set(check) != CHECK_KEYS:
+        raise ProductError(f"{where}: the H2 probability_check keys must be exactly {sorted(CHECK_KEYS)}")
+    if check["point"] != ("fit" if two["status"] == "converged" else "fit-last") or check["channels"] != int(event.live.sum()) \
+            or not _count(check["failures"]) or not _number(check["max_abs_deviation"]) or not _number(check["largest_ratio"]) \
+            or not isinstance(check["failed_channels"], list):
+        raise ProductError(f"{where}: the H2 probability_check is malformed or not at H2's point")
+
+
+def _verify_topology(doc, tev, model, header, where: str) -> None:
+    """H2's start points from H1's fit and the data, every H2 start's ln L at its end point, and the check at H2's point."""
+    topo = doc["topology"]
+    if topo["h2"] is None:
+        return
+    head = header["topology"]
+    tb = topology.TopologyBudget(head["format"], tuple(head["starts"]), head["tie_tolerance"], head["sha256"])
+    h1 = fit_result_of(doc["fit"])
+    for k, ((name, start), s) in enumerate(zip(topology.start_points(model, tev, tb, h1), topo["h2"]["starts"])):
+        if (start is None) != (s["start"] is None):
+            raise ProductError(f"{where}: H2 start {k} ({name}) is {'not ' if start is None else ''}formed from H1's fit and the data")
+        if start is not None:
+            stored = _two_point_of(s["start"], where)
+            again = numpy.r_[start.vertices.ravel(), start.directions.ravel(), start.e_vis, start.t0]
+            kept = numpy.r_[stored.vertices.ravel(), stored.directions.ravel(), stored.e_vis, stored.t0]
+            if not numpy.all(numpy.abs(again - kept) <= START_TOLERANCE * numpy.maximum(1.0, numpy.abs(again))):
+                raise ProductError(f"{where}: H2 start {k} ({name}) does not recompute from H1's fit and the data")
+        if s["ln_likelihood"] is not None:
+            value = topology.log_likelihood(model, tev, _two_point_of(s["end"], where))
+            if not abs(value - s["ln_likelihood"]) <= LN_L_TOLERANCE * max(1.0, abs(value)):
+                raise ProductError(f"{where}: H2 start {k} ln L {s['ln_likelihood']} does not recompute ({value})")
+    check = topo["probability_check"]
+    if check is not None:
+        two = topo["h2"]["fit"]
+        point = _two_point_of(_fit_point_doc(two), where)
+        again = topology.probability_check(model, tev.event, point)
+        if (again["failures"], again["failed_channels"], again["channels"]) != (check["failures"], check["failed_channels"], check["channels"]) \
+                or abs(again["max_abs_deviation"] - check["max_abs_deviation"]) > DEVIATION_TOLERANCE \
+                or abs(again["largest_ratio"] - check["largest_ratio"]) > RATIO_TOLERANCE * max(1.0, abs(check["largest_ratio"])):
+            raise ProductError(f"{where}: the check at H2's point does not recompute")
+
+
 def _verify(doc, event, tev, model, where: str, header=None) -> None:
     """Recompute ln L (the joint ln L for /2) and the probability check from the product; any defect is a ProductError (fix
     round 1, F2). A stored point outside the fit's domain is refused by the probability check (EventError), turned into a
@@ -544,6 +857,8 @@ def _verify(doc, event, tev, model, where: str, header=None) -> None:
             again = {"point": check["point"], **probability_check(model, event)}
         if header is not None and "starts" in doc:
             _verify_starts(doc, tev, model, header, where)
+        if header is not None and "topology" in doc:
+            _verify_topology(doc, tev, model, header, where)
     except ValueError as exc:
         if isinstance(exc, ProductError):
             raise
@@ -560,6 +875,8 @@ def _check_event(doc, index: int, header: dict, variant: Variant):
     keys = EVENT_KEYS | {"prefit"} if variant.timed else EVENT_KEYS
     if variant.multistart:
         keys = keys | {"starts", "choice"}
+    if variant.topology:
+        keys = keys | {"topology"}
     if not isinstance(doc, dict) or set(doc) != keys:
         raise ProductError(f"{where}: keys must be exactly {sorted(keys)}")
     if doc["event"] != index or isinstance(doc["event"], bool):
@@ -570,6 +887,8 @@ def _check_event(doc, index: int, header: dict, variant: Variant):
     _check_fit(doc["fit"], event, source, where, variant)
     if variant.multistart:
         _check_starts(doc, header["budget"], where)
+    if variant.topology:
+        _check_topology(doc, header["topology"], where, event)
     check = doc["probability_check"]
     if not isinstance(check, dict) or set(check) != CHECK_KEYS:
         raise ProductError(f"{where}: probability_check keys must be exactly {sorted(CHECK_KEYS)}")
@@ -590,9 +909,10 @@ def _structural(where: str, action, *args):
         raise ProductError(f"{where}: malformed field ({type(exc).__name__}: {exc})") from None
 
 
-def read_text(text: str, model=None, cfg=None, budget=None) -> Product:
-    """Read and check a product (/1, /2 or /3). model (and cfg) given: ln L and the probability check are recomputed per event
-    (for /3 every start too); budget given: a /3 product must have been made with it."""
+def read_text(text: str, model=None, cfg=None, budget=None, topology_budget=None) -> Product:
+    """Read and check a product (/1, /2, /3 or /4). model (and cfg) given: ln L and the probability check are recomputed per event
+    (for /3 and /4 every start too, for /4 H2's starts and its check); budget given: a /3 or /4 product must have been made with
+    it; topology_budget given: a /4 product must have been made with it."""
     if not text.endswith("\n"):
         raise ProductError("the last line is unfinished")
     lines = text[:-1].split("\n")
@@ -603,7 +923,7 @@ def read_text(text: str, model=None, cfg=None, budget=None) -> Product:
     if len(docs) < 2:
         raise ProductError("a product needs a header and an end line")
     header = docs[0]
-    variant = _structural("header", _check_header, header, cfg, budget)
+    variant = _structural("header", _check_header, header, cfg, budget, topology_budget)
     if model is not None and header["input"]["channels"] != model.geometry.channels:
         raise ProductError("the product's channels are not the model's")
     end = docs[-1]
@@ -633,12 +953,12 @@ def format_of(path) -> str | None:
     return doc.get("format") if isinstance(doc, dict) and isinstance(doc.get("format"), str) else None
 
 
-def read_product(path, model=None, cfg=None, budget=None) -> Product:
+def read_product(path, model=None, cfg=None, budget=None, topology_budget=None) -> Product:
     try:
         text = Path(path).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         raise ProductError(f"product cannot be read: {exc}") from None
-    return read_text(text, model, cfg, budget)
+    return read_text(text, model, cfg, budget, topology_budget)
 
 
 CHARGE_ONLY = Variant(FORMAT, LIKELIHOOD, PARAMETERS, NOT_ESTIMATED, UNCERTAINTY_TEXT, SETTINGS, RETENTION, False)
@@ -646,5 +966,7 @@ CHARGE_TIME = Variant(FORMAT_JOINT, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_ESTI
                       RETENTION_JOINT, True)
 MULTISTART = Variant(FORMAT_MULTISTART, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_ESTIMATED_JOINT, UNCERTAINTY_JOINT, SETTINGS_MULTISTART,
                      RETENTION_JOINT, True, True, multistart.FAILURES)
-VARIANTS = {v.format: v for v in (CHARGE_ONLY, CHARGE_TIME, MULTISTART)}
+TOPOLOGY = Variant(FORMAT_TOPOLOGY, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_ESTIMATED_JOINT, UNCERTAINTY_JOINT, SETTINGS_MULTISTART,
+                   RETENTION_JOINT, True, True, multistart.FAILURES, HYPOTHESIS_TOPOLOGY, True)
+VARIANTS = {v.format: v for v in (CHARGE_ONLY, CHARGE_TIME, MULTISTART, TOPOLOGY)}
 BY_LIKELIHOOD = {"charge-only": CHARGE_ONLY, "charge-time": CHARGE_TIME}
