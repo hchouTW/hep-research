@@ -1136,13 +1136,16 @@ def t1_g7(reps: int = 40, K: int = 10, seed: int = SEED_T1 + 70) -> dict:
 # nominal MC, so that the boundary point stays within the reweighting range of the nominal sample
 G8_THETA = {"momentum_scale": {"bounds": (0.995, 1.5), "prior": (0.995, 1.02)},
             "sum_term_a": {"bounds": (0.2, 3.0), "prior": (0.8, 1.2)}}
+# NOTE: the toy-detector G8 functions below (t1_g8_*, g8_counting_from_pools) are exploratory and not registered:
+# by approval A10 the two G8 negative controls run on the linear configurations (gate1_g8_lndet, gate1_g8_counting)
 G8_CAL = ["track5_p_width", "track2_p_width", "track5_dx_width", "track2_dx_width", "track5_p_mean", "track2_p_mean"]
 G8_LINKS = {n: "identity" for n in G8_CAL}
 
 
-def _g8_problem(truth, seed_tuple, exposure=100, mc=100):
-    """The G8 configuration: identity links (V of a width grows with theta), exposure 100, MC 100 per run, so that a
-    fitter omitting ln det is biased by about 0.7 sigma in sum_term_a (pilot). Each pseudo-data set has its own
+def _g8_problem(truth, seed_tuple, exposure=400, mc=200):
+    """The G8 configuration: identity links (V of a width grows with theta), exposure 400, MC 200 per run (V_MC then
+    carries much of the theta dependence), where the correct fits are unbiased within about 0.1 sigma and a fitter
+    omitting ln det is biased by about 0.4 sigma (pilots, 2026-11-11). Each pseudo-data set has its own
     nominal-size MC and its own bootstrap (section 8.4: misestimation of V_MC then enters G8's bias and coverage);
     the pseudo-data are fresh events at the injection point."""
     st = [TP._seed_int(x) for x in seed_tuple]
@@ -1202,59 +1205,92 @@ def _judge_g8(c):
     return {**c, "ok": bool(c["detections_bad"] >= 0.8 * c["reps"])}
 
 
-def t1_g8_counting(reps: int = 1000, pool: int = 3000, seed: int = SEED_T1 + 90, exposure: int = 400) -> dict:
-    """Item 10 (G8 counting), toy detector, full level, d = 3: a pool of `pool` real pseudo-data fits per injection
-    point, each with its own MC and bootstrap (coverage by the total Gaussian intervals); each repetition draws N_c with replacement from the pool; the
-    eps = 1% non-convergence concentrated in covered pseudo-data: replacing them keeps false alarms <= 62 in 1000,
-    counting them as not covered (negative control) gives > 62."""
+G8C_THETA = {"momentum_scale": G8_THETA["momentum_scale"],
+             "layer_b_offset": {"bounds": (-1.0, 1.0), "prior": (-0.05, 0.05)}}
+G8C_CAL = ["track5_p_mean", "track2_p_mean", "track5_dx_mean", "track2_dx_mean"]
+G8C_LINKS = {"track5_dx_mean": "identity", "track2_dx_mean": "identity"}
+G8C_TRUTH = np.array([1.004, 0.01])
+
+
+def _g8c_points(seed):
+    """The injection points of the counting control: d = 2 parameters entering linearly (the momentum scale through
+    the momentum means, the layer-b offset through the position-difference means; sum_term_a at nominal), whose
+    correct fits are unbiased at the full level's resolution. (The resolution parameter sum_term_a carries a residual
+    bias of about 0.1 sigma in the toy, which G8 at the full level resolves: recorded as an open item.)"""
     from core.calibration import closure as C
-    # the third parameter enters linearly (the position-difference mean is the layer-b offset, identity link), so the
-    # correct fits are unbiased at G8's full-level resolution (a b^2 term would leave a ~0.2 sigma nonlinear bias)
-    th3 = {**G8_THETA, "layer_b_offset": {"bounds": (-1.0, 1.0), "prior": (-0.05, 0.05)}}
-    cal = TRACK_CAL + ["track5_dx_mean", "track2_dx_mean"]
-    links = {"track5_dx_mean": "identity", "track2_dx_mean": "identity"}
-    truth3 = np.r_[TRACK_TRUTH, 0.01]
-    p0 = _track_fit(0, seed, cal=cal, truth=truth3, theta=th3, sigma_noise=False, links=links, exposure=exposure,
-                    mc=10 * exposure)
+    p0 = _track_fit(0, seed, cal=G8C_CAL, truth=G8C_TRUTH, theta=G8C_THETA, sigma_noise=False, links=G8C_LINKS)
     sd = F.iterate(p0, p0.initial_beta()).sigma_tot
-    interior, boundary = C.injection_points([v["prior"] for v in th3.values()], [v["bounds"] for v in th3.values()],
-                                            sd, truth3)
-    pools, Xpool = {}, {}
-    for k, pt in enumerate((interior, boundary)):
-        errs, c68, c95, X = [], [], [], 0
-        for s in range(pool):                     # each pseudo-data set: its own MC and bootstrap (section 8.4)
-            q = _track_fit(10 ** 5 * (k + 1) + s, seed, cal=cal, truth=pt, theta=th3, sigma_noise=False, links=links,
-                           exposure=exposure, mc=10 * exposure)
-            f = F.iterate(q, q.initial_beta())
-            if not f.converged:
-                X += 1
-                continue
-            e = f.beta[:3] - pt
-            errs.append(e)
-            c68.append(np.abs(e) <= f.sigma_tot)
-            c95.append(np.abs(e) <= 1.96 * f.sigma_tot)
-        pools[k] = (np.array(errs), np.array(c68), np.array(c95))
-        Xpool[k] = X
-    N = C.n_c(3, "full")["N_c"]
+    interior, boundary = C.injection_points([v["prior"] for v in G8C_THETA.values()],
+                                            [v["bounds"] for v in G8C_THETA.values()], sd, G8C_TRUTH)
+    return sd, (interior, boundary)
+
+
+def t1_g8_counting_pool(k: int, start: int, n: int, seed: int = SEED_T1 + 90) -> dict:
+    """Pseudo-data fits start..start+n-1 of injection point k (0 interior, 1 boundary) of the counting control's pool:
+    each pseudo-data set with its own MC and bootstrap (section 8.4); errors and Gaussian-interval coverage."""
+    sd, pts = _g8c_points(seed)
+    pt = pts[k]
+    errs, sig, c68, c95, X = [], [], [], [], 0
+    for s in range(start, start + n):
+        q = _track_fit(10 ** 5 * (k + 1) + s, seed, cal=G8C_CAL, truth=pt, theta=G8C_THETA, sigma_noise=False,
+                       links=G8C_LINKS)
+        f = F.iterate(q, q.initial_beta())
+        if not f.converged:
+            X += 1
+            continue
+        e = f.beta[:2] - pt
+        errs.append(e.tolist())
+        sig.append(f.sigma_tot[:2].tolist())
+        c68.append((np.abs(e) <= f.sigma_tot).tolist())
+        c95.append((np.abs(e) <= 1.96 * f.sigma_tot).tolist())
+    return {"item": "10 G8 counting pool (toy detector)", "point": k, "start": start, "n": n, "errors": errs,
+            "sigma_tot": sig, "cover68": c68, "cover95": c95, "X": X, "sigma_design": sd.tolist(), "ok": True}
+
+
+def g8_counting_from_pools(pools: list, reps: int = 1000, seed: int = SEED_T1 + 90) -> dict:
+    """Item 10 (G8 counting), toy detector, full level, d = 2 (N_c = 483): the null bootstrap of the pool of real
+    pseudo-data fits (errors recentred on the pool mean, coverage recomputed from each fit's own sigma_tot), so that
+    the pool's own mean error does not become a common offset of every repetition; each of `reps` repetitions draws
+    N_c with replacement from the recentred pool of each injection point; 1% of the N_c pseudo-data are non-converged, concentrated in
+    covered ones. Replacing them keeps false alarms <= 62 in 1000; counting them as not covered (negative control)
+    gives > 62."""
+    from core.calibration import closure as C
+    pool = {}
+    for k in (0, 1):
+        rs = [x for x in pools if x["point"] == k]
+        E = np.array([e for x in rs for e in x["errors"]])
+        S = np.array([s for x in rs for s in x["sigma_tot"]])
+        E = E - E.mean(axis=0)                         # the null bootstrap: recentred on the pool mean
+        pool[k] = (E, np.abs(E) <= S, np.abs(E) <= 1.96 * S)
+    sd = np.asarray(pools[0]["sigma_design"])
+    N = C.n_c(2, "full")["N_c"]
     fa = {"replace": 0, "count": 0}
     for r in range(reps):
         rng = np.random.default_rng([seed, r])
         for kind in fa:
             res = {}
             for k, name in enumerate(("interior", "boundary")):
-                E, A68, A95 = pools[k]
+                E, A68, A95 = pool[k]
                 idx = rng.integers(len(E), size=N)
                 e, c68, c95 = E[idx], A68[idx].copy(), A95[idx].copy()
-                if kind == "count":                   # 1% non-converged, concentrated in covered pseudo-data
+                if kind == "count":
                     cov = np.flatnonzero(c68.all(1))
                     nc = rng.choice(cov, size=min(len(cov), int(round(0.01 * N))), replace=False)
                     c68[nc] = False
                     c95[nc] = False
                 res[name] = {"errors": e, "cover68": c68, "cover95": c95, "nontruth_basin": np.zeros(N, bool),
                              "X": 0, "interval_toys": {"X": 0, "n": 0}}
-            fa[kind] += C.g8("full", list(th3), sd, res["interior"], res["boundary"])["status"] == "failed"
-    return {"item": "10 G8 counting (toy detector)", "false_alarms": fa, "reps": reps, "pool": pool,
-            "pool_nonconverged": Xpool, "N_c": N, "ok": fa["replace"] <= 62 and fa["count"] > 62}
+            fa[kind] += C.g8("full", list(G8C_THETA), sd, res["interior"], res["boundary"])["status"] == "failed"
+    n_pool = {k: int(len(pool[k][0])) for k in pool}
+    X = {k: sum(x["X"] for x in pools if x["point"] == k) for k in (0, 1)}
+    return {"item": "10 G8 counting (toy detector)", "false_alarms": fa, "reps": reps, "pool": n_pool,
+            "pool_nonconverged": X, "N_c": N, "ok": fa["replace"] <= 62 and fa["count"] > 62}
+
+
+def t1_g8_counting(reps: int = 1000, pool: int = 3000, seed: int = SEED_T1 + 90) -> dict:
+    """The counting control in one process (local use; the array splits the pool into chunks)."""
+    pools = [t1_g8_counting_pool(k, 0, pool, seed) for k in (0, 1)]
+    return g8_counting_from_pools(pools, reps, seed)
 
 
 P7_VAL = ["track5_p_width", "track2_p_width", "track5_dx_width", "track2_dx_width", "track2_p_mean"]
@@ -1676,12 +1712,12 @@ def _units() -> dict:
 GATE1T_TASKS = [("units", "_units", {}), ("toy_p3", "gate1_toy_p3", {}), ("g1", "t1_g1", {}), ("g2", "t1_g2", {}),
                 ("g5", "t1_g5", {}), ("g6", "t1_g6", {}), ("g7", "t1_g7", {}), ("g7_bblite", "t1_g7_bblite", {}),
                 ("cv", "t1_cv", {}), ("propagation", "t1_propagation", {}), ("p7_cross", "t1_p7_cross", {}),
-                ("p7_point", "t1_p7_point_estimate", {}), ("g8_counting", "t1_g8_counting", {}),
-                ("event_samples", "t1_event_samples", {})]
+                ("p7_point", "t1_p7_point_estimate", {}), ("event_samples", "t1_event_samples", {}),
+                # approval A10: these two G8 negative controls stay on the linear configurations of the first run
+                ("g8_lndet", "gate1_g8_lndet", {}), ("g8_counting", "gate1_g8_counting", {})]
 GATE1T_TASKS += [("v_cross", "t1_v_cross_terms", {"reps": 1000, "r0": 1000 * i}) for i in range(2)]
-GATE1T_TASKS += [("v_shift", "t1_v_shift", {"reps": 200, "r0": 200 * i}) for i in range(10)]
+GATE1T_TASKS += [("v_shift", "t1_v_shift", {"reps": 250, "r0": 250 * i}) for i in range(8)]
 GATE1T_TASKS += [("shape_total", "t1_shape_total", {"nobs": (n,)}) for n in (300, 1200, 1500, 3000)]
-GATE1T_TASKS += [("g8_lndet", "t1_g8_lndet", {"reps": 5, "r0": 5 * i}) for i in range(10)]
 
 
 def gate1_toy_task(i: int, out_dir: Path) -> dict:
@@ -1724,10 +1760,6 @@ def gate1_toy_merge(out_dir: Path, out: Path) -> dict:
             rej = {k: sum(x["rejections"][k] for x in rs) for k in rs[0]["rejections"]}
             items[key] = _judge_shift({"item": rs[0]["item"], "rejections": rej,
                                        **{k: sum(x[k] for x in rs) for k in ("n", "X", "X_pm2_refits", "reps")}})
-        elif key == "g8_lndet":
-            items[key] = _judge_g8({"item": rs[0]["item"], "N_c": rs[0]["N_c"],
-                                    **{k: sum(x[k] for x in rs) for k in ("detections_bad", "false_alarms_good",
-                                                                          "reps")}})
         elif key == "shape_total":
             items[key] = _judge_shape({"item": rs[0]["item"], "reps": rs[0]["reps"],
                                        "sizes": {k: v for x in rs for k, v in x["sizes"].items()}})
