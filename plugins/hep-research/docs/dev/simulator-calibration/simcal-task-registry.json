@@ -393,6 +393,13 @@
    "registered_at": "2026-11-12T23:40:14Z",
    "card_commit": "424c7b00",
    "reason": "second registration of row 2004 (campaign p3-cals-p6) after the P6 fix and A13"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "2462cf14475ba37d117e93bacaed4cd78ca841b8e433f2d140b38df7cc613cee",
+   "registered_at": "2026-11-12T23:51:04Z",
+   "card_commit": "6932de94",
+   "reason": "campaign p3-toy-g8 registered before any run (reduced: cal 12 folded into cal 6, curves 200, bimodal 100 toys)"
   }
  ]
 }
