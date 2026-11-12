@@ -325,7 +325,8 @@ class ToyProblem:
         if self.count_spec:
             pr = self.counts_pred(params)
             tau = {n: L.bb_tau(pr[n]["sumw"], pr[n]["sumw2"]) for n, c in self.count_spec.items() if c.get("bb")}
-        ref = L.Reference(V_G=Vd + V_mc, V_std=Vd, U=U, S=S, tau=tau)
+        V_emu = 0.0 if r.get("V_emu") is None else np.asarray(r["V_emu"], float) * np.outer(D, D)
+        ref = L.Reference(V_G=Vd + V_mc + V_emu, V_std=Vd, U=U, S=S, tau=tau)   # V_emu: surrogate (section 6.4)
         ref.V_MC = V_mc
         return ref.finalize()
 

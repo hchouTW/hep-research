@@ -5,7 +5,8 @@ the nuisance columns with N(0, 1) constraints (a profile-mode phi in units of it
 is free), so sigma_tot^design already contains their contribution (section 17, phase 1):
 
     Sigma_beta = (X^T W X + P)^-1,  A = Sigma_beta X^T W,  W = V_cc^-1 (the projected inverse on N_d,c^perp when the
-    calibration side declares N_d,c, section 2.1),  V_cc = V_data^unc + V_MC (+ V_emu + V_learn, phase 3 and 5).
+    calibration side declares N_d,c, section 2.1),  V_cc = V_data^unc + V_MC + V_emu (+ V_learn, phase 5);
+    V_emu (the surrogate's interpolation variance, section 6.4) enters W only, not Sigma_MC.
 
 Sigma_MC = A_theta V_MC A_theta^T and Sigma_data = A_theta V_data A_theta^T (section 6.7, only Gaussian blocks:
 B_m = -A, B_y = A); sigma_tot,i^design = sqrt(Sigma_theta,ii) at theta_ref, without Sigma_boot / w (Sigma_boot is
@@ -64,7 +65,8 @@ def projected_inverse(V: np.ndarray, constraints: list[np.ndarray], V_std: np.nd
 
 
 def operator(J: np.ndarray, V_data: np.ndarray, V_MC: np.ndarray, nuisance: np.ndarray | None = None,
-             free_extra: np.ndarray | None = None, constraints: list[np.ndarray] | None = None) -> dict:
+             free_extra: np.ndarray | None = None, constraints: list[np.ndarray] | None = None,
+             V_emu: np.ndarray | None = None) -> dict:
     """A, Sigma_beta, sigma_tot (theta block), Sigma_MC, Sigma_data for the linear Gaussian model with theta columns J,
     N(0,1)-constrained nuisance columns and free extra columns (an unconstrained profile phi)."""
     n, d = J.shape
@@ -78,7 +80,7 @@ def operator(J: np.ndarray, V_data: np.ndarray, V_MC: np.ndarray, nuisance: np.n
         prior.append(np.ones(nuisance.shape[1]))
     X = np.concatenate(cols, axis=1)
     P = np.diag(np.concatenate(prior))
-    V = V_data + V_MC
+    V = V_data + V_MC + (0.0 if V_emu is None else V_emu)
     W = projected_inverse(V, constraints or [], V_data)
     F = X.T @ W @ X + P
     if not np.all(np.isfinite(F)) or np.linalg.cond(F) > 1e14:
@@ -231,6 +233,7 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
     V_mc = r0["V_MC"]
     mu_l, J_l, Vd_l, Vm_l = _to_link(mu, J, V_data, V_mc, links)
     g = to_link_delta(mu, links)
+    Ve_l = None if r0.get("V_emu") is None else np.asarray(r0["V_emu"], float) * np.outer(g, g)
     U = vmodel_columns(contract, names)
     S = systematic_columns(systematics, names, mu, links)
     Phi = np.stack([c * g for c in phi_cols], axis=1) if phi_cols else np.zeros((len(names), 0))
@@ -243,10 +246,10 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
                         for k, nm in enumerate(names)])
         if vec.any():
             constraints.append(vec)
-    op = operator(J_l, Vd_l, Vm_l, nuis, Free, constraints)
+    op = operator(J_l, Vd_l, Vm_l, nuis, Free, constraints, Ve_l)
     psi_effect = {p: (op["A_theta"] @ (c * g)) for p, c in psi_cols.items()}
     return {"names": names, "links": links, "theta": thetas, "theta_ref": theta_ref, "mu": mu, "J": J_l,
-            "V_data": Vd_l, "V_MC": Vm_l, "n_nu": U.shape[1], "n_eta": S.shape[1], "n_phi": Phi.shape[1] + Free.shape[1],
+            "V_data": Vd_l, "V_MC": Vm_l, "V_emu": Ve_l, "n_nu": U.shape[1], "n_eta": S.shape[1], "n_phi": Phi.shape[1] + Free.shape[1],
             "psi_effect": psi_effect, "runs": runs, "evaluation": r0, **op,
             "lambda_max": matrix_condition(op["Sigma_MC"], op["Sigma_data"]),
             "flags": ["provisional-thresholds"], "sigma_tot_note": "sigma_tot^design without Sigma_boot / w (phase 2)"}

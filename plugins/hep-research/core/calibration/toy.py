@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 from scipy import special, stats
@@ -433,6 +434,9 @@ class ChainEvaluator:
         self.observables = [o.name for o in model.observables]
         self._nominal = None
         self._other: dict = {}
+        self.surrogate: Any = None                       # a trained emulator.Surrogate (attach_surrogate)
+        self._design_cache: dict = {}
+        self._asked: dict = {}                           # ask/tell: run_id -> result
         self._validate()
 
     # ---- generation
@@ -609,6 +613,14 @@ class ChainEvaluator:
         if effects_off:
             raise ValueError("effects_off (the contribution decomposition of section 10.5) is phase 4")
         target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {})}
+        sur = self.surrogate
+        if sur is not None and any(self.default_method(p) == "surrogate-model" for p in sur.parameters):
+            return self._evaluate_surrogate(target, seeds, names)
+        return self._full(target, seeds, names)
+
+    def _full(self, target: dict, seeds: dict | None, names) -> dict:
+        """The evaluation without a surrogate: a surrogate-model parameter is resimulated (its design-point path)."""
+        target = {**self.model.nominal, **target}
         nom = self._sample_for(seeds)
         run_events, regen = self._prepared(target, nom)
         out = self._observe(target, nom, run_events, regen, names)
@@ -706,11 +718,58 @@ class ChainEvaluator:
     def learned_closure(self, fold):
         raise NotImplementedError("learned density ratios are phase 5")
 
-    def ask(self):
-        raise NotImplementedError("ask/tell is phase 3")
+    # ---- surrogate model (section 6.4) and ask/tell (section 7.1)
+    def attach_surrogate(self, surrogate) -> None:
+        """Evaluate the surrogate's parameters with it whenever their method is surrogate-model (section 6.5: the
+        surrogate outermost, each design point evaluated at the query's other parameters by the inner methods)."""
+        self.surrogate = surrogate
+        self._design_cache = {}
 
-    def tell(self, *args):
-        raise NotImplementedError("ask/tell is phase 3")
+    def _evaluate_surrogate(self, target: dict, seeds: dict | None, names) -> dict:
+        sur = self.surrogate
+        ts = {p: target[p] for p in sur.parameters}
+        w = sur.weights(ts)                                    # a query outside the domain is rejected here
+        nm = list(names) if names is not None else list(self.observables)
+        missing = [n for n in nm if n not in sur.names]
+        if missing:
+            raise ValueError(f"the surrogate was not trained on observables {missing}")
+        idx = [sur.names.index(n) for n in nm]
+        if len(self._design_cache) > 4096:
+            self._design_cache.clear()
+        rs = []
+        for pt in sur.points:
+            t = {**target, **pt}
+            key = (repr(sorted(t.items())), repr(sorted((seeds or {}).items())), tuple(nm))
+            if key not in self._design_cache:
+                self._design_cache[key] = self._full(t, seeds, nm)
+            rs.append(self._design_cache[key])
+        out = dict(rs[int(np.argmax(w))])                      # runs, names, n_eff, samples of the nearest point
+        out["pred"] = sum(wj * r["pred"] for wj, r in zip(w, rs))
+        Vm = sum(wj * r["V_MC"] for wj, r in zip(w, rs))
+        lam, U = np.linalg.eigh(0.5 * (Vm + Vm.T))
+        out["V_MC"] = (U * np.clip(lam, 0.0, None)) @ U.T
+        out["s2"] = sum(wj * r["s2"] for wj, r in zip(w, rs))
+        out["per_event_var"] = sum(wj * r["per_event_var"] for wj, r in zip(w, rs))
+        out["influence"] = {run: {j: (sum(wj * r["influence"][run][j][0] for wj, r in zip(w, rs)), col[1])
+                                  for j, col in cols.items()} for run, cols in rs[0]["influence"].items()}
+        out["V_emu"] = sur.v_emu(ts)[np.ix_(idx, idx)]
+        out["surrogate_weights"] = w
+        out["theta"] = target
+        out["methods"] = {**out.get("methods", {}), **{p: "surrogate-model" for p in sur.parameters}}
+        return out
+
+    def ask(self, requests: list) -> list:
+        """Submit evaluations [{run_id, theta, seeds, names}] (full simulation: resimulation for a surrogate-model
+        parameter); the toy evaluates at once, a batch adapter would submit and return."""
+        for q in requests:
+            seeds = {k: v for k, v in (q.get("seeds") or {}).items() if v is not None} or None
+            self._asked[q["run_id"]] = self._full(dict(q["theta"]), seeds, q.get("names"))
+        return [q["run_id"] for q in requests]
+
+    def tell(self, run_ids=None) -> dict:
+        """The results of submitted evaluations that are done, {run_id: result} (each handed over once)."""
+        ids = list(self._asked) if run_ids is None else list(run_ids)
+        return {r: self._asked.pop(r) for r in ids if r in self._asked}
 
 
 def _same(a, b):

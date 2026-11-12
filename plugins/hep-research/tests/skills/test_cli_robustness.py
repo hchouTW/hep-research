@@ -145,7 +145,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/calib_data.py": [["ingest", "--release", M], ["draft", "--ledger", M, "--series", "s"]],
     "skills/hep-statistics/scripts/calib_deps.py": ["roles", "--contract", M],
     "skills/hep-statistics/scripts/calib_design.py": [["p2", "--contract", M], ["p5", "--contract", M, "--plan", M]],
-    "skills/hep-statistics/scripts/calib_emulator.py": ["p6", "--plan", M],
+    "skills/hep-statistics/scripts/calib_emulator.py": [["p6", "--input", M], ["ask", "--state", M]],
     "skills/hep-statistics/scripts/calib_kernel_check.py": ["p0", "--contract", M, "--plan", M],
     "skills/hep-statistics/scripts/calib_fit.py": ["fit", "--contract", M, "--plan", M, "--values", M],
     "skills/hep-statistics/scripts/calib_likelihood.py": ["layout", "--contract", M],

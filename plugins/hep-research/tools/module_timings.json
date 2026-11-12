@@ -501,6 +501,7 @@
   "tests.core.test_calibration_reweight": 3.3,
   "tests.core.test_calibration_linear": 2.6,
   "tests.core.test_calibration_design": 5.5,
+  "tests.core.test_calibration_emulator": 32.0,
   "tests.core.test_calibration_kernel_check": 51.1,
   "tests.core.test_calibration_preflight": 1.7,
   "tests.core.test_calibration_closure": 4.0,

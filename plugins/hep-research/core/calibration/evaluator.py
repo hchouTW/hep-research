@@ -7,7 +7,13 @@ An experiment's adapter implements five functions:
     resample(node, theta, phi, psi, model, inputs, seeds)          -> direct sampling of that node
     evaluate_from(node, samples, theta, phi, psi, model, seeds)    -> observables from a node output (for P0)
     learned_closure(fold)                                         -> phase 5 (G4-L)
-    ask() / tell()                                                -> phase 3 (resimulation and surrogate models)
+    ask(requests) / tell(run_ids)                                 -> the asynchronous interface (below)
+
+ask/tell (resimulation and surrogate models, phase 3): the engine keeps the state file (calibration-ask-tell/1,
+core/calibration/emulator.py: new_state, ask, tell, drive), one entry per evaluation with its `run_id`, parameter
+point and seeds. `ask(requests)` submits [{run_id, theta, seeds, names}] and returns the run_ids accepted; `tell(
+run_ids)` returns {run_id: result} for those done (each once; pending ones are absent), a result being what
+`evaluate` returns ({names, pred, V_MC}, optionally the per-event contributions `influence` for sigma_Delta of P6).
 
 tiers() and domain() are not the adapter's: candidate methods come from calib_chain, feasibility and the final method
 from calib_design (section 7.1). The engine knows the evaluators of this registry by the plan's `evaluator.kind`; the
@@ -34,10 +40,15 @@ class Evaluator(Protocol):
     def evaluate_from(self, node: str, samples, theta: dict, phi: dict | None, psi: dict | None, model: str,
                       seeds: dict) -> dict: ...
 
+    def ask(self, requests: list) -> list: ...
+
+    def tell(self, run_ids=None) -> dict: ...
+
 
 def make(plan: dict, contract: dict | None = None):
     """The evaluator the plan names (plan['evaluator'] = {'kind': ..., ...}); phase 1 knows the toy detector, its
-    variants and the declared small chains (core/calibration/toy.py)."""
+    variants and the declared small chains (core/calibration/toy.py). With plan['evaluator']['surrogate'] (a trained
+    surrogate's record, emulator.Surrogate.record) the surrogate-model parameters are evaluated with it (phase 3)."""
     spec = plan.get("evaluator") or {}
     kind = spec.get("kind")
     from core.calibration import toy                       # the only evaluators in core
@@ -46,4 +57,8 @@ def make(plan: dict, contract: dict | None = None):
     if kind not in builders:
         raise EvaluatorUnavailable(f"no evaluator of kind {kind!r} in this engine version (phase 1 has "
                                    f"{sorted(builders)}; the g4sim evaluator is phase 3)")
-    return builders[kind](spec, plan)
+    ev = builders[kind](spec, plan)
+    if spec.get("surrogate"):                            # a trained surrogate (calib_emulator.py train --out)
+        from core.calibration import emulator
+        ev.attach_surrogate(emulator.Surrogate.from_record(spec["surrogate"]))
+    return ev
