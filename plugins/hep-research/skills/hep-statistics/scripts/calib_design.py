@@ -23,7 +23,7 @@ Phase 2 (sections 2.1 (iii), 6.6, 8.2 notes 3 and 5, 9.3, 9.4; the engine in cor
 Phase 3 (sections 6.1, 6.6, 14.1 with g4sim; the engine in core/calibration/design_g4sim.py):
   calib_design.py g4sim-support --contract FILE --plan FILE --documents FILE   support and recording levels (section 6.1)
   calib_design.py intervals     --plan FILE      event intervals, run_seed, replica 0, seed blocks, one digitization path
-  calib_design.py digi-jobs     --plan FILE --documents FILE                   every g4sim-digi-job/1 of the plan
+  calib_design.py digi-jobs     --plan FILE --documents FILE [--contract FILE] every g4sim-digi-job/1 of the plan
 --documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it.
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
@@ -101,6 +101,7 @@ def main(argv=None) -> int:
     dj = sub.add_parser("digi-jobs")
     dj.add_argument("--plan", required=True)
     dj.add_argument("--documents", required=True)
+    dj.add_argument("--contract", help="the contract whose locked bindings the plan must agree with")
     for name in ("points", "p2", "applicability", "linearize", "support", "p5", "methods"):
         p = sub.add_parser(name)
         if name != "applicability":
@@ -203,7 +204,7 @@ def main(argv=None) -> int:
                 return DG.interval_findings(plan)
             docs = documents(args.documents)
             if args.cmd == "digi-jobs":
-                f = DG.digi_job_findings(plan, docs)
+                f = DG.digi_job_findings(plan, docs, io.load_object(args.contract) if args.contract else None)
                 return {"status": "failed" if f else "passed", "findings": f, "jobs": len(plan.get("digi_jobs") or [])}
             contract = io.load_object(args.contract)
             return DG.support_g4sim(contract, plan, docs)

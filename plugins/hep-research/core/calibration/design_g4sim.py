@@ -74,6 +74,50 @@ def pointer_set(document, pointer: str, value):
     return out
 
 
+# The contract's parameters[].bindings (locked and masked into the model identity, section 5.1) use the schema's
+# document names; this module's evaluator documents use the short names.
+CONTRACT_DOCUMENTS = {"detector-spec": "detector", "run-card": "run", "simulation-request": "request",
+                      "response-pipeline": "pipeline", "condition-snapshot": "conditions"}
+
+
+def contract_bindings(contract: dict) -> dict:
+    """{parameter: {document, pointer}} of the theta and phi of the contract whose one binding is in a document this
+    evaluator writes (alignment overlays, reconstruction and evaluator-level bindings are calib_chain.py's). A theta
+    bound in several documents is rejected here: the g4sim evaluator writes one field per parameter."""
+    out = {}
+    for p in contract.get("parameters", []) or []:
+        if p.get("role") not in ("theta", "phi"):
+            continue
+        own = [b for b in p.get("bindings") or [] if b.get("document") in CONTRACT_DOCUMENTS]
+        if len(own) > 1:
+            raise CheckError("binding.multiple", f"{p['name']} is bound in {len(own)} documents; the g4sim evaluator "
+                             "writes one field per parameter")
+        if own:
+            out[p["name"]] = {"document": CONTRACT_DOCUMENTS[own[0]["document"]], "pointer": own[0]["pointer"]}
+    return out
+
+
+def resolve(plan: dict, contract: dict | None) -> dict:
+    """The plan with node_binding.parameters taken from the contract's locked bindings (the one source of the binding).
+    A plan that also lists parameters must agree with the contract for every parameter: a different document or
+    pointer, or a parameter the contract does not bind, is rejected. Without a contract (or a contract that binds
+    nothing here) the plan's own list is used as before."""
+    if not contract:
+        return plan
+    cb = contract_bindings(contract)
+    if not cb:
+        return plan
+    own = (plan.get("node_binding") or {}).get("parameters") or {}
+    for name, b in own.items():
+        c = cb.get(name)
+        if c is None or c["document"] != b.get("document") or c["pointer"] != b.get("pointer"):
+            raise CheckError("binding.plan_contract_mismatch", f"{name}: the plan binds {b}, the contract "
+                             f"{c if c else 'nothing'} (section 5.1: the binding is locked in the contract)")
+    out = dict(plan)
+    out["node_binding"] = dict(plan.get("node_binding") or {}, parameters=cb)
+    return out
+
+
 def bindings(plan: dict) -> dict:
     return dict((plan.get("node_binding") or {}).get("parameters") or {})
 
@@ -197,6 +241,7 @@ def support_g4sim(contract: dict, plan: dict, documents: dict, n_scan: int = 16,
     (ii) a generation-time filter acting at one of its nodes or downstream of it is missing support for that node and
     its observables, unless the plan records it as ignorable (to be confirmed by P0); (iii) the source support of node
     0. Returns the infeasible parameters (the next tier, section 3.6) with their findings."""
+    plan = resolve(plan, contract)
     graph = contract.get("stage_graph") or {"nodes": [], "edges": []}
     kids = chain.children_of(graph)
     nodes = (plan.get("node_binding") or {}).get("nodes") or {}
@@ -465,13 +510,14 @@ def _same(a, b) -> bool:
     return json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
 
 
-def digi_job_findings(plan: dict, documents: dict) -> list:
+def digi_job_findings(plan: dict, documents: dict, contract: dict | None = None) -> list:
     """Every `g4sim-digi-job/1` of the plan (section 6.6): run_seed = its evaluation's logical_run_seed; replica = 0;
     a job without conditions whose keys (if any) equal digitize.job_with_keys of the job, and keys present when it runs
     in g4sim_digi; a job with conditions without keys and digitized in Python only (D83 (9)), with event_time_ns the
     plan's rule over its interval (D87 (h)); and its agreement with the hashed documents (the pipeline at the entry's
     theta, the map at its replica, the snapshot, the timing built here) by model_identity.digi_job_findings (section
     5.1, the one implementation; codes digi_job.*). documents = {pipeline, maps: {name: map}, conditions: snapshot or None}."""
+    plan = resolve(plan, contract)
     evs = {e["run_id"]: e for e in plan.get("evaluations") or []}
     out = []
     for i, entry in enumerate(plan.get("digi_jobs") or []):

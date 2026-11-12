@@ -132,6 +132,7 @@ class G4simEvaluator:
     channels, threshold}], run (the label of the observables' exposure, default g4sim)."""
 
     def __init__(self, spec: dict, plan: dict):
+        plan = DG.resolve(plan, spec.get("contract"))    # the contract's locked bindings (section 5.1)
         self.spec, self.plan = spec, plan
         self.documents = spec["documents"]
         self.readout = spec.get("readout")

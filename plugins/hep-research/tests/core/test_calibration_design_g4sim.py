@@ -289,5 +289,55 @@ class DigiJobs(unittest.TestCase):
         self.assertEqual(self.check(self.job, map_replica=0), [])
 
 
+class ContractBindings(unittest.TestCase):
+    """The g4sim evaluator's bindings come from the contract's locked parameters[].bindings (section 5.1); a plan
+    copy that disagrees is rejected (the WP-B and WP-C readings reconciled)."""
+    PTR = "/stages/0/parameters/light_yield_per_MeV/value"
+
+    def contract(self, bindings):
+        return {"parameters": [{"name": "light_yield", "role": "theta", "bindings": bindings},
+                               {"name": "noise", "role": "psi", "bindings": [{"document": "response-pipeline",
+                                                                               "pointer": "/x"}]}]}
+
+    def plan(self, params=None):
+        p = {"node_binding": {"nodes": {}}}
+        if params is not None:
+            p["node_binding"]["parameters"] = params
+        return p
+
+    def test_positive_contract_bindings_are_mapped(self):
+        c = self.contract([{"document": "response-pipeline", "pointer": self.PTR}])
+        r = DG.resolve(self.plan(), c)
+        self.assertEqual(DG.bindings(r), {"light_yield": {"document": "pipeline", "pointer": self.PTR}})
+        agree = self.plan({"light_yield": {"document": "pipeline", "pointer": self.PTR}})
+        self.assertEqual(DG.bindings(DG.resolve(agree, c)), DG.bindings(r))     # an agreeing plan copy is accepted
+        self.assertEqual(DG.resolve(agree, None), agree)                        # no contract: the plan as before
+
+    def test_plan_pointer_differs_is_rejected(self):
+        c = self.contract([{"document": "response-pipeline", "pointer": self.PTR}])
+        bad = self.plan({"light_yield": {"document": "pipeline", "pointer": "/stages/1/parameters/gain/value"}})
+        with self.assertRaises(DG.CheckError) as cm:
+            DG.resolve(bad, c)
+        self.assertEqual(cm.exception.code, "binding.plan_contract_mismatch")
+
+    def test_plan_parameter_unbound_in_contract_is_rejected(self):
+        c = self.contract([{"document": "response-pipeline", "pointer": self.PTR}])
+        extra = self.plan({"light_yield": {"document": "pipeline", "pointer": self.PTR},
+                           "gain": {"document": "pipeline", "pointer": "/stages/1/parameters/gain/value"}})
+        with self.assertRaises(DG.CheckError) as cm:
+            DG.resolve(extra, c)
+        self.assertEqual(cm.exception.code, "binding.plan_contract_mismatch")
+
+    def test_two_evaluator_bindings_are_rejected(self):
+        c = self.contract([{"document": "response-pipeline", "pointer": self.PTR},
+                           {"document": "detector-spec", "pointer": "/materials/0/birks_mm_per_MeV"}])
+        with self.assertRaises(DG.CheckError) as cm:
+            DG.resolve(self.plan(), c)
+        self.assertEqual(cm.exception.code, "binding.multiple")
+        one = self.contract([{"document": "response-pipeline", "pointer": self.PTR},
+                             {"document": "alignment-overlay", "pointer": "/a"}])  # overlays are calib_chain.py's
+        self.assertEqual(list(DG.bindings(DG.resolve(self.plan(), one))), ["light_yield"])
+
+
 if __name__ == "__main__":
     unittest.main()

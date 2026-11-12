@@ -66,6 +66,8 @@ def make(plan: dict, contract: dict | None = None):
     if kind not in builders:
         raise EvaluatorUnavailable(f"no evaluator of kind {kind!r} in this engine version (phase 1 has "
                                    f"{sorted(builders)}; the g4sim evaluator registers itself when the Geant4 adapter's evaluator is imported)")
+    if kind in _REGISTERED and contract is not None:     # adapters read the contract's locked bindings
+        spec = dict(spec, contract=contract)
     ev = builders[kind](spec, plan)
     if spec.get("surrogate"):                            # a trained surrogate (calib_emulator.py train --out)
         if not hasattr(ev, "attach_surrogate"):
