@@ -1,0 +1,26 @@
+{
+ "format": "t10-replay-tolerance/1",
+ "state": "frozen",
+ "frozen_by": "the user, 2026-11-12: \"Freeze as proposed (Recommended)\" (decisions.md, The user's freeze of T10's replay comparator tolerance)",
+ "k09": "drafted by the T10 replay stage 3 (t10-replay-stage-plan.md, section 4); the user freezes it before the run (decisions.md, U7: freeze tolerance later)",
+ "stopping": 1e-10,
+ "safety": 10,
+ "kappa": 24.47,
+ "map_gain": 0.8757,
+ "tau_baselines": 2.5e-08,
+ "tau_map": 2.2e-08,
+ "norm": "2-norm of the difference over all baselines (tau_baselines) or all pixels (tau_map), each relative to the 2-norm of the reference baselines",
+ "derivation": "on 1-perp, ||a_cg - a_ref||_2 <= eps ||b||_2 / lambda_min <= eps kappa ||a_ref||_2 and ||m_cg - m_ref||_2 <= G ||a_cg - a_ref||_2; tau = safety x kappa x eps (baselines) and safety x G x kappa x eps (map), rounded up; kappa = lambda_max / lambda_min of D on 1-perp and G = ||M^-1 P^T F||_2 of the fixture t10-destripe/1 (seed 20260), recomputed by the comparator",
+ "zero_sum_relative": 1e-13,
+ "ladder": [
+  0.01,
+  0.001,
+  0.0001,
+  1e-05,
+  1e-06
+ ],
+ "min_informative_steps": 2,
+ "ladder_rule": "fix round 1 (I1): five more runs at the ladder's stopping values; each baseline difference within safety x kappa x eps_j x ||a_ref||_2 and each map difference within safety x G x kappa x eps_j x ||a_ref||_2; between consecutive rungs the baseline difference strictly smaller when the iteration count rises and equal when it does not, never fewer iterations; at least min_informative_steps strictly smaller steps, else incomplete (exit 3); map shrinking and ||dm|| / (G ||da||) are readings",
+ "readings": "the eps / 2 run (determinism: bit-identical when it takes no extra iteration; within tau / 2), and the a-posteriori bound safety x max(r_n, 1e4 u) x ||b||_2 / lambda_min beside the measured baseline difference; readings, not gates",
+ "expected_difference": "about 3e-16 to 3e-15 of ||a_ref||_2, a prediction from synthetic data on the fixture's pointing (review t10-replay-review.md), not a fixture reading: a PASS means only below tau"
+}

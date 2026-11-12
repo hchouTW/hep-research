@@ -1,0 +1,259 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "destriper",
+ "entry": "adapters/destriper/assets/destriper.py",
+ "operations": [
+  {
+   "operation_id": "solve",
+   "summary": "reco.scan.destriper/1, a development binding, not native: conjugate gradient on the reduced destriping system restricted to the zero-sum subspace of the baselines, then the map by binning; writes destriper-product/1 with the embedded reconstruction:scan-v1 global product; --constraint zero-sum (default) or none (every parameter named unidentifiable, only determined combinations reported)",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--timestream",
+      "input": "timestream"
+     },
+     {
+      "flag": "--product",
+      "input": "product"
+     },
+     {
+      "flag": "--product-id",
+      "input": "product_id"
+     },
+     {
+      "flag": "--constraint",
+      "input": "constraint"
+     },
+     {
+      "flag": "--stopping",
+      "input": "stopping"
+     },
+     {
+      "flag": "--max-iterations",
+      "input": "max_iterations"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "timestream",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a destriper-timestream/1 file, role reconstruction-input: per sample an integer pixel index and a finite value, whole baselines of baseline_length samples, exactly the format's keys"
+    },
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the destriper-product/1 to write; never an existing file"
+    },
+    {
+     "name": "product_id",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the product's identity"
+    },
+    {
+     "name": "constraint",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "zero-sum (default) or none"
+    },
+    {
+     "name": "stopping",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "relative recomputed residual at which the iteration stops, in (0, 1); default 1e-10"
+    },
+    {
+     "name": "max_iterations",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "iteration budget, at least 1; default 10 per baseline"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "product",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "constraint",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "stopping",
+     "kind": "quantity",
+     "unit": "1"
+    },
+    {
+     "name": "iterations",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "relative_residual",
+     "kind": "quantity",
+     "unit": "1"
+    },
+    {
+     "name": "input_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "components",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "seconds",
+     "kind": "quantity",
+     "unit": "s"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the map is not determined by the data and the one constraint: an unobserved pixel, or more than one connected component (the components are listed); status not-converged when the budget ran out; no product is written"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an input is refused (missing, malformed, an existing target, a stopping value outside (0, 1)); stdout carries status rejected and the reason; no product is written"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "fixed-execution"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "check-product",
+   "summary": "Read a destriper-product/1 back, refusing a malformed or incomplete one or one whose method card differs, and run contracts.reconstruction.read_sidecar on the embedded reconstruction-product/1",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--product",
+      "input": "product"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a destriper-product/1 file"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "errors",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "constraint",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "contract_seconds",
+     "kind": "quantity",
+     "unit": "s"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "contracts.reconstruction refuses the embedded product; its error codes are listed"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "the product is missing, malformed or incomplete, or its method card differs; stdout carries status rejected"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}
