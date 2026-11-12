@@ -365,6 +365,13 @@
    "registered_at": "2026-11-12T14:33:59Z",
    "card_commit": "c1a40ed6",
    "reason": "RICH-replica risk closed (S7 case ams02-rich-replica, check-spec ok); RICH items of 15.2 and 8.7 note 6 assigned to WP-F; no run judged yet"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "a239b0ea060d89e0f4e4a4a60ad7c798c55e2c4000c0a7d41a993b4d64fba81e",
+   "registered_at": "2026-11-12T15:27:55Z",
+   "card_commit": "748230da",
+   "reason": "wave 1 merged; execution log and open author items added; no run judged yet"
   }
  ]
 }
