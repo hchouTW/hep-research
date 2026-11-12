@@ -3,6 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-detector: method text for eleven instrument families with none** (documentation only; no tool, no run). Four new references, linked from `event-reconstruction.md` (a registered wiring hub): `threshold-and-quantum-sensor-reconstruction.md` (superconducting nanowire and kinetic inductance detectors, superheated bubble chambers and droplet detectors, Skipper-CCD readout), `gamma-ray-imaging-and-polarimetry-reconstruction.md` (Compton telescopes, pair-conversion telescopes, coded-mask imaging, photoelectric and Compton polarimetry), `frequency-and-scan-encoded-spectroscopy-reconstruction.md` (CRES, cavity, spin and broadband haloscopes, retarding spectroscopy) and `timestream-to-map-reconstruction.md` (destriping and map-making for scanning radiometers). Each method is stated per axis (signal extraction, finding, estimation, space and time, energy, identification, uncertainty) with its failure modes, scoped to the instrument or study of one of twenty-six sources read on 2026-11-06, each cited at its read level (`full-text`, or `page` for named sections only); a variant or axis with no source read stays a stated gap ("no method text: no source read"), among them the circuit haloscope and modulated-readout polarimeter variants, collimated and focusing imaging, and charge sign in pair telescopes. Each page lists its sources with read levels; the bibliography's closing note says so. No method is implemented or validated by the plugin. README reference count 45 -> 49; reference inventory regenerated.
+
 ## 0.66.1 (2026-11-12)
 
 Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged. Ships PRs #391 and #392 (issues #388 and #389): a new hep-detector reference on DIS kinematic reconstruction, `experiment:eic` 0.6.1, and two EIC routing cases that now expect the profile.

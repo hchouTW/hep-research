@@ -297,4 +297,4 @@ be sourced from the relevant apparatus's own documentation. Nuclear emulsions, f
 proton detectors, neutron detectors, beam and luminosity monitors, polarimeters, and
 cryogenic bolometers are treated at the principle level in this study and are covered by
 the general textbooks and PDG reviews above; add primary sources when a downstream
-analysis relies on a specific device.
+analysis relies on a specific device. Source-scoped method pages list their own sources read.
