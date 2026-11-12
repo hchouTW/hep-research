@@ -288,6 +288,13 @@
    "registered_at": "2026-11-12T05:41:43Z",
    "card_commit": "4e147265",
    "reason": "before its run: deferred section 8.7 calibrations batch B (10 and the rest of 12; the user's decisions of 2026-11-12), tests/core/calibration_phase2_cals_b.py; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "cb675b3f42aa40b4b3fbcff0fb1721e7159620813f705a66f8cdc8705a3d21fc",
+   "registered_at": "2026-11-12T06:44:12Z",
+   "card_commit": "ead505a7",
+   "reason": "before its run: gate 1 on the toy detector rerun at the hand-over commit (identifiers renamed, toy additions; the user's approval of 2026-11-12), and gates 2 and 3; items, seeds and criteria unchanged"
   }
  ]
 }
