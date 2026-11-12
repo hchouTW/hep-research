@@ -281,7 +281,7 @@ class Collection(unittest.TestCase):
         self.assertTrue(all("required output missing" in m.reason for m in missing))
         records = [core.TestResult(gate="g", bin="b", statistic="rate", estimate=0.0, standard_error=None, lower=0.0, upper=0.001, limit=0.01,
                                    result="pass", step=3, attempt=1, confidence=0.95, replicates=None, required=True, reason="", readings={})] * 268 + missing
-        self.assertEqual(core.workflow_outcome("T09", records, [], attempt=1).r11_state, "failed")
+        self.assertEqual(core.workflow_outcome("T09", records, [], attempt=1, required_checks=()).r11_state, "failed")
 
     def test_a_truncated_product_makes_the_bin_missing(self):
         short = product(500, 500, drop_last=True)
@@ -396,7 +396,17 @@ class ScriptRuns(unittest.TestCase):
                     "t08_fixture_files.py": '{"block": 1, "events": 600, "status": "ok"}', "calo_cluster.py": '{"chain": [], "status": "ok"}',
                     "t09_fixture_files.py": '{"files": {}, "status": "ok"}', "photon_likelihood.py": '{"exit_code": 0, "status": "ok"}',
                     "t09_truth_start.py": 'RESULT {"exit_code": 0, "status": "ok"}', "fbrun_tools.py classify": "CLASSIFY job 1 NO-DRAW: x",
-                    "fbrun_tools.py t07-comparator": "RESULT comparator ok: 1 of 1 noise bins"}
+                    "fbrun_tools.py t07-comparator": "RESULT comparator ok: 1 of 1 noise bins",
+                    "t09_negative_checks.py relabel-dead": '{"format": "t09-dead-as-unhit/1", "status": "ok"}',
+                    "t08_scenarios.py accounting": "GATE main-E3-iso selection-and-accounting PASS: 0 of 3000 events with a defect",
+                    "t08_scenarios.py reference-selection": "GATE reference-selection PASS: the reference clusterer's W, SN, Q, TC, TS and ITERS",
+                    "t08_cai.py payloads": '{"files": {}, "status": "ok"}',
+                    "t08_cai.py fixed-membership": "CAI-T08-1 main-E3-iso-multiply RESULT PASS",
+                    "t08_cai.py rereco": "CAI-T08-2 main-E3-iso-multiply RESULT RECORDED",
+                    "t09_fixed_points.py": "GATE per-channel sum at the fixed points (v4 9.3, the T09 stop): points 50, failures 0: PASS",
+                    "check_generators.py": "RESULT PASS",
+                    "t07_evaluation_scoring.py": "RESULT t07-scoring score-bin ok: T07 fixture 7001 block 11 stratum 0: 57 records written",
+                    "t04_evaluation_tasks.py": "RESULT score ok"}
         self.assertEqual(set(examples), set(layout.RESULT_LINES))
         for name, line in examples.items():
             with self.subTest(name=name):
@@ -582,6 +592,19 @@ class T07RangesByIndex(unittest.TestCase):
         self.assertEqual(layout.classify_t07_by_index(self.full, self.full, [(0, self.parts[0][1]), (3, hits)])[0], "draw differs")
 
 
+class PooledBins(unittest.TestCase):
+    """E6c fix round 1 (with E6b's O5): a pool is complete only if every member bin is."""
+
+    def test_pool_status(self):
+        pool = core.PooledIdentity("T09", 9001, 11, 0, (3, 4, 5), "test pool")
+        self.assertEqual(layout.pool_status(pool, {3: ("complete", ""), 4: ("complete", ""), 5: ("complete", "")}), ("complete", ""))
+        status, reason = layout.pool_status(pool, {3: ("complete", ""), 4: ("missing", "a range crashed"), 5: ("complete", "")})
+        self.assertEqual(status, "missing")
+        self.assertIn("member stratum 4 is incomplete: a range crashed", reason)
+        with self.assertRaises(layout.LayoutError):
+            layout.pool_status(pool, {3: ("complete", ""), 4: ("complete", "")})
+
+
 class EvaluationPlan(unittest.TestCase):
     """The evaluation on blocks 11 and 12 as arrays of short tasks, its task count, CPU-hours and wall by the closed form."""
 
@@ -592,14 +615,19 @@ class EvaluationPlan(unittest.TestCase):
         self.assertEqual(counts["T08 sample"], 15)
         self.assertEqual(counts["T09 generation"], 15)
         self.assertEqual(counts["T09 range"], 15 * 24)
-        self.assertEqual((counts["T07 collection"], counts["T07 scoring"], counts["T09 scoring"]), (1, 24, 15))
+        self.assertEqual((counts["T07 collection"], counts["T07 scoring"]), (1, 24))
         for task in plan.tasks:
             self.assertEqual(task.cpu_class, "AMD EPYC 9645 96-Core Processor")   # U-W7 (review M9)
             if task.kind in ("T07 bin", "T07 refit"):
                 self.assertEqual((task.cpus, task.memory_mb), (2, 7900))            # fix round 1, I5: as the Freeze-B run
         for task in plan.tasks:
             with self.subTest(task=task.name):
-                self.assertLess(task.wall_seconds, 3600 * 0.6)  # every task well under 1 h at the recorded costs
+                self.assertLess(task.wall_seconds, 3600 * (0.6 if "scoring" not in task.kind else 1.0))  # recipe tasks well under 1 h; scoring under 1 h
+        for kind in ("T09 fixed points", "T08 checks", "T07 checks", "T07 negative cases"):
+            self.assertEqual(counts[kind], 1)
+        self.assertEqual((counts["T07 slices"], counts["T09 scoring"], counts["T09 pool scoring"]), (10, 15, 1))   # E6c fix round 1 (M4; slices, E5)
+        self.assertEqual(set(plan.by_name["T09 summary"].depends) >= {"T09 score pool", "T09 fixed points"}, True)
+        self.assertIn("T08 checks", plan.by_name["T08 summary"].depends)
         for key, ranges_of_bin in plan.ranges_by_bin().items():
             with self.subTest(bin=key):
                 layout.check_ranges(ranges_of_bin, 12000)
@@ -619,6 +647,9 @@ class EvaluationPlan(unittest.TestCase):
         self.assertEqual(plan.overhead_hours(), (10 + 10 + 10 + 30) / 3600)
         with self.assertRaises(layout.LayoutError):
             layout.Plan([layout.Task("a", "fit", 1, 1.0, 1, ("missing",))]).longest_chain_seconds()
+
+    def test_the_memory_record_holds_job_7591439s_measurement(self):
+        self.assertEqual(layout.T07_REFIT_PEAK_MEMORY, {3000: 8012452, 12000: 31841752})
 
     def test_the_refit_range_follows_the_memory_record(self):
         """Fix round 1, I5: 8.0 GB per 3,000 events (Freeze-B run, linear) cannot fit 12,000 events in 2 x 7,900 MB: the refit is split."""

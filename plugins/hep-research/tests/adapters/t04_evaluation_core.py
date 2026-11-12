@@ -60,11 +60,11 @@ DELTA_FLOOR, DELTA_FACTOR, DELTA_EVENTS = 0.01, 5.961, 10000      # section 5.2,
 FAMILY_TESTS = 1260           # section 5.3: all T07-T09 gates use T07's count, M = 1,260
 Z_FAMILY = float(stats.norm.isf(0.01 / FAMILY_TESTS))  # section 5.3, z1 4.316; enters slack only, never a pass rule
 ATTEMPT_OF_BLOCK = {11: 1, 12: 2}                    # section 3.2, blocks 11 and 12: evaluation attempts 1 and 2
-# Readings awaiting the user (K09, with Freeze B; coordinator's ruling, E6a fix round 1, M1 and O2). v4 3.4: "Pass bounds use 99 %, z = 2.326, in
-# place of 95 %, on every test"; U-K2: the paired bound is "the estimate - 1.645 x the event-bootstrap se". At attempt 2 the core reads 3.4 as
-# covering every bound: step 1's fail bounds (pull and rate) at 99 %, and the paired bound at z 2.326 (its percentile reading at 1 %).
-STEP1_ALPHA_OF_ATTEMPT = {1: 0.05, 2: 0.01}          # step 1 of the pull and rate tests (v4 5.2); reading awaiting the user
-PAIRED_ALPHA_OF_ATTEMPT = {1: 0.05, 2: 0.01}         # the paired bound (U-K2 at attempt 1; v4 3.4 at attempt 2); reading awaiting the user
+# The user's answers on the attempt-2 levels (decisions.md, "The user's answers on the attempt-2 levels (K09, 2026-11-12)"): v4 3.4's 99 % moves
+# the bounds that decide a pass; the bounds that declare a fail keep 95 %. So step 1 of the pull and rate tests (the fail-first step) is at 95 %
+# at both attempts, and the paired bound (a pass bound; U-K2's form) is at z 2.326 at attempt 2 (its percentile reading at 1 %).
+STEP1_ALPHA_OF_ATTEMPT = {1: 0.05, 2: 0.05}          # step 1 of the pull and rate tests (v4 5.2): 95 % at both attempts (the user, K09)
+PAIRED_ALPHA_OF_ATTEMPT = {1: 0.05, 2: 0.01}         # the paired bound: U-K2's 1.645 at attempt 1, v4 3.4's 2.326 at attempt 2 (the user, K09)
 ALPHA_OF_ATTEMPT = {1: 0.05, 2: 0.01}                # section 3.4: 95 %, then 99 % on every test
 CONFIDENCE_OF_ATTEMPT = {1: 0.95, 2: 0.99}
 RESULT_WORDS = ("pass", "fail", "inconclusive", "not-applicable")  # sections 5.2 and 10
@@ -173,7 +173,43 @@ class BinIdentity:
         return level_of_block(self.block)
 
 
-def seed_entropy(identity: BinIdentity) -> tuple:
+POOL_STRATUM_BASE = 100       # a pooled bin's stratum field is 100 + its pool index: its entropy is never a bin's (strata 0 to 11)
+
+
+@dataclass(frozen=True)
+class PooledIdentity:
+    """A test pooled over bins of one fixture and block (D4 E6c fix round 1, with E6b's O5): T09's mirrored and reversed (v4 9.4, main B2-B4)
+    and T07's angle slices (v4 8.2, the 12 bins of a fixture). Its bootstrap entropy is (520, fixture_id, block, 100 + pool), never a bin's or
+    another pool's of the same fixture; its level is its block's; it is complete only if every member bin is (layout.check_pool)."""
+    workflow: str
+    fixture_id: int
+    block: int
+    pool: int
+    members: tuple
+    name: str
+
+    def __post_init__(self):
+        if self.fixture_id not in WORKFLOW_FIXTURES.get(self.workflow, ()):
+            raise CoreError(f"fixture {self.fixture_id} is not a fixture of {self.workflow} (section 3.2)")
+        members = tuple(self.members)
+        if self.block < 1 or not 0 <= self.pool < STRATA_PER_FIXTURE or len(members) < 2 or len(set(members)) != len(members) \
+                or not all(0 <= m < STRATA_PER_FIXTURE for m in members) or not self.name:
+            raise CoreError(f"pool {self.pool} of strata {members}, block {self.block}: a pool has a name, 2 or more distinct strata 0 to 11, a pool index 0 to 11")
+
+    @property
+    def stratum(self) -> int:
+        return POOL_STRATUM_BASE + self.pool
+
+    @property
+    def label(self) -> str:
+        return f"{self.workflow} fixture {self.fixture_id} block {self.block} pool {self.pool} ({self.name}; strata {', '.join(map(str, self.members))})"
+
+    @property
+    def level(self) -> Level:
+        return level_of_block(self.block)
+
+
+def seed_entropy(identity) -> tuple:
     return (BOOTSTRAP_DOMAIN, identity.fixture_id, identity.block, identity.stratum)
 
 
@@ -317,6 +353,13 @@ def _pull_records(name: str, label: str, events: EventValues, level: Level, rows
                                 replicates=None, reason="required output missing: no pull in the bin", **common)
                      for s in ("trimmed-centre", "sigma68-width"))
     rows = rows() if callable(rows) else rows
+    empty = int((events.counts[rows].sum(axis=1) == 0).sum())
+    if empty:
+        # A replicate holding no object has no centre or width, so the bootstrap se is undefined (fix round 1; E6b review I4): inconclusive, the
+        # reason stated, as step 2 reads an se it cannot bound. The numbers of the bin stay as readings.
+        reason = f"required output missing: {empty} of {rows.shape[0]} bootstrap replicates hold no pull, so the se is undefined"
+        return tuple(TestResult(statistic=s, estimate=None, standard_error=None, lower=None, upper=None, limit=TOLERANCE, result="inconclusive",
+                                step=2, replicates=int(rows.shape[0]), reason=reason, **common) for s in ("trimmed-centre", "sigma68-width"))
     centre_rep, width_rep = numpy.empty(rows.shape[0]), numpy.empty(rows.shape[0])
     for b, row in enumerate(rows):
         replicate = events.gather(row)
@@ -331,7 +374,7 @@ def _pull_records(name: str, label: str, events: EventValues, level: Level, rows
     return tuple(records)
 
 
-def pull_tests(name: str, identity: BinIdentity, per_event, *, required: bool = True) -> tuple:
+def pull_tests(name: str, identity, per_event, *, required: bool = True) -> tuple:
     """The location and width gates of section 6 on one bin: (centre record, width record), with the bin's own B = 1,000 replicates for both and
     the level of the bin's block. No other replicates are accepted (B is v4 5.1's)."""
     level = identity.level
@@ -418,7 +461,7 @@ def _rate_record(name: str, label: str, m, y, limit: float, level: Level, min_ev
     return TestResult(estimate=found["r_dev"], standard_error=None, lower=lower, upper=upper, result=word, step=step, reason="", readings=readings, **common)
 
 
-def rate_test(name: str, identity: BinIdentity, m, y, limit: float, *, min_events: int | None = None, required: bool = True,
+def rate_test(name: str, identity, m, y, limit: float, *, min_events: int | None = None, required: bool = True,
               statistic: str = "rate") -> TestResult:
     """Section 5.2 on one bin, at the level of the bin's block: m_e objects and y_e failures per event; steps 1 to 4. E2's rate_rule gives the
     counts and DEFF_hat."""
@@ -533,7 +576,7 @@ _WORST = {"pass": 0, "inconclusive": 1, "fail": 2}
 
 def workflow_outcome(workflow: str, tests, checks, *, attempt: int, forbidden_constants=(), freeze_b_blocks_used_up: bool = False,
                      critical_false_success=(), evaluation_could_not_run: bool = False, matching_sensitivity_disagrees: bool = False,
-                     found_obligations=()) -> WorkflowOutcome:
+                     found_obligations=(), required_checks=None) -> WorkflowOutcome:
     """Every row of section 10's table. A workflow's result is the worst of its gates; a mean over bins never makes up for a failed bin.
     A gate is the set of records with one gate name; inconclusive in a required bin fails the workflow (R11). The required set is intact when
     the required records number section 10's count (REQUIRED_TESTS); the fixed obligations are always merged in, and found_obligations
@@ -541,6 +584,7 @@ def workflow_outcome(workflow: str, tests, checks, *, attempt: int, forbidden_co
     if attempt not in (1, 2):
         raise CoreError(f"attempt {attempt}: at most 2 evaluation attempts (section 3.4)")
     tests = list(tests)
+    checks = list(checks)
     recorded = ["matching sensitivity disagrees (recorded, no effect)"] if matching_sensitivity_disagrees else []
     obligations = list(fixed_obligations(workflow)) + list(found_obligations)
     if freeze_b_blocks_used_up:
@@ -549,6 +593,14 @@ def workflow_outcome(workflow: str, tests, checks, *, attempt: int, forbidden_co
     if evaluation_could_not_run:
         return WorkflowOutcome(workflow, {}, "not judged", "blocked-by-resource", attempt, tuple(obligations),
                                ("resources: the evaluation cannot run at all (K10)",), tuple(recorded), False, False)
+    # Fix round 1 (E6c review I2): v4 10's pass row needs the deterministic, negative and CAI checks to pass, so a pass needs every required check
+    # present. required_checks: the names the workflow requires (t08_scoring.REQUIRED_CHECKS, t09_scoring.REQUIRED_CHECKS, E6b's for T07). A
+    # required check absent, or no list given, is refused (CoreError): the summary reads it as incomplete, never as a pass or a fail.
+    if required_checks is None:
+        raise CoreError("workflow_outcome needs the workflow's required checks (v4 10: deterministic, negative and CAI checks)")
+    absent = sorted(set(required_checks) - {check.name for check in checks})
+    if absent:
+        raise CoreError(f"required checks absent: {absent}; no outcome is read without them (v4 10)")
     required = [record for record in tests if record.required]
     if len(required) != REQUIRED_TESTS[workflow]:
         return WorkflowOutcome(workflow, {}, "fail", "failed", attempt, tuple(obligations),
