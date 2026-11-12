@@ -281,6 +281,13 @@
    "registered_at": "2026-11-12T04:50:52Z",
    "card_commit": "9b1a3e97",
    "reason": "before its run: deferred section 8.7 calibrations batch A (2, 4, 8, 11, 15; the user's decisions of 2026-11-12), tasks of tests/core/calibration_phase2_cals.py at 9b1a3e97; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6c9167b4f209e14efc23a83e6fa940ccd55803a74eb00497d1705035a9b763bb",
+   "registered_at": "2026-11-12T05:41:43Z",
+   "card_commit": "4e147265",
+   "reason": "before its run: deferred section 8.7 calibrations batch B (10 and the rest of 12; the user's decisions of 2026-11-12), tests/core/calibration_phase2_cals_b.py; tightening only"
   }
  ]
 }
