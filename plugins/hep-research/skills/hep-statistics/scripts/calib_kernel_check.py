@@ -8,8 +8,10 @@ theta with the design-stage A: |Delta theta_i| <= 0.1 sigma_tot,i^design + z sig
 Bonferroni over d x (number of theta') at alpha = 0.01. Output: one JSON object; passed (exit 0), not-applicable
 (exit 0: the plan uses no P0 method, section 8.1), failed (exit 1, remedy level plan, contract if the kernel semantics
 are wrong), rejected (exit 2), incomplete (exit 3). Results carry provisional-thresholds (sigma_tot^design without
-Sigma_boot, phase 2). The engine (core/calibration) needs NumPy and SciPy. Phase 1
-(section 17).
+Sigma_boot, phase 2). With g4sim (phase 3) the section 5.4 spot checks (k_B extremes with the scintillation formula
+downstream, r outside 0.15..1, light-yield extremes) are added to the default points; --points without them is
+rejected (p0.spot_checks_missing, exit 2) before any evaluation. The engine (core/calibration) needs NumPy and SciPy.
+Phase 1 (section 17); spot checks phase 3.
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -57,16 +59,24 @@ def main(argv=None) -> int:
         if plan is None:
             raise io.InputError("--plan is needed (or a fixture with a plan)")
         try:
-            ev = evaluator.make(plan, contract)
-            d = linear.design(ev, contract, plan, systematics=io.systematics(args.release, extras))
+            required = kernel_check.required_spot_checks(contract, plan)      # section 5.4, before any evaluation
+            pts, extra = None, []
             if args.points:
                 pts = io.load(args.points)
                 if not isinstance(pts, list) or not all(isinstance(x, dict) for x in pts):
                     raise io.InputError("--points: a JSON list of theta' objects")
-            else:
+                missing = kernel_check.missing_spot_checks(pts, required, "P0")
+                if missing:
+                    return {"gate": "P0", "status": "rejected", "required": required, "findings": [
+                        {"code": "p0.spot_checks_missing", "message": f"the section 5.4 spot checks {missing} are not "
+                         "among --points (full g4sim_run plus response at each; they cannot be omitted)"}]}
+            ev = evaluator.make(plan, contract)
+            d = linear.design(ev, contract, plan, systematics=io.systematics(args.release, extras))
+            if pts is None:                                                    # the defaults always add them
                 pts = kernel_check.default_points(ev, contract, plan)
+                extra = [q for r in required if r["gate"] == "P0" for q in r["points"]]
             seed = args.seed if args.seed is not None else int((plan.get("seeds") or {}).get("resample", 20261111))
-            return kernel_check.p0(ev, contract, plan, d, pts, seed)
+            return kernel_check.p0(ev, contract, plan, d, pts, seed, spot_checks=extra, required=required)
         except evaluator.EvaluatorUnavailable as exc:
             return {"status": "incomplete", "reason": str(exc)}
         except linear.DesignError as exc:

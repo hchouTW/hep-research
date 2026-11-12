@@ -121,6 +121,42 @@
        }
       },
       "$comment": "the external constraint of a phi (N(nominal, sigma^2)) or the uncertainty of a psi (D37)"
+     },
+     "bindings": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "document",
+        "pointer"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "document": {
+         "enum": [
+          "detector-spec",
+          "alignment-overlay",
+          "simulation-request",
+          "run-card",
+          "response-pipeline",
+          "condition-snapshot",
+          "reconstruction",
+          "evaluator"
+         ]
+        },
+        "pointer": {
+         "type": "string"
+        },
+        "form": {
+         "enum": [
+          "value",
+          "scale"
+         ],
+         "$comment": "value (default): theta is the value at the pointer; scale: theta multiplies every element of the array at the pointer (n(E) -> s n(E)), nominal 1"
+        }
+       }
+      },
+      "$comment": "g4sim (section 5.1, 11.4): the specification fields the parameter is bound to, by JSON Pointer; the theta and phi bindings are the mask list of the model identity, locked with the contract"
      }
     }
    },
@@ -652,6 +688,10 @@
   "exposure": {
    "type": "object",
    "$comment": "expected number of data events per sample (design stage, section 6.7 and 8.2 note 5: metadata only, no data values)"
+  },
+  "pde_split": {
+   "type": "object",
+   "$comment": "section 6.7 PDE split (g4sim): {parameters, model: scale | table, applied_as, table: {energy_eV, value}, angle_dependent, ties, sensor_surfaces, map_mode}; core/calibration/pde_split.contract_findings"
   }
  },
  "$comment": "calibration-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. calib_contract.py check applies the rules of section 5.2."

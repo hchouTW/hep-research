@@ -43,12 +43,13 @@
    }
   },
   "phase-3": {
-   "state": "not-started",
+   "state": "in-progress",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-3",
    "branch": "simcal/phase-3",
-   "task_card_sha256": "e5581f56bc91717cf992e0cef42a25358b5f989901fb32988f19ed8501278f79",
+   "task_card_sha256": "a239b0ea060d89e0f4e4a4a60ad7c798c55e2c4000c0a7d41a993b4d64fba81e",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-3.md",
-   "blocked_on": []
+   "blocked_on": [],
+   "note": "started 2026-11-12 from origin/main ca70a606 (phases 0-2 merged as #385, #386, #396); the eight author items unblocked by approval A12, 2026-11-12"
   },
   "phase-4": {
    "state": "not-started",
@@ -68,7 +69,7 @@
   }
  },
  "g4sim_preconditions": {
-  "checked_at": "2026-11-10T07:27:36Z",
+  "checked_at": "2026-11-12T14:05:50Z",
   "g4sim_status_updated": "2026-11-09T06:37:23Z",
   "stages": {
    "S0": "merged",
@@ -82,7 +83,7 @@
    "S8": "merged",
    "S9": "merged"
   },
-  "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
+  "note": "Phase 3 (checked 2026-11-12): S1, S3, S4, S5, S7, S8, S9 merged. Gate records read: S7 is partially complete, gate 3 (TR yield) a recorded gap; no phase-3 item uses a TR yield. The RICH replica fixture is the S7 reference case ams02-rich-replica (expressed at 210b1685, evaluated 2026-11-08, job 7523520, synthetic); the S7 record's 'not yet expressed' belongs to its first judged run's open items. check-spec on the case returns ok at f93841c3. S8 and S9 gates-recorded with all gates passing."
  },
- "updated": "2026-11-12T14:21:38Z"
+ "updated": "2026-11-12T15:40:48Z"
 }

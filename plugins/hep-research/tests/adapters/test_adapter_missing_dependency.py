@@ -27,6 +27,7 @@ ARGS = {
         ["--request", "@TMP/request.json", "--response", "@TMP/response.json"], {}),
     "adapters/cr-propagation/assets/dragon2_to_prediction.py": (
         ["--txt", "@TMP/run.txt", "--numerator", "B", "--denominator", "C", "--edges", "1,2", "--out", "@TMP/out"], {}),
+    "adapters/geant4/assets/g4sim_calib_eval.py": (["evaluate", "--plan", "@TMP/plan.json", "--theta", "@TMP/t.json"], {}),
     "adapters/hepdata/assets/hepdata_export.py": (
         ["--artifact", "@TMP/record.json", "--out", "@TMP/out", "--engine", "hepdata_lib"], {}),
     "adapters/hepdata/assets/hepdata_record.py": (

@@ -51,6 +51,46 @@
    "type": "object",
    "$comment": "the method per parameter (section 3.6): analytic-reweighting, step-level-reweighting, learned-density-ratio, rerun, resimulation, surrogate-model"
   },
+  "evaluations": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["run_id", "use", "logical_run_seed", "first_event", "events"]
+   },
+   "$comment": "section 6.6 Check: one record per g4sim evaluation (run_id, use, set, logical_run_seed, global event interval, run_seed, replica, digitization path per readout); calib_design.py intervals"
+  },
+  "seed_blocks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["block", "logical_run_seed", "t", "m_blk", "N_ev"]
+   },
+   "$comment": "section 14.1: the registry of seed blocks (S_b, t)"
+  },
+  "digi_jobs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["job", "evaluation"]
+   },
+   "$comment": "section 6.6: every g4sim-digi-job/1 with its evaluation, readout, map, map_replica, theta and implementation; calib_design.py digi-jobs"
+  },
+  "event_time": {
+   "type": "object",
+   "$comment": "D87 (h): each event's time as a function of its global event number ({kind: linear, t0_ns, ns_per_event})"
+  },
+  "mapping_scans": {
+   "type": "object",
+   "$comment": "section 6.7, D28: the declared seeding of the mapping runs of each theta scan ({scan: {seeding: shared | independent, map_term: joint-pattern | analytic | g4sim-replicas | fallback, points, N_map, R, pattern_table, observables}}); calib_design.py map-plan"
+  },
+  "efficiency_map": {
+   "type": "object",
+   "$comment": "section 6.7: {mode: fixed | varies-with-theta, R, linear_in_eps: [observable], u_construction: {observable: digitized | map_replica | linear}, affected: [observable], through_surrogate: [observable]}; calib_design.py map-plan"
+  },
+  "pde_split": {
+   "type": "object",
+   "$comment": "section 6.7 PDE split: routes per readout, route 1, photons, map, grid, prior, scan maps, split-check record and pair; calib_design.py pde-split (core/calibration/pde_split.design_findings)"
+  },
   "design": {
    "type": "object",
    "$comment": "design-stage settings: fd_fraction, n_scan, scan_seed, bootstrap, bootstrap_seed"

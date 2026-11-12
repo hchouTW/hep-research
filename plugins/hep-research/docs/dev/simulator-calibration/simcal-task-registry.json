@@ -351,6 +351,27 @@
    "registered_at": "2026-11-12T13:23:34Z",
    "card_commit": "merge of simcal/phase-1 b508fadc",
    "reason": "after its execution-log update: the stack re-merged before the merge of PR #396; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "9d0111542b64a55ca189e9429a494ef197d4e109f4c3be61b130a5152c54b92c",
+   "registered_at": "2026-11-12T14:15:51Z",
+   "card_commit": "9e915272",
+   "reason": "phase 3 start: refreshed from Part B, the index and A12; work packages WP-A to WP-F; no run judged yet"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "641eb006dc9c1da88de26e0665bf02999fd624b59d47dcb2448ed022c77f2125",
+   "registered_at": "2026-11-12T14:33:59Z",
+   "card_commit": "c1a40ed6",
+   "reason": "RICH-replica risk closed (S7 case ams02-rich-replica, check-spec ok); RICH items of 15.2 and 8.7 note 6 assigned to WP-F; no run judged yet"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "a239b0ea060d89e0f4e4a4a60ad7c798c55e2c4000c0a7d41a993b4d64fba81e",
+   "registered_at": "2026-11-12T15:27:55Z",
+   "card_commit": "748230da",
+   "reason": "wave 1 merged; execution log and open author items added; no run judged yet"
   }
  ]
 }

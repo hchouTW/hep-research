@@ -131,5 +131,45 @@ class LinearToyG8(unittest.TestCase):
         self.assertIn("bias", [f["test"] for f in r["fails"]])
 
 
+class WeightedTruthD6(unittest.TestCase):
+    """D6 as approved in A12 (phase 3): G8 pseudo-data from a weighted truth MC."""
+
+    def test_positive_weights_resampled_proportional_to_w(self):
+        rng = np.random.default_rng(1)
+        x = rng.normal(size=4000)
+        w = np.exp(0.5 * x)                                          # reweighting a N(0, 1) sample to N(0.5, 1)
+        src = C.pseudo_data_source([{"name": "truth", "weights": w}])
+        self.assertEqual((src["status"], src["kind"]), ("ok", "positive-weights"))
+        n = C.pseudo_data_size({"kind": "fixed", "events": 500}, rng)
+        means = [x[C.resample_truth(w, n, rng)].mean() for _ in range(400)]
+        target = float(np.sum(w * x) / np.sum(w))
+        self.assertLess(abs(np.mean(means) - target), 4 * np.std(means) / np.sqrt(400))
+        idx = C.resample_truth(w, 5000, rng)
+        self.assertGreater(len(idx) - len(set(idx.tolist())), 0)                      # with replacement
+        sizes = [C.pseudo_data_size({"kind": "poisson", "mean": 300.0}, rng) for _ in range(200)]
+        self.assertGreater(np.std(sizes), 10)                                         # Poisson around the exposure
+        with self.assertRaises(C.ClosureError):
+            C.pseudo_data_size({"kind": "multinomial"}, rng)
+
+    def test_negative_weights_form_no_pseudo_data(self):
+        """Negative: a sample with negative weights -> no pseudo-data; alone, G8 is a `gap`. Positive control: a
+        separate unweighted truth sample is used, the negative one listed as skipped, and G8 decides."""
+        w = np.ones(100)
+        w[3] = -0.2
+        with self.assertRaises(C.ClosureError) as caught:
+            C.resample_truth(w, 50, np.random.default_rng(2))
+        self.assertEqual(caught.exception.code, "g8.negative_weights")
+        gap = C.pseudo_data_source([{"name": "nlo", "weights": w}])
+        self.assertEqual((gap["status"], gap["finding"]), ("gap", "g8.no_positive_truth_sample"))
+        r = C.g8("standard", ["a"], np.ones(1), synthetic(99, 1, seed=4), synthetic(99, 1, seed=5), source=gap)
+        self.assertEqual((r["gate"], r["status"]), ("G8", "gap"))
+        ok = C.pseudo_data_source([{"name": "nlo", "weights": w}, {"name": "lo", "weights": None}])
+        self.assertEqual((ok["status"], ok["sample"], ok["kind"], ok["skipped_negative_weights"]),
+                         ("ok", "lo", "unweighted", ["nlo"]))
+        r = C.g8("standard", ["a"], np.ones(1), synthetic(99, 1, seed=4), synthetic(99, 1, seed=5), source=ok)
+        self.assertIn(r["status"], ("passed", "failed"))
+        self.assertEqual(C.truth_sample_kind(np.zeros(5)), "negative-weights")      # no positive weight at all
+
+
 if __name__ == "__main__":
     unittest.main()

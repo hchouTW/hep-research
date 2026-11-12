@@ -16,6 +16,10 @@ is its CLI.
   the exact binomial), computed at p1' = p1 / (1 - eps_max).
 - Screening: only the Asimov bias is reported, `closure-not-tested`. Remedy level contract when the pseudo-data
   theta-hat fall in a non-truth basin (D57 (2), A8), plan otherwise.
+- A weighted truth MC (D6, the reading approved in A12; phase 3): with positive weights the pseudo-data events are drawn
+  with probability proportional to w, with replacement, at the size of the data's sampling model; a sample with a
+  negative weight forms no pseudo-data, a separate unweighted (or positive-weight) truth sample is required, and
+  without one G8 is recorded as a `gap` (`pseudo_data_source`, `resample_truth`, `pseudo_data_size`).
 """
 from __future__ import annotations
 
@@ -179,10 +183,12 @@ def run_point(make_pseudo, fit_and_cover, n_req: int, seeds, truth_basin=None) -
             "interval_toys": {"X": toys_x, "n": toys_n}, "seeds_used": res.seeds_used}
 
 
-def g8(level: str, names, sigma_design, interior: dict, boundary: dict) -> dict:
+def g8(level: str, names, sigma_design, interior: dict, boundary: dict, source: dict | None = None) -> dict:
     """G8 at standard or full level: the summed ratio test of the pseudo-data fits (n_req = 2 N_c), the summed ratio
     test of the interval toys of the whole of G8 (on failure G8 is incomplete and only the interval toys are
-    regenerated), then the decision."""
+    regenerated), then the decision. `source`: the `pseudo_data_source` record; a `gap` source decides nothing."""
+    if source is not None and source.get("status") == "gap":
+        return gap_record(source)
     X = interior["X"] + boundary["X"]
     N = interior["errors"].shape[0]
     kst = F.k_star(2 * N)
@@ -194,3 +200,69 @@ def g8(level: str, names, sigma_design, interior: dict, boundary: dict) -> dict:
     if it["n"] and it["X"] >= F.k_star(it["n"], False):
         return {"gate": "G8", "status": "incomplete", "finding": "g8.interval_toys_ratio_test", **it}
     return decide(level, list(names), interior, boundary, np.asarray(sigma_design, float))
+
+
+# ------------------------------------------------------------------ G8 pseudo-data from a weighted truth MC (D6, A12)
+class ClosureError(ValueError):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+
+
+def truth_sample_kind(weights) -> str:
+    """`unweighted` (no weights or all equal to 1), `positive-weights` (w >= 0 with a positive sum), or
+    `negative-weights` (any w < 0, or no positive weight)."""
+    if weights is None:
+        return "unweighted"
+    w = np.asarray(weights, float)
+    if w.size == 0 or not np.all(np.isfinite(w)) or np.any(w < 0) or not w.sum() > 0:
+        return "negative-weights"
+    return "unweighted" if np.all(w == 1.0) else "positive-weights"
+
+
+def pseudo_data_source(samples: list) -> dict:
+    """The truth sample G8's pseudo-data are formed from (D6 as read in A12): the first of `samples` ([{name, weights?}],
+    in the plan's order) that is unweighted or has positive weights; samples with a negative weight are skipped and
+    listed. With none left, G8 is a `gap`: a separate unweighted (or positive-weight) truth sample is required."""
+    skipped = []
+    for smp in samples:
+        kind = truth_sample_kind(smp.get("weights"))
+        if kind == "negative-weights":
+            skipped.append(smp["name"])
+            continue
+        return {"status": "ok", "sample": smp["name"], "kind": kind, "skipped_negative_weights": skipped,
+                "resampling": "with replacement, probability proportional to w (D6, A12)"}
+    return {"status": "gap", "skipped_negative_weights": skipped, "finding": "g8.no_positive_truth_sample",
+            "message": "every truth sample has a negative weight: G8 pseudo-data are not formed from it; a separate "
+                       "unweighted (or positive-weight) truth sample is required (D6, A12)"}
+
+
+def gap_record(source: dict) -> dict:
+    """G8 recorded as a `gap` (D6, A12): no pseudo-data, no decision."""
+    return {"gate": "G8", "status": "gap", "finding": source.get("finding", "g8.no_positive_truth_sample"),
+            "message": source.get("message"), "skipped_negative_weights": source.get("skipped_negative_weights", []),
+            "reading": "D6 as approved in A12"}
+
+
+def pseudo_data_size(sampling: dict, rng) -> int:
+    """The number of events of one pseudo-data set by the data's sampling model: {kind: fixed, events: N} or
+    {kind: poisson, mean: nu} (an absolute count, Poisson around the exposure's expectation)."""
+    kind = sampling.get("kind")
+    if kind == "fixed":
+        return int(sampling["events"])
+    if kind == "poisson":
+        return int(rng.poisson(float(sampling["mean"])))
+    raise ClosureError("g8.sampling_model", f"unknown sampling model {kind!r} (fixed or poisson)")
+
+
+def resample_truth(weights, size: int, rng) -> np.ndarray:
+    """Indices of one pseudo-data set drawn from a truth MC with replacement, with probability proportional to w (all
+    1 when unweighted). A sample with a negative weight is refused (D6, A12)."""
+    kind = truth_sample_kind(weights)
+    if kind == "negative-weights":
+        raise ClosureError("g8.negative_weights", "a truth sample with negative weights forms no G8 pseudo-data (D6, "
+                           "A12): use a separate unweighted or positive-weight truth sample")
+    if weights is None:
+        raise ClosureError("g8.sample_size", "an unweighted sample: give its weights as ones (the sample size)")
+    w = np.asarray(weights, float)
+    return rng.choice(w.size, size=int(size), replace=True, p=w / w.sum())

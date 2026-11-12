@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 import calibration_fixtures as F  # noqa: E402
+import calibration_g4sim_fixtures as G4  # noqa: E402
 import calibration_phase1 as H  # noqa: E402
 
 sys.path.insert(0, str(ROOT))
@@ -108,6 +109,94 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["status"]), (2, "rejected"))
         rc, out = run("calib_contract.py", "check", "--contract", self.put("shape.json", {"schema": "x"}))
         self.assertEqual((rc, out["stage"]), (2, "schema"))
+
+    def test_calib_contract_and_design_pde_split(self):
+        """Phase 3 (section 6.7 PDE split, WP-E): calib_contract.py check rejects a PDE tied to another optical
+        property, and with the model documents a declared sensor surface the specification lacks; the route-3 PDE(E)
+        part enters item 4; calib_design.py pde-split passes an exact split and fails a tied reflectance."""
+        import calibration_pde_fixtures as P
+        rels = F.releases()
+        args = ["--release", self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL])]
+        c = G4.contract(identity={"detector_spec": [G4.SHA, None], "simulation_request": G4.SHA,
+                                  "run_physics": G4.SHA, "response_pipeline": G4.SHA, "build_environment": G4.BUILD})
+        c["data"] = {"calibration_releases": [observed.release_hash(rels[F.CAL])],
+                     "validation_releases": [observed.release_hash(rels[F.VAL])]}
+        c["parameters"].append(G4.parameter("pde", "theta", "pde", "evaluator", "/pde", physical_bounds=[0.0, 1.0],
+                                            sampling_bounds=[0.2, 0.6]))
+        c["pde_split"] = {"parameters": ["pde"], "model": "scale", "sensor_surfaces": ["photocathode"],
+                          "angle_dependent": False, "ties": []}
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("pc.json", c), *args)
+        self.assertEqual((rc, out["status"]), (0, "accepted"), out.get("findings"))
+        tied = json.loads(json.dumps(c))
+        tied["pde_split"]["ties"] = ["reflectivity = 1 - PDE"]
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("pt.json", tied), *args)
+        self.assertEqual((rc, {f["code"] for f in out["findings"]}), (2, {"pde_split.tied_property"}))
+        (self.d / "detector.json").write_bytes(G4.detector_text())
+        (self.d / "map.json").write_text(json.dumps(G4.efficiency_map()))
+        entry = {"detector_spec": "detector.json", "efficiency_map": "map.json"}
+        rc, out = run("calib_contract.py", "check", "--contract", self.d / "pc.json", "--model-documents",
+                      self.put("pd.json", {"nominal": entry}), *args)
+        self.assertEqual(rc, 2)
+        self.assertIn("pde_split.sensor_surface", {f["code"] for f in out["findings"]})
+        ph1, pr, emitted, detected = P.run(6000)
+        php = P.run(6000, efficiency=0.4)[0]
+        tiedph = P.run(6000, efficiency=0.4, rho=0.3)[0]
+        m = P.build_map(emitted, detected)
+        for name, text in (("one.csv", ph1), ("nom.csv", php), ("tied.csv", tiedph), ("prim.csv", pr)):
+            (self.d / name).write_text(text)
+        self.put("m1.json", m)
+        docs = self.put("dd.json", {"maps": {"one": "m1.json"}, "photons": {"one": "one.csv", "nom": "nom.csv",
+                                    "tied": "tied.csv"}, "primaries": {"one": "prim.csv"}})
+        plan = {"schema": "calibration-plan/1", "pde_split": {
+            "map": "one", "centre_mm": P.CENTRE, "readouts": {"ecal": {"route": "2_1", "observables": {"q": True}}},
+            "record": {"status": "passed", **m["form"]["hashes"]}, "split_check": {"one": "one", "p": "nom", "nominal": {"p": 0.4}}}}
+        rc, out = run("calib_design.py", "pde-split", "--contract", self.d / "pc.json", "--plan",
+                      self.put("pp.json", plan), "--documents", docs)
+        self.assertEqual((rc, out["status"]), (0, "passed"), out.get("findings"))
+        plan["pde_split"]["split_check"]["p"] = "tied"
+        rc, out = run("calib_design.py", "pde-split", "--contract", self.d / "pc.json", "--plan",
+                      self.put("pq.json", plan), "--documents", docs)
+        self.assertEqual((rc, out["status"]), (1, "failed"))
+        self.assertIn("pde_split.not_nested", {f["code"] for f in out["findings"]})
+
+    def test_calib_contract_g4sim_identity(self):
+        """Phase 3: calib_contract.py identity recomputes the five items of section 5.1 from the model documents, and
+        check --model-documents rejects a contract whose declared items differ from them."""
+        files = {"detector_spec": ("detector.json", G4.detector_text()), "simulation_request": ("request.json",
+                 G4.request_text()), "alignment_overlay": ("overlay.json", G4.overlay()),
+                 "run_card": ("run.json", G4.run_card()), "response_pipeline": ("pipeline.json", G4.pipeline()),
+                 "condition_snapshot": ("snapshot.json", G4.snapshot()), "efficiency_map": ("map.json",
+                 G4.efficiency_map())}
+        entry = {}
+        for key, (name, value) in files.items():
+            (self.d / name).write_bytes(value if isinstance(value, bytes) else json.dumps(value).encode())
+            entry[key] = name
+        entry.update(event_time_rule=G4.EVENT_TIME, build_environment=G4.BUILD)
+        docs = self.put("documents.json", {"nominal": entry})
+        rels = F.releases()
+        args = ["--release", self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL])]
+        c = G4.contract()
+        c["data"] = {"calibration_releases": [observed.release_hash(rels[F.CAL])],
+                     "validation_releases": [observed.release_hash(rels[F.VAL])]}
+        rc, out = run("calib_contract.py", "identity", "--contract", self.put("c.json", c), "--model-documents", docs)
+        self.assertEqual((rc, out["status"]), (0, "ok"), out)
+        c["models"]["enumerated"][0]["identity"] = out["identities"]["nominal"]
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("c.json", c), "--model-documents", docs,
+                      *args)
+        self.assertEqual((rc, out["status"]), (0, "accepted"), out.get("findings"))
+        changed = G4.pipeline()
+        changed["stages"][2]["parameters"]["excess_noise"]["value"] = 0.2         # a non-theta stage value
+        (self.d / "pipeline.json").write_text(json.dumps(changed))
+        rc, out = run("calib_contract.py", "check", "--contract", self.d / "c.json", "--model-documents", docs, *args)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        self.assertEqual({f["code"] for f in out["findings"]}, {"models.identity_mismatch"})
+        rc, out = run("calib_chain.py", "candidates", "--contract", self.d / "c.json", "--plan",
+                      self.put("plan.json", G4.plan()))
+        self.assertEqual((rc, out["status"], out["parameters"]["birks"][0]["method"]), (0, "ok", "rerun"))
+        p = G4.plan()
+        p["node_binding"]["nodes"]["source"]["recording"] = "moments"
+        rc, out = run("calib_chain.py", "candidates", "--contract", self.d / "c.json", "--plan", self.put("p.json", p))
+        self.assertEqual((rc, out["without_candidate"]), (1, ["beam_energy"]))
 
     def test_calib_data_flow(self):
         from core.calibration import validate as V
@@ -249,12 +338,54 @@ class Phase1Scripts(unittest.TestCase):
                       self.put("t4.json", {"mu": "abc"}))
         self.assertEqual((rc, out["status"]), (2, "rejected"))                       # review F10
 
-    def test_calib_emulator_is_a_stub(self):
-        plan = self.put("plan.json", {"schema": "calibration-plan/1", "kernels": {}})
-        for cmd in ("train", "p6", "ask", "tell"):
-            rc, out = run("calib_emulator.py", cmd, "--plan", plan)
-            self.assertEqual((rc, out["status"]), (3, "incomplete"))
-        rc, out = run("calib_emulator.py", "p6", "--plan", self.d / "absent.json")
+    def test_calib_emulator(self):
+        """Phase 3: the ask/tell state file through the CLI, training, the surrogate domain, P6 on the toy detector
+        and on arrays, and the G8 spot check's bookkeeping (not-decided)."""
+        d = H.toy_design()
+        c, p = d["contract"], d["plan"]
+        for q in c["parameters"]:
+            if q["name"] == "threshold":
+                q["sampling_bounds"] = [1.0, 16.0]
+        c["observables"] = [o for o in c["observables"] if o["name"].startswith("spe_")]
+        p["methods"]["threshold"] = "surrogate-model"
+        p["design"]["surrogate"] = {"n_design": 8, "held_back": 8, "seed": 9}
+        fx = self.put("fx.json", {**d, "contract": c, "plan": p})
+        st = self.d / "state.json"
+        rc, out = run("calib_emulator.py", "init", "--contract", fx, "--purpose", "training", "--out", st)
+        self.assertEqual((rc, out["n"]), (0, 8))
+        rc, out = run("calib_emulator.py", "ask", "--state", st, "--n", "2")
+        self.assertEqual((rc, [q["run_id"] for q in out["requests"]]), (0, ["training-0000", "training-0001"]))
+        k = len(out["requests"][0]["names"])
+        res = {"training-0000": {"names": out["requests"][0]["names"], "pred": [0.0] * k,
+                                 "V_MC": [[0.0] * k] * k}}
+        rc, out = run("calib_emulator.py", "tell", "--state", st, "--results", self.put("r.json", res))
+        self.assertEqual((rc, out["complete"]), (0, False))
+        rc, out = run("calib_emulator.py", "tell", "--state", st, "--results",
+                      self.put("r2.json", {"nope": res["training-0000"]}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        rc, out = run("calib_emulator.py", "train", "--contract", fx, "--state", st)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))                 # evaluations outstanding
+        model = self.d / "model.json"
+        rc, out = run("calib_emulator.py", "train", "--contract", fx, "--out", model)
+        self.assertEqual((rc, out["surrogate"]["parameters"]), (0, ["threshold"]))
+        rc, out = run("calib_emulator.py", "domain", "--model", model)
+        self.assertEqual((rc, out["domain"]["bounds"]), (0, {"threshold": [1.0, 16.0]}))
+        rc, out = run("calib_emulator.py", "p6", "--contract", fx)
+        self.assertEqual((rc, out["status"], out["flags"]), (0, "passed", ["provisional-thresholds"]))
+        arr = {"v_data": [1.0], "points": [{"delta_m": [5.0], "cov_delta": [[1.0]]}]}
+        rc, out = run("calib_emulator.py", "p6", "--input", self.put("a.json", arr))
+        self.assertEqual((rc, out["status"]), (1, "failed"))
+        arr["points"][0]["delta_m"] = [0.5]
+        rc, out = run("calib_emulator.py", "p6", "--input", self.put("b.json", arr))
+        self.assertEqual((rc, out["status"]), (0, "passed"))
+        rc, out = run("calib_emulator.py", "p6", "--input", self.put("c.json", {"v_data": [1.0], "points": []}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        rc, out = run("calib_emulator.py", "spot-check-plan", "--training-state", st, "--points",
+                      self.put("pts.json", [{"threshold": 6.0}]), "--seeds",
+                      self.put("s.json", [{"nominal": p["seeds"]["nominal"]}]), "--out", self.d / "sp.json")
+        self.assertEqual((rc, out["status"]), (2, "rejected"))                 # the training set's seed
+        rc, out = run("calib_emulator.py", "spot-check", "--state", self.d / "absent.json", "--model", model,
+                      "--v-data", self.put("v.json", [1.0]))
         self.assertEqual((rc, out["status"]), (2, "rejected"))
 
     def test_calib_contract_preflight(self):
@@ -447,6 +578,59 @@ class Phase2Wiring(unittest.TestCase):
             code, out = run("calib_design.py", "p7", "--input", x)
             self.assertEqual((code, out["status"]), (0, st))
 
+    def test_kernel_check_birks_spot_checks_and_g8_gap(self):
+        """Phase 3: calib_kernel_check.py rejects --points without the section 5.4 k_B extremes before any evaluation
+        (positive control: with them it gets to the evaluator, which this CLI cannot build for g4sim: incomplete);
+        calib_closure.py records G8 as a gap when the truth MC has negative weights (D6, A12)."""
+        import calibration_zdc_fixture as Z
+        c = self.write("zc.json", Z.contract())
+        p = self.write("zp.json", Z.plan({"nominal": Z.batch(3, 0, 5)}))
+        code, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points",
+                        self.write("zpts.json", [{"birks": 0.1}, {"birks": 0.2}, {"birks": 0.02}]))
+        self.assertEqual((code, out["status"], out["findings"][0]["code"]), (2, "rejected", "p0.spot_checks_missing"))
+        code, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points",
+                        self.write("zpts2.json", [{"birks": 0.1}, {"birks": 0.4}, {"birks": 0.02}]))
+        self.assertEqual((code, out["status"]), (3, "incomplete"))
+        gap = {"status": "gap", "finding": "g8.no_positive_truth_sample", "skipped_negative_weights": ["nlo"]}
+        code, out = run("calib_closure.py", "decide", "--results", self.write("g.json", {"pseudo_data_source": gap}))
+        self.assertEqual((code, out["status"]), (3, "gap"))
+        pt = {"errors": [[0.1], [-0.2], [0.05], [0.0]], "cover68": [[True], [True], [False], [True]]}
+        res = {"level": "standard", "names": ["a"], "sigma_design": [1.0], "interior": pt, "boundary": pt,
+               "pseudo_data_source": {"status": "ok", "sample": "lo"}}
+        code, out = run("calib_closure.py", "decide", "--results", self.write("g2.json", res))
+        self.assertIn(out["status"], ("passed", "failed"))
+
+    def test_design_g4sim_checks(self):
+        """Phase 3 (sections 6.1, 6.6): g4sim support and recording levels, event intervals, digitization jobs."""
+        import calibration_g4sim_eval_fixtures as G
+        import test_calibration_design_g4sim as T
+        from core.calibration import design_g4sim as DG
+        docs = G.documents()
+        d = self.write("docs.json", {**{k: v for k, v in docs.items() if k != "run"}, "run": "run.json"})
+        self.write("run.json", docs["run"])
+        c, p = self.write("c.json", T.contract()), self.write("p.json", T.plan())
+        self.assertEqual(run("calib_design.py", "g4sim-support", "--contract", c, "--plan", p, "--documents", d)[0], 0)
+        moments = T.plan()
+        moments["node_binding"]["nodes"]["transport"]["recording"] = "moments"
+        code, out = run("calib_design.py", "g4sim-support", "--contract", c, "--plan", self.write("m.json", moments),
+                        "--documents", d)
+        self.assertEqual((code, out["infeasible"]), (1, ["birks"]))
+        self.assertEqual(run("calib_design.py", "intervals", "--plan", self.write("i.json", {"evaluations": T.GOOD}))[0],
+                         0)
+        bad = {"evaluations": T.GOOD + [T.ev("g8-2", "G8", 11, 0, 1000, set=2)]}
+        code, out = run("calib_design.py", "intervals", "--plan", self.write("i2.json", bad))
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.g8_interval_overlap"))
+        code, out = run("calib_design.py", "intervals", "--plan", self.write("i3.json", {**bad, "g8": {"run": False}}))
+        self.assertEqual((code, out["flags"]), (0, ["closure-not-tested"]))
+        job = DG.job_from_documents(docs["pipeline"], docs["maps"]["light"], "zdc", [0, 1], 11)
+        jp = {"evaluations": T.GOOD, "digi_jobs": [{"job": job, "evaluation": "fit@a", "map": "light"}]}
+        self.assertEqual(run("calib_design.py", "digi-jobs", "--plan", self.write("j.json", jp), "--documents", d)[0], 0)
+        jp["digi_jobs"][0]["job"] = dict(job, replica=1)
+        code, out = run("calib_design.py", "digi-jobs", "--plan", self.write("j2.json", jp), "--documents", d)
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.digi_replica"))
+        code, out = run("calib_design.py", "intervals", "--plan", self.write("i4.json", {"evaluations": [{"x": 1}]}))
+        self.assertEqual((code, out["status"]), (2, "rejected"))
+
     def test_holdout_decision_is_computed(self):
         """calib_validate.py holdout on the toy detector: the fit, T_v with C_r^+ against chi2_k, and a decision
         record carrying the statistic (no outcome given by hand, review F4)."""
@@ -486,6 +670,102 @@ class Phase2Wiring(unittest.TestCase):
         c = self.write("c.json", {})
         code, out = run("calib_fit.py", "g6", "--contract", c, "--values", c, "--toys", 100)
         self.assertEqual((code, out["status"]), (2, "rejected"))
+
+
+class Phase3MapScripts(unittest.TestCase):
+    """Phase 3 efficiency-map phi (section 6.7, D28, D83 (1), D84): calib_design.py, calib_propagate.py and
+    calib_likelihood.py subcommands; each negative with its positive control."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, record):
+        p = self.d / name
+        p.write_text(json.dumps(record))
+        return p
+
+    def test_design_map_items(self):
+        import test_calibration_map as TM
+        from core.simulation import efficiency_map as em
+        code, out = run("calib_design.py", "map-plan", "--plan", self.write("p.json", TM.varies_plan()))
+        self.assertEqual((code, out["status"]), (0, "passed"), out)
+        code, out = run("calib_design.py", "map-plan", "--plan",
+                        self.write("p2.json", TM.varies_plan(map_term="g4sim-replicas")))
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.map_per_map_replicas"))
+        doc = G4.efficiency_map()
+        doc["source_of_facts"] = "mapping run x"
+        doc["form"]["uniformity"] = em.transverse_uniformity(doc)
+        code, out = run("calib_design.py", "map-schema", "--map", self.write("m.json", doc))
+        self.assertEqual((code, out["known_defects"]), (0, ["D83 (1)"]))
+        del doc["source_of_facts"]
+        self.assertEqual(run("calib_design.py", "map-schema", "--map", self.write("m2.json", doc))[0], 1)
+        a, b = self.d / "a.csv", self.d / "b.csv"
+        a.write_text("event,track,x,y,z\n0,1,0.5,0,0\n1,1,0.2,0,0\n")
+        b.write_text("event,track,x,y,z\n0,1,0.5,0,0\n1,1,0.3,0,0\n")
+        self.assertEqual(run("calib_design.py", "map-primaries", "--primaries", a, a)[0], 0)
+        code, out = run("calib_design.py", "map-primaries", "--primaries", a, b)
+        self.assertEqual((code, out["findings"][0]["event"]), (1, "1"))
+
+    def test_theta_noise_and_g6_size(self):
+        import numpy as np
+        import test_calibration_map as TM
+        s = TM.surrogate(noise=0.02)
+        g = np.random.default_rng(11)
+        base = g.normal(size=(2, 20))
+        U = [(base + 0.3 * g.normal(size=(2, 20))).tolist() for _ in range(6)]
+        pts = [{"theta": {"t0": x}, "V_G": np.eye(2).tolist()} for x in (0.3, 1.0, 1.7)]
+        x = {"surrogate": s.record(), "points": pts, "sigma_tot": {"t0": 0.3}, "U": U, "seeding": "shared"}
+        code, out = run("calib_design.py", "theta-noise", "--input", self.write("t.json", x))
+        self.assertEqual((code, out["finding"]), (1, "p5.theta_noise"))
+        x["U"] = [(0.05 * np.asarray(u)).tolist() for u in U]
+        self.assertEqual(run("calib_design.py", "theta-noise", "--input", self.write("t2.json", x))[0], 0)
+        y = {"J": [[1.0]] * 8, "V_G": np.eye(8).tolist(), "maps": {"1": "map.json"}, "J_eps": np.eye(8).tolist(),
+             "R": 100, "n_toys": 2}
+        self.write("map.json", G4.efficiency_map())
+        code, out = run("calib_design.py", "map-g6-size", "--input", self.write("g.json", y))
+        self.assertEqual((code, out["R"], out["n_toys"]), (0, 100, 2))
+        y["R"] = 10
+        self.assertEqual(run("calib_design.py", "map-g6-size", "--input", self.write("g2.json", y))[0], 2)
+
+    def test_propagate_and_likelihood_map(self):
+        import numpy as np
+        import calibration_map_fixtures as MF
+        import test_calibration_map as TM
+        self.write("map.json", G4.efficiency_map())
+        maps = self.write("maps.json", {"1": "map.json"})
+        code, out = run("calib_propagate.py", "map-basis", "--maps", maps, "--replicas", 100, "--jacobian",
+                        self.write("j.json", np.eye(8)[:3].tolist()))
+        self.assertEqual((code, out["construction"], out["key"]["R"]), (0, "linear", 100))
+        self.assertEqual(run("calib_propagate.py", "map-basis", "--maps", maps, "--replicas", 50)[0], 2)
+        U = np.asarray(out["U"])
+        st = {"kind": "native-basis", "basis": out["key"]["id"], "observables": ["a", "b", "c"], "U": U.tolist()}
+        code, cc = run("calib_propagate.py", "map-cross", "--input", self.write("c.json", {"a": st, "b": st}))
+        self.assertEqual(code, 0)
+        np.testing.assert_allclose(cc["cov"], U @ U.T, atol=1e-15)
+        code, cc = run("calib_propagate.py", "map-cross", "--input",
+                       self.write("c2.json", {"a": st, "b": {**st, "kind": "study-pca"}}))
+        self.assertEqual((code, cc["code"]), (2, "propagate.pca_by_index"))
+        mp, bins, dets, chans = MF.scan(photons=3000)
+        jx = {"bins": {str(e): b for e, b in bins.items()}, "detections": [{str(e): c for e, c in d.items()}
+                                                                             for d in dets],
+              "maps": mp, "logical_run_seed": 5, "N_map": 3000, "R": 100}
+        code, out = run("calib_propagate.py", "joint-pattern", "--input", self.write("jp.json", jx))
+        self.assertEqual((code, out["registration_key"]["R"], len(out["replicas"])), (0, 100, 3))
+        jx["maps"] = [mp[1], mp[0], mp[2]]
+        self.assertEqual(run("calib_propagate.py", "joint-pattern", "--input", self.write("jp2.json", jx))[0], 1)
+        sur = TM.surrogate()
+        mt = {"mode": "shared", "U": [np.full((2, 3), j + 1.0).tolist() for j in range(6)], "rows": [0, 1],
+              "n_link": 2, "surrogate": sur.record(), "theta": {"t0": 0.5}}
+        code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt.json", mt))
+        self.assertEqual((code, out["n_phi"], out["profiled"]), (0, 3, True))
+        code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt2.json", {**mt, "fallback": True}))
+        self.assertEqual((code, out["point"], out["exported"]), (0, 1, False))
+        code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt3.json", {**mt, "mode": "fixed"}))
+        self.assertEqual((code, out["code"]), (2, "map_term.fixed"))
 
 
 if __name__ == "__main__":

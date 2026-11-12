@@ -298,7 +298,7 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
 def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n_scan: int | None = None) -> dict:
     """The cheapest feasible candidate per parameter (section 3.6 step 2): reweighting if its support holds and the
     ESS item of P5 holds over its own prior scan (and jointly with the other reweighted parameters); rerun if the plan's
-    storage is acceptable; resimulation as the plan decides (a declared budget); a surrogate model needs P6 (phase 3).
+    storage is acceptable; resimulation as the plan decides (a declared budget); a surrogate model if P6 passes.
     An infeasible reweighting moves to the next tier automatically (section 15.3.1)."""
     cands = chain.candidate_methods(contract, plan)
     if cands.get("status") == "incomplete":
@@ -337,10 +337,17 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
                 if resim_ok:
                     chosen[p] = m
                     break
-            elif m == "surrogate-model":
-                log.append({"parameter": p, "method": m, "feasible": None, "reason": "P6 is phase 3"})
-                return {"status": "incomplete", "reason": f"{p}: the next feasible method is a surrogate model, whose "
-                        "feasibility is P6 (phase 3)", "log": log}
+            elif m == "surrogate-model":                    # feasible when P6 passes (calib_emulator.py, phase 3)
+                from core.calibration import emulator
+                r6 = emulator.feasibility(evaluator, contract, plan, p)
+                log.append({"parameter": p, "method": m, "feasible": r6["feasible"], "P6": r6["status"],
+                            **({"reason": r6["reason"]} if "reason" in r6 else {})})
+                if r6["status"] == "incomplete":
+                    return {"status": "incomplete", "reason": f"{p}: P6 of the surrogate model is incomplete "
+                            f"({r6.get('reason', 'evaluations outstanding')})", "log": log}
+                if r6["feasible"]:
+                    chosen[p] = m
+                    break
         if p not in chosen:
             return {"status": "failed", "findings": [{"code": "p5.no_feasible_method", "message": f"no feasible method "
                     f"for {p} among {order[p]}"}], "log": log}
