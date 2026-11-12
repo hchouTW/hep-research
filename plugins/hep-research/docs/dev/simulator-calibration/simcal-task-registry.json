@@ -330,6 +330,27 @@
    "registered_at": "2026-11-12T11:01:47Z",
    "card_commit": "merge of simcal/phase-1",
    "reason": "after its execution-log update: the new basis (origin/main 0.66.1 through simcal/phase-0 and simcal/phase-1) merged into simcal/phase-2 on the user's word; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
+   "registered_at": "2026-11-12T13:15:10Z",
+   "card_commit": "merge of origin/main 127163b3",
+   "reason": "after its execution-log update: main merged again before the merge of PR #385; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "f05cb219cfe3e7b077a2ec33f948fb941728ef04ca7a8cccf5f7484bae414b75",
+   "registered_at": "2026-11-12T13:19:48Z",
+   "card_commit": "merge of simcal/phase-0 526f3948",
+   "reason": "after its execution-log update: the stack re-merged before the merge of PR #386; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "e1bdba1360e51e1d392b1c39803eac9eef1eb0649963151ff3cc8084077e8447",
+   "registered_at": "2026-11-12T13:23:34Z",
+   "card_commit": "merge of simcal/phase-1 b508fadc",
+   "reason": "after its execution-log update: the stack re-merged before the merge of PR #396; no gate-deciding file changed"
   }
  ]
 }

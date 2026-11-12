@@ -5,7 +5,7 @@
    "state": "gates-recorded",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
-   "task_card_sha256": "5740f3dc8c8f7843867f6417b0772d740bd6e83cd6fc0bd10bdfa24fd6f26e1a",
+   "task_card_sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
    "blocked_on": []
   },
@@ -13,7 +13,7 @@
    "state": "gates-recorded",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-1",
    "branch": "simcal/phase-1",
-   "task_card_sha256": "361c0792d53a8a9d2060e32d80267c669f8129637ea1d5b0b952da0d0c23ce2e",
+   "task_card_sha256": "f05cb219cfe3e7b077a2ec33f948fb941728ef04ca7a8cccf5f7484bae414b75",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-1.md",
    "blocked_on": [],
    "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10"
@@ -22,7 +22,7 @@
    "state": "gates-recorded",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
-   "task_card_sha256": "8db434e085c3e7da5977991f799eafbfc041a8c9947cf42bc0686ee35b4bb682",
+   "task_card_sha256": "e1bdba1360e51e1d392b1c39803eac9eef1eb0649963151ff3cc8084077e8447",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
    "blocked_on": [],
    "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10"
@@ -69,5 +69,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-12T11:01:47Z"
+ "updated": "2026-11-12T13:23:34Z"
 }
