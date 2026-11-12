@@ -379,6 +379,13 @@
    "registered_at": "2026-11-12T22:42:20Z",
    "card_commit": "f540af0d",
    "reason": "campaign p3-cals configurations (rows 2004 P6 part, 2008, 2009) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "d6ee1345e0c39e97e99974b828c762764e203e746a36fba15a306f8212faeaed",
+   "registered_at": "2026-11-12T22:54:18Z",
+   "card_commit": "78f65933",
+   "reason": "campaign p3-g4 (Geant4 production ZDC and RICH, evidence rules) registered before any run"
   }
  ]
 }
