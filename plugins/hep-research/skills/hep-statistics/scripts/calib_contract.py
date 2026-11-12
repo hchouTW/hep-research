@@ -2,6 +2,7 @@
 """The contract checker (simulator calibration workflow, Part B section 5.2; owner of the contract rules).
 
   calib_contract.py check     --contract FILE [--release FILE ...] [--series-graph FILE] [--design FILE]
+                              [--locking FILE]
   calib_contract.py preflight --contract DRAFT --release FILE --ledger FILE [--write-draft OUT]
 FILE is a calibration-contract/1; each --release is a calibration-data-release/1 metadata file (its lineage,
 samples, observables and declarations; the release hash is the canonical SHA-256 of its metadata, and a declared
@@ -9,8 +10,10 @@ samples, observables and declarations; the release hash is the canonical SHA-256
 --series-graph maps contract series to the series of their upstream results (cycle check). Output: one JSON object
 with the findings and the rules deferred to later phases; status accepted (exit 0) or rejected (exit 2: a contract
 error, no result is produced). --design is the output of `calib_design.py linearize`: with it the D37 rule (approval
-A7) is applied, a psi whose effect on theta-hat via A exceeds 0.1 sigma_tot^design must be listed as phi. The
-locking-stage checks that need model quantities are added in phase 2 and the g4sim model identity in phase 3.
+A7) is applied, a psi whose effect on theta-hat via A exceeds 0.1 sigma_tot^design must be listed as phi. --locking
+is the report of `calib_data.py locking` (phase 2): its failures (rounding, sigma^(0) = 0, the N_d,c declaration
+check, value conventions) reject the contract and the rules it decides leave `deferred`; the g4sim model identity is
+phase 3.
 
 preflight is A0 (pipeline stage A0, not a gate): the calibration values come from calib_data's provider, which records
 a fit read with the contract draft's series as read channel in the ledger (written under its lock); for each declared
@@ -50,6 +53,7 @@ def main(argv=None) -> int:
     p.add_argument("--release", action="append", default=[])
     p.add_argument("--series-graph")
     p.add_argument("--design")
+    p.add_argument("--locking", help="the locking report of calib_data.py locking (phase 2)")
     q = sub.add_parser("preflight")
     q.add_argument("--contract", required=True)
     q.add_argument("--release", required=True)
@@ -104,8 +108,9 @@ def main(argv=None) -> int:
         if shape:
             return {"status": "rejected", "findings": shape, "stage": "schema"}
         design = io.load(args.design) if args.design else None
+        locking = io.load(args.locking) if args.locking else None
         try:
-            r = cc.check(c, rels, graph, design)
+            r = cc.check(c, rels, graph, design, locking)
         except (TypeError, ValueError) as exc:
             raise io.InputError(f"--design: {exc}") from None
         return {"status": r["status"], "contract_sha256": cc.lock_hash(c), "findings": r["findings"],

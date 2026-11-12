@@ -143,6 +143,174 @@
    "reason": "execution log only (repeated gate runs, checks, gates recorded, E8 report); thresholds and test design as registered ca717b11"
   },
   {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "680945fb49eaf2b06d61e96b1d7b127698fe87bad8e870451524a6d786699882",
+   "registered_at": "2026-11-10T21:46:08Z",
+   "card_commit": "84006811",
+   "reason": "execution log only (worktree, blocked report on the 25 author decisions); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "51facff0b5023b1c0be583630557f15f07c5198fa504ed2d3e68269aebf88821",
+   "registered_at": "2026-11-10T21:53:23Z",
+   "card_commit": "50c61c2c",
+   "reason": "refreshed at the start of phase 2 from Part B, the index and approval A8, before any run: work packages, the three gate test designs, seeds and the designs of the fifteen section 8.7 calibrations registered; configurations fixed by re-registration before each run (tightening only); lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "f95333cb4b028123ea0419eefc6d581068a725b4de3391576e49beec3f327f19",
+   "registered_at": "2026-11-10T22:34:05Z",
+   "card_commit": "6cf90549",
+   "reason": "execution log only (WP1 to WP4 part 1: readings implemented and engine checks); thresholds and test designs as registered 51facff0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "59c119033ef4319118838f6f68fa12f879e821df766753d56d1b1257bf3fb652",
+   "registered_at": "2026-11-11T00:17:44Z",
+   "card_commit": "036610b7",
+   "reason": "execution log only (WP4 part 2 to the toy-detector problem: readings implemented and engine checks); thresholds and test designs as registered 51facff0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "21bf05947eac9cfcae0a73417ccfbeb5c3d07271057f84948921ba1d52d67a25",
+   "registered_at": "2026-11-11T00:46:49Z",
+   "card_commit": "84e042e9",
+   "reason": "before their runs: the configurations of calibrations 3, 5, 7, 13, 14 (functions of calibration_phase2_gates.py at the card commit) and the user's scoping (linear-toy calibrations now, toy-detector ones re-registered at a reduced size later); thresholds unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6361f17d463f64c2ed766f2a4fc5787e32f1bbc07640a559cc8d587e63cd30ea",
+   "registered_at": "2026-11-11T00:56:18Z",
+   "card_commit": "b9d9d60d",
+   "reason": "execution log only (results of calibrations 3, 5, 7, 13, 14; calibration 7 fails, blocked report); thresholds and configurations as registered 6e8842e9"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6661bff7780570c14da954397fe79624a8062fb885dfa0a7f69e6728ae7576b5",
+   "registered_at": "2026-11-11T01:33:18Z",
+   "card_commit": "4f56bf7e",
+   "reason": "before the calibration-7 rerun: approval A9 (b_J bound tightened 0.15 -> 0.10, paired K_l = 0 reference); calibration 7 re-registered as a fresh run with V_MC at theta_ref (the first run superseded); tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6915665b097be2d5814df7f7d8758a39c80640ae8b3d9cad8987b5f054806d35",
+   "registered_at": "2026-11-11T01:47:31Z",
+   "card_commit": "21987316",
+   "reason": "execution log only (calibration 7 passes at the A9 bound, clean rerun); thresholds and configurations as registered 4a521280"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "baae4d51acd219a483203b1700df626c6e0e7398ad89c0b2ac28f96fd8e008e0",
+   "registered_at": "2026-11-11T03:20:55Z",
+   "card_commit": "ff45b424",
+   "reason": "before the gate-2 run: its configuration on the toy detector (gate_segmented at the card commit); criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "23e85de4582968418889589f93cedb5be506d5479182a6f7cbb16438d36ce505",
+   "registered_at": "2026-11-11T04:02:28Z",
+   "card_commit": "534331ab",
+   "reason": "execution log only (gate 2 passes); thresholds, configurations and test designs as registered ffcab887"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "f2b7be4489274fddd3350bd60b742737c50b5fe57c5966c41f426f7221dad741",
+   "registered_at": "2026-11-11T04:03:22Z",
+   "card_commit": "cf8d33a4",
+   "reason": "before the gate-3 run: its implementation (gate_shift at the card commit), the cases and seeds as registered 51facff0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "387c795ab425495e5da2ed3d53826c7009ce418c4f5d7404d954f7605af5b001",
+   "registered_at": "2026-11-11T04:03:39Z",
+   "card_commit": "fb2e1404",
+   "reason": "execution log only (gate 3 passes); as registered 2b429ea1"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "7d1e153c8ac72707a0e53ddfbe6a423d0a4bd86ee80424084b910146f59e3dc7",
+   "registered_at": "2026-11-11T04:43:21Z",
+   "card_commit": "0fb9a121",
+   "reason": "before the gate-1 run: its implementation (gate_negatives and the harness items at the card commit) with their configurations and criteria; registered items and criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "2b41f33463e3f06aa02a4eef8477462738e8faf9e92544eeef0dfe71dff06b32",
+   "registered_at": "2026-11-11T05:23:03Z",
+   "card_commit": "89ef3c99",
+   "reason": "execution log only (gate 1 passes); as registered dc4eace0"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "96460ab1f25e8caa62fbfec84f3f23ff6dfaddde20ad0fab6c0e3d52274d398f",
+   "registered_at": "2026-11-11T05:39:35Z",
+   "card_commit": "ed2f4736",
+   "reason": "before their runs: the configurations of calibrations 9 and 12 (functions at the card commit); thresholds unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "1ff2555405b74878e55feb39513220efaed3bf80115d79ec1170daaedee785e1",
+   "registered_at": "2026-11-11T05:53:35Z",
+   "card_commit": "53028a37",
+   "reason": "execution log only (calibrations 9 and 12 pass); as registered 771c1b9a"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "c6a826a51db849ed146346a2761a73ca070ee0b5673d2d72085b3f56ebfa2818",
+   "registered_at": "2026-11-11T23:09:12Z",
+   "card_commit": "f662646a",
+   "reason": "before its run: gate 1 on the toy detector (review F1, F2; approval A10 for two G8 controls), implementation gate1_toy_task/GATE1T_TASKS at 95b4191c; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "2182d365c14817ba11a2a35a1dead6bdb340a8b4133da639a4125d68feb47a0c",
+   "registered_at": "2026-11-11T23:26:22Z",
+   "card_commit": "af16b7c7",
+   "reason": "before its run: gate 1 on the toy detector re-registered with the engine at 518c0d6d (array 7584035 cancelled); items and criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "b39da1b6b3499ff6ad0ecb34ee74e8a58dbe95f4bac60b1a9c5f1c81b881f951",
+   "registered_at": "2026-11-12T02:01:19Z",
+   "card_commit": "28c1ede1",
+   "reason": "before its run: gate 1 on the toy detector re-registered after array 7584442 failed on v_shift (X 7.45%); v_shift's nominal MC 16000, every other item, seed and criterion unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "5494522c3e9b12ce5dbf1142c252eab0e1c04c13ddfb601457000aa3f9032fb7",
+   "registered_at": "2026-11-12T04:50:52Z",
+   "card_commit": "9b1a3e97",
+   "reason": "before its run: deferred section 8.7 calibrations batch A (2, 4, 8, 11, 15; the user's decisions of 2026-11-12), tasks of tests/core/calibration_phase2_cals.py at 9b1a3e97; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6c9167b4f209e14efc23a83e6fa940ccd55803a74eb00497d1705035a9b763bb",
+   "registered_at": "2026-11-12T05:41:43Z",
+   "card_commit": "4e147265",
+   "reason": "before its run: deferred section 8.7 calibrations batch B (10 and the rest of 12; the user's decisions of 2026-11-12), tests/core/calibration_phase2_cals_b.py; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "cb675b3f42aa40b4b3fbcff0fb1721e7159620813f705a66f8cdc8705a3d21fc",
+   "registered_at": "2026-11-12T06:44:12Z",
+   "card_commit": "ead505a7",
+   "reason": "before its run: gate 1 on the toy detector rerun at the hand-over commit (identifiers renamed, toy additions; the user's approval of 2026-11-12), and gates 2 and 3; items, seeds and criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "16b0962e082f79801b7e67bf9892ed14e738ab338885f08ead05fd31a8d7fff1",
+   "registered_at": "2026-11-12T07:39:23Z",
+   "card_commit": "ec040189",
+   "reason": "before its run: calibration 10 (e) rerun with the corrected injection reference (the user's decision of 2026-11-12), cal10_g7_fixed; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6be65e12529b4ebcccc1cbf156425cea56967e29f641c764dbfd40c8466ec423",
+   "registered_at": "2026-11-12T08:49:32Z",
+   "card_commit": "a123e47d",
+   "reason": "before its run: batch C (approval A11: G8 rows on the linear configurations; calibration 6 G7 half; research on the toy detector's G8 deviation), tests/core/calibration_phase2_cals_c.py; tightening only"
+  },
+  {
    "card": "simcal-tasks/phase-0.md",
    "sha256": "5740f3dc8c8f7843867f6417b0772d740bd6e83cd6fc0bd10bdfa24fd6f26e1a",
    "registered_at": "2026-11-12T10:52:38Z",
@@ -157,6 +325,13 @@
    "reason": "after its execution-log update: the new basis (origin/main 0.66.1 through simcal/phase-0) merged into simcal/phase-1 on the user's word; no gate-deciding file changed"
   },
   {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "8db434e085c3e7da5977991f799eafbfc041a8c9947cf42bc0686ee35b4bb682",
+   "registered_at": "2026-11-12T11:01:47Z",
+   "card_commit": "merge of simcal/phase-1",
+   "reason": "after its execution-log update: the new basis (origin/main 0.66.1 through simcal/phase-0 and simcal/phase-1) merged into simcal/phase-2 on the user's word; no gate-deciding file changed"
+  },
+  {
    "card": "simcal-tasks/phase-0.md",
    "sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
    "registered_at": "2026-11-12T13:15:10Z",
@@ -169,6 +344,13 @@
    "registered_at": "2026-11-12T13:19:48Z",
    "card_commit": "merge of simcal/phase-0 526f3948",
    "reason": "after its execution-log update: the stack re-merged before the merge of PR #386; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "e1bdba1360e51e1d392b1c39803eac9eef1eb0649963151ff3cc8084077e8447",
+   "registered_at": "2026-11-12T13:23:34Z",
+   "card_commit": "merge of simcal/phase-1 b508fadc",
+   "reason": "after its execution-log update: the stack re-merged before the merge of PR #396; no gate-deciding file changed"
   }
  ]
 }

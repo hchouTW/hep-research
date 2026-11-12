@@ -379,3 +379,18 @@ def p5_with_final_methods(evaluator, contract: dict, plan: dict, systematics=Non
     r["final_methods"] = m["methods"]
     r["moved_to_next_tier"] = m["moved_to_next_tier"]
     return r
+
+
+def g4_inputs(evaluator, contract: dict, theta: dict, f: float = F_DEFAULT) -> tuple[dict, dict, list]:
+    """The inputs of G4 at one parameter point (section 6.7, D41): the event-level product weights of the events
+    entering each calibration observable, and N_req,k = s_k^2 / (f V^unc_data,kk) with s_k^2 the weighted influence
+    variance. Returns (weights_by_obs, n_req, missing_support_runs); `calib_reweight.py g4` decides with reweight.g4."""
+    obs = linear.calibration_observables(contract)
+    names = [o["name"] for o in obs]
+    r = evaluator.evaluate(theta, names=names)
+    exposure = contract.get("exposure") or {}
+    n_data = np.array([linear._exposure(exposure, o, r["runs"][k]) for k, o in enumerate(obs)], dtype=float)
+    v_data = np.diag(r["s2"]) / n_data
+    n_req = np.asarray(r["per_event_var"], float) / (f * v_data)
+    weights = {names[k]: np.asarray(r["samples"][k][1], float) for k in range(len(names))}
+    return weights, dict(zip(names, n_req.tolist())), sorted(r.get("missing_support_runs") or [])

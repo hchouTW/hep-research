@@ -8,8 +8,11 @@
   calib_deps.py finalize --result FILE --payload FILE --out FILE
                                             write the version id into a result, then its result hash (acyclic)
 Output: one JSON object; status ok (exit 0), failed (exit 1: findings or a cycle), rejected (exit 2: unreadable
-input), written (exit 0) for finalize. Standard library only. Phase 0 (section 17); invalidation and the conflict
-rules of section 10.4 come in later phases.
+input), written (exit 0) for finalize. Standard library only. Phase 0 (section 17); the section 10.4 conflict
+rules (`packages`) phase 2; invalidation comes later.
+  calib_deps.py packages --input FILE      {packages, upstreams, common_sources?}: the section 10.4 decision
+                                            (package split, version conflict, source overlap, common source,
+                                            theta/nu split); failed (exit 1) with findings
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -38,6 +41,7 @@ def main(argv=None) -> int:
     sub.add_parser("roles").add_argument("--contract", required=True)
     sub.add_parser("cycles").add_argument("--graph", required=True)
     sub.add_parser("version").add_argument("--payload", required=True)
+    sub.add_parser("packages").add_argument("--input", required=True)
     f = sub.add_parser("finalize")
     for a in ("--result", "--payload", "--out"):
         f.add_argument(a, required=True)
@@ -58,6 +62,13 @@ def main(argv=None) -> int:
                     raise io.InputError("the graph maps each result to the list of its upstreams")
                 cyc = deps.find_cycle(g)
                 return {"status": "failed" if cyc else "ok", "cycle": cyc}
+            if args.cmd == "packages":
+                x = io.load(args.input)
+                if not isinstance(x, dict) or not isinstance(x.get("packages"), list):
+                    raise io.InputError("--input: {packages: [...], upstreams: {...}, common_sources?: {...}}")
+                cs = {k: set(v) for k, v in (x.get("common_sources") or {}).items()}
+                findings = deps.check_packages(x["packages"], x.get("upstreams") or {}, cs or None)
+                return {"status": "failed" if findings else "ok", "findings": findings}
             payload = io.load(args.payload)
             if args.cmd == "version":
                 return {"status": "ok", "update_digest": deps.update_digest(payload),

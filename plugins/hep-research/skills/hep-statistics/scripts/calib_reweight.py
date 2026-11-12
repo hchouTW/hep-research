@@ -31,7 +31,7 @@ import sys
 
 try:
     MISSING = None
-    from core.calibration import evaluator, io, reweight
+    from core.calibration import design, evaluator, io, reweight
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -47,6 +47,11 @@ def main(argv=None) -> int:
     p.add_argument("--contract", required=True)
     p.add_argument("--plan")
     p.add_argument("--theta", required=True)
+    g = sub.add_parser("g4", help="G4 at a parameter point: N_eff,k >= N_req,k and Pareto k (section 6.7, D41)")
+    g.add_argument("--contract", required=True)
+    g.add_argument("--plan")
+    g.add_argument("--theta", required=True)
+    g.add_argument("--smoothed", action="store_true", help="PSIS-smoothed weights (Pareto k < 0.7)")
     args = ap.parse_args(argv)
 
     def go():
@@ -65,6 +70,15 @@ def main(argv=None) -> int:
             raise io.InputError(f"unknown parameters {sorted(unknown)}")
         if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in theta.values()):
             raise io.InputError("--theta: every value is a number")
+        if args.cmd == "g4":
+            try:
+                w, n_req, missing = design.g4_inputs(ev, contract, theta)
+            except (KeyError, TypeError, ValueError) as exc:
+                raise io.InputError(f"malformed contract: {exc!r}") from None
+            r = reweight.g4(w, n_req, smoothed=args.smoothed)
+            if missing:                                   # an event not recorded at a reweighted node fails G4
+                r.update(status="failed", finding="g4.missing_support", missing_support_runs=missing)
+            return r
         target = {**ev.model.nominal, **theta}
         w = ev.weights(target, nodes=ev.reweighted_nodes(target))
         missing = w.pop("_missing_support", [])

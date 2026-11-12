@@ -87,3 +87,54 @@ def summary(weights: dict) -> dict:
         out[rid] = {"n": int(len(x)), "kish": kish(x), "max_weight_fraction": float(x.max() / tot) if tot > 0 else None,
                     "max_abs_w_minus_1": float(np.abs(x - 1).max()) if len(x) else 0.0}
     return out
+
+
+# ------------------------------------------------------------------ G4 (section 8.2 note 6; phase 2)
+def pareto_k(w: np.ndarray) -> float:
+    """The generalized-Pareto shape k of the largest weights: the Zhang-Stephens (2009) estimate with its weak prior,
+    on the exceedances of the M = min(N/5, 3 sqrt(N)) largest weights over the next one (as in PSIS). k >= 0.5 means
+    infinite variance of raw importance weights (section 8.2 note 6)."""
+    w = np.sort(np.asarray(w, float))
+    w = w[np.isfinite(w) & (w > 0)]
+    N = w.size
+    if N < 25:
+        return math.inf
+    M = int(min(N / 5, 3 * math.sqrt(N)))
+    x = w[-M:] - w[-M - 1]
+    x = np.sort(x[x > 0])
+    n = x.size
+    if n < 5:
+        return 0.0
+    m = 30 + int(math.sqrt(n))
+    b = 1 - np.sqrt(m / (np.arange(1, m + 1) - 0.5))
+    b = b / (3.0 * x[int(n / 4 + 0.5) - 1]) + 1.0 / x[-1]
+    kb = np.log1p(-b[:, None] * x[None, :]).mean(axis=1)
+    lik = n * (np.log(-(b / kb)) - kb - 1)
+    with np.errstate(over="ignore"):
+        wts = 1.0 / np.exp(lik - lik[:, None]).sum(axis=1)
+    keep = wts >= 10 * np.finfo(float).eps
+    wts, b = wts[keep], b[keep]
+    wts = wts / wts.sum()
+    bpost = float(np.sum(b * wts))
+    k = float(np.log1p(-bpost * x).mean())
+    return float((n * k + 10 * 0.5) / (n + 10))
+
+
+def g4(weights_by_obs: dict, n_req: dict, smoothed: bool = False) -> dict:
+    """G4: for each observable N_eff,k >= N_req,k (section 6.7) and Pareto k < 0.5 for raw weights (< 0.7 with
+    PSIS-smoothed weights), over the event-level product weights of the events entering observable k (D41).
+    `node_diag` is a diagnostic only. Remedy level plan."""
+    lim = 0.7 if smoothed else 0.5
+    rows, bad = [], []
+    for k, w in weights_by_obs.items():
+        ess = kish(np.asarray(w, float))
+        pk = pareto_k(w)
+        r = {"observable": k, "n_eff": ess, "n_req": float(n_req[k]), "pareto_k": pk}
+        rows.append(r)
+        if ess < float(n_req[k]):
+            bad.append({"observable": k, "code": "g4.ess"})
+        if not pk < lim:
+            bad.append({"observable": k, "code": "g4.pareto_k"})
+    ok = not bad
+    return {"gate": "G4", "status": "passed" if ok else "failed", "observables": rows, "findings": bad,
+            "finding": bad[0]["code"] if bad else None, "pareto_limit": lim, "remedy": "plan"}

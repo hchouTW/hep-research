@@ -1072,6 +1072,13 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_closure.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/calib_contract.py",
    "depth": 3,
    "skills": [
@@ -1107,7 +1114,42 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_identify.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_interval.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/calib_kernel_check.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_likelihood.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_propagate.py",
    "depth": 3,
    "skills": [
     "hep-statistics"
@@ -1121,7 +1163,21 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_shift.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/calib_use.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_validate.py",
    "depth": 3,
    "skills": [
     "hep-statistics"
@@ -1849,7 +1905,7 @@
   {
    "skill": "hep-statistics",
    "name": "stability_monitor.py",
-   "source": "skills/hep-statistics/references/core-stats-guide.md:81",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:52",
    "matches": []
   },
   {
@@ -1873,7 +1929,7 @@
   {
    "skill": "hep-statistics",
    "name": "test_core_stats_guide.py",
-   "source": "skills/hep-statistics/references/core-stats-guide.md:43",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:25",
    "matches": []
   },
   {
@@ -1980,7 +2036,7 @@
   }
  ],
  "counts": {
-  "scripts": 208,
+  "scripts": 216,
   "unresolved": 70,
   "named_without_main": 28
  }

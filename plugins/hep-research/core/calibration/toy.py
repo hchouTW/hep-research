@@ -331,8 +331,18 @@ def _parent_values(run: Run, events: dict, node: str) -> dict:
 
 
 # ------------------------------------------------------------------ functionals
+def c4(n: float) -> float:
+    """E[s] / sigma for a Gaussian sample of (effective) size n with the unbiased variance; 1 for n <= 1."""
+    if not n > 1.0:
+        return 1.0
+    return math.exp(0.5 * math.log(2.0 / (n - 1.0)) + math.lgamma(n / 2.0) - math.lgamma((n - 1.0) / 2.0))
+
+
 def functional(values: np.ndarray, w: np.ndarray, kind: str):
-    """(estimate, per-event influence psi) of a weighted functional over the events given."""
+    """(estimate, per-event influence psi) of a weighted functional over the events given. The width is unbiased for
+    a Gaussian sample at any size (the variance with the effective-count correction W - sum w^2 / W, then 1 / c4 at
+    the effective count): the data (a few hundred events) and the MC prediction (thousands) then estimate the same
+    quantity, without an O(1/N) difference that G8 would see as an evaluator bias (found 2026-11-11)."""
     W = w.sum()
     if W <= 0 or len(values) == 0:
         return float("nan"), np.zeros_like(values)
@@ -340,8 +350,11 @@ def functional(values: np.ndarray, w: np.ndarray, kind: str):
     if kind in ("mean", "fraction"):
         return m, values - m
     if kind == "std":
-        var = float((w * (values - m) ** 2).sum() / W)
-        s = math.sqrt(max(var, 0.0))
+        W2 = float((w * w).sum())
+        n_eff = W * W / W2 if W2 > 0 else 0.0
+        denom = W - W2 / W
+        var = float((w * (values - m) ** 2).sum() / (denom if denom > 0 else W))
+        s = math.sqrt(max(var, 0.0)) / c4(n_eff)
         return s, ((values - m) ** 2 - var) / (2.0 * s if s > 0 else 1.0)
     raise ValueError(f"unknown functional {kind!r}")
 
@@ -891,9 +904,13 @@ def toy_detector_subgraph(spec: dict, plan: dict) -> ChainEvaluator:
 def toy_detector_bimodal(spec: dict, plan: dict) -> ChainEvaluator:
     """The overlapping modules read out as a sum, S = a f + b (1 - f) + eps, f ~ Beta(alpha, beta), eps ~ N(0, s^2):
     a symmetric Beta gives two exactly degenerate mirror basins (section 15.1; used by G1 in phase 2)."""
-    alpha, beta = float(spec.get("alpha", 2.0)), float(spec.get("beta", 2.0))
-    s = float(spec.get("s", 0.05))
-    n = int(spec.get("events", 40_000))
+    return ChainEvaluator(build_bimodal(int(spec.get("events", 40_000)), float(spec.get("alpha", 2.0)),
+                                        float(spec.get("beta", 2.0)), float(spec.get("s", 0.05))), plan)
+
+
+def build_bimodal(n: int = 40_000, alpha: float = 2.0, beta: float = 2.0, s: float = 0.05) -> Model:
+    """The model of the bimodal variant (`toy_detector_bimodal`), for the toy-detector Problem of the section 7.4
+    calibration: alpha = beta is the exact mirror degeneracy, alpha != beta breaks it."""
 
     class Mix(Kernel):
         kind = "black-box"
@@ -909,8 +926,7 @@ def toy_detector_bimodal(spec: dict, plan: dict) -> ChainEvaluator:
     obs = [Observable("sum_mean", "sum", lambda ev: ev["modules"]["S"], "mean"),
            Observable("sum_width", "sum", lambda ev: ev["modules"]["S"], "std"),
            Observable("sum_m3", "sum", lambda ev: (ev["modules"]["S"] - ev["modules"]["S"].mean()) ** 3, "mean")]
-    return ChainEvaluator(Model(["modules"], {"sum": run}, obs, {"a": 1.0, "b": 0.6}, {"a": ["modules"],
-                                                                                         "b": ["modules"]}), plan)
+    return Model(["modules"], {"sum": run}, obs, {"a": 1.0, "b": 0.6}, {"a": ["modules"], "b": ["modules"]})
 
 
 # ------------------------------------------------------------------ small declared chains (tests, single gates)

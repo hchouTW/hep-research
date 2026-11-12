@@ -190,3 +190,64 @@ def rebuild_order(versions: dict) -> list[str]:
             done.append(v)
             placed.add(v)
     return done
+
+
+# ------------------------------------------------------------------ conflict rules over packages (section 10.4, 15.3a)
+def source_set(uncertainty: dict, upstreams: dict) -> set:
+    """The source set of an uncertainty object: xi of result U is {U} union the central closure of U; a shared nuisance
+    version has its lineage (the updater and its central closure)."""
+    if uncertainty["kind"] == "xi":
+        return {uncertainty["result"]} | central_closure(uncertainty["result"], upstreams)
+    if uncertainty["kind"] == "zeta":
+        return {uncertainty["updater"]} | central_closure(uncertainty["updater"], upstreams)
+    raise DependencyError("deps.object", f"unknown uncertainty object kind {uncertainty['kind']!r}", "kind")
+
+
+def check_packages(packages: list, upstreams: dict, common_sources: dict | None = None) -> list:
+    """The decision of section 10.4: first the atomic packages (xi_U with its matching joint zeta version of the same
+    upstream), then the dependencies between packages. Findings:
+    - `deps.package_split`: a package whose zeta is not the version exported with its xi (the decomposition must stay
+      intact);
+    - `deps.version_conflict`: two packages constraining the same nuisance key with different versions (joint fit);
+    - `deps.source_overlap`: intersecting source sets of different packages (sibling, triangle, xi and xi,
+      parent-child) unless an explicit joint factor covers them;
+    - `deps.common_source`: disjoint source sets but a shared raw-data lineage, MC sample, external measurement,
+      shared prior or efficiency-map basis (`common_sources` = {package id: set of keys}); disjointness is not proof;
+    - `deps.theta_nu_split`: theta and nu of one upstream exported separately.
+    A package: {id, upstream, xi_version, zeta: {key: version}, exported_zeta: {key: version}, joint_factor?,
+    exports?}. The same key and version create one variable and one constraint only."""
+    out = []
+    for p in packages:
+        if p.get("exports") and {"theta", "nu"} <= set(p["exports"]):
+            out.append({"code": "deps.theta_nu_split", "package": p["id"]})
+        if p.get("exported_zeta") is not None and p.get("zeta") is not None:
+            for k, v in p["zeta"].items():
+                if k in p["exported_zeta"] and p["exported_zeta"][k] != v:
+                    out.append({"code": "deps.package_split", "package": p["id"], "key": k})
+    by_key: dict = {}
+    for p in packages:
+        for k, v in (p.get("zeta") or {}).items():
+            by_key.setdefault(k, set()).add(v)
+    for k, vs in by_key.items():
+        if len(vs) > 1:
+            out.append({"code": "deps.version_conflict", "key": k, "versions": sorted(vs)})
+    sets = {}
+    for p in packages:
+        s = source_set({"kind": "xi", "result": p["upstream"]}, upstreams)
+        for v in (p.get("zeta_updaters") or {}).values():
+            s |= source_set({"kind": "zeta", "updater": v}, upstreams)
+        sets[p["id"]] = s
+    ids = [p["id"] for p in packages]
+    joint = {frozenset(p.get("joint_factor") or ()) for p in packages}
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            a, b = ids[i], ids[j]
+            if any({a, b} <= set(jf) for jf in joint):
+                continue
+            inter = sets[a] & sets[b]
+            if inter:
+                out.append({"code": "deps.source_overlap", "packages": [a, b], "sources": sorted(inter)})
+            elif common_sources and (common_sources.get(a, set()) & common_sources.get(b, set())):
+                out.append({"code": "deps.common_source", "packages": [a, b],
+                            "sources": sorted(common_sources[a] & common_sources[b])})
+    return out

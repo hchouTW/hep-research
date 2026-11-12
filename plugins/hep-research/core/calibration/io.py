@@ -13,8 +13,11 @@ from pathlib import Path
 
 from core.canonical import load_json_strict
 
-EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "not-applicable": 0, "failed": 1, "refused": 1,
-        "rejected": 2, "incomplete": 3}
+EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "not-applicable": 0, "synthetic": 0,
+        "no-testable-direction": 0,                     # a decision: no direction to test (section 9.4)
+        "failed": 1, "refused": 1, "insufficient": 1,   # insufficient power is a negative verdict (section 9.4)
+        "rejected": 2,
+        "incomplete": 3, "not-decided": 3, "pending": 3}  # no decision reached (e.g. G9 after P8 failed, G8 not run)
 
 
 class InputError(ValueError):
@@ -30,6 +33,19 @@ def load(path: str):
         return load_json_strict(text)
     except ValueError as exc:
         raise InputError(f"{path} is not valid JSON: {exc}") from None
+
+
+
+def load_object(path: str, required=()) -> dict:
+    """`load` for an input that must be a JSON object with the `required` keys: anything else is bad input (exit 2),
+    never a traceback."""
+    x = load(path)
+    if not isinstance(x, dict):
+        raise InputError(f"{path}: expected a JSON object, got {type(x).__name__}")
+    missing = [k for k in required if k not in x]
+    if missing:
+        raise InputError(f"{path}: missing key(s) {', '.join(missing)}")
+    return x
 
 
 def emit(out: dict) -> int:

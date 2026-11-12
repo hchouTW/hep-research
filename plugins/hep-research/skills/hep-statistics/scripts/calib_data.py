@@ -12,7 +12,12 @@
                                                                     validation reads and pending failure records;
                          the raw units come from the releases' lineage (unconfirmed lineage or a holdout sharing
                          raw units is refused, nothing is recorded); --conditions holds the opening conditions
-  calib_data.py decide   --ledger FILE --decision FILE             apply a decision record (phase 0: a stub)
+  calib_data.py decide   --ledger FILE --book FILE --kappa K       apply kappa's decision record from calib_validate's
+                                                                   book (computed records and abandonment only, F4)
+  calib_data.py locking  --contract FILE --plan FILE --release FILE --out FILE [--n-scan N]
+                         the locking-stage decisions at the evaluation points (rounding, sigma0, N_d,c, conventions)
+  calib_data.py provide  --ledger FILE --release FILE --channel FILE --calibration HASH ... --out FILE [--kappa K]
+                         the one provider of calibration values to a fit (records the fit read, section 9.5)
   calib_data.py inputs   --ledger FILE --kappa K --vmode MODE --validation-units FILE --calibration-units FILE
                          [--no-validation-read]                    the reuse and failure-record inputs
 --units files hold a JSON list of raw-unit ids; --channel files hold {"contract_sha256": H} or {"series": S,
@@ -92,7 +97,20 @@ def main(argv=None) -> int:
     o.add_argument("--conditions")
     de = sub.add_parser("decide")
     de.add_argument("--ledger", required=True)
-    de.add_argument("--decision", required=True)
+    de.add_argument("--book", required=True)
+    de.add_argument("--kappa", required=True)
+    lk = sub.add_parser("locking")
+    lk.add_argument("--contract", required=True)
+    lk.add_argument("--plan")
+    lk.add_argument("--release", required=True)
+    lk.add_argument("--n-scan", type=int, default=64)
+    lk.add_argument("--out", required=True)
+    pv = sub.add_parser("provide")
+    for a in ("--ledger", "--release", "--channel", "--out"):
+        pv.add_argument(a, required=True)
+    pv.add_argument("--calibration", action="append", required=True,
+                    help="hash of a calibration release declared by the contract")
+    pv.add_argument("--kappa")
     i = sub.add_parser("inputs")
     for a in ("--ledger", "--kappa", "--validation-units", "--calibration-units"):
         i.add_argument(a, required=True)
@@ -139,8 +157,33 @@ def main(argv=None) -> int:
                     args.kappa, read[0], u["validation_units"], u["calibration_units"], chan, cond),
                     "validation_units": len(u["validation_units"] or ()),
                     "calibration_units": len(u["calibration_units"] or ())})
+            if args.cmd == "locking":
+                from core.calibration import data_checks, io as cio, problems
+                contract, plan, extras = cio.contract_and_plan(args.contract, args.plan)
+                rel = io.load(args.release)
+                p = problems.from_inputs(contract, plan)
+                from core.canonical import canonical_sha256
+                hs = {"contract": canonical_sha256(contract), "plan": canonical_sha256(plan) if plan else None,
+                      "release": canonical_sha256(rel)}
+                rep = data_checks.locking_report(contract, rel.get("declarations") or {}, p, args.n_scan, hashes=hs)
+                io.write_json(args.out, cio.jsonable(rep))
+                return {"status": "written", "report": args.out, "decision": rep["status"],
+                        "findings": len(rep["findings"])}
+            if args.cmd == "provide":
+                rel, chan = io.load(args.release), io.load(args.channel)
+
+                def prov(led):
+                    values, seq = led.provide_values(rel, chan, args.calibration, args.kappa)
+                    io.write_json(args.out, values)
+                    return {"read_seq": seq, "values": args.out}
+                return write(prov)
             if args.cmd == "decide":
-                dec = io.load(args.decision)
+                book = io.load(args.book)
+                recs = [d for d in (book.get("decisions") or []) if d.get("kappa") == args.kappa]
+                dec = recs[-1] if recs else None
+                if dec is None or not (dec.get("computed") or dec.get("outcome") == "abandoned"):
+                    raise io.InputError("no decision record of calib_validate for this kappa (a decision comes only "
+                                        "from a computed statistic or an abandonment)")
                 return write(lambda led: {"record_status": led.apply_decision(dec)})
             led = _ledger(args.ledger)
             v, c = _units(args.validation_units), _units(args.calibration_units)

@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 import calibration_fixtures as F  # noqa: E402
 from core.calibration import contract as cc  # noqa: E402
-from core.calibration import data_release as data  # noqa: E402
+from core.calibration import data_release as observed  # noqa: E402
 from core.calibration import preflight as pf  # noqa: E402
 
 E = np.arange(1.0, 9.0)
@@ -64,15 +64,15 @@ class A0(unittest.TestCase):
         unit; a release the contract does not declare as calibration data is refused."""
         rel = F.release("calibration", ["u1", "u2"], [], {})
         rel["content"] = {"values": linearity_example(0.01)}
-        h = data.release_hash(rel)
-        led = data.Ledger()
+        h = observed.release_hash(rel)
+        led = observed.Ledger()
         values, seq = led.provide_values(rel, {"series": "zdc-linearity"}, [h])
         self.assertEqual(len(values), 8)
         ev = [e for e in led.state["events"] if e["seq"] == seq]
         self.assertEqual({e["unit"] for e in ev}, {"u1", "u2"})
         self.assertEqual({e["kind"] for e in ev}, {"fit"})
         self.assertEqual(ev[0]["channel"], {"series": "zdc-linearity", "draft": 1})
-        with self.assertRaises(data.DataError):
+        with self.assertRaises(observed.DataError):
             led.provide_values(rel, {"series": "zdc-linearity"}, [])
 
 
