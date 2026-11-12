@@ -54,7 +54,7 @@ widths, dipole-model parameters, nonperturbative prescriptions and the names of 
 
 | Question | Owner |
 |---|---|
-| Reconstructing x, Q^2, y (electron, hadron, double-angle methods), hadron P_hT, recoil detection | hep-detector |
+| Reconstructing x, Q^2, y (electron, hadron, double-angle methods; [DIS kinematic reconstruction](../../hep-detector/references/dis-kinematic-reconstruction.md)), hadron P_hT, recoil detection | hep-detector |
 | Binning, selections, backgrounds, whether data are radiatively corrected | hep-measurement |
 | chi2 of a prediction against data, PDF reweighting and profiling, fits | hep-statistics |
 | Literature, equation locations, set versions | hep-citations |

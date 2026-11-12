@@ -1,5 +1,6 @@
 """experiment:eic usage example: a project config selects the profile, each routing scenario reads only the files
-the index names, a wrong version pin is rejected, no other profile's file is opened, and the run is reproducible."""
+the index names, a wrong version pin is rejected, no other profile's file is opened, the detector atlas reaches the
+profile (bound rows for ePIC and EIC, see_profile for unbound names), and the run is reproducible."""
 import json
 import subprocess
 import sys
@@ -59,6 +60,28 @@ class EicRoutingExampleTests(unittest.TestCase):
         self.assertEqual(sel["decision"], "use")
         self.assertEqual(sel["source"], "project-config")
         self.assertEqual(sel["experiments"], ["experiment:eic"])
+
+    def test_bound_epic_atlas_query_returns_profile_rows(self):
+        by = {(q["binding"], q["experiment"]): q for q in self.r["atlas_queries"]}
+        rows = [r for r in by[("bound", "ePIC")]["rows"] if r["origin"] == "bound experiment profile"]
+        self.assertGreaterEqual(len(rows), 1)
+
+    def test_bound_eic_atlas_query_matches_the_ledger(self):
+        ledger = json.loads((PLUGIN / "profiles" / "experiments" / "eic" / "evidence" / "claims.json").read_text(encoding="utf-8"))
+        has_eic = any(c.get("atlas", {}).get("experiment") == "EIC" for c in ledger)
+        by = {(q["binding"], q["experiment"]): q for q in self.r["atlas_queries"]}
+        rows = [r for r in by[("bound", "EIC")]["rows"] if r["origin"] == "bound experiment profile"]
+        if has_eic:
+            self.assertGreaterEqual(len(rows), 1)
+        else:
+            self.assertEqual(rows, [])
+            self.skipTest("blocked: no eic claim carries an atlas block with experiment EIC")
+
+    def test_unbound_atlas_queries_point_to_the_profile(self):
+        unbound = [q for q in self.r["atlas_queries"] if q["binding"] == "unbound"]
+        self.assertEqual(sorted(q["experiment"] for q in unbound), ["EIC", "Electron-Ion Collider", "ePIC"])
+        for q in unbound:
+            self.assertEqual(q.get("see_profile"), "experiment:eic", q)
 
     def test_committed_output_is_reproduced(self):
         fresh = json.loads((self.out / "results.json").read_text(encoding="utf-8"))

@@ -5,8 +5,11 @@ Builds a temporary project directory holding hep-research.project.json that pins
 contracts/project.py, then walks the profile's routing scenarios (benchmarks/routing-scenarios.json): for each
 request it asks resolve_context for the decision and, only when experiment:eic is selected, opens the one module
 the index names. Every file opened under profiles/ is recorded; the run fails if any file of another profile is
-read. Also shows that a wrong version pin is rejected. Standard library only; no model call; nothing about the EIC
-or ePIC is asserted here, only how the profile is selected and read.
+read. Also shows that a wrong version pin is rejected, and how the hep-detector atlas reaches the profile: five
+`detector_atlas.py query` runs, as subprocesses so that their reads stay outside this run's audit, bound to the pinned
+project for ePIC and for EIC, and unbound for ePIC, EIC and "Electron-Ion Collider" (the atlas links these names to
+experiment:eic). Only the row count, each row's claim id and origin, and see_profile are recorded. Standard library
+only; no model call; no EIC or ePIC value is asserted here, only how the profile is selected and read.
 
 Usage (from the plugin root): python3 examples/eic-profile-routing/run.py [--out DIR]
 """
@@ -15,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -62,6 +66,29 @@ def index_files(index_text: str, keyword: str) -> list[str]:
     return []
 
 
+ATLAS_SCRIPT = PLUGIN / "skills" / "hep-detector" / "scripts" / "detector_atlas.py"
+ATLAS_CASES = (("bound", "ePIC"), ("bound", "EIC"), ("unbound", "ePIC"), ("unbound", "EIC"), ("unbound", "Electron-Ion Collider"))
+
+
+def atlas_query(experiment: str, project_dir: Path | None) -> dict:
+    """All pages of one atlas query; records only total, (claim_id, origin) per row and see_profile, never inputs."""
+    rows, page, total, see_profile = [], 0, 0, None
+    while page is not None:
+        command = [sys.executable, str(ATLAS_SCRIPT), "query", "--experiment", experiment, "--page", str(page)]
+        if project_dir is not None:
+            command += ["--project", str(project_dir)]
+        answer = json.loads(subprocess.run(command, capture_output=True, text=True, timeout=300, check=True).stdout)
+        total, see_profile = answer.get("total", 0), answer.get("see_profile")
+        rows += [{"claim_id": r["claim_id"], "origin": r["origin"]} for r in answer.get("rows", [])]
+        page = answer.get("next_page")
+    return {"total": total, "rows": rows, "see_profile": see_profile}
+
+
+def run_atlas_queries(project_dir: Path) -> list[dict]:
+    return [{"binding": binding, "experiment": experiment,
+             **atlas_query(experiment, project_dir if binding == "bound" else None)} for binding, experiment in ATLAS_CASES]
+
+
 def run_scenarios() -> list[dict]:
     scenarios = json.loads((PROFILE_DIR / "benchmarks" / "routing-scenarios.json").read_text(encoding="utf-8"))["scenarios"]
     index_text = (PROFILE_DIR / "index.md").read_text(encoding="utf-8")
@@ -91,8 +118,10 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     a.out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="eic-example-") as tmp:
-        good = load_project(write_project(Path(tmp), PROFILE["version"]))
+        good_dir = write_project(Path(tmp), PROFILE["version"])
+        good = load_project(good_dir)
         bad = load_project(write_project(Path(tmp), "9.9.9"))
+        atlas = run_atlas_queries(good_dir)
     wrong_pin_rejected = (not bad.report.ok) and any(f.code == "project.version_pin_mismatch" for f in bad.report.findings)
     scenarios = run_scenarios() if good.report.ok else []
     ctx = resolve_context({"experiments": [], "theory": []}, good, True)
@@ -101,19 +130,23 @@ def main(argv=None) -> int:
     files = sorted(OPENED)
     # load_project validates the whole registry, so every registered profile.json is read as metadata; that is not a load
     foreign = [p for p in files if not (p.startswith("profiles/experiments/eic/") or p == "profiles/registry.json" or p.endswith("/profile.json"))]
-    passed = good.report.ok and wrong_pin_rejected and bool(scenarios) and all(s["pass"] for s in scenarios) and project_selects and not foreign
+    atlas_links = all(q["see_profile"] == PROFILE["id"] for q in atlas if q["binding"] == "unbound")
+    passed = (good.report.ok and wrong_pin_rejected and bool(scenarios) and all(s["pass"] for s in scenarios) and project_selects
+              and not foreign and atlas_links)
     results = {"plugin_version": PLUGIN_VERSION, "profile": {"id": PROFILE["id"], "version": PROFILE["version"]},
                "project_config": {k: project_config(PROFILE["version"])[k] for k in ("experiments", "theory")},
                "project_valid": good.report.ok, "bound_profiles": [p["id"] for p in good.profiles],
                "wrong_pin_rejected": wrong_pin_rejected, "project_config_selection": project_config_selection,
                "scenarios": scenarios, "profile_files_read": files,
-               "foreign_profile_files_read": foreign, "pass": passed,
-               "caveat": "Shows profile selection and selective loading only; asserts nothing about the EIC or ePIC."}
+               "foreign_profile_files_read": foreign, "atlas_queries": atlas, "pass": passed,
+               "caveat": "Shows profile selection, selective loading and how the detector atlas reaches the profile; asserts no EIC or ePIC value (the atlas rows are listed by claim id only)."}
     (a.out / "results.json").write_text(json.dumps(results, indent=1) + "\n", encoding="utf-8")
     lines = ["# experiment:eic usage example", "", f"Profile {PROFILE['id']} {PROFILE['version']} selected through hep-research.project.json; wrong pin rejected: {wrong_pin_rejected}.", "",
              "| Scenario | Decision | Files read |", "|---|---|---|"]
     lines += [f"| {s['id']} | {s['decision']} | {', '.join(s['files_read']) or 'none'} |" for s in scenarios]
     lines += ["", f"Project config alone (request names no profile): decision {ctx['decision']}, source {ctx['source']}, experiments {', '.join(ctx['experiments'])}."]
+    lines += ["", "| Atlas query | Rows | Bound-profile rows | see_profile |", "|---|---|---|---|"]
+    lines += [f"| {q['binding']} {q['experiment']} | {q['total']} | {sum(r['origin'] == 'bound experiment profile' for r in q['rows'])} | {q['see_profile'] or '-'} |" for q in atlas]
     lines += ["", f"Profile files opened during the run: {', '.join(files)}.", "", results["caveat"]]
     (a.out / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps({"pass": passed, "scenarios": [(s["id"], s["pass"]) for s in scenarios], "foreign": foreign}))

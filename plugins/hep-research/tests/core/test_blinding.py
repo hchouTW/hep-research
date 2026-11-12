@@ -559,5 +559,50 @@ class RoundingZerosTests(unittest.TestCase):
                 self.assertEqual(bool(bl.scan_text(text, [22014.0])), want)
 
 
+
+class HexWordTests(unittest.TestCase):
+    """sci-fix BLINDING-HEX-WORDS: a digit run inside a hexadecimal word of 16 or more characters with a letter (a
+    SHA-256 digest, a git commit id) is not a printed number. Before the fix scan_text tokenized it, so a release
+    digest ending in ...9082c936a853 was a hit for a sealed 936.24 and the AMS example's sentinel audit failed.
+    Hexadecimal is in OUT_OF_SCOPE_RENDERINGS; shorter hex words and words with other letters are scanned as before."""
+    LETTERS = "abcdef"
+
+    @staticmethod
+    def word(length, n, at, upper=False):
+        """A hex word of the given length, letters only except the digits of n written at position at."""
+        base = ("abcdef" * 12)[:length]
+        out = base[:at] + str(n) + base[at + len(str(n)):]
+        return out.upper() if upper else out
+
+    def test_digits_inside_hex_words_exhaustively(self):
+        """Exhaustive over the stated domain: every sealed integer n = 100 to 999, at every position inside a 64- and
+        a 16-character hex word, lower and upper case, is not a hit; inside a 15-character word it still is (the
+        boundary). Expected values come from the definition of the domain, not from the scanner."""
+        for n in range(100, 1000):
+            sealed = [n + 0.25]
+            for length, want in ((64, False), (16, False), (15, True)):
+                for at in range(length - 3 + 1):
+                    for upper in (False, True):
+                        text = f"digest: {self.word(length, n, at, upper)}\n"
+                        got = bool(bl.scan_text(text, sealed))
+                        if got != want:
+                            self.fail(f"n={n} length={length} at={at} upper={upper}: hit={got}, expected {want}")
+
+    def test_release_digest_is_not_a_printed_number(self):
+        """The case that failed the AMS example's sentinel audit in CI on release/0.66.0."""
+        digest = "fe310bac4875367740c1d0ee52330b293c033673b0fe797207cd9082c936a853"
+        text = json.dumps({"versions": {"plugin_release": {"release": "0.66.0", "digest": digest}}}, indent=1)
+        self.assertEqual(bl.scan_text(text, [936.2388685586601]), [])
+
+    def test_numbers_beside_hex_words_still_hit(self):
+        """Negative control: a printed number next to a hash, a short hex word, an all-digit run, a word with a
+        non-hex letter and an underscore-joined value are still found."""
+        digest = "fe310bac4875367740c1d0ee52330b293c033673b0fe797207cd9082c936a853"
+        for text in (f"{digest} 936.24", f"936.24 {digest}", "tag c936a", "0000000000000936", "ghij936abcdefabcdefab",
+                     "count_936.24", f"{digest}\n936\n"):
+            with self.subTest(text=text):
+                self.assertTrue(bl.scan_text(text, [936.2388685586601]), text)
+
+
 if __name__ == "__main__":
     unittest.main()

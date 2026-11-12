@@ -141,6 +141,20 @@
    "registered_at": "2026-11-10T16:16:01Z",
    "card_commit": "103429aa",
    "reason": "execution log only (repeated gate runs, checks, gates recorded, E8 report); thresholds and test design as registered ca717b11"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "5740f3dc8c8f7843867f6417b0772d740bd6e83cd6fc0bd10bdfa24fd6f26e1a",
+   "registered_at": "2026-11-12T10:52:38Z",
+   "card_commit": "merge of origin/main",
+   "reason": "after its execution-log update: origin/main (0.66.1) merged into simcal/phase-0 on the user's word; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "361c0792d53a8a9d2060e32d80267c669f8129637ea1d5b0b952da0d0c23ce2e",
+   "registered_at": "2026-11-12T10:57:15Z",
+   "card_commit": "merge of simcal/phase-0",
+   "reason": "after its execution-log update: the new basis (origin/main 0.66.1 through simcal/phase-0) merged into simcal/phase-1 on the user's word; no gate-deciding file changed"
   }
  ]
 }

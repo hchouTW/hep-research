@@ -1,0 +1,88 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "eic-theory-spec-positive",
+ "artifact_type": "theory-spec",
+ "objective": "SYNTHETIC test fixture for the EIC configuration checker: unpolarized structure function F2 at the 18x275 e+p configuration, with user-supplied beam values; not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "synthetic-model",
+   "description": "structural fixture"
+  },
+  "assumptions": [
+   "placeholder assumption"
+  ],
+  "conventions": {
+   "unit_system": "natural units (synthetic)",
+   "hbar_c_one": true,
+   "metric_signature": "+---",
+   "coupling_normalization": "not-applicable",
+   "renormalization_scheme": "not-applicable",
+   "scales": "not-applicable",
+   "energy_variable": "sqrt_s",
+   "frame": "laboratory frame; the center-of-mass frame differs",
+   "angle_definition": "not-applicable",
+   "spin_treatment": "not-applicable",
+   "mass_approximation": "not-applicable",
+   "eic:beam_energy_configuration": "18x275 e+p",
+   "rapidity_frame": "laboratory frame with +z along the hadron beam, as stated by the analysis",
+   "polarization_convention": "helicity convention of the analysis, stated in its note",
+   "eic:crossing_angle_treatment": "boosted to the head-on frame using the 25 mrad crossing angle of eic:C41"
+  },
+  "order": "tree-level",
+  "parameters": {
+   "p": "placeholder",
+   "eic:beams": {
+    "electron": {
+     "energy_GeV": {
+      "value": 18,
+      "source": "user-supplied"
+     },
+     "polarization": null
+    },
+    "hadron": {
+     "species": "p",
+     "A": 1,
+     "Z": 1,
+     "energy_per_nucleon_GeV": {
+      "value": 275,
+      "source": "user-supplied"
+     },
+     "polarization": null
+    },
+    "crossing_angle_mrad": {
+     "value": 25,
+     "source": "user-supplied"
+    }
+   }
+  },
+  "scales": "not-applicable",
+  "derivation_status": "not-derived",
+  "validity_domain": {
+   "note": "placeholder"
+  },
+  "checks_run": [],
+  "checks_not_run": [
+   "all (fixture)"
+  ]
+ }
+}

@@ -18,7 +18,7 @@ from core.evidence import query as q  # noqa: E402
 LEDGER = ROOT / "docs" / "evidence" / "statistics"
 PUBLIC_LEDGERS = [d for d in (LEDGER, ROOT / "profiles" / "experiments" / "eic" / "evidence",
                               ROOT / "profiles" / "experiments" / "ams-02" / "evidence") if (d / "claims.json").is_file()]
-TODAY = date(2026, 11, 8)  # the latest verification in the public ledgers (the g4sim S6 claims of ams-02 and eic)
+TODAY = date(2026, 11, 11)  # the latest verification in the public ledgers (eic source eic:S02)
 FILES = {"sources": "sources.json", "claims": "claims.json"}
 
 

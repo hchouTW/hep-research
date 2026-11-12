@@ -1331,6 +1331,7 @@
    "path": "skills/hep-theory/scripts/dis_kinematics.py",
    "depth": 3,
    "skills": [
+    "hep-detector",
     "hep-theory"
    ]
   },

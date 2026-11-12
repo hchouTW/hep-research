@@ -14,6 +14,9 @@ How to choose the estimator for a reconstructed quantity is in
 [detector measurement framework](detector-measurement-framework.md#choosing-the-estimator);
 likelihood reconstruction from many photosensor hits is in
 [photon likelihood reconstruction](photon-likelihood-reconstruction.md).
+Reconstructing the DIS variables x, y and Q^2 from the scattered lepton and the hadronic final state
+(electron, Jacquet-Blondel, double-angle and Sigma methods; a crossing angle) is in
+[DIS kinematic reconstruction](dis-kinematic-reconstruction.md).
 
 ## The chain, and why its order matters
 
