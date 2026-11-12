@@ -117,6 +117,7 @@ class Basins(unittest.TestCase):
         pass
 
 
+@unittest.skipUnless(R.AVAILABLE, R.SKIP_REASON)
 class Geant4Configuration(unittest.TestCase):
     """The Slurm-scale configuration of the real evidence (not run)."""
 

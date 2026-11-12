@@ -22,6 +22,9 @@ from core.canonical import canonical_sha256  # noqa: E402
 
 CASE = ROOT / "profiles" / "reference" / "geometry-cases" / "cases" / "ams02-rich-replica"
 CLAIMS = ("ams02:C70", "ams02:C205")
+# the case is part of the AMS-02 profile, absent from a copy without it (the CI check "AMS optional")
+AVAILABLE = (CASE / "detector-spec.json").is_file()
+SKIP_REASON = "the AMS-02 profile (its ams02-rich-replica case) is not in this copy"
 BINDINGS = {"height_mm": {"document": "detector", "pointer": "/params/height_mm"},
             "index_scale": {"document": "detector", "pointer": "/materials/aerogel/optical/rindex/value",
                             "form": "scale"}}

@@ -120,6 +120,7 @@ class Coupling(unittest.TestCase):
             EP.estimate_sigma_noise(q, [0.15], ["s0", "s1"])
 
 
+@unittest.skipUnless(R.AVAILABLE, R.SKIP_REASON)
 class ScaleBinding(unittest.TestCase):
     """A theta that rescales a spectrum: n(E) -> s n(E) on materials.aerogel.optical.rindex (RICH precondition (a))."""
 
