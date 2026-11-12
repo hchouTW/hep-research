@@ -1093,6 +1093,34 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_design.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_emulator.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_kernel_check.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_reweight.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/calib_use.py",
    "depth": 3,
    "skills": [
@@ -1952,7 +1980,7 @@
   }
  ],
  "counts": {
-  "scripts": 204,
+  "scripts": 208,
   "unresolved": 70,
   "named_without_main": 28
  }

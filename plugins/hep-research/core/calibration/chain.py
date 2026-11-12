@@ -243,6 +243,10 @@ def node_candidates(node: dict, kernel_plan: dict) -> set[str]:
         out.add("rerun")
     if k == "black-box" and node.get("samplable") and stored.get("inputs"):
         out |= {"resimulation", "surrogate-model"}
+    if k == "density" and node.get("samplable") and stored.get("inputs"):
+        # rerunning a density kernel from its stored inputs with new random numbers is resimulation of that node:
+        # the next tier when reweighting is infeasible (section 3.6, 15.3.1; phase-1 reading, reported)
+        out.add("resimulation")
     return out
 
 

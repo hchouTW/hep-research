@@ -8,12 +8,13 @@ import json
 import os
 import sys
 import tempfile
+from typing import Any
 from pathlib import Path
 
 from core.canonical import load_json_strict
 
-EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "failed": 1, "refused": 1, "rejected": 2,
-        "incomplete": 3}
+EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "not-applicable": 0, "failed": 1, "refused": 1,
+        "rejected": 2, "incomplete": 3}
 
 
 class InputError(ValueError):
@@ -84,3 +85,53 @@ def guard_stdout_encoding() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         with contextlib.suppress(Exception):
             sys.stdout.reconfigure(encoding="utf-8")
+
+
+def contract_and_plan(contract_path: str, plan_path: str | None = None) -> tuple[dict, dict | None, dict]:
+    """(contract, plan, extras) from a calibration-contract/1 and a calibration-plan/1, or from a calibration-fixture/1
+    holding both (extras: its other keys, e.g. the design fixture's synthetic `systematics`)."""
+    doc = load(contract_path)
+    if not isinstance(doc, dict):
+        raise InputError(f"{contract_path}: a contract or fixture is a JSON object")
+    if doc.get("schema") == "calibration-fixture/1":
+        contract, plan = doc.get("contract"), doc.get("plan")
+        extras = {k: v for k, v in doc.items() if k not in ("contract", "plan")}
+    else:
+        contract, plan, extras = doc, None, {}
+    if plan_path:
+        plan = load(plan_path)
+    if not isinstance(contract, dict):
+        raise InputError("no contract")
+    return contract, plan, extras
+
+
+def jsonable(x):
+    """NumPy arrays and scalars to plain JSON values (NaN to null, +-inf to the strings "inf", "-inf"); keys starting
+    with '_' (internal detail) dropped."""
+    import numpy as np
+    if isinstance(x, dict):
+        return {k: jsonable(v) for k, v in x.items() if not str(k).startswith("_")}
+    if isinstance(x, (list, tuple)):
+        return [jsonable(v) for v in x]
+    if isinstance(x, np.ndarray):
+        return x.tolist()
+    if isinstance(x, np.generic):
+        x = x.item()
+    if isinstance(x, float) and not np.isfinite(x):        # NaN / Infinity are not JSON (review F15)
+        return None if np.isnan(x) else ("inf" if x > 0 else "-inf")
+    return x
+
+
+def systematics(release_path: str | None, extras: dict) -> list | None:
+    """The eta columns' source: the `systematic` component of a calibration release (readable; the sealed components
+    are never provided, section 2.1): the release file given, else a design fixture's synthetic release."""
+    from core.calibration import data_release as data
+    r = load(release_path) if release_path else extras.get("release")
+    if r is not None:
+        try:
+            systematic: Any = data.provide(r, "systematic", opened=False, role="calibration")
+            return systematic
+        except (data.DataError, KeyError, TypeError) as exc:
+            raise InputError(f"{release_path or 'the fixture release'}: no readable systematic component ({exc})") \
+                from None
+    return None

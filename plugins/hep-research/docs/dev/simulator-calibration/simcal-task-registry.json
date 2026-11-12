@@ -115,6 +115,34 @@
    "reason": "execution log only (campaign 2, final checks, gates recorded, E8 report); thresholds and test design as registered 06fb1860"
   },
   {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "32bc1e6d83ae4b327864dc31d17c7e37237ec1f907b4134fbe9732e4c3b3af0d",
+   "registered_at": "2026-11-10T13:40:54Z",
+   "card_commit": "2e8c1f91",
+   "reason": "refreshed at the start of phase 1 from Part B, the index and approval A7 (D37, D41, D42), before any run: gate test designs, seeds and the two section 8.7 calibrations of the phase registered"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "fd133e3088497e27bda6fde9057530e6536c7eca1aa3285138dc152f0963a6c5",
+   "registered_at": "2026-11-10T14:27:38Z",
+   "card_commit": "618cf38a",
+   "reason": "before any gate run: gate-2 electronics case on the runs without zero suppression (threshold left out of that case), criterion (ii) over the observables of the runs the node acts in (tightening), s_k^2 as the bootstrap's limit, data errors per data sample; thresholds unchanged; execution log"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "ca717b11c66be98b8d551f562f6ec2b6f7faecfc884c90b6b87aabd1c645726f",
+   "registered_at": "2026-11-10T15:13:20Z",
+   "card_commit": "eee18408",
+   "reason": "after the independent review, before repeating the gate runs at the fixed code (tightening only): gate-2 criterion (ii) with the paired covariance over the runs whose node kernel reads the case's parameters (F3); the electronics case's plan records its filtering as ignorable (F7); rerun streams per (seed, point) in gate 2 and calibration 1 (F4); thresholds unchanged; the first gate run and calibration run superseded"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "a3857419f2276b68027fcf048258514010d49dabb0bf8f83ce1d51847bad3d65",
+   "registered_at": "2026-11-10T16:16:01Z",
+   "card_commit": "103429aa",
+   "reason": "execution log only (repeated gate runs, checks, gates recorded, E8 report); thresholds and test design as registered ca717b11"
+  },
+  {
    "card": "simcal-tasks/phase-0.md",
    "sha256": "5740f3dc8c8f7843867f6417b0772d740bd6e83cd6fc0bd10bdfa24fd6f26e1a",
    "registered_at": "2026-11-12T10:52:38Z",
@@ -122,11 +150,25 @@
    "reason": "after its execution-log update: origin/main (0.66.1) merged into simcal/phase-0 on the user's word; no gate-deciding file changed"
   },
   {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "361c0792d53a8a9d2060e32d80267c669f8129637ea1d5b0b952da0d0c23ce2e",
+   "registered_at": "2026-11-12T10:57:15Z",
+   "card_commit": "merge of simcal/phase-0",
+   "reason": "after its execution-log update: the new basis (origin/main 0.66.1 through simcal/phase-0) merged into simcal/phase-1 on the user's word; no gate-deciding file changed"
+  },
+  {
    "card": "simcal-tasks/phase-0.md",
    "sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
    "registered_at": "2026-11-12T13:15:10Z",
    "card_commit": "merge of origin/main 127163b3",
    "reason": "after its execution-log update: main merged again before the merge of PR #385; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "f05cb219cfe3e7b077a2ec33f948fb941728ef04ca7a8cccf5f7484bae414b75",
+   "registered_at": "2026-11-12T13:19:48Z",
+   "card_commit": "merge of simcal/phase-0 526f3948",
+   "reason": "after its execution-log update: the stack re-merged before the merge of PR #386; no gate-deciding file changed"
   }
  ]
 }
