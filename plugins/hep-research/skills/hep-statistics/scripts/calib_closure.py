@@ -5,8 +5,10 @@
   calib_closure.py decide --results FILE                  the Holm decision from the pseudo-data results
   calib_closure.py not-executed --reason TEXT             no decision: closure-not-tested
 The results file: {level, names, sigma_design, interior: {errors, cover68, cover95, nontruth_basin, X,
-interval_toys}, boundary: {...}}. Output: one JSON object; passed (exit 0), failed (exit 1, remedy plan; contract
-when the pseudo-data fall in a non-truth basin, D57), incomplete (exit 3). Phase 2 (section 17).
+interval_toys}, boundary: {...}, pseudo_data_source?}. Output: one JSON object; passed (exit 0), failed (exit 1, remedy
+plan; contract when the pseudo-data fall in a non-truth basin, D57), incomplete (exit 3), gap (exit 3: the truth MC
+has negative weights and no unweighted or positive-weight truth sample was given, D6 as approved in A12). Phase 2
+(section 17); D6 phase 3.
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -61,6 +63,9 @@ def main(argv=None) -> int:
         if args.cmd == "not-executed":
             return closure.not_executed(args.reason)                    # status not-decided (exit 3)
         r = io.load(args.results)
+        source = r.get("pseudo_data_source")                  # D6 (A12): a gap source decides nothing (exit 3)
+        if isinstance(source, dict) and source.get("status") == "gap":
+            return io.jsonable(closure.gap_record(source))
         pts = {}
         for k in ("interior", "boundary"):
             x = r.get(k)
