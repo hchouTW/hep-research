@@ -179,6 +179,9 @@ effects** (space charge, gain drop), and time resolution set by gap and gas.
 - **Tails**: discharge events, gain-nonuniformity-induced position biases.
 - **Data sample**: cosmic/test-beam and in-situ tracks for gain map.
 - **Transfers**: charge-centroid/micro-TPC to other segmented gas detectors.
+- **Identification**: Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. MPGD dE/dx or topology for
+  particle identification: no method text, no source read. In a muon system the identification is the system's
+  ([muon systems](muon-systems.md#reconstruction-chain)).
 
 ## Scintillating-fiber trackers
 

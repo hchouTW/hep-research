@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 49,
-   "bytes": 783891,
+   "bytes": 788338,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2134,7 +2134,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "10db758c 2026-11-12"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2252,7 +2252,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "10db758c 2026-11-12"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2289,7 +2289,7 @@
     "skills/hep-detector/references/timestream-to-map-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/front-end-calibration.md",
@@ -2362,13 +2362,13 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 20735,
-   "lines": 324,
+   "bytes": 21119,
+   "lines": 327,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-tracking.md",
@@ -2416,8 +2416,8 @@
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
    "owner": "hep-detector",
-   "bytes": 21108,
-   "lines": 299,
+   "bytes": 24570,
+   "lines": 338,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2515,8 +2515,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 21358,
-   "lines": 306,
+   "bytes": 21630,
+   "lines": 308,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2551,8 +2551,8 @@
   {
    "path": "skills/hep-detector/references/particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 18727,
-   "lines": 287,
+   "bytes": 19056,
+   "lines": 290,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -2818,7 +2818,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/timestream-to-map-reconstruction.md",
@@ -2831,7 +2831,7 @@
     "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",

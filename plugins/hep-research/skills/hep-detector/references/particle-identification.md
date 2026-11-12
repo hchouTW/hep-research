@@ -226,6 +226,9 @@ choice stated:
 - **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
   declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
   separation (see "Combining measurements" below).
+- **Assigning samples to the track.** Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists.
+  The samples arrive already assigned to one particle;
+  assigning layer signals to a track: no method text, no source read.
 
 ## Combining measurements
 
