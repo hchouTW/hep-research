@@ -22,7 +22,7 @@
    "state": "in-progress",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
-   "task_card_sha256": "cb675b3f42aa40b4b3fbcff0fb1721e7159620813f705a66f8cdc8705a3d21fc",
+   "task_card_sha256": "16b0962e082f79801b7e67bf9892ed14e738ab338885f08ead05fd31a8d7fff1",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
    "blocked_on": [],
    "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10"
@@ -69,5 +69,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-12T06:44:12Z"
+ "updated": "2026-11-12T07:39:23Z"
 }

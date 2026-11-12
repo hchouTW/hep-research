@@ -295,6 +295,13 @@
    "registered_at": "2026-11-12T06:44:12Z",
    "card_commit": "ead505a7",
    "reason": "before its run: gate 1 on the toy detector rerun at the hand-over commit (identifiers renamed, toy additions; the user's approval of 2026-11-12), and gates 2 and 3; items, seeds and criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "16b0962e082f79801b7e67bf9892ed14e738ab338885f08ead05fd31a8d7fff1",
+   "registered_at": "2026-11-12T07:39:23Z",
+   "card_commit": "ec040189",
+   "reason": "before its run: calibration 10 (e) rerun with the corrected injection reference (the user's decision of 2026-11-12), cal10_g7_fixed; tightening only"
   }
  ]
 }
