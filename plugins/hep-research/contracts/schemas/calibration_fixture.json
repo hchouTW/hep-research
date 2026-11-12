@@ -99,6 +99,35 @@
          "spec_pointer": {
           "type": "string",
           "minLength": 1
+         },
+         "bindings": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "required": [
+            "document",
+            "pointer"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "document": {
+             "enum": [
+              "detector-spec",
+              "alignment-overlay",
+              "simulation-request",
+              "run-card",
+              "response-pipeline",
+              "condition-snapshot",
+              "reconstruction",
+              "evaluator"
+             ]
+            },
+            "pointer": {
+             "type": "string"
+            }
+           }
+          },
+          "$comment": "g4sim (section 5.1, 11.4): the specification fields the parameter is bound to, by JSON Pointer; the theta and phi bindings are the mask list of the model identity, locked with the contract"
          }
         }
        },
