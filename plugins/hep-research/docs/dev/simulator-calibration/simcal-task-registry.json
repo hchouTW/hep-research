@@ -267,6 +267,13 @@
    "registered_at": "2026-11-11T23:26:22Z",
    "card_commit": "af16b7c7",
    "reason": "before its run: gate 1 on the toy detector re-registered with the engine at 518c0d6d (array 7584035 cancelled); items and criteria unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "b39da1b6b3499ff6ad0ecb34ee74e8a58dbe95f4bac60b1a9c5f1c81b881f951",
+   "registered_at": "2026-11-12T02:01:19Z",
+   "card_commit": "28c1ede1",
+   "reason": "before its run: gate 1 on the toy detector re-registered after array 7584442 failed on v_shift (X 7.45%); v_shift's nominal MC 16000, every other item, seed and criterion unchanged"
   }
  ]
 }
