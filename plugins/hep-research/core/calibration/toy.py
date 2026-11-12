@@ -31,13 +31,13 @@ class Kernel:
     n_u = 1
     filtered = False
 
-    def sample(self, par: dict, p: dict, u: np.ndarray, run: "Run") -> dict:
+    def sample(self, par: dict, p: dict, u: np.ndarray, run: Run) -> dict:
         raise NotImplementedError
 
-    def logpdf(self, out: dict, par: dict, p: dict, run: "Run") -> np.ndarray:
+    def logpdf(self, out: dict, par: dict, p: dict, run: Run) -> np.ndarray:
         raise NotImplementedError(f"{type(self).__name__} has no density")
 
-    def support(self, par: dict, p: dict, run: "Run") -> dict | None:
+    def support(self, par: dict, p: dict, run: Run) -> dict | None:
         """{output: (lo, hi)} per event, or None when unbounded / not restricted by the parameters."""
         return None
 
