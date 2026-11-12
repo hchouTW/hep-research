@@ -2,7 +2,7 @@
 
 ## Background
 
-Phase 3 of the simulator parameter calibration workflow (Part B, `simulator-calibration-v7.37.4-clean-en.md`, §17, line 3581). This is a **draft** written with the task package of 2026-11-10: phase 0 refreshes it from Part B and `simcal-decision-index.md`, lints it and registers it before any run a threshold judges (`simcal-task.md`, Sections E4 and E9). The §17 text and the §8.7 rows below are copied verbatim from Part B; the lists marked **Inferred** are the drafter's reading of which scripts and test sections the content touches.
+Phase 3 of the simulator parameter calibration workflow (Part B, `simulator-calibration-v7.37.4-clean-en.md`, §17, line 3581). Refreshed on 2026-11-12 at the start of phase 3 from Part B, `simcal-decision-index.md` and `simcal-approvals.md` (approval A12) on `origin/main` ca70a606 (phases 0–2 merged). It was first a **draft** written with the task package of 2026-11-10: phase 0 refreshes it from Part B and `simcal-decision-index.md`, lints it and registers it before any run a threshold judges (`simcal-task.md`, Sections E4 and E9). The §17 text and the §8.7 rows below are copied verbatim from Part B; the lists marked **Inferred** are the drafter's reading of which scripts and test sections the content touches.
 
 This card uses the headings `lint_task.py` requires, and carries the eight sections of `simcal-task.md` Section E5, in E5's order, as level-4 headings under them.
 
@@ -71,14 +71,17 @@ Deliver the content of phase 3 of §17 so that its gate holds: P6 negative tests
 
 ## Repository Context
 
-Confirmed in hep-research `main` at 5c2d1c7 (0.65.1): `contracts/` with `validate.py` and `schemas/`; `core/stats/fit_diagnostics.py` and `core/stats/toy_ensemble.py`; `core/simulation/` (`response.py`, `digitize.py`, `efficiency_map.py`, `rng.py`, `seeds.py`, `hits.py`); `core/partition/` (`states.py`, `campaign.py`); `adapters/batch-schedulers/batch_campaign.py`; `skills/hep-computing/scripts/lint_task.py`. Not present yet (to be created by this workflow): `core/calibration/`, every `calib_*.py` script, `adapters/geant4/assets/g4sim_calib_eval.py`, hep-detector `simulation-calibration/`, `docs/dev/simulator-calibration/`.
+On `simcal/phase-3`, from `origin/main` ca70a606 (phases 0–2 merged: #385, #386, #396; hep-research 0.66.1 and later): `core/calibration/` with the phase 0–2 engine (`toy.py`, `toy_problem.py`, `toys_linear.py`, `problems.py`, `likelihood.py`, `fit.py`, `identify.py`, `interval.py`, `shift.py`, `validate.py`, `closure.py`, `propagate.py`, `design.py`, `design_noise.py`, `data_checks.py`, `kernel_check.py`, `contract.py`, `chain.py`, `deps.py`, `use.py`, `io.py`, `linear.py`, `reweight.py`, `preflight.py`, `data_release.py`), the phase-3 stubs `emulator.py` (answers `incomplete`) and `evaluator.py` (ask/tell refused), and the `calib_*.py` scripts in `skills/hep-statistics/scripts/`. g4sim (S0–S9 merged): `core/simulation/` (`response.py`, `digitize.py`, `efficiency_map.py`, `rng.py`, `seeds.py`, `hits.py`, `conditions.py`, `source_density.py`), `adapters/geant4/assets/` (`g4sim_run.py`, `g4sim_efficiency_map.py`, `g4sim_digi/`). Not present yet: `adapters/geant4/assets/g4sim_calib_eval.py`.
 
 ## Technical Approach
 
 1. Run the phase loop of `simcal-task.md` Section E4 in worktree `simcal/phase-3`.
-2. Implement the §17 content through the scripts of §14, each check in exactly one script; follow §14's conventions (JSON output, exit codes 0–3, the standard library plus NumPy/SciPy).
-3. Add each test of this phase before the gate run, and show that each negative test is caught.
-4. Calibrate each §8.7 value of this phase as its row says, register it, then run the gates.
+2. Deliver the content in six work packages, in two waves; each runs in its own git worktree branched from `simcal/phase-3`, passes the commit gate, and is merged into `simcal/phase-3` (merge commits) with the gate re-run after each merge (subagents approved by the user, 2026-11-12):
+   - wave 1: **WP-A surrogate model** (ask/tell, training set, P6, V_emu, the combination of resimulation and surrogate model, the §19-5 reading of A12; `emulator.py`, `evaluator.py`, `calib_emulator.py`); **WP-B g4sim evaluator** (`g4sim_calib_eval.py` of §7.1, common random numbers, the event-interval check of §6.6, the g4sim support and recording levels of §6.1); **WP-C model identity and binding** (the masked-hash model identity of §5.1 with D86 and the §19-g5 integration tests, the node binding and candidate-method derivation of §11.4 Table 2; §15.3.19, §15.3a);
+   - wave 2, after wave 1 is merged: **WP-D efficiency-map φ** (§6.7: the map term U(θ)φ_map, the seeds of the mapping runs, the joint-pattern replicas, the θ-noise item of P5 (D28), the D84 G6 size check, the D83 (1) exemption of A12); **WP-E PDE split** (§6.7: routes 2₁, 3 and 1, the split check with its nested pair, the route-3 replicas); **WP-F synthetic ZDC fixture** (§15.2, P0 (k_B) with its spot check, the D6 reading of A12, the positive g4sim tests).
+3. Each work package adds its unit tests (positive tests and the negative tests of its gates, each negative with a positive control); each check in exactly one script (§14), JSON output, exit codes 0–3, the standard library plus NumPy/SciPy.
+4. Before each §8.7 calibration run, re-register this card with its configuration fixed (tightening only); run each calibration as registered; register the calibrated value before the gate run that uses it; never reuse a calibration run as a gate run. Every Slurm submission needs the user's approval, per array.
+5. Run the gates as registered, then the independent review (Section E4, step 10), the common checks and the hand-over.
 
 ## Deliverables
 
@@ -92,16 +95,16 @@ Confirmed in hep-research `main` at 5c2d1c7 (0.65.1): `contracts/` with `validat
 
 #### Decisions this phase depends on
 
-Needs the author (each must be approved in `simcal-approvals.md` before the phase starts; Section E7, item 1):
+Needs the author (each must be approved in `simcal-approvals.md` before the phase starts; Section E7, item 1). All eight are approved by record A12 (2026-11-12, “Accept all 8 as proposed”), which states the decision of each; phase 3 implements them as recorded there:
 
-- D6 (line 4090; needs the author before the phase it is deferred to)
-- D83 (line 4167; needs the author)
-- D84 (line 4168; needs the author)
-- D85 (line 4169; needs the author)
-- §19-5 (§19) (line 3709; needs the author before the phase it is deferred to)
-- §19-8 (§19) (line 3712; needs the author before the phase it is deferred to)
-- §19-9 (§19) (line 3713; needs the author before the phase it is deferred to)
-- §19-g5 (§19) (line 3742; needs the author before the phase it is deferred to)
+- D6 (line 4090; needs the author before the phase it is deferred to); approved, record A12
+- D83 (line 4167; needs the author); approved, record A12
+- D84 (line 4168; needs the author); approved, record A12
+- D85 (line 4169; needs the author); approved, record A12
+- §19-5 (§19) (line 3709; needs the author before the phase it is deferred to); approved, record A12
+- §19-8 (§19) (line 3712; needs the author before the phase it is deferred to); approved, record A12
+- §19-9 (§19) (line 3713; needs the author before the phase it is deferred to); approved, record A12
+- §19-g5 (§19) (line 3742; needs the author before the phase it is deferred to); approved, record A12
 
 Implemented as Part B writes them, the author confirming later (computation results; D19, D25 and the open §14.1 items, by front matter line 38), or settled by plugin source:
 
@@ -133,6 +136,8 @@ Accepted or decided items that this phase implements (their text in Part B is no
 - §8.7 line 2009: **PDE split (§6.7)** — design value: split check: χ² at α = 0.01, and \|Δθ_i\| + 2 sd(Δθ_i) ≤ 0.1σ_tot,i^design with the pair sized by sd(Δθ_i) ≤ 0.1σ_tot,i^design/(2 + z_{1−0.025/d}), a joint pass probability ≥ 0.94 under an exact split; route-3 replicas: pseudo-mass K_cat/2 ≤ 0.01 n_b per bin and Dirichlet variance (analytic) ≥ 0.98 of the multinomial variance; transit integerisation to 10⁶ (design values decided by the author, 2026-11-10; en/research-PDE.md, en/pde-geant4-check.md) — calibration: on the ZDC fixture with optics, the false-rejection rate of the split check under an exact split, and its power against a reflectance tied to the PDE; the route-3 replica covariance against the analytic multinomial covariance over several grid sizes (§15.2) — phase column: 3
 - §8.7 line 2018: **basin admission, separation and tie tolerances, and number of starts (§7.4)** — design value: R_admit = 1; τ_bar = max(0.1, 4σ_noise) at 19 segment points; τ_tie = max(0.01, 4σ_noise); max(2d, 16) Sobol starts (settled by computation, en/compute-D57.md; to be confirmed by the author) — calibration: note 6 — phase column: 2 (3 for the RICH replica)
 
+**Carried from phase 2 (`provisional-thresholds` until calibrated here)**: the toy-detector versions of the G8 rows (calibration 1, row 2000; the G8 half of calibration 6, row 2006; the G8 items of calibrations 10, 12 and 15, rows 2013, 2015, 2018), which A11 ran on the linear configurations; the toy's sum-term-a G8 bias is finite-sample (−0.14σ at 100 events per run, −0.003σ at 8000), so the g4sim G8 runs use exposures where it is below 0.02σ or model it; the effective-count approximation pulls (BB-lite, binomial auxiliary likelihood, weighted MC; note 4); P7 power under injected non-convergence; Wishart toys for G6; θ requiring resimulation under common random numbers at the Geant4 layer (note 3); the shift-mode confirmation at r = 0.5–4 with a resimulation-level φ (note 5); the P6 part of the Bonferroni row (2004), the θ-noise item of P5 (2008). Each is registered with its configuration before its run.
+
 Rule: every value above is registered in this card before the run that it judges; it may be tightened, never loosened.
 
 ## Validation
@@ -144,13 +149,16 @@ Rule: every value above is registered in this card before the run that it judges
 
 #### Risks and stop points
 
-- D6, D83, D84, D85 and four deferred §19 items need the author before this phase (index)
+- D6, D83, D84, D85 and four deferred §19 items needed the author before this phase: approved by A12 (2026-11-12)
+- D83 (1): a built map fails its own `efficiency-map/1` schema (`form.uniformity`); checked with that single exemption until fixed upstream (A12)
+- The RICH replica is not yet expressed in g4sim S7: the RICH part of row 2018 (note 6) may be a gap (Section E7, item 5)
+- The Geant4-level G8 and §8.7 calibrations are Slurm-scale; each array needs the user's approval
 - Geant4 was not run for the PDE split's evidence; repeat with Geant4 transport (§15.2)
 - g4sim preconditions of §17: S7 is merged with gate 3 (TR yield) a recorded gap and the RICH replica not yet expressed (`docs/dev/geant4-architecture/g4sim-gates/S7.md`); read each stage's gate record, not only its status
 
 #### Execution log
 
-- (filled in during the phase)
+- 2026-11-12: card refreshed at the phase start (A12; work packages WP-A to WP-F in two waves of parallel subagents, approved by the user; Slurm per array).
 
 ## Open Questions
 
