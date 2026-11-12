@@ -218,7 +218,7 @@ class G4simEvaluator:
         changed = {p: v for p, v in values.items() if p in self.methods and not _same(v, self.nominal_theta[p])}
         flags = []
         w, missing, diag = self._weights(values, changed, tab, events)
-        kb, kb0 = self._birks(values)
+        kb, kb0 = self._birks(values, batch)
         vis, bound = self._visible(tab, events, kb) if kb is not None else (None, None)
         need_digi = any(o["quantity"] in DIGITIZED for o in self.observable_specs)
         rows = None
@@ -268,12 +268,15 @@ class G4simEvaluator:
                 "max_weight_fraction": float(w.max() / w.sum()) if w.sum() > 0 else None}
         return w, sorted(set(missing)), {"source": node}
 
-    def _birks(self, values):
+    def _birks(self, values, batch=None):
+        """(k_B at theta, k_B the batch's split was scored at): the nominal k_B, or the k_B of a run told at a k_B
+        point (a full g4sim_run at k_B', whose split is already k_B''s and is not scaled again)."""
         kb_pars = [p for p, m in self.methods.items() if m == "rerun"]
         if not kb_pars:
             return None, None
         p = kb_pars[0]
-        return float(values[p]), float(self.nominal_theta[p])
+        own = ((batch or {}).get("point") or {}).get(p)
+        return float(values[p]), float(self.nominal_theta[p] if own is None else own)
 
     def _visible(self, tab, events, kb):
         """edep_visible per (event, volume) from edep_by_dedx_class at k_B, with the section 5.4 discretization bound."""
@@ -336,14 +339,16 @@ class G4simEvaluator:
         theta; a response stage is the digitization of the batch `seeds['batch']` (new Geant4 events, its own keys)
         at theta, recomputed as a whole segment from the stored scorer quantities (no stage 2 -> 3 hand-off)."""
         values = {**self.nominal_theta, **(psi or {}), **(phi or {}), **(theta or {})}
-        if node == "transport":
-            name = self._told_batch({p: values[p] for p in self.methods if self.methods[p] in ("rerun", "resimulation")})
+        if node == "transport":                   # the run told at theta (every parameter off nominal, e.g. a light-yield
+            name = self._told_batch({p: values[p] for p in self.methods  # spot check, section 5.4)
+                                     if self.methods[p] in ("rerun", "resimulation")
+                                     or not _same(values[p], self.nominal_theta[p])})
             if name is None:
                 raise ResimulationRequired(f"node {node} at {theta} is a g4sim_run that has not been told (ask)")
             return {"batch": name}
         bname, batch = self._batch(seeds, values)
         tab = batch_tables(batch, self.scorers)
-        kb, kb0 = self._birks(values)
+        kb, kb0 = self._birks(values, batch)
         return {"batch": bname, "channel_rows": self._digitize(values, tab, batch, kb, kb0)}
 
     def evaluate_from(self, node: str, samples, theta: dict, phi: dict | None, psi: dict | None, model: str,
@@ -352,8 +357,18 @@ class G4simEvaluator:
         values = {**self.nominal_theta, **(psi or {}), **(phi or {}), **(theta or {})}
         batch = self.batches[samples["batch"]]
         out = self._observe(values, samples["batch"], batch, names, given=samples.get("channel_rows"))
-        out["independent_runs"] = [self.run] if samples["batch"] != self.nominal_batch else []
+        out["independent_runs"] = [] if self._same_set(samples["batch"], self.nominal_batch) else [self.run]
         return out
+
+    def _same_set(self, a: str, b: str) -> bool:
+        """Two batches are one set of Geant4 events (paired, section 6.6) when they are the same batch, or declare the same
+        `set` on the same logical_run_seed and interval (a rerun of those events at another k_B: without optical photons
+        k_B draws no random number in transport)."""
+        if a == b:
+            return True
+        x, y = self.batches[a], self.batches[b]
+        key = ("logical_run_seed", "first_event", "events")
+        return "set" in x and x.get("set") == y.get("set") and all(x[k] == y[k] for k in key)
 
     def learned_closure(self, fold):
         raise NotImplementedError("learned density ratios are not g4sim's (phase 5)")

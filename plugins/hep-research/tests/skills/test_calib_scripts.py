@@ -529,6 +529,28 @@ class Phase2Wiring(unittest.TestCase):
             code, out = run("calib_design.py", "p7", "--input", x)
             self.assertEqual((code, out["status"]), (0, st))
 
+    def test_kernel_check_birks_spot_checks_and_g8_gap(self):
+        """Phase 3: calib_kernel_check.py rejects --points without the section 5.4 k_B extremes before any evaluation
+        (positive control: with them it gets to the evaluator, which this CLI cannot build for g4sim: incomplete);
+        calib_closure.py records G8 as a gap when the truth MC has negative weights (D6, A12)."""
+        import calibration_zdc_fixture as Z
+        c = self.write("zc.json", Z.contract())
+        p = self.write("zp.json", Z.plan({"nominal": Z.batch(3, 0, 5)}))
+        code, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points",
+                        self.write("zpts.json", [{"birks": 0.1}, {"birks": 0.2}, {"birks": 0.02}]))
+        self.assertEqual((code, out["status"], out["findings"][0]["code"]), (2, "rejected", "p0.spot_checks_missing"))
+        code, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points",
+                        self.write("zpts2.json", [{"birks": 0.1}, {"birks": 0.4}, {"birks": 0.02}]))
+        self.assertEqual((code, out["status"]), (3, "incomplete"))
+        gap = {"status": "gap", "finding": "g8.no_positive_truth_sample", "skipped_negative_weights": ["nlo"]}
+        code, out = run("calib_closure.py", "decide", "--results", self.write("g.json", {"pseudo_data_source": gap}))
+        self.assertEqual((code, out["status"]), (3, "gap"))
+        pt = {"errors": [[0.1], [-0.2], [0.05], [0.0]], "cover68": [[True], [True], [False], [True]]}
+        res = {"level": "standard", "names": ["a"], "sigma_design": [1.0], "interior": pt, "boundary": pt,
+               "pseudo_data_source": {"status": "ok", "sample": "lo"}}
+        code, out = run("calib_closure.py", "decide", "--results", self.write("g2.json", res))
+        self.assertIn(out["status"], ("passed", "failed"))
+
     def test_design_g4sim_checks(self):
         """Phase 3 (sections 6.1, 6.6): g4sim support and recording levels, event intervals, digitization jobs."""
         import calibration_g4sim_eval_fixtures as G

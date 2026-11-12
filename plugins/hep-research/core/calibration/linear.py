@@ -198,7 +198,7 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
     def column(p, step):
         lo = dict(theta_ref)
         hi = dict(theta_ref)
-        base = theta_ref.get(p, evaluator.model.nominal.get(p))
+        base = theta_ref[p] if p in theta_ref else evaluator.model.nominal.get(p)   # g4sim evaluators have no model
         lo[p], hi[p] = base - step, base + step
         r_hi, r_lo = evaluator.evaluate(hi, names=names), evaluator.evaluate(lo, names=names)
         _no_missing_support(r_hi, hi)
