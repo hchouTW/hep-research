@@ -38,15 +38,7 @@ def documents() -> dict:
 
 def apply(docs: dict, theta: dict, sample: dict | None = None) -> dict:
     """The documents at theta (decimal strings, as the specification writes them) and, with a sample, its beam."""
-    out = copy.deepcopy(docs)
-    for name, value in theta.items():
-        b = BINDINGS[name]
-        if b.get("form") == "scale":
-            old = DG.pointer_get(out[b["document"]], b["pointer"])
-            out[b["document"]] = DG.pointer_set(out[b["document"]], b["pointer"],
-                                                [repr(float(v) * float(value)) for v in old])
-        else:
-            out[b["document"]] = DG.pointer_set(out[b["document"]], b["pointer"], repr(float(value)))
+    out = DG.apply_theta(copy.deepcopy(docs), {"node_binding": {"parameters": BINDINGS}}, theta)  # scale: s n(E)
     if sample is not None:
         src = out["request"]["source"]
         src["particle"] = sample["particle"]

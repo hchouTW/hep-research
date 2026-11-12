@@ -50,14 +50,18 @@ try:  # NumPy (and the engine, which needs it) is reported by main() as a missin
     from core.calibration import io as calib_io
     from core.calibration import reweight, toy
     from core.canonical import canonical_sha256
-    from core.simulation import digitize, source_density
+    from core.simulation import conditions, digitize, response, rng, source_density
+    from scipy import stats
     MISSING = None
 except ImportError as _exc:
     MISSING = _exc.name or "numpy"
 
 KIND = "g4sim"
 STATE_SCHEMA = "g4sim-calib-eval-state/1"
-QUANTITIES = ("primary_energy", "edep_visible", "photoelectrons", "charge", "code")
+QUANTITIES = ("primary_energy", "edep_visible", "photoelectrons", "charge", "code", "photon_hits", "cherenkov_angle",
+              "ring_radius")
+PHOTON_QUANTITIES = ("photon_hits", "cherenkov_angle", "ring_radius")
+COUPLINGS = ("quantile", "g4sim")
 DIGITIZED = ("photoelectrons", "charge", "code")
 RESIMULATION_DOCUMENTS = ("detector", "run", "request")
 
@@ -91,6 +95,13 @@ def batch_tables(batch: dict, scorers: dict) -> dict:
     holds E^S_b; bin -1 is the direct sum)."""
     first, n = int(batch["first_event"]), int(batch["events"])
     prim = {int(r[0]): float(r[1]) for r in batch.get("primaries", [])}
+    direction = {int(r[0]): np.array([float(x) for x in r[5:8]]) for r in batch.get("primaries", []) if len(r) >= 8}
+    photons: dict = {}
+    for r in batch.get("photons", []):       # photons.csv (S7): event, scorer, volume, arrival, transit, energy eV,
+        event = int(r[0])                    # emission point (3), arrival direction (3), parent track
+        if not first <= event < first + n:
+            raise DG.CheckError("batch.event", f"photon of event {event} is outside the batch [{first}, +{n})")
+        photons.setdefault(event, []).append((str(r[1]), int(r[2]), np.array([float(x) for x in r[9:12]])))
     dedx: dict = {}
     split: dict = {}
     for r in batch.get("cells", []):
@@ -107,7 +118,7 @@ def batch_tables(batch: dict, scorers: dict) -> dict:
                 row[0], row[2] = float(r[4]), int(r[5])
             else:
                 row[1] = float(r[4])
-    return {"first": first, "n": n, "primaries": prim, "dedx": dedx,
+    return {"first": first, "n": n, "primaries": prim, "directions": direction, "photons": photons, "dedx": dedx,
             "split": [(e, v, b, L, S, k) for (e, v, b), (L, S, k) in sorted(split.items())]}
 
 
@@ -132,6 +143,126 @@ def merge_parts(parts: list) -> dict:
 def read_csv_rows(path: Path) -> list:
     with path.open(encoding="utf-8", newline="") as fh:
         return [row for row in csv.reader(fh) if row and not row[0].startswith("#") and row[0] != "event"]
+
+
+def photon_values(o: dict, tab: dict, events) -> np.ndarray:
+    """Per-event values from photons.csv (g4sim S7, full optical tracking), the detected photons of the observable's
+    scorer (o['scorer']) and volumes: `photon_hits`, their number; `cherenkov_angle`, the mean angle between each
+    photon's arrival direction and the axis (o['axis'], else the event's primary direction from primaries.csv);
+    `ring_radius`, the mean of expansion_mm x tan(angle), the radius on a detection plane at distance o['expansion_mm']
+    from the emission (a direct ring: photons no surface turned; o['max_angle_rad'] drops wider ones, e.g. reflected).
+    An event without a photon has no angle or radius (NaN: it does not enter the functional)."""
+    q = o["quantity"]
+    vols = set(o["volumes"]) if o.get("volumes") is not None else None
+    scorer = o.get("scorer")
+    cut = float(o.get("max_angle_rad", np.pi))
+    if q == "ring_radius" and not float(o.get("expansion_mm", 0.0)) > 0:
+        raise DG.CheckError("evaluator.observable", f"{o['name']}: ring_radius needs a positive expansion_mm")
+    out = np.full(len(events), np.nan if q != "photon_hits" else 0.0)
+    fixed = np.asarray(o["axis"], float) if o.get("axis") is not None else None
+    for i, e in enumerate(events):
+        hits = [d for s, v, d in tab["photons"].get(int(e), []) if (scorer is None or s == scorer)
+                and (vols is None or v in vols)]
+        if q == "photon_hits":
+            out[i] = len(hits)
+            continue
+        if not hits:
+            continue
+        axis = fixed if fixed is not None else tab["directions"].get(int(e))
+        if axis is None:
+            raise DG.CheckError("evaluator.observable", f"{o['name']}: event {e} has no primary direction or axis")
+        axis = axis / np.linalg.norm(axis)
+        ang = [float(np.arccos(np.clip(d @ axis / np.linalg.norm(d), -1.0, 1.0))) for d in hits]
+        ang = [a for a in ang if a <= cut]
+        if q == "cherenkov_angle" and ang:
+            out[i] = float(np.mean(ang))
+        elif q == "ring_radius":
+            ang = [a for a in ang if a < np.pi / 2]
+            if ang:
+                out[i] = float(np.mean(float(o["expansion_mm"]) * np.tan(ang)))
+    return out
+
+
+# ------------------------------------------------------------------ re-digitization coupled across theta
+def coupled_digitize(job: dict, rows: list) -> list:
+    """The channel rows of digitize.digitize (event, volume, channel index, photoelectrons, charge, code) with the
+    multinomial of each bin drawn by a quantile coupling, so that every draw is monotone in theta for fixed uniforms
+    and one more photon moves at most a few channel counts (common random numbers that vary smoothly, section 11.4
+    "Re-digitization and common random numbers"); the marginal law is g4sim's exactly.
+
+    Per (event, volume, bin), on g4sim's own sub-stream (the scintillation stage's volume key, counter (event, volume
+    ID, bin)), the same for every theta: N_b = response.bin_photons (the same draw as g4sim's: inverse transform below
+    a mean of 10, the rounded Gaussian of one Box-Muller group above, both monotone in the mean); then one output group
+    per channel c, whose first variate u_c gives k_c = F^-1_Binomial(u_c; N_b - sum_{c'<c} k_c', eps_c / (1 - sum_{c'<c}
+    eps_c')), the conditional binomials of a multinomial by their quantile functions. The yield factor, the sensor and
+    the electronics stages (with conditions) are g4sim's draws on g4sim's streams (continuous in their parameters).
+    g4sim's own multinomial (inverse transform or BTPE, rejection with a theta-dependent number of variates) cannot be
+    reproduced by a monotone coupling, so the channel split is not g4sim's realization, only its law. Timing (one time
+    per detected photon) is not coupled: a job with timing is refused."""
+    digitize.check_job(job)
+    if job.get("timing"):
+        raise DG.CheckError("evaluator.coupling_timing", "the quantile coupling draws no photon times; use coupling "
+                            "g4sim for a job with timing")
+    stage, sensor, electronics = job["stage"], job["sensor"], job["electronics"]
+    document = {"run_seed": job["run_seed"], "replica": job["replica"]}
+    count = len(job["channels"])
+    key = rng.volume_key(job["run_seed"], stage["name"], job["replica"])
+    grouped: dict = {}
+    for event, volume, b, large, small, steps in rows:
+        bins = grouped.setdefault((int(event), int(volume)), {})
+        if b in bins:
+            raise digitize.DigiError("bin-twice", f"event {event}, volume {volume}: bin {b} appears twice")
+        bins[b] = (large, small, steps)
+    owners, totals, uniforms, effs = [], [], [], []
+    for (event, volume), bins in sorted(grouped.items()):
+        factor = response.yield_factor(document, event, volume, stage.get("yield_relative_width", 0.0))
+        for b in sorted(bins):
+            eff = job["efficiencies"].get(str(b))
+            if eff is None:
+                raise digitize.DigiError("efficiencies", f"bin {b} has no efficiencies")
+            stream = rng.SubStream(key, event, volume, b)
+            large, small, steps = bins[b]
+            totals.append(response.bin_photons(stream, stage["light_yield_per_MeV"], stage["resolution_scale"], large,
+                                               small, steps, factor))
+            uniforms.append([stream.group()[0] for _ in range(count)])
+            effs.append(eff)
+            owners.append((event, volume))
+    pe: dict = {k: np.zeros(count, dtype=np.int64) for k in grouped}
+    if totals:
+        left = np.asarray(totals, dtype=np.int64)
+        U, P = np.asarray(uniforms, float), np.asarray(effs, float)
+        rest = np.ones(len(left))
+        K = np.zeros((len(left), count), dtype=np.int64)
+        for c in range(count):
+            q = np.clip(np.divide(P[:, c], rest, out=np.zeros_like(rest), where=rest > 0), 0.0, 1.0)
+            k = np.where((left > 0) & (q > 0), stats.binom.ppf(U[:, c], left, q), 0.0)
+            K[:, c] = np.minimum(np.nan_to_num(k, nan=0.0).astype(np.int64), left)
+            left = left - K[:, c]
+            rest = rest - P[:, c]
+        for i, o in enumerate(owners):
+            pe[o] += K[i]
+    sensor_key = rng.channel_key(job["run_seed"], job["readout"], sensor["name"], job["replica"])
+    electronics_key = rng.channel_key(job["run_seed"], job["readout"], electronics["name"], job["replica"])
+    out = []
+    for (event, volume) in sorted(grouped):
+        for at in range(count):
+            cell = volume * count + at
+            state = {"gain_factor": 1.0, "dead": False}
+            if "conditions" in job:
+                time = job["event_time_ns"].get(str(event))
+                if time is None:
+                    raise digitize.DigiError("event-time", f"event {event} has no time")
+                state = conditions.at(job["conditions"], time, {"volume": volume, "channel": at})
+            n_pe = int(pe[(event, volume)][at])
+            charge = response.sensor_response(rng.SubStream(sensor_key, event, cell), n_pe,
+                                              sensor["gain"] * state["gain_factor"], sensor["excess_noise"],
+                                              sensor["dark_rate_per_ns"], sensor["gate_ns"])
+            code = response.electronics_response(rng.SubStream(electronics_key, event, cell), charge,
+                                                 electronics["noise_sigma"], state.get("threshold",
+                                                                                       electronics["threshold"]),
+                                                 electronics["lsb"], electronics["bits"])
+            out.append((event, volume, at, n_pe, charge, None if state["dead"] else code))
+    return out
 
 
 # ------------------------------------------------------------------ the evaluator
@@ -172,11 +303,15 @@ class G4simEvaluator:
         if src.get("density") != "analytic" and any(b["document"] == "request" for b in self.bindings.values()):
             raise DG.CheckError("evaluator.source_density", "node 0 is reweighted only with an analytic source "
                                 "(source-density/1); an external source is rejected (section 5.2)")
-        self.nominal_theta = {p: float(DG.pointer_get(self.documents[b["document"]], b["pointer"]))
+        self.nominal_theta = {p: DG.nominal_value(self.documents, b)
                               for p, b in self.bindings.items() if b["document"] != "evaluator"}
         if self.pde and self.pde.get("parameter"):
             self.nominal_theta[self.pde["parameter"]] = float(self.pde["table"]["value"][self.pde_index]) \
                 if self.pde.get("route") == "3" else float(self.pde.get("nominal", 1.0))
+        self.coupling = spec.get("coupling", "quantile")   # re-digitization coupled across theta (default), or g4sim's
+        if self.coupling not in COUPLINGS:              # own stream exactly (digitize.digitize)
+            raise DG.CheckError("evaluator.coupling", f"coupling {self.coupling!r} is one of {COUPLINGS}")
+        self.digitization_path = "job-coupled" if self.coupling == "quantile" else "job"
         self.observable_specs = list(spec.get("observables") or [])
         for o in self.observable_specs:
             if o["quantity"] not in QUANTITIES:
@@ -265,7 +400,7 @@ class G4simEvaluator:
                                       bound, rows))) for o in specs if o["quantity"] == "edep_visible"}
         out.update({"V_emu": None, "V_learn": None, "node_diag": diag, "theta": values, "batch": bname,
                     "methods": {p: self.methods[p] for p in changed}, "missing_support_runs": missing,
-                    "flags": flags, "seeds": {"logical_run_seed": int(batch["logical_run_seed"]),
+                    "flags": flags, "digitization": self.digitization_path if need_digi else None, "seeds": {"logical_run_seed": int(batch["logical_run_seed"]),
                                               "first_event": tab["first"], "events": tab["n"]}})
         return out
 
@@ -342,6 +477,8 @@ class G4simEvaluator:
             if self.pde.get("route", "2_1") == "1":
                 return pde_split.digitize_route1(job, rows, p, int(self.pde.get("component", 1)))[0]
             job = pde_split.route21_job(job, p)
+        if self.coupling == "quantile":
+            return coupled_digitize(job, rows)
         channel_rows, _ = digitize.digitize(job, rows)
         return channel_rows
 
@@ -352,6 +489,9 @@ class G4simEvaluator:
         vols = set(o["volumes"]) if o.get("volumes") is not None else None
         if q == "primary_energy":
             return np.array([tab["primaries"].get(int(e), np.nan) for e in events])
+        if q in PHOTON_QUANTITIES:
+            x = photon_values(o, tab, events)
+            return (x >= float(o.get("threshold", 0.0))).astype(float) if o.get("functional") == "fraction" else x
         if q == "edep_visible":
             if vis is None:
                 raise DG.CheckError("evaluator.observable", f"{o['name']}: edep_visible needs a k_B binding and "
@@ -488,7 +628,7 @@ def _resolve(plan: dict, base: Path) -> dict:
         elif isinstance(v, str):
             docs[k] = calib_io.load(str(base / v))
     for b in (spec.get("batches") or {}).values():
-        for key in ("cells", "primaries"):
+        for key in ("cells", "primaries", "photons"):
             if isinstance(b.get(key), str):
                 b[key] = read_csv_rows(base / b[key])
     for key in ("photons", "primaries"):          # route 3 of the PDE split: the mapping run's CSV files as text

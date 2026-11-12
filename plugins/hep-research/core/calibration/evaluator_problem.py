@@ -142,3 +142,20 @@ def _functional(obs: dict, truth_events: dict, name: str) -> str:
     """The estimator of an observable: the truth sample's declaration (the evaluator's), else the contract's."""
     f = (truth_events.get("functionals") or {}).get(name)
     return f or {"location": "mean", "width": "std"}.get(obs.get("functional", "location"), "mean")
+
+
+def estimate_sigma_noise(problem: EvaluatorProblem, tp, batches, K: int = 5) -> float:
+    """sigma_noise (section 8.1, table of section 8.2): the standard deviation of the objective at theta recomputed with
+    K >= 5 independent sets of MC events (the evaluator's batches `batches`, each its own logical_run_seed and interval),
+    the data and the reference quantities kept; it enters the G1 EDM threshold max(0.002 tol, 0.1 sigma_noise)."""
+    batches = list(batches)
+    if len(batches) < max(K, 5):
+        raise ValueError("sigma_noise needs K >= 5 independent batches")
+    if problem.observed is None:
+        raise ValueError("sigma_noise is the objective's spread: the problem needs its observations (with_data)")
+    tp = np.asarray(tp, float)
+    ref = problem.reference(tp, None)
+    lk = L.Likelihood(problem.layout, problem.observed, ref)
+    vals = [lk.deviance(tp, EvaluatorProblem(problem.evaluator, problem.contract, problem.plan,
+                                             seeds={"batch": b}).h(tp)) for b in batches[:max(K, 5)]]
+    return float(np.std(vals, ddof=1))

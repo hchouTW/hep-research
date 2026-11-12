@@ -30,6 +30,7 @@ from core.canonical.encoding import INTEGER_LIMIT
 from core.simulation import efficiency_map, response
 
 MASK = "calib-masked/1"
+SCALE_SUFFIX = "/~scale"     # a mask-list entry for a scale binding ("~s" is no JSON Pointer escape, so no key collides)
 ITEMS = ("detector_spec", "simulation_request", "run_physics", "response_pipeline", "build_environment")
 DOCUMENTS = ("detector-spec", "alignment-overlay", "simulation-request", "run-card", "response-pipeline",
              "condition-snapshot")
@@ -184,11 +185,38 @@ def read_spec(text, spec_field_types: dict):
 
 
 # ------------------------------------------------------------------ masking and the items
+def _scale_shape(values, pointer):
+    """A scale-bound array (theta multiplies every element, nominal 1) as [MASK, v_1/v_0, ...]: invariant under the
+    scale, keeping the shape in the identity; ratios to 12 significant digits, so the float rounding of s v_i / (s v_0)
+    does not move the hash."""
+    if not isinstance(values, list) or not values or any(isinstance(v, (dict, list, bool)) for v in values):
+        raise IdentityError("identity.mask_scale", f"{pointer}: a scale binding names an array of numbers")
+    first = float(values[0])
+    if first == 0:
+        raise IdentityError("identity.mask_scale", f"{pointer}: the first element of a scaled array is 0")
+    return [MASK] + [f"{float(v) / first:.12g}" for v in values[1:]]
+
+
 def mask(document, pointers) -> dict:
     """The document with each pointer's leaf replaced by MASK. Refuses a pointer to nothing, to a container (masking a
-    whole container to hide non-parameter settings is forbidden, section 5.1) or to the document root."""
+    whole container to hide non-parameter settings is forbidden, section 5.1) or to the document root. A pointer with
+    SCALE_SUFFIX names a scale-bound array, replaced by its shape (_scale_shape)."""
     out = json.loads(json.dumps(document))
     for pointer in sorted(set(pointers)):
+        if pointer.endswith(SCALE_SUFFIX):
+            base = pointer[: -len(SCALE_SUFFIX)]
+            segs = _segments(base)
+            node = out
+            for s in segs[:-1]:
+                node = _step(node, s, base)
+            last = segs[-1]
+            target = _step(node, last, base)
+            shaped = _scale_shape(target, base)
+            if isinstance(node, dict):
+                node[last] = shaped
+            else:
+                node[int(last)] = shaped
+            continue
         segs = _segments(pointer)
         if not segs or segs == [""]:
             raise IdentityError("identity.mask_root", "the whole document cannot be masked")
@@ -354,7 +382,8 @@ def masks(contract: dict) -> dict:
             continue
         for b in p.get("bindings", []) or []:
             if b.get("document") in out:
-                out[b["document"]].append(b.get("pointer"))
+                scale = b.get("form", "value") == "scale"
+                out[b["document"]].append(b.get("pointer") + SCALE_SUFFIX if scale else b.get("pointer"))
     return out
 
 

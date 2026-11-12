@@ -28,7 +28,11 @@ MODE = {"mode": "refractive index and geometric scale",
         "signal": "multiple beta: several momenta or particle species (section 3.5)"}
 
 
-def beta_of(kinetic_per_nucleon_gev: float, mass_per_nucleon_gev: float = 0.938272) -> float:
+def beta_of(kinetic_per_nucleon_gev: float, mass_per_nucleon_gev: float | None = None) -> float:
+    """beta at a kinetic energy per nucleon; the mass per nucleon defaults to the proton mass from core/constants."""
+    if mass_per_nucleon_gev is None:
+        from core import constants  # imported here: the stand-in's other users need no data files
+        mass_per_nucleon_gev = constants.constant("proton_mass_energy", unit="GeV").value
     gamma = 1.0 + kinetic_per_nucleon_gev / mass_per_nucleon_gev
     return math.sqrt(1.0 - 1.0 / gamma ** 2)
 

@@ -11,7 +11,7 @@ of calib_chain.py):
                                               "recording": "column" | "event_file" | "moments"
                                                            | {"inputs": level, "outputs": level}}},
                     "parameters": {parameter: {"document": "request" | "detector" | "run" | "pipeline" | "conditions",
-                                               "pointer": JSON Pointer of the value}},
+                                               "pointer": JSON Pointer of the value, "form": value | scale}},
                     "filters_ignorable": [{"filter": code, "reason": text}]}
 
 Evaluation records (section 6.6 "Check"): plan["evaluations"] = [{run_id, use, set, logical_run_seed, first_event,
@@ -33,6 +33,7 @@ from core.simulation import digitize, efficiency_map, response, rng, seeds, sour
 RECORDED = ("column", "event_file")               # section 6.1: moments hold linear quantities only
 LEVELS = RECORDED + ("moments",)
 EVALUATED_FROM_RECORDS = frozenset(REWEIGHTING + ("rerun", "re-digitization"))
+DIGITIZATION_PATHS = ("job", "job-coupled", "direct")  # job-coupled: the evaluator's quantile coupling of the multinomial
 EVENT_SPACE = 2 ** 32                             # global event numbers under one logical_run_seed (section 14.1)
 SENSOR_FIELDS = ("gain", "excess_noise", "dark_rate_per_ns", "gate_ns")
 ELECTRONICS_FIELDS = ("noise_sigma", "threshold", "lsb", "bits")
@@ -93,7 +94,8 @@ def contract_bindings(contract: dict) -> dict:
             raise CheckError("binding.multiple", f"{p['name']} is bound in {len(own)} documents; the g4sim evaluator "
                              "writes one field per parameter")
         if own:
-            out[p["name"]] = {"document": CONTRACT_DOCUMENTS[own[0]["document"]], "pointer": own[0]["pointer"]}
+            out[p["name"]] = {"document": CONTRACT_DOCUMENTS[own[0]["document"]], "pointer": own[0]["pointer"],
+                              **({"form": own[0]["form"]} if own[0].get("form", "value") != "value" else {})}
     return out
 
 
@@ -110,7 +112,8 @@ def resolve(plan: dict, contract: dict | None) -> dict:
     own = (plan.get("node_binding") or {}).get("parameters") or {}
     for name, b in own.items():
         c = cb.get(name)
-        if c is None or c["document"] != b.get("document") or c["pointer"] != b.get("pointer"):
+        if c is None or c["document"] != b.get("document") or c["pointer"] != b.get("pointer") \
+                or c.get("form", "value") != b.get("form", "value"):
             raise CheckError("binding.plan_contract_mismatch", f"{name}: the plan binds {b}, the contract "
                              f"{c if c else 'nothing'} (section 5.1: the binding is locked in the contract)")
     out = dict(plan)
@@ -134,8 +137,20 @@ def apply_theta(documents: dict, plan: dict, theta: dict) -> dict:
         if doc not in out:
             raise CheckError("binding.document", f"{name} binds to document {doc!r}, which is not given")
         old = pointer_get(out[doc], b["pointer"])
+        if b.get("form", "value") == "scale":       # theta multiplies the whole array (nominal 1): n(E) -> s n(E)
+            if not isinstance(old, list) or not old or any(isinstance(v, (dict, list, bool)) for v in old):
+                raise CheckError("binding.scale", f"{name}: a scale binds an array of numbers, not {b['pointer']}")
+            out[doc] = pointer_set(out[doc], b["pointer"], [_like(v, float(v) * float(value)) for v in old])
+            continue
         out[doc] = pointer_set(out[doc], b["pointer"], _like(old, value))
     return out
+
+
+def nominal_value(documents: dict, binding: dict) -> float:
+    """theta at the documents: the value at the pointer, or 1 for a scale binding."""
+    if binding.get("form", "value") == "scale":
+        return 1.0
+    return float(pointer_get(documents[binding["document"]], binding["pointer"]))
 
 
 def _like(old, value):
@@ -422,20 +437,21 @@ def interval_findings(plan: dict) -> dict:
 
 def path_findings(evs: list) -> list:
     """One digitization path within a readout system (section 6.6, accepted 2026-11-09): all evaluations of one
-    ensemble (use) and all re-digitizations of one batch of events use the job path or the direct path, not both."""
+    ensemble (use) and all re-digitizations of one batch of events use one path (job, job-coupled or direct)."""
     out: list = []
     groups: dict = {}
     for e in evs:
         for readout, path in (e.get("digitization") or {}).items():
-            if path not in ("job", "direct"):
-                raise CheckError("design.digitization_path", f"{e['run_id']}: path {path!r} is job or direct")
+            if path not in DIGITIZATION_PATHS:
+                raise CheckError("design.digitization_path", f"{e['run_id']}: path {path!r} is one of "
+                                 f"{DIGITIZATION_PATHS}")
             groups.setdefault(("use", readout, e["use"]), set()).add(path)
             groups.setdefault(("batch", readout, int(e["logical_run_seed"]), int(e["first_event"])), set()).add(path)
     for g, paths in sorted(groups.items(), key=lambda x: str(x[0])):
         if len(paths) > 1:
-            out.append(_finding("design.digi_mixed_paths", f"readout {g[1]}: {g[0]} {g[2:]} is digitized on both the "
-                                "g4sim-digi-job/1 path and the direct path, whose channel-stream counters differ, so the "
-                                "two share no sensor or electronics noise (section 6.6)"))
+            out.append(_finding("design.digi_mixed_paths", f"readout {g[1]}: {g[0]} {g[2:]} is digitized on the paths "
+                                f"{sorted(paths)}, whose channel streams or draws differ, so they share no common random "
+                                "numbers (section 6.6)"))
     return out
 
 

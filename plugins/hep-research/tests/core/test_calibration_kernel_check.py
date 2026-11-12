@@ -133,7 +133,8 @@ class ReviewFixes(unittest.TestCase):
 
 
 # ------------------------------------------------------------------ phase 3: P0 (k_B) on the synthetic ZDC fixture
-def calorimeter(r=0.5, seed=21, n=300, observables=("pe_std",), thetas=("birks",), told=(0.21,), methods=None, priors=None):
+def calorimeter(r=0.5, seed=21, n=300, observables=("pe_std",), thetas=("birks",), told=(0.21,), methods=None, priors=None,
+                coupling="g4sim"):
     """The fixture's evaluator over a nominal batch and runs told at k_B points (the same events: a k_B rerun of
     g4sim's transport without optical photons draws no extra random number); `synthetic transport stand-in`."""
     import calibration_zdc_fixture as Z
@@ -144,6 +145,9 @@ def calorimeter(r=0.5, seed=21, n=300, observables=("pe_std",), thetas=("birks",
         bs[f"kb{kb}"] = Z.batch(seed, 0, n, birks=kb, point={"birks": kb}, use="fit", set="s")
     c = Z.contract(thetas=thetas, observables=observables, priors=priors)
     p = Z.plan(bs, r=r, **({"methods": methods} if methods else {}))
+    # default g4sim's own digitization stream, for the tuned assertions of the machinery tests below; the evaluator's
+    # default quantile coupling halves sigma_MC and shows the split bias at both extremes (see the test of it)
+    p["evaluator"]["coupling"] = coupling
     return c, p, engine.make(p, c)
 
 
@@ -191,6 +195,25 @@ class BirksSpotChecks(unittest.TestCase):
         d = linear.design(ev, c, p)
         req = kernel_check.required_spot_checks(c, p)
         ok = kernel_check.p0(ev, c, p, d, [{"birks": 0.21}], 3, spot_checks=req[0]["points"], required=req)
+        self.assertEqual(ok["status"], "passed")
+
+    def test_coupled_default_sees_the_split_bias_at_both_extremes(self):
+        """With the evaluator's default (quantile) coupling, sigma_MC halves and P0 at r = 0.5 fails at both k_B
+        extremes, not only the upper one: the nominal-split re-digitization is biased across the k_B prior (a finding
+        of phase 3, recorded in the card; 3 seeds: ratios 1.6-1.9 at 0.02, 6.1-6.8 at 0.4). Positive control: at
+        r = 1 P0 passes at the same points."""
+        c, p, ev = calorimeter(coupling="quantile")
+        req = kernel_check.required_spot_checks(c, p)
+        r = kernel_check.p0(ev, c, p, linear.design(ev, c, p), [{"birks": 0.21}], 3, spot_checks=req[0]["points"],
+                            required=req)
+        rows = {row["point"]["birks"]: row for row in r["points"]}
+        self.assertEqual(r["status"], "failed")
+        self.assertEqual(rows[0.02]["failing"], ["birks"])
+        self.assertEqual(rows[0.4]["failing"], ["birks"])
+        c, p, ev = calorimeter(r=1.0, coupling="quantile")
+        req = kernel_check.required_spot_checks(c, p)
+        ok = kernel_check.p0(ev, c, p, linear.design(ev, c, p), [{"birks": 0.21}], 3, spot_checks=req[0]["points"],
+                             required=req)
         self.assertEqual(ok["status"], "passed")
 
     def test_incomplete_until_the_extreme_is_told(self):
