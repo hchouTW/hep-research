@@ -134,10 +134,11 @@ def merge_parts(parts: list) -> dict:
     for a, b in zip(ps, ps[1:]):
         if int(a["first_event"]) + int(a["events"]) != int(b["first_event"]):
             raise DG.CheckError("batch.parts", "the parts' event ranges must be disjoint and contiguous")
+    photons = [r for p in ps for r in p.get("photons", [])]        # photons.csv (S7) of optical runs, kept
     return {"logical_run_seed": seed.pop(), "first_event": int(ps[0]["first_event"]),
             "events": sum(int(p["events"]) for p in ps), "cells": [r for p in ps for r in p.get("cells", [])],
-            "primaries": [r for p in ps for r in p.get("primaries", [])], **({"point": ps[0]["point"]}
-                                                                           if "point" in ps[0] else {})}
+            "primaries": [r for p in ps for r in p.get("primaries", [])], **({"photons": photons} if photons else {}),
+            **({"point": ps[0]["point"]} if "point" in ps[0] else {})}
 
 
 def read_csv_rows(path: Path) -> list:

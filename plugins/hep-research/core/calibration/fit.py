@@ -202,7 +202,8 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
     (profile scan points, segment points, restricted fits)."""
     lk = L.Likelihood(problem.layout, problem.observed, ref)
     tpi = _tp_index(lk)
-    hfun = hfun or problem.h
+    own_h = hfun is None                                 # the problem's own predictor (and its H, if any);
+    hfun = hfun or problem.h                             # a bound method is a new object on each access, so
     steps = fd_steps(problem)
     lo, hi = _beta_bounds(problem, lk)
     b = np.clip(np.asarray(beta0, float).copy(), lo, hi)
@@ -220,9 +221,9 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
         calls += 1
         if Hfun is not None:
             link_jacobian = Hfun(tp)
-        elif hfun is problem.h:
+        elif own_h:                                      # `hfun is problem.h` was always False (WP-I finding)
             link_jacobian = jacobian(problem, tp, steps)
-            calls += 2 * tp.size
+            calls += 0 if hasattr(problem, "H") else 2 * tp.size
         else:
             link_jacobian = _fd(hfun, tp, steps)
         D = lk.deviance(b, h)

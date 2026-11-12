@@ -509,6 +509,7 @@
   "tests.core.test_calibration_design_noise": 6.6,
   "tests.core.test_calibration_design_g4sim": 0.2,
   "tests.core.test_calibration_pde_split": 10.0,
+  "tests.core.test_calibration_phase3_g4": 45.0,
   "tests.core.test_calibration_g4sim_eval": 7.0,
   "tests.core.test_calibration_g4sim_eval_coupling": 35.0,
   "tests.core.test_calibration_evaluator_problem": 82.0,
