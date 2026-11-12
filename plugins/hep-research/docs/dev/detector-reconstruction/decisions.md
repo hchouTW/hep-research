@@ -647,3 +647,68 @@ Coordinator. Built in parallel after the user's "Start E1b and E2"; each with a 
 - E5: the negative-case file kept in `tests/adapters/data/t07-negative-cases/` (`*.t07data` binary), byte-equal to the earlier construction.
 
 **Not met by these builds.** The evaluation harness (E6), E1a's and E5's use at evaluation, and Freeze B itself. The Freeze-B run job is drafted next and goes to the user before submission.
+
+## The user's go-ahead for the Freeze-B run (2026-11-12)
+
+The user: "go-ahead", to the coordinator's statement that the Freeze-B run on block 2 would be brought for submission after its jobs are drafted and reviewed. The coordinator submits the run once its jobs pass a fresh review, its fixes and a re-review, and their manifests are verified; it asks again if the review changes the scope, the sizes, the resources (U-B9) or the block.
+
+## The Freeze-B run on block 2: results (2026-11-12)
+
+Coordinator. Jobs T07 7585954, T08 7585955, T09 step-1 array 7585956 (0-14), step-2 array 7585957 (0-12), collection 7585958: all 31
+COMPLETED, collection `JOB RESULT PASS` (hpa-wn33, AMD EPYC 9645). Recipe commit 5228a3e2, manifest `915042c4…` (898 files). Readings and
+records only; no gate verdict, no tuning, no evaluation block.
+
+- **`r_dev` (v4 8.3), per noise bin at 12,000 events:** `U_dev <= C` (0.005) in all 12 bins. `k` 0 in 10 bins (`r_dev` 0, `U_dev`
+  2.496e-4); stratum 5 `k` 2 of 431,431 (`r_dev` 4.64e-6, `L_dev` 8.24e-7, `U_dev` 2.585e-4); stratum 8 `k` 1 of 431,402 (`r_dev`
+  2.32e-6, `L_dev` 1.19e-7, `U_dev` 2.541e-4). Events without tracks 0 in every bin. Evaluation may start on this rule.
+- **Hashes, equal to the proposal's predictions:** T07 `configuration_sha256` 2448d935…, `vertex_configuration_sha256` 10a86263…, CKF
+  budget 55fb16d9…, vertex budget 16cb8224…, refit `start_prior` 25cd896b…; T08 configuration 5fbbea3b…; T09 configuration ea0e6756…,
+  budget 03110227…, single-photon variant e3d815ab…. Adapter manifests: acts-tracking fe80f264…, calo-cluster cb0153ba…,
+  photon-likelihood 060e967a…. Records beside Freeze B (U-B8): the comparators and E5's files as listed in the collection output.
+- **Blocks:** samples from block 2 only (T07 180,000 events, T08 45,000, T09 45,000, as v4 3.2); block 6 only for the 16 + 1
+  generator checks and the fixed points, each equal to its job of record.
+- **Cost:** billed 39.67 CPU-hours (U-B9: 30 to 41). T07's sacct MaxRSS 16,172,844 kB against 15,800 MB requested is the cgroup's
+  memory with page cache (`jobacct_gather/cgroup`); the largest process was the refit at 8.01 GB (predicted 8.0). A cost reading for
+  the evaluation's T07 request. Disk 7.0 GB after U-B11's deletion (every noise file's SHA-256 matched first).
+
+Freeze B is not given: it is the user's word (U6), with U-B8 (E6 built first) and U-B15; the record above is what it would freeze.
+
+## The user's choice of parallel work (2026-11-12)
+
+The user, to the coordinator's question of which work runs in parallel with D4, each in its own worktree with its own reviews:
+"E6b + E6c together (Recommended), F1: T11 method text (Recommended)". Not chosen now: E1 (T10 solver options draft), F2 (T12 design
+draft). E6b and E6c start once E6a's block-1 job passes; F1 starts now, on its own branch; its PRs stay on the user's word (finish-plan
+F1 step 4).
+
+## The Freeze-B run's rate check: a defect and its supplement (2026-11-12)
+
+Coordinator. Found while reading E6a's job 7590464: the Freeze-B run's T07 rate-check step (`jobs/freeze-b-run/t07.sh:129-133`) ran
+`t07_fake_rate.py check` under `python -I`, which in Python 3.13 leaves the script's folder off the import path; it crashed
+(ModuleNotFoundError, `rate-check.log`) and the step accepted the exit code 1 as a negative reading. `U_dev <= C` in all 12 bins stood
+on the runner's own result line and on `t07-records`' UDEV-CHECK; the reader's check of the kept record had not run. The run's records
+and hashes are unaffected. Supplement, not a repeat: job 7590984 (`jobs/freeze-b-ratecheck/`, read-only, manifest `7f756177…`)
+verified the record against the run's `outputs.sha256` and manifest `915042c4…`, then ran the check: "OK U_dev <= C (0.005) in all 12
+bins of block 2", PASS. From E6a on, every script step is judged by its own result line and a crash is never read as a negative.
+
+## D4 build E6a: the statistics core and the evaluation layout (2026-11-12)
+
+Coordinator. Built after the user's "go ahead, dispatch the E6a implementer"; fresh review (0 Critical, 7 Important, 14 Minor), three
+fix rounds, two scoped re-reviews and a coordinator check. Job 7590464 failed at its T07 memory step (`python -I`, see the rate-check
+section above); job of record 7591439 PASS (hpa-wn33, 24 min 42 s, batch MaxRSS 23.8 GB), block 1 only.
+
+- Files: `tests/adapters/t04_evaluation_core.py` and `t04_evaluation_layout.py` with their tests (scoring side; layering keeps them
+  out of `core/` and the adapters; no recipe imports them). E2's rate rule is taken by import.
+- The core equals the frozen codings: the pull replay reproduces `calc-pull-table.py`'s stream (0 lines differ), the rate replay
+  equals `calc-rate-rule.py`. The attempt level comes from the bin's block only (11: 95 %, 12: 99 %). v4 10's fixed obligations and
+  U-K7's are built in per workflow. `k = n` fails at step 1; ungated records keep numbers only.
+- Layout: T08 and T09 generate each stratum whole and fit it in ranges; T07 uses the generator's `--first-event`. Merged ranges equal a
+  full run for T07 (noise and clean, compared by event index), T08 and T09. Collections run on `afterany` with a completeness check;
+  a missing range is "required output missing", never a short bin; no repeat on blocks 11 and 12 once a draw or fit has started;
+  every script judged by its own result line.
+- T07 memory at 12,000 events (readings): refit 31.8 GB and 182.7 s for all 12,000 (12.3 GB product), 8.0 GB for 3,000; runner
+  1.3 GB (noise, 296 s); comparator 2.3 GB. So the evaluation splits T07's refit into 4,000-event ranges at 2 CPUs x 7,900 MB.
+- Evaluation layout estimate: about 511 tasks, 170 CPU-hours, longest chain about 0.8 h; the user approves the resources before
+  evaluation.
+- Waiting for the user (K09, with Freeze B): at attempt 2, the paired bound's `z` (2.326 by v4 3.4, against U-K2's literal 1.645) and
+  whether step 1 also uses 99 %. Carried: N1 (T07 refit ranges in the completeness check) and the pooled angle-slice identity to E6b;
+  N3 (task scripts write `fit-started`) to E6c.
