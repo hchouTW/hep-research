@@ -120,6 +120,13 @@
    "registered_at": "2026-11-12T10:52:38Z",
    "card_commit": "merge of origin/main",
    "reason": "after its execution-log update: origin/main (0.66.1) merged into simcal/phase-0 on the user's word; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
+   "registered_at": "2026-11-12T13:15:10Z",
+   "card_commit": "merge of origin/main 127163b3",
+   "reason": "after its execution-log update: main merged again before the merge of PR #385; no gate-deciding file changed"
   }
  ]
 }

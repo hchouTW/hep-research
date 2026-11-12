@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 45,
-   "bytes": 712155,
+   "references": 49,
+   "bytes": 783891,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1918,6 +1918,7 @@
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/extensive-air-showers.md",
+    "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/scripts/calorimeter_resolution.py"
@@ -2053,6 +2054,7 @@
    "cited_by": [
     "skills/hep-detector/references/detector-glossary.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
     "tests/skills/hep_detector/test_detector_atlas.py"
    ],
    "cited_by_other_skills": [],
@@ -2110,6 +2112,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "tests/skills/hep_detector/test_reference_links.py"
    ],
@@ -2122,7 +2125,7 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 24464,
+   "bytes": 24520,
    "lines": 301,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2131,7 +2134,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7cfaea3d 2026-11-06"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2222,13 +2225,13 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "28ad9ffa 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 24594,
-   "lines": 333,
+   "bytes": 25323,
+   "lines": 341,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/facility/interaction-region.md",
@@ -2242,13 +2245,14 @@
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
+    "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "5e3b104e 2026-10-29"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2273,6 +2277,19 @@
     "hep-citations"
    ],
    "last_commit": "af7ad3bb 2026-10-21"
+  },
+  {
+   "path": "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 22029,
+   "lines": 266,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/timestream-to-map-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-detector/references/front-end-calibration.md",
@@ -2336,6 +2353,18 @@
    "last_commit": "7cfaea3d 2026-11-06"
   },
   {
+   "path": "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 22402,
+   "lines": 274,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
    "bytes": 20735,
@@ -2350,6 +2379,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [
@@ -2744,6 +2774,7 @@
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -2776,6 +2807,31 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "bbeb133f 2026-10-25"
+  },
+  {
+   "path": "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 19145,
+   "lines": 228,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-detector/references/timestream-to-map-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 7375,
+   "lines": 90,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
@@ -2818,11 +2874,13 @@
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-detector/scripts/multiple_scattering.py",
     "skills/hep-detector/scripts/tracker_resolution.py",
     "tests/skills/hep_detector/test_hep_detector_audit.py"
@@ -4642,7 +4700,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
@@ -4769,7 +4827,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c7b8ea3 2026-10-23"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -5193,6 +5251,7 @@
   ],
   "imaging": [
    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+   "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
    "skills/hep-detector/references/imaging-atmospheric-cherenkov.md"
   ],
   "inference": [
@@ -5270,20 +5329,9 @@
    "skills/hep-computing/references/risk-and-quality.md",
    "skills/hep-computing/references/task-quality-checklist.md"
   ],
-  "ray": [
-   "skills/hep-theory/references/cosmic-ray-new-physics.md",
-   "skills/hep-theory/references/cosmic-ray-phenomenology.md",
-   "skills/hep-theory/references/cosmic-ray-propagation.md"
-  ],
   "readout": [
    "skills/hep-detector/references/readout-digitization-and-overlay.md",
    "skills/hep-detector/references/signal-formation-and-readout.md"
-  ],
-  "reconstruction": [
-   "skills/hep-detector/references/dis-kinematic-reconstruction.md",
-   "skills/hep-detector/references/event-reconstruction.md",
-   "skills/hep-detector/references/photon-likelihood-reconstruction.md",
-   "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
   ],
   "report": [
    "skills/hep-authoring/references/code-review-report.md",
@@ -5293,6 +5341,10 @@
    "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "skills/hep-computing/references/root-debugging.md",
    "skills/hep-computing/references/root-usage-patterns.md"
+  ],
+  "sensor": [
+   "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
+   "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md"
   ],
   "signal": [
    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",

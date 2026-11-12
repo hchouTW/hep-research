@@ -17,6 +17,14 @@ likelihood reconstruction from many photosensor hits is in
 Reconstructing the DIS variables x, y and Q^2 from the scattered lepton and the hadronic final state
 (electron, Jacquet-Blondel, double-angle and Sigma methods; a crossing angle) is in
 [DIS kinematic reconstruction](dis-kinematic-reconstruction.md).
+Method text scoped to the sources read, with the gaps stated, for instruments outside this chain's usual objects:
+superconducting photon sensors, bubble and droplet detectors and Skipper CCDs in
+[threshold and quantum sensor reconstruction](threshold-and-quantum-sensor-reconstruction.md); Compton,
+pair-conversion and coded-aperture imaging and polarimetry in
+[gamma-ray imaging and polarimetry reconstruction](gamma-ray-imaging-and-polarimetry-reconstruction.md); CRES,
+haloscopes and retarding spectrometers in
+[frequency- and scan-encoded spectroscopy reconstruction](frequency-and-scan-encoded-spectroscopy-reconstruction.md);
+scanning radiometers in [timestream to map reconstruction](timestream-to-map-reconstruction.md).
 
 ## The chain, and why its order matters
 
