@@ -31,14 +31,14 @@ def node_index(graph: dict) -> dict:
 
 
 def parents_of(graph: dict) -> dict:
-    out = {n: [] for n in node_index(graph)}
+    out: dict[str, list] = {n: [] for n in node_index(graph)}
     for e in graph.get("edges", []):
         out.setdefault(e["to"], []).append(e["from"])
     return out
 
 
 def children_of(graph: dict) -> dict:
-    out = {n: [] for n in node_index(graph)}
+    out: dict[str, list] = {n: [] for n in node_index(graph)}
     for e in graph.get("edges", []):
         out.setdefault(e["from"], []).append(e["to"])
     return out
@@ -50,7 +50,7 @@ def check_graph(graph) -> list[dict]:
     out: list[dict] = []
     if not isinstance(graph, dict) or not isinstance(graph.get("nodes"), list) or not isinstance(graph.get("edges"), list):
         return [_finding("graph.shape", "$.stage_graph", "a stage graph has lists 'nodes' and 'edges'")]
-    ids = [n.get("id") for n in graph["nodes"] if isinstance(n, dict)]
+    ids: list = [n.get("id") for n in graph["nodes"] if isinstance(n, dict)]
     for dup in sorted({i for i in ids if ids.count(i) > 1}):
         out.append(_finding("graph.duplicate_node", "$.stage_graph.nodes", f"node {dup!r} declared twice"))
     nodes = node_index(graph)

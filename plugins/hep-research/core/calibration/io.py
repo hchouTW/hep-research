@@ -33,7 +33,7 @@ def load(path: str):
 
 def emit(out: dict) -> int:
     print(json.dumps(out, indent=1, sort_keys=False, default=sorted))
-    return EXIT.get(out.get("status"), 2)
+    return EXIT.get(str(out.get("status")), 2)
 
 
 def run(fn) -> int:
