@@ -308,7 +308,7 @@ G7_MODES = ("none",) + tuple(f"{m}|{e}" for e in EPSILONS for m in ("independent
 G7_K = 10
 
 
-def g7_block(mode: str, r0: int, reps: int) -> list:
+def g7_block(mode: str, r0: int, reps: int, reference_scale: float = 1.0) -> list:
     """Calibration 5's configuration (d = 3, K = 10, V_MC correct): refits declared non-converged independently of the
     outcome, or when among the eps closest to (farthest from) the data fit in the Mahalanobis distance of Sigma_MC
     (its chi2_3 quantile), are replaced by the next MC seed (section 7.3, with replacement); G7 on the K kept."""
@@ -322,7 +322,7 @@ def g7_block(mode: str, r0: int, reps: int) -> list:
         p0 = T.make(cfg, [0.5, -0.3, 1.0], data_seed=int(rng.integers(2 ** 62)), mc_seed=int(rng.integers(2 ** 62)))
         f0 = F.iterate(p0, T.initial_beta(p0), lndet=False)
         S = F.sigma_mc(p0, f0, cfg.V_MC)
-        Si = np.linalg.pinv(S)
+        Si = np.linalg.pinv(reference_scale * S)        # the reference of the refit-to-fit distance
         th, X, k = [], 0, 0
         while len(th) < G7_K and k < 10 * G7_K:
             p = T.LinearProblem(cfg, mc_seed=int(np.random.SeedSequence([cal_seed(10, r), 300 + j, 5, k])
@@ -337,7 +337,7 @@ def g7_block(mode: str, r0: int, reps: int) -> list:
                 continue
             th.append(t)
         g = F.g7(np.array(th), S)
-        rows.append({"r": r, "failed": g["status"] == "failed", "X": X})
+        rows.append({"r": r, "failed": g["status"] == "failed", "X": X, "attempts": k})
     return rows
 
 
@@ -352,6 +352,23 @@ def g7_judge(rows_by: dict) -> dict:
         out[mode] = rec
     return {"item": "G7 false alarms under injected non-convergence", "configurations": out, "passed": bool(ok),
             "rule": "false alarms with a correct V_MC <= 2 alpha (<= 34 of 1000 refit sets, alpha = 0.01) for every mode"}
+
+
+def cal10_g7_fixed(reps: int = 1000) -> dict:
+    """10 (e) rerun with the corrected reference (re-registered after array 7588669): a refit and the data fit carry
+    independent MC samples on the same data, so their difference has covariance 2 Sigma_MC; the closest and farthest
+    modes then declare non-converged the eps fraction they are registered for. Rule as registered (false alarms <= 34
+    of 1000 per mode); the injected fraction X / attempts is reported."""
+    out, ok = {}, True
+    for mode in G7_MODES:
+        rows = g7_block(mode, 0, reps, reference_scale=2.0)
+        fa = int(sum(x["failed"] for x in rows))
+        X, att = sum(x["X"] for x in rows), sum(x["attempts"] for x in rows)
+        rec = {"reps": reps, "false_alarms": fa, "injected_fraction": X / max(att, 1), "passed": bool(fa <= 34 * reps / 1000)}
+        ok = ok and rec["passed"]
+        out[mode] = rec
+    return {"calibration": 10, "item": "G7 false alarms under injected non-convergence (corrected reference)",
+            "configurations": out, "passed": bool(ok), "reps": reps}
 
 
 # ------------------------------------------------------------------ 10 (e'): replacement bias of Sigma_boot, C-hat_r
@@ -705,7 +722,7 @@ def merge(out_dir: Path, out: Path) -> dict:
     return rep
 
 
-LOCAL = {"plus_half": cal10_plus_half, "replacement": cal10_replacement, "vhat": cal10_vhat,
+LOCAL = {"plus_half": cal10_plus_half, "replacement": cal10_replacement, "vhat": cal10_vhat, "g7_fixed": cal10_g7_fixed,
          "controls": cal12_controls}
 SMOKE = {"tv": ("tv", {"config": "shape K=50", "r0": 900000, "reps": 2}),
          "tv_shared": ("tv", {"config": "shared p=50", "r0": 900000, "reps": 2}),
