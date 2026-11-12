@@ -289,7 +289,7 @@
   "calibration": {
    "steward": "hep-statistics",
    "status": "phase-2",
-   "purpose": "Simulator parameter calibration workflow (docs/dev/simulator-calibration/, Part B): the engine library of the calib_*.py scripts; each check of Part B section 14 is implemented once, in the module of its owning script (use: evidence grades, Appendix C, rule-0 aggregation; deps: dependencies, roles, version ids; chain: stage graph, candidate methods (with the g4sim binding of section 11.4), P4; data_release: releases, lineage, reads, failure records, opening conditions; contract: calib_contract check, D37; model_identity: the g4sim model identity of section 5.1; preflight: A0; reweight: the weight formula; design: Sobol points, P2, P5, feasibility and final method, support, applicability; kernel_check: P0; linear: the design-stage fit operator A; emulator: the P6 interface stub; evaluator: the section 7.1 interface; toy: the toy detector of section 15.1; likelihood: the joint likelihood and V_model; fit: the section 7.3 iteration, 7.4 multi-start, ratio test, G1, G2, G3, G6, G7; identify: P3, G5; shift: P8, G9; interval: intervals and inference flags; validate: validation statistics, power and decision records; data_checks: calib_data's locking-stage checks and enclosures; design_noise: Sigma_boot, b_J, P7, fold rules, rejected practices; design_g4sim: the g4sim support and recording levels, event intervals, seed blocks and digitization-job checks; closure: G8; propagate: the joint-posterior export; toy_problem, problems, toys_linear: the toy detector and the linear toy configurations as fit problems)",
+   "purpose": "Simulator parameter calibration workflow (docs/dev/simulator-calibration/, Part B): the engine library of the calib_*.py scripts; each check of Part B section 14 is implemented once, in the module of its owning script (use: evidence grades, Appendix C, rule-0 aggregation; deps: dependencies, roles, version ids; chain: stage graph, candidate methods (with the g4sim binding of section 11.4), P4; data_release: releases, lineage, reads, failure records, opening conditions; contract: calib_contract check, D37; model_identity: the g4sim model identity of section 5.1; preflight: A0; reweight: the weight formula; design: Sobol points, P2, P5, feasibility and final method, support, applicability; kernel_check: P0; linear: the design-stage fit operator A; emulator: the P6 interface stub; evaluator: the section 7.1 interface; toy: the toy detector of section 15.1; likelihood: the joint likelihood and V_model; fit: the section 7.3 iteration, 7.4 multi-start, ratio test, G1, G2, G3, G6, G7; identify: P3, G5; shift: P8, G9; interval: intervals and inference flags; validate: validation statistics, power and decision records; data_checks: calib_data's locking-stage checks and enclosures; design_noise: Sigma_boot, b_J, P7, fold rules, rejected practices; design_g4sim: the g4sim support and recording levels, event intervals, seed blocks and digitization-job checks; closure: G8; propagate: the joint-posterior export; map_basis: efficiency-map native bases, U, joint-pattern replicas (calib_propagate); map_term: the map term U(theta) phi_map (calib_likelihood); design_map: the efficiency-map items of calib_design (theta-noise of P5, the D84 G6 size check, mapping-run seeds, D83 (1)); toy_problem, problems, toys_linear: the toy detector and the linear toy configurations as fit problems)",
    "consumers": [
     "skills/hep-statistics/scripts/calib_use.py",
     "skills/hep-statistics/scripts/calib_deps.py",
@@ -336,6 +336,9 @@
     "design_noise",
     "closure",
     "propagate",
+    "map_basis",
+    "map_term",
+    "design_map",
     "toy_problem",
     "problems"
    ],

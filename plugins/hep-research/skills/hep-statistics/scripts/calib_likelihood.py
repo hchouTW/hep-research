@@ -7,6 +7,10 @@ summaries of weighted MC; phase 2).
   calib_likelihood.py vmodel   --components FILE [--keep-all]   V_model principal components (conditions 1 and 2)
   calib_likelihood.py binomial --moments FILE                   variance-matched n_eff, k_eff and the scope
   calib_likelihood.py bootstrap-size --p P                      B >= max(500, 50 p)
+Phase 3 (section 6.7, D28; the engine in core/calibration/map_term.py):
+  calib_likelihood.py map-term --input FILE   the map term U(theta) phi_map at theta: {mode: fixed | shared |
+                       independent, U: [U_j], rows, n_link, surrogate (record), theta, theta_names?, fallback?}; U,
+                       d U / d theta and U U^T; with fallback: true, the nearest design point's covariance (held fixed)
 Output: one JSON object; ok (exit 0), rejected (exit 2). The engine needs NumPy and SciPy. Phase 2 (section 17).
 """
 from __future__ import annotations
@@ -31,7 +35,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, likelihood as L, linear
+    from core.calibration import emulator, io, likelihood as L, linear, map_term as MT
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -55,10 +59,13 @@ def main(argv=None) -> int:
     v.add_argument("--keep-all", action="store_true")
     sub.add_parser("binomial").add_argument("--moments", required=True)
     sub.add_parser("bootstrap-size").add_argument("--p", type=int, required=True)
+    sub.add_parser("map-term").add_argument("--input", required=True)
     args = ap.parse_args(argv)
 
     def go():
         try:
+            if args.cmd == "map-term":
+                return map_term(io.load_object(args.input, ("mode", "U", "rows", "n_link")))
             if args.cmd == "bootstrap-size":
                 return {"status": "ok", "B_min": L.bootstrap_size(args.p)}
             if args.cmd == "layout":
@@ -84,9 +91,28 @@ def main(argv=None) -> int:
             if "T_P" in m:
                 out["scope"] = L.binomial_scope(k / n, n, m["S_P"], m["S_F"], m["T_P"], m["T_F"])
             return out
-        except L.LikelihoodError as exc:
+        except (L.LikelihoodError, MT.MapTermError, emulator.EmulatorError) as exc:
             return {"status": "rejected", "code": exc.code, "error": str(exc)}
-    return io.run(go)
+    return io.run(lambda: io.jsonable(go()))
+
+
+def map_term(x: dict) -> dict:
+    try:
+        U = [np.asarray(u, float) for u in x["U"]]
+        sur = emulator.Surrogate.from_record(x["surrogate"]) if x.get("surrogate") is not None else None
+        theta = {k: float(v) for k, v in (x.get("theta") or {}).items()}
+        if x.get("fallback"):
+            if sur is None:
+                raise io.InputError("--input: the fallback needs the surrogate (its design points)")
+            return {"status": "ok", **MT.fallback_covariance(U, sur, theta)}
+        names = x.get("theta_names") or (sur.parameters if sur is not None else [])
+        term = MT.MapTerm(U, x["rows"], int(x["n_link"]), x["mode"], surrogate=sur, theta_names=names)
+        return {"status": "ok", **term.record(), "U": term.U(theta), "dU": dict(zip(names, term.derivatives(theta))),
+                "covariance": term.covariance(theta)}
+    except (KeyError, TypeError, ValueError) as exc:
+        if isinstance(exc, (MT.MapTermError, emulator.EmulatorError, io.InputError)):
+            raise
+        raise io.InputError(f"malformed input: {exc!r}") from None
 
 
 if __name__ == "__main__":

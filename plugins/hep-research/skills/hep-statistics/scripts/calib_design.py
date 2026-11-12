@@ -24,6 +24,16 @@ Phase 3 (sections 6.1, 6.6, 14.1 with g4sim; the engine in core/calibration/desi
   calib_design.py g4sim-support --contract FILE --plan FILE --documents FILE   support and recording levels (section 6.1)
   calib_design.py intervals     --plan FILE      event intervals, run_seed, replica 0, seed blocks, one digitization path
   calib_design.py digi-jobs     --plan FILE --documents FILE [--contract FILE] every g4sim-digi-job/1 of the plan
+Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the engine in core/calibration/design_map.py):
+  calib_design.py theta-noise --input FILE   P5's theta-noise item: {surrogate (record), points: [{theta, V_G}],
+                                             sigma_tot: {p: s}, U: [U_j] | Sigma, seeding}
+  calib_design.py map-g6-size --input FILE   D84: {J, V_G, maps: {component: map}, J_eps, R, n_toys, alpha?, seed?}
+  calib_design.py map-plan    --plan FILE [--theta-noise FILE]   the mapping-run seeds (and the section 6.6 interval
+                                             check), the rejected map practices, the fixed-map U construction
+  calib_design.py map-primaries --primaries CSV CSV [...]   a shared-seed scan's primaries.csv agree event by event
+  calib_design.py map-job-route --documents FILE --rows FILE --replica R [--readout NAME]   the job route with
+                                             g4sim's replica r reproduces map_replica = r (documents {pipeline, map})
+  calib_design.py map-schema  --map FILE     a built map against efficiency-map/1, exempting form.uniformity (D83 (1))
 --documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it.
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
@@ -57,7 +67,8 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import design, design_g4sim as DG, design_noise as DN, evaluator, io, linear, problems
+    from core.calibration import design, design_g4sim as DG, design_map as DM, design_noise as DN, evaluator, io, \
+        linear, problems
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -102,6 +113,18 @@ def main(argv=None) -> int:
     dj.add_argument("--plan", required=True)
     dj.add_argument("--documents", required=True)
     dj.add_argument("--contract", help="the contract whose locked bindings the plan must agree with")
+    sub.add_parser("theta-noise").add_argument("--input", required=True)
+    sub.add_parser("map-g6-size").add_argument("--input", required=True)
+    mp = sub.add_parser("map-plan")
+    mp.add_argument("--plan", required=True)
+    mp.add_argument("--theta-noise", help="the result of calib_design.py theta-noise for an independent-seed scan")
+    sub.add_parser("map-primaries").add_argument("--primaries", nargs="+", required=True)
+    jr = sub.add_parser("map-job-route")
+    jr.add_argument("--documents", required=True)
+    jr.add_argument("--rows", required=True)
+    jr.add_argument("--replica", type=int, required=True)
+    jr.add_argument("--readout", default=None)
+    sub.add_parser("map-schema").add_argument("--map", required=True)
     for name in ("points", "p2", "applicability", "linearize", "support", "p5", "methods"):
         p = sub.add_parser(name)
         if name != "applicability":
@@ -214,6 +237,8 @@ def main(argv=None) -> int:
             raise io.InputError(f"malformed input: {exc!r}") from None
 
     def go():
+        if args.cmd in MAP_COMMANDS:
+            return map_items(args, documents)
         if args.cmd in ("g4sim-support", "intervals", "digi-jobs"):
             return phase3()
         if args.cmd in ("sigma-boot", "bj", "p7", "folds", "practices", "seeds"):
@@ -266,6 +291,71 @@ def main(argv=None) -> int:
             raise io.InputError(f"malformed contract or plan: {exc!r}") from None
         raise io.InputError(f"unknown command {args.cmd}")
     return io.run(lambda: io.jsonable(go()))
+
+
+MAP_COMMANDS = ("theta-noise", "map-g6-size", "map-plan", "map-primaries", "map-job-route", "map-schema")
+
+
+def _csv_rows(path):
+    import csv
+    try:
+        with open(path, encoding="utf-8", newline="") as handle:
+            return [r for r in csv.reader(handle) if r and r[0] != "event" and not r[0].startswith("#")]
+    except OSError as exc:
+        raise io.InputError(f"cannot read {path}: {exc.strerror or exc}") from None
+
+
+def map_items(args, documents) -> dict:
+    try:
+        if args.cmd == "theta-noise":
+            from core.calibration import emulator
+            x = io.load_object(args.input, ("surrogate", "points", "sigma_tot"))
+            pts = [{"theta": {k: float(v) for k, v in p["theta"].items()}, "V_G": np.asarray(p["V_G"], float)}
+                   for p in x["points"]]
+            r = DM.theta_noise(emulator.Surrogate.from_record(x["surrogate"]), pts, x["sigma_tot"],
+                               U_list=x.get("U"), Sigma=x.get("Sigma"), seeding=x.get("seeding", "shared"))
+            return {"status": "passed" if r["passed"] else "failed", **r}
+        if args.cmd == "map-g6-size":
+            from pathlib import Path
+            x = io.load_object(args.input, ("J", "V_G", "maps", "J_eps", "R", "n_toys"))
+            base = Path(args.input).resolve().parent
+            maps = {int(k): io.load_object(str(base / v)) if isinstance(v, str) else v for k, v in x["maps"].items()}
+            ds, dt = DM.g4sim_replica_toys(maps, x["J_eps"], int(x["R"]))
+            r = DM.g6_size(x["J"], x["V_G"], ds, dt, int(x["n_toys"]), float(x.get("alpha", 0.01)),
+                           x.get("seed", 20261112))
+            return {"status": "passed" if r["passed"] else "failed", **r}
+        if args.cmd == "map-plan":
+            plan = io.load_object(args.plan)
+            tn = io.load_object(args.theta_noise) if args.theta_noise else None
+            f = DM.mapping_seed_findings(plan) + DM.map_plan_findings(plan, tn)
+            iv = DG.interval_findings(plan)              # section 6.6 overlaps: design_g4sim's check, reused
+            ok = not f and iv["status"] == "passed"
+            return {"status": "passed" if ok else "failed", "findings": f, "intervals": iv}
+        if args.cmd == "map-primaries":
+            f = DM.primaries_findings({p: _csv_rows(p) for p in args.primaries})
+            return {"status": "failed" if f else "passed", "findings": f, "points": len(args.primaries)}
+        if args.cmd == "map-job-route":
+            docs = documents(args.documents)
+            rows = [(int(r[0]), int(r[1]), int(r[2]), float(r[3]), float(r[4]), int(r[5]))
+                    for r in io.load(args.rows)]
+            readout = args.readout or next(s["readout"] for s in docs["pipeline"]["stages"]
+                                           if s["kind"] == "scintillation")
+            f = DM.job_route_findings(docs["pipeline"], docs["map"], readout, rows, args.replica)
+            return {"status": "failed" if f else "passed", "findings": f, "replica": args.replica}
+        from contracts.schema import validate
+        doc = io.load_object(args.map)
+        errs = [{"path": e.path, "code": e.code, "message": e.message}
+                for e in validate(doc, "efficiency_map.json").errors]
+        return DM.map_schema_findings(errs)
+    except DG.CheckError as exc:
+        return {"status": "rejected", "code": exc.code, "error": str(exc)}
+    except (KeyError, TypeError, ValueError, AttributeError, StopIteration, IndexError) as exc:
+        if isinstance(exc, io.InputError):
+            raise
+        code = getattr(exc, "code", None)
+        if code is not None:
+            return {"status": "rejected", "code": code, "error": str(exc)}
+        raise io.InputError(f"malformed input: {exc!r}") from None
 
 
 if __name__ == "__main__":

@@ -17,7 +17,8 @@ Blocks:
   binomial likelihood of the variance-matched effective counts (n_eff, k_eff) (section 2.1, D30); the data
   efficiency is logit^-1(logit eps_MC(theta, phi) + delta + U nu + S eta).
 
-beta = (theta, phi_P, nu, eta, omega, gamma, delta) in that order. The engine minimizes by Fisher scoring
+beta = (theta, phi_P, nu, eta, omega, gamma, delta, phi_map) in that order (phi_map: the efficiency-map term
+U(theta) phi_map of section 6.7, `map_term.py`, N(0, I), profiled with theta). The engine minimizes by Fisher scoring
 (`fit.py`): each block returns its deviance, the gradient and the expected information with respect to its
 link-space predictor and its own nuisances; theta and phi columns of the predictor are central differences of
 the evaluator with common random numbers.
@@ -30,6 +31,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 from scipy import linalg, special, stats
@@ -218,11 +220,13 @@ class Layout:
     omega: list = field(default_factory=list)     # block names with a free omega
     gamma: list = field(default_factory=list)     # (block name, bin) with a BB-lite gamma
     delta: list = field(default_factory=list)     # block names with an MC efficiency nuisance
+    n_phi_map: int = 0                            # the efficiency-map term's phi_map (map_term.py, section 6.7)
 
     @property
     def sizes(self):
         return {"theta": len(self.theta), "phi_P": len(self.phi_P), "nu": self.n_nu, "eta": self.n_eta,
-                "omega": len(self.omega), "gamma": len(self.gamma), "delta": len(self.delta)}
+                "omega": len(self.omega), "gamma": len(self.gamma), "delta": len(self.delta),
+                "phi_map": self.n_phi_map}
 
     def slices(self):
         out, a = {}, 0
@@ -308,6 +312,7 @@ class Reference:
     constraints: list = field(default_factory=list)
     W: np.ndarray | None = None
     ln_det: float = 0.0
+    map_term: Any = None                  # map_term.MapTerm: U(theta) phi_map, profiled with theta (section 6.7)
 
     def finalize(self):
         """The projected inverse W on N_d,c^perp (section 2.1) and ln det of the projected V_G (for the section 7.3
@@ -396,6 +401,12 @@ class Likelihood:
         self.layout, self.observed, self.ref = layout, observed, ref
         if ref.W is None:
             ref.finalize()
+        self.map_term = ref.map_term
+        if (self.map_term.n_phi if self.map_term is not None else 0) != layout.n_phi_map:
+            raise LikelihoodError("likelihood.map_term", "the layout's n_phi_map and the reference's map term differ")
+        if self.map_term is not None and self.map_term.theta_names \
+                and self.map_term.theta_names != list(layout.theta) + list(layout.phi_P):
+            raise LikelihoodError("likelihood.map_term", "the map term's theta_names are the layout's theta and phi_P")
         self.layout_slices = layout.slices()
         self._g_rows = layout.gaussian_rows()
 
@@ -426,6 +437,8 @@ class Likelihood:
             z = z + self.ref.U @ p["nu"]
         if self.layout.n_eta:
             z = z + self.ref.S @ p["eta"]
+        if self.map_term is not None:
+            z = z + self.map_term.U(self.theta_phi(beta)) @ p["phi_map"]
         return z
 
     def deviance(self, beta, h, parts=False):
@@ -458,7 +471,8 @@ class Likelihood:
                     D["aux"] += self._aux_binomial(b, h, dl)[0]
         nu0 = self.observed.nu0 if self.observed.nu0 is not None else np.zeros(self.layout.n_nu)
         eta0 = self.observed.eta0 if self.observed.eta0 is not None else np.zeros(self.layout.n_eta)
-        D["constraints"] = float(np.sum((p["nu"] - nu0) ** 2) + np.sum((p["eta"] - eta0) ** 2))
+        D["constraints"] = float(np.sum((p["nu"] - nu0) ** 2) + np.sum((p["eta"] - eta0) ** 2)
+                                 + np.sum(p["phi_map"] ** 2))
         if self.layout.phi_P:
             dphi = p["phi_P"] - self.observed.phi0
             D["constraints"] += float(dphi @ linalg.solve(self.observed.phi_cov, dphi, assume_a="pos"))
@@ -503,6 +517,11 @@ class Likelihood:
             Jz[:, layout_slices["nu"]] = self.ref.U
         if lay.n_eta:
             Jz[:, layout_slices["eta"]] = self.ref.S
+        if self.map_term is not None:                  # U(theta) phi_map: its columns and its theta derivative
+            th = self.theta_phi(beta)
+            Jz[:, layout_slices["phi_map"]] = self.map_term.U(th)
+            for i, du in zip(tp, self.map_term.derivatives(th)):
+                Jz[:, i] += du @ p["phi_map"]
         g = np.zeros(nb)
         F = np.zeros((nb, nb))
         if self._g_rows.size:
@@ -568,6 +587,9 @@ class Likelihood:
         if lay.n_eta:
             g[layout_slices["eta"]] += 2.0 * (p["eta"] - eta0)
             F[layout_slices["eta"], layout_slices["eta"]] += 2.0 * np.eye(lay.n_eta)
+        if lay.n_phi_map:
+            g[layout_slices["phi_map"]] += 2.0 * p["phi_map"]
+            F[layout_slices["phi_map"], layout_slices["phi_map"]] += 2.0 * np.eye(lay.n_phi_map)
         if lay.phi_P:
             Ci = linalg.inv(self.observed.phi_cov)
             g[layout_slices["phi_P"]] += 2.0 * Ci @ (p["phi_P"] - self.observed.phi0)
