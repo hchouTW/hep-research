@@ -513,6 +513,7 @@
   "tests.core.test_calibration_g4sim_eval": 7.0,
   "tests.core.test_calibration_g4sim_eval_coupling": 35.0,
   "tests.core.test_calibration_evaluator_problem": 82.0,
+  "tests.core.test_calibration_phase3_gates": 40.0,
   "tests.core.test_calibration_cherenkov_standin": 5.3,
   "tests.core.test_calibration_fit": 8.5,
   "tests.core.test_calibration_g4": 0.1,
