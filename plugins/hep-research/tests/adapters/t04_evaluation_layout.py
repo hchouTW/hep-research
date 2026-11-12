@@ -221,6 +221,19 @@ def collect_bin(expected, ranges, attempts, products, *, kind: str = "jsonl", to
     return BinCollection("complete", "", tuple(chosen))
 
 
+def pool_status(pool, statuses) -> tuple:
+    """A pooled bin (core.PooledIdentity, E6c fix round 1 with E6b's O5) is complete only if every member bin is: statuses maps each member
+    stratum to (status, reason) of its collection. Returns ("complete", "") or ("missing", the first missing member and its reason)."""
+    members = tuple(pool.members)
+    if set(statuses) != set(members):
+        raise LayoutError(f"the pool's statuses name strata {sorted(statuses)}, not its members {list(members)}")
+    for stratum in members:
+        status, reason = statuses[stratum]
+        if status != "complete":
+            return "missing", f"member stratum {stratum} is incomplete: {reason} (a pool is scored only when every member bin is complete)"
+    return "complete", ""
+
+
 def missing_bin_records(identity, gates, reason: str) -> list:
     """Section 10's "Required output missing, so the test cannot be computed": an inconclusive record of every gate of an incomplete bin."""
     from tests.adapters import t04_evaluation_core as core
@@ -244,14 +257,26 @@ RESULT_LINES = {
     "t09_truth_start.py": r"^RESULT \{",
     "fbrun_tools.py classify": r"^CLASSIFY job ",
     "fbrun_tools.py t07-comparator": r"^RESULT comparator (ok|failed):",
+    # E6c fix round 1 (review M9): the scripts the evaluation's tasks also start, and E6b's T07 scoring command line
+    "t09_negative_checks.py relabel-dead": r'^\{.*"status": "[a-z-]+"|^REFUSED ',
+    "t08_scenarios.py accounting": r"^(GATE .* selection-and-accounting (PASS|FAIL)|REFUSED )",
+    "t08_scenarios.py reference-selection": r"^(GATE reference-selection (PASS|FAIL)|REFUSED )",
+    "t08_cai.py payloads": r'^\{.*"status": "[a-z-]+"|^REFUSED ',
+    "t08_cai.py fixed-membership": r"^(CAI-T08-1 .* RESULT (PASS|FAIL)|REFUSED )",
+    "t08_cai.py rereco": r"^(CAI-T08-2 .* RESULT (PASS|FAIL|RECORDED)|GATE |REFUSED )",
+    "t09_fixed_points.py": r"^(GATE per-channel sum at the fixed points|REFUSED |ERROR )",
+    "check_generators.py": r"^RESULT (PASS|FAIL)",
+    "t07_evaluation_scoring.py": r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected|incomplete):",   # E6 merge stage: the summary's incomplete
+    "t04_evaluation_tasks.py": r"^RESULT [a-z0-9-]+ (ok|failed|rejected|crashed|incomplete)",
 }
-SCRIPT_STATES = ("ok", "negative", "crashed")
+SCRIPT_STATES = ("ok", "negative", "incomplete", "crashed")
 
 
 def classify_script_run(exit_code: int, run_text: str, result_pattern: str) -> tuple:
     """How a script's run ended: (state, result line). "crashed" when the run_text holds a traceback, when the script's own result line is absent,
     or when the exit code is outside core/status.py's 0-3 (core/status.py: the run's outcome cannot be classified, incomplete, exit 3); else "ok"
-    at exit 0 and "negative" at any other exit with its result line (a refusal or a failed check the script itself reports). A
+    at exit 0, "incomplete" at exit 3 with its result line (core/status.py: a missing dependency or an incomplete run; E6 merge review, nit:
+    never a negative reading), and "negative" at exit 1 or 2 with its result line (a refusal or a failed check the script itself reports). A
     ModuleNotFoundError at import is a crash, never a negative reading."""
     import re
     lines = run_text.splitlines()
@@ -259,7 +284,7 @@ def classify_script_run(exit_code: int, run_text: str, result_pattern: str) -> t
     if "Traceback (most recent call last)" in run_text or not found or exit_code not in (0, 1, 2, 3):
         why = "a traceback" if "Traceback (most recent call last)" in run_text else ("no result line" if not found else f"exit {exit_code}")
         return "crashed", why
-    return ("ok" if exit_code == 0 else "negative"), found[-1]
+    return {0: "ok", 3: "incomplete"}.get(exit_code, "negative"), found[-1]
 
 
 # ---- Earlier attempts.
@@ -275,6 +300,9 @@ def classify_attempt(state: str, exit_code: int, elapsed: str, milestones) -> tu
     if milestones is None and elapsed == "00:00:00" and base in ("CANCELLED", "PENDING"):
         return "NEVER-RAN", f"Slurm state {state} with no elapsed time and no milestones: it never started, nothing drawn"
     marks = set(milestones or ())
+    if "generator-check-failed" in marks:
+        # E6c fix round 1 (review M2): a failed v4 2.1 generator check is a defect needing the user (v4 18, generator-check rows 2-4), never NO-DRAW.
+        return "NOT-REPEATABLE", "the milestone generator-check-failed is present: v4 18's generator-check rows go to the user"
     if "first-reading" in marks:
         return "NOT-REPEATABLE", "the milestone first-reading is present: an output was read"
     if base == "COMPLETED" and exit_code == 0:
@@ -693,7 +721,9 @@ T07_CLEAN_FIND_PER_EVENT = {lvl: (find + 1.0) / 3000 * T07_SCORING_FACTOR for lv
 T07_REFIT_PER_EVENT = {lvl: T07_REFIT_PER_TRACK * tracks * T07_SCORING_FACTOR for lvl, tracks in enumerate(T07_TRACKS_PER_EVENT)}
 # T07 memory (fix round 1, I5): MaxRSS of the clean refit by events of an o3 bin. The Freeze-B run: 8,012,452 kB for the 3,000-event bins
 # (collect-7585958.out, "t07 refit"); the E6a job adds 3,000 and 12,000 block-1 events (t07-memory step) and its numbers go here.
-T07_REFIT_PEAK_MEMORY = {3000: 8012452}   # MaxRSS in kB, by events
+# E6c fix round 1: with job 7591439's measurement at 12,000 events (t07-memory, "MEASURE t07 refit clean s2 ... 12000 events ... MaxRSS 31841752
+# kB"; its 3,000-event value 8,000,600 kB is under the Freeze-B record kept here). 4,000-event refit pieces either way.
+T07_REFIT_PEAK_MEMORY = {3000: 8012452, 12000: 31841752}   # MaxRSS in kB, by events
 T07_TASK_CPUS, T07_TASK_MEMORY_MB = 2, MAX_MEMORY_PER_CPU_MB   # as the Freeze-B run (t07.sh: 2 x 7,900 MB, WORKERS=1)
 T07_MEMORY_MARGIN = 0.9
 T07_REFIT_CANDIDATES = (12000, 6000, 4000, 3000, 2000, 1500, 1000)
@@ -716,7 +746,38 @@ START_UP_SECONDS = {"T07": 60, "T08": 30, "T09": 30}
 # Scoring per bin: a budget. T07 from job 7474461's pull table: 600 CPU-s for 2.2e10 object-replicates (both statistics), 2.7e-8 s each; an o3
 # clean bin's about 5.7e6 objects over its pull statistics x 1,000 replicates x 1.4 (log n at 432,000 against 12,000 objects): about 215 s,
 # so 900 s is the upper budget (E6b replaces it from its job; the E6a pull replay prints its own rate).
-SCORING_SECONDS = {"T07": 900, "T08": 120, "T09": 300}
+# E6c fix round 1 (review I3; E6b review I5): budgets from recorded costs, scaled to 12,000 events, replaced by the block-1 jobs' measurements.
+# T08: the Freeze-B run's readings at most 2.4 s and 366 MB per 3,000 events (collect-7585958.out costs), x 4, plus 9 bootstrapped pull tests:
+# 300 s at 1 CPU x 6,000 MB. T09: the Freeze-B run per 3,000 events, topology-readings at most 131 s and 1.13 GB, readings 97 s, check-single-
+# photon 74 s, fires 158 s; per bin the /4 and /3 read (x 4: about 900 s), stratum 10 and the dead control one more product (about 300 s): 1,500
+# s at 1 CPU x 6,000 MB (the scoring keeps reduced event documents, not the products). T07: E6b's block-1 job 7591993 (3,000 events per bin):
+# score-bin 11-59 s, at most 1.74 GB per bin. Scaled to 12,000 events: time x 5 (4 for the events, 1.25 for the sorts of the 1,000 bootstrap
+# replicates, n log n), 59 s x 5 = 295 s, so 300 s; memory x 4, linear, the conservative reading (the finding record is parsed whole and the
+# product states held per track, both linear in events; the bootstrap rows of 1,000 x 12,000 int64 add 96 MB): 7.0 GB, at 2 CPUs x 6,000 MB.
+# E6 merge stage: T08 and T09 from E6c's block-1 job of record 7592360 (MEASURE lines, scaled to 12,000 events: time x 4.4 for T08 and x 22 for T09,
+# the bootstrap sorts n log n; memory linear, conservative). T09: main stratum 10, the heaviest scoring (the /4, /3, truth-start and single-photon
+# products, E1b), 71 s and 2.87 GB; budget 300 s, a margin of 4.2. T08: main-E2-far 12 s and 2.72 GB (dead-E3 7 s); the heaviest T08 scoring of
+# that job's COST lines is main-E4-far, 3.5 s at 3,000 events, 15 s scaled; budget 120 s, a margin of 8 on it. T07 unchanged: E6b's job of record
+# 7592299 gives score-bin at most 54.4 s and 1.21 GB per 3,000 events, x 5 is 272 s, so 300 s (a margin of 1.1; the Slurm limit of 1 h is 12 times
+# it). Memory: every scoring task keeps 6,000 MB per CPU (scaled at most 2.87 GB for T08 and T09, 4.9 GB for T07 at x 4). The Slurm limit of
+# every scoring task stays 1 h (score.sh); a scoring task draws nothing and may be rerun (E6c fix round 1, I1).
+# E6 merge review M4 (the coordinator's ruling, conservative): T09 back to E6c's estimate from the Freeze-B readings, (131 + 97) x 4 + 74 x 4 =
+# 1,208 s. The 71 s of job 7592360 is a 600-event measurement scaled x 22, and the two are not reconciled: the slim event documents plausibly
+# remove most of the reading, but the heaviest bin (main stratum 10) is not yet measured at 12,000 events (job 7592611 scores saturation-B3).
+SCORING_SECONDS = {"T07": 300, "T08": 120, "T09": 1208}
+SCORING_CPUS = {"T07": 2, "T08": 1, "T09": 1}
+SCORING_MEMORY_MB = {"T07": 6000, "T08": 6000, "T09": 6000}
+T09_POOL_SCORING_SECONDS = 120        # the pool reads the nine bins' reduced (m, y) files the scoring tasks write
+T09_FIXED_POINTS_SECONDS = 135.3 + 30  # the Freeze-B run, block6-fixed-points 135.3 s (collect-7585958.out), plus start-up
+T08_GENERATION_CHECK_SECONDS = 24.5   # the Freeze-B run's T08 block6-generator-check (each T08 sample task runs it before its draw)
+# The checks rerun at evaluation (the user, 2026-11-12: "Rerun at evaluation", on their own v4 3.2 blocks): T08 CAI-T08-1 and -2 and the
+# reference selection on block 1, main E3 iso, far and near, 3,000 events each (the Freeze-B run: draws and reconstructions about 30 s, cai steps
+# 16 + 70 + 40 s, generator check 24.5 s); T07's (CAI-T07, A05, A07, A17, A39) are E6b's commands: a budget until E6b states them.
+T08_CHECKS_SECONDS = 30 + 126 + 24.5 + 60
+T07_CHECKS_SECONDS = 1800
+T07_SLICES_SECONDS = 300               # E6b's estimate: one task per (fixture, parameter), about 5 min at 144,000 pooled events
+T07_SLICE_TASKS = 10
+T07_NEGATIVE_CASES_SECONDS = 300       # E5 on the kept file (finder, no vertex step, then negative-cases): a budget
 COLLECTION_SECONDS = 300   # per workflow: sacct, every product hashed and read (an assumption)
 SUMMARY_SECONDS = 120
 T07_BUILD_SECONDS, T07_BUILD_CPUS = 86 + 7 + 60, 6    # job 7584388: configure 7 s, build 86 s on 6 CPUs, and its checks
@@ -854,7 +915,8 @@ def evaluation_plan(*, block: int, t07_range: int = T07_RANGE_EVENTS, t08_range:
     for fixture, stratum, label in T08_LABELS:
         for span in split(EVENTS_PER_BIN, t08_range):
             name = f"T08 {label} {span.first}-{span.end - 1}"
-            tasks.append(Task(name, "T08 sample", span.count, T08_PER_EVENT, START_UP_SECONDS["T08"], (), 1, (8, fixture, stratum), span))
+            tasks.append(Task(name, "T08 sample", span.count, T08_PER_EVENT, START_UP_SECONDS["T08"] + T08_GENERATION_CHECK_SECONDS, (), 1,
+                              (8, fixture, stratum), span))
             work["T08"].append(name)
         bins["T08"].append(label)
     for fixture, stratum, label in T09_LABELS:
@@ -867,12 +929,30 @@ def evaluation_plan(*, block: int, t07_range: int = T07_RANGE_EVENTS, t08_range:
             tasks.append(Task(name, "T09 range", span.count, per_event, START_UP_SECONDS["T09"], (generation,), 1, (9, fixture, stratum), span))
             work["T09"].append(name)
         bins["T09"].append(label)
+    # E6c fix round 1: the tasks the summaries also read (review M4: one printed total, the approved one).
+    tasks.append(Task("T09 fixed points", "T09 fixed points", 0, 0.0, T09_FIXED_POINTS_SECONDS, ()))
+    tasks.append(Task("T08 checks", "T08 checks", 0, 0.0, T08_CHECKS_SECONDS, ()))
+    tasks.append(Task("T07 checks", "T07 checks", 0, 0.0, T07_CHECKS_SECONDS, ("T07 build",), T07_TASK_CPUS, memory_mb=T07_TASK_MEMORY_MB))
+    tasks.append(Task("T07 negative cases", "T07 negative cases", 0, 0.0, T07_NEGATIVE_CASES_SECONDS, ("T07 build",), T07_TASK_CPUS,
+                      memory_mb=T07_TASK_MEMORY_MB))
     for workflow in ("T07", "T08", "T09"):
         collection = f"{workflow} collection"
         tasks.append(Task(collection, f"{workflow} collection", 0, 0.0, COLLECTION_SECONDS, tuple(work[workflow]), dependency="afterany"))
         scores = []
         for label in bins[workflow]:
-            tasks.append(Task(f"{workflow} score {label}", f"{workflow} scoring", 0, 0.0, SCORING_SECONDS[workflow], (collection,)))
+            tasks.append(Task(f"{workflow} score {label}", f"{workflow} scoring", 0, 0.0, SCORING_SECONDS[workflow], (collection,),
+                              SCORING_CPUS[workflow], memory_mb=SCORING_MEMORY_MB[workflow]))
             scores.append(tasks[-1].name)
-        tasks.append(Task(f"{workflow} summary", f"{workflow} summary", 0, 0.0, SUMMARY_SECONDS, tuple(scores), dependency="afterany"))
+        after = list(scores)
+        if workflow == "T07":
+            for k in range(T07_SLICE_TASKS):
+                tasks.append(Task(f"T07 slices {k}", "T07 slices", 0, 0.0, T07_SLICES_SECONDS, tuple(scores), dependency="afterany"))
+                after.append(tasks[-1].name)
+            after += ["T07 checks", "T07 negative cases"]
+        if workflow == "T08":
+            after.append("T08 checks")
+        if workflow == "T09":
+            tasks.append(Task("T09 score pool", "T09 pool scoring", 0, 0.0, T09_POOL_SCORING_SECONDS, tuple(scores), dependency="afterany"))
+            after += [tasks[-1].name, "T09 fixed points"]
+        tasks.append(Task(f"{workflow} summary", f"{workflow} summary", 0, 0.0, SUMMARY_SECONDS, tuple(after), dependency="afterany"))
     return Plan(tasks, tuple(notes))

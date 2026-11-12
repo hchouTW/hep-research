@@ -146,9 +146,10 @@ class PullRule(unittest.TestCase):
         self.assertEqual(self.word(0.08, 0.01, ATTEMPT_1), ("pass", 3))   # 0.08 + 0.01645 = 0.0964
         self.assertEqual(self.word(0.08, 0.01, ATTEMPT_2), ("fail", 4))   # 0.08 + 0.02326 = 0.1033
         self.assertEqual(self.word(0.125, 0.01, ATTEMPT_1), ("fail", 1))  # 0.125 - 0.01645 = 0.1086
-        self.assertEqual(self.word(0.125, 0.01, ATTEMPT_2), ("fail", 1))  # 0.125 - 0.02326 = 0.1017 > 0.10
+        self.assertEqual(self.word(0.125, 0.01, ATTEMPT_2), ("fail", 1))  # step 1 at 95 % at both attempts (the user, K09): 0.1086 > 0.10
         self.assertEqual(self.word(0.115, 0.01, ATTEMPT_1), ("fail", 4))  # 0.115 - 0.01645 = 0.0986: past step 1
-        self.assertEqual(self.word(0.12, 0.01, ATTEMPT_2), ("fail", 4))   # 0.12 - 0.02326 = 0.0967: past step 1
+        self.assertEqual(self.word(0.12, 0.01, ATTEMPT_2), ("fail", 1))   # 0.12 - 0.01645 = 0.1036: step 1 (no longer 2.326, E6c fix round 1)
+        self.assertEqual(self.word(0.115, 0.01, ATTEMPT_2), ("fail", 4))  # 0.115 - 0.01645 = 0.0986: past step 1
 
     def test_the_rule_needs_finite_numbers(self):
         for estimate, se in ((math.nan, 0.01), (0.0, math.nan), (0.0, -0.001), (math.inf, 0.01)):
@@ -344,12 +345,12 @@ class RateRule(unittest.TestCase):
                 theirs = fake_rate.bounds_of(k, n, events, deff)
                 self.assertEqual((own["u_a"], own["u_b"], own["u"], own["lower"]), (theirs["u_a"], theirs["u_b"], theirs["u_dev"], theirs["l_dev"]))
 
-    def test_attempt_2_raises_both_bounds(self):
+    def test_attempt_2_raises_the_pass_bound_only(self):
         m, y = spread_counts(3000, 6, 3)
         one = core.rate_test("rate", T07_NOISE, m, y, 0.01)
         two = core.rate_test("rate", T07_NOISE_2, m, y, 0.01)
         self.assertGreater(two.upper, one.upper)
-        self.assertLess(two.lower, one.lower)
+        self.assertEqual(two.lower, one.lower)                           # step 1's fail bound stays at 95 % (the user, K09)
         self.assertEqual((two.attempt, two.confidence), (2, 0.99))
         self.assertAlmostEqual(core.rate_test("rate", T07_NOISE_2, *spread_counts(3000, 6, 0), 0.01).upper, 1 - 0.01 ** (1 / 3000), delta=1e-12)
 
@@ -490,24 +491,29 @@ class LevelFromTheBinsBlock(unittest.TestCase):
         records = full_set("T07")
         records[0] = dataclasses.replace(records[0], attempt=2, confidence=0.99)
         with self.assertRaises(core.CoreError):
-            core.workflow_outcome("T07", records, [], attempt=1)
+            core.workflow_outcome("T07", records, [], attempt=1, required_checks=())
 
 
 class AttemptTwoReadings(unittest.TestCase):
-    """Fix round 1, M1, M2: readings named as constants, awaiting the user (K09); and k = n reads fail at step 1."""
+    """The user's answers on the attempt-2 levels (K09, 2026-11-12): step 1, a fail bound, stays at 95 % at both attempts; the paired bound, a
+    pass bound, is at 2.326 at attempt 2; and k = n reads fail at step 1 (E6a fix round 1, M2)."""
 
-    def test_step_1_at_attempt_2_uses_99_percent(self):
-        """v4 3.4 read as every bound: e - 1.645 se > 0.10 >= e - 2.326 se with se above the cap reads inconclusive at attempt 2, not fail."""
-        self.assertEqual((core.STEP1_ALPHA_OF_ATTEMPT, core.PAIRED_ALPHA_OF_ATTEMPT), ({1: 0.05, 2: 0.01}, {1: 0.05, 2: 0.01}))
+    def test_step_1_stays_at_95_percent_at_attempt_2(self):
+        """e - 1.645 se > 0.10 with se above the cap fails at step 1 at both attempts (E6c fix round 1, the user's answer)."""
+        self.assertEqual((core.STEP1_ALPHA_OF_ATTEMPT, core.PAIRED_ALPHA_OF_ATTEMPT), ({1: 0.05, 2: 0.05}, {1: 0.05, 2: 0.01}))
         self.assertEqual(core.pull_step(0.125, 0.0, 0.012, ATTEMPT_1), ("fail", 1))
-        self.assertEqual(core.pull_step(0.125, 0.0, 0.012, ATTEMPT_2), ("inconclusive", 2))
+        self.assertEqual(core.pull_step(0.125, 0.0, 0.012, ATTEMPT_2), ("fail", 1))
+        self.assertEqual(ATTEMPT_2.z, float(stats.norm.isf(0.01)))     # the pass bound (step 3) at 99 %
+        self.assertEqual(core.pull_step(0.08, 0.0, 0.0095, ATTEMPT_1), ("pass", 3))
+        self.assertEqual(core.pull_step(0.08, 0.0, 0.0095, ATTEMPT_2), ("fail", 4))   # 0.08 + 2.326 x 0.0095 > 0.10
 
-    def test_rate_step_1_at_attempt_2_uses_99_percent(self):
+    def test_rate_step_1_stays_at_95_percent_at_attempt_2(self):
         m, y = spread_counts(3000, 6, 30)
         one = core.rate_test("r", T07_NOISE, m, y, 0.01)
         two = core.rate_test("r", T07_NOISE_2, m, y, 0.01)
-        self.assertEqual(two.lower, core.bounds_at(30, 18000, 3000, two.readings["deff_hat"], 0.99)["lower"])
-        self.assertLess(two.lower, one.lower)
+        self.assertEqual(two.lower, one.lower)
+        self.assertEqual(two.lower, core.bounds_at(30, 18000, 3000, two.readings["deff_hat"], 0.95)["lower"])
+        self.assertGreater(two.upper, one.upper)                         # the pass bound U at 99 %
 
     def test_k_equal_to_n_fails_at_step_1(self):
         m = numpy.full(3000, 2)
@@ -545,7 +551,16 @@ class R11Mapping(unittest.TestCase):
         tests = full_set(workflow, kwargs.get("attempt", 1)) if tests is None else tests
         checks = [core.CheckResult("A05 wrong hits", "negative", "pass")] if checks is None else checks
         kwargs.setdefault("attempt", 1)
+        kwargs.setdefault("required_checks", ())
         return core.workflow_outcome(workflow, tests, checks, **kwargs)
+
+    def test_a_required_check_absent_is_refused(self):
+        """E6c fix round 1, I2: every record pass and a required check absent is no outcome (v4 10: the checks must pass)."""
+        with self.assertRaises(core.CoreError):
+            self.outcome(required_checks=("A05 wrong hits", "CAI-T07-1"))
+        with self.assertRaises(core.CoreError):
+            core.workflow_outcome("T07", full_set("T07"), [], attempt=1)
+        self.assertEqual(self.outcome(required_checks=("A05 wrong hits",)).r11_state, "done (narrowed claim)")
 
     def test_row_all_pass_is_a_narrowed_claim_for_every_workflow(self):
         for workflow in ("T07", "T08", "T09"):
@@ -790,6 +805,34 @@ class FrozenCodingAgreement(unittest.TestCase):
             with self.subTest(events=m.size, k=int(y.sum())):
                 self.assertEqual(core.replay_rate_test("r", m, y, 0.01, attempt=1).upper, self.rate.bound(m, y))
                 self.assertEqual(core.replay_rate_test("r", m, y, 0.01, attempt=2).upper, self.rate.bound(m, y, cl=0.99))
+
+
+class EmptyReplicatesAndPools(unittest.TestCase):
+    """E6c fix round 1: a bootstrap replicate with no object gives inconclusive with its reason (E6b review I4); the pooled identity."""
+
+    def test_an_empty_replicate_is_inconclusive_not_a_crash(self):
+        per_event = [numpy.array([0.3])] + [numpy.array([])] * 3      # one pull in four events: some of the 1,000 rows hold no object
+        centre, width = core.pull_tests("pull x", T07_NOISE, per_event)
+        for record in (centre, width):
+            self.assertEqual((record.result, record.step), ("inconclusive", 2))
+            self.assertIn("bootstrap replicates hold no pull", record.reason)
+        full = [numpy.array([0.3 + 0.01 * i]) for i in range(50)]
+        self.assertEqual(core.pull_tests("pull x", T07_NOISE, full)[0].step in (1, 2, 3, 4), True)
+
+    def test_a_pool_has_its_own_entropy_and_level(self):
+        pool = core.PooledIdentity("T09", 9001, 11, 0, tuple(range(3, 12)), "main B2-B4")
+        self.assertEqual(core.seed_entropy(pool), (520, 9001, 11, 100))
+        bins = {core.seed_entropy(core.BinIdentity("T09", 9001, 11, s)) for s in range(12)}
+        self.assertNotIn(core.seed_entropy(pool), bins)
+        self.assertEqual(pool.level, core.level_of_block(11))
+        self.assertIn("pool 0", pool.label)
+        record = core.rate_test("reversed", pool, numpy.ones(10, dtype=int), numpy.zeros(10, dtype=int), 0.005)
+        self.assertEqual(record.bin, pool.label)
+        for bad in ((9001, 11, 0, (3,), "x"), (9001, 11, 0, (3, 3), "x"), (9001, 11, 12, (3, 4), "x"), (7001, 11, 0, (3, 4), "x"), (9001, 11, 0, (3, 12), "x")):
+            with self.subTest(bad=bad), self.assertRaises(core.CoreError):
+                core.PooledIdentity("T09", *bad)
+        with self.assertRaises(core.CoreError):
+            core.PooledIdentity("T09", 9001, 1, 0, (3, 4), "x").level
 
 
 if __name__ == "__main__":
