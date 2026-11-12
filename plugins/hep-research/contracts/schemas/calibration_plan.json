@@ -87,6 +87,10 @@
    "type": "object",
    "$comment": "section 6.7: {mode: fixed | varies-with-theta, R, linear_in_eps: [observable], u_construction: {observable: digitized | map_replica | linear}}; calib_design.py map-plan"
   },
+  "pde_split": {
+   "type": "object",
+   "$comment": "section 6.7 PDE split: routes per readout, route 1, photons, map, grid, prior, scan maps, split-check record and pair; calib_design.py pde-split (core/calibration/pde_split.design_findings)"
+  },
   "design": {
    "type": "object",
    "$comment": "design-stage settings: fd_fraction, n_scan, scan_seed, bootstrap, bootstrap_seed"

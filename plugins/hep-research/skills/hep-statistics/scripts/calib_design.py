@@ -24,6 +24,8 @@ Phase 3 (sections 6.1, 6.6, 14.1 with g4sim; the engine in core/calibration/desi
   calib_design.py g4sim-support --contract FILE --plan FILE --documents FILE   support and recording levels (section 6.1)
   calib_design.py intervals     --plan FILE      event intervals, run_seed, replica 0, seed blocks, one digitization path
   calib_design.py digi-jobs     --plan FILE --documents FILE [--contract FILE] every g4sim-digi-job/1 of the plan
+  calib_design.py pde-split     --contract FILE --plan FILE --documents FILE   the PDE split of section 6.7 (routes,
+                                route 1, keys, EFFICIENCY > 0, photons.csv, energy grid, scan surfaces, split check)
 Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the engine in core/calibration/design_map.py):
   calib_design.py theta-noise --input FILE   P5's theta-noise item: {surrogate (record), points: [{theta, V_G}],
                                              sigma_tot: {p: s}, U: [U_j] | Sigma, seeding}
@@ -34,7 +36,9 @@ Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the en
   calib_design.py map-job-route --documents FILE --rows FILE --replica R [--readout NAME]   the job route with
                                              g4sim's replica r reproduces map_replica = r (documents {pipeline, map})
   calib_design.py map-schema  --map FILE     a built map against efficiency-map/1, exempting form.uniformity (D83 (1))
---documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it.
+--documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it;
+for pde-split {detector, detectors: {name}, maps: {name}, photons: {name}, primaries: {name}, pipelines: [..], readouts,
+build_environment} (detector specs and CSV files read as text).
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
 Output: one JSON object; status passed/ok (exit 0), failed (exit 1: P2, P5 or support failed, remedy level in the
@@ -109,6 +113,9 @@ def main(argv=None) -> int:
     for a in ("--contract", "--plan", "--documents"):
         gs.add_argument(a, required=True)
     sub.add_parser("intervals").add_argument("--plan", required=True)
+    pd = sub.add_parser("pde-split")
+    for a in ("--contract", "--plan", "--documents"):
+        pd.add_argument(a, required=True)
     dj = sub.add_parser("digi-jobs")
     dj.add_argument("--plan", required=True)
     dj.add_argument("--documents", required=True)
@@ -236,9 +243,38 @@ def main(argv=None) -> int:
         except (KeyError, TypeError, ValueError, AttributeError) as exc:
             raise io.InputError(f"malformed input: {exc!r}") from None
 
+    def pde():
+        from pathlib import Path
+        from contracts.geometry import field_types
+        from core.calibration import pde_split
+        spec = io.load_object(args.documents)
+        base = Path(args.documents).resolve().parent
+
+        def text(x):
+            try:
+                return (base / str(x)).read_text(encoding="utf-8")
+            except OSError as exc:
+                raise io.InputError(f"--documents: {x}: {exc.strerror or exc}") from None
+        docs = {"readouts": spec.get("readouts") or [], "build_environment": spec.get("build_environment")}
+        if spec.get("detector"):
+            docs["detector"] = text(spec["detector"])
+        for k in ("detectors", "photons", "primaries"):
+            docs[k] = {n: text(v) for n, v in (spec.get(k) or {}).items()}
+        docs["maps"] = {n: io.load_object(str(base / v)) for n, v in (spec.get("maps") or {}).items()}
+        docs["pipelines"] = [io.load_object(str(base / v)) for v in spec.get("pipelines") or []]
+        try:
+            return pde_split.design_findings(io.load_object(args.contract), io.load_object(args.plan), docs,
+                                             field_types())
+        except pde_split.SplitError as exc:
+            return {"status": "rejected", "code": "pde_split." + exc.code, "error": str(exc)}
+        except (KeyError, TypeError, ValueError, AttributeError) as exc:
+            raise io.InputError(f"malformed input: {exc!r}") from None
+
     def go():
         if args.cmd in MAP_COMMANDS:
             return map_items(args, documents)
+        if args.cmd == "pde-split":
+            return pde()
         if args.cmd in ("g4sim-support", "intervals", "digi-jobs"):
             return phase3()
         if args.cmd in ("sigma-boot", "bj", "p7", "folds", "practices", "seeds"):

@@ -504,6 +504,10 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
     _parameters(contract, out)
     _models(contract, out)
     out.extend(chain.binding_findings(contract))
+    if contract.get("pde_split") is not None or any(b.get("document") == "evaluator" for p in
+                                                     contract.get("parameters", []) for b in p.get("bindings") or []):
+        from core.calibration import pde_split    # section 6.7 "Rejected" (NumPy/SciPy: only for a PDE split)
+        out.extend(pde_split.contract_findings(contract))
     if identities is not None:
         out.extend(identity_findings(contract, identities))
     samples = _samples(contract, out, releases)

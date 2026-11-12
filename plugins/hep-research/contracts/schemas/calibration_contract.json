@@ -681,6 +681,10 @@
   "exposure": {
    "type": "object",
    "$comment": "expected number of data events per sample (design stage, section 6.7 and 8.2 note 5: metadata only, no data values)"
+  },
+  "pde_split": {
+   "type": "object",
+   "$comment": "section 6.7 PDE split (g4sim): {parameters, model: scale | table, applied_as, table: {energy_eV, value}, angle_dependent, ties, sensor_surfaces, map_mode}; core/calibration/pde_split.contract_findings"
   }
  },
  "$comment": "calibration-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. calib_contract.py check applies the rules of section 5.2."

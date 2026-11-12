@@ -507,18 +507,24 @@ def g4sim_candidates(contract: dict, plan: dict) -> dict:
     (plan.node_binding: {nodes: {node: {table1, stored, recording, distribution, stage, support_declared,
     poisson_interval_only}}, fast_sim_envelope: {materials, stages}, pde_split}). Each candidate states its form,
     whether it forms event weights (the G4 applicability, D75) and its preconditions; excluded methods give a
-    reason. PDE-split bindings (document "evaluator") are incomplete here (section 6.7)."""
+    reason. PDE-split bindings (document "evaluator") take the row of section 6.7 (pde_split.candidates)."""
     findings = binding_findings(contract) + g4sim_findings(contract, plan)
     nb_all = (plan.get("node_binding") or {}).get("nodes") or {}
-    out, excluded, incomplete = {}, {}, []
+    out, excluded = {}, {}
     blocked = {f["path"] for f in findings}
     for i, par in enumerate(contract.get("parameters", [])):
         if par.get("role") not in ("theta", "phi"):
             continue
         nb = [nb_all.get(n) or {} for n in par.get("nodes", [])]
         rows = {binding_row(b)[0] for b in par.get("bindings", [])}
-        if "evaluator" in rows:
-            incomplete.append(par["name"])
+        if "evaluator" in rows:                   # the PDE split of section 6.7 (routes 2_1, 3 and 1)
+            stored = set().union(*[set(b.get("stored", [])) for b in nb]) if nb else set()
+            recorded = bool(nb) and all(b.get("recording", plan.get("recording_level")) in RECORDED for b in nb)
+            from core.calibration import pde_split    # NumPy/SciPy: imported only for a PDE split
+            c, x = pde_split.candidates(par, contract, plan, stored, recorded)
+            out[par["name"]] = [_entry(*e) for e in c] if rows == {"evaluator"} else []
+            if x:
+                excluded[par["name"]] = x
             continue
         sets: list[list] = []
         excl: list[dict] = []
@@ -538,9 +544,5 @@ def g4sim_candidates(contract: dict, plan: dict) -> dict:
         if excl:
             excluded[par["name"]] = excl
     none = sorted(p for p, ms in out.items() if not ms)
-    status = "failed" if findings or none else "incomplete" if incomplete else "ok"
-    res = {"status": status, "parameters": out, "excluded": excluded, "without_candidate": none, "findings": findings}
-    if incomplete:
-        res["incomplete"] = {"parameters": incomplete, "reason": "PDE-split parameters applied by the evaluator: "
-                             "routes 2_1, 3 and 1 of section 6.7"}
-    return res
+    status = "failed" if findings or none else "ok"
+    return {"status": status, "parameters": out, "excluded": excluded, "without_candidate": none, "findings": findings}

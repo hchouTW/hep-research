@@ -90,6 +90,12 @@ def identities(contract: dict, path: str) -> dict:
                     raise io.InputError(f"--model-documents: {key} of {mid!r}: {exc.strerror or exc}") from None
             elif key == "efficiency_map":
                 docs[key] = io.load_object(str(base / str(value)))
+            elif key == "pde":                      # the PDE(E) part of item 4 (section 6.7, route 3)
+                from core.calibration import pde_split
+                try:
+                    docs[key] = pde_split.identity_part(value, pde_split.table_masked(contract))
+                except pde_split.SplitError as err:
+                    raise io.InputError(f"--model-documents: pde of {mid!r}: {err}") from None
             elif key in INLINE:
                 docs[key] = value
             else:
@@ -103,6 +109,26 @@ def identities(contract: dict, path: str) -> dict:
             out[mid] = mi.identity(docs, masks, tables)
         except mi.IdentityError as err:
             out[mid] = {"error": {"code": err.code, "message": str(err)}}
+    return out
+
+
+def pde_documents(contract: dict, path: str) -> list:
+    """The PDE-split rules that need the documents (section 6.7 "Rejected"): per model, the efficiency-1 map's sensor
+    surfaces and surfaces_sha256 against the production detector-spec/1, and the EFFICIENCY > 0 condition."""
+    from core.calibration import pde_split
+    spec = io.load_object(path)
+    base = Path(path).resolve().parent
+    out = []
+    for mid, entry in spec.items():
+        if not isinstance(entry, dict) or "detector_spec" not in entry:
+            continue
+        try:
+            text = (base / str(entry["detector_spec"])).read_bytes()
+        except OSError as exc:
+            raise io.InputError(f"--model-documents: detector_spec of {mid!r}: {exc.strerror or exc}") from None
+        emap = io.load_object(str(base / str(entry["efficiency_map"]))) if entry.get("efficiency_map") else None
+        for f in pde_split.document_findings(contract, text, field_types(), emap):
+            out.append({**f, "model": mid})
     return out
 
 
@@ -184,6 +210,10 @@ def main(argv=None) -> int:
             r = cc.check(c, rels, graph, design, locking, ids)
         except (TypeError, ValueError) as exc:
             raise io.InputError(f"--design: {exc}") from None
+        if args.model_documents and isinstance(c, dict) and c.get("pde_split") is not None:
+            extra = pde_documents(c, args.model_documents)
+            r["findings"] += extra
+            r["status"] = "rejected" if extra else r["status"]
         return {"status": r["status"], "contract_sha256": cc.lock_hash(c), "findings": r["findings"],
                 "deferred": r["deferred"]}
     return io.run(go)
