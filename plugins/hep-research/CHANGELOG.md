@@ -3,6 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-detector: DIS kinematic reconstruction** (#389). New `skills/hep-detector/references/dis-kinematic-reconstruction.md`: the electron, Jacquet-Blondel, mixed, double-angle, Sigma and e-Sigma estimators of x, y and Q^2 with their formulas (Bassler and Bernardi 1995, checked on exact four-vectors), what each is sensitive to (low and high y, energy scale, forward losses), QED radiation (ISR, FSR, the Sigma + Sigma_e window), the head-on frame for a crossing angle, purity and stability, SIDIS and Breit-frame variables, and learned reconstruction; sources read and Crossref-matched (Bassler and Bernardi 1995 and 1999, the EIC Yellow Report, Arratia et al. 2022), also in the bibliography. Linked from `event-reconstruction.md` (now a registered wiring hub), the hadron-structure hub and `dis-kinematics.md`. `experiment:eic` 0.6.1: a placement row and `facility/interaction-region.md` point to it (no number changed); the eic-profile-routing example output regenerated for the version only.
+
 ## 0.66.0 (2026-11-11)
 
 Minor release; contracts 3.27.0 and `adapters/geant4` 0.15.0 unchanged, `CORE_VERSION` 1.13.1. Ships the `experiment:eic` expansion (PR #387): `experiment:eic` 0.3.0 -> 0.6.0 (sourced EIC facility and ePIC detector design values, the EIC configuration checker) and `reference:detector-atlas` 0.3.1.

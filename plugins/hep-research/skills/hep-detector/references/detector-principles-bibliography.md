@@ -261,6 +261,24 @@ here, not a re-reading of the work, and no performance number is taken from them
   discrimination.
 <!-- /example -->
 
+<!-- example: source citations (experiments named as the source of a general method) -->
+**DIS kinematic reconstruction** (cited in [DIS kinematic reconstruction](dis-kinematic-reconstruction.md)). Each
+entry was matched against the Crossref record of its DOI on 2026-11-12 and read at the level that page states
+(its "Sources read" section).
+
+- U. Bassler and G. Bernardi, "On the kinematic reconstruction of deep inelastic scattering at HERA", Nucl.
+  Instrum. Methods A361 (1995) 197-208, DOI 10.1016/0168-9002(95)00173-5. Electron, hadron, mixed, double-angle,
+  Sigma and e-Sigma methods.
+- U. Bassler and G. Bernardi, "Structure function measurements and kinematic reconstruction at HERA", Nucl.
+  Instrum. Methods A426 (1999) 583-598, DOI 10.1016/S0168-9002(99)00044-3. Method comparison, rescaled variants.
+- M. Arratia, D. Britzger, O. Long and B. Nachman, "Reconstructing the kinematics of deep inelastic scattering
+  with deep learning", Nucl. Instrum. Methods A1025 (2022) 166164, DOI 10.1016/j.nima.2021.166164. Learned
+  reconstruction with QED-radiation inputs.
+- R. Abdul Khalek et al., "Science Requirements and Detector Concepts for the Electron-Ion Collider: EIC Yellow
+  Report", Nucl. Phys. A 1026 (2022) 122447, DOI 10.1016/j.nuclphysa.2022.122447. Sections 7.6.2, 8.1 and 8.2.3
+  (methods, migration, radiative corrections), section 8.4.6 (crossing angle and beam effects).
+<!-- /example -->
+
 ## Statistics, performance measurement, and uncertainties ([reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md), [data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md))
 
 - G. Cowan, K. Cranmer, E. Gross and O. Vitells, "Asymptotic formulae for

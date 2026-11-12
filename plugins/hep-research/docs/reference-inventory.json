@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 44,
-   "bytes": 698507,
+   "references": 45,
+   "bytes": 712129,
    "uncited": 0
   },
   "hep-measurement": {
@@ -45,7 +45,7 @@
   },
   "hep-theory": {
    "references": 31,
-   "bytes": 243624,
+   "bytes": 243815,
    "uncited": 0
   }
  },
@@ -1882,6 +1882,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-calibration.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2103,6 +2104,7 @@
     "skills/hep-detector/references/detector-glossary.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -2120,8 +2122,8 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 23048,
-   "lines": 283,
+   "bytes": 24464,
+   "lines": 301,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2204,10 +2206,29 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
+   "path": "skills/hep-detector/references/dis-kinematic-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 11956,
+   "lines": 156,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "profiles/experiments/eic/modules/facility/interaction-region.md",
+    "profiles/experiments/eic/modules/placement-inventory.md",
+    "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-theory/references/dis-kinematics.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-theory"
+   ],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 24344,
-   "lines": 330,
+   "bytes": 24594,
+   "lines": 333,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/facility/interaction-region.md",
@@ -2219,6 +2240,7 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
@@ -2626,6 +2648,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
@@ -2649,6 +2672,7 @@
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -4601,20 +4625,23 @@
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
    "owner": "hep-theory",
-   "bytes": 6128,
-   "lines": 79,
+   "bytes": 6224,
+   "lines": 80,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/eic/modules/facility/beam-configurations.md",
     "profiles/experiments/eic/modules/facility/interaction-region.md",
     "profiles/experiments/eic/modules/placement-inventory.md",
+    "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/dis-structure-functions.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/scripts/dis_kinematics.py",
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
    "last_commit": "f046cc69 2026-10-23"
   },
   {
@@ -4719,7 +4746,7 @@
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
    "owner": "hep-theory",
-   "bytes": 6785,
+   "bytes": 6880,
    "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -5253,6 +5280,7 @@
    "skills/hep-detector/references/signal-formation-and-readout.md"
   ],
   "reconstruction": [
+   "skills/hep-detector/references/dis-kinematic-reconstruction.md",
    "skills/hep-detector/references/event-reconstruction.md",
    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"

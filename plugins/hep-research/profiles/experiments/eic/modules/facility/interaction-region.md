@@ -28,4 +28,4 @@ These are envelopes for the detector, not the detector's dimensions. The detecto
 
 ## General method
 
-DIS kinematics in the head-on and laboratory frames belong to hep-theory (`<plugin root>/skills/hep-theory/references/dis-kinematics.md`), and the reconstruction of events with a crossing angle to hep-detector (`<plugin root>/skills/hep-detector/references/event-reconstruction.md`).
+DIS kinematics in the head-on and laboratory frames belong to hep-theory (`<plugin root>/skills/hep-theory/references/dis-kinematics.md`), and the reconstruction of x, y and Q^2, including events with a crossing angle, to hep-detector (`<plugin root>/skills/hep-detector/references/dis-kinematic-reconstruction.md`, with the reconstruction chain in `event-reconstruction.md`).

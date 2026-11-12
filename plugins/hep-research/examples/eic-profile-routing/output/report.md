@@ -1,6 +1,6 @@
 # experiment:eic usage example
 
-Profile experiment:eic 0.6.0 selected through hep-research.project.json; wrong pin rejected: True.
+Profile experiment:eic 0.6.1 selected through hep-research.project.json; wrong pin rejected: True.
 
 | Scenario | Decision | Files read |
 |---|---|---|
