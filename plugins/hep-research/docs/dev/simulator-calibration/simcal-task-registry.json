@@ -358,6 +358,13 @@
    "registered_at": "2026-11-12T14:15:51Z",
    "card_commit": "9e915272",
    "reason": "phase 3 start: refreshed from Part B, the index and A12; work packages WP-A to WP-F; no run judged yet"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "641eb006dc9c1da88de26e0665bf02999fd624b59d47dcb2448ed022c77f2125",
+   "registered_at": "2026-11-12T14:33:59Z",
+   "card_commit": "c1a40ed6",
+   "reason": "RICH-replica risk closed (S7 case ams02-rich-replica, check-spec ok); RICH items of 15.2 and 8.7 note 6 assigned to WP-F; no run judged yet"
   }
  ]
 }
