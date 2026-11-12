@@ -26,7 +26,7 @@ Status words: **tested** means the interface has checks that pass on synthetic f
 | R34 | Chain order of applied payloads | Written for T08 (job 7552825): each cell-chain step records its payload identity in chain order; exactness under a gain change is CAI-T08-1, tested in D2 stage 2 (job 7554028, below) | T07, T08 | `chain_record` in `adapters/calo-cluster/assets/calo_recipe/cell_chain.py` | `CAI-T08-1`, `CAI-T08-2` |
 | R32, R34, R37 | Gain payload of the cell chain with its channel map; derived payloads with their own identity and source; the product records the gain payload it consumed and is never overwritten; fixed-membership re-evaluation under another gain payload | Tested (D2 stage 2, job 7554028 PASS, on synthetic data): every refusal of the job exits 2 and writes nothing; 15 development products `calo-cluster-product/1`, 12 CAI products `/2` | T08 | `adapters/calo-cluster/assets/calo_recipe/gain_payload.py`, `calo_recipe/recalibration.py`, the gain step of the product header (`calo_recipe/cell_chain.py`, `calo_recipe/product.py`), `reconstruct` in `calo_cluster.py`; checks in `fixture_tools/t08_cai.py` | `tests/adapters/test_calo_cai.py`; `CAI-T08-1`, `CAI-T08-2` on t08-grid/1 block 1 (below) |
 | R34 | Stable channel identifiers, cluster track associations, cell path lengths | Partly written (job 7552825): stable channel IDs and per-cluster sharing fractions in the calo-cluster product; track associations and cell path lengths not written (no tracks in t08-grid/1) | T08 | `adapters/calo-cluster/assets/calo_recipe/product.py` | `CAI-T08-1`, `CAI-T08-2` |
-| R35 | Time hits before and after each correction step, event-time source and weights, dE/dx samples | Designed | T10 | Not yet written | `CAI-T10-1`, `CAI-T10-2` |
+| R35 | Time hits before and after each correction step, event-time source and weights, dE/dx samples | Time chain and event times written in the T10 timing lane, stage 1 (`t10-timing-stage-plan.md`), checked by unit tests on the login node only; its stage job is drafted, not run, so not yet Tested. dE/dx samples: Designed (stage 2) | T10 | `adapters/timing-pid/assets/timing_recipe/time_chain.py`, `timing_recipe/event_time.py`, `timing_recipe/timing_payload.py` (`timing-payload/1`) | `CAI-T10-1`, `CAI-T10-2` in `adapters/timing-pid/assets/fixture_tools/t10_cai.py`; `tests/adapters/test_timing_chain.py`, `tests/adapters/test_timing_cai.py` |
 | R36 | Rounds are separable: a payload records its family and round, a product the round it consumed, checked against the payload, and reuse follows identity only, with a new dependency also invalidating | Tested | T06 | `loop` in `conditions_payload.json`, `round` in `conditions_used`, `check_used`, `reuse_decision` | `test_rounds_are_separable`, `ConsumedRound`, `test_added_dependency_invalidates` |
 | R36 | Final-round delivery and iteration status of non-final outputs | Designed | T12 | Not yet written; the fixed final-round rule stays in `skills/hep-detector/references/calibration-and-alignment.md` (G06) | `CAI-T12-1`, `CAI-T12-2` |
 
@@ -124,6 +124,28 @@ Cases R37's stated expectations do not cover (its last paragraph), recorded befo
 - **The divide role on a fixture whose gain multiplies.** With g = 1 the two roles give the same E bit for bit; the expectation used is the divide formula `(g/g' − 1)` and event lines of the nominal products equal to job 7552825's.
 - **Clipped cells.** The readout clips before the gain, so a clipped member follows the multiplicative formula (hand-made test only; no saturation stratum in the job).
 - **The zdcsim input (D2 stage 3, job 7555555).** Products of the labelled `simulated-unvalidated` input are `calo-cluster-product/3`, read through an identity readout (no pedestal, gain 1, no noise). A labelled readout with a `calo-gain-payload/1` gain is refused, so CAI-T08-1 and -2 do not apply to `/3` products; they stay tested on t08-grid/1 only. The R34 chain records hold for `/3` as for `/1` and `/2`.
+
+## T10 acceptance items (timing lane stage 1; conventions and expectations fixed before the job, R37)
+
+Status: written; login unit tests and a seeded check-tool run only, its stage job drafted and not run, so neither item is Tested yet.
+Full text: `t10-timing-stage-plan.md` sections 2 and 3. Everything in this section that R37 does not state is **derived here, not from
+a source**, and is recorded here before the check runs (R37's recording rule).
+
+- **Chain and sign convention (fixture choices, derived here):** `t_1 = t_raw − o_c`, `t_2 = t_1 − a_c/sqrt(A)` (the 1/sqrt(A) walk
+  is a fixture form, no physical shape claimed), single-ended `t_3 = t_2 − d/v_c` with d the distance to the read-out end taken from
+  the track (source `track`; no position is invented). Raising channel c's offset by Δ lowers its offset-corrected times by Δ.
+- **Two-ended counter (derived here, not from a source):** end 0 at −L/2, end 1 at +L/2; `t_0 = (t_e0 + t_e1)/2 − L/(2v)`,
+  `x = v (t_e0 − t_e1)/2`. Raising end 0's offset by Δ moves the mean and `t_0` by −Δ/2 and x by −vΔ/2; end 1's by −Δ/2 and +vΔ/2.
+- **Event times:** the per-track leave-one-out excludes every hit of the track (keyed by `track_id`). For several hits K on the
+  changed channel (derived here; R37's formulas are the one-hit case): common `ΔT_0 = Σ_{k∈K} w_kΔt_k`, `ΔTOF_h = Δt_h − ΔT_0`;
+  leave-one-out for track j `ΔT_0^(−j) = Σ_{k∈K, k∉j} w_k^(−j)Δt_k`; external `ΔTOF_h = Δt_h`.
+- **Tolerances:** 1e-12 ns on time changes, exactly 0 where nothing changes, 1e-10 cm on positions, 1e-12 relative on β; step
+  Δ = 0.1 ns and Δ/2, difference quotients within 4 tol/Δ; β's forward-difference error ratio in [0.45, 0.55].
+
+| ID | Status | Fixture and check |
+| --- | --- | --- |
+| `CAI-T10-1` | Written, login only | single-ended counters; `adapters/timing-pid/assets/fixture_tools/t10_cai.py`, `tests/adapters/test_timing_cai.py` |
+| `CAI-T10-2` | Written, login only | a two-ended counter; same files |
 
 ## Boundaries for the C&A plan
 
