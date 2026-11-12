@@ -38,8 +38,8 @@ Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the en
                                              g4sim's replica r reproduces map_replica = r (documents {pipeline, map})
   calib_design.py map-schema  --map FILE     a built map against efficiency-map/1, exempting form.uniformity (D83 (1))
 --documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it;
-for pde-split {detector, detectors: {name}, maps: {name}, photons: {name}, primaries: {name}, pipelines: [..], readouts,
-build_environment} (detector specs and CSV files read as text).
+for pde-split {detector, detectors: {name}, maps: {name}, photons: {name}, primaries: {name}, pipelines: [..], rows:
+{name: edep_visible_ly_split rows}, readouts, build_environment} (detector specs and CSV files read as text).
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
 Output: one JSON object; status passed/ok (exit 0), failed (exit 1: P2, P5 or support failed, remedy level in the
@@ -264,6 +264,7 @@ def main(argv=None) -> int:
             docs[k] = {n: text(v) for n, v in (spec.get(k) or {}).items()}
         docs["maps"] = {n: io.load_object(str(base / v)) for n, v in (spec.get("maps") or {}).items()}
         docs["pipelines"] = [io.load_object(str(base / v)) for v in spec.get("pipelines") or []]
+        docs["rows"] = {n: io.load(str(base / v)) for n, v in (spec.get("rows") or {}).items()}
         try:
             return pde_split.design_findings(io.load_object(args.contract), io.load_object(args.plan), docs,
                                              field_types())

@@ -295,6 +295,24 @@ class SplitCheck(unittest.TestCase):
         self.assertFalse(r["sizing"]["sized"])
         self.assertGreater(r["sizing"]["photon_factor"], 1)
 
+    def test_delta_mu_from_both_maps_digitized_with_one_run_seed(self):
+        """delta mu automated: the nominal-PDE run and the split digitized with one run_seed (digitization and
+        thinning noise in the covariance); the exact split passes, the tied reflectance fails on d theta."""
+        m, r1, rp, lines = self.pair("p04", efficiency=0.4)
+        rows = P.bins_rows(200)
+        job = job_at(m)
+        obs = [{"quantity": "photoelectrons"}]
+        mu1 = np.mean([r[3] for r in digitize.digitize(job, rows)[0]]) * 2           # per-event sum, 2 channels
+        prop = S.digitized_propagation(m, r1, rp, {"p": 0.4}, job, rows, obs, [[1.0 / mu1]], [0.4])
+        self.assertGreater(np.array(prop["cov_delta_mu"])[0, 0], np.array(prop["digitization_cov"])[0, 0])
+        r = S.split_check(m, r1, rp, {"p": 0.4}, lines, prop)
+        self.assertEqual(r["status"], "passed", r["findings"])
+        m, r1, rt, lines = self.pair("tied", efficiency=0.4, rho=0.25)
+        prop = S.digitized_propagation(m, r1, rt, {"p": 0.4}, job, rows, obs, [[1.0 / mu1]], [0.4])
+        self.assertIn("pde_split.dtheta", codes(S.split_check(m, r1, rt, {"p": 0.4}, None, prop)["findings"]))
+        with self.assertRaises(S.SplitError):
+            S.digitized_propagation(m, r1, rp, {"p": 0.4}, job, rows, [{"quantity": "code"}], [[1.0]], [0.4])
+
     def test_pair_seeding_and_interval_reuse(self):
         def ev(run_id, seed, first, **kw):
             return {"run_id": run_id, "use": "pde-split-pair", "logical_run_seed": seed, "first_event": first,
@@ -421,6 +439,13 @@ class DesignRules(unittest.TestCase):
                               "split_check": {"one": "one", "p": "nom", "nominal": {"p": 0.4}}}}
         r = S.design_findings(contract(), plan, docs)
         self.assertEqual(r["status"], "passed", r["findings"])
+        dg = copy.deepcopy(plan)                    # delta mu from both maps digitized with the pipeline's run_seed
+        dg["pde_split"]["split_check"]["digitize"] = {"rows": "r", "readout": "ecal", "A": [[0.015]],
+                                                      "sigma_tot_design": [0.4],
+                                                      "observables": [{"quantity": "photoelectrons"}]}
+        r = S.design_findings(contract(), dg, {**docs, "rows": {"r": [list(x) for x in P.bins_rows(100)]}})
+        self.assertEqual(r["status"], "passed", r["findings"])
+        self.assertEqual(len(r["split_check"]["dtheta"]), 1)
         bad = copy.deepcopy(plan)
         bad["pde_split"]["readouts"]["ecal"]["route"] = "2_1"
         bad["pde_split"]["route1"]["stream"] = "efficiency_map/1"
@@ -490,7 +515,31 @@ class Evaluator(unittest.TestCase):
             self.assertEqual(rp["seeds"], r1["seeds"])                      # common random numbers
             self.assertEqual(e.default_method("pde"), "re-digitization")
         with self.assertRaises(Exception):
-            self.make("3")
+            self.make("4")
+
+    def test_route3_in_the_evaluator(self):
+        """Route 3 reads the efficiency-1 mapping run's photons.csv: a constant PDE(E) = 0.4 gives exactly the
+        prediction of route 2_1 at p = 0.4, and a theta on a table value moves it."""
+        sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
+        import calibration_g4sim_eval_fixtures as GE
+        import g4sim_calib_eval  # noqa: F401
+        from core.calibration import evaluator
+        ph, pr, emitted, detected = Runs.get("one")
+
+        def make(pde):
+            plan = GE.plan({"nominal": GE.batch(101, 0, 40, use="fit")})
+            plan["evaluator"]["documents"]["maps"]["light"] = P.build_map(emitted, detected)
+            plan["evaluator"]["pde"] = pde
+            return evaluator.make(plan)
+        flat = {"energy_eV": [2.0, 3.5], "value": [0.4, 0.4]}
+        r3 = make({"route": "3", "photons": ph, "primaries": pr, "centre_mm": P.CENTRE, "table": flat}).evaluate({})
+        r21 = make({"parameter": "pde", "route": "2_1", "nominal": 1.0}).evaluate({"pde": 0.4})
+        np.testing.assert_allclose(r3["pred"], r21["pred"])
+        e = make({"route": "3", "photons": ph, "primaries": pr, "centre_mm": P.CENTRE, "table": P.pde_table(),
+                  "parameter": "pde", "pointer": "/pde/table/value/3"})
+        k = e.evaluate({})["names"].index("pe_mean")
+        self.assertAlmostEqual(e.nominal_theta["pde"], 0.5)
+        self.assertGreater(e.evaluate({"pde": 0.9})["pred"][k], e.evaluate({})["pred"][k])
 
 
 class Geant4Items(unittest.TestCase):
