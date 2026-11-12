@@ -518,6 +518,7 @@
   "tests.core.test_calibration_validate": 24.0,
   "tests.core.test_calibration_locking": 2.2,
   "tests.core.test_calibration_model_identity": 1.8,
-  "tests.core.test_calibration_g4sim_binding": 0.1
+  "tests.core.test_calibration_g4sim_binding": 0.1,
+  "tests.core.test_calibration_map": 12.0
  }
 }

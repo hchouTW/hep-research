@@ -601,5 +601,101 @@ class Phase2Wiring(unittest.TestCase):
         self.assertEqual((code, out["status"]), (2, "rejected"))
 
 
+class Phase3MapScripts(unittest.TestCase):
+    """Phase 3 efficiency-map phi (section 6.7, D28, D83 (1), D84): calib_design.py, calib_propagate.py and
+    calib_likelihood.py subcommands; each negative with its positive control."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, record):
+        p = self.d / name
+        p.write_text(json.dumps(record))
+        return p
+
+    def test_design_map_items(self):
+        import test_calibration_map as TM
+        from core.simulation import efficiency_map as em
+        code, out = run("calib_design.py", "map-plan", "--plan", self.write("p.json", TM.varies_plan()))
+        self.assertEqual((code, out["status"]), (0, "passed"), out)
+        code, out = run("calib_design.py", "map-plan", "--plan",
+                        self.write("p2.json", TM.varies_plan(map_term="g4sim-replicas")))
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.map_per_map_replicas"))
+        doc = G4.efficiency_map()
+        doc["source_of_facts"] = "mapping run x"
+        doc["form"]["uniformity"] = em.transverse_uniformity(doc)
+        code, out = run("calib_design.py", "map-schema", "--map", self.write("m.json", doc))
+        self.assertEqual((code, out["known_defects"]), (0, ["D83 (1)"]))
+        del doc["source_of_facts"]
+        self.assertEqual(run("calib_design.py", "map-schema", "--map", self.write("m2.json", doc))[0], 1)
+        a, b = self.d / "a.csv", self.d / "b.csv"
+        a.write_text("event,track,x,y,z\n0,1,0.5,0,0\n1,1,0.2,0,0\n")
+        b.write_text("event,track,x,y,z\n0,1,0.5,0,0\n1,1,0.3,0,0\n")
+        self.assertEqual(run("calib_design.py", "map-primaries", "--primaries", a, a)[0], 0)
+        code, out = run("calib_design.py", "map-primaries", "--primaries", a, b)
+        self.assertEqual((code, out["findings"][0]["event"]), (1, "1"))
+
+    def test_theta_noise_and_g6_size(self):
+        import numpy as np
+        import test_calibration_map as TM
+        s = TM.surrogate(noise=0.02)
+        g = np.random.default_rng(11)
+        base = g.normal(size=(2, 20))
+        U = [(base + 0.3 * g.normal(size=(2, 20))).tolist() for _ in range(6)]
+        pts = [{"theta": {"t0": x}, "V_G": np.eye(2).tolist()} for x in (0.3, 1.0, 1.7)]
+        x = {"surrogate": s.record(), "points": pts, "sigma_tot": {"t0": 0.3}, "U": U, "seeding": "shared"}
+        code, out = run("calib_design.py", "theta-noise", "--input", self.write("t.json", x))
+        self.assertEqual((code, out["finding"]), (1, "p5.theta_noise"))
+        x["U"] = [(0.05 * np.asarray(u)).tolist() for u in U]
+        self.assertEqual(run("calib_design.py", "theta-noise", "--input", self.write("t2.json", x))[0], 0)
+        y = {"J": [[1.0]] * 8, "V_G": np.eye(8).tolist(), "maps": {"1": "map.json"}, "J_eps": np.eye(8).tolist(),
+             "R": 100, "n_toys": 2}
+        self.write("map.json", G4.efficiency_map())
+        code, out = run("calib_design.py", "map-g6-size", "--input", self.write("g.json", y))
+        self.assertEqual((code, out["R"], out["n_toys"]), (0, 100, 2))
+        y["R"] = 10
+        self.assertEqual(run("calib_design.py", "map-g6-size", "--input", self.write("g2.json", y))[0], 2)
+
+    def test_propagate_and_likelihood_map(self):
+        import numpy as np
+        import calibration_map_fixtures as MF
+        import test_calibration_map as TM
+        self.write("map.json", G4.efficiency_map())
+        maps = self.write("maps.json", {"1": "map.json"})
+        code, out = run("calib_propagate.py", "map-basis", "--maps", maps, "--replicas", 100, "--jacobian",
+                        self.write("j.json", np.eye(8)[:3].tolist()))
+        self.assertEqual((code, out["construction"], out["key"]["R"]), (0, "linear", 100))
+        self.assertEqual(run("calib_propagate.py", "map-basis", "--maps", maps, "--replicas", 50)[0], 2)
+        U = np.asarray(out["U"])
+        st = {"kind": "native-basis", "basis": out["key"]["id"], "observables": ["a", "b", "c"], "U": U.tolist()}
+        code, cc = run("calib_propagate.py", "map-cross", "--input", self.write("c.json", {"a": st, "b": st}))
+        self.assertEqual(code, 0)
+        np.testing.assert_allclose(cc["cov"], U @ U.T, atol=1e-15)
+        code, cc = run("calib_propagate.py", "map-cross", "--input",
+                       self.write("c2.json", {"a": st, "b": {**st, "kind": "study-pca"}}))
+        self.assertEqual((code, cc["code"]), (2, "propagate.pca_by_index"))
+        mp, bins, dets, chans = MF.scan(photons=3000)
+        jx = {"bins": {str(e): b for e, b in bins.items()}, "detections": [{str(e): c for e, c in d.items()}
+                                                                             for d in dets],
+              "maps": mp, "logical_run_seed": 5, "N_map": 3000, "R": 100}
+        code, out = run("calib_propagate.py", "joint-pattern", "--input", self.write("jp.json", jx))
+        self.assertEqual((code, out["registration_key"]["R"], len(out["replicas"])), (0, 100, 3))
+        jx["maps"] = [mp[1], mp[0], mp[2]]
+        self.assertEqual(run("calib_propagate.py", "joint-pattern", "--input", self.write("jp2.json", jx))[0], 1)
+        sur = TM.surrogate()
+        mt = {"mode": "shared", "U": [np.full((2, 3), j + 1.0).tolist() for j in range(6)], "rows": [0, 1],
+              "n_link": 2, "surrogate": sur.record(), "theta": {"t0": 0.5}}
+        code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt.json", mt))
+        self.assertEqual((code, out["n_phi"], out["profiled"]), (0, 3, True))
+        code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt2.json", {**mt, "fallback": True}))
+        self.assertEqual((code, out["point"], out["exported"]), (0, 1, False))
+        code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt3.json", {**mt, "mode": "fixed"}))
+        self.assertEqual((code, out["code"]), (2, "map_term.fixed"))
+
+
 if __name__ == "__main__":
     unittest.main()
