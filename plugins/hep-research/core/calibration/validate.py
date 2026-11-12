@@ -11,6 +11,8 @@ coordinates as r. tau_num = 1e-10 (section 8.7).
 """
 from __future__ import annotations
 
+from typing import Any
+
 import hashlib
 import json
 import math
@@ -65,7 +67,7 @@ def declaration_check(C_r0: np.ndarray, s: np.ndarray, constraints: list, expect
     Any failure is a contract error (exit 2); N_d^perp empty passes (c) (section 9.2)."""
     U, N = complement(s, constraints)
     Ct = C_r0 / np.outer(s, s)
-    out = {"k0": int(U.shape[1]), "failures": []}
+    out: dict[str, Any] = {"k0": int(U.shape[1]), "failures": []}
     if N.shape[1]:
         if toy_residuals is not None:
             proj = (np.asarray(toy_residuals) / s) @ N
@@ -129,7 +131,7 @@ def remove_directions(s: np.ndarray, constraints: list, removed: list) -> list:
     for v in removed:
         vt = s * np.asarray(v, float)
         p = U @ (U.T @ vt)
-        if np.linalg.norm(p) > 1e-12 * max(1.0, np.linalg.norm(vt)):
+        if np.linalg.norm(p) > 1e-12 * max(1.0, float(np.linalg.norm(vt))):
             out.append(p / s)
             U, N = complement(s, out)
     return out
@@ -264,7 +266,7 @@ def power_analytic(cross_reps: dict, k: int, alpha: float = 0.05, alpha_P: float
     = the chi'2 power at lambda_low."""
     m = len(cross_reps)
     lev = bonferroni_levels(m, "analytic", alpha_P)["lambda"]
-    out = {}
+    out: dict = {}
     for a, reps in cross_reps.items():
         if reps is None:
             out[a] = None
@@ -605,7 +607,8 @@ def cv_ensemble(problem, folds, truth, n_req: int, seed, n_start=None, g5=None, 
     incomplete with no redo; renewal stops at F_G5 > 0.25 sum n_req (section 9.3, 14.1, 19-14.1f)."""
     eps = F.eps_max_cv(len(folds))
     kst = F.k_star(n_req, replacement, eps)
-    vals, X, g5f, decided, i = [], 0, 0, 0, 0
+    vals: list = []
+    X, g5f, decided, i = 0, 0, 0, 0
     while len(vals) < n_req:
         if g5_stop(g5f, n_req):
             break

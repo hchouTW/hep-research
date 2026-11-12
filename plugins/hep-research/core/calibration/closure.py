@@ -97,7 +97,7 @@ def holm(pvals: dict, alpha: float = ALPHA_G8) -> dict:
 def decide(level: str, names: list, interior: dict, boundary: dict, sigma_design: np.ndarray) -> dict:
     """The G8 decision from the pseudo-data results. `interior`/`boundary` = {pulls?, errors: [N x d] theta-hat -
     truth, cover68: [N x d] bool, cover95: [N x d] bool, nontruth_basin: [N] bool}."""
-    p = {}
+    p: dict = {}
     err = np.asarray(interior["errors"], float)
     N = err.shape[0]
     bbar = err.mean(0)

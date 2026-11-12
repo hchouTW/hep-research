@@ -6,6 +6,8 @@ non-repeating seeds (for non-g4sim evaluators; the g4sim event-interval check is
 """
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from scipy import linalg
 
@@ -46,7 +48,7 @@ def sigma_boot(problem, beta_ref: np.ndarray, seed, N_t: int = 10, K_b: int = 6,
         rng = np.random.default_rng([F._seed_int(seed), t])
         observed = problem.simulate(beta_ref, rng)
         toy = problem.with_data(observed)
-        vals = []
+        vals: list = []
         r = 0
         while len(vals) < K_b:
             if X >= kst:
@@ -63,7 +65,7 @@ def sigma_boot(problem, beta_ref: np.ndarray, seed, N_t: int = 10, K_b: int = 6,
                 continue
             vals.append(f.beta.copy())
         groups.append(np.array(vals))
-    within = sum(np.cov(g, rowvar=False) * (K_b - 1) for g in groups) / (N_t * (K_b - 1))
+    within: Any = sum(np.cov(g, rowvar=False) * (K_b - 1) for g in groups) / (N_t * (K_b - 1))
     eps_p = F.eps_hat(X, n_tot, plus=True)
     w = F.w_factor(eps_p)
     return {"status": "ok", "Sigma_boot": 0.5 * (within + within.T), "nu_b": N_t * (K_b - 1), "X": X, "w": w,
@@ -96,7 +98,7 @@ def b_J(J: np.ndarray, W: np.ndarray, Ks: list) -> np.ndarray:
 def p5_b_J(points: list, bound: float = JACOBIAN_BIAS_BOUND) -> dict:
     """P5's b_J item over the scan points: each point {J, W, K: [K_l], sigma_tot}; |b_J,i| <= BJ_BOUND sigma_tot,i^design
     at every point, the worst deciding (0.10 by approval A9; Part B's design value was 0.15). K_l = 0 passes."""
-    worst = (0.0, None)
+    worst: tuple = (0.0, None)
     for i, p in enumerate(points):
         if not any(np.any(K) for K in p["K"]):
             continue
@@ -126,7 +128,7 @@ def p7(mode: str, k0: int, alternatives: dict, path: str, k: int | None = None, 
     else:
         m = len(toy_results or {})
         lev = V.bonferroni_levels(m, "toy")["rate"]
-        bounds = {}
+        bounds: dict = {}
         for a, tr in (toy_results or {}).items():
             if tr is None or tr.get("status") == "incomplete":
                 bounds[a] = None
@@ -158,7 +160,7 @@ def fold_split_check(contract: dict, folds: dict) -> list:
         groups.append(("N_dc", [k for k, v in nd["n"].items() if v]))
     for rel in val.get("total_dependent_relations", []):
         groups.append(("relation", list(rel["observables"])))
-    shapes = {}
+    shapes: dict = {}
     for o, f in folds.items():
         base = o.split("[")[0]
         shapes.setdefault(base, set()).add(f)
@@ -219,7 +221,8 @@ def practice_findings(plan: dict) -> list:
 def seed_independence(uses: dict) -> list:
     """Toy replicas, bootstrap realizations, pseudo-data and fit MC of a non-g4sim evaluator are independent when no
     seed (key) repeats across uses (section 6.6, 17): `uses` = {use: [seed keys]}. Returns the repeated keys."""
-    seen, out = {}, []
+    seen: dict = {}
+    out: list = []
     for use, keys in uses.items():
         for k in keys:
             kk = tuple(k) if isinstance(k, (list, tuple)) else (k,)

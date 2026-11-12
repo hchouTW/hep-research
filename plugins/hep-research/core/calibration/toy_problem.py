@@ -13,6 +13,8 @@
 """
 from __future__ import annotations
 
+from typing import Any
+
 import math
 
 import numpy as np
@@ -110,7 +112,7 @@ class ToyProblem:
         self.B = max(int(B or 0), L.bootstrap_size(p_max))
         self.boot_exposure = int(boot_exposure or exposure)  # != exposure only in a negative control (omega = 1)
         self.generation = dict(generation or {})
-        self.observed = None
+        self.observed: Any = None
         self.truth = None
         self.pert = np.zeros(len(self.names))
         self.sigma_noise = 0.0
@@ -121,14 +123,14 @@ class ToyProblem:
         self._data_model = build(self.exposure if not self.poisson_total else
                                  int(self.exposure + 8 * math.sqrt(self.exposure) + 20))
         self._boot_model = build(self.boot_exposure * self.B)
-        self._cache = {}
+        self._cache: dict = {}
         # validation observables (holdout, section 9.2): a separate event sample of the same detector (its own nominal
         # MC and its own data), so that validation data share no events with the calibration data
         self.val_names = list(val_names or [])
         self.val_exposure = int(val_exposure or exposure)
         self.val_mc_seed = val_mc_seed
         self.pert_val = np.zeros(len(self.val_names))
-        self._val_cache = {}
+        self._val_cache: dict = {}
         self._val_point = None
         if self.val_names:
             vb = val_build or build

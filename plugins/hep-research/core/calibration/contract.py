@@ -510,7 +510,7 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
         for f in locking.get("findings", []):
             out.add(f["code"], "$.observables", json.dumps({k: v for k, v in f.items() if k != "code"},
                                                            default=str)[:400])
-        decided = ("clause 9 item 2", "clause 9 item 8", "clause 9 item 13", "clause 6 item 2")
+        decided: tuple[str, ...] = ("clause 9 item 2", "clause 9 item 8", "clause 9 item 13", "clause 6 item 2")
         decided += ("clause 9 item 4", "clause 9 item 12") if (set(locking.get("not_applicable", [])) >= {
             "n_min", "block_conversion", "N_exp"} or (locking.get("counts") or {}).get("blocks")) else ()
         deferred = [d for d in deferred if not d.startswith(decided)]

@@ -16,6 +16,8 @@ computed here, called by `calib_contract.py check` at the evaluation points and 
 """
 from __future__ import annotations
 
+from typing import Any
+
 import math
 
 import numpy as np
@@ -102,7 +104,7 @@ def evaluation_points(theta_box: list, scan_points: np.ndarray, nuisance_sigmas:
     if d <= max_vertices_dim:
         for mask in range(2 ** d):
             pts.append(np.array([box[i, (mask >> i) & 1] for i in range(d)]))
-    out = []
+    out: list = []
     for p in pts:
         out.append((p, {}))
         for nm, sg in nuisance_sigmas.items():
@@ -113,7 +115,7 @@ def evaluation_points(theta_box: list, scan_points: np.ndarray, nuisance_sigmas:
 
 def worst_over_points(points, fn) -> dict:
     """fn(theta, nuisances) -> dict with `value` (larger is worse) and `passed`; the worst point decides."""
-    worst = None
+    worst: Any = None
     for th, nu in points:
         r = fn(th, nu)
         if worst is None or r["value"] > worst["value"]:
@@ -427,7 +429,7 @@ def locking_report(contract: dict, release_declarations: dict, problem, n_scan: 
             p.update({n: c + nu.get(n, 0.0) for n, (c, _) in problem.phi_spec.items()})
             p.update({k: v for k, v in nu.items() if k.startswith("eta:")})
             points.append(p)
-    worst = {"ratio": 0.0, "point": None}
+    worst: dict[str, Any] = {"ratio": 0.0, "point": None}
     findings = []
     for p in points:
         q = point_quantities(problem, {k: v for k, v in p.items() if not k.startswith("eta:")})
@@ -460,7 +462,8 @@ def locking_report(contract: dict, release_declarations: dict, problem, n_scan: 
                 findings.append({"code": "data.convention_violates_constraint", "observables": obs})
     constrained = {n for nd in val.get("N_d", []) + val.get("N_dc", []) for n, v in nd["n"].items() if v}
     findings += unbounded_relations(release_declarations or {}, constrained)
-    status, na, counts = ("failed" if findings else "passed"), [], {}
+    status, na = ("failed" if findings else "passed"), []
+    counts: dict[str, Any] = {}
     if all(b.kind == "gaussian-scalar" for b in problem.layout.blocks):
         na = ["n_min", "block_conversion", "N_exp"]
     elif not hasattr(problem, "expected_counts"):

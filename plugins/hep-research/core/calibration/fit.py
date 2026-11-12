@@ -20,6 +20,8 @@ Covariances: D = -2 ln L; F is the expected Hessian of D; Sigma_beta = 2 F^-1.
 """
 from __future__ import annotations
 
+from typing import Any
+
 import math
 from dataclasses import dataclass, field
 
@@ -108,7 +110,9 @@ def run_estimation_ensemble(member, n_req: int, seeds, eps_max: float = EPS_MAX,
     (converged: bool, value, record). A redo continues the ensemble: the summed X and the converged members of the
     earlier attempts replace n_req in k* (section 7.3, "A redo is treated as a continuation")."""
     kst = k_star(max(n_req + carried_converged, 1), True, eps_max)
-    values, bad, used = [], [], []
+    values: list = []
+    bad: list = []
+    used: list = []
     X = carried_X
     it = iter(seeds)
     while len(values) < n_req:
@@ -133,7 +137,9 @@ def run_testing_ensemble(member, n: int, seeds, eps_max: float = EPS_MAX, carrie
     """An ensemble for testing (reference distributions, power toys): no replacement, every one of the n toys run;
     the ratio test on X summed over attempts with Bin(attempts x n) (section 7.3)."""
     kst = k_star(n + carried_n, False, eps_max)
-    values, bad, used = [], [], []
+    values: list = []
+    bad: list = []
+    used: list = []
     it = iter(seeds)
     for _ in range(n):
         try:
@@ -207,7 +213,7 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
     edm_g1 = edm_threshold(problem)                      # the G1 criterion (with 0.1 sigma_noise)
     edm_tol = 0.002 * float(getattr(problem, "edm_tol", 0.1))   # pursued first: a noisy objective must not stop the
     lam = 1e-3                                           # minimizer early; G1's threshold accepts a stall
-    D = None
+    D: Any = None
     for it in range(max_steps):
         tp = b[tpi]
         h = hfun(tp)
@@ -334,6 +340,8 @@ class Fit:
     basins: list = field(default_factory=list)
     nonidentified: list = field(default_factory=list)
     endpoints: list = field(default_factory=list)
+    full: float = math.inf                       # D + ln det V_G of a basin's fit (section 7.4)
+    _lin: Any = None                             # the linearization of the locally linear toys (G6)
 
     def record(self):
         return {"theta": {k: float(v) for k, v in self.theta.items()}, "sigma_tot": self.sigma_tot.tolist(),
@@ -362,8 +370,10 @@ def iterate(problem, beta0: np.ndarray, frozen=None, boot_cov=None, w_boot: floa
     probe = L.Likelihood(lay, problem.observed, problem.reference(b[_tp_index_layout(lay)], b, frozen))
     tpi = _tp_index(probe)
     ref = probe.ref
-    hist, calls, prev = [], 0, None
-    m = None
+    hist: list = []
+    calls = 0
+    prev: Any = None
+    m: Any = None
     for it in range(1, limit + 1):
         m = minimize(problem, ref, b)
         calls += m.calls
@@ -584,7 +594,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, boot_cov
         fit.nonidentified = nonid
         fit.calls += calls
         return fit
-    reps = []
+    reps: list = []
     for e in admitted:                                  # the segment with V fixed at the representative (section 7.4)
         if not any(not separated(problem, r["ref"], r["beta"], e["beta"], tau_bar) for r in reps):
             e["ref"] = problem.reference(e["beta"][_tp_index_layout(lay)], e["beta"], frozen)
@@ -781,7 +791,9 @@ def g6(problem, fit: Fit, toys, n_lin_check: int = 50, alpha: float = 0.01, allo
     Delta chi2_lin| > 0.5 must be <= 5% (D56); otherwise `g6.linearity_check_failed` and the caller switches to full
     toys or a quadratic model."""
     T_obs = fit.D
-    T, X, lin_pts = [], 0, []
+    T: list = []
+    X = 0
+    lin_pts: list = []
     lk = L.Likelihood(problem.layout, problem.observed, fit.ref)
     tpi = _tp_index(lk)
     for observed, pert, ref in toys:

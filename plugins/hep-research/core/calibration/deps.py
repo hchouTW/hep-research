@@ -224,7 +224,7 @@ def check_packages(packages: list, upstreams: dict, common_sources: dict | None 
             for k, v in p["zeta"].items():
                 if k in p["exported_zeta"] and p["exported_zeta"][k] != v:
                     out.append({"code": "deps.package_split", "package": p["id"], "key": k})
-    by_key = {}
+    by_key: dict = {}
     for p in packages:
         for k, v in (p.get("zeta") or {}).items():
             by_key.setdefault(k, set()).add(v)
