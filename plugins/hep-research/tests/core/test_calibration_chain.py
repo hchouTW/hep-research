@@ -72,8 +72,8 @@ class Fixtures(unittest.TestCase):
         plan["kernels"]["shower_deposition"]["stored"]["steps"] = True
         got = [x["method"] for x in chain.candidate_methods(d["contract"], plan)["parameters"]["dead_material"]]
         self.assertEqual(got, ["step-level-reweighting", "resimulation", "surrogate-model"])
-        self.assertEqual(chain.candidate_methods(d["contract"], dict(plan, node_binding={"x": 1}))["status"],
-                         "incomplete")                                      # g4sim Table 2: phase 3
+        g4 = chain.candidate_methods(d["contract"], dict(plan, node_binding={"nodes": {}}))  # Table 2 (phase 3)
+        self.assertEqual((g4["status"], g4["findings"][0]["code"]), ("failed", "binding.simulator"))
 
 
 class ReferenceCoverage(unittest.TestCase):

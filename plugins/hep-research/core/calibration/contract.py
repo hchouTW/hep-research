@@ -6,7 +6,8 @@ read release metadata, lineage or totals call core.calibration.data. The locking
 produced by the model (rounding negligibility, N_exp of absolute count shapes, n_min, block-conversion conditions,
 sigma_i^(0) > 0, the standardized SVD of N_d and N_d,c, the N_d,c declaration check) are added in phase 2; the
 phase-0 check only confirms that their declarations exist and lists them under "deferred". The g4sim model identity
-(the five masked hashes of section 5.1) is added in phase 3 (section 17, g4sim preconditions).
+(the five masked hashes of section 5.1, core.calibration.model_identity) and the field binding of parameters (section
+11.4, calling core.calibration.chain) are phase 3.
 
 check() returns {"status": "accepted"|"rejected", "findings": [...], "deferred": [...]}; a rejected contract produces
 no result (exit 2). Standard library only.
@@ -18,6 +19,7 @@ import math
 
 from core.calibration import data_release as data
 from core.calibration import chain, deps
+from core.calibration import model_identity as mi
 from core.canonical import canonical_sha256
 
 ROLES = ("calibration", "validation", "measurement")
@@ -43,8 +45,9 @@ DEFERRED = [
     "clause 9 item 12: n_min and block-conversion conditions at the evaluation points (phase 2, calib_data.py)",
     "clause 9 item 13: sigma_i^(0) > 0 (phase 2)",
     "clause 6 item 2 and clause 7 item 4: the N_d,c and N_d decisions in standardized V_G coordinates (phase 2)",
-    "clause 1 item 2: the five g4sim model identity items (phase 3)",
 ]
+IDENTITY_UNVERIFIED = ("clause 1 item 2: the five g4sim identity items are present and of their form; they are "
+                       "recomputed from the model documents only with --model-documents")
 
 
 class _Findings(list):
@@ -123,6 +126,13 @@ def _models(c, out):
                             f"physics lists {a!r} and {b!r} are used as different models without a record that they "
                             "use different models in the relevant particle and energy range (clause 1 item 3)")
     if c.get("simulator") == "g4sim":
+        models = m.get("enumerated", []) + m.get("absorbed", [])
+        if not models:
+            out.add("models.identity_missing", "$.models", "with g4sim each model carries the five identity items of "
+                    "section 5.1; the contract declares no model (clause 1 item 2)")
+        for x in models:
+            for f in mi.item_findings(x.get("id"), x.get("identity")):
+                out.append(f)
         src = (c.get("source") or {}).get("density")
         if src == "external":
             out.add("source.external", "$.source", "an external event source is always rejected (clause 2)")
@@ -445,12 +455,35 @@ def psi_findings(contract: dict, design: dict) -> list[dict]:
     return out
 
 
+def identity_findings(contract: dict, identities: dict) -> list[dict]:
+    """Clause 1 item 2 with the documents: each g4sim model's declared items equal the items recomputed from its
+    documents (identities: {model id: model_identity.identity(...) or {"error": {code, message}}})."""
+    out = []
+    m = contract.get("models") or {}
+    for x in m.get("enumerated", []) + m.get("absorbed", []):
+        mid, got = x.get("id"), identities.get(x.get("id"))
+        path = f"$.models[{mid}].identity"
+        if got is None:
+            out.append({"code": "models.identity_documents", "path": path, "message": f"no documents given for model "
+                        f"{mid!r}: its identity cannot be recomputed"})
+        elif "error" in got:
+            out.append({"code": "models." + got["error"]["code"].replace("identity.", "identity_"), "path": path,
+                        "message": got["error"]["message"]})
+        else:
+            for item in mi.changed_items(x.get("identity") or {}, got):
+                out.append({"code": "models.identity_mismatch", "path": f"{path}.{item}", "message": f"the declared "
+                            f"{item} of model {mid!r} is not the one recomputed from its documents (section 5.1)"})
+    return out
+
+
 def check(contract: dict, releases: dict | None = None, series_graph: dict | None = None,
-          design: dict | None = None, locking: dict | None = None) -> dict:
+          design: dict | None = None, locking: dict | None = None, identities: dict | None = None) -> dict:
     """Section 5.2 in phase-0 scope, and the D37 rule of phase 1 when the design-stage linearization is given
     (design: theta, sigma_tot, psi_effect, from calib_design.py linearize). releases maps release hashes to their
     metadata (calib_data's view: lineage, samples, observables, declarations, totals); series_graph maps a contract
-    series to the series of its upstream results (calib_deps), for the cycle check."""
+    series to the series of its upstream results (calib_deps), for the cycle check. With g4sim (phase 3), the five
+    identity items of each model (clause 1 item 2) and the field binding of the parameters (chain.binding_findings);
+    identities, from the model documents, recomputes the items."""
     out = _Findings()
     releases = releases or {}
     if not isinstance(contract, dict):
@@ -470,6 +503,9 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
     _references(contract, out)
     _parameters(contract, out)
     _models(contract, out)
+    out.extend(chain.binding_findings(contract))
+    if identities is not None:
+        out.extend(identity_findings(contract, identities))
     samples = _samples(contract, out, releases)
     _observables(contract, out, samples)
     est = contract.get("estimators") or {}
@@ -502,6 +538,8 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
         if any({"calibration", "validation"} <= r for r in roles.values()):
             flags.append("cv")       # validation observables share events with calibration ones (section 2.1)
     deferred = list(DEFERRED)
+    if contract.get("simulator") == "g4sim" and identities is None:
+        deferred.append(IDENTITY_UNVERIFIED)
     if locking is not None and (locking.get("hashes") or {}).get("contract") != canonical_sha256(contract):
         out.add("contract.locking_stale", "$", "the locking report was not computed for this contract (its contract "
                 "hash differs or is missing): its decisions are not applied")
