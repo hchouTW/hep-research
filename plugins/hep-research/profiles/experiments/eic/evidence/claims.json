@@ -70,13 +70,24 @@
    "species": [],
    "range": null,
    "data_period": null,
-   "analysis": "none"
+   "analysis": "none",
+   "number_kind": "design-value"
   },
   "limitations": "Design value from an undated web page; the page does not say which design release it describes",
   "verification_strength": "page",
   "numeric_quotation_allowed": true,
   "last_reviewed": "2026-10-04",
-  "evidence_status": "public-fact"
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "magnet",
+   "quantity": "magnet field",
+   "value": "1.7",
+   "unit": "T",
+   "kind": "design",
+   "valid_for": "ePIC: magnet design value on a laboratory web page; design, not a measured field map",
+   "conditions": null
+  }
  },
  {
   "id": "eic:C04",
@@ -156,7 +167,7 @@
  },
  {
   "id": "eic:C07",
-  "claim": "The EIC Conceptual Design Report is described on its OSTI record as the technical reference design for the EIC, demonstrating the capability to meet the performance goals of the recommended scientific program; this profile has not read its body and quotes none of its design parameters",
+  "claim": "The EIC Conceptual Design Report is described on its OSTI record as the technical reference design for the EIC, demonstrating the capability to meet the performance goals of the recommended scientific program",
   "claim_types": [
    "detector_fact"
   ],
@@ -173,10 +184,10 @@
    "data_period": null,
    "analysis": "none"
   },
-  "limitations": "Abstract and metadata only; a reader needing a value must open the report and add a claim at the level read",
+  "limitations": "Abstract and metadata only for this pointer claim; design parameters read from the report body are separate numeric claims",
   "verification_strength": "abstract+metadata",
   "numeric_quotation_allowed": false,
-  "last_reviewed": "2026-10-04",
+  "last_reviewed": "2026-11-11",
   "evidence_status": "public-fact"
  },
  {
@@ -952,5 +963,1799 @@
   "last_reviewed": "2026-11-08",
   "evidence_status": "public-fact",
   "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
+ },
+ {
+  "id": "eic:C38",
+  "claim": "The EIC CDR design covers electron-proton center-of-mass energies E_CM from 20 to 140 GeV",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 3 (PDF p. 13); \u00a71.4, printed p. 11",
+  "scope": {
+   "text": "EIC facility: design target, center-of-mass energy range (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design target of the 2021 CDR; \u00a73.1.1 writes the upper end as 141 GeV, the overview as 140 GeV",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron-proton center-of-mass energy range",
+   "value": "20-140",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C39",
+  "claim": "The EIC CDR design reaches its highest luminosity, 10^34 cm^-2 s^-1, with 10 GeV electrons colliding with 275 GeV protons (E_CM 105 GeV)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 6 (PDF p. 16); Table 1.1, printed p. 7",
+  "scope": {
+   "text": "EIC facility: design target, peak electron-proton luminosity (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Peak design luminosity at one configuration; other configurations are lower (Table 3.3); a design target, not an achieved value",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "peak electron-proton luminosity",
+   "value": "10^34",
+   "unit": "cm^-2 s^-1",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.2 and Table 1.1",
+   "conditions": "10 GeV electrons on 275 GeV protons"
+  }
+ },
+ {
+  "id": "eic:C40",
+  "claim": "In the EIC CDR design the electron storage ring has beam energies up to 18 GeV, and the hadron storage ring operates between 41 and 275 GeV for protons and 41 to 110 GeV per nucleon for ions",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1.1, printed p. 93 (PDF p. 103)",
+  "scope": {
+   "text": "EIC facility: design target, beam energy ranges (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design ranges of the 2021 CDR; the configurations actually listed are in Tables 3.3 to 3.5",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "beam energy ranges (electron maximum; proton; ion per nucleon)",
+   "value": "18; 41-275; 41-110",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a73.1.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C41",
+  "claim": "The EIC CDR interaction region design uses a total crossing angle of 25 mrad between the electron and hadron beams, compensated by crab cavities (197 MHz) in each beam",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 6; \u00a73.1 printed p. 101 (PDF p. 111); \u00a73.2.1, printed p. 107 (PDF p. 117)",
+  "scope": {
+   "text": "EIC facility: design target, crossing angle (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design value of the 2021 CDR for the project interaction region; a second interaction region is not part of the project",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "total crossing angle",
+   "value": "25",
+   "unit": "mrad",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a73.2.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C42",
+  "claim": "The EIC CDR design keeps a region of \u00b14.5 m around the interaction point free of accelerator elements",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.4, printed p. 13 (PDF p. 23)",
+  "scope": {
+   "text": "EIC facility: design target, interaction-region free space (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design layout of the 2021 CDR; the detector's actual extent is set by the ePIC design, not by this claim",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "region around the interaction point kept free of accelerator elements",
+   "value": "4.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.4",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C43",
+  "claim": "The EIC CDR plans highly polarized (about 70%) electron, proton and light-ion (deuteron and \u00b3He) beams; heavy ion beams will be unpolarized",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a71.2, printed p. 3-4 (PDF pp. 13-14); \u00a71.4, printed p. 14 (PDF p. 24); \u00a75.1, printed p. 427",
+  "scope": {
+   "text": "EIC facility: design target, beam polarization (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "An approximate design level for the polarized beams, stated for the facility as a whole rather than per configuration; not an achieved polarization",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "planned beam polarization (electrons, protons, light ions)",
+   "value": "70",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), \u00a71.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C44",
+  "claim": "The EIC CDR lists electron-proton beam energy configurations (electron x proton, GeV) 18 x 275, 10 x 275, 10 x 100, 5 x 100 and 5 x 41, at center-of-mass energies 140.7, 104.9, 63.2, 44.7 and 28.6 GeV",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1.1, Tables 3.3 and 3.4, printed pp. 102-103 (PDF pp. 112-113)",
+  "scope": {
+   "text": "EIC facility: design target, electron-proton configurations (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Configurations as listed in the 2021 CDR tables; the project may run others",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron x proton beam energies",
+   "value": "18x275, 10x275, 10x100, 5x100, 5x41",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), Tables 3.3 and 3.4",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C45",
+  "claim": "In the EIC CDR Table 3.3 setting, the electron-proton luminosities for 18 x 275, 10 x 275, 10 x 100, 5 x 100 and 5 x 41 GeV are 1.54, 10.00, 4.48, 3.68 and 0.44 in units of 10^33 cm^-2 s^-1",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1.1, Table 3.3, printed p. 102 (PDF p. 112; values read from the rendered page)",
+  "scope": {
+   "text": "EIC facility: design target, electron-proton luminosity per configuration (CDR 2021, Table 3.3 setting)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design luminosities with strong hadron cooling in one of two interaction-region settings (Table 3.3); the other setting (Table 3.4) gives lower values at the higher energies",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron-proton luminosity per configuration",
+   "value": "1.54, 10.00, 4.48, 3.68, 0.44",
+   "unit": "10^33 cm^-2 s^-1",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), Table 3.3",
+   "conditions": "Table 3.3 setting, with strong hadron cooling"
+  }
+ },
+ {
+  "id": "eic:C46",
+  "claim": "The EIC CDR lists collisions of electrons with fully stripped gold ions (Z = 79, A = 197) at electron x gold-ion beam energies 18 x 110, 10 x 110, 5 x 110 and 5 x 41 GeV, ion energies per nucleon, at center-of-mass energies 89.0, 66.3, 46.9 and 28.6 GeV",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design parameter from the CDR; a design target, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "\u00a73.1 printed p. 101 and Table 3.5, printed p. 104 (PDF pp. 111, 114); per nucleon from \u00a73.1.1, printed p. 93",
+  "scope": {
+   "text": "EIC facility: design target, electron-gold configurations (CDR 2021)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Configurations as listed in the 2021 CDR; Table 3.5 itself does not label the ion energy as per nucleon (\u00a73.1.1 does); center-of-mass energies are per nucleon pair",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "electron x gold-ion beam energies (ion energy per nucleon)",
+   "value": "18x110, 10x110, 5x110, 5x41",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC CDR (February 2021), Table 3.5",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C47",
+  "claim": "The EIC project requirements set a 25 mrad crossing angle for the colliding beams and require the crossing angle to be compensated with crab cavities in both the electron and hadron beams",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project requirement on the interaction region; a requirement, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S18"
+  ],
+  "location": "F-IR-HSR.08 (updated 2026-09-21) and F-IR-RF.01 (updated 2025-09-30), approved",
+  "scope": {
+   "text": "EIC facility: design requirement, crossing angle (project requirements page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "requirement"
+  },
+  "limitations": "A live requirements page; requirement wording and dates as read on the verification date",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "crossing angle of the colliding beams",
+   "value": "25",
+   "unit": "mrad",
+   "kind": "design",
+   "valid_for": "EIC project requirements page IR.html, read 2026-11-11, F-IR-HSR.08 (updated 2026-09-21) and F-IR-RF.01 (updated 2025-09-30)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C48",
+  "claim": "The EIC project requirements set a stay-clear volume around the IP that extends -4.5 m along Z in the electron direction and +5 m in the hadron direction, with an additional 0.5 m on either side, a total stay-clear length of 10.5 m",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project requirement on the interaction region; a requirement, not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S18"
+  ],
+  "location": "F-IR.05 (updated 2025-08-20), approved",
+  "scope": {
+   "text": "EIC facility: design requirement, stay-clear volume around the interaction point (project requirements page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "requirement"
+  },
+  "limitations": "Requirement on the space left for the detector, not the detector's dimensions; differs from the symmetric \u00b14.5 m of the 2021 CDR",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "stay-clear length along Z around the IP (electron side; hadron side; margin; total)",
+   "value": "-4.5; 5; 0.5; 10.5",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC project requirements page IR.html, read 2026-11-11, F-IR.05 (updated 2025-08-20)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C49",
+  "claim": "The EIC project requirements place the first EIC interaction-region detector system at the IP of IR6, with at least one interaction region and detector system and the feasibility of adding a second",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project requirement on the interaction-region location",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S18"
+  ],
+  "location": "F-IR.01 (updated 2025-08-20) and G-IR.02 (updated 2026-09-21), approved",
+  "scope": {
+   "text": "EIC facility: design requirement, interaction-region location (project requirements page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Location requirement only; which experiment occupies it is not stated on this page",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C50",
+  "claim": "DOE approved Critical Decision 3B for the Electron-Ion Collider, the second phase of long-lead procurements of accelerator and detector components as the EIC transitions into construction, after a first phase announced in April 2024; the EIC is built at Brookhaven National Laboratory in partnership with Jefferson Lab",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "project stage and site, not a design parameter",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S19"
+  ],
+  "location": "article dated 2026-02-06, paragraphs 1 and 6",
+  "scope": {
+   "text": "EIC facility: project stage as of February 2026 (laboratory news page)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Project stage as announced on 2026-02-06; later decisions are unverified, not nonexistent",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C51",
+  "claim": "The 2023 NSAC Long Range Plan recommends the expeditious completion of the EIC as the highest priority for facility construction, and records that the EIC was launched as a DOE project in 2019 and its conceptual design approved in 2021",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "programme standing, not a design parameter",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S20"
+  ],
+  "location": "Executive Summary, Recommendation 3 (PDF p. 12)",
+  "scope": {
+   "text": "EIC facility: programme standing (advisory report, 2023)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Advisory recommendation as of 2023; not a project decision",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C52",
+  "claim": "The 2023 NSAC Long Range Plan states that the competitive review led to the ePIC collaboration, which is finalizing the designs of the detector subsystems at IR6, and that a second detector would turn on several years after ePIC",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "programme standing, not a design parameter",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S20"
+  ],
+  "location": "Chapter 9 Facilities, EIC (PDF p. 74)",
+  "scope": {
+   "text": "ePIC: identity and site as described in an advisory report (2023)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Advisory report as of 2023; design status has moved on since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C53",
+  "claim": "The EIC Yellow Report states the machine requirements as a luminosity of 10^33 to 10^34 cm^-2 s^-1 over center-of-mass energies between 20 and 140 GeV, electron and light-ion beam polarizations above 70%, and ion beams from deuterium to the heaviest nuclei",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.1, report p. 406-407",
+  "scope": {
+   "text": "EIC facility: design target, machine requirements as stated in the Yellow Report",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Requirements of the 2021 report; the same section gives the then-current design as 29 to 141 GeV",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "required center-of-mass energy range",
+   "value": "20-140",
+   "unit": "GeV",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C54",
+  "claim": "In the EIC Yellow Report machine description the two beams collide at a crossing angle of 25 mrad, and the luminosity loss from the crossing angle is compensated by crab cavities in each beam",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.1, report p. 407",
+  "scope": {
+   "text": "EIC facility: design target, crossing angle (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design of the 2021 report; agrees with the CDR",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "crossing angle",
+   "value": "25",
+   "unit": "mrad",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C55",
+  "claim": "The EIC Yellow Report states that both the electron and the proton beam will reach 70% polarization, with the same level expected for \u00b3He beams; electron polarization is longitudinal, while protons and light ions are required in both longitudinal and transverse polarization",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.1, report p. 407",
+  "scope": {
+   "text": "EIC facility: design target, beam polarization (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Design level of the 2021 report, not an achieved polarization",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "beams",
+   "quantity": "beam polarization (electron, proton)",
+   "value": "70",
+   "unit": "%",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C56",
+  "claim": "The EIC Yellow Report gives the reference space kept free of machine elements around the IP as [-4.5, 5.0] m along the beam line",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Ch. 9, Sec. 9.2, item 5, report p. 405",
+  "scope": {
+   "text": "EIC facility: design target, space kept free of machine elements around the IP (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Reference figure of the 2021 report for the first interaction region; the detector's actual extent is an ePIC design matter",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "interval along the beam line kept free of machine elements around the IP (IP at zero)",
+   "value": "-4.5; 5.0",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 9.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C57",
+  "claim": "The EIC Yellow Report describes the detector integration in the interaction region as extending over \u00b1 40 m beyond the main detector, with a far-forward detector region downstream of the ion beam covering about 30 m and a far-backward region along the outgoing lepton beam for luminosity monitoring and low-Q\u00b2 coverage",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility design target from the Yellow Report machine chapter; not an achieved value",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "Sec. 10.2, report p. 411-412",
+  "scope": {
+   "text": "EIC facility: design target, extent of the far-forward and far-backward regions (Yellow Report)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-target"
+  },
+  "limitations": "Layout description of the 2021 report; the detectors placed there are ePIC design matters",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "EIC",
+   "subsystem": "interaction region",
+   "quantity": "extent along the beam lines of the integrated detector region (overall; far-forward)",
+   "value": "40; 30",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "EIC Yellow Report (v1.1, March 2021; Nucl. Phys. A 1026 (2022) 122447), Sec. 10.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C58",
+  "claim": "The ePIC tracking system occupies a volume of radius R = 75 cm and -165 cm < z < 200 cm along the beam axis, inside the MARCO magnet, whose reference field is 1.7 T and which can provide up to 2 T (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.1, p. 52; Sec. 8.3.3, p. 59",
+  "scope": {
+   "text": "ePIC: design value, tracking volume and magnet field (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "tracking",
+   "quantity": "tracking volume radius",
+   "value": "75",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.3",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C59",
+  "claim": "In the ePIC Silicon Vertex Tracker design the Inner Barrel has three MAPS layers at radii of 38, 50 and 125 mm and the Outer Barrel two layers at radii of 270 and 420 mm; the SVT active volume is limited to -105 < z < 135 cm and a radius of approximately 50 cm",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S26"
+  ],
+  "location": "Sec. 1-3",
+  "scope": {
+   "text": "ePIC: design value, silicon vertex tracker layers (journal paper, 2025)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "Design of 2025; the PDR draft of December 2024 lists slightly different inner radii",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "tracking",
+   "quantity": "SVT barrel layer radii",
+   "value": "38, 50, 125, 270, 420",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "Nucl. Instrum. Meth. A 1080 (2025) 170806",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C60",
+  "claim": "The ePIC SVT Inner Barrel uses the ALICE ITS3 MOSAIX MAPS sensor, made in 65 nm CMOS, thinned to 50 \u03bcm, with a pixel size of 21 \u00d7 23 \u03bcm\u00b2, twelve repeated sensor units stitched to about 27 cm; the Outer Barrel uses a modified version, the EIC Large Area Sensor",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S26"
+  ],
+  "location": "Sec. 2-3",
+  "scope": {
+   "text": "ePIC: design value, silicon vertex tracker sensors (journal paper, 2025)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "Sensor design values; the Outer Barrel sensor is still being developed",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "tracking",
+   "quantity": "MAPS sensor thickness",
+   "value": "50",
+   "unit": "\u03bcm",
+   "kind": "design",
+   "valid_for": "Nucl. Instrum. Meth. A 1080 (2025) 170806",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C61",
+  "claim": "The ePIC barrel MPGD trackers are CyMBaL, in a radial envelope between 55 cm and 60 cm covering -105 cm < z < 143 cm, and a \u03bcRWELL layer at a radius of 72.5 cm in front of the hpDIRC, built of 12 rectangular modules per z-sector in a dodecagon (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.3.2, pp. 85-86",
+  "scope": {
+   "text": "ePIC: design value, barrel MPGD trackers (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "tracking",
+   "quantity": "CyMBaL radial envelope",
+   "value": "55-60",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.3.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C62",
+  "claim": "The ePIC MPGD endcap trackers are four G-RWELL disks (a GEM pre-amplification stage over a \u03bc-RWELL), two in the electron-going and two in the hadron-going region, covering |\u03b7| > 2 over the full azimuth, with a 2D strip readout of 600 \u03bcm pitch",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S23"
+  ],
+  "location": "Abstract; Sec. 1-2",
+  "scope": {
+   "text": "ePIC: design value, MPGD endcap trackers (journal paper, 2025)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "Design as described in 2025; the PDR draft gives other coverage limits for these disks",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "tracking",
+   "quantity": "MPGD endcap strip pitch",
+   "value": "600",
+   "unit": "\u03bcm",
+   "kind": "design",
+   "valid_for": "Nucl. Instrum. Meth. A 1080 (2025) 170622",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C63",
+  "claim": "The ePIC pfRICH is a proximity-focusing RICH in the backward region, -3.5 \u2272 \u03b7 \u2272 -1.5, made of an aerogel radiator, conical mirrors and a plane of HRPPD photosensors",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S24"
+  ],
+  "location": "Sec. 1-2",
+  "scope": {
+   "text": "ePIC: design value, pfRICH coverage (journal paper, 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "Coverage stated approximately",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "particle identification",
+   "quantity": "pfRICH pseudorapidity coverage",
+   "value": "-3.5 to -1.5",
+   "unit": "",
+   "kind": "design",
+   "valid_for": "JINST 21 (2026) P09043",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C64",
+  "claim": "The ePIC pfRICH is a cylindrical vessel 1.3 m in diameter and about 49 cm long, 123.6 cm from the interaction point, with 2.5 cm thick aerogel tiles of nominal refractive index 1.040 and 68 HRPPD photosensors (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.4.2, pp. 125-127",
+  "scope": {
+   "text": "ePIC: design value, pfRICH geometry and radiator (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "particle identification",
+   "quantity": "pfRICH vessel distance from the interaction point",
+   "value": "123.6",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.4.2",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C65",
+  "claim": "The ePIC dRICH design uses an aerogel radiator with refractive index 1.026, the current default replacing 1.019, planned to be 4 cm thick, and a C2F6 gas radiator, with six identical sectors of spherical mirrors and SiPM photosensors",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S17"
+  ],
+  "location": "Sec. 1, 3, 4",
+  "scope": {
+   "text": "ePIC: design value, dRICH radiators (journal paper, 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "Design as of 2026; the radiator choice evolved (1.019 earlier)",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "particle identification",
+   "quantity": "dRICH aerogel radiator thickness",
+   "value": "4",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "Nucl. Instrum. Meth. A 1088 (2026) 171509",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C66",
+  "claim": "The ePIC dRICH is a ring-shaped detector 1.27 m long and 3.6 m in diameter in the forward endcap, with 6 sectors, aerogel of refractive index 1.026 and C2F6 gas; its SiPMs are read out by ALCOR chips (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.4.4, p. 169; Table 8.34, p. 189",
+  "scope": {
+   "text": "ePIC: design value, dRICH geometry and readout (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the SiPM and ALCOR counts differ between Table 8.34 and the DAQ component-count figure and are not quoted",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "particle identification",
+   "quantity": "dRICH length",
+   "value": "1.27",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.4.4",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C67",
+  "claim": "The ePIC hpDIRC has twelve optically isolated sectors, each with a bar box of ten synthetic fused-silica radiator bars and a readout box; each prism is synthetic fused silica with a 32\u00b0 opening angle, 237 mm \u00d7 350 mm \u00d7 300 mm, its detector plane covered by 24 sensors (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.4.3, pp. 154-155",
+  "scope": {
+   "text": "ePIC: design value, hpDIRC layout (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the bar length and radius are stated inconsistently in the draft and are not quoted",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "particle identification",
+   "quantity": "hpDIRC prism opening angle",
+   "value": "32",
+   "unit": "deg",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.4.3",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C68",
+  "claim": "The ePIC time-of-flight system uses AC-LGAD sensors: strips of 500 \u03bcm \u00d7 1 cm pitch on 3.2x2 cm sensors 50 \u03bcm thick in the barrel, and pixels of 500 \u03bcm \u00d7 500 \u03bcm on 1.6x1.6 cm sensors 20 \u03bcm thick in the endcap and the B0 trackers; the barrel has 144 tilted staves about 270 cm long (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.4.1, p. 106; Table 8.18, p. 107",
+  "scope": {
+   "text": "ePIC: design value, time-of-flight sensors (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the barrel radius and the forward channel count are stated inconsistently and are not quoted",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "particle identification",
+   "quantity": "AC-LGAD pixel pitch (endcap TOF and B0 trackers)",
+   "value": "500 \u00d7 500",
+   "unit": "\u03bcm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Table 8.18",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C69",
+  "claim": "The ePIC backward electromagnetic calorimeter (EEEMCal) uses lead tungstate (PWO) crystals with 2 \u00d7 2 cm2 transverse size and 20 cm length (22 X0), at 175 cm from the interaction point, read out by SiPMs (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.5.1, pp. 202-203",
+  "scope": {
+   "text": "ePIC: design value, backward electromagnetic calorimeter (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the crystal count and coverage are not stated in the draft",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "calorimetry",
+   "quantity": "EEEMCal distance from the interaction point",
+   "value": "175",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.5.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C70",
+  "claim": "The ePIC Barrel Imaging Calorimeter (BIC) has an active length of 435 cm, an inner radius of 82.5 cm and 48 sectors, covering -1.71 \u2272 \u03b7 \u2272 1.31 (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Table 8.38, p. 216",
+  "scope": {
+   "text": "ePIC: design value, barrel electromagnetic calorimeter (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "calorimetry",
+   "quantity": "BIC inner radius",
+   "value": "82.5",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Table 8.38",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C71",
+  "claim": "The ePIC forward electromagnetic calorimeter (tungsten powder and scintillating fibres) covers 1.4 \u2272 \u03b7 \u2272 3.9 with an outer radius of about 190 cm and its front face at about 341 cm, in 18320 towers of 2.5 cm \u00d7 2.5 cm, each read out by four 6 \u00d7 6 mm2 SiPMs (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Table 8.44, p. 236",
+  "scope": {
+   "text": "ePIC: design value, forward electromagnetic calorimeter (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the table labels the coverage row with a word this profile does not copy",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "calorimetry",
+   "quantity": "forward EMCal tower transverse size",
+   "value": "2.5 \u00d7 2.5",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Table 8.44",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C72",
+  "claim": "The ePIC hadronic calorimeters by region: backward (nHCal) 10 layers of 4 cm steel and 0.4 cm scintillator between radii 14 cm and 276 cm at -395 cm; barrel, based on the sPHENIX outer HCal, steel within envelope radii of 1820 mm and 2700 mm; forward (LFHCal) at z = 3.68 m, radius about 2.7 m, depth 1.32 m, 1.52 cm steel and 0.4 cm scintillator layers (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.6.1, p. 249; Table 8.52, p. 271; Sec. 8.3.6.3, p. 289",
+  "scope": {
+   "text": "ePIC: design value, hadronic calorimeters (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the draft states the backward and insert coverage inconsistently, which is not quoted; the barrel channel count differs between Table 8.52 and the DAQ component-count figure and is not quoted",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "calorimetry",
+   "quantity": "LFHCal position along z",
+   "value": "3.68",
+   "unit": "m",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.6.3",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C73",
+  "claim": "CALOROC1B is a 36-channel front-end ASIC that reads large-area SiPMs for the ePIC calorimeters; each channel has 3 amplification paths (four gains), two ADCs for the energy and a discriminator with a TDC for the time of arrival, and the chip has a streaming readout",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S25"
+  ],
+  "location": "Abstract; Sec. 1-2",
+  "scope": {
+   "text": "ePIC: design value, calorimeter front-end ASIC (journal paper, 2025)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "Architecture of the CALOROC1B version; which calorimeters use it is not stated",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "readout",
+   "quantity": "CALOROC1B channels per ASIC",
+   "value": "36",
+   "unit": "channels",
+   "kind": "design",
+   "valid_for": "JINST 20 (2025) P11024",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C74",
+  "claim": "The ePIC B0 detector has four silicon tracking layers between 590 and 690 cm from the interaction point and a calorimeter of PbWO4 crystals of 2 x 2 x 20 cm3 (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.7.1, p. 304",
+  "scope": {
+   "text": "ePIC: design value, B0 detector (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the crystal count is not quoted because the DAQ component-count figure lists a different channel count",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "far-forward and far-backward",
+   "quantity": "B0 tracker position range along the beam",
+   "value": "590-690",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.7.1",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C75",
+  "claim": "The ePIC zero-degree calorimeter has a crystal layer of 2 \u00d7 2 cm2 LYSO crystals in a 30 \u00d7 30 grid (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.7.3, p. 319",
+  "scope": {
+   "text": "ePIC: design value, ZDC crystal layer (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; the ZDC hadronic section is a placeholder in the draft",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "far-forward and far-backward",
+   "quantity": "ZDC crystal grid",
+   "value": "30 \u00d7 30",
+   "unit": "crystals",
+   "kind": "design",
+   "valid_for": "PDR draft, Dec 2024, Sec. 8.3.7.3",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C76",
+  "claim": "The SiPM-on-tile ZDC design, which its authors state was incorporated into the ePIC baseline design, has overall dimensions of 60 \u00d7 60 \u00d7 162 cm3, iron absorber blocks of 96 mm \u00d7 98 mm \u00d7 20 mm and 25 cm2 hexagonal scintillator tiles 3 mm thick read out by SiPMs",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC construction parameter; a design value, not a measured one",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S06"
+  ],
+  "location": "Sec. 2; Addendum",
+  "scope": {
+   "text": "ePIC: design value, ZDC hadronic design (journal paper, 2025)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "design-value"
+  },
+  "limitations": "The baseline statement is the authors' own (addendum), not a collaboration document; the tile layout may have changed since (later ePIC material describes square tiles); a 2024 proceedings describes a crystal electromagnetic section in front",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "ePIC",
+   "subsystem": "far-forward and far-backward",
+   "quantity": "ZDC overall dimensions",
+   "value": "60 \u00d7 60 \u00d7 162",
+   "unit": "cm",
+   "kind": "design",
+   "valid_for": "Nucl. Instrum. Meth. A 1079 (2025) 170613",
+   "conditions": null
+  }
+ },
+ {
+  "id": "eic:C77",
+  "claim": "The ePIC zero-degree calorimeter uses SiPM-on-tile technology, which is used across ePIC central and forward calorimetry; its final readout electronics are based on the CALOROC ASIC",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC design fact without numbers",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S07"
+  ],
+  "location": "Sec. 1, 2, 5",
+  "scope": {
+   "text": "ePIC: ZDC technology and readout (journal paper, 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Statements of a prototype paper about the final design",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C78",
+  "claim": "The ePIC Roman pots and off-momentum detectors are vacuum-based AC-LGAD silicon sensors arranged in two stations, and the low-Q\u00b2 tagger has two trackers of four layers of Timepix4 pixel sensors (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC design fact without numbers",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.7.2, p. 312; Sec. 8.3.8.2, pp. 340-341",
+  "scope": {
+   "text": "ePIC: far-forward trackers and low-Q\u00b2 tagger (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since; positions are not given or not final",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C79",
+  "claim": "ePIC has no global trigger system: each front-end board self-triggers and provides a stream of hit data (PDR draft, Dec 2024)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC design fact without numbers",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "Sec. 8.3.10.2, p. 353",
+  "scope": {
+   "text": "ePIC: streaming readout without a hardware trigger (PDR draft, Dec 2024)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "A draft design report (PDR draft, Dec 2024); the design may have changed since",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C80",
+  "claim": "The ePIC barrel PID system is a DIRC (hpDIRC) with a compound lens and small-pixel photosensors; its baseline design is advancing toward production, with legacy BaBar DIRC radiator bars being refurbished at Jefferson Lab",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC design fact without numbers",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S27",
+   "eic:S22"
+  ],
+  "location": "Abstracts",
+  "scope": {
+   "text": "ePIC: hpDIRC concept (journal papers, 2024 and 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Abstracts only; no number quoted",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C81",
+  "claim": "The ePIC dRICH photodetector uses SiPMs (chosen also for the magnetic field at the dRICH) read out by the ALCOR mixed-signal ASIC developed for the dRICH",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "ePIC design fact without numbers",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S29",
+   "eic:S28"
+  ],
+  "location": "Abstracts",
+  "scope": {
+   "text": "ePIC: dRICH photodetector and readout (journal papers, 2024 and 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Abstracts only; no number quoted; prototype values not used",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C82",
+  "claim": "The ePIC Early Science Report proposes for the first five years an electron beam of 9 GeV with the configurations e+Ag 9x115, e+D 9x130, e+p 9x130, e+p 9x275, e+Au 9x100 and e+\u00b3He 9x166 GeV, ion energies and e+A luminosities per nucleon, with integrated luminosities of 1.0, 1.5, 1.0, 2.5, 1.0 and 1.5 fb^-1",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "proposed run plan; not a design target",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S21"
+  ],
+  "location": "Sec. 3, Table 2, pp. 3-4",
+  "scope": {
+   "text": "ePIC: proposed run plan (not a design target), early-running configurations (Early Science Report, 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "proposal"
+  },
+  "limitations": "A provisional proposal of the collaboration, expected to evolve with the accelerator; not a facility design target",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C83",
+  "claim": "The ePIC Early Science Report expects no beam polarization in the first year, then longitudinally polarized electrons with transversely and later longitudinally polarized protons, with polarization expected to reach 70% for both electron and hadron beams",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "proposed run plan; not a design target",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S21"
+  ],
+  "location": "Sec. 3, p. 3",
+  "scope": {
+   "text": "ePIC: proposed run plan (not a design target), early-running polarization (Early Science Report, 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "proposal"
+  },
+  "limitations": "A provisional proposal; not a facility design target",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C84",
+  "claim": "The ePIC Early Science Report states that the 9 GeV electron beam limits the e+p center-of-mass energy to 100 GeV, compared with 140 GeV at the 18x275 GeV design configuration, and that per-species integrated luminosities of 1.0 to 2.5 fb^-1 fall short of the 10 fb^-1 or more per year expected for full operations",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "proposed run plan; not a design target",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S21"
+  ],
+  "location": "Sec. 8, p. 30",
+  "scope": {
+   "text": "ePIC: proposed run plan (not a design target), stated limits of early running (Early Science Report, 2026)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none",
+   "number_kind": "proposal"
+  },
+  "limitations": "Statements of the report about its own proposal",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C85",
+  "claim": "The ePIC SVT is described as an inner and an outer barrel and ten endcap disks, five per side, of MAPS sensors based on the ALICE ITS3 design, air-cooled thanks to their low power",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "Tier 3 context",
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S30"
+  ],
+  "location": "Sec. 1-4",
+  "scope": {
+   "text": "ePIC: preliminary context, silicon vertex tracker (Tier 3; no numbers quoted)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Conference proceedings; context only",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C86",
+  "claim": "ePIC time-of-flight layers use AC-LGAD sensors, strips in the barrel and pixels in the endcaps, and the ePIC PID system combines the pfRICH (backward), hpDIRC (barrel), dRICH (forward) and AC-LGAD time-of-flight",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "Tier 3 context",
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S31",
+   "eic:S34"
+  ],
+  "location": "Sec. 1-5",
+  "scope": {
+   "text": "ePIC: preliminary context, PID overview (Tier 3; no numbers quoted)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Conference proceedings; context only",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C87",
+  "claim": "ePIC has distinct electromagnetic and hadronic calorimeter designs in the backward, central and forward regions, and the barrel imaging calorimeter combines AstroPix silicon imaging layers with a Pb/SciFi bulk section read out by SiPMs",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "Tier 3 context",
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S33",
+   "eic:S32"
+  ],
+  "location": "Abstract; Sec. 1-3",
+  "scope": {
+   "text": "ePIC: preliminary context, calorimetry overview (Tier 3; no numbers quoted)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Conference proceedings; context only",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C88",
+  "claim": "The ePIC far-forward array comprises the B0 detector inside the B0 dipole, off-momentum detectors and Roman pots with AC-LGAD tracking planes placed in the machine vacuum, and a zero-degree calorimeter; the far-backward region holds a luminosity monitor with a pair spectrometer and a direct-photon calorimeter",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "Tier 3 context",
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S09",
+   "eic:S35"
+  ],
+  "location": "Sec. 2 (proceedings); Sec. 8.3.7.2 (early PDR draft)",
+  "scope": {
+   "text": "ePIC: preliminary context, far-forward and far-backward detectors (Tier 3; no numbers quoted)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Conference proceedings; context only; the early draft has placeholder sections",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C89",
+  "claim": "ePIC reconstruction is being adapted to streaming readout by splitting the data into timeframes",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "Tier 3 context",
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S36"
+  ],
+  "location": "Abstract",
+  "scope": {
+   "text": "ePIC: preliminary context, streaming readout (Tier 3; no numbers quoted)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Conference proceedings; context only; abstract only",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C90",
+  "claim": "No peer-reviewed paper describing the design of the ePIC backward lead-tungstate electromagnetic calorimeter (EEEMCal) was found; the closest hits are papers on the SiPM-array readout of its crystals and on crystal production, and the design itself is described only in the draft preliminary design report",
+  "claim_types": [
+   "published_result"
+  ],
+  "claim_type_note": "absence claim",
+  "support_kind": "absence_search",
+  "source_ids": [
+   "eic:S37"
+  ],
+  "location": "INSPIRE queries 2026-11-11: t EEEMCal; t ePIC and t calorimeter; t \"backward electromagnetic calorimeter\" and t EIC; arXiv listing and EIC User Group document list checked the same day",
+  "scope": {
+   "text": "ePIC: backward electromagnetic calorimeter publication status; search-limited, not a proof of absence",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "INSPIRE queries 2026-11-11; search-limited"
+  },
+  "limitations": "INSPIRE coverage of proceedings and notes is incomplete; a later paper is unverified, not nonexistent; re-check before calling anything the latest",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C91",
+  "claim": "No peer-reviewed paper describing the design of the ePIC forward calorimeters (the forward electromagnetic calorimeter, LFHCal and its insert) was found; the closest hit is a conference overview of ePIC calorimetry",
+  "claim_types": [
+   "published_result"
+  ],
+  "claim_type_note": "absence claim",
+  "support_kind": "absence_search",
+  "source_ids": [
+   "eic:S33"
+  ],
+  "location": "INSPIRE queries 2026-11-11: t LFHCAL; t FEMC; t ePIC and t calorimeter; t ePIC and t calorimetry; t \"forward calorimeter\" and t EIC; arXiv listing and EIC User Group document list checked the same day",
+  "scope": {
+   "text": "ePIC: forward calorimetry publication status; search-limited, not a proof of absence",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "INSPIRE queries 2026-11-11; search-limited"
+  },
+  "limitations": "INSPIRE coverage of proceedings and notes is incomplete; a later paper is unverified, not nonexistent; re-check before calling anything the latest",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C92",
+  "claim": "No peer-reviewed paper describing the design of the ePIC B0 detector was found; the closest hit is a conference overview of the far-forward and far-backward detectors",
+  "claim_types": [
+   "published_result"
+  ],
+  "claim_type_note": "absence claim",
+  "support_kind": "absence_search",
+  "source_ids": [
+   "eic:S09"
+  ],
+  "location": "INSPIRE queries 2026-11-11: t ePIC and t B0; t B0 and t EIC; t \"ePIC far-forward\"; arXiv listing and EIC User Group document list checked the same day",
+  "scope": {
+   "text": "ePIC: B0 detector publication status; search-limited, not a proof of absence",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "INSPIRE queries 2026-11-11; search-limited"
+  },
+  "limitations": "INSPIRE coverage of proceedings and notes is incomplete; a later paper is unverified, not nonexistent; re-check before calling anything the latest",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C93",
+  "claim": "No peer-reviewed paper describing the design of the ePIC luminosity monitor or low-Q\u00b2 tagger was found; the closest hits are a status report on pixel tracking detectors for the low-Q\u00b2 tagger and a conference overview of the far-backward detectors",
+  "claim_types": [
+   "published_result"
+  ],
+  "claim_type_note": "absence claim",
+  "support_kind": "absence_search",
+  "source_ids": [
+   "eic:S38",
+   "eic:S09"
+  ],
+  "location": "INSPIRE queries 2026-11-11: t ePIC and t luminosity; t \"luminosity monitor\" and t EIC; t \"low-Q2 tagger\"; t ePIC and t tagger; arXiv listing and EIC User Group document list checked the same day",
+  "scope": {
+   "text": "ePIC: luminosity monitor and low-Q\u00b2 tagger publication status; search-limited, not a proof of absence",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "INSPIRE queries 2026-11-11; search-limited"
+  },
+  "limitations": "INSPIRE coverage of proceedings and notes is incomplete; a later paper is unverified, not nonexistent; re-check before calling anything the latest",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-11",
+  "evidence_status": "public-fact"
  }
 ]

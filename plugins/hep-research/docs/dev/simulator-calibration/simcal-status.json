@@ -5,7 +5,7 @@
    "state": "gates-recorded",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
-   "task_card_sha256": "06fb186030ea143b53c413514f81c35a69d97baf379e84e234f2c136fe47f5ee",
+   "task_card_sha256": "5740f3dc8c8f7843867f6417b0772d740bd6e83cd6fc0bd10bdfa24fd6f26e1a",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
    "blocked_on": []
   },
@@ -67,5 +67,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-10T12:52:07Z"
+ "updated": "2026-11-12T10:52:38Z"
 }

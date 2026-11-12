@@ -24,6 +24,7 @@ earlier run's totals included them ("since removed") the totals are quoted as th
 | E3 | Linux (EL9) shared cluster node (AlmaLinux 9, Linux 5.14.0 x86_64), plugin tree on a network file system, Python 3.11.13 in a venv on local disk; system ROOT 6.40.04 (C++17, g++ 11.5.0; PyROOT through the system Python 3.9), cmake 3.31.8, Graphviz 2.44.0, HTCondor 25.0.14; Claude Code 2.1.287, Codex CLI 0.160.0 |
 | E4 | Linux cloud container (Claude Code cloud, Linux x86_64), Python 3.13.16 in `.venv-hep` with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0, pyhf 0.7.6; no ROOT, PyTorch, Combine or Codex; Claude Code 2.1.292 |
 | E-crprop | The E2 host (macOS 26.5 arm64; Python 3.13.2 in the E2 venv with numpy 2.5.3, scipy 1.18.1) plus the external cosmic-ray propagation codes of the cr-propagation campaign: DRAGON2 (cosmicrays/DRAGON2-Beta_version commit cd588707, configure.ac DRAGON 3.1.0; serial build of 2026-10-15, binary sha256 d26dbb85…, data directory = the checkout's `data/`), built with Homebrew GCC 15.2.0_1 (g++-15, gfortran-15), GSL 2.8, CFITSIO 4.6.4, Autoconf 2.72, libtool 2.6.2; on the host also ROOT 6.38.04, cmake 4.3.2, Apple clang 21.0.0 (not used by DRAGON2). From 2026-10-28 (host now macOS 27.2, Darwin 27.2.0): USINE V3.5 (gitlab.com/dmaurin/USINE tag V3.5, tag object 7197ddc1, commit fb53006d; GPL-2.0; decision A1.1), built with cmake 4.3.2 and Apple clang 21.0.0 (`-O0`, C++17) against Homebrew ROOT 6.38.04 (GSL 2.8 through ROOT MathMore; CFITSIO not used), binary sha256 1d444720…, data directory = the checkout's `inputs/` (run with `USINE` set to the checkout). GALPROP v57 absent (no source, D5, A1.2). No batch client: local `local_partition.py` only (D6). Located through `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`, `HEP_USINE_BIN`, `HEP_USINE_DATA`; records in `tests/adapters/fixtures/cr_propagation/env/` |
+| E6 | Linux (EL9) shared cluster node (AlmaLinux 9.5, Linux 5.14.0 x86_64), plugin tree in a git worktree on a CephFS network file system, Python 3.13.18 (conda environment; standard library only for the eic profile checks); Claude Code 2.1.322 and Codex CLI present |
 
 Aggregate command: `python3 tools/run_all_checks.py --out <dir>` from the plugin root (`--help` runs nothing). Seeds
 and tolerances of every example are in its `results.json`.
@@ -773,6 +774,60 @@ Relocation passes (`codex-plugin-load` skips in the copy). Detection note: Codex
 as invoked when its `SKILL.md` is read; 54 runs read one SKILL.md and 7 read two (`j02`, `an-direct-2` checked by
 hand). GitHub source: `codex plugin marketplace add hchouTW/hep-research` in a throwaway `CODEX_HOME` found the
 marketplace file and `codex plugin add` installed 0.2.0 with the seven skills; removal clean; no login or model call.
+
+## EIC-EXPANSION-M3 (2026-11-11, E6, version 0.65.1): experiment:eic 0.6.0
+
+Final release gate G3 of the EIC profile expansion (milestone M3, configuration checker), with the full aggregate and relocation checks (FULL_CHECK_AT final).
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 97 tests; `ledger.py --strict` exit 0 (38 sources, 93 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Configuration checker | two positive fixtures exit 0 and pass `contracts/validate.py`; nine negative cases each exit 1 with only their own code; deprecated keys reported as info; with `--profiles-from`, core keys such as `rapidity_frame` not reported; non-JSON and non-spec input exit 2 | `tests/test_eic_conventions.py` (14 tests) |
+| Registry, layering, budgets, capabilities | pass; registry 3007 B ≤ 3072, eic index 3369 B ≤ 4096; no `profile.unbacked_capability` | `contracts/registry.py`, `tools/check_layering.py` |
+| `detector_atlas.py audit --strict`; atlas and geometry-cases suites; frozen set | ok on every `facility/` and `detector/` module; suites pass; frozen records identical to the start commit | gate log |
+| Plugin scans | pass: `test_eic_profile_routing` (16 scenarios, 5 atlas queries), `test_evidence_query`, `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract`; `check_naming.py` no new finding | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | release gate |
+| `run_all_checks.py` (full, `--jobs 4`) | 34 pass, 0 fail, 0 skip; unit tests 7220 run, 0 failures, 0 errors, 385 skipped | check-run record of 2026-11-11T10:34:47Z |
+| `check_relocation.py` (`--jobs 4`) | 33 pass, 0 fail, 1 skip (`codex-plugin-load`: host CLI check, unverified, not passed) | relocation record of 2026-11-11T11:05:58Z |
+
+Environment notes: both full runs used TMPDIR on a private local folder under `/var/tmp`. On this host, TMPDIR under `/tmp` fails the name-extraction tests (an empty `/tmp/.git` folder makes temporary folders look like a repository), and TMPDIR on the shared CephFS work area fails two revocation tests (ancestor folders are writable by other accounts through ACLs, which the revocation check correctly reports); neither involves code changed here. Software checks only; not physical validity.
+
+Follow-up (2026-11-11, open question Q12): `number_rules.py` keeps a number from 1900 to 2099 when a count word follows it (`2000 channels`); the profile suite then passed with 98 tests (new `test_years_and_counts_in_the_year_range`), every module still passed the per-number test unchanged (all 24 such numbers in the modules are dates), and `run_all_checks.py --part static` passed (32 pass, 0 fail, 0 skip). Q10 (`scope.number_kind` not shown by `render_index.py`) was accepted as is.
+
+## EIC-EXPANSION-M2 (2026-11-11, E6, version 0.65.1): experiment:eic 0.5.0
+
+Release gate G2 of the EIC profile expansion (milestone M2, ePIC detector values), with `reference:detector-atlas` 0.3.1.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 83 tests; `ledger.py --strict` exit 0 (38 sources, 93 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Per-number sourcing, performance words, scope separation | every number in the six new detector modules and the rewritten overview is in a cited numeric claim with a `scope.number_kind`; no number near a performance word | `test_scope_and_placement.py` |
+| `detector_atlas.py audit --strict` | ok on every `facility/` and `detector/` module | gate log |
+| Registry, layering, budgets | pass; registry 3007 B ≤ 3072, eic index 3172 B ≤ 4096 | `contracts/registry.py`, `tools/check_layering.py` |
+| Atlas link | unbound queries for ePIC, EIC and "Electron-Ion Collider" return `see_profile: experiment:eic`; bound to `experiment:eic`, ePIC returns 20 and EIC 16 profile rows | `tests/examples/test_eic_profile_routing.py`; atlas suite pass |
+| Geometry cases; frozen set | pass; eic:S04, S05, S10, C08, C09, C10-C37 identical to the start commit | run helper `check-frozen` |
+| Example and plugin scans | pass: example (15 scenarios, 5 atlas queries), `test_evidence_query`, `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract` | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | check-run record of 2026-11-11T07:31:18Z |
+| Independent verification | 22 numeric claims (C58-C76, C82-C84) and the new non-numeric claims ending in 0 or 5 supported by three verifiers that wrote no content, after fixes (counts the PDR draft states inconsistently removed from C66, C72, C74; wording of C76, C80, C82, C84); none flagged as performance | run log of the expansion |
+
+ePIC values are design values (construction parameters) from a draft design report and subsystem papers, and proposals of the Early Science Report; none is a measured or performance value. Software checks only.
+
+## EIC-EXPANSION-M1 (2026-11-11, E6, version 0.65.1): experiment:eic 0.4.0
+
+Release gate G1 of the EIC profile expansion (milestone M1, facility values) on the `eic-profile-expansion` branch, before the gate commit.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 83 tests; `ledger.py --strict` exit 0 (20 sources, 57 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Per-number sourcing; derived values | every number in the three facility modules is in a cited numeric claim with a `scope.number_kind`; 8 derived center-of-mass energies recomputed by `dis_kinematics.py` and equal to the CDR values to the digits written | `test_scope_and_placement.py` |
+| `detector_atlas.py audit --strict` | ok on every `facility/` and `detector/` module | gate log |
+| Registry, layering, budgets | pass; registry 3007 B ≤ 3072, eic index 2462 B ≤ 4096 | `contracts/registry.py`, `tools/check_layering.py` |
+| Atlas and geometry-cases profile tests; frozen set | pass; eic:S04, S05, S10, C08, C09, C10-C37 identical to the start commit | profile suites; run helper `check-frozen` |
+| Example and plugin scans | pass: `tests.examples.test_eic_profile_routing`, `tests.core.test_evidence_query` (`TODAY` 2026-11-11), `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract` | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | check-run record of 2026-11-11T07:04:43Z |
+| Independent verification | 18 numeric claims (C03, C38-C48, C53-C57) supported by two verifiers that wrote no content; none flagged as performance; derived lines reproduced twice | run log of the expansion |
+
+Facility values are design targets (CDR 2021, Yellow Report) and project requirements as read on 2026-11-11; none is an achieved value. Software checks only.
 
 ## EIC-PROFILE (2026-10-04, E2, version 0.2.0): experiment:eic 0.1.0, with EIC-FOLLOWUPS and EIC-TODO
 
@@ -8981,6 +9036,88 @@ S2 worktree, whose path contains the reviewer label `S2`, pass here.
 
 Open: gate 4 of S2 ran at `ebd4d056`, and the later fixes were checked by spot runs; gate 6 covers a sample of 3 runs; GB9 no longer tests against independent masses; the hadronic conservation
 limits catch large defects only. The custodian's re-evaluation of qualification follows this release and is not recorded here.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.66.1 release check (2026-11-12, CI and E6)
+
+Release commit `6e0ccaf1` on `release/0.66.1`, based on main `09403241` (PRs #391 and #392 merged). Patch release: the hep-detector reference `dis-kinematic-reconstruction.md`, `experiment:eic` 0.6.1 and two EIC routing cases (issues #388, #389). Contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.1 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- a CHANGELOG `0.66.1` section (the former `Unreleased` entries).
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #391 at `ddd98d3c` and PR #392 at `28ad9ffa` | success (27 pass, 3 skipped; 29 pass, 3 skipped) |
+| CI `tests.yml` on PR #393 at `6e0ccaf1` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `6e0ccaf1`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7223 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `6e0ccaf1`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7223 tests, 0 failures, 402 skipped |
+
+Environment note as in the 0.66.0 release check. **E2 and E5 were not run for this release**; it changes no Geant4, g4sim or GPU path.
+
+Passing checks show software consistency, not physical validity.
+
+## SCIFIX-HEX-WORDS (2026-11-11, E6 and CI; branch `release/0.66.0`)
+
+sci-fix BLINDING-HEX-WORDS (S2: a wrong verdict, a false alarm that fails the scan). Found by CI on PR #390:
+`tests.examples.test_ams_flux_ratio.PathATests.test_blinding_audit_with_synthetic_sentinel` failed after the 0.66.0
+release manifest was added, locally as well (3 of 3 runs). Every example artifact records `versions.plugin_release`
+with the release digest `fe310bac...9082c936a853`; `scan_text` tokenized the `936` inside it, which matched the
+example's sealed synthetic count 936.24 at 3 significant digits. The fix: a digit run inside a hexadecimal word of 16
+or more characters with at least one letter (a SHA-256 digest, a git commit id) is not a token. Hexadecimal was
+already in `OUT_OF_SCOPE_RENDERINGS`. Shorter hex words, all-digit runs, words with another letter and values joined by
+`_` are scanned as before. `CORE_VERSION` 1.13.0 -> 1.13.1.
+
+**Correctness (C4, exhaustive):** `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively`
+writes every sealed n = 100 to 999 (sealed n + 0.25) at every position of a 64-, a 16- and a 15-character hex word, lower
+and upper case (205,200 scans): no hit at 64 and 16 characters, a hit at 15 (the boundary). The expected values come
+from the domain's definition, not from the scanner. `test_release_digest_is_not_a_printed_number` is the CI case.
+Negative control `test_numbers_beside_hex_words_still_hit`: a number before or after a digest, `c936a`, an all-digit
+16-character run, a word with `g` to `j`, `count_936.24` are hits on the parent and on the fix.
+
+**Discrimination (D3):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively` | exhaustive | fail (assertion): n=100 at position 0 of a 64-character word is a hit | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_release_digest_is_not_a_printed_number` | behavioral | fail (assertion): token `936` on line 5 | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_numbers_beside_hex_words_still_hit` | behavioral (negative control) | pass | pass | no | E6 |
+
+Parent: `b3974460` (release branch) with this commit's test file copied in. Local mutants of the filter in
+`scan_text`, killed by `HexWordTests`: the revert, a length floor of 8, a length floor of 17, no letter required. One
+mutant survives: treating `_` as a word boundary (a value joined to a hex word by `_` is then skipped as part of no
+word, and the tests contain no such case). Blinding suites (`test_blinding`, `test_blinding_regressions`,
+`test_blinding_residual`, `test_blinding_u11`, `test_r5_blinding`) and `test_ams_flux_ratio`: 122 tests pass on the fix.
+
+**Advisory waiver:** the fix only removes false alarms on a rendering already out of scope; no released number
+changes and no sealed value printed as a decimal is missed. Decided 2026-11-11 with the maintainer's choice of
+this fix in the session.
+
+## 0.66.0 release check (2026-11-11, CI and E6)
+
+Release branch `release/0.66.0`, based on main `401f322f` (PR #387 merged); checks at `054dcc22`. Minor release: the `experiment:eic` expansion, `experiment:eic` 0.3.0 -> 0.6.0 (evidence in EIC-EXPANSION-M1 to M3 above, and the Q12 follow-up in M3) and `reference:detector-atlas` 0.3.1; the sci-fix BLINDING-HEX-WORDS (SCIFIX-HEX-WORDS above), `CORE_VERSION` 1.13.0 -> 1.13.1. Contracts 3.27.0 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py` (`5af131ad`);
+- a CHANGELOG `0.66.0` section (the former `Unreleased` entries and the sci-fix);
+- the sci-fix `1f97a1c6` and its evidence `f43507bd`. CI on `b3974460`, the first commit with a 0.66.0 release manifest, failed `test_blinding_audit_with_synthetic_sentinel` (units 1/3 and hostile-paths units 1/3): the release digest in the example artifacts matched a sealed synthetic count. That manifest was dropped (`054dcc22`) and is regenerated last.
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #387 at `f3722217` | success (27 pass, 3 skipped) |
+| CI `tests.yml` on PR #390 at `b3974460` | failure: the two unit shards 1/3 (one test, the case above); the other jobs pass |
+| CI `tests.yml` on PR #390 at `054dcc22` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `054dcc22`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7223 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `054dcc22`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7223 tests, 0 failures, 402 skipped |
+
+Environment note: on E6, `TMPDIR` under `/tmp` or on the shared CephFS work area fails tests unrelated to this release (see the EIC-EXPANSION-M3 environment notes).
+
+**E2 and E5 were not run for this release.** The release changes no Geant4, g4sim or GPU path, so no real-hardware check applies.
 
 Passing checks show software consistency, not physical validity.
 
