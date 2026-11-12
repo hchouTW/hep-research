@@ -184,7 +184,7 @@ def _observables(c, out, samples):
                             f"sample {s!r} are converted to Gaussian summary statistics; binomial and Poisson blocks "
                             "share no events (section 2.1 block rules)")
         if s not in samples:
-            out.add("observables.sample_undeclared", f"$.event_samples", f"sample {s!r} is not declared")
+            out.add("observables.sample_undeclared", "$.event_samples", f"sample {s!r} is not declared")
 
 
 def _vector(o, path, out, shapes):
