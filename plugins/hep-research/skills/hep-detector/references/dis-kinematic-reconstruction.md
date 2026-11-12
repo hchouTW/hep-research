@@ -99,7 +99,7 @@ the two beams are collinear and head-on, then apply the formulas there. The tran
 beam four-momenta: one boost and one rotation. Then state the beam axis and sign convention, as hep-theory
 requires for frames. The invariants x, y and Q^2 are frame-independent, but E, theta, Sigma and gamma are not.
 Computing them in the laboratory frame with head-on formulas gives a biased estimate. s itself comes from the
-crossing angle and the two energies (`dis_kinematics.py` in hep-theory).
+crossing angle and the two energies (`<plugin root>/skills/hep-theory/scripts/dis_kinematics.py`).
 
 The Yellow Report treats the crossing angle as well defined and correctable event by event. The beam momentum
 spread and angular divergence are not correctable event by event (section 8.4.6, p. 346). Generators mostly assume

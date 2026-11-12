@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 45,
-   "bytes": 712129,
+   "bytes": 712155,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2131,7 +2131,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7cfaea3d 2026-11-06"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2208,7 +2208,7 @@
   {
    "path": "skills/hep-detector/references/dis-kinematic-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 11956,
+   "bytes": 11982,
    "lines": 156,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2222,7 +2222,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
@@ -2248,7 +2248,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "5e3b104e 2026-10-29"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -4642,7 +4642,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
@@ -4769,7 +4769,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6c7b8ea3 2026-10-23"
+   "last_commit": "10db758c 2026-11-12"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
