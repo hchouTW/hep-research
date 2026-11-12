@@ -2,30 +2,45 @@
  "schema": "simcal-status/1",
  "phases": {
   "phase-0": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
    "task_card_sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
-   "blocked_on": []
+   "blocked_on": [],
+   "merged": {
+    "pr": 385,
+    "merge_commit": "af8ebf1b",
+    "date": "2026-11-12"
+   }
   },
   "phase-1": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-1",
    "branch": "simcal/phase-1",
    "task_card_sha256": "f05cb219cfe3e7b077a2ec33f948fb941728ef04ca7a8cccf5f7484bae414b75",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-1.md",
    "blocked_on": [],
-   "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10"
+   "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10",
+   "merged": {
+    "pr": 386,
+    "merge_commit": "3c7f9835",
+    "date": "2026-11-12"
+   }
   },
   "phase-2": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
    "task_card_sha256": "e1bdba1360e51e1d392b1c39803eac9eef1eb0649963151ff3cc8084077e8447",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
    "blocked_on": [],
-   "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10"
+   "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10",
+   "merged": {
+    "pr": 396,
+    "merge_commit": "ca70a606",
+    "date": "2026-11-12"
+   }
   },
   "phase-3": {
    "state": "not-started",
@@ -69,5 +84,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-12T13:23:34Z"
+ "updated": "2026-11-12T14:21:38Z"
 }
