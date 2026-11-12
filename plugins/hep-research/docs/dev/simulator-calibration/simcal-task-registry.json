@@ -351,6 +351,13 @@
    "registered_at": "2026-11-12T13:23:34Z",
    "card_commit": "merge of simcal/phase-1 b508fadc",
    "reason": "after its execution-log update: the stack re-merged before the merge of PR #396; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "9d0111542b64a55ca189e9429a494ef197d4e109f4c3be61b130a5152c54b92c",
+   "registered_at": "2026-11-12T14:15:51Z",
+   "card_commit": "9e915272",
+   "reason": "phase 3 start: refreshed from Part B, the index and A12; work packages WP-A to WP-F; no run judged yet"
   }
  ]
 }
