@@ -28,7 +28,9 @@ wavelength shifter such as TPB (PDG RPP 2025, sec. 36, noble liquids).
 
 **Reconstruction.**
 - **Pulse finding** in the waveform (`S1`, `S2`, multiple scatters, single-electron
-  tails); pairing `S1`-`S2` in the presence of pileup.
+  tails); pairing `S1`-`S2` in the presence of pileup. Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists.
+  Which `S1` goes with which `S2` when an event has several candidates: no method text, no
+  source read.
 - **3D position**: `xy` from the light pattern (dual phase) or charge pattern; `z` from
   the `S1`-`S2` drift time (`z = v_d Delta t`). In single-phase detectors the
   wire/pad readout and the charge-arrival time give 3D once the interaction time `t0`

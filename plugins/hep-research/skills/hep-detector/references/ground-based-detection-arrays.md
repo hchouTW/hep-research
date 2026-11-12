@@ -64,6 +64,19 @@ energy, since the shower footprint grows with energy). Each station records a si
 - **Saturation.** Stations near the core can saturate. A low-gain channel or a fit to the
   undistorted part of the pulse recovers part of the range; beyond that the signal is a
   lower bound and enters the lateral-distribution fit as censored, not as a measured value.
+- **Station and hit selection** (three schemes read, cited below). In the sparse station array
+  read, an offline trigger keeps events mainly on a coincidence of adjacent stations within the
+  propagation time of the shower front; stations whose times do not fit the estimated front are
+  removed as random, and a search of each trace for time-compatible peaks rejects random-muon
+  signals. A fiducial cut keeps only events whose highest-signal station has all its operating
+  neighbours, for a reliable core and a simple exposure; a looser cut may serve direction
+  studies. In the two dense arrays read (one hit per photosensor or unit), hits are first cut by
+  a time window (around the trigger in one; in the other a 400 ns window and a 100 m circle),
+  without abnormal units and known-bad hits (afterpulses after a high-charge hit, crossing
+  patterns unlike real light, charges above the calibrated range); core and direction are
+  fitted, hits far in time from the fitted plane (or far from the core) are dropped, and the fit
+  is repeated. Final counts or gamma/hadron variables use the hits near the last plane: one
+  accidental muon can make a gamma-ray shower look hadronic.
 - **Core and size fit.** The core position and the signal at the reference distance are
   fitted together with a lateral-distribution function, using Poisson-like statistics for
   small signals and including stations that did not trigger (they bound the footprint, as
@@ -81,9 +94,20 @@ energy, since the shower footprint grows with energy). Each station records a si
   signal (muons arrive earlier and sharper). Each separation is a model-dependent
   decomposition with its own calibration.
 
-**Check:** The station signal scale, the treatment of saturated and non-triggered stations,
-the station time-variance model used in the direction fit, and the per-event uncertainty of
-the size estimator are stated.
+<!-- example: source citation -->
+Sparse array: the Pierre Auger surface detector (T4 physics trigger, time cuts keeping 99% of
+stations with a shower signal, 6T5 fiducial cut; The Pierre Auger Collaboration, Nucl. Instrum.
+Methods A 798 (2015) 172, arXiv:1502.01323, sec. 11.1). Dense arrays: HAWC (hits from -150 to
++400 ns around the trigger; second fit on hits within 50 ns of the first plane; compactness and
+PINCness from hits within 20 ns of the second; Abeysekara et al. (HAWC), ApJ 843 (2017) 39,
+arXiv:1701.01778, secs. 2.3 and 2.7, Table 1) and LHAASO-KM2A (second selection: hits within
+[-30, 50] ns of the plane and 200 m of the core; Aharonian et al. (LHAASO), Chin. Phys. C 45
+(2021) 025002, arXiv:2010.06205, sec. 3 opening).
+<!-- /example -->
+
+**Check:** The hit or station selection, the station signal scale, the treatment of saturated
+and non-triggered stations, the station time-variance model used in the direction fit, and the
+per-event uncertainty of the size estimator are stated.
 
 ## Fluorescence detectors
 
@@ -123,6 +147,17 @@ rather than of the shower physics.
 
 ### Fluorescence geometry and profile reconstruction
 
+- **Pixel signal and pixel selection.** In the scheme cited below, the baseline is subtracted
+  from each pixel's ADC trace, the noise taken from the variance of early signal-free bins, and
+  counts converted to photons at the aperture by calibration. Each triggered pixel's trace is
+  scanned for the pulse start and stop that maximize the signal-to-noise ratio; only pulses with
+  a ratio of at least 5 enter the geometry fits. The pulse time is the signal-weighted centroid of
+  the pulse bins, the charge their sum, with uncertainties from the noise variance and Poisson
+  photoelectron fluctuations. For the light profile, each time bin sums the pixels pointing within
+  an angle `zeta` of the direction to the shower centre at that time, `zeta` chosen to maximize
+  the signal-to-noise ratio; divided by the diaphragm area, this is the light flux at the
+  aperture. Light outside the collection angle `zeta`, from the shower's lateral extent, is
+  corrected with universal lateral distributions of fluorescence and Cherenkov light.
 - **Shower-detector plane.** The pixels on the shower image define, through their
   pointing directions weighted by signal, the plane containing the shower axis and the
   telescope.
@@ -134,21 +169,25 @@ rather than of the shower physics.
   `chi_0` are degenerate, the main weakness of monocular reconstruction. One surface
   station's time breaks the degeneracy (hybrid reconstruction); a second telescope gives
   the axis as the intersection of two planes (stereo).
-- **Profile.** The light at the aperture is converted to energy deposit per depth after
-  subtracting the direct and scattered Cherenkov light that the shower also sends toward
-  the telescope, with the atmospheric transmission of the night; the deposit profile is then
+- **Profile.** The light at the aperture is converted to energy deposit per depth with the
+  atmospheric transmission of the night. The light sources are disentangled: fluorescence light,
+  the direct and scattered Cherenkov light that the shower also sends toward the telescope, and
+  multiply scattered light. Fluorescence and Cherenkov light are tied to the energy deposit by a
+  linear set of equations, solved together by linear least squares; the deposit profile is then
   fitted (see [extensive air showers](extensive-air-showers.md)). Geometry errors propagate
   into both `X_max` and energy, so the event selection usually requires a well-constrained
   geometry and a viewed shower maximum.
 
 <!-- example: source citation -->
 These steps follow the reconstruction described for a hybrid observatory (The Pierre Auger
-Collaboration, Nucl. Instrum. Methods A 798 (2015) 172).
+Collaboration, Nucl. Instrum. Methods A 798 (2015) 172, arXiv:1502.01323; pulse
+reconstruction, sec. 10.1; light collection, sec. 10.4; lateral-light correction and the joint
+linear solution for fluorescence and Cherenkov light, sec. 10.5).
 <!-- /example -->
 
-**Check:** Fluorescence events state monocular, hybrid or stereo geometry, the Cherenkov
-subtraction and atmospheric transmission used, and the propagation of geometry errors into
-`X_max` and energy.
+**Check:** Fluorescence events state monocular, hybrid or stereo geometry, the pixel selection
+for the light profile, the treatment of Cherenkov light and the atmospheric transmission used,
+and the propagation of geometry errors into `X_max` and energy.
 
 ## Atmospheric monitoring
 
