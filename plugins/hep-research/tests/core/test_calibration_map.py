@@ -494,6 +494,23 @@ class TestMapPlan(unittest.TestCase):
         self.assertIn("design.map_shared_seed", codes)
         self.assertIn("design.map_shared_interval", codes)
 
+    def test_nongaussian_block_rule(self):
+        """Map varies with theta: a map-affected Poisson or binomial observable must be Gaussian or predicted through the
+        surrogate (section 6.7)."""
+        contract = {"observables": [{"name": "sum", "block": "gaussian"}, {"name": "hits", "block": "poisson"},
+                                    {"name": "eff", "block": "binomial"}]}
+        p = varies_plan(observables=["sum"])
+        self.assertEqual([f["code"] for f in DM.map_plan_findings(p, None, contract)], [])
+        p["efficiency_map"]["affected"] = ["hits", "eff"]
+        self.assertEqual([f["code"] for f in DM.map_plan_findings(p, None, contract)],
+                         ["design.map_nongaussian_block"] * 2)
+        p["efficiency_map"]["through_surrogate"] = ["hits", "eff"]
+        self.assertEqual(DM.map_plan_findings(p, None, contract), [])
+        p["efficiency_map"]["affected"].append("nope")
+        self.assertEqual([f["code"] for f in DM.map_plan_findings(p, None, contract)], ["design.map_observable_unknown"])
+        fixed = {"efficiency_map": {"mode": "fixed", "affected": ["hits"]}}
+        self.assertEqual(DM.map_plan_findings(fixed, None, contract), [])          # the rule is for the varying map
+
     def test_fixed_map_linear_construction_only_for_linear_observables(self):
         p = {"efficiency_map": {"mode": "fixed", "R": 100, "linear_in_eps": ["sum"],
                                 "u_construction": {"sum": "linear", "width": "digitized"}}}
