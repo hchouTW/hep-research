@@ -302,6 +302,13 @@
    "registered_at": "2026-11-12T07:39:23Z",
    "card_commit": "ec040189",
    "reason": "before its run: calibration 10 (e) rerun with the corrected injection reference (the user's decision of 2026-11-12), cal10_g7_fixed; tightening only"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "6be65e12529b4ebcccc1cbf156425cea56967e29f641c764dbfd40c8466ec423",
+   "registered_at": "2026-11-12T08:49:32Z",
+   "card_commit": "a123e47d",
+   "reason": "before its run: batch C (approval A11: G8 rows on the linear configurations; calibration 6 G7 half; research on the toy detector's G8 deviation), tests/core/calibration_phase2_cals_c.py; tightening only"
   }
  ]
 }

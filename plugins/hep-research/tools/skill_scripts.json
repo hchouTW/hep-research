@@ -1904,7 +1904,7 @@
   {
    "skill": "hep-statistics",
    "name": "stability_monitor.py",
-   "source": "skills/hep-statistics/references/core-stats-guide.md:81",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:52",
    "matches": []
   },
   {
@@ -1928,7 +1928,7 @@
   {
    "skill": "hep-statistics",
    "name": "test_core_stats_guide.py",
-   "source": "skills/hep-statistics/references/core-stats-guide.md:43",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:25",
    "matches": []
   },
   {
