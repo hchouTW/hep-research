@@ -4,7 +4,8 @@ Hand-made inputs only: fake scripts in a temporary folder stand in for the recip
 judges them by the real scripts' result lines), a hand-made sacct and hand-made milestones; no fixture is drawn, no recipe runs, no Slurm job
 is submitted. Expectations, fixed before the first run (d4-e6c-report.md, "Predictions"): every block but 11 and 12 is refused by every
 operation before anything is read; fit-started is in the milestones file before the first recipe call; a crashed range task leaves its bin
-"missing" and every test of the bin "required output missing", so the workflow fails; the T07 interface is a stub that refuses.
+"missing" and every test of the bin "required output missing", so the workflow fails; the T07 calls are E6b's commands, each parsed by E6b's
+own parser (E6 merge stage, E6c re-review R2), and a T07 harness task that left no marker makes the summary incomplete.
 
 Run from the plugin root: python -m unittest tests.adapters.test_t04_evaluation_tasks -v
 """
@@ -26,6 +27,7 @@ sys.path.insert(0, str(ROOT))
 from tests.adapters import t04_evaluation_core as core  # noqa: E402
 from tests.adapters import t04_evaluation_layout as layout  # noqa: E402
 from tests.adapters import t04_evaluation_tasks as tasks  # noqa: E402
+from tests.adapters import t07_evaluation_scoring as scoring  # noqa: E402
 
 TEMPORARY_ROOT = os.environ.get("TMPDIR") or None
 
@@ -377,37 +379,271 @@ class ChecksSource(unittest.TestCase):
 
 
 class T07Interface(unittest.TestCase):
-    def test_the_stub_refuses(self):
-        with self.assertRaises(tasks.T07InterfaceNotMerged):
-            tasks.t07_interface("score", block=11, index=0)
-        for op in ("t07-bin", "t07-refit", "t07-score", "t07-slices"):
-            code, text = run_main([op, "--block", 11, "--index", 0, "--out", "/nonexistent-e6c"])
-            self.assertEqual(code, 2)
-            self.assertIn("E6b's interface is not merged", text)
-        for op in ("t07-negative-cases", "t07-checks"):
-            code, text = run_main([op, "--block", 11, "--out", "/nonexistent-e6c"])
-            self.assertEqual(code, 2)
-        code, text = run_main(["collect", "--block", 11, "--workflow", "T07", "--attempts", "/x", "--out", "/nonexistent-e6c"])
-        self.assertEqual(code, 2)
-        code, text = run_main(["summary", "--block", 11, "--workflow", "T07", "--attempts", "/x", "--collection", "/x", "--scores", "/x", "--out", "/x"])
-        self.assertEqual(code, 2)
+    """E6 merge stage (E6c re-review R2): E6c's T07 calls adapted to E6b's parser. Every call is E6b's operation and keywords (t07_call), run by
+    E6b's t07_interface; each parses through E6b's real build_parser; the stub is gone."""
 
-    def test_the_commands_use_the_t07_scoring_argument_names(self):
-        """d4-e6b-report.md, "The interface for E6c": score-bin, score-slices, negative-cases, summary and their options."""
-        flags = (lambda command: [c for c in command if c.startswith("--")])
-        bin_ = tasks.t07_commands("score-bin", block=11, fixture_id=7002, stratum=3, record="r", product="p", truth="t", out="o",
-                                  truth_seeded_record="ts", rate_record="rr")
-        self.assertEqual(bin_[bin_.index(str(tasks.T07_SCORING_SCRIPT)) + 1], "score-bin")
-        self.assertEqual(flags(bin_), ["--block", "--fixture-id", "--stratum", "--events", "--record", "--product", "--truth", "--out",
-                                       "--truth-seeded-record", "--rate-record"])
-        self.assertIn("--refit-collection", flags(tasks.t07_commands("score-bin", block=11, fixture_id=7001, stratum=3, record="r", product="p",
-                                                                     truth="t", out="o", refit_collection="j")))
-        self.assertEqual(flags(tasks.t07_commands("score-slices", block=12, fixture_id=7001, bins="b", out="o", parameters="loc0")),
-                         ["--block", "--fixture-id", "--events", "--bins", "--out", "--parameters"])
-        self.assertEqual(flags(tasks.t07_commands("negative-cases", block=11, record="r", seeds="s", out="o")),
-                         ["--block", "--folder", "--record", "--seeds", "--out"])
-        self.assertEqual(flags(tasks.t07_commands("summary", block=11, scores="s", checks="c")), ["--block", "--scores", "--checks"])
-        self.assertEqual(layout.RESULT_LINES["t07_evaluation_scoring.py"], r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected):")
+    def parsed(self, operation, **arguments):
+        e6b_operation, keywords = tasks.t07_call(operation, **arguments)
+        argv = scoring.interface_argv(e6b_operation, **keywords)
+        with redirect_stdout(io.StringIO()):
+            try:
+                return argv, scoring.build_parser().parse_args(argv)
+            except SystemExit:
+                self.fail(f"E6b's parser refuses {argv}")
+
+    def test_the_stub_is_gone(self):
+        self.assertFalse(hasattr(tasks, "T07InterfaceNotMerged"))
+        self.assertFalse(hasattr(tasks, "T07_INTERFACE_STATE"))
+
+    def test_every_call_parses_through_the_t07_scoring_parser(self):
+        argv, ns = self.parsed("bin", block=11, index=23, build="b", out="o")
+        self.assertEqual((ns.operation, ns.fixture_id, ns.stratum, ns.first, ns.count, ns.build, ns.out), ("bin-task", 7002, 11, 0, 12000, "b", "o"))
+        _, ns = self.parsed("bin", block=12, index=0, build="b", out="o")
+        self.assertEqual((ns.block, ns.fixture_id, ns.stratum), (12, 7001, 0))
+        _, ns = self.parsed("refit", block=11, index=35, bin_dir="d", build="b", out="o")
+        self.assertEqual((ns.operation, ns.stratum, ns.first, ns.count, ns.bin_dir), ("refit-task", 11, 8000, 4000, "d"))
+        _, ns = self.parsed("refit", block=11, index=0, bin_dir="d", build="b", out="o")
+        self.assertEqual((ns.stratum, ns.first, ns.count), (0, 0, 4000))
+        _, ns = self.parsed("slices", block=11, index=9, scores="s")
+        self.assertEqual((ns.operation, ns.fixture_id, ns.events, ns.bins, ns.out, ns.parameters), ("score-slices", 7002, 12000, "s", "s", "q/p"))
+        _, ns = self.parsed("slices", block=11, index=0, scores="s")
+        self.assertEqual((ns.fixture_id, ns.parameters), (7001, "loc0"))
+        _, ns = self.parsed("negative-cases", block=11, build="b", out="o")
+        self.assertEqual((ns.operation, ns.folder), ("negative-task", str(tasks.T07_NEGATIVE_FOLDER)))
+        _, ns = self.parsed("checks", block=11, build="b", out="o", workers=2)
+        self.assertEqual((ns.operation, ns.workers), ("checks-task", 2))
+        _, ns = self.parsed("collect", block=11, index=12, attempts="a.json", out="c.json")
+        self.assertEqual((ns.operation, ns.fixture_id, ns.stratum, ns.count, ns.refit_range), ("collect", 7002, 0, 12000, 4000))
+        _, ns = self.parsed("score", block=11, index=5, collection="c.json", scores="s")
+        self.assertEqual((ns.operation, ns.fixture_id, ns.stratum, ns.events, ns.collection, ns.out, ns.rate_record), ("score-bin", 7001, 5, 12000, "c.json", "s", None))
+        _, ns = self.parsed("score", block=11, index=17, collection="c.json", scores="s", rate_record="rr")
+        self.assertEqual((ns.fixture_id, ns.stratum, ns.rate_record), (7002, 5, "rr"))
+        argv, ns = self.parsed("summary", block=11, scores="s", checks="n.json,d.json")
+        self.assertEqual((ns.operation, ns.scores, ns.checks), ("summary", "s", "n.json,d.json"))
+        self.assertNotIn("--out", argv)                                  # E6b's summary has no --out
+        e6b_operation, keywords = tasks.t07_call("score", block=11, index=5, collection="c", scores="s")
+        self.assertNotIn("--index", scoring.interface_argv(e6b_operation, **keywords))
+
+    def test_indices_and_inputs_are_refused_before_anything_runs(self):
+        for operation, arguments in (("bin", dict(index=24, build="b", out="o")), ("refit", dict(index=36, bin_dir="d", build="b", out="o")),
+                                     ("slices", dict(index=10, scores="s")), ("score", dict(index=17, collection="c", scores="s")),
+                                     ("collect", dict(index=-1, attempts="a", out="c")), ("pool", dict(index=0))):
+            with self.assertRaises(tasks.TaskError):
+                tasks.t07_call(operation, block=11, **arguments)
+        code, text = run_main(["t07-bin", "--block", 11, "--index", 0, "--out", "/nonexistent-merge"])
+        self.assertEqual(code, 2)
+        self.assertIn("RESULT t07-bin rejected", text)                    # no build given: refused before any draw
+        self.assertEqual(layout.RESULT_LINES["t07_evaluation_scoring.py"], scoring.RESULT_LINE)
+
+    def test_the_refit_takes_the_counted_bin_attempt(self):
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            base = Path(folder)
+            first, second = base / "bin-a", base / "bin-b"
+            for d in (first, second):
+                d.mkdir()
+            (base / "attempts.tsv").write_text(f"T07 bin 4\t901_4\t{first}\nT07 bin 4\t902_4\t{second}\n")
+            states = {"901_4": ("FAILED", 2, "00:00:05"), "902_4": ("COMPLETED", 0, "00:03:00")}   # a NO-DRAW refusal, then the counted run
+            seen = {}
+            original = tasks.t07_run
+            tasks.t07_run = lambda operation, **a: seen.update(a, operation=operation) or 0
+            try:
+                code = tasks.t07_refit(11, 13, base / "out", "b", base / "attempts.tsv", state_of=states.get)
+            finally:
+                tasks.t07_run = original
+            self.assertEqual((code, seen["operation"], seen["index"], Path(seen["bin_dir"])), (0, "refit", 13, second))
+
+    def test_collect_score_slices_and_summary_end_to_end_on_hand_made_state(self):
+        """No attempt of any bin: E6b's collection marks all 24 missing; each scoring writes v4 10's records and its marker; the slices read the
+        markers; the summary needs every marker and both checks tasks, else it is incomplete; with all, the outcome is the core's (a fail)."""
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            base = Path(folder)
+            neg_line, neg = fake_single(base, "T07 negative cases", "t07-negative-cases", {"t07-negative-cases.log": "RESULT t07-negative-cases ok\n"})
+            chk_line, chk = fake_single(base, "T07 checks", "t07-checks", {"t07-checks.log": "RESULT t07-checks ok\n"})
+            (base / "attempts.tsv").write_text(neg_line + "\n" + chk_line + "\n")
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(tasks.t07_collect(11, base / "attempts.tsv", base / "collection", state_of=DONE), 0)
+            document = json.loads((base / "collection" / "collection.json").read_text())
+            self.assertTrue(document["finished"])
+            self.assertEqual(len(document["bins"]), 24)
+            self.assertTrue(all(entry["status"] == "missing" for entry in document["bins"].values()))
+            scores = base / "scores"
+
+            def summary():
+                with redirect_stdout(io.StringIO()) as printed:
+                    code = tasks.t07_summary(11, scores, base / "collection" / "collection.json", base / "summary", attempts_file=base / "attempts.tsv",
+                                             state_of=DONE)
+                return code, printed.getvalue()
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(tasks.t07_score(11, 0, base / "collection" / "collection.json", scores / "bin-0", "rr"), 0)
+            self.assertEqual(len(scoring.read_records(scores / scoring.records_name(7001, 11, 0))), 57)
+            self.assertTrue((scores / "bin-0" / "scored.json").exists())
+            code, text = summary()
+            self.assertEqual(code, 3)
+            self.assertIn("SUMMARY INCOMPLETE T07 block 11: the scoring of T07 bin 1 left no scored.json", text)
+            with redirect_stdout(io.StringIO()):
+                for index in range(1, 24):
+                    self.assertEqual(tasks.t07_score(11, index, base / "collection" / "collection.json", scores / f"bin-{index}", "rr"), 0)
+                code, text = run_main(["t07-slices", "--block", 11, "--index", 0, "--scores", scores, "--out", base / "slices-task"])
+            self.assertEqual(code, 0, text)
+            code, text = summary()
+            self.assertEqual(code, 3)
+            self.assertIn("the slices task 1 left no scored.json", text)
+            with redirect_stdout(io.StringIO()):
+                for index in range(1, 10):
+                    self.assertEqual(tasks.t07_slices(11, index, scores, base / f"slices-{index}"), 0)
+            code, text = summary()
+            self.assertEqual(code, 3)
+            self.assertIn("negative-checks.json", text)                  # the negative cases task left no checks: incomplete, never a fail
+            (neg / "negative-checks.json").write_text(json.dumps([{"name": n, "kind": "negative", "result": "pass", "stop": False,
+                                                                   "recorded_unsupported_gap": False} for n in scoring.NEGATIVE_CHECK_NAMES]))
+            (chk / "deterministic-checks.json").write_text(json.dumps([{"name": n, "kind": k, "result": "pass", "stop": False,
+                                                                        "recorded_unsupported_gap": False} for n, k, _ in scoring.T07_CHECKS]))
+            code, text = summary()
+            self.assertEqual(code, 0, text)
+            self.assertIn("SUMMARY T07 attempt 1: workflow fail, R11 state failed; 1260 records", text)   # every bin missing on the recipe side
+            (scores / "bin-3" / "scored.json").write_text(json.dumps({"collection_sha256": "0" * 64}))
+            code, text = summary()
+            self.assertEqual(code, 3)
+            self.assertIn("T07 bin 3 is not of this collection", text)
+
+
+class T07Markers(unittest.TestCase):
+    """E6 merge review, the coordinator's rulings: a slice marker pins its member bins' .slices.npz files and the summary checks them against the
+    current bin markers (M1); a bin refused at scoring leaves a refused marker and the summary stays incomplete naming the bin and the refusal
+    (M3); the collection reads the refit pieces by their count (M6) and removes an earlier collection.json first (M7)."""
+
+    def setUp(self):
+        self.base = Path(tempfile.mkdtemp(dir=TEMPORARY_ROOT, prefix="t07-markers-"))
+        self.addCleanup(__import__("shutil").rmtree, self.base, True)
+        self.collection = self.base / "collection" / "collection.json"
+        self.scores = self.base / "scores"
+
+    def whole_state(self):
+        """Every T07 harness task ended: the collection (no recipe attempt: every bin missing), the 24 scorings, the 10 slices, both checks."""
+        neg_line, neg = fake_single(self.base, "T07 negative cases", "t07-negative-cases", {"t07-negative-cases.log": "RESULT t07-negative-cases ok\n"})
+        chk_line, chk = fake_single(self.base, "T07 checks", "t07-checks", {"t07-checks.log": "RESULT t07-checks ok\n"})
+        (neg / "negative-checks.json").write_text(json.dumps([{"name": n, "kind": "negative", "result": "pass", "stop": False,
+                                                               "recorded_unsupported_gap": False} for n in scoring.NEGATIVE_CHECK_NAMES]))
+        (chk / "deterministic-checks.json").write_text(json.dumps([{"name": n, "kind": k, "result": "pass", "stop": False,
+                                                                    "recorded_unsupported_gap": False} for n, k, _ in scoring.T07_CHECKS]))
+        (self.base / "attempts.tsv").write_text(neg_line + "\n" + chk_line + "\n")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(tasks.t07_collect(11, self.base / "attempts.tsv", self.collection.parent, state_of=DONE), 0)
+            for index in range(24):
+                self.assertEqual(tasks.t07_score(11, index, self.collection, self.scores / f"bin-{index}", "rr"), 0)
+            for index in range(10):
+                self.assertEqual(tasks.t07_slices(11, index, self.scores, self.base / f"slices-{index}"), 0)
+
+    def summary(self):
+        with redirect_stdout(io.StringIO()) as printed:
+            code = tasks.t07_summary(11, self.scores, self.collection, self.base / "summary", attempts_file=self.base / "attempts.tsv", state_of=DONE)
+        return code, printed.getvalue()
+
+    def test_m1_a_slice_marker_pins_its_bins_slice_files(self):
+        self.whole_state()
+        self.assertEqual(self.summary()[0], 0)
+        marker = json.loads((self.scores / "slices-0" / "scored.json").read_text())
+        self.assertEqual(marker["bin_slices"]["3"], json.loads((self.scores / "bin-3" / "scored.json").read_text())["slices_sha256"])
+        # bin 3 rescored after the slices ran (a new slice file and its own new marker): the slices read the old file, so they are stale
+        slices = self.scores / scoring.slices_name(7001, 11, 3)
+        scoring.write_slices(slices, scoring.bin_identity(7001, 11, 3), None, "", "missing", "rescored after the slices ran")
+        bin_marker = self.scores / "bin-3" / "scored.json"
+        doc = json.loads(bin_marker.read_text())
+        doc["slices_sha256"] = sha(slices)
+        bin_marker.write_text(json.dumps(doc, sort_keys=True) + "\n")
+        code, text = self.summary()
+        self.assertEqual(code, 3)
+        self.assertIn("the slices task 0 read another .slices.npz of T07 bin 3", text)
+
+    def test_m3_a_bin_refused_at_scoring_has_a_refused_marker_and_the_summary_names_it(self):
+        self.whole_state()
+        original = tasks.t07_run
+
+        def refusing(operation, **a):   # E6b's score-bin on files it refuses: v4 10's records and the slices file, then exit 2
+            if operation != "score" or a["index"] != 5:
+                return original(operation, **a)
+            identity = scoring.bin_identity(7001, 11, 5)
+            reason = "the bin's files are refused: the product is of another bin"
+            scoring.write_records(Path(a["scores"]) / scoring.records_name(7001, 11, 5),
+                                  [core.missing_output(g, identity, s, reason) for g, s in scoring.bin_gates(7001)])
+            scoring.write_slices(Path(a["scores"]) / scoring.slices_name(7001, 11, 5), identity, None, "", "missing", reason)
+            print(f"RESULT t07-scoring score-bin rejected: {reason}")
+            return 2
+        tasks.t07_run = refusing
+        try:
+            with redirect_stdout(io.StringIO()):
+                code = tasks.t07_score(11, 5, self.collection, self.scores / "bin-5", "rr")
+        finally:
+            tasks.t07_run = original
+        self.assertEqual(code, 2)                                        # the task itself: rejected
+        marker = json.loads((self.scores / "bin-5" / "scored.json").read_text())
+        self.assertTrue(marker["refused"])
+        self.assertIn("the product is of another bin", marker["reason"])
+        code, text = self.summary()
+        self.assertEqual(code, 3)                                        # never a pass, never silently a fail: the coordinator's
+        self.assertIn("SUMMARY INCOMPLETE T07 block 11: T07 bin 5 was refused at scoring", text)
+        self.assertIn("the product is of another bin", text)
+        self.assertNotIn("SUMMARY T07 attempt", text)
+        code, text = run_main(["t07-slices", "--block", 11, "--index", 0, "--scores", self.scores, "--out", self.base / "slices-again"])
+        self.assertEqual(code, 3)
+        self.assertIn("T07 bin 5 was refused at scoring", text)
+
+    def test_m6_the_collection_reads_the_refit_pieces_by_their_count(self):
+        original = (tasks.T07_REFIT_PIECES, tasks.t07_run)
+        seen = {}
+
+        def collect(operation, **a):
+            seen[a["index"]] = json.loads(Path(a["attempts"]).read_text())
+            Path(a["out"]).write_text(json.dumps({"status": "missing", "reason": "hand-made"}))
+            return 0
+        folder = self.base / "refit-2"
+        folder.mkdir()
+        (self.base / "attempts.tsv").write_text(f"T07 refit 2\t901_2\t{folder}\n")
+        tasks.T07_REFIT_PIECES = tuple(layout.split(tasks.EVENTS, 6000))   # 2 pieces: refit index 2 s + p
+        tasks.t07_run = collect
+        try:
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(tasks.t07_collect(11, self.base / "attempts.tsv", self.collection.parent, state_of=DONE), 0)
+        finally:
+            tasks.T07_REFIT_PIECES, tasks.t07_run = original
+        self.assertEqual(seen[1]["refit"]["0"][0][1], str(folder))        # stratum 1, piece 0 is refit 2 with two pieces (3 s + p would read 3)
+        self.assertEqual(seen[0]["refit"]["6000"], [])
+
+    def test_m7_a_collection_rerun_removes_the_earlier_collection_first(self):
+        original = tasks.t07_run
+
+        def collect(operation, **a):
+            if a["index"] == 5 and failing:
+                return 2
+            Path(a["out"]).write_text(json.dumps({"status": "missing", "reason": "hand-made"}))
+            return 0
+        (self.base / "attempts.tsv").write_text("")
+        tasks.t07_run = collect
+        try:
+            failing = False
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(tasks.t07_collect(11, self.base / "attempts.tsv", self.collection.parent, state_of=DONE), 0)
+            self.assertTrue(self.collection.exists())
+            failing = True
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(tasks.t07_collect(11, self.base / "attempts.tsv", self.collection.parent, state_of=DONE), 2)
+        finally:
+            tasks.t07_run = original
+        self.assertFalse(self.collection.exists())                       # no earlier collection.json beside rewritten bin documents
+
+
+class ExitThreeIsIncomplete(unittest.TestCase):
+    """E6 merge review (nit): a script that ends with its own result line and exit 3 (core/status.py: incomplete) makes its task incomplete
+    (exit 3, rerun), never a failed step."""
+
+    def test_run_script_reads_exit_3_as_a_crash_of_the_task(self):
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            script = Path(folder) / "t07_fake_rate.py"
+            script.write_text("import sys\nprint('RESULT failed: a dependency is missing')\nsys.exit(3)\n")
+            with self.assertRaises(tasks.ScriptCrash):
+                tasks.run_script(script, ["run"], Path(folder) / "run.log", ok=(0, 1))
+            script.write_text("import sys\nprint('RESULT failed: U_dev > C')\nsys.exit(1)\n")
+            self.assertEqual(tasks.run_script(script, ["run"], Path(folder) / "run.log", ok=(0, 1))[0], 1)
 
 
 class PlanTotals(unittest.TestCase):

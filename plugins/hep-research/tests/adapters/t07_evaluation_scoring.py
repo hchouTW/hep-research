@@ -21,8 +21,10 @@ What it holds:
 - N1 of the E6a re-review: the T07 refit ranges are outside the layout's completeness check, so collect_refit checks them as the layout checks a bin
   (attempt selection, ranges complete, each product's SHA-256 and events), and score_bin refuses a short refit set: its 21 tests read "required
   output missing" (section 10), never a smaller sample (section 3.4, "Top-up: never");
-- O5 of the E6a review: a pooled angle slice has an identity of its own (SliceIdentity: stratum code SLICE_STRATUM_BASE + slice, so its bootstrap
-  rows are its own, never a bin's), and is scored only when all 12 bins of its fixture and block are complete (score_slices);
+- O5 of the E6a review: a pooled angle slice has an identity of its own, the core's core.PooledIdentity (E6 merge stage: pool = the slice,
+  members strata 0-11; its stratum code core.POOL_STRATUM_BASE + slice, so its bootstrap rows are its own, never a bin's), and is scored only
+  when all 12 bins of its fixture and block are complete (score_slices, layout.pool_status); a primary with no plane-1 result counts as a
+  failure in its slice's tail (E6b re-review N1; v4 5.1, 7);
 - the reported, not gated, items of section 8.4 as readings, with no result word;
 - E5 at evaluation (section 11): the kept negative-case file, its SHA-256 checked first, and v4 11's expected outcomes as negative checks;
 - block 1 as a development reading only (DevelopmentBin: labelled "development reading, block 1", the attempt-1 rule, never a workflow verdict).
@@ -35,6 +37,7 @@ Run from anywhere: python -B -s -E t07_evaluation_scoring.py score-bin --block B
 from __future__ import annotations
 
 import argparse
+import builtins
 import collections
 import dataclasses
 import hashlib
@@ -99,7 +102,8 @@ FREEZE_B_BLOCK = 2                                          # decisions.md, "The
 FREEZE_B_CONFIGURATION_SHA256 = "2448d935fd8a20d8856be6772d7dfbaa774819f74a0a90d139cdc680531a3050"   # ibid.: T07 configuration_sha256 (v4 11: fixed at Freeze B)
 FREEZE_B_EVENTS_PER_BIN = 12000                             # section 3.2, T07 noise
 SLICE_EDGES = (-0.15, -0.075, 0.0, 0.075, 0.15)             # section 7, "Angle slices": truth u-slope at the vertex, the last slice closed
-SLICE_STRATUM_BASE = 100                                    # O5: a slice's stratum code; never a stratum of section 3.2 (0-11)
+SLICE_STRATUM_BASE = core.POOL_STRATUM_BASE                # O5: a slice's stratum code (the core's pooled code); never a stratum of section 3.2 (0-11)
+SLICE_MEMBERS = tuple(range(12))                            # a slice pools strata 0-11 of its fixture (section 8.2, "Angle")
 REFIT_RECIPE = "reco.track.acts-kf-refit/1"                # section 8.1
 # E5 (decisions.md, "D4 builds E1 and E2"; collect-7585958.out, "RECORD beside Freeze B (U-B8)"): the kept negative-case folder by its hashes.
 NEGATIVE_CASE_SHA256 = "06a7741a4fe0eb89bd412a53bc8c5c1fca668a8ed6cbc18ea129922d23dd6a9d"
@@ -112,7 +116,9 @@ PLANE_PITCH_MM = 50.0
 GEV_PER_TESLA_MM = 0.299792458e-3
 FIELD_TESLA = 1.0
 FINITE_STEPS = numpy.array([1e-3, 1e-3, 1e-6, 1e-6, 1e-5])   # as test_acts_refit_field.FINITE_STEPS
-RESULT_LINE = r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected):"   # the result line E6c requires (layout.classify_script_run); "crashed" never matches
+# The result line E6c requires (layout.classify_script_run); "crashed" never matches. "incomplete" (exit 3): the summary, when a required check
+# is absent or a check is given twice (E6 merge stage; E6c re-review: an absent check is incomplete, never a fail).
+RESULT_LINE = r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected|incomplete):"
 EXIT_OK, EXIT_NEGATIVE, EXIT_BAD_INPUT, EXIT_INCOMPLETE = 0, 1, 2, 3   # core/status.py
 
 
@@ -150,33 +156,30 @@ def slice_of(slope_u: float):
     return len(SLICE_EDGES) - 2
 
 
+def slice_name(slice_index: int) -> str:
+    """The pool name of an angle slice: its index and its truth u-slope interval (the last slice closed)."""
+    low, high = SLICE_EDGES[slice_index], SLICE_EDGES[slice_index + 1]
+    closing = "]" if slice_index == len(SLICE_EDGES) - 2 else ")"
+    return f"angle slice {slice_index} [{low}, {high}{closing} pooled over strata 0-11"
+
+
 @dataclass(frozen=True)
-class SliceIdentity(core.BinIdentity):
-    """O5: a pooled angle slice of one fixture and block. Its stratum field holds SLICE_STRATUM_BASE + slice, so its bootstrap entropy
-    (520, fixture, block, 100 + slice) is never a bin's (strata 0-11) and never another slice's."""
+class DevelopmentSlice(core.PooledIdentity):
+    """A pooled angle slice of block 1: the core's pooled identity (its bootstrap entropy, members and name), read as a development reading by
+    the attempt-1 rule, labelled so, never judged (as DevelopmentBin is of core.BinIdentity)."""
 
     def __post_init__(self):
-        if self.workflow != WORKFLOW or self.fixture_id not in FIXTURES:
-            raise ScoringError(f"a pooled angle slice is T07's, fixture 7001 or 7002: {self.workflow} {self.fixture_id}")
-        if self.block not in EVALUATION_BLOCKS + (DEVELOPMENT_BLOCK,):
-            raise ScoringError(f"block {self.block}: slices are scored on blocks 11 and 12, or read on block 1")
-        if not 0 <= self.stratum - SLICE_STRATUM_BASE < len(SLICE_EDGES) - 1:
-            raise ScoringError(f"slice code {self.stratum}: slices 0 to {len(SLICE_EDGES) - 2}")
-
-    @property
-    def slice_index(self) -> int:
-        return self.stratum - SLICE_STRATUM_BASE
+        super().__post_init__()
+        if self.block != DEVELOPMENT_BLOCK:
+            raise ScoringError(f"a development slice is of block {DEVELOPMENT_BLOCK}: block {self.block}")
 
     @property
     def label(self) -> str:
-        low, high = SLICE_EDGES[self.slice_index], SLICE_EDGES[self.slice_index + 1]
-        closing = "]" if self.slice_index == len(SLICE_EDGES) - 2 else ")"
-        text = f"{WORKFLOW} fixture {self.fixture_id} block {self.block} angle slice {self.slice_index} [{low}, {high}{closing} pooled over strata 0-11"
-        return f"{DEVELOPMENT_LABEL}: {text}" if self.block == DEVELOPMENT_BLOCK else text
+        return f"{DEVELOPMENT_LABEL}: {super().label}"
 
     @property
     def level(self) -> core.Level:
-        return core.level_of_block(DEVELOPMENT_RULE_BLOCK if self.block == DEVELOPMENT_BLOCK else self.block)
+        return core.level_of_block(DEVELOPMENT_RULE_BLOCK)
 
 
 def bin_identity(fixture_id: int, block: int, stratum: int) -> core.BinIdentity:
@@ -190,8 +193,19 @@ def bin_identity(fixture_id: int, block: int, stratum: int) -> core.BinIdentity:
     raise ScoringError(f"block {block} is neither an evaluation block (11, 12) nor block 1 (a development reading): refused")
 
 
-def slice_identity(fixture_id: int, block: int, slice_index: int) -> SliceIdentity:
-    return SliceIdentity(WORKFLOW, fixture_id, block, SLICE_STRATUM_BASE + slice_index)
+def slice_identity(fixture_id: int, block: int, slice_index: int) -> core.PooledIdentity:
+    """O5 on the core's pooled identity (E6 merge stage, E6b's slice identity becomes core.PooledIdentity): pool = the slice, members strata
+    0-11, so its entropy (520, fixture, block, 100 + slice) is never a bin's or another slice's; blocks 11 and 12 the core's, block 1 a
+    DevelopmentSlice; any other fixture, block or slice is refused."""
+    if fixture_id not in FIXTURES:
+        raise ScoringError(f"a pooled angle slice is T07's, fixture 7001 or 7002: {fixture_id}")
+    if not 0 <= slice_index < len(SLICE_EDGES) - 1:
+        raise ScoringError(f"slice {slice_index}: slices 0 to {len(SLICE_EDGES) - 2}")
+    if block in EVALUATION_BLOCKS:
+        return core.PooledIdentity(WORKFLOW, fixture_id, block, slice_index, SLICE_MEMBERS, slice_name(slice_index))
+    if block == DEVELOPMENT_BLOCK:
+        return DevelopmentSlice(WORKFLOW, fixture_id, block, slice_index, SLICE_MEMBERS, slice_name(slice_index))
+    raise ScoringError(f"block {block}: slices are scored on blocks 11 and 12, or read on block 1")
 
 
 def is_development(identity) -> bool:
@@ -783,23 +797,28 @@ def tally_estimates(tally: BinTally, fixture_id: int) -> dict:
     Refit pulls follow truth hit sets, not the matching, and are left out. Used by the sensitivity rerun (section 7.1, line 533)."""
     found = {}
 
-    def pulls(name, per_event):
+    def pulls(name, per_event, without=None):
+        """without: the objects with no result (per event); they count as failures in the tail, as in the gated tail (_pull_records; the E6 merge
+        review's nit: the slices' estimates count them since N1)."""
         values = numpy.concatenate([numpy.asarray(v, float) for v in per_event]) if per_event else numpy.zeros(0)
+        missed = int(numpy.sum(without)) if without else 0
         if values.size:
             found[(name, "trimmed-centre")] = core.trimmed_centre(values)
             found[(name, "sigma68-width")] = core.sigma_68(values) - 1.0
-            found[(name, "tail")] = float((numpy.abs(values) > TAIL_PULL).mean())
+        if values.size + missed:
+            found[(name, "tail")] = (int((numpy.abs(values) > TAIL_PULL).sum()) + missed) / (values.size + missed)
 
     if "product" not in tally.missing:
         for index, name in enumerate(PARAMETERS):
-            pulls(f"T07 track pull {name}", [p[:, index] for p in tally.pulls])
+            pulls(f"T07 track pull {name}", [p[:, index] for p in tally.pulls], _missing_counts(tally.without_result))
         for charge_name, sign in CHARGES:
-            pulls(f"T07 q/p pull {charge_name}", [p[numpy.asarray(c) == sign, 4] for p, c in zip(tally.pulls, tally.pull_charges)])
+            pulls(f"T07 q/p pull {charge_name}", [p[numpy.asarray(c) == sign, 4] for p, c in zip(tally.pulls, tally.pull_charges)],
+                  _missing_counts(tally.without_result, sign))
         m, y = _counts(tally.charge_sign)
         if m.sum():
             found[("T07 charge sign", "rate")] = y.sum() / m.sum()
     for index, axis in enumerate(AXES):
-        pulls(f"T07 vertex pull {axis}", [v[:, index] for v in tally.vertex_pulls])
+        pulls(f"T07 vertex pull {axis}", [v[:, index] for v in tally.vertex_pulls], tally.vertex_without_result or None)
     for gate, pair, kind in (("T07 duplicates", tally.duplicates, "rate"), ("T07 vertex assignment", tally.vertex_assignment, "rate"),
                              ("T07 vertex finding", tally.vertex_finding, "efficiency")):
         m, y = _counts(pair)
@@ -967,6 +986,7 @@ def score_bin(identity, inputs: BinInputs, *, events: int) -> dict:
     near_pulls, sign_pulls = [], {("loc0", "+"): [], ("loc0", "-"): [], ("loc1", "+"): [], ("loc1", "-"): []}
     predicted, filtered, unbiased, classes = [], [], [], collections.Counter()
     slice_rows = {"0.5": [], "0.7": []}
+    slice_without = {"0.5": [], "0.7": []}   # N1 (E6b re-review): (ordinal, truth u-slope) of each primary with no plane-1 result
     per_fraction = {}
     for ordinal, (event, truth_event) in enumerate(zip(record["events"], truth_files.iter_truth_events(inputs.truth))):
         particles = _truth_particles(truth_event)
@@ -1020,6 +1040,7 @@ def score_bin(identity, inputs: BinInputs, *, events: int) -> dict:
                         totals[f"primaries without a plane-1 result ({label})"] += 1
                         without.append(int(tracks_meta[p]["charge"]))
                         without_reconstructable += int(p in reconstructable_set)
+                        slice_without[label].append((ordinal, float(tracks_meta[p]["slope_u"])))
                     continue
                 pull, fitted_q_over_p, propagated = found
                 event_pulls.append(pull)
@@ -1075,7 +1096,9 @@ def score_bin(identity, inputs: BinInputs, *, events: int) -> dict:
     readings["plane-1 unbiased residual pulls"] = {name: _centre_width(numpy.asarray(unbiased, float).reshape(-1, 2)[:, a]) for a, name in enumerate(("loc0", "loc1"))}
     readings["pulls by sign of local position (truth)"] = {f"{name} {sign}": _centre_width(values) for (name, sign), values in sign_pulls.items()}
     slices = {label: {"ordinal": numpy.array([r[0] for r in rows], dtype=numpy.int64), "slope_u": numpy.array([r[1] for r in rows], float),
-                      "pulls": numpy.asarray([r[2] for r in rows], float).reshape(-1, 5)} for label, rows in slice_rows.items()}
+                      "pulls": numpy.asarray([r[2] for r in rows], float).reshape(-1, 5),
+                      "without_ordinal": numpy.array([r[0] for r in slice_without[label]], dtype=numpy.int64),
+                      "without_slope_u": numpy.array([r[1] for r in slice_without[label]], float)} for label, rows in slice_rows.items()}
     return {"records": records, "tally": tally, "estimates": estimates, "rerun": rerun, "sensitivity": sensitivity_changes(estimates, rerun),
             "readings": readings, "slices": slices, "product_complete": "product" not in tally.missing}
 
@@ -1149,9 +1172,11 @@ def _score_refit(identity, refit: RefitInput | None, truth_path, header, tally: 
 
 def score_slices(fixture_id: int, block: int, bins, *, events_per_bin: int = layout.EVENTS_PER_BIN, parameters=PARAMETERS) -> dict:
     """The 60 tests of one fixture's slices (or those of `parameters`), pooled over its 12 bins of `block`. bins: per bin {"fixture_id", "block",
-    "stratum", "events", "status", "reason", "populations": {"0.5"|"0.7": {"ordinal", "slope_u", "pulls"}}}. The pool is scored only when every
-    one of strata 0-11 is there once, of this fixture and block, complete, with events_per_bin events; else every test reads "required output
-    missing". The event is the unit (section 5.1): event e of bin s is pooled event offset(s) + e, bootstrapped by the slice's own identity."""
+    "stratum", "events", "status", "reason", "populations": {"0.5"|"0.7": {"ordinal", "slope_u", "pulls", "without_ordinal", "without_slope_u"}}}.
+    The pool is scored only when every one of strata 0-11 is there once, of this fixture and block, complete (layout.pool_status), with
+    events_per_bin events and the count of its primaries with no plane-1 result; else every test reads "required output missing". The event is
+    the unit (section 5.1): event e of bin s is pooled event offset(s) + e, bootstrapped by the slice's own identity. A primary with no plane-1
+    result counts as a failure in its slice's tail, of every parameter, and in the 70 % estimate (N1; v4 5.1, 7)."""
     gates = slice_gates(parameters)
     identities = {index: slice_identity(fixture_id, block, index) for index in range(len(SLICE_EDGES) - 1)}
     bins = list(bins)
@@ -1163,12 +1188,17 @@ def score_slices(fixture_id: int, block: int, bins, *, events_per_bin: int = lay
         for item in bins:
             if (item["fixture_id"], item["block"]) != (fixture_id, block):
                 problem = f"bin {item['stratum']} is of fixture {item['fixture_id']}, block {item['block']}"
-            elif item["status"] != "complete":
-                problem = f"bin {item['stratum']} is incomplete: {item['reason']}"
-            elif item["events"] != events_per_bin:
+            elif item["status"] == "complete" and item["events"] != events_per_bin:
                 problem = f"bin {item['stratum']} holds {item['events']} events, not {events_per_bin}"
+            elif item["status"] == "complete" and any(not {"without_ordinal", "without_slope_u"} <= set(population)
+                                                      for population in item["populations"].values()):
+                problem = f"bin {item['stratum']}'s slice file holds no count of primaries with no plane-1 result (N1)"
             if problem:
                 break
+        if not problem:   # E6 merge stage: the core's layout.pool_status, as T09's pool: complete only if every member bin is
+            status, reason = layout.pool_status(identities[0], {item["stratum"]: (item["status"], item["reason"]) for item in bins})
+            if status != "complete":
+                problem = reason
     if problem:
         reason = f"the pooled slice is incomplete (O5): {problem}"
         records = [core.missing_output(gate, identities[int(gate.split()[3])], statistic, reason) for gate, statistic in gates]
@@ -1176,28 +1206,40 @@ def score_slices(fixture_id: int, block: int, bins, *, events_per_bin: int = lay
     ordered = sorted(bins, key=lambda item: item["stratum"])
     total = sum(item["events"] for item in ordered)
     offsets = numpy.cumsum([0] + [item["events"] for item in ordered])[:-1]
-    found = {}
+    found, without = {}, {}
     for label in ("0.5", "0.7"):
         pooled_event = numpy.concatenate([offsets[i] + numpy.asarray(item["populations"][label]["ordinal"], dtype=numpy.int64) for i, item in enumerate(ordered)])
         slopes = numpy.concatenate([numpy.asarray(item["populations"][label]["slope_u"], float) for item in ordered])
         pulls = numpy.concatenate([numpy.asarray(item["populations"][label]["pulls"], float).reshape(-1, 5) for item in ordered])
         found[label] = (pooled_event, numpy.array([-1 if slice_of(s) is None else slice_of(s) for s in slopes]), pulls)
+        without_event = numpy.concatenate([offsets[i] + numpy.asarray(item["populations"][label]["without_ordinal"], dtype=numpy.int64)
+                                           for i, item in enumerate(ordered)])
+        without_slope = numpy.concatenate([numpy.asarray(item["populations"][label]["without_slope_u"], float) for item in ordered])
+        without[label] = (without_event, numpy.array([-1 if slice_of(s) is None else slice_of(s) for s in without_slope], dtype=numpy.int64))
     records, estimates, rerun = [], {}, {}
     for index in range(len(SLICE_EDGES) - 1):
         for name in parameters:
             column = PARAMETERS.index(name)
             gate = f"T07 angle slice {index} pull {name}"
             per_event = _pool(found["0.5"], index, column, total)
-            records += _pull_records(gate, identities[index], per_event, None)
+            records += _pull_records(gate, identities[index], per_event, None, _pool_without(without["0.5"], index, total))
             for target, label in ((estimates, "0.5"), (rerun, "0.7")):
                 values = numpy.concatenate(_pool(found[label], index, column, total))
+                missed = int(_pool_without(without[label], index, total).sum())
                 if values.size:
                     target[(gate, "trimmed-centre")] = core.trimmed_centre(values)
                     target[(gate, "sigma68-width")] = core.sigma_68(values) - 1.0
-                    target[(gate, "tail")] = float((numpy.abs(values) > TAIL_PULL).mean())
+                if values.size + missed:
+                    target[(gate, "tail")] = float(((numpy.abs(values) > TAIL_PULL).sum() + missed) / (values.size + missed))
     if [(r.gate, r.statistic) for r in records] != gates:
         raise ScoringError("the slices' records are not slice_gates' list")
     return {"records": records, "estimates": estimates, "rerun": rerun, "sensitivity": sensitivity_changes(estimates, rerun)}
+
+
+def _pool_without(population, index: int, total: int):
+    """Per pooled event, the primaries of slice `index` with no plane-1 result (N1): failures in the slice's tail rate."""
+    pooled_event, slices = population
+    return numpy.bincount(pooled_event[slices == index], minlength=total).astype(numpy.int64)
 
 
 def _pool(population, index: int, column: int, total: int) -> list:
@@ -1542,10 +1584,54 @@ def negative_task(block: int, *, build, folder, out) -> tuple:
     return [f"COST t07 negative cases finder: {seconds:.1f} s"] + [f"CHECK negative (section 11) {c.name}: {c.result}" for c in checks], checks
 
 
+class ChecksCrashed(RuntimeError):
+    """A check module could not run (E6 merge review I2): no unittest result line, errors with no failure, or an import or OS error in its
+    output. A crash (exit 3, core/status.py: the task is rerun), never a failed check; no checks file is written."""
+
+
+# Exceptions whose traceback in a module's output marks a setup defect, not a check that ran and failed: ImportError and OSError with their
+# subclasses (ModuleNotFoundError, PermissionError, FileNotFoundError, a read-only file system's OSError, ...).
+SETUP_ERRORS = tuple(sorted(name for name, value in vars(builtins).items() if isinstance(value, type) and issubclass(value, (ImportError, OSError))))
+
+
+UNITTEST_RAN = r"^Ran \d+ tests? in [\d.]+s$"
+UNITTEST_SUMMARY = r"^(OK|FAILED)( \((failures|errors|skipped|expected failures|unexpected successes)=\d+(, (failures|errors|skipped|expected failures|unexpected successes)=\d+)*\))?$"
+
+
+def unittest_verdict(module: str, text: str) -> str:
+    """E6 merge re-review N3: the module's verdict is unittest's own final summary only: the first non-blank line after the last "Ran N tests in
+    Xs" line, in unittest's form (OK or FAILED, with its counts). An earlier line that starts with OK or FAILED (a program's output) is never
+    the verdict; no such summary (the module killed, or never reaching it) is a crash."""
+    import re
+    lines = text.splitlines()
+    ran = [index for index, line in enumerate(lines) if re.match(UNITTEST_RAN, line)]
+    following = [line for line in lines[ran[-1] + 1:] if line.strip()] if ran else []
+    if not following or not re.match(UNITTEST_SUMMARY, following[0]):
+        raise ChecksCrashed(f"{module} ended with no unittest summary after its 'Ran N tests' line (a crash, not a negative)")
+    return following[0]
+
+
+def module_crash(module: str, text: str, verdict: str) -> None:
+    """Raise ChecksCrashed when a check module's run is a crash: its unittest summary counts a skip (re-review N1: a setup gap, such as a build
+    or a variable not set) or errors and no failure, or a traceback in its output ends in an import or OS error (SETUP_ERRORS). A module that
+    ran and failed (failures, with no skip and no setup error) is a failed check."""
+    import re
+    counts = dict((name, int(n)) for name, n in re.findall(r"(failures|errors|skipped)=(\d+)", verdict))
+    if counts.get("skipped", 0):
+        raise ChecksCrashed(f"{module}: {verdict}, a test skipped (a setup gap: a crash, never a pass or a fail; re-review N1)")
+    if counts.get("errors", 0) and not counts.get("failures", 0):
+        raise ChecksCrashed(f"{module}: {verdict}, errors with no failure (a crash, not a negative)")
+    pattern = r"^(?:[A-Za-z_][\w.]*\.)?(" + "|".join(SETUP_ERRORS) + r")(?::|$)"
+    found = re.search(pattern, text, flags=re.M)
+    if "Traceback (most recent call last)" in text and found:
+        raise ChecksCrashed(f"{module}: its output holds a {found.group(1)} traceback (a setup defect, a crash, not a negative): {verdict}")
+
+
 def checks_task(block: int, *, build, out, workers: int = 1, module_runner=None) -> tuple:
     """I3, DETERMINISTIC_CHECKS_SOURCE: each module of T07_CHECKS run once at the frozen hash with the build (python -B -m unittest -v), on its
-    own blocks; a check passes when its module ends OK with no skip, fails on FAILED or a skip. A module with no unittest result line is a crash
-    (TaskFailed is not raised: the task stops with the traceback). Writes deterministic-checks.json."""
+    own blocks; a check passes when its module's unittest summary (unittest_verdict) is OK, fails on FAILED with a failure. A module with no
+    unittest summary, with a skip, with errors and no failure, or with an import or OS error traceback is a crash (ChecksCrashed: the task is
+    incomplete, exit 3; E6 merge review I2, re-review N1 and N3). Writes deterministic-checks.json only when every module was read."""
     import os
     import subprocess
     out = Path(out)
@@ -1561,29 +1647,40 @@ def checks_task(block: int, *, build, out, workers: int = 1, module_runner=None)
     results, lines = {}, []
     for module in dict.fromkeys(module for _, _, module in T07_CHECKS):
         text = run(module)
-        verdict_lines = [line for line in text.splitlines() if line.startswith(("OK", "FAILED"))]
-        if not verdict_lines:
-            raise RuntimeError(f"{module} ended with no unittest result line (a crash, not a negative)")
-        results[module] = verdict_lines[-1].startswith("OK") and "skipped=" not in verdict_lines[-1]
-        lines.append(f"CHECK module {module}: {verdict_lines[-1]}")
+        verdict = unittest_verdict(module, text)
+        module_crash(module, text, verdict)
+        results[module] = verdict.startswith("OK")
+        lines.append(f"CHECK module {module}: {verdict}")
     checks = [core.CheckResult(name, kind, "pass" if results[module] else "fail") for name, kind, module in T07_CHECKS]
     (out / "deterministic-checks.json").write_text(json.dumps([dataclasses.asdict(c) for c in checks], sort_keys=True) + "\n", encoding="utf-8")
     return lines + [f"CHECK {c.kind} {c.name}: {c.result} ({DETERMINISTIC_CHECKS_SOURCE})" for c in checks], checks
 
 
-def t07_interface(operation: str, **arguments) -> int:
-    """The one call of E6c's T07 tasks (its stub's signature): operation bin, refit, collect, score, pool, negative-cases, checks or summary,
-    with the command line's options as keywords (dashes as underscores). Returns the command's exit code; the command prints its result line."""
-    commands = {"bin": "bin-task", "refit": "refit-task", "collect": "collect", "score": "score-bin", "pool": "score-slices", "negative-cases": "negative-task",
-                "checks": "checks-task", "summary": "summary"}
-    if operation not in commands:
-        _result("interface", "rejected", f"operation {operation}: one of {sorted(commands)}")
-        return EXIT_BAD_INPUT
-    argv = [commands[operation]]
+INTERFACE_COMMANDS = {"bin": "bin-task", "refit": "refit-task", "collect": "collect", "score": "score-bin", "pool": "score-slices",
+                      "negative-cases": "negative-task", "checks": "checks-task", "summary": "summary"}
+
+
+def interface_argv(operation: str, **arguments) -> list:
+    """The command line t07_interface runs: the operation's command, then each keyword as its option (dashes for underscores; None and False
+    left out, True a flag). E6 merge stage: E6c's task runner builds its calls with this, and its test parses them through build_parser."""
+    if operation not in INTERFACE_COMMANDS:
+        raise ScoringError(f"operation {operation}: one of {sorted(INTERFACE_COMMANDS)}")
+    argv = [INTERFACE_COMMANDS[operation]]
     for name, value in arguments.items():
         if value is None or value is False:
             continue
         argv += [f"--{name.replace('_', '-')}"] + ([] if value is True else [str(value)])
+    return argv
+
+
+def t07_interface(operation: str, **arguments) -> int:
+    """The one call of E6c's T07 tasks (its stub's signature): operation bin, refit, collect, score, pool, negative-cases, checks or summary,
+    with the command line's options as keywords (dashes as underscores). Returns the command's exit code; the command prints its result line."""
+    try:
+        argv = interface_argv(operation, **arguments)
+    except ScoringError as error:
+        _result("interface", "rejected", str(error))
+        return EXIT_BAD_INPUT
     return main(argv)
 
 
@@ -1595,21 +1692,16 @@ NEGATIVE_CHECK_NAMES = ("wrong hits: honest", "wrong hits: one-wrong-plane", "wr
                         "limits reached are marked search-truncated (U-K3 on delivered tracks)")
 
 
-def required_checks(checks) -> list:
-    """I3: the checks a T07 pass needs (v4 10's "deterministic, negative and CAI checks pass"; v4 11's T07 row): E5's negative checks
-    (NEGATIVE_CHECK_NAMES) and the deterministic and CAI checks (T07_CHECKS). Each must appear once; an absent or doubled one is a failing
-    check, so a summary never passes on a part that was not run."""
-    checks = list(checks)
-    by_name = collections.Counter(c.name for c in checks)
-    found = list(checks)
-    kinds = {name: "negative" for name in NEGATIVE_CHECK_NAMES}
-    kinds.update({name: kind for name, kind, _ in T07_CHECKS})
-    for name, kind in kinds.items():
-        if by_name[name] == 0:
-            found.append(core.CheckResult(f"{name}: absent (no result of its task)", kind, "fail"))
-        elif by_name[name] > 1:
-            found.append(core.CheckResult(f"{name}: given {by_name[name]} times", kind, "fail"))
-    return found
+class ChecksIncomplete(ScoringError):
+    """The summary's checks are not whole (a required check absent, or one given twice): incomplete (exit 3), rerun the check's task; never
+    read as a fail (E6c re-review; the E6 merge stage)."""
+
+
+def required_checks() -> tuple:
+    """I3: the names of the checks a T07 outcome needs (v4 10's "deterministic, negative and CAI checks pass"; v4 11's T07 row): E5's negative
+    checks (NEGATIVE_CHECK_NAMES) and the deterministic and CAI checks (T07_CHECKS). The summary passes them to core.workflow_outcome
+    (required_checks), which refuses an outcome while any is absent: an absent check is incomplete, never a fail (E6 merge stage)."""
+    return NEGATIVE_CHECK_NAMES + tuple(name for name, _, _ in T07_CHECKS)
 
 
 def summarize(records, checks, *, sensitivity_changes, forbidden_constants=(), critical_false_success=(), evaluation_could_not_run=False,
@@ -1623,14 +1715,24 @@ def summarize(records, checks, *, sensitivity_changes, forbidden_constants=(), c
     doubled = [key for key, n in collections.Counter((r.bin, r.gate, r.statistic) for r in records).items() if n > 1]
     if doubled:
         raise ScoringError(f"{len(doubled)} records appear more than once, first {doubled[0]}: refused")
-    checks = required_checks(checks)
+    checks = list(checks)
+    given_twice = sorted(name for name, n in collections.Counter(c.name for c in checks).items() if n > 1)
+    if given_twice:
+        raise ChecksIncomplete(f"checks given more than once: {given_twice}; rerun the task that wrote them (no draw)")
     attempts = {record.attempt for record in records}
     if len(attempts) != 1:
         raise ScoringError(f"the records are of attempts {sorted(attempts)}: one attempt per run (section 3.4)")
+    absent = sorted(set(required_checks()) - {c.name for c in checks})
+    if absent:   # a required check absent (the core would refuse the outcome), as E6c's summary: incomplete, never a fail
+        raise ChecksIncomplete(f"required checks absent: {absent}; rerun the task that writes them (no draw)")
     disagrees, _ = matching_sentence(sensitivity_changes)
-    return core.workflow_outcome(WORKFLOW, records, checks, attempt=attempts.pop(), forbidden_constants=forbidden_constants,
-                                 critical_false_success=critical_false_success, evaluation_could_not_run=evaluation_could_not_run,
-                                 matching_sensitivity_disagrees=disagrees, freeze_b_blocks_used_up=freeze_b_blocks_used_up)
+    try:
+        return core.workflow_outcome(WORKFLOW, records, checks, attempt=attempts.pop(), forbidden_constants=forbidden_constants,
+                                     critical_false_success=critical_false_success, evaluation_could_not_run=evaluation_could_not_run,
+                                     matching_sensitivity_disagrees=disagrees, freeze_b_blocks_used_up=freeze_b_blocks_used_up,
+                                     required_checks=required_checks())
+    except core.CoreError as error:   # E6 merge review M2: any other refusal of the core is a record defect, refused (exit 2), not a rerun
+        raise ScoringError(f"a record defect, refused by the core (not an absent check; the coordinator's): {error}") from None
 
 
 # ---- Files and the command line (the interface of E6c's T07 tasks).
@@ -1682,7 +1784,8 @@ def write_slices(path, identity, score: dict, record_sha256: str, status: str, r
 def read_slices(path) -> dict:
     with numpy.load(path, allow_pickle=False) as found:
         head = json.loads(str(found["header"]))
-        head["populations"] = {label: {name: found[f"{label}/{name}"] for name in ("ordinal", "slope_u", "pulls")}
+        head["populations"] = {label: {name: found[f"{label}/{name}"] for name in ("ordinal", "slope_u", "pulls", "without_ordinal", "without_slope_u")
+                                       if f"{label}/{name}" in found.files}
                                for label in ("0.5", "0.7") if f"{label}/ordinal" in found.files}
     return head
 
@@ -1836,6 +1939,10 @@ def _summary_command(arguments) -> int:
             checks += [core.CheckResult(**item) for item in json.loads(Path(name).read_text(encoding="utf-8"))]
     try:
         outcome = summarize(records, checks, sensitivity_changes=changes)
+    except ChecksIncomplete as error:
+        print(f"SUMMARY INCOMPLETE T07 block {arguments.block}: {error}")
+        _result("summary", "incomplete", str(error))
+        return EXIT_INCOMPLETE
     except ScoringError as error:
         _result("summary", "rejected", str(error))
         return EXIT_BAD_INPUT
@@ -1893,6 +2000,9 @@ def _task_command(arguments) -> int:
     except TaskFailed as error:
         _result(operation, "failed", str(error))
         return EXIT_NEGATIVE
+    except ChecksCrashed as error:   # E6 merge review I2: a check module that could not run is a crash, never a failed check
+        _result(operation, "incomplete", str(error))
+        return EXIT_INCOMPLETE
     except (ScoringError, core.CoreError, layout.LayoutError, finding_record.RecordFormatError) as error:
         _result(operation, "rejected", str(error))
         return EXIT_BAD_INPUT

@@ -24,8 +24,12 @@ Operations, on the layout of E6a (t04_evaluation_layout.evaluation_plan):
                 check-product (exit 1: the probability-sum stop, kept in stop.json), the truth-start comparator (main bins only: the controls'
                 were never read, fix round 1, M6), topology and its check (main, two-source), E1a's fit (dead), E1b's (stratum 10).
   t09-fixed-points  v4 9.3's likelihood check and per-channel sum at the 50 fixed points of block 6 (t09_fixed_points.py), deterministic.
-  t07-bin, t07-refit, t07-slices, t07-negative-cases, t07-checks, t07-score, T07 collect and summary: through t07_interface, E6b's command
-                line (one named stub until E6b is merged: T07_INTERFACE_STATE); the commands it will run are built here (t07_commands).
+  t07-bin, t07-refit, t07-slices, t07-negative-cases, t07-checks, T07 collect, score and summary: E6b's commands (t07_evaluation_scoring),
+                each call mapped here to E6b's operation and options (t07_call; E6 merge stage, E6c re-review R2: index to fixture and
+                stratum, E6b's names, no option E6b's parser lacks) and run by E6b's t07_interface. T07's collection is one E6b collect per bin
+                (attempts classified here), its scoring one score-bin per bin into the common scores folder with a scored.json marker per bin,
+                its slices one score-slices per fixture and parameter once every bin of the fixture has its marker, and its summary E6b's,
+                reached only when every bin and slice marker and both checks tasks' counted results are there (else SUMMARY INCOMPLETE).
   collect       per workflow, afterany on every task: attempts classified (layout.classify_attempt from sacct and the milestones file), the
                 counted one selected (layout.select_attempt), each bin checked with its products (layout.collect_bin); an incomplete bin is
                 "missing" with its reason; recorded stops carried. collection.json is written last, with "finished": true.
@@ -75,7 +79,6 @@ CHECKS_SOURCE = "rerun-at-evaluation"
 CHECKS_BLOCK = 1
 CHECKS_EVENTS = 3000
 CHECKS_SAMPLES = ((8001, 6, "main-E3-iso"), (8001, 7, "main-E3-far"), (8001, 8, "main-E3-near"))
-T07_INTERFACE_STATE = "stub: E6b's interface is not merged into this tree (d4-e6c-report.md, 'The T07 interface')"
 
 
 class TaskError(ValueError):
@@ -92,10 +95,6 @@ class StepFailed(RuntimeError):
 
 class Incomplete(RuntimeError):
     """A harness task's output is absent or not finished: the summary is incomplete (exit 3), never a workflow fail."""
-
-
-class T07InterfaceNotMerged(RuntimeError):
-    """E6b's T07 interface is not in this tree yet."""
 
 
 def check_block(block) -> int:
@@ -118,36 +117,269 @@ def checks_source(value: str = CHECKS_SOURCE) -> str:
     return value
 
 
-# ---- the T07 interface (E6b's command line: d4-e6b-report.md, "The interface for E6c")
+# ---- the T07 interface (E6b's command line: d4-e6b-report.md, "The interface for E6c"; E6 merge stage, E6c re-review R2)
 
-T07_SCORING_SCRIPT = ROOT / "tests" / "adapters" / "t07_evaluation_scoring.py"
+T07_BINS = tuple((fixture_id, stratum) for fixture_id in (7001, 7002) for stratum in range(12))   # t07-bin index: 0-11 clean s, 12-23 noise s - 12
+T07_REFIT_PIECES = tuple(layout.split(EVENTS, layout.t07_refit_range()))                       # 3 pieces of 4,000 events (E6a's measured refit)
+T07_REFITS = tuple((stratum, piece) for stratum in range(12) for piece in T07_REFIT_PIECES)    # t07-refit index 3 s + p: clean stratum s, piece p
+T07_NEGATIVE_FOLDER = ROOT / "tests" / "adapters" / "data" / "t07-negative-cases"
+T07_CHECK_TASKS = (("T07 negative cases", "t07-negative-cases", "negative-checks.json"), ("T07 checks", "t07-checks", "deterministic-checks.json"))
 
 
-def t07_commands(operation: str, **a) -> list:
-    """The E6b command lines the T07 tasks run (its argument names; test T07Interface): score-bin, score-slices, negative-cases, summary."""
-    head = [sys.executable, *layout.SCRIPT_FLAGS, str(T07_SCORING_SCRIPT), operation, "--block", str(a["block"])]
-    if operation == "score-bin":
-        out = head + ["--fixture-id", str(a["fixture_id"]), "--stratum", str(a["stratum"]), "--events", str(EVENTS), "--record", str(a["record"]),
-                      "--product", str(a["product"]), "--truth", str(a["truth"]), "--out", str(a["out"])]
-        for key, flag in (("truth_seeded_record", "--truth-seeded-record"), ("refit_collection", "--refit-collection"), ("rate_record", "--rate-record")):
-            if a.get(key) is not None:
-                out += [flag, str(a[key])]
-        return out
-    if operation == "score-slices":
-        return head + ["--fixture-id", str(a["fixture_id"]), "--events", str(EVENTS), "--bins", str(a["bins"]), "--out", str(a["out"]),
-                       "--parameters", a.get("parameters", "")]
+def _t07():
+    from tests.adapters import t07_evaluation_scoring
+    return t07_evaluation_scoring
+
+
+def t07_slice_tasks() -> tuple:
+    """t07-slices index k: (fixture, parameter), 5 per fixture (E6b's one score-slices per fixture and parameter)."""
+    return tuple((fixture_id, name) for fixture_id in (7001, 7002) for name in _t07().PARAMETERS)
+
+
+def _index(index, count: int, what: str) -> int:
+    if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < count:
+        raise TaskError(f"{what} {index!r}: 0 to {count - 1}")
+    return index
+
+
+def t07_call(operation: str, *, block: int, **a) -> tuple:
+    """One T07 call of this runner as E6b's (operation, keywords) for t07_evaluation_scoring.t07_interface: the index mapped to fixture and
+    stratum (or refit piece, or slice task), E6b's own option names, and nothing E6b's parser does not define (its summary has no --out). Test:
+    each call parses through E6b's build_parser."""
+    if operation == "bin":
+        fixture_id, stratum = T07_BINS[_index(a["index"], len(T07_BINS), "T07 bin")]
+        return "bin", dict(block=block, fixture_id=fixture_id, stratum=stratum, first=0, count=EVENTS, build=a["build"], out=a["out"])
+    if operation == "refit":
+        stratum, piece = T07_REFITS[_index(a["index"], len(T07_REFITS), "T07 refit")]
+        return "refit", dict(block=block, stratum=stratum, first=piece.first, count=piece.count, bin_dir=a["bin_dir"], build=a["build"], out=a["out"])
+    if operation == "slices":
+        fixture_id, name = t07_slice_tasks()[_index(a["index"], len(t07_slice_tasks()), "T07 slices task")]
+        return "pool", dict(block=block, fixture_id=fixture_id, events=EVENTS, bins=a["scores"], out=a["scores"], parameters=name)
     if operation == "negative-cases":
-        return head + ["--folder", "tests/adapters/data/t07-negative-cases", "--record", str(a["record"]), "--seeds", str(a["seeds"]),
-                       "--out", str(a["out"])]
+        return "negative-cases", dict(block=block, build=a["build"], folder=T07_NEGATIVE_FOLDER, out=a["out"])
+    if operation == "checks":
+        return "checks", dict(block=block, build=a["build"], out=a["out"], workers=a.get("workers", 1))
+    if operation == "collect":
+        fixture_id, stratum = T07_BINS[_index(a["index"], len(T07_BINS), "T07 bin")]
+        return "collect", dict(block=block, fixture_id=fixture_id, stratum=stratum, count=EVENTS, refit_range=layout.t07_refit_range(),
+                               attempts=a["attempts"], out=a["out"])
+    if operation == "score":
+        fixture_id, stratum = T07_BINS[_index(a["index"], len(T07_BINS), "T07 bin")]
+        if fixture_id == 7002 and not a.get("rate_record"):
+            raise TaskError("a T07 noise bin needs the Freeze-B r_dev record (F2, v4 8.3): give --rate-record")
+        return "score", dict(block=block, fixture_id=fixture_id, stratum=stratum, events=EVENTS, collection=a["collection"], out=a["scores"],
+                             rate_record=a.get("rate_record") if fixture_id == 7002 else None)
     if operation == "summary":
-        return head + ["--scores", str(a["scores"]), "--checks", str(a["checks"])]
-    raise TaskError(f"no E6b command {operation}")
+        return "summary", dict(block=block, scores=a["scores"], checks=a["checks"])
+    raise TaskError(f"no T07 call {operation}")
 
 
-def t07_interface(operation: str, **arguments) -> int:
-    """The one call E6c's T07 tasks make (bin, refit, slices, negative-cases, checks, score, collect, summary); at the merge it runs E6b's
-    commands (t07_commands) and E6b's bin, refit and checks tasks. A stub until then: it refuses (exit 2, RESULT rejected), so no T07 task can pass."""
-    raise T07InterfaceNotMerged(f"t07_interface({operation}): {T07_INTERFACE_STATE}")
+def t07_run(operation: str, **a) -> int:
+    """E6b's command for one call (t07_call), in this process; it prints its own result line (RESULT t07-scoring ...); returns its exit code."""
+    e6b_operation, keywords = t07_call(operation, **a)
+    return _t07().t07_interface(e6b_operation, **keywords)
+
+
+def _needs(value, what: str):
+    if not value:
+        raise TaskError(f"{what} is not given")
+    return value
+
+
+def _workers() -> int:
+    return len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else 1
+
+
+def _classified(rows, state_of) -> list:
+    """[[verdict, folder]] of a task's attempts (layout.classify_attempt from sacct and each folder's milestones), as E6b's collect reads them."""
+    found = []
+    for job, folder in rows:
+        state, code, elapsed = state_of(job)
+        marks = Milestones(folder)
+        found.append([layout.classify_attempt(state, code, elapsed, marks.names() if marks.path.exists() else None)[0], str(folder)])
+    return found
+
+
+def _sha_or_none(path) -> str | None:
+    return sha256_file(path) if Path(path).is_file() else None
+
+
+def t07_bin(block: int, index: int, out: Path, build) -> int:
+    check_block(block)
+    return t07_run("bin", block=block, index=index, build=_needs(build, "the T07 build (--t07-build)"), out=out)
+
+
+def t07_refit(block: int, index: int, out: Path, build, attempts_file, *, state_of=None) -> int:
+    """One refit piece of a clean bin, on the data file of its bin task's counted attempt (attempts.tsv, "T07 bin s")."""
+    check_block(block)
+    state_of = state_of or sacct_state
+    build = _needs(build, "the T07 build (--t07-build)")
+    stratum, _ = T07_REFITS[_index(index, len(T07_REFITS), "T07 refit")]
+    rows = read_attempts(Path(_needs(attempts_file, "the attempts file (--attempts)"))).get(f"T07 bin {stratum}", [])
+    bin_dir = counted_folder(rows, block, state_of)
+    return t07_run("refit", block=block, index=index, bin_dir=bin_dir, build=build, out=out)
+
+
+def t07_negative_cases(block: int, out: Path, build) -> int:
+    check_block(block)
+    return t07_run("negative-cases", block=block, build=_needs(build, "the T07 build (--t07-build)"), out=out)
+
+
+def t07_checks(block: int, out: Path, build) -> int:
+    check_block(block)
+    return t07_run("checks", block=block, build=_needs(build, "the T07 build (--t07-build)"), out=out, workers=_workers())
+
+
+def t07_collect(block: int, attempts_file: Path, out: Path, *, state_of=None) -> int:
+    """T07's collection: per bin E6b's collect (the bin and, for a clean bin, its three refit pieces; attempts classified here), then
+    collection.json, written last with "finished": true. A bin collect that is refused or fails leaves no collection.json (incomplete)."""
+    check_block(block)
+    state_of = state_of or sacct_state
+    attempts = read_attempts(attempts_file)
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    if (out / "collection.json").exists():   # E6 merge review M7: a rerun that stops early leaves no earlier collection.json behind
+        (out / "collection.json").unlink()
+    bins = {}
+    pieces = len(T07_REFIT_PIECES)   # E6 merge review M6: refit index pieces x s + p (submit.sh numbers them the same way, from the names)
+    for index, (fixture_id, stratum) in enumerate(T07_BINS):
+        label = f"T07 bin {index}"
+        tried = {"bin": _classified(attempts.get(label, []), state_of), "refit": {}}
+        if fixture_id == 7001:
+            for p, piece in enumerate(T07_REFIT_PIECES):
+                tried["refit"][str(piece.first)] = _classified(attempts.get(f"T07 refit {pieces * stratum + p}", []), state_of)
+        attempts_path, document_path = out / f"t07-bin-{index}.attempts.json", out / f"t07-bin-{index}.json"
+        attempts_path.write_text(json.dumps(tried, sort_keys=True) + "\n", encoding="utf-8")
+        code = t07_run("collect", block=block, index=index, attempts=attempts_path, out=document_path)
+        if code != EXIT_OK:
+            return code
+        document = json.loads(document_path.read_text(encoding="utf-8"))
+        bins[label] = {"status": document["status"], "reason": document["reason"], "collection": str(document_path), "sha256": sha256_file(document_path)}
+        print(f"COLLECT T07 block {block} {label} (fixture {fixture_id} stratum {stratum}): {document['status']}"
+              + (f" ({document['reason']})" if document["reason"] else "") + (f"; refit {document['refit']['status']}" if "refit" in document else ""))
+    (out / "collection.json").write_text(json.dumps({"workflow": "T07", "block": block, "bins": bins, "finished": True}, sort_keys=True, indent=1) + "\n",
+                                         encoding="utf-8")
+    return EXIT_OK
+
+
+def t07_score(block: int, index: int, collection: Path, out: Path, rate_record) -> int:
+    """One T07 bin: E6b's score-bin on its collection, into the common scores folder (Path(out).parent, which E6b's slices and summary read),
+    then the bin's scored.json in out, written last (the summary's marker, E6c fix round 1, I1)."""
+    check_block(block)
+    bins = _collection(collection, "T07", block)
+    label = f"T07 bin {_index(index, len(T07_BINS), 'T07 bin')}"
+    entry = bins[label]
+    if sha256_file(entry["collection"]) != entry["sha256"]:
+        raise TaskError(f"{label}: its collection changed after the collection (SHA-256)")
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    marker = out / "scored.json"
+    if marker.exists():
+        marker.unlink()
+    scores = out.parent
+    fixture_id, stratum = T07_BINS[index]
+    scoring = _t07()
+    records, slices = scores / scoring.records_name(fixture_id, block, stratum), scores / scoring.slices_name(fixture_id, block, stratum)
+    for path in (records, slices):   # only this run's files may stand beside its marker
+        if path.exists():
+            path.unlink()
+    code = t07_run("score", block=block, index=index, collection=entry["collection"], scores=scores, rate_record=rate_record)
+    if code == EXIT_REJECTED and records.is_file() and slices.is_file():
+        # E6 merge review M3 (the coordinator's ruling): E6b refused the bin's files and wrote v4 10's "required output missing" records. A
+        # refused marker: the summary stays incomplete naming the bin and the refusal, for the coordinator; never a pass, never silently a fail.
+        found = scoring.read_records(records)
+        marker.write_text(json.dumps({"bin": label, "refused": True, "reason": found[0].reason if found else "no record",
+                                      "collection_sha256": sha256_file(collection), "bin_collection_sha256": entry["sha256"],
+                                      "records_sha256": _sha_or_none(records), "slices_sha256": _sha_or_none(slices)}, sort_keys=True) + "\n",
+                          encoding="utf-8")
+        return code
+    if code != EXIT_OK:
+        return code
+    marker.write_text(json.dumps({"bin": label, "collection_sha256": sha256_file(collection), "bin_collection_sha256": entry["sha256"],
+                                  "records_sha256": _sha_or_none(scores / scoring.records_name(fixture_id, block, stratum)),
+                                  "slices_sha256": _sha_or_none(scores / scoring.slices_name(fixture_id, block, stratum))}, sort_keys=True) + "\n",
+                      encoding="utf-8")
+    return EXIT_OK
+
+
+def _t07_bin_marker(scores: Path, index: int, tag: str | None, block: int) -> dict:
+    fixture_id, stratum = T07_BINS[index]
+    scoring = _t07()
+    marker = Path(scores) / f"bin-{index}" / "scored.json"
+    if not marker.exists():
+        raise Incomplete(f"the scoring of T07 bin {index} left no scored.json: it crashed or was refused; rerun it (no draw)")
+    doc = json.loads(marker.read_text(encoding="utf-8"))
+    if doc.get("refused"):
+        raise Incomplete(f"T07 bin {index} was refused at scoring ({doc.get('reason')}): the coordinator's, not a rerun; never a pass or a fail "
+                         "(E6 merge review M3)")
+    if (tag is not None and doc.get("collection_sha256") != tag) or doc.get("records_sha256") is None \
+            or _sha_or_none(Path(scores) / scoring.records_name(fixture_id, block, stratum)) != doc.get("records_sha256") \
+            or _sha_or_none(Path(scores) / scoring.slices_name(fixture_id, block, stratum)) != doc.get("slices_sha256"):
+        raise Incomplete(f"the scoring of T07 bin {index} is not of this collection, or its files changed; rerun it (no draw)")
+    return doc
+
+
+def t07_slices(block: int, index: int, scores, out: Path) -> int:
+    """One fixture's slices of one parameter (E6b's score-slices), once the scoring of each of the fixture's 12 bins left its marker; then
+    scores/slices-<index>/scored.json, written last."""
+    check_block(block)
+    fixture_id, name = t07_slice_tasks()[_index(index, len(t07_slice_tasks()), "T07 slices task")]
+    scores = Path(_needs(scores, "the T07 scores folder (--scores)"))
+    members, member_slices = {}, {}
+    for stratum in range(12):
+        bin_index = T07_BINS.index((fixture_id, stratum))
+        doc = _t07_bin_marker(scores, bin_index, None, block)
+        members[bin_index], member_slices[bin_index] = doc["records_sha256"], doc["slices_sha256"]
+    Path(out).mkdir(parents=True, exist_ok=True)
+    marker = scores / f"slices-{index}" / "scored.json"
+    if marker.exists():
+        marker.unlink()
+    code = t07_run("slices", block=block, index=index, scores=scores)
+    if code != EXIT_OK:
+        return code
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.write_text(json.dumps({"slices": index, "fixture_id": fixture_id, "parameter": name, "bins": members, "bin_slices": member_slices,
+                                  "records_sha256": _sha_or_none(scores / _t07().slice_records_name(fixture_id, block, (name,)))}, sort_keys=True) + "\n",
+                      encoding="utf-8")
+    return EXIT_OK
+
+
+def t07_summary(block: int, scores: Path, collection: Path, out: Path, *, attempts_file: Path | None = None, state_of=None) -> int:
+    """E6b's summary (section 10, the core's workflow_outcome with T07's required checks), reached only when the collection finished, every bin
+    and slice task left its marker against it, and both checks tasks' counted attempts ended ok or failed with their checks file; else SUMMARY
+    INCOMPLETE, exit 3, no outcome (E6c fix round 1, I1)."""
+    check_block(block)
+    state_of = state_of or sacct_state
+    scores = Path(scores)
+    try:
+        _collection(collection, "T07", block)
+        tag = sha256_file(collection)
+        attempts = read_attempts(attempts_file) if attempts_file is not None and Path(attempts_file).exists() else {}
+        bin_markers = {index: _t07_bin_marker(scores, index, tag, block) for index in range(len(T07_BINS))}
+        for index, (fixture_id, name) in enumerate(t07_slice_tasks()):
+            marker = scores / f"slices-{index}" / "scored.json"
+            if not marker.exists():
+                raise Incomplete(f"the slices task {index} left no scored.json: it crashed or was refused; rerun it (no draw)")
+            doc = json.loads(marker.read_text(encoding="utf-8"))
+            if _sha_or_none(scores / _t07().slice_records_name(fixture_id, block, (name,))) != doc.get("records_sha256") or doc.get("records_sha256") is None:
+                raise Incomplete(f"the slices task {index}'s records changed after it ended; rerun it (no draw)")
+            for stratum in range(12):   # E6 merge review M1: the slices read the member bins' current .slices.npz files
+                bin_index = T07_BINS.index((fixture_id, stratum))
+                if (doc.get("bin_slices") or {}).get(str(bin_index)) != bin_markers[bin_index].get("slices_sha256"):
+                    raise Incomplete(f"the slices task {index} read another .slices.npz of T07 bin {bin_index} than its current scoring; rerun the "
+                                     "slices (no draw)")
+        files = []
+        for name, operation, file in T07_CHECK_TASKS:
+            folder = counted_single(attempts, name, block, state_of)
+            task_result(folder, operation)
+            if not (folder / file).exists():
+                raise Incomplete(f"{name} in {folder} left no {file}; rerun it")
+            files.append(str(folder / file))
+    except Incomplete as error:
+        print(f"SUMMARY INCOMPLETE T07 block {block}: {error}")
+        return EXIT_CRASHED
+    Path(out).mkdir(parents=True, exist_ok=True)
+    return t07_run("summary", block=block, scores=scores, checks=",".join(files))
 
 
 # ---- running scripts
@@ -184,6 +416,8 @@ def run_script(script: Path, arguments, log: Path, *, ok=(0,)) -> tuple:
     state, line = layout.classify_script_run(done.returncode, text, pattern)
     if state == "crashed":
         raise ScriptCrash(f"{Path(script).name} {arguments[:1]} crashed ({line}); log {log}")
+    if state == "incomplete":   # E6 merge review (nit): exit 3 with its own line is incomplete (core/status.py), never a failed step
+        raise ScriptCrash(f"{Path(script).name} {arguments[:1]} ended incomplete, exit 3 ({line}); log {log}")
     if done.returncode not in ok:
         raise StepFailed(f"{Path(script).name} {arguments[:1]} ended {state}, exit {done.returncode}: {line}")
     return done.returncode, line, seconds
@@ -628,10 +862,10 @@ def write_scores(out: Path, records, checks, lines, *, collection_sha256: str, l
                                  sort_keys=True) + "\n", encoding="utf-8")
 
 
-def score(workflow: str, block: int, index: int, collection: Path, out: Path, paths: Paths) -> int:
+def score(workflow: str, block: int, index: int, collection: Path, out: Path, paths: Paths, *, rate_record=None) -> int:
     check_block(block)
     if workflow == "T07":
-        return t07_interface("score", block=block, index=index, collection=collection, out=out)
+        return t07_score(block, index, collection, out, rate_record)
     bins = _collection(collection, workflow, block)
     tag = sha256_file(collection)
     if workflow == "T08":
@@ -933,7 +1167,7 @@ def plan(block: int) -> int:
 # ---- the command line
 
 OPERATIONS = ("t08-sample", "t08-checks", "t09-generate", "t09-range", "t09-fixed-points", "collect", "score", "summary", "plan", "names", "t07-bin",
-              "t07-refit", "t07-slices", "t07-negative-cases", "t07-checks", "t07-score")
+              "t07-refit", "t07-slices", "t07-negative-cases", "t07-checks")
 
 
 def main(argv=None) -> int:
@@ -944,7 +1178,7 @@ def main(argv=None) -> int:
         p.add_argument("--block", required=True)
         if name not in ("plan", "names"):
             p.add_argument("--out", required=True)
-        if name in ("t08-sample", "t09-generate", "t09-range", "score", "t07-bin", "t07-refit", "t07-slices", "t07-score"):
+        if name in ("t08-sample", "t09-generate", "t09-range", "score", "t07-bin", "t07-refit", "t07-slices"):
             p.add_argument("--index", type=int, required=True)
         if name == "t09-range":
             p.add_argument("--range", type=int, required=True)
@@ -953,6 +1187,14 @@ def main(argv=None) -> int:
             p.add_argument("--workflow", required=True, choices=("T07", "T08", "T09"))
         if name in ("collect", "summary"):
             p.add_argument("--attempts", required=True)
+        if name == "t07-refit":
+            p.add_argument("--attempts", help="attempts.tsv: the refit runs on its bin task's counted attempt")
+        if name in ("t07-bin", "t07-refit", "t07-negative-cases", "t07-checks"):
+            p.add_argument("--t07-build", help="the T07 build folder (t07-build.sh)")
+        if name == "t07-slices":
+            p.add_argument("--scores", help="the T07 scores folder (score.sh's)")
+        if name == "score":
+            p.add_argument("--rate-record", help="T07 noise bins: the Freeze-B r_dev record (F2, v4 8.3)")
         if name in ("score", "summary"):
             p.add_argument("--collection", required=True)
         if name == "summary":
@@ -983,21 +1225,29 @@ def main(argv=None) -> int:
             code = t09_fixed_points(block, Path(args.out), paths)
         elif op == "collect":
             code = collect(args.workflow, block, Path(args.attempts), Path(args.out)) if args.workflow != "T07" else \
-                t07_interface("collect", block=block, attempts=args.attempts, out=args.out)
+                t07_collect(block, Path(args.attempts), Path(args.out))
         elif op == "score":
-            code = score(args.workflow, block, args.index, Path(args.collection), Path(args.out), paths)
+            code = score(args.workflow, block, args.index, Path(args.collection), Path(args.out), paths, rate_record=args.rate_record)
         elif op == "summary":
             code = summary(args.workflow, block, Path(args.scores), Path(args.collection), Path(args.out), attempts_file=Path(args.attempts)) \
-                if args.workflow != "T07" else t07_interface("summary", block=block, scores=args.scores, out=args.out)
+                if args.workflow != "T07" else t07_summary(block, Path(args.scores), Path(args.collection), Path(args.out), attempts_file=Path(args.attempts))
         elif op == "plan":
             code = plan(block)
         elif op == "names":
             for kind, sample, span, name in task_names():
                 print(f"NAME\t{kind}\t{sample}\t{span}\t{name}")
             code = EXIT_OK
+        elif op == "t07-bin":
+            code = t07_bin(block, args.index, Path(args.out), args.t07_build)
+        elif op == "t07-refit":
+            code = t07_refit(block, args.index, Path(args.out), args.t07_build, args.attempts)
+        elif op == "t07-slices":
+            code = t07_slices(block, args.index, args.scores, Path(args.out))
+        elif op == "t07-negative-cases":
+            code = t07_negative_cases(block, Path(args.out), args.t07_build)
         else:
-            code = t07_interface(op.split("-", 1)[1], block=block, index=getattr(args, "index", None), out=args.out)
-    except (TaskError, T07InterfaceNotMerged, layout.LayoutError, bin_scorer.ScoringError) as error:
+            code = t07_checks(block, Path(args.out), args.t07_build)
+    except (TaskError, layout.LayoutError, bin_scorer.ScoringError) as error:
         print(f"REJECTED {op}: {error}")
         print(f"RESULT {op} rejected", flush=True)
         return EXIT_REJECTED

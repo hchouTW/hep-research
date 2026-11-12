@@ -266,16 +266,17 @@ RESULT_LINES = {
     "t08_cai.py rereco": r"^(CAI-T08-2 .* RESULT (PASS|FAIL|RECORDED)|GATE |REFUSED )",
     "t09_fixed_points.py": r"^(GATE per-channel sum at the fixed points|REFUSED |ERROR )",
     "check_generators.py": r"^RESULT (PASS|FAIL)",
-    "t07_evaluation_scoring.py": r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected):",
+    "t07_evaluation_scoring.py": r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected|incomplete):",   # E6 merge stage: the summary's incomplete
     "t04_evaluation_tasks.py": r"^RESULT [a-z0-9-]+ (ok|failed|rejected|crashed|incomplete)",
 }
-SCRIPT_STATES = ("ok", "negative", "crashed")
+SCRIPT_STATES = ("ok", "negative", "incomplete", "crashed")
 
 
 def classify_script_run(exit_code: int, run_text: str, result_pattern: str) -> tuple:
     """How a script's run ended: (state, result line). "crashed" when the run_text holds a traceback, when the script's own result line is absent,
     or when the exit code is outside core/status.py's 0-3 (core/status.py: the run's outcome cannot be classified, incomplete, exit 3); else "ok"
-    at exit 0 and "negative" at any other exit with its result line (a refusal or a failed check the script itself reports). A
+    at exit 0, "incomplete" at exit 3 with its result line (core/status.py: a missing dependency or an incomplete run; E6 merge review, nit:
+    never a negative reading), and "negative" at exit 1 or 2 with its result line (a refusal or a failed check the script itself reports). A
     ModuleNotFoundError at import is a crash, never a negative reading."""
     import re
     lines = run_text.splitlines()
@@ -283,7 +284,7 @@ def classify_script_run(exit_code: int, run_text: str, result_pattern: str) -> t
     if "Traceback (most recent call last)" in run_text or not found or exit_code not in (0, 1, 2, 3):
         why = "a traceback" if "Traceback (most recent call last)" in run_text else ("no result line" if not found else f"exit {exit_code}")
         return "crashed", why
-    return ("ok" if exit_code == 0 else "negative"), found[-1]
+    return {0: "ok", 3: "incomplete"}.get(exit_code, "negative"), found[-1]
 
 
 # ---- Earlier attempts.
@@ -753,7 +754,17 @@ START_UP_SECONDS = {"T07": 60, "T08": 30, "T09": 30}
 # score-bin 11-59 s, at most 1.74 GB per bin. Scaled to 12,000 events: time x 5 (4 for the events, 1.25 for the sorts of the 1,000 bootstrap
 # replicates, n log n), 59 s x 5 = 295 s, so 300 s; memory x 4, linear, the conservative reading (the finding record is parsed whole and the
 # product states held per track, both linear in events; the bootstrap rows of 1,000 x 12,000 int64 add 96 MB): 7.0 GB, at 2 CPUs x 6,000 MB.
-SCORING_SECONDS = {"T07": 300, "T08": 300, "T09": 1500}
+# E6 merge stage: T08 and T09 from E6c's block-1 job of record 7592360 (MEASURE lines, scaled to 12,000 events: time x 4.4 for T08 and x 22 for T09,
+# the bootstrap sorts n log n; memory linear, conservative). T09: main stratum 10, the heaviest scoring (the /4, /3, truth-start and single-photon
+# products, E1b), 71 s and 2.87 GB; budget 300 s, a margin of 4.2. T08: main-E2-far 12 s and 2.72 GB (dead-E3 7 s); the heaviest T08 scoring of
+# that job's COST lines is main-E4-far, 3.5 s at 3,000 events, 15 s scaled; budget 120 s, a margin of 8 on it. T07 unchanged: E6b's job of record
+# 7592299 gives score-bin at most 54.4 s and 1.21 GB per 3,000 events, x 5 is 272 s, so 300 s (a margin of 1.1; the Slurm limit of 1 h is 12 times
+# it). Memory: every scoring task keeps 6,000 MB per CPU (scaled at most 2.87 GB for T08 and T09, 4.9 GB for T07 at x 4). The Slurm limit of
+# every scoring task stays 1 h (score.sh); a scoring task draws nothing and may be rerun (E6c fix round 1, I1).
+# E6 merge review M4 (the coordinator's ruling, conservative): T09 back to E6c's estimate from the Freeze-B readings, (131 + 97) x 4 + 74 x 4 =
+# 1,208 s. The 71 s of job 7592360 is a 600-event measurement scaled x 22, and the two are not reconciled: the slim event documents plausibly
+# remove most of the reading, but the heaviest bin (main stratum 10) is not yet measured at 12,000 events (job 7592611 scores saturation-B3).
+SCORING_SECONDS = {"T07": 300, "T08": 120, "T09": 1208}
 SCORING_CPUS = {"T07": 2, "T08": 1, "T09": 1}
 SCORING_MEMORY_MB = {"T07": 6000, "T08": 6000, "T09": 6000}
 T09_POOL_SCORING_SECONDS = 120        # the pool reads the nine bins' reduced (m, y) files the scoring tasks write

@@ -724,8 +724,9 @@ class AngleSliceIdentity(unittest.TestCase):
         slope = numpy.array([-0.14, 0.01, -0.05, 0.1, 0.13, -0.08])
         pulls = numpy.tile(numpy.linspace(-1, 1, 6)[:, None], (1, 5)) * (1 + stratum / 10)
         return {"fixture_id": fixture, "block": block, "stratum": stratum, "events": events, "status": status, "reason": "" if status == "complete" else "the bin is incomplete",
-                "record_sha256": "0" * 64, "populations": {"0.5": {"ordinal": ordinal, "slope_u": slope, "pulls": pulls},
-                                                         "0.7": {"ordinal": ordinal, "slope_u": slope, "pulls": pulls}}}
+                "record_sha256": "0" * 64, "populations": {label: {"ordinal": ordinal, "slope_u": slope, "pulls": pulls,
+                                                                   "without_ordinal": numpy.zeros(0, dtype=numpy.int64), "without_slope_u": numpy.zeros(0)}
+                                                           for label in ("0.5", "0.7")}}
 
     def test_complete_slices_give_60_records_in_order(self):
         bins = [self.slice_data(7001, s) for s in range(12)]
@@ -823,12 +824,12 @@ class DevelopmentReadings(unittest.TestCase):
 
     def test_the_summary_counts_the_required_set(self):
         records = evaluation_records()
-        outcome = scoring.summarize(records, [], sensitivity_changes=[])
+        outcome = scoring.summarize(records, every_check(), sensitivity_changes=[])
         self.assertIn("required set not intact: 1140 required tests", outcome.reasons[0])
         slices = []
         for fixture in (7001, 7002):
             slices += scoring.score_slices(fixture, 11, [AngleSliceIdentity.slice_data(None, fixture, s) for s in range(12)], events_per_bin=4)["records"]
-        outcome = scoring.summarize(records + slices, [], sensitivity_changes=[])
+        outcome = scoring.summarize(records + slices, every_check(), sensitivity_changes=[])
         self.assertEqual(len(records + slices), 1260)
         self.assertFalse(any("required set not intact" in reason for reason in outcome.reasons), outcome.reasons)
         self.assertEqual((outcome.workflow_result, outcome.r11_state), ("fail", "failed"))   # hand-made bins are too small: inconclusive in required bins
@@ -852,7 +853,7 @@ class MatchingSensitivity(unittest.TestCase):
     def test_the_rerun_is_recorded_in_the_outcome_and_blocks_nothing(self):
         records = evaluation_records()
         changes = scoring.sensitivity_changes({("T07 duplicates", "rate"): 0.0}, {("T07 duplicates", "rate"): 0.5})
-        outcome = scoring.summarize(records, [], sensitivity_changes=changes)
+        outcome = scoring.summarize(records, every_check(), sensitivity_changes=changes)
         self.assertIn("matching sensitivity disagrees (recorded, no effect)", outcome.recorded)
 
 
@@ -900,6 +901,14 @@ def negative_record(names, overrides=None):
     return {"header": header, "configuration": config, "events": events}, seeds
 
 
+def writable_copy(source: Path, target: Path) -> None:
+    """A copy of a kept folder whose files and folders this test may change, also when the plugin is a read-only copy (the jobs' snapshots; E6
+    merge review I2): the bytes only, never the source's modes."""
+    shutil.copytree(source, target, copy_function=shutil.copyfile)
+    for folder in [target, *(p for p in target.rglob("*") if p.is_dir())]:
+        folder.chmod(0o755)
+
+
 class NegativeCasesAtEvaluation(unittest.TestCase):
     """E5 (v4 11): the kept file, its SHA-256 checked first; wrong hits, branch explosion, seed failure; limits reached marked search-truncated."""
 
@@ -911,7 +920,7 @@ class NegativeCasesAtEvaluation(unittest.TestCase):
     def test_a_changed_folder_is_refused_before_it_is_read(self):
         with tempfile.TemporaryDirectory() as folder:
             copy = Path(folder) / "kept"
-            shutil.copytree(KEPT_NEGATIVE_CASES, copy)
+            writable_copy(KEPT_NEGATIVE_CASES, copy)
             flipped = bytearray((copy / "t07-negative-cases-1.t07data").read_bytes())
             flipped[-1] ^= 1
             (copy / "t07-negative-cases-1.t07data").write_bytes(bytes(flipped))
@@ -922,7 +931,7 @@ class NegativeCasesAtEvaluation(unittest.TestCase):
         """A folder its own builder would accept (another source event, case file and sums rebuilt): only the hashes kept at Freeze B refuse it."""
         with tempfile.TemporaryDirectory() as folder:
             copy = Path(folder) / "kept"
-            shutil.copytree(KEPT_NEGATIVE_CASES, copy)
+            writable_copy(KEPT_NEGATIVE_CASES, copy)
             description = json.loads((copy / scoring.negative_cases.DESCRIPTION_FILE).read_text(encoding="utf-8"))
             description["hits"][0][1] += 0.001
             cases = scoring.negative_cases.cases_of(description)
@@ -1115,9 +1124,9 @@ class FixRoundOne(unittest.TestCase):
         self.assertEqual({kind for _, kind, _ in scoring.T07_CHECKS}, {"deterministic", "cai"})
 
     def test_i3_the_checks_task_reads_each_modules_result(self):
-        outputs = {"tests.adapters.test_acts_scenarios": "Ran 20 tests\n\nOK\n", "tests.adapters.test_acts_finding": "Ran 64 tests\n\nOK (skipped=1)\n",
-                   "tests.adapters.test_acts_cai_refit": "Ran 20 tests\n\nOK\n", "tests.adapters.test_acts_truth_seeded": "Ran 20 tests\n\nFAILED (failures=1)\n",
-                   "tests.adapters.test_acts_track_outputs": "Ran 45 tests\n\nOK\n"}
+        outputs = {"tests.adapters.test_acts_scenarios": "Ran 20 tests in 1.0s\n\nOK\n", "tests.adapters.test_acts_finding": "Ran 64 tests in 1.0s\n\nFAILED (failures=2)\n",
+                   "tests.adapters.test_acts_cai_refit": "Ran 20 tests in 1.0s\n\nOK\n", "tests.adapters.test_acts_truth_seeded": "Ran 20 tests in 1.0s\n\nFAILED (failures=1)\n",
+                   "tests.adapters.test_acts_track_outputs": "Ran 45 tests in 1.0s\n\nOK\n"}
         _, checks = scoring.checks_task(11, build="b", out=self.folder, module_runner=outputs.get)
         words = {c.name.split(":")[0]: c.result for c in checks}
         self.assertEqual(words, {"A05": "pass", "A07": "fail", "A17": "pass", "A39": "fail", "CAI-T07-1 and CAI-T07-2": "pass", "CAI-T07-3 and CAI-T07-4": "pass"})
@@ -1126,17 +1135,15 @@ class FixRoundOne(unittest.TestCase):
             scoring.checks_task(11, build="b", out=self.folder, module_runner=outputs.get)
 
     def test_i3_a_pass_needs_every_named_check(self):
+        """E6 merge stage: the names go to the core (required_checks), and an absent one is incomplete, never a fail (E6c re-review)."""
         records = evaluation_records()
-        found = scoring.required_checks([])
-        self.assertEqual(len(found), len(scoring.NEGATIVE_CHECK_NAMES) + len(scoring.T07_CHECKS))
-        self.assertTrue(all(c.result == "fail" and "absent" in c.name for c in found))
-        every = [core.CheckResult(n, "negative", "pass") for n in scoring.NEGATIVE_CHECK_NAMES] + [core.CheckResult(n, k, "pass") for n, k, _ in scoring.T07_CHECKS]
-        self.assertEqual(scoring.required_checks(every), every)
-        self.assertTrue(any("given 2 times" in c.name for c in scoring.required_checks(every + every[:1])))
+        self.assertEqual(len(scoring.required_checks()), len(scoring.NEGATIVE_CHECK_NAMES) + len(scoring.T07_CHECKS))
+        every = every_check()
         for fixture in (7001, 7002):
             records += scoring.score_slices(fixture, 11, [AngleSliceIdentity.slice_data(None, fixture, s) for s in range(12)], events_per_bin=4)["records"]
-        outcome = scoring.summarize(records, every[1:], sensitivity_changes=[])
-        self.assertTrue(any("absent" in reason for reason in outcome.reasons))
+        with self.assertRaises(scoring.ChecksIncomplete) as raised:
+            scoring.summarize(records, every[1:], sensitivity_changes=[])
+        self.assertIn("absent", str(raised.exception))
         description = scoring.check_negative_case_folder(KEPT_NEGATIVE_CASES)
         record, seeds = negative_record(description["names"])
         self.assertEqual([c.name for c in scoring.negative_case_checks(description, record, seeds)], list(scoring.NEGATIVE_CHECK_NAMES))
@@ -1287,6 +1294,230 @@ class EveryCommandsParser(unittest.TestCase):
             with contextlib.redirect_stdout(stream):
                 code = scoring.main(["score-bin"] + [x if x != "o" else folder for x in self.MINIMAL["score-bin"]])
         self.assertEqual((code, layout.classify_script_run(code, stream.getvalue(), scoring.RESULT_LINE)[0]), (2, "negative"))
+
+
+def every_check(result="pass") -> list:
+    """One CheckResult of each required T07 check (E5's negative checks, the deterministic and CAI checks)."""
+    return [core.CheckResult(n, "negative", result) for n in scoring.NEGATIVE_CHECK_NAMES] + [core.CheckResult(n, k, result) for n, k, _ in scoring.T07_CHECKS]
+
+
+class MergeStage(unittest.TestCase):
+    """The E6 merge stage (d4-e6-merge-brief.md, item 2): E6b re-review N1 (a primary with no plane-1 result is a failure in its slice's tail),
+    the summary's required checks passed to the core (an absent check is incomplete, never a fail), the slice identity on core.PooledIdentity."""
+
+    def setUp(self):
+        self.folder = Path(tempfile.mkdtemp(prefix="t07-merge-"))
+
+    def tearDown(self):
+        shutil.rmtree(self.folder, ignore_errors=True)
+
+    def test_n1_a_primary_with_no_plane_one_result_is_kept_for_its_slice(self):
+        files = hand_bin(self.folder)
+        FixRoundOne.drop_state(self, files, "event-1-candidate-2")     # particle 2 of event 1: primary, no smoothed state
+        identity = scoring.bin_identity(7001, 1, 0)
+        score = scoring.score_bin(identity, scoring.BinInputs(files["record"], files["product"], files["truth"]), events=4)
+        population = score["slices"]["0.5"]
+        self.assertEqual(population["without_ordinal"].tolist(), [1])
+        self.assertEqual(len(population["without_slope_u"]), 1)
+        self.assertIsNotNone(scoring.slice_of(float(population["without_slope_u"][0])))
+        self.assertEqual(len(population["ordinal"]), 22)                # the 22 with a result, as the bin's pulls
+        path = self.folder / "s.slices.npz"
+        scoring.write_slices(path, identity, score, "0" * 64, "complete", "")
+        back = scoring.read_slices(path)["populations"]["0.5"]
+        self.assertEqual(back["without_ordinal"].tolist(), [1])
+        self.assertEqual(back["without_slope_u"].tolist(), population["without_slope_u"].tolist())
+
+    def test_n1_the_slice_tail_counts_it_a_failure(self):
+        base_bins = [AngleSliceIdentity.slice_data(None, 7001, s) for s in range(12)]
+        bins = [AngleSliceIdentity.slice_data(None, 7001, s) for s in range(12)]
+        for label in ("0.5", "0.7"):
+            bins[3]["populations"][label]["without_ordinal"] = numpy.array([2], dtype=numpy.int64)
+            bins[3]["populations"][label]["without_slope_u"] = numpy.array([0.1])     # slice 3, [0.075, 0.15]
+        base = scoring.score_slices(7001, 11, base_bins, events_per_bin=4)
+        found = scoring.score_slices(7001, 11, bins, events_per_bin=4)
+        before = {(r.gate, r.statistic): r for r in base["records"]}
+        after = {(r.gate, r.statistic): r for r in found["records"]}
+        for name in scoring.PARAMETERS:
+            gate = f"T07 angle slice 3 pull {name}"
+            self.assertEqual(after[(gate, "tail")].readings["objects"], before[(gate, "tail")].readings["objects"] + 1)
+            self.assertEqual(after[(gate, "tail")].readings["failures"], before[(gate, "tail")].readings["failures"] + 1)
+            for statistic in ("trimmed-centre", "sigma68-width"):         # no pull value: centre and width as before
+                self.assertEqual(after[(gate, statistic)].estimate, before[(gate, statistic)].estimate)
+            self.assertGreater(found["estimates"][(gate, "tail")], base["estimates"][(gate, "tail")])
+            self.assertGreater(found["rerun"][(gate, "tail")], base["rerun"][(gate, "tail")])
+            for other in (0, 1, 2):
+                key = (f"T07 angle slice {other} pull {name}", "tail")
+                self.assertEqual(after[key].readings, before[key].readings)
+
+    def test_n1_a_slice_file_without_the_count_is_missing(self):
+        bins = [AngleSliceIdentity.slice_data(None, 7002, s) for s in range(12)]
+        del bins[5]["populations"]["0.5"]["without_ordinal"]
+        records = scoring.score_slices(7002, 11, bins, events_per_bin=4)["records"]
+        self.assertEqual(len(records), 60)
+        self.assertTrue(all(r.result == "inconclusive" and "required output missing" in r.reason and "(N1)" in r.reason for r in records))
+
+    def test_the_slice_identity_is_the_cores_pooled_identity(self):
+        identity = scoring.slice_identity(7002, 12, 1)
+        self.assertIsInstance(identity, core.PooledIdentity)
+        self.assertEqual(identity, core.PooledIdentity("T07", 7002, 12, 1, tuple(range(12)), scoring.slice_name(1)))
+        self.assertEqual(identity.level, core.level_of_block(12))
+        self.assertIn("angle slice 1 [-0.075, 0.0)", identity.label)
+        self.assertIn("angle slice 3 [0.075, 0.15]", scoring.slice_identity(7001, 11, 3).label)
+        development = scoring.slice_identity(7001, 1, 0)
+        self.assertIsInstance(development, core.PooledIdentity)
+        self.assertTrue(development.label.startswith(scoring.DEVELOPMENT_LABEL))
+        self.assertEqual(development.level, core.level_of_block(11))
+        self.assertEqual(core.seed_entropy(development), (core.BOOTSTRAP_DOMAIN, 7001, 1, core.POOL_STRATUM_BASE))
+        bins = [AngleSliceIdentity.slice_data(None, 7001, s) for s in range(12)]
+        bins[7] = AngleSliceIdentity.slice_data(None, 7001, 7, status="missing")
+        records = scoring.score_slices(7001, 11, bins, events_per_bin=4)["records"]
+        self.assertTrue(all("member stratum 7 is incomplete" in r.reason for r in records))   # layout.pool_status names the member
+
+    def test_the_summary_passes_the_required_checks_to_the_core(self):
+        records = evaluation_records()
+        for fixture in (7001, 7002):
+            records += scoring.score_slices(fixture, 11, [AngleSliceIdentity.slice_data(None, fixture, s) for s in range(12)], events_per_bin=4)["records"]
+        seen = {}
+        original = core.workflow_outcome
+
+        def spy(*arguments, **keywords):
+            seen.update(keywords, checks=list(arguments[2]))
+            return original(*arguments, **keywords)
+        core.workflow_outcome = spy
+        try:
+            outcome = scoring.summarize(records, every_check(), sensitivity_changes=[])
+        finally:
+            core.workflow_outcome = original
+        self.assertEqual(tuple(seen["required_checks"]), scoring.required_checks())
+        self.assertEqual(seen["checks"], every_check())                  # no padding of absent checks
+        self.assertFalse(any("absent" in reason for reason in outcome.reasons))
+        failing = [core.CheckResult(c.name, c.kind, "fail" if i == 0 else "pass") for i, c in enumerate(every_check())]
+        self.assertEqual(scoring.summarize(records, failing, sensitivity_changes=[]).workflow_result, "fail")   # a check that ran and failed: a fail
+
+    def test_an_absent_or_doubled_check_is_incomplete_never_a_fail(self):
+        records = evaluation_records()
+        for checks in ([], every_check()[1:], every_check() + every_check()[:1]):
+            with self.assertRaises(scoring.ChecksIncomplete):
+                scoring.summarize(records, checks, sensitivity_changes=[])
+
+    def test_the_summary_command_reads_incomplete_by_its_own_result_line(self):
+        records = evaluation_records()
+        scoring.write_records(self.folder / "t07-score-7001-b11-s0.records.jsonl", records)
+        checks = self.folder / "checks.json"
+        checks.write_text(json.dumps([dataclasses.asdict(c) for c in every_check()[1:]]) + "\n", encoding="utf-8")
+        import contextlib
+        import io
+        stream = io.StringIO()
+        with contextlib.redirect_stdout(stream):
+            code = scoring.main(["summary", "--block", "11", "--scores", str(self.folder), "--checks", str(checks)])
+        text = stream.getvalue()
+        self.assertEqual(code, scoring.EXIT_INCOMPLETE)
+        self.assertIn("SUMMARY INCOMPLETE T07 block 11", text)
+        self.assertNotIn("SUMMARY T07 attempt", text)
+        state, line = layout.classify_script_run(code, text, layout.RESULT_LINES["t07_evaluation_scoring.py"])
+        self.assertEqual(state, "incomplete")                            # its own result line, exit 3: incomplete, never negative or crashed
+        self.assertIn("RESULT t07-scoring summary incomplete:", line)
+
+
+class MergeFixRound(unittest.TestCase):
+    """Fix round 1 of the E6 merge review (d4-e6-merge-review.md, the coordinator's rulings): a check module that errors with no failure, or
+    whose output holds an import or OS error, is a crash (exit 3), never a failed check (I2); a record defect is refused, apart from an absent
+    check (M2); the bin's 70 % tail estimate counts primaries with no plane-1 result (nit)."""
+
+    def setUp(self):
+        self.folder = Path(tempfile.mkdtemp(prefix="t07-merge-fix-"))
+        self.addCleanup(shutil.rmtree, self.folder)
+
+    def outputs(self, **changed):
+        found = {module: "Ran 20 tests in 1.0s\n\nOK\n" for _, _, module in scoring.T07_CHECKS}
+        found.update({f"tests.adapters.{name}": text for name, text in changed.items()})
+        return found
+
+    def test_i2_a_module_that_errors_with_no_failure_is_a_crash(self):
+        for text in ("Ran 20 tests in 1.0s\n\nFAILED (errors=1)\n", "Ran 20 tests in 1.0s\n\nFAILED (errors=2, skipped=1)\n"):
+            with self.subTest(text=text):
+                with self.assertRaises(scoring.ChecksCrashed):
+                    scoring.checks_task(11, build="b", out=self.folder, module_runner=self.outputs(test_acts_finding=text).get)
+                self.assertFalse((self.folder / "deterministic-checks.json").exists())   # no checks file: the summary stays incomplete
+
+    def test_i2_an_import_or_file_system_error_traceback_is_a_crash_even_beside_a_failure(self):
+        for error in ("ImportError: cannot import name 'test_acts_tracking' from 'tests.adapters'", "ModuleNotFoundError: No module named 'x'",
+                      "PermissionError: [Errno 13] Permission denied: 'evidence'", "OSError: [Errno 30] Read-only file system: 'a'",
+                      "FileNotFoundError: [Errno 2] No such file or directory: 'b'"):
+            text = f"ERROR: test_x\n----\nTraceback (most recent call last):\n  File \"a.py\", line 1, in f\n{error}\n\nRan 20 tests in 1.0s\n\nFAILED (failures=1, errors=1)\n"
+            with self.subTest(error=error.split(":")[0]):
+                with self.assertRaises(scoring.ChecksCrashed):
+                    scoring.checks_task(11, build="b", out=self.folder, module_runner=self.outputs(test_acts_scenarios=text).get)
+
+    def test_i2_a_failure_without_a_setup_error_is_still_a_failed_check(self):
+        text = "FAIL: test_x\nTraceback (most recent call last):\nAssertionError: 1 != 2\n\nRan 20 tests in 1.0s\n\nFAILED (failures=1, errors=1)\n"
+        _, checks = scoring.checks_task(11, build="b", out=self.folder, module_runner=self.outputs(test_acts_truth_seeded=text).get)
+        self.assertEqual({c.name.split(":")[0]: c.result for c in checks}["A39"], "fail")
+
+    def test_n1_a_module_that_skips_is_a_crash_never_a_pass_or_a_fail(self):
+        """E6 merge re-review N1 (the coordinator's ruling): a skip (a build or a variable not set) is a setup gap, so a crash: ChecksCrashed, no
+        checks file, the task incomplete (exit 3)."""
+        for text in ("Ran 64 tests in 1.0s\n\nOK (skipped=1)\n", "Ran 64 tests in 1.0s\n\nOK (skipped=64)\n",
+                     "Ran 64 tests in 1.0s\n\nFAILED (failures=1, skipped=2)\n"):
+            with self.subTest(text=text.splitlines()[-1]):
+                with self.assertRaises(scoring.ChecksCrashed) as caught:
+                    scoring.checks_task(11, build="b", out=self.folder, module_runner=self.outputs(test_acts_finding=text).get)
+                self.assertIn("skip", str(caught.exception))
+                self.assertFalse((self.folder / "deterministic-checks.json").exists())
+
+    def test_n3_the_verdict_is_unittests_own_final_summary_only(self):
+        """E6 merge re-review N3: earlier lines that start with OK or FAILED (a program's own output) are never the verdict; a module whose
+        output has no unittest summary after its "Ran N tests" line (killed, or never reached it) is a crash."""
+        early = "OK U_dev <= C (0.005) in all 3 bins\nFAILED to open a cache, retried\n"
+        _, checks = scoring.checks_task(11, build="b", out=self.folder,
+                                        module_runner=self.outputs(test_acts_scenarios=early + "Ran 20 tests in 1.0s\n\nFAILED (failures=1)\n").get)
+        self.assertEqual({c.name.split(":")[0]: c.result for c in checks}["A05"], "fail")   # the summary, not the early "OK ..." line
+        for text in (early, early + "Ran 20 tests in 1.0s\n", "Ran 20 tests in 1.0s\n\nOK and then a program's output\n"):
+            with self.subTest(text=text[-30:]):
+                with self.assertRaises(scoring.ChecksCrashed):
+                    scoring.checks_task(11, build="b", out=self.folder, module_runner=self.outputs(test_acts_scenarios=text).get)
+
+    def test_i2_the_checks_task_command_reads_a_crash_as_incomplete_exit_3(self):
+        import contextlib
+        import io
+        original = scoring.checks_task
+
+        def crashing(*arguments, **keywords):
+            raise scoring.ChecksCrashed("tests.adapters.test_acts_finding: FAILED (errors=1) with no failure")
+        scoring.checks_task = crashing
+        try:
+            with contextlib.redirect_stdout(io.StringIO()) as stream:
+                code = scoring.main(["checks-task", "--block", "11", "--build", "b", "--out", str(self.folder)])
+        finally:
+            scoring.checks_task = original
+        self.assertEqual(code, scoring.EXIT_INCOMPLETE)
+        self.assertIn("RESULT t07-scoring checks-task incomplete:", stream.getvalue())
+        self.assertEqual(layout.classify_script_run(code, stream.getvalue(), scoring.RESULT_LINE)[0], "incomplete")
+
+    def test_m2_a_record_defect_is_refused_not_an_absent_check(self):
+        records = evaluation_records()
+        for fixture in (7001, 7002):
+            records += scoring.score_slices(fixture, 11, [AngleSliceIdentity.slice_data(None, fixture, s) for s in range(12)], events_per_bin=4)["records"]
+        index = next(i for i, r in enumerate(records) if r.required)
+        defective = list(records)
+        defective[index] = dataclasses.replace(records[index], result="not-applicable")
+        with self.assertRaises(scoring.ScoringError) as caught:
+            scoring.summarize(defective, every_check(), sensitivity_changes=[])
+        self.assertNotIsInstance(caught.exception, scoring.ChecksIncomplete)
+        self.assertIn("record defect", str(caught.exception))
+        with self.assertRaises(scoring.ChecksIncomplete) as absent:
+            scoring.summarize(records, every_check()[1:], sensitivity_changes=[])
+        self.assertIn("rerun", str(absent.exception))
+
+    def test_nit_the_bins_tail_estimate_counts_a_primary_with_no_plane_one_result(self):
+        files = hand_bin(self.folder)
+        FixRoundOne.drop_state(self, files, "event-1-candidate-2")
+        score = scoring.score_bin(scoring.bin_identity(7001, 1, 0), scoring.BinInputs(files["record"], files["product"], files["truth"]), events=4)
+        by = {(r.gate, r.statistic): r for r in score["records"]}
+        for gate in ("T07 track pull loc0", "T07 q/p pull positive"):
+            with self.subTest(gate=gate):
+                record = by[(gate, "tail")]
+                self.assertEqual(score["estimates"][(gate, "tail")], record.readings["failures"] / record.readings["objects"])
 
 
 if __name__ == "__main__":

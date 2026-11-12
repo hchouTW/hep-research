@@ -389,7 +389,14 @@ class ScriptRuns(unittest.TestCase):
         self.assertEqual(layout.classify_script_run(1, "", pattern)[0], "crashed")
         self.assertEqual(layout.classify_script_run(139, "RESULT ok: x\n", pattern)[0], "crashed")             # a signal
         self.assertEqual(layout.classify_script_run(0, "RESULT ok: x\nTraceback (most recent call last):\n", pattern)[0], "crashed")
-        self.assertEqual(layout.SCRIPT_STATES, ("ok", "negative", "crashed"))
+        self.assertEqual(layout.SCRIPT_STATES, ("ok", "negative", "incomplete", "crashed"))
+
+    def test_exit_3_with_its_own_line_is_incomplete_never_negative(self):
+        """E6 merge review (nit): core/status.py's exit 3 (a missing dependency or an incomplete run) is never read as a negative reading."""
+        pattern = layout.RESULT_LINES["t07_evaluation_scoring.py"]
+        line = "RESULT t07-scoring summary incomplete: required checks absent"
+        self.assertEqual(layout.classify_script_run(3, line + "\n", pattern), ("incomplete", line))
+        self.assertEqual(layout.classify_script_run(2, "RESULT t07-scoring summary rejected: x\n", pattern)[0], "negative")
 
     def test_the_result_lines_match_the_scripts_own(self):
         examples = {"t07_fake_rate.py run": "RESULT ok: 12 clean bins produced; no rate", "t07_fake_rate.py check": "OK every noise bin within C",
@@ -607,6 +614,13 @@ class PooledBins(unittest.TestCase):
 
 class EvaluationPlan(unittest.TestCase):
     """The evaluation on blocks 11 and 12 as arrays of short tasks, its task count, CPU-hours and wall by the closed form."""
+
+    def test_the_t09_scoring_budget_is_the_conservative_estimate(self):
+        """E6 merge review M4 (the coordinator's ruling): until the heaviest T09 scoring (main stratum 10) is measured at 12,000 events, T09's
+        budget is E6c's estimate from the Freeze-B readings, about 1,208 s ((131 + 97) x 4 + 74 x 4), not the 600-event measurement scaled x 22;
+        the total stays within the user's 200 CPU-hours."""
+        self.assertGreaterEqual(layout.SCORING_SECONDS["T09"], 1208)
+        self.assertLessEqual(layout.evaluation_plan(block=11).cpu_hours(), 200)
 
     def test_the_plan(self):
         plan = layout.evaluation_plan(block=11)
