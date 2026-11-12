@@ -946,6 +946,85 @@ def split_check(map_one: dict, run_one: dict, run_p: dict, nominal: dict, lines:
     return res
 
 
+def nominal_job(job_one: dict, map_one: dict, run_p: dict) -> dict:
+    """The job of the mapping run at the nominal PDE, in the efficiency-1 map's segmentation and transit edges: per
+    bin the efficiencies K_p,bc/n_b and the integer transit counts of the nominal run's detections (the second map of
+    the pair, digitized with the same run_seed, rows and stages as the split job)."""
+    chans = list(map_one["channels"])
+    edges = map_one["form"]["transit_edges_ns"]
+    n = {str(r["bin"]): r["emitted"] for r in map_one["form"]["bins"]}
+    k = {b: [0] * len(chans) for b in n}
+    tr = {b: [0] * efficiency_map.TRANSIT_BINS for b in n}
+    for b, c, t, _, _ in run_p["detections"]:
+        k[str(b)][chans.index(c)] += 1
+        tr[str(b)][_transit_cell(edges, t)] += 1
+    out = {**job_one, "efficiencies": {b: [x / n[b] for x in k[b]] for b in job_one["efficiencies"]}}
+    if job_one.get("timing") and job_one["timing"]["transit"]["kind"] == "mapped":
+        out["timing"] = {**job_one["timing"], "transit": {"kind": "mapped", "edges_ns": list(edges), "counts": {
+            b: tr[b] for b in job_one["timing"]["transit"]["counts"]}}}
+    return out
+
+
+def split_job(job_one: dict, map_one: dict, run_one: dict, nominal: dict) -> dict:
+    """The split's job at the nominal PDE: route 2_1 (p0 eps(1)) or route 3 (the PDE(E) weighting of the efficiency-1
+    run)."""
+    if "table" in nominal:
+        return route3_job(job_one, route3(map_one, run_one, nominal["table"]))
+    return route21_job(job_one, float(nominal["p"]))
+
+
+def _per_event(channel_rows: list, events: list, quantity: str, channels) -> np.ndarray:
+    col = {"photoelectrons": 3, "charge": 4, "code": 5}[quantity]
+    at = {e: i for i, e in enumerate(events)}
+    x = np.zeros(len(events))
+    for r in channel_rows:
+        if channels is None or r[2] in channels:
+            x[at[r[0]]] += 0.0 if r[col] is None else float(r[col])
+    return x
+
+
+def digitized_propagation(map_one: dict, run_one: dict, run_p: dict, nominal: dict, job_one: dict, rows: list,
+                          observables: list, A, sigma_tot_design, J=None) -> dict:
+    """The split check's delta mu with both maps digitized with one run_seed (section 6.7): the nominal-PDE map
+    (nominal_job) and the split (split_job) on the same rows, stages and keys; delta mu_k = the mean over events of the
+    paired difference of observable k (observables: [{quantity photoelectrons | charge | code, channels}], per-event
+    sums, functional mean). Its covariance is the digitization noise (the paired differences' covariance / N) plus the
+    thinning noise J diag(Var d eps) J^T, J (n_obs x cells in map (bin, channel) order) given or, for photoelectrons and
+    charge (linear in eps in expectation), the mean photon number per (event, bin) times the sensor gain for charge.
+    Returns the `propagation` of split_check ({delta_mu, cov_delta_mu, A, sigma_tot_design})."""
+    events = sorted({r[0] for r in rows})
+    a = digitize.digitize(nominal_job(job_one, map_one, run_p), rows)[0]
+    b = digitize.digitize(split_job(job_one, map_one, run_one, nominal), rows)[0]
+    diff = np.array([_per_event(a, events, o["quantity"], o.get("channels")) -
+                     _per_event(b, events, o["quantity"], o.get("channels")) for o in observables])
+    cov = np.atleast_2d(np.cov(diff)) / len(events)
+    chans = list(map_one["channels"])
+    cells = [(r["bin"], c) for r in map_one["form"]["bins"] for c in range(len(chans))]
+    n = {r["bin"]: r["emitted"] for r in map_one["form"]["bins"]}
+    q = _q(run_one["detections"], nominal)
+    var = np.zeros(len(cells))
+    ci = {cell: i for i, cell in enumerate(cells)}
+    for d, qi in zip(run_one["detections"], q):
+        var[ci[(d[0], chans.index(d[1]))]] += qi * (1 - qi)
+    var /= np.array([n[bb] for bb, _ in cells], float) ** 2
+    if J is None:
+        stage = job_one["stage"]
+        photons: dict = {}
+        for _e, _, bb, large, small, _ in rows:
+            photons[bb] = photons.get(bb, 0.0) + stage["light_yield_per_MeV"] * (large + small)
+        J = np.zeros((len(observables), len(cells)))
+        for k, o in enumerate(observables):
+            if o["quantity"] == "code":
+                raise SplitError("propagation", f"observable {k} is a code: give J (not linear in eps)")
+            g = job_one["sensor"]["gain"] if o["quantity"] == "charge" else 1.0
+            for i, (bb, c) in enumerate(cells):
+                if o.get("channels") is None or c in o["channels"]:
+                    J[k, i] = g * photons.get(bb, 0.0) / len(events)
+    J = np.atleast_2d(np.asarray(J, float))
+    return {"delta_mu": diff.mean(axis=1).tolist(), "cov_delta_mu": (cov + (J * var) @ J.T).tolist(),
+            "A": A, "sigma_tot_design": sigma_tot_design, "digitization_cov": cov.tolist()}
+
+
 def pair_size_total(p0: float, b: float, d: int = 1) -> float:
     """The detections at efficiency 1 for an exact split to pass jointly with probability >= 0.94 on a total (section
     6.7): K_1 >= (2 + z_{1-0.025/d})^2 (1 - p0)/(p0 b^2), b = 0.1 sigma_tot/p0 the bound relative to p0."""
@@ -977,8 +1056,10 @@ def design_findings(contract: dict, plan: dict, docs: dict, spec_field_types: di
     (name of the efficiency-1 mapping run's photons in docs), map (name of the efficiency-1 map), centre_mm, grid
     (energy edges), prior (p range [lo, hi] or PDE(E) tables), replicas R, joint_keys {label: [hi, lo]},
     scan [{map, detector}] (theta-scan maps), record (the split-check record), split_check {nominal: {p} | {table},
-    one, p (photon-file names), propagation}}. docs: maps {name: map}, photons {name: text}, primaries {name: text},
-    detector (spec text), detectors {name: spec text}, pipelines [response-pipeline/1], readouts, build_environment."""
+    one, p (photon-file names), propagation | digitize {rows, readout, observables, A, sigma_tot_design, J,
+    pipeline}}}. docs: maps {name: map}, photons {name: text}, primaries {name: text},
+    detector (spec text), detectors {name: spec text}, pipelines [response-pipeline/1], rows {name: rows}, readouts,
+    build_environment."""
     decl = declaration(contract)
     ps = plan.get("pde_split") or {}
     if decl is None:
@@ -1044,7 +1125,17 @@ def design_findings(contract: dict, plan: dict, docs: dict, spec_field_types: di
         prim = read_primaries(docs["primaries"][sc.get("primaries", sc["one"])])
         r_one = binned(mp, lo, prim, ps.get("centre_mm", [0, 0, 0]))
         r_p = binned(mp, lp, prim, ps.get("centre_mm", [0, 0, 0]))
-        chk = split_check(mp, r_one, r_p, sc["nominal"], (lo, lp), sc.get("propagation"))
+        prop = sc.get("propagation")
+        dg = sc.get("digitize")          # delta mu from both maps digitized with one run_seed
+        if dg is not None:
+            from core.calibration import design_g4sim
+            pipe = docs["pipelines"][int(dg.get("pipeline", 0))]
+            rows = [tuple(r) for r in docs["rows"][dg["rows"]]]
+            job = design_g4sim.job_from_documents(pipe, mp, dg["readout"], sorted({r[2] for r in rows}),
+                                                  int(pipe["run_seed"]))
+            prop = digitized_propagation(mp, r_one, r_p, sc["nominal"], job, rows, dg["observables"], dg["A"],
+                                         dg["sigma_tot_design"], dg.get("J"))
+        chk = split_check(mp, r_one, r_p, sc["nominal"], (lo, lp), prop)
         out["split_check"] = {k: v for k, v in chk.items() if k != "findings"}
         findings += chk["findings"]
     out.update(status="failed" if findings else "passed", findings=findings)

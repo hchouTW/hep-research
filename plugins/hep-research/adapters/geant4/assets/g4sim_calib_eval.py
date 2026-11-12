@@ -20,7 +20,9 @@ Methods (derived from the binding of each theta, section 11.4 Table 2; outside t
   `g4sim-digi-job/1` path (job built by `design_g4sim.job_from_documents`, run_seed = logical_run_seed, replica = 0), the
   same Geant4 events and Philox keys at every theta (common random numbers, section 6.6);
 - a PDE under the split of section 6.7 (spec `pde`: {parameter, route 2_1 | 1, component, nominal}): the job's
-  efficiencies p eps_c of the efficiency-1 map (route 2_1), or the per-photon thinning nested in p (route 1), by
+  efficiencies p eps_c of the efficiency-1 map (route 2_1), or the per-photon thinning nested in p (route 1); route 3
+  ({route 3, photons, primaries (the efficiency-1 mapping run's CSV files), centre_mm, table, parameter and pointer
+  /pde/table/value/<k> when a table value is theta}): sum_i PDE(E_i)/n_b and the PDE-weighted transit; all by
   `core/calibration/pde_split.py`;
 - any other detector-spec, run-card or request field: resimulation (`g4sim_run`), requested by ask.
 The detector-spec Birks constant stays nominal (g4sim_run refuses a read-back difference, section 11.4)."""
@@ -145,11 +147,15 @@ class G4simEvaluator:
         self.bindings = DG.bindings(plan)
         self.parameters = list(self.bindings)
         self.methods = {p: method_of(b) for p, b in self.bindings.items()}
-        self.pde = spec.get("pde")       # the PDE split of section 6.7: {parameter, route 2_1 | 1, component, nominal}
-        if self.pde:
-            if self.pde.get("route", "2_1") not in ("2_1", "1"):
-                raise DG.CheckError("evaluator.pde_route", "the evaluator applies routes 2_1 and 1 (a scale p); route 3 "
-                                    "jobs come from pde_split.route3_job")
+        self.pde = spec.get("pde")       # the PDE split of section 6.7 (see the module docstring)
+        if self.pde and self.pde.get("route", "2_1") not in ("2_1", "1", "3"):
+            raise DG.CheckError("evaluator.pde_route", "the PDE-split routes are 2_1, 1 and 3")
+        if self.pde and self.pde.get("route") == "3":    # the efficiency-1 mapping run's photons.csv (section 6.7)
+            self.pde_run = pde_split.binned(self.documents["maps"][spec["map"]],
+                                            pde_split.read_photons(self.pde["photons"]),
+                                            pde_split.read_primaries(self.pde["primaries"]), self.pde["centre_mm"])
+            self.pde_index = int(str(self.pde.get("pointer", "/pde/table/value/0")).rsplit("/", 1)[1])
+        if self.pde and self.pde.get("parameter"):
             self.bindings[self.pde["parameter"]] = {"document": "evaluator", "pointer": "/pde"}
             self.parameters.append(self.pde["parameter"])
             self.methods[self.pde["parameter"]] = "re-digitization"
@@ -164,8 +170,9 @@ class G4simEvaluator:
                                 "(source-density/1); an external source is rejected (section 5.2)")
         self.nominal_theta = {p: float(DG.pointer_get(self.documents[b["document"]], b["pointer"]))
                               for p, b in self.bindings.items() if b["document"] != "evaluator"}
-        if self.pde:
-            self.nominal_theta[self.pde["parameter"]] = float(self.pde.get("nominal", 1.0))
+        if self.pde and self.pde.get("parameter"):
+            self.nominal_theta[self.pde["parameter"]] = float(self.pde["table"]["value"][self.pde_index]) \
+                if self.pde.get("route") == "3" else float(self.pde.get("nominal", 1.0))
         self.observable_specs = list(spec.get("observables") or [])
         for o in self.observable_specs:
             if o["quantity"] not in QUANTITIES:
@@ -321,7 +328,12 @@ class G4simEvaluator:
                                     sorted({r[2] for r in rows}) or [0], int(batch["logical_run_seed"]),
                                     conditions=snapshot, event_time=self.plan.get("event_time"),
                                     interval=(tab["first"], tab["n"]) if snapshot is not None else None)
-        if pde:                          # job efficiencies p eps (route 2_1) or the nested thinning (route 1)
+        if self.pde and self.pde.get("route") == "3":   # sum_i PDE(E_i)/n_b and the PDE-weighted transit
+            table = {"energy_eV": list(self.pde["table"]["energy_eV"]), "value": list(self.pde["table"]["value"])}
+            if pde:
+                table["value"][self.pde_index] = float(values.get(pde, self.nominal_theta[pde]))
+            job = pde_split.route3_job(job, pde_split.route3(docs["maps"][self.spec["map"]], self.pde_run, table))
+        elif pde:                        # job efficiencies p eps (route 2_1) or the nested thinning (route 1)
             p = float(values.get(pde, self.nominal_theta[pde]))
             if self.pde.get("route", "2_1") == "1":
                 return pde_split.digitize_route1(job, rows, p, int(self.pde.get("component", 1)))[0]
@@ -474,6 +486,9 @@ def _resolve(plan: dict, base: Path) -> dict:
         for key in ("cells", "primaries"):
             if isinstance(b.get(key), str):
                 b[key] = read_csv_rows(base / b[key])
+    for key in ("photons", "primaries"):          # route 3 of the PDE split: the mapping run's CSV files as text
+        if isinstance((spec.get("pde") or {}).get(key), str):
+            spec["pde"][key] = (base / spec["pde"][key]).read_text(encoding="utf-8")
     if isinstance(spec.get("state"), str):
         spec["state"] = str(base / spec["state"])
     return spec
