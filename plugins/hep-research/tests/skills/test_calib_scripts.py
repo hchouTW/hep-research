@@ -289,12 +289,54 @@ class Phase1Scripts(unittest.TestCase):
                       self.put("t4.json", {"mu": "abc"}))
         self.assertEqual((rc, out["status"]), (2, "rejected"))                       # review F10
 
-    def test_calib_emulator_is_a_stub(self):
-        plan = self.put("plan.json", {"schema": "calibration-plan/1", "kernels": {}})
-        for cmd in ("train", "p6", "ask", "tell"):
-            rc, out = run("calib_emulator.py", cmd, "--plan", plan)
-            self.assertEqual((rc, out["status"]), (3, "incomplete"))
-        rc, out = run("calib_emulator.py", "p6", "--plan", self.d / "absent.json")
+    def test_calib_emulator(self):
+        """Phase 3: the ask/tell state file through the CLI, training, the surrogate domain, P6 on the toy detector
+        and on arrays, and the G8 spot check's bookkeeping (not-decided)."""
+        d = H.toy_design()
+        c, p = d["contract"], d["plan"]
+        for q in c["parameters"]:
+            if q["name"] == "threshold":
+                q["sampling_bounds"] = [1.0, 16.0]
+        c["observables"] = [o for o in c["observables"] if o["name"].startswith("spe_")]
+        p["methods"]["threshold"] = "surrogate-model"
+        p["design"]["surrogate"] = {"n_design": 8, "held_back": 8, "seed": 9}
+        fx = self.put("fx.json", {**d, "contract": c, "plan": p})
+        st = self.d / "state.json"
+        rc, out = run("calib_emulator.py", "init", "--contract", fx, "--purpose", "training", "--out", st)
+        self.assertEqual((rc, out["n"]), (0, 8))
+        rc, out = run("calib_emulator.py", "ask", "--state", st, "--n", "2")
+        self.assertEqual((rc, [q["run_id"] for q in out["requests"]]), (0, ["training-0000", "training-0001"]))
+        k = len(out["requests"][0]["names"])
+        res = {"training-0000": {"names": out["requests"][0]["names"], "pred": [0.0] * k,
+                                 "V_MC": [[0.0] * k] * k}}
+        rc, out = run("calib_emulator.py", "tell", "--state", st, "--results", self.put("r.json", res))
+        self.assertEqual((rc, out["complete"]), (0, False))
+        rc, out = run("calib_emulator.py", "tell", "--state", st, "--results",
+                      self.put("r2.json", {"nope": res["training-0000"]}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        rc, out = run("calib_emulator.py", "train", "--contract", fx, "--state", st)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))                 # evaluations outstanding
+        model = self.d / "model.json"
+        rc, out = run("calib_emulator.py", "train", "--contract", fx, "--out", model)
+        self.assertEqual((rc, out["surrogate"]["parameters"]), (0, ["threshold"]))
+        rc, out = run("calib_emulator.py", "domain", "--model", model)
+        self.assertEqual((rc, out["domain"]["bounds"]), (0, {"threshold": [1.0, 16.0]}))
+        rc, out = run("calib_emulator.py", "p6", "--contract", fx)
+        self.assertEqual((rc, out["status"], out["flags"]), (0, "passed", ["provisional-thresholds"]))
+        arr = {"v_data": [1.0], "points": [{"delta_m": [5.0], "cov_delta": [[1.0]]}]}
+        rc, out = run("calib_emulator.py", "p6", "--input", self.put("a.json", arr))
+        self.assertEqual((rc, out["status"]), (1, "failed"))
+        arr["points"][0]["delta_m"] = [0.5]
+        rc, out = run("calib_emulator.py", "p6", "--input", self.put("b.json", arr))
+        self.assertEqual((rc, out["status"]), (0, "passed"))
+        rc, out = run("calib_emulator.py", "p6", "--input", self.put("c.json", {"v_data": [1.0], "points": []}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        rc, out = run("calib_emulator.py", "spot-check-plan", "--training-state", st, "--points",
+                      self.put("pts.json", [{"threshold": 6.0}]), "--seeds",
+                      self.put("s.json", [{"nominal": p["seeds"]["nominal"]}]), "--out", self.d / "sp.json")
+        self.assertEqual((rc, out["status"]), (2, "rejected"))                 # the training set's seed
+        rc, out = run("calib_emulator.py", "spot-check", "--state", self.d / "absent.json", "--model", model,
+                      "--v-data", self.put("v.json", [1.0]))
         self.assertEqual((rc, out["status"]), (2, "rejected"))
 
     def test_calib_contract_preflight(self):

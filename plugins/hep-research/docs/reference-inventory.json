@@ -2134,7 +2134,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "10db758c 2026-11-12"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2252,7 +2252,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "10db758c 2026-11-12"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2289,7 +2289,7 @@
     "skills/hep-detector/references/timestream-to-map-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/front-end-calibration.md",
@@ -2362,7 +2362,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2818,7 +2818,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/timestream-to-map-reconstruction.md",
@@ -2831,7 +2831,7 @@
     "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "9359950e 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
