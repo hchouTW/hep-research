@@ -958,20 +958,22 @@ def _judge_cross(c):
 SHIFT_SIGMA = 0.07
 
 
-def t1_v_shift(reps: int = 2000, seed: int = SEED_T1 + 20, r0: int = 0) -> dict:
+def t1_v_shift(reps: int = 2000, seed: int = SEED_T1 + 20, r0: int = 0, exposure: int = 2000,
+               val_exposure: int = 16000, sigma: float = SHIFT_SIGMA, mc: int = 16000) -> dict:
     """Item 11 (V), shift-mode phi on the toy detector: sum_term_b in shift mode (centre 0.5, sigma 0.07; exposures 2000 and 16000 for validation, so that
     the phi-induced residual dominates C_r), its true
     value drawn from its prior in each repetition and fixed at nominal in the fit; C_r with sum d_l d_l^T (the
     symmetric +-1 sigma refits) gives a rejection rate within alpha +- 25%; only the indirect effect, and the refit
-    derivative with a minus sign, give a rate outside alpha +- 25%."""
+    derivative with a minus sign, give a rate outside alpha +- 25%. The nominal MC is 16000 events (V_MC/V_data 0.125): at
+    4000 the ln det diagnostic failed 7.45% of the fits and +-1 sigma refits (array 7584442)."""
     from core.calibration import shift as Sh
     cal = ["track5_p_mean", "track5_p_width", "track2_p_width", "track5_dx_width"]
     val = ["track5_dx_width", "track2_dx_width", "track2_p_width"]
     res = {"ok": 0, "minus": 0, "indirect": 0}
     X, X2, n = 0, 0, 0
     for r in range(r0, r0 + reps):
-        p = track_problem(r, cal, val, seed=seed, shift={"sum_term_b": (0.5, SHIFT_SIGMA)}, exposure=2000,
-                          val_exposure=16000)
+        p = track_problem(r, cal, val, seed=seed, shift={"sum_term_b": (0.5, sigma)}, exposure=exposure,
+                          val_exposure=val_exposure, mc=mc)
         rng = np.random.default_rng([seed, r])
         truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
         phi = rng.normal(size=1)
