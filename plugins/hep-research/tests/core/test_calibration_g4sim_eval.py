@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import calibration_fixtures as F  # noqa: E402
-import calibration_g4sim_fixtures as G  # noqa: E402
+import calibration_g4sim_eval_fixtures as G  # noqa: E402
 import g4sim_calib_eval as E  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
 

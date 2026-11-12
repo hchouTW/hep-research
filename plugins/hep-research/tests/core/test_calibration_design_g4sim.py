@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_g4sim_fixtures as G  # noqa: E402
+import calibration_g4sim_eval_fixtures as G  # noqa: E402
 
 from core.calibration import design_g4sim as DG  # noqa: E402
 from core.simulation import digitize, seeds  # noqa: E402
@@ -270,9 +270,11 @@ class DigiJobs(unittest.TestCase):
         self.assertEqual(self.check(wrong), ["design.digi_event_time"])
         other = copy.deepcopy(SNAPSHOT)
         other["iovs"][0]["rows"][0]["gain_factor"] = 1.2
-        self.assertEqual(self.check(dict(cj, conditions=other)), ["design.digi_documents"])
+        self.assertEqual(self.check(dict(cj, conditions=other)), ["digi_job.conditions"])
 
     def test_fields_differ_from_the_hashed_documents(self):
+        want = {"stage": "digi_job.differs", "sensor": "digi_job.differs", "electronics": "digi_job.differs",
+                "efficiencies": "digi_job.efficiencies", "channels": "digi_job.channels", "timing": "digi_job.timing"}
         for field, change in (("stage", lambda j: j["stage"].update(light_yield_per_MeV=210.0)),
                               ("sensor", lambda j: j["sensor"].update(gain=1.1)),
                               ("electronics", lambda j: j["electronics"].update(threshold=0.5)),
@@ -283,7 +285,7 @@ class DigiJobs(unittest.TestCase):
             job = copy.deepcopy(self.job)
             change(job)
             with self.subTest(field):
-                self.assertEqual(self.check(job), ["design.digi_documents"])
+                self.assertEqual(self.check(job), [want[field]])
         self.assertEqual(self.check(self.job, map_replica=0), [])
 
 

@@ -2,7 +2,8 @@
 """The contract checker (simulator calibration workflow, Part B section 5.2; owner of the contract rules).
 
   calib_contract.py check     --contract FILE [--release FILE ...] [--series-graph FILE] [--design FILE]
-                              [--locking FILE]
+                              [--locking FILE] [--model-documents FILE]
+  calib_contract.py identity  --contract FILE --model-documents FILE
   calib_contract.py preflight --contract DRAFT --release FILE --ledger FILE [--write-draft OUT]
 FILE is a calibration-contract/1; each --release is a calibration-data-release/1 metadata file (its lineage,
 samples, observables and declarations; the release hash is the canonical SHA-256 of its metadata, and a declared
@@ -12,8 +13,14 @@ with the findings and the rules deferred to later phases; status accepted (exit 
 error, no result is produced). --design is the output of `calib_design.py linearize`: with it the D37 rule (approval
 A7) is applied, a psi whose effect on theta-hat via A exceeds 0.1 sigma_tot^design must be listed as phi. --locking
 is the report of `calib_data.py locking` (phase 2): its failures (rounding, sigma^(0) = 0, the N_d,c declaration
-check, value conventions) reject the contract and the rules it decides leave `deferred`; the g4sim model identity is
-phase 3.
+check, value conventions) reject the contract and the rules it decides leave `deferred`.
+
+With g4sim (phase 3): each model carries the five identity items of section 5.1 and each theta/phi its field bindings
+(section 11.4). --model-documents names a JSON object {model id: {detector_spec, alignment_overlay, simulation_request,
+run_card, response_pipeline, efficiency_map, condition_snapshot: file paths relative to it; event_time_rule, mapping,
+pde, build_environment: objects}}; with it the five items are recomputed (detector-spec/1 read by g4sim's procedure,
+the other documents normalized with type tables from their schemas, theta/phi fields masked) and must equal the
+declared ones. `identity` prints the recomputed items (status ok), to be written into the contract.
 
 preflight is A0 (pipeline stage A0, not a gate): the calibration values come from calib_data's provider, which records
 a fit read with the contract draft's series as read channel in the ledger (written under its lock); for each declared
@@ -39,10 +46,64 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
 import argparse
 import sys
 
-from contracts.schema import validate
+from pathlib import Path
+
+from contracts.geometry import field_types
+from contracts.schema import load_schema, validate
 from core.calibration import contract as cc
+from core.calibration import model_identity as mi
 from core.calibration import data_release as data
 from core.calibration import io
+
+
+ROOT = Path(__file__).resolve().parents[3]
+RUN_CARD_SCHEMA = ROOT / "adapters" / "geant4" / "assets" / "g4sim_run.schema.json"   # g4sim's run card schema
+TEXT_DOCUMENTS = ("detector_spec", "alignment_overlay", "simulation_request", "run_card", "response_pipeline",
+                  "condition_snapshot")
+INLINE = ("event_time_rule", "mapping", "pde", "build_environment")
+
+
+def type_tables() -> dict:
+    out = {"detector-spec": field_types(),
+           "run-card": mi.type_table(io.load_object(str(RUN_CARD_SCHEMA)))}
+    for kind, name in (("alignment-overlay", "alignment_overlay.json"), ("simulation-request", "simulation_request.json"),
+                       ("response-pipeline", "response_pipeline.json"), ("condition-snapshot", "condition_snapshot.json")):
+        out[kind] = mi.type_table(load_schema(name))
+    return out
+
+
+def identities(contract: dict, path: str) -> dict:
+    """{model id: the five recomputed items, or {"error": {code, message}}} from the --model-documents file."""
+    spec = io.load_object(path)
+    base = Path(path).resolve().parent
+    tables, masks = type_tables(), mi.masks(contract)
+    out = {}
+    for mid, entry in spec.items():
+        if not isinstance(entry, dict):
+            raise io.InputError(f"--model-documents: model {mid!r} maps to an object of documents")
+        docs = {}
+        for key, value in entry.items():
+            if key in TEXT_DOCUMENTS:
+                try:
+                    docs[key] = (base / str(value)).read_bytes()
+                except OSError as exc:
+                    raise io.InputError(f"--model-documents: {key} of {mid!r}: {exc.strerror or exc}") from None
+            elif key == "efficiency_map":
+                docs[key] = io.load_object(str(base / str(value)))
+            elif key in INLINE:
+                docs[key] = value
+            else:
+                raise io.InputError(f"--model-documents: unknown entry {key!r} of model {mid!r}")
+        missing = [k for k in ("detector_spec", "simulation_request", "run_card", "response_pipeline",
+                               "build_environment") if k not in docs]
+        if missing:
+            out[mid] = {"error": {"code": "identity.documents", "message": f"model {mid!r} lacks {missing}"}}
+            continue
+        try:
+            out[mid] = mi.identity(docs, masks, tables)
+        except mi.IdentityError as err:
+            out[mid] = {"error": {"code": err.code, "message": str(err)}}
+    return out
 
 
 def main(argv=None) -> int:
@@ -54,6 +115,10 @@ def main(argv=None) -> int:
     p.add_argument("--series-graph")
     p.add_argument("--design")
     p.add_argument("--locking", help="the locking report of calib_data.py locking (phase 2)")
+    p.add_argument("--model-documents", help="the g4sim documents of each model (section 5.1)")
+    t = sub.add_parser("identity")
+    t.add_argument("--contract", required=True)
+    t.add_argument("--model-documents", required=True)
     q = sub.add_parser("preflight")
     q.add_argument("--contract", required=True)
     q.add_argument("--release", required=True)
@@ -93,6 +158,11 @@ def main(argv=None) -> int:
     def go():
         if args.cmd == "preflight":
             return preflight()
+        if args.cmd == "identity":
+            c = io.load_object(args.contract)
+            ids = identities(c, args.model_documents)
+            bad = {k: v["error"] for k, v in ids.items() if "error" in v}
+            return {"status": "rejected" if bad else "ok", "identities": ids}
         c = io.load(args.contract)
         rels = {}
         for path in args.release:
@@ -109,8 +179,9 @@ def main(argv=None) -> int:
             return {"status": "rejected", "findings": shape, "stage": "schema"}
         design = io.load(args.design) if args.design else None
         locking = io.load(args.locking) if args.locking else None
+        ids = identities(c, args.model_documents) if args.model_documents else None
         try:
-            r = cc.check(c, rels, graph, design, locking)
+            r = cc.check(c, rels, graph, design, locking, ids)
         except (TypeError, ValueError) as exc:
             raise io.InputError(f"--design: {exc}") from None
         return {"status": r["status"], "contract_sha256": cc.lock_hash(c), "findings": r["findings"],

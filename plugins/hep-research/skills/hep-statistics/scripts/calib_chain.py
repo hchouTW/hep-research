@@ -5,10 +5,13 @@
   calib_chain.py check      --contract FILE                 the stage graph and the placement of references
   calib_chain.py candidates --contract FILE --plan FILE     candidate methods per parameter (section 3.6 step 1)
   calib_chain.py p4         --contract FILE                 directed reachability: can each theta be constrained?
-FILE is a calibration-contract/1 (or a calibration-fixture/1, whose contract and plan are used). Output: one JSON
-object; status ok/passed (exit 0), failed (exit 1: findings, a parameter without candidate, or P4 failed, remedy
-level contract), incomplete (exit 3: g4sim node binding, Table 2 of section 11.4 arrives in phase 3), rejected
-(exit 2: unreadable input). Standard library only. Phase 0 (section 17).
+FILE is a calibration-contract/1 (or a calibration-fixture/1, whose contract and plan are used). With g4sim (a plan
+with node_binding, phase 3) the candidates come from section 11.4 Table 2: each theta/phi's field bindings give its
+rows, the node binding (Table 1) the preconditions; each candidate states whether it forms event weights (D75) and
+each excluded method its reason (moments-only recording, a fast_sim_envelope, D83 (7) for a misaligned geometry).
+Output: one JSON object; status ok/passed (exit 0), failed (exit 1: findings, a parameter without candidate, or P4
+failed, remedy level contract), incomplete (exit 3: a PDE-split parameter applied by the evaluator, section 6.7),
+rejected (exit 2: unreadable input). Standard library only. Phases 0 and 3 (section 17).
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -68,6 +71,8 @@ def main(argv=None) -> int:
             return chain.candidate_methods(contract, plan)
         except KeyError as exc:
             raise io.InputError(f"a parameter acts on an undeclared node {exc}") from None
+        except (AttributeError, TypeError) as exc:
+            raise io.InputError(f"malformed plan or node binding: {exc}") from None
     return io.run(go)
 
 

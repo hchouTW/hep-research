@@ -26,7 +26,7 @@ import copy
 import json
 import math
 
-from core.calibration import chain
+from core.calibration import chain, model_identity
 from core.calibration.design import REWEIGHTING, CheckError, sobol_points
 from core.simulation import digitize, efficiency_map, response, rng, seeds, source_density
 
@@ -36,7 +36,6 @@ EVALUATED_FROM_RECORDS = frozenset(REWEIGHTING + ("rerun", "re-digitization"))
 EVENT_SPACE = 2 ** 32                             # global event numbers under one logical_run_seed (section 14.1)
 SENSOR_FIELDS = ("gain", "excess_noise", "dark_rate_per_ns", "gate_ns")
 ELECTRONICS_FIELDS = ("noise_sigma", "threshold", "lsb", "bits")
-JOB_FIELDS = ("readout", "channels", "stage", "efficiencies", "timing", "sensor", "electronics")
 
 
 def _finding(code: str, message: str, **extra) -> dict:
@@ -470,9 +469,9 @@ def digi_job_findings(plan: dict, documents: dict) -> list:
     """Every `g4sim-digi-job/1` of the plan (section 6.6): run_seed = its evaluation's logical_run_seed; replica = 0;
     a job without conditions whose keys (if any) equal digitize.job_with_keys of the job, and keys present when it runs
     in g4sim_digi; a job with conditions without keys and digitized in Python only (D83 (9)), with event_time_ns the
-    plan's rule over its interval (D87 (h)); and its stage, sensor, electronics, timing, channels and efficiencies those
-    built from the hashed documents (the pipeline at the entry's theta, the map at its replica, the snapshot; section
-    5.1). documents = {pipeline, maps: {name: map}, conditions: snapshot or None}."""
+    plan's rule over its interval (D87 (h)); and its agreement with the hashed documents (the pipeline at the entry's
+    theta, the map at its replica, the snapshot, the timing built here) by model_identity.digi_job_findings (section
+    5.1, the one implementation; codes digi_job.*). documents = {pipeline, maps: {name: map}, conditions: snapshot or None}."""
     evs = {e["run_id"]: e for e in plan.get("evaluations") or []}
     out = []
     for i, entry in enumerate(plan.get("digi_jobs") or []):
@@ -513,21 +512,23 @@ def digi_job_findings(plan: dict, documents: dict) -> list:
                                         "recomputing the keys runs with stale streams)"))
             elif impl == "g4sim_digi":
                 out.append(_finding("design.digi_keys_missing", f"{where}: g4sim_digi needs the precomputed keys"))
-        try:
-            maps = documents.get("maps") or {}
-            if entry.get("map") not in maps:
-                raise CheckError("design.digi_map", f"no map {entry.get('map')!r} among the hashed documents")
+        maps = documents.get("maps") or {}
+        if entry.get("map") not in maps:
+            out.append(_finding("design.digi_map", f"{where}: no map {entry.get('map')!r} among the hashed documents"))
+            continue
+        try:                                     # the agreement with the hashed documents is section 5.1's check
             pipe = apply_theta({"pipeline": documents["pipeline"]}, plan, entry.get("theta") or {})["pipeline"]
-            want_job = job_from_documents(pipe, maps[entry["map"]], entry.get("readout", job.get("readout")),
-                                          list(job.get("efficiencies", {})), ev["logical_run_seed"],
-                                          map_replica=int(entry.get("map_replica", 0)))
+            want = job_from_documents(pipe, maps[entry["map"]], entry.get("readout", job.get("readout")),
+                                      list(job.get("efficiencies", {})), ev["logical_run_seed"],
+                                      map_replica=int(entry.get("map_replica", 0)))
         except CheckError as exc:
             out.append(_finding(exc.code, f"{where}: {exc}"))
             continue
-        bad = [f for f in JOB_FIELDS if not _same(job.get(f), want_job.get(f))]
-        if "conditions" in job and not _same(job["conditions"], documents.get("conditions")):
-            bad.append("conditions")
-        if bad:
-            out.append(_finding("design.digi_documents", f"{where}: {', '.join(bad)} differ from the hashed documents "
-                                "(section 5.1)", fields=bad))
+        for f in model_identity.digi_job_findings(job, pipe, map_document=maps[entry["map"]],
+                                                  map_replica=int(entry.get("map_replica", 0)),
+                                                  snapshot=documents.get("conditions") if "conditions" in job else None,
+                                                  timing=want["timing"]):
+            out.append(_finding(f["code"], f"{where}: {f['message']} (section 5.1)"))
+        if want["timing"] is None and job.get("timing") is not None:     # model_identity compares timing only when
+            out.append(_finding("digi_job.timing", f"{where}: the job has timing, the documents declare none"))  # given
     return out

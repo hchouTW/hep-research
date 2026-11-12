@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 import calibration_fixtures as F  # noqa: E402
+import calibration_g4sim_fixtures as G4  # noqa: E402
 import calibration_phase1 as H  # noqa: E402
 
 sys.path.insert(0, str(ROOT))
@@ -108,6 +109,45 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["status"]), (2, "rejected"))
         rc, out = run("calib_contract.py", "check", "--contract", self.put("shape.json", {"schema": "x"}))
         self.assertEqual((rc, out["stage"]), (2, "schema"))
+
+    def test_calib_contract_g4sim_identity(self):
+        """Phase 3: calib_contract.py identity recomputes the five items of section 5.1 from the model documents, and
+        check --model-documents rejects a contract whose declared items differ from them."""
+        files = {"detector_spec": ("detector.json", G4.detector_text()), "simulation_request": ("request.json",
+                 G4.request_text()), "alignment_overlay": ("overlay.json", G4.overlay()),
+                 "run_card": ("run.json", G4.run_card()), "response_pipeline": ("pipeline.json", G4.pipeline()),
+                 "condition_snapshot": ("snapshot.json", G4.snapshot()), "efficiency_map": ("map.json",
+                 G4.efficiency_map())}
+        entry = {}
+        for key, (name, value) in files.items():
+            (self.d / name).write_bytes(value if isinstance(value, bytes) else json.dumps(value).encode())
+            entry[key] = name
+        entry.update(event_time_rule=G4.EVENT_TIME, build_environment=G4.BUILD)
+        docs = self.put("documents.json", {"nominal": entry})
+        rels = F.releases()
+        args = ["--release", self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL])]
+        c = G4.contract()
+        c["data"] = {"calibration_releases": [observed.release_hash(rels[F.CAL])],
+                     "validation_releases": [observed.release_hash(rels[F.VAL])]}
+        rc, out = run("calib_contract.py", "identity", "--contract", self.put("c.json", c), "--model-documents", docs)
+        self.assertEqual((rc, out["status"]), (0, "ok"), out)
+        c["models"]["enumerated"][0]["identity"] = out["identities"]["nominal"]
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("c.json", c), "--model-documents", docs,
+                      *args)
+        self.assertEqual((rc, out["status"]), (0, "accepted"), out.get("findings"))
+        changed = G4.pipeline()
+        changed["stages"][2]["parameters"]["excess_noise"]["value"] = 0.2         # a non-theta stage value
+        (self.d / "pipeline.json").write_text(json.dumps(changed))
+        rc, out = run("calib_contract.py", "check", "--contract", self.d / "c.json", "--model-documents", docs, *args)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        self.assertEqual({f["code"] for f in out["findings"]}, {"models.identity_mismatch"})
+        rc, out = run("calib_chain.py", "candidates", "--contract", self.d / "c.json", "--plan",
+                      self.put("plan.json", G4.plan()))
+        self.assertEqual((rc, out["status"], out["parameters"]["birks"][0]["method"]), (0, "ok", "rerun"))
+        p = G4.plan()
+        p["node_binding"]["nodes"]["source"]["recording"] = "moments"
+        rc, out = run("calib_chain.py", "candidates", "--contract", self.d / "c.json", "--plan", self.put("p.json", p))
+        self.assertEqual((rc, out["without_candidate"]), (1, ["beam_energy"]))
 
     def test_calib_data_flow(self):
         from core.calibration import validate as V
@@ -449,7 +489,7 @@ class Phase2Wiring(unittest.TestCase):
 
     def test_design_g4sim_checks(self):
         """Phase 3 (sections 6.1, 6.6): g4sim support and recording levels, event intervals, digitization jobs."""
-        import calibration_g4sim_fixtures as G
+        import calibration_g4sim_eval_fixtures as G
         import test_calibration_design_g4sim as T
         from core.calibration import design_g4sim as DG
         docs = G.documents()
