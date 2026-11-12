@@ -40,16 +40,20 @@ for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
     if folder not in sys.path:
         sys.path.insert(0, folder)
 
-import numpy as np  # noqa: E402
+try:  # NumPy (and the engine, which needs it) is reported by main() as a missing dependency (exit 3)
+    import numpy as np
 
-import g4sim_simulate as simulate  # noqa: E402
-from core.calibration import design_g4sim as DG  # noqa: E402
-from core.calibration import evaluator as engine_evaluator  # noqa: E402
-from core.calibration import pde_split  # noqa: E402
-from core.calibration import io as calib_io  # noqa: E402
-from core.calibration import reweight, toy  # noqa: E402
-from core.canonical import canonical_sha256  # noqa: E402
-from core.simulation import digitize, source_density  # noqa: E402
+    import g4sim_simulate as simulate
+    from core.calibration import design_g4sim as DG
+    from core.calibration import evaluator as engine_evaluator
+    from core.calibration import pde_split
+    from core.calibration import io as calib_io
+    from core.calibration import reweight, toy
+    from core.canonical import canonical_sha256
+    from core.simulation import digitize, source_density
+    MISSING = None
+except ImportError as _exc:
+    MISSING = _exc.name or "numpy"
 
 KIND = "g4sim"
 STATE_SCHEMA = "g4sim-calib-eval-state/1"
@@ -469,7 +473,8 @@ def build(spec: dict, plan: dict) -> G4simEvaluator:
     return G4simEvaluator(spec, plan)
 
 
-engine_evaluator.register(KIND, build)
+if MISSING is None:
+    engine_evaluator.register(KIND, build)
 
 
 # ------------------------------------------------------------------ CLI
@@ -512,6 +517,9 @@ def main(argv=None) -> int:
         tl.add_argument(a, required=True)
     tl.add_argument("--parts", nargs="+", required=True)
     args = ap.parse_args(argv)
+    if MISSING:  # exit 3, a missing dependency (hep-computing script contract)
+        print(json.dumps({"status": "missing-dependency", "reason": f"{MISSING} is not installed: pip install numpy"}))
+        return 3
 
     def go():
         try:

@@ -98,3 +98,10 @@ def scan_patterns(works: list, template: str, segmentation: dict, maps: list | N
     return {"status": "failed" if findings else "ok", "findings": findings, "pattern_table": table, "channels": channels,
             "pattern_table_sha256": map_basis.pattern_sha256(table), "bins": runs[0]["bins"],
             "detections": [r["detections"] for r in runs]}
+
+
+if __name__ == "__main__":
+    import argparse
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+    print(json.dumps({"status": "rejected", "message": "a library: call run_patterns or scan_patterns from Python"}))
+    sys.exit(2)
