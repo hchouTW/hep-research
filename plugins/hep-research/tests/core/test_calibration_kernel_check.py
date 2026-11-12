@@ -144,6 +144,9 @@ def calorimeter(r=0.5, seed=21, n=300, observables=("pe_std",), thetas=("birks",
         bs[f"kb{kb}"] = Z.batch(seed, 0, n, birks=kb, point={"birks": kb}, use="fit", set="s")
     c = Z.contract(thetas=thetas, observables=observables, priors=priors)
     p = Z.plan(bs, r=r, **({"methods": methods} if methods else {}))
+    # g4sim's own digitization stream: with the evaluator's default quantile coupling sigma_MC halves and P0 also sees
+    # the nominal split's width bias at k_B = 0.21 (Delta k_B ~ -0.02, ratio ~ 1; reported by WP-B, 2026-11-12)
+    p["evaluator"]["coupling"] = "g4sim"
     return c, p, engine.make(p, c)
 
 

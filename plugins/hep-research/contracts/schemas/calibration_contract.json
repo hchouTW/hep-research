@@ -146,6 +146,13 @@
         },
         "pointer": {
          "type": "string"
+        },
+        "form": {
+         "enum": [
+          "value",
+          "scale"
+         ],
+         "$comment": "value (default): theta is the value at the pointer; scale: theta multiplies every element of the array at the pointer (n(E) -> s n(E)), nominal 1"
         }
        }
       },
