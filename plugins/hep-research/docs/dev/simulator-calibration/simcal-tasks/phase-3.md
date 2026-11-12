@@ -78,7 +78,7 @@ On `simcal/phase-3`, from `origin/main` ca70a606 (phases 0–2 merged: #385, #38
 1. Run the phase loop of `simcal-task.md` Section E4 in worktree `simcal/phase-3`.
 2. Deliver the content in six work packages, in two waves; each runs in its own git worktree branched from `simcal/phase-3`, passes the commit gate, and is merged into `simcal/phase-3` (merge commits) with the gate re-run after each merge (subagents approved by the user, 2026-11-12):
    - wave 1: **WP-A surrogate model** (ask/tell, training set, P6, V_emu, the combination of resimulation and surrogate model, the §19-5 reading of A12; `emulator.py`, `evaluator.py`, `calib_emulator.py`); **WP-B g4sim evaluator** (`g4sim_calib_eval.py` of §7.1, common random numbers, the event-interval check of §6.6, the g4sim support and recording levels of §6.1); **WP-C model identity and binding** (the masked-hash model identity of §5.1 with D86 and the §19-g5 integration tests, the node binding and candidate-method derivation of §11.4 Table 2; §15.3.19, §15.3a);
-   - wave 2, after wave 1 is merged: **WP-D efficiency-map φ** (§6.7: the map term U(θ)φ_map, the seeds of the mapping runs, the joint-pattern replicas, the θ-noise item of P5 (D28), the D84 G6 size check, the D83 (1) exemption of A12); **WP-E PDE split** (§6.7: routes 2₁, 3 and 1, the split check with its nested pair, the route-3 replicas); **WP-F synthetic ZDC fixture** (§15.2, P0 (k_B) with its spot check, the D6 reading of A12, the positive g4sim tests).
+   - wave 2, after wave 1 is merged: **WP-D efficiency-map φ** (§6.7: the map term U(θ)φ_map, the seeds of the mapping runs, the joint-pattern replicas, the θ-noise item of P5 (D28), the D84 G6 size check, the D83 (1) exemption of A12); **WP-E PDE split** (§6.7: routes 2₁, 3 and 1, the split check with its nested pair, the route-3 replicas); **WP-F synthetic ZDC fixture** (§15.2, P0 (k_B) with its spot check, the D6 reading of A12, the positive g4sim tests) and the **RICH replica items** on `ams02-rich-replica` (§15.2 line 3149: with a single β, refractive index and radiator height decided not identifiable by P3 with a "multiple β" hint, and P3 passing after a second particle or momentum; §8.7 note 6 (row 2018, phase 3 for the RICH replica, line 2081): the §7.4 basin classification on its degeneracy).
 3. Each work package adds its unit tests (positive tests and the negative tests of its gates, each negative with a positive control); each check in exactly one script (§14), JSON output, exit codes 0–3, the standard library plus NumPy/SciPy.
 4. Before each §8.7 calibration run, re-register this card with its configuration fixed (tightening only); run each calibration as registered; register the calibrated value before the gate run that uses it; never reuse a calibration run as a gate run. Every Slurm submission needs the user's approval, per array.
 5. Run the gates as registered, then the independent review (Section E4, step 10), the common checks and the hand-over.
@@ -151,13 +151,14 @@ Rule: every value above is registered in this card before the run that it judges
 
 - D6, D83, D84, D85 and four deferred §19 items needed the author before this phase: approved by A12 (2026-11-12)
 - D83 (1): a built map fails its own `efficiency-map/1` schema (`form.uniformity`); checked with that single exemption until fixed upstream (A12)
-- The RICH replica is not yet expressed in g4sim S7: the RICH part of row 2018 (note 6) may be a gap (Section E7, item 5)
+- RICH replica: resolved at the phase start (2026-11-12). The S7 gate record's "not yet expressed" is in the open items of S7's first judged run; the same record's section "The RICH replica case (2026-11-08)" expresses it as the reference case `ams02-rich-replica` (210b1685; FTFP_BERT_EMZ on the maintainer's word; job 7523520, +0.56% within 3%, control caught), the fixture Part B §15.2 (line 3095) names; `g4sim_run.py check-spec --run run.json` on it returns ok at f93841c3. Remaining limits, from Part B: `synthetic` (a positive test of P3/G5 and of the §7.4 basin classification, never validation), no PDE stage (§19, C3), and a θ on the refractive index needs resimulation (Geant4 runs on Slurm, each array approved by the user)
 - The Geant4-level G8 and §8.7 calibrations are Slurm-scale; each array needs the user's approval
 - Geant4 was not run for the PDE split's evidence; repeat with Geant4 transport (§15.2)
-- g4sim preconditions of §17: S7 is merged with gate 3 (TR yield) a recorded gap and the RICH replica not yet expressed (`docs/dev/geant4-architecture/g4sim-gates/S7.md`); read each stage's gate record, not only its status
+- g4sim preconditions of §17: S7 is merged with gate 3 (TR yield) a recorded gap, which no phase-3 item uses (`docs/dev/geant4-architecture/g4sim-gates/S7.md`); read each stage's gate record, not only its status
 
 #### Execution log
 
+- 2026-11-12: the RICH-replica risk closed: the S7 case `ams02-rich-replica` expresses it (see Risks); its items assigned to WP-F.
 - 2026-11-12: card refreshed at the phase start (A12; work packages WP-A to WP-F in two waves of parallel subagents, approved by the user; Slurm per array).
 
 ## Open Questions

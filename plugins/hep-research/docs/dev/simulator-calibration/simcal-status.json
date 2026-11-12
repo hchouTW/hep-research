@@ -68,7 +68,7 @@
    "S8": "merged",
    "S9": "merged"
   },
-  "note": "Phase 3 (checked 2026-11-12): S1, S3, S4, S5, S7, S8, S9 merged. Gate records read: S7 is partially complete, gate 3 (TR yield) a recorded gap; no phase-3 item uses a TR yield. S7 also records the RICH replica as not yet expressed: the RICH-replica part of the 8.7 row 2018 (note 6) depends on it and is a phase-3 risk. S8 and S9 gates-recorded with all gates passing."
+  "note": "Phase 3 (checked 2026-11-12): S1, S3, S4, S5, S7, S8, S9 merged. Gate records read: S7 is partially complete, gate 3 (TR yield) a recorded gap; no phase-3 item uses a TR yield. The RICH replica fixture is the S7 reference case ams02-rich-replica (expressed at 210b1685, evaluated 2026-11-08, job 7523520, synthetic); the S7 record's 'not yet expressed' belongs to its first judged run's open items. check-spec on the case returns ok at f93841c3. S8 and S9 gates-recorded with all gates passing."
  },
  "updated": "2026-11-12T14:15:51Z"
 }
