@@ -2,30 +2,45 @@
  "schema": "simcal-status/1",
  "phases": {
   "phase-0": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
    "task_card_sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
-   "blocked_on": []
+   "blocked_on": [],
+   "merged": {
+    "pr": 385,
+    "merge_commit": "af8ebf1b",
+    "date": "2026-11-12"
+   }
   },
   "phase-1": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-1",
    "branch": "simcal/phase-1",
    "task_card_sha256": "f05cb219cfe3e7b077a2ec33f948fb941728ef04ca7a8cccf5f7484bae414b75",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-1.md",
    "blocked_on": [],
-   "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10"
+   "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10",
+   "merged": {
+    "pr": 386,
+    "merge_commit": "3c7f9835",
+    "date": "2026-11-12"
+   }
   },
   "phase-2": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
    "task_card_sha256": "e1bdba1360e51e1d392b1c39803eac9eef1eb0649963151ff3cc8084077e8447",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
    "blocked_on": [],
-   "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10"
+   "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10",
+   "merged": {
+    "pr": 396,
+    "merge_commit": "ca70a606",
+    "date": "2026-11-12"
+   }
   },
   "phase-3": {
    "state": "in-progress",
@@ -70,5 +85,5 @@
   },
   "note": "Phase 3 (checked 2026-11-12): S1, S3, S4, S5, S7, S8, S9 merged. Gate records read: S7 is partially complete, gate 3 (TR yield) a recorded gap; no phase-3 item uses a TR yield. The RICH replica fixture is the S7 reference case ams02-rich-replica (expressed at 210b1685, evaluated 2026-11-08, job 7523520, synthetic); the S7 record's 'not yet expressed' belongs to its first judged run's open items. check-spec on the case returns ok at f93841c3. S8 and S9 gates-recorded with all gates passing."
  },
- "updated": "2026-11-12T15:27:55Z"
+ "updated": "2026-11-12T15:40:48Z"
 }
