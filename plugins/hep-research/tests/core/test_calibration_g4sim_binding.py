@@ -168,12 +168,15 @@ class Refusals(unittest.TestCase):
         self.assertNotIn("binding.overlay_every_point", codes(derive(c, p)))
         self.assertEqual(derive(None, p)["status"], "ok")             # control: no alignment parameter
 
-    def test_pde_split_parameter_is_incomplete(self):
+    def test_pde_split_parameter_needs_its_declaration(self):
+        """An evaluator binding is the PDE split of section 6.7 (core/calibration/pde_split, WP-E): without the
+        contract's pde_split it has no candidate; with it, re-digitization (control)."""
         c = G.contract()
         c["parameters"].append(G.parameter("pde", "theta", "pde", "evaluator", "/pde"))
         r = derive(c)
-        self.assertEqual(r["status"], "incomplete")
-        self.assertEqual(r["incomplete"]["parameters"], ["pde"])
+        self.assertEqual((r["status"], r["without_candidate"]), ("failed", ["pde"]))
+        c["pde_split"] = {"parameters": ["pde"], "model": "scale", "sensor_surfaces": ["photocathode"]}
+        self.assertEqual(methods(derive(c), "pde"), ["rerun"])
 
     def test_non_g4sim_contract_unchanged(self):
         d = G.F.toy()

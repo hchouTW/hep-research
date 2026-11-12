@@ -110,6 +110,55 @@ class Scripts(unittest.TestCase):
         rc, out = run("calib_contract.py", "check", "--contract", self.put("shape.json", {"schema": "x"}))
         self.assertEqual((rc, out["stage"]), (2, "schema"))
 
+    def test_calib_contract_and_design_pde_split(self):
+        """Phase 3 (section 6.7 PDE split, WP-E): calib_contract.py check rejects a PDE tied to another optical
+        property, and with the model documents a declared sensor surface the specification lacks; the route-3 PDE(E)
+        part enters item 4; calib_design.py pde-split passes an exact split and fails a tied reflectance."""
+        import calibration_pde_fixtures as P
+        rels = F.releases()
+        args = ["--release", self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL])]
+        c = G4.contract(identity={"detector_spec": [G4.SHA, None], "simulation_request": G4.SHA,
+                                  "run_physics": G4.SHA, "response_pipeline": G4.SHA, "build_environment": G4.BUILD})
+        c["data"] = {"calibration_releases": [observed.release_hash(rels[F.CAL])],
+                     "validation_releases": [observed.release_hash(rels[F.VAL])]}
+        c["parameters"].append(G4.parameter("pde", "theta", "pde", "evaluator", "/pde", physical_bounds=[0.0, 1.0],
+                                            sampling_bounds=[0.2, 0.6]))
+        c["pde_split"] = {"parameters": ["pde"], "model": "scale", "sensor_surfaces": ["photocathode"],
+                          "angle_dependent": False, "ties": []}
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("pc.json", c), *args)
+        self.assertEqual((rc, out["status"]), (0, "accepted"), out.get("findings"))
+        tied = json.loads(json.dumps(c))
+        tied["pde_split"]["ties"] = ["reflectivity = 1 - PDE"]
+        rc, out = run("calib_contract.py", "check", "--contract", self.put("pt.json", tied), *args)
+        self.assertEqual((rc, {f["code"] for f in out["findings"]}), (2, {"pde_split.tied_property"}))
+        (self.d / "detector.json").write_bytes(G4.detector_text())
+        (self.d / "map.json").write_text(json.dumps(G4.efficiency_map()))
+        entry = {"detector_spec": "detector.json", "efficiency_map": "map.json"}
+        rc, out = run("calib_contract.py", "check", "--contract", self.d / "pc.json", "--model-documents",
+                      self.put("pd.json", {"nominal": entry}), *args)
+        self.assertEqual(rc, 2)
+        self.assertIn("pde_split.sensor_surface", {f["code"] for f in out["findings"]})
+        ph1, pr, emitted, detected = P.run(6000)
+        php = P.run(6000, efficiency=0.4)[0]
+        tiedph = P.run(6000, efficiency=0.4, rho=0.3)[0]
+        m = P.build_map(emitted, detected)
+        for name, text in (("one.csv", ph1), ("nom.csv", php), ("tied.csv", tiedph), ("prim.csv", pr)):
+            (self.d / name).write_text(text)
+        self.put("m1.json", m)
+        docs = self.put("dd.json", {"maps": {"one": "m1.json"}, "photons": {"one": "one.csv", "nom": "nom.csv",
+                                    "tied": "tied.csv"}, "primaries": {"one": "prim.csv"}})
+        plan = {"schema": "calibration-plan/1", "pde_split": {
+            "map": "one", "centre_mm": P.CENTRE, "readouts": {"ecal": {"route": "2_1", "observables": {"q": True}}},
+            "record": {"status": "passed", **m["form"]["hashes"]}, "split_check": {"one": "one", "p": "nom", "nominal": {"p": 0.4}}}}
+        rc, out = run("calib_design.py", "pde-split", "--contract", self.d / "pc.json", "--plan",
+                      self.put("pp.json", plan), "--documents", docs)
+        self.assertEqual((rc, out["status"]), (0, "passed"), out.get("findings"))
+        plan["pde_split"]["split_check"]["p"] = "tied"
+        rc, out = run("calib_design.py", "pde-split", "--contract", self.d / "pc.json", "--plan",
+                      self.put("pq.json", plan), "--documents", docs)
+        self.assertEqual((rc, out["status"]), (1, "failed"))
+        self.assertIn("pde_split.not_nested", {f["code"] for f in out["findings"]})
+
     def test_calib_contract_g4sim_identity(self):
         """Phase 3: calib_contract.py identity recomputes the five items of section 5.1 from the model documents, and
         check --model-documents rejects a contract whose declared items differ from them."""

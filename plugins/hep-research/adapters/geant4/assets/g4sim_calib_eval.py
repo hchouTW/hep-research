@@ -19,6 +19,9 @@ Methods (derived from the binding of each theta, section 11.4 Table 2; outside t
 - response-pipeline/1 and condition-snapshot/1 values: re-digitization through `core/simulation/digitize.py` on the
   `g4sim-digi-job/1` path (job built by `design_g4sim.job_from_documents`, run_seed = logical_run_seed, replica = 0), the
   same Geant4 events and Philox keys at every theta (common random numbers, section 6.6);
+- a PDE under the split of section 6.7 (spec `pde`: {parameter, route 2_1 | 1, component, nominal}): the job's
+  efficiencies p eps_c of the efficiency-1 map (route 2_1), or the per-photon thinning nested in p (route 1), by
+  `core/calibration/pde_split.py`;
 - any other detector-spec, run-card or request field: resimulation (`g4sim_run`), requested by ask.
 The detector-spec Birks constant stays nominal (g4sim_run refuses a read-back difference, section 11.4)."""
 from __future__ import annotations
@@ -40,6 +43,7 @@ import numpy as np  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
 from core.calibration import design_g4sim as DG  # noqa: E402
 from core.calibration import evaluator as engine_evaluator  # noqa: E402
+from core.calibration import pde_split  # noqa: E402
 from core.calibration import io as calib_io  # noqa: E402
 from core.calibration import reweight, toy  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
@@ -141,6 +145,14 @@ class G4simEvaluator:
         self.bindings = DG.bindings(plan)
         self.parameters = list(self.bindings)
         self.methods = {p: method_of(b) for p, b in self.bindings.items()}
+        self.pde = spec.get("pde")       # the PDE split of section 6.7: {parameter, route 2_1 | 1, component, nominal}
+        if self.pde:
+            if self.pde.get("route", "2_1") not in ("2_1", "1"):
+                raise DG.CheckError("evaluator.pde_route", "the evaluator applies routes 2_1 and 1 (a scale p); route 3 "
+                                    "jobs come from pde_split.route3_job")
+            self.bindings[self.pde["parameter"]] = {"document": "evaluator", "pointer": "/pde"}
+            self.parameters.append(self.pde["parameter"])
+            self.methods[self.pde["parameter"]] = "re-digitization"
         for p, m in (plan.get("methods") or {}).items():
             if p in self.methods and m != self.methods[p] and not (m == "surrogate-model"
                                                                    and self.methods[p] == "resimulation"):
@@ -151,7 +163,9 @@ class G4simEvaluator:
             raise DG.CheckError("evaluator.source_density", "node 0 is reweighted only with an analytic source "
                                 "(source-density/1); an external source is rejected (section 5.2)")
         self.nominal_theta = {p: float(DG.pointer_get(self.documents[b["document"]], b["pointer"]))
-                              for p, b in self.bindings.items()}
+                              for p, b in self.bindings.items() if b["document"] != "evaluator"}
+        if self.pde:
+            self.nominal_theta[self.pde["parameter"]] = float(self.pde.get("nominal", 1.0))
         self.observable_specs = list(spec.get("observables") or [])
         for o in self.observable_specs:
             if o["quantity"] not in QUANTITIES:
@@ -284,8 +298,9 @@ class G4simEvaluator:
         return vis, bound
 
     def _digitize(self, values, tab, batch, kb, kb0):
+        pde = (self.pde or {}).get("parameter")
         docs = DG.apply_theta(self.documents, self.plan, {p: v for p, v in values.items()
-                                                          if self.methods.get(p) == "re-digitization"})
+                                                          if self.methods.get(p) == "re-digitization" and p != pde})
         rows = tab["split"]
         if kb is not None and not _same(kb, kb0):
             scaled = []
@@ -303,6 +318,11 @@ class G4simEvaluator:
                                     sorted({r[2] for r in rows}) or [0], int(batch["logical_run_seed"]),
                                     conditions=snapshot, event_time=self.plan.get("event_time"),
                                     interval=(tab["first"], tab["n"]) if snapshot is not None else None)
+        if pde:                          # job efficiencies p eps (route 2_1) or the nested thinning (route 1)
+            p = float(values.get(pde, self.nominal_theta[pde]))
+            if self.pde.get("route", "2_1") == "1":
+                return pde_split.digitize_route1(job, rows, p, int(self.pde.get("component", 1)))[0]
+            job = pde_split.route21_job(job, p)
         channel_rows, _ = digitize.digitize(job, rows)
         return channel_rows
 
