@@ -20,6 +20,11 @@ Phase 2 (sections 2.1 (iii), 6.6, 8.2 notes 3 and 5, 9.3, 9.4; the engine in cor
                                                                    the fold-split rules, and P3 of each training fold
   calib_design.py practices     --plan FILE                        rejected toy, bootstrap and G8 practices
   calib_design.py seeds         --uses FILE                        independence of seeds across uses
+Phase 3 (sections 6.1, 6.6, 14.1 with g4sim; the engine in core/calibration/design_g4sim.py):
+  calib_design.py g4sim-support --contract FILE --plan FILE --documents FILE   support and recording levels (section 6.1)
+  calib_design.py intervals     --plan FILE      event intervals, run_seed, replica 0, seed blocks, one digitization path
+  calib_design.py digi-jobs     --plan FILE --documents FILE                   every g4sim-digi-job/1 of the plan
+--documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it.
 FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
 Output: one JSON object; status passed/ok (exit 0), failed (exit 1: P2, P5 or support failed, remedy level in the
@@ -52,7 +57,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import design, design_noise as DN, evaluator, io, linear, problems
+    from core.calibration import design, design_g4sim as DG, design_noise as DN, evaluator, io, linear, problems
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -89,6 +94,13 @@ def main(argv=None) -> int:
     fo.add_argument("--values")
     sub.add_parser("practices").add_argument("--plan", required=True)
     sub.add_parser("seeds").add_argument("--uses", required=True)
+    gs = sub.add_parser("g4sim-support")
+    for a in ("--contract", "--plan", "--documents"):
+        gs.add_argument(a, required=True)
+    sub.add_parser("intervals").add_argument("--plan", required=True)
+    dj = sub.add_parser("digi-jobs")
+    dj.add_argument("--plan", required=True)
+    dj.add_argument("--documents", required=True)
     for name in ("points", "p2", "applicability", "linearize", "support", "p5", "methods"):
         p = sub.add_parser(name)
         if name != "applicability":
@@ -170,7 +182,39 @@ def main(argv=None) -> int:
         except (KeyError, TypeError, ValueError) as exc:
             raise io.InputError(f"malformed input: {exc!r}") from None
 
+    def documents(path):
+        from pathlib import Path
+        docs = io.load_object(path)
+        base = Path(path).resolve().parent
+        out = {}
+        for k, v in docs.items():
+            if k == "maps":
+                if not isinstance(v, dict):
+                    raise io.InputError("--documents: maps is {name: map}")
+                out[k] = {m: io.load(str(base / x)) if isinstance(x, str) else x for m, x in v.items()}
+            else:
+                out[k] = io.load(str(base / v)) if isinstance(v, str) else v
+        return out
+
+    def phase3():
+        try:
+            plan = io.load_object(args.plan)
+            if args.cmd == "intervals":
+                return DG.interval_findings(plan)
+            docs = documents(args.documents)
+            if args.cmd == "digi-jobs":
+                f = DG.digi_job_findings(plan, docs)
+                return {"status": "failed" if f else "passed", "findings": f, "jobs": len(plan.get("digi_jobs") or [])}
+            contract = io.load_object(args.contract)
+            return DG.support_g4sim(contract, plan, docs)
+        except DG.CheckError as exc:
+            return {"status": "rejected", "code": exc.code, "error": str(exc)}
+        except (KeyError, TypeError, ValueError, AttributeError) as exc:
+            raise io.InputError(f"malformed input: {exc!r}") from None
+
     def go():
+        if args.cmd in ("g4sim-support", "intervals", "digi-jobs"):
+            return phase3()
         if args.cmd in ("sigma-boot", "bj", "p7", "folds", "practices", "seeds"):
             return phase2()
         if args.cmd == "applicability":

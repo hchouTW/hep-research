@@ -45,6 +45,15 @@ class Evaluator(Protocol):
     def tell(self, run_ids=None) -> dict: ...
 
 
+_REGISTERED: dict = {}
+
+
+def register(kind: str, builder) -> None:
+    """Register an adapter's builder (spec, plan) -> evaluator under `kind` (phase 3: the g4sim evaluator of the
+    Geant4 adapter, section 7.1, registers itself on import; core never imports it)."""
+    _REGISTERED[kind] = builder
+
+
 def make(plan: dict, contract: dict | None = None):
     """The evaluator the plan names (plan['evaluator'] = {'kind': ..., ...}); phase 1 knows the toy detector, its
     variants and the declared small chains (core/calibration/toy.py). With plan['evaluator']['surrogate'] (a trained
@@ -53,12 +62,14 @@ def make(plan: dict, contract: dict | None = None):
     kind = spec.get("kind")
     from core.calibration import toy                       # the only evaluators in core
     builders = {"toy-detector": toy.toy_detector, "toy-detector-subgraph": toy.toy_detector_subgraph,
-                "toy-detector-bimodal": toy.toy_detector_bimodal, "chain": toy.chain_from_spec}
+                "toy-detector-bimodal": toy.toy_detector_bimodal, "chain": toy.chain_from_spec, **_REGISTERED}
     if kind not in builders:
         raise EvaluatorUnavailable(f"no evaluator of kind {kind!r} in this engine version (phase 1 has "
-                                   f"{sorted(builders)}; the g4sim evaluator is phase 3)")
+                                   f"{sorted(builders)}; the g4sim evaluator registers itself when the Geant4 adapter's evaluator is imported)")
     ev = builders[kind](spec, plan)
     if spec.get("surrogate"):                            # a trained surrogate (calib_emulator.py train --out)
+        if not hasattr(ev, "attach_surrogate"):
+            raise EvaluatorUnavailable(f"the evaluator of kind {kind!r} cannot carry a surrogate model")
         from core.calibration import emulator
         ev.attach_surrogate(emulator.Surrogate.from_record(spec["surrogate"]))
     return ev
