@@ -101,6 +101,9 @@ class Support(unittest.TestCase):
         r = DG.support_g4sim(contract(), plan(), d)
         self.assertEqual({f["filter"] for f in r["findings"]}, {"zero_suppression:strip"})
         self.assertEqual(r["infeasible"], sorted(["beam_mean", "birks", "light_yield", "gain"]))
+        p = plan()
+        p["node_binding"]["nodes"].pop("readout")                    # an unbound stage is never silently skipped
+        self.assertEqual(codes(DG.support_g4sim(contract(), p, d)), ["support.filter_unbound"])
         d["request"]["truth"] = {"keep": ["all"]}                     # keeping all truth prunes nothing
         self.assertEqual(len(DG.support_g4sim(contract(), plan(), d)["findings"]), 4)
 

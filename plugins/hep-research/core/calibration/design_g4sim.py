@@ -235,7 +235,15 @@ def support_g4sim(contract: dict, plan: dict, documents: dict, n_scan: int = 16,
             reach = below(n)
             for f in filters:
                 fn = where.get(f["at"])
-                if fn is None or fn not in reach:
+                if fn is None and f["filter"] in ignorable:
+                    confirm.append({"parameter": p, "filter": f["filter"], "node": None})
+                    continue
+                if fn is None:                           # an unbound g4sim object: its position cannot be ruled out
+                    fs.append(_finding("support.filter_unbound", f"{p}: {f['filter']} acts at {f['at']}, which the "
+                                       "node binding does not bind: bind it, or record the filter as ignorable",
+                                       parameter=p, filter=f["filter"]))
+                    continue
+                if fn not in reach:
                     continue
                 if f["filter"] in ignorable or fn in ignorable_nodes:
                     confirm.append({"parameter": p, "filter": f["filter"], "node": fn})
