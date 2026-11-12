@@ -1,0 +1,34 @@
+{
+ "type": "object",
+ "required": [
+  "mode"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "mode": {
+   "enum": [
+    "binomial-thinning-chain",
+    "poisson-times-gain",
+    "quadrature-sum",
+    "offset-in-width",
+    "two-term-sum",
+    "scale-and-shape",
+    "index-and-scale",
+    "efficiency-threshold-noise",
+    "redundant-common-mode"
+   ]
+  },
+  "parameters": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "minLength": 1
+   }
+  },
+  "breaking_signal": {
+   "type": "string",
+   "minLength": 1
+  }
+ },
+ "$comment": "calibration-degeneracy-mode/1 (section 3.5): a diagnostic hint, never part of a decision."
+}

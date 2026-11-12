@@ -1,0 +1,132 @@
+{
+ "schema": "simcal-task-registry/1",
+ "note": "One entry per registration, oldest first. The latest entry of a card is the one in force; gate records cite it. Phase 0 adds the first entries (simcal-task.md, Section E9).",
+ "registrations": [
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "a2641ceb0694cc111192a847477d7640ce03456ae549c10c78b2633113911925",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; execution log opened; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "2fde1fcde79ab4b5b07325801727436671fb5694b91628bf48a3bf2635027cc4",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "dae97aeb68444f672739376458950f16716b77bb893d8bdc885daf2ff12ce490",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "e5581f56bc91717cf992e0cef42a25358b5f989901fb32988f19ed8501278f79",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-4.md",
+   "sha256": "80e961f3b2e6fdacee6828a0d996e706b101ca7a9251819b350e310641c236db",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "a358a75e0ca3419fbeb58bba6392afaa39589b436ddb5ba22006589aa0c79ab0",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "34e2f7cdc48830da1cfff0f6a71cdc234a6ca5ab42fd945888a93a1931c5ea80",
+   "registered_at": "2026-11-10T07:28:59Z",
+   "card_commit": "a12bfff6",
+   "reason": "execution log only (D5/D11 material, blocked report); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "24afbbaeea8407e2a03f173cb6e47bdb9658670b1f24e89ec5a1f61da252f1a1",
+   "registered_at": "2026-11-10T07:32:46Z",
+   "card_commit": "2d7e29a5",
+   "reason": "execution log only (approval A6 of D5 and D11, blocked report); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "5439e8b5958577936a2a553ce5dd0d44d7b150c9c8a47d3597532b05f8371b1e",
+   "registered_at": "2026-11-10T07:37:04Z",
+   "card_commit": "b5b88332",
+   "reason": "execution log only (approval A7, A6 table fix); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "0c19448e7b00821275ef898ee200fa8f53d3815e11d3b4a598df3135f530fab7",
+   "registered_at": "2026-11-10T07:39:12Z",
+   "card_commit": "ade91e86",
+   "reason": "execution log only (supplied decision table does not match); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "f4ce326516be95655d8563d8ba6a68caa68aa7c7af2d1598ca2118cfb428dc7d",
+   "registered_at": "2026-11-10T07:40:18Z",
+   "card_commit": "9fa7b35d",
+   "reason": "execution log only (v7.37 decision table does not match); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "99b25274b1af1155578dd37f445420317666958bf11d1c04d12d8b27727edecd",
+   "registered_at": "2026-11-10T07:42:41Z",
+   "card_commit": "de427f0f",
+   "reason": "execution log only (reference implementation supplied, phase unblocked); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "e81e2eb8ae3cafd1e3c746c10b0a050803a5950d4d90c0be4cedf8b5bd5681f9",
+   "registered_at": "2026-11-10T07:58:57Z",
+   "card_commit": "c4fa708f",
+   "reason": "execution log only (worktree moved to ceph); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "2b6513dfdeb535cd2de9cfe0d1c57f31e30134e6fda0d111ba2bb6020611fb5e",
+   "registered_at": "2026-11-10T08:35:58Z",
+   "card_commit": "1206749a",
+   "reason": "gate test design registered before any gate run (exhaustive Appendix C scope in 68 shards: agree 32, invariants 32, lookup 4; mutants on the fixed slice; named cases; fixtures); D5/D11 settled by A6; execution-log decisions"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "06fb186030ea143b53c413514f81c35a69d97baf379e84e234f2c136fe47f5ee",
+   "registered_at": "2026-11-10T10:08:39Z",
+   "card_commit": "7c48394d",
+   "reason": "tightened after the independent review, before the gate run at the fixed code (tightening only): the named cases of §15.3 listed one by one with their tests or their later phase (F4); a mutant campaign item, provenance and total checks, variation flags compared (F6, F10, F11): 69 items; campaign 1 superseded"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "8bb5ff3cae5d88c7f1431c294afac431dcb17292e2ee2285b4b37e9eb6c544d8",
+   "registered_at": "2026-11-10T12:54:11Z",
+   "card_commit": "37ffe4c0",
+   "reason": "execution log only (campaign 2, final checks, gates recorded, E8 report); thresholds and test design as registered 06fb1860"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "5740f3dc8c8f7843867f6417b0772d740bd6e83cd6fc0bd10bdfa24fd6f26e1a",
+   "registered_at": "2026-11-12T10:52:38Z",
+   "card_commit": "merge of origin/main",
+   "reason": "after its execution-log update: origin/main (0.66.1) merged into simcal/phase-0 on the user's word; no gate-deciding file changed"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "0fb07dcdb0f3988d114aa1db060fc3d600a583d0529f80eeb229bb063354019e",
+   "registered_at": "2026-11-12T13:15:10Z",
+   "card_commit": "merge of origin/main 127163b3",
+   "reason": "after its execution-log update: main merged again before the merge of PR #385; no gate-deciding file changed"
+  }
+ ]
+}

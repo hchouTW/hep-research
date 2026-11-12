@@ -1,0 +1,119 @@
+{
+ "type": "object",
+ "required": [
+  "id",
+  "type",
+  "edge",
+  "observation"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "id": {
+   "type": "string",
+   "minLength": 1
+  },
+  "type": {
+   "enum": [
+    "known-input",
+    "mid-chain-injection",
+    "internal-constraint",
+    "redundant-measurement",
+    "population-feature",
+    "tag-and-probe"
+   ]
+  },
+  "edge": {
+   "anyOf": [
+    {
+     "type": "object",
+     "required": [
+      "from",
+      "to"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "from": {
+       "type": "string",
+       "minLength": 1
+      },
+      "to": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "into"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "into": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "out_of"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "out_of": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "inside"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "inside": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    }
+   ]
+  },
+  "observation": {
+   "type": "string",
+   "minLength": 1
+  },
+  "enabled": {
+   "type": "boolean"
+  },
+  "upstream_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "conversion": {
+   "type": "object",
+   "required": [
+    "relation"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "relation": {
+     "type": "string",
+     "minLength": 1
+    },
+    "parameters": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  }
+ },
+ "$comment": "calibration-reference/1 (section 3.4): a known quantity on an edge. A mid-chain injection declares its conversion relation (parameters listed as phi); 'inside' is accepted by the schema so the checker can name an unsplit node."
+}

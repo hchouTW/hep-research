@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Dependencies between calibration results (simulator calibration workflow, Part B sections 5.2 clause 5, 10.2,
+10.3, 10.4; owner of hash references, cycle checks, roles derived from usage and version ids).
+
+  calib_deps.py roles   --contract FILE     upstream[] of a contract: hash citations, usages, derived roles
+  calib_deps.py cycles  --graph FILE        {result or series: [upstreams]}: a cycle is rejected (section 10.3)
+  calib_deps.py version --payload FILE      update_digest and version id of a shared-nuisance version (section 10.4)
+  calib_deps.py finalize --result FILE --payload FILE --out FILE
+                                            write the version id into a result, then its result hash (acyclic)
+Output: one JSON object; status ok (exit 0), failed (exit 1: findings or a cycle), rejected (exit 2: unreadable
+input), written (exit 0) for finalize. Standard library only. Phase 0 (section 17); invalidation and the conflict
+rules of section 10.4 come in later phases.
+"""
+from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+
+import argparse
+import sys
+
+from core.calibration import deps, io
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("roles").add_argument("--contract", required=True)
+    sub.add_parser("cycles").add_argument("--graph", required=True)
+    sub.add_parser("version").add_argument("--payload", required=True)
+    f = sub.add_parser("finalize")
+    for a in ("--result", "--payload", "--out"):
+        f.add_argument(a, required=True)
+    args = ap.parse_args(argv)
+
+    def go():
+        try:
+            if args.cmd == "roles":
+                c = io.load(args.contract)
+                ups = c.get("upstream", []) if isinstance(c, dict) else None
+                findings = deps.check_upstream_entries(ups)
+                roles = {e.get("result_sha256"): deps.derive_role(e["usages"]) for e in ups or []
+                         if isinstance(e, dict) and e.get("usages") and set(e["usages"]) <= deps.USAGES}
+                return {"status": "failed" if findings else "ok", "roles": roles, "findings": findings}
+            if args.cmd == "cycles":
+                g = io.load(args.graph)
+                if not isinstance(g, dict) or not all(isinstance(v, list) for v in g.values()):
+                    raise io.InputError("the graph maps each result to the list of its upstreams")
+                cyc = deps.find_cycle(g)
+                return {"status": "failed" if cyc else "ok", "cycle": cyc}
+            payload = io.load(args.payload)
+            if args.cmd == "version":
+                return {"status": "ok", "update_digest": deps.update_digest(payload),
+                        "version_id": deps.version_id(payload)}
+            r = deps.finalize_result(io.load(args.result), payload)
+            io.write_json(args.out, r)
+            return {"status": "written", "out": args.out, "version_id": r["version_id"],
+                    "result_sha256": r["result_sha256"]}
+        except deps.DependencyError as exc:
+            raise io.InputError(f"{exc.code}: {exc}") from None
+        except (AttributeError, KeyError, TypeError) as exc:
+            raise io.InputError(f"unexpected input structure: {exc}") from None
+    return io.run(go)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

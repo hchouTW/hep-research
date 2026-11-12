@@ -1,0 +1,127 @@
+{
+ "type": "object",
+ "required": [
+  "schema",
+  "fixture",
+  "description",
+  "status",
+  "contract",
+  "plan"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "calibration-fixture/1"
+  },
+  "fixture": {
+   "type": "string",
+   "minLength": 1
+  },
+  "description": {
+   "type": "string",
+   "minLength": 1
+  },
+  "status": {
+   "const": "synthetic"
+  },
+  "contract": {
+   "type": "object",
+   "required": [
+    "stage_graph",
+    "parameters",
+    "references"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "stage_graph": {
+     "$ref": "calibration_stage_graph.json"
+    },
+    "parameters": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "role",
+       "nodes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "role": {
+        "enum": [
+         "theta",
+         "phi",
+         "psi"
+        ]
+       },
+       "nodes": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "minLength": 1
+        },
+        "minItems": 1
+       },
+       "mechanism": {
+        "$ref": "calibration_mechanism.json"
+       },
+       "physical_bounds": {
+        "type": "array",
+        "items": {
+         "type": "number"
+        }
+       },
+       "sampling_bounds": {
+        "type": "array",
+        "items": {
+         "type": "number"
+        }
+       },
+       "source": {
+        "type": "string",
+        "minLength": 1
+       },
+       "uncertainty": {
+        "enum": [
+         "negligible",
+         "non-negligible"
+        ]
+       },
+       "index": {
+        "$ref": "calibration_parameter_index.json"
+       },
+       "spec_pointer": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     },
+     "minItems": 1
+    },
+    "references": {
+     "type": "array",
+     "items": {
+      "$ref": "calibration_reference.json"
+     }
+    }
+   }
+  },
+  "plan": {
+   "type": "object",
+   "required": [
+    "kernels"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "kernels": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "$comment": "calibration-fixture/1: a stage-graph fixture of phase 0 (section 17), graph structure only."
+}

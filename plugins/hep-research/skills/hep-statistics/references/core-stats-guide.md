@@ -7,7 +7,7 @@ applies.
 
 The scripts are **diagnostics, not frameworks**: small counting, template and unfolding problems with stated
 simplifications. A many-nuisance shape model, a workspace combination or a production sampler goes through the
-pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script with `--help` for its input format.
+pyhf/Combine adapter ([statistical tools](statistical-tools.md)).
 
 **Reference index**: the [command reference](core-stats-commands.md) (per-module
 subcommands, inputs and outputs, validation tools outside `core/stats`, publication-gate rules),
@@ -105,8 +105,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 
 ## Skill scripts
 
-Helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above, never replace
-them: run them, do not hand-compute.
+Helpers in `skills/hep-statistics/scripts/` (read `--help` first) call the modules above, never replace them.
 
 Unmarked scripts use the standard library only; marked ones refuse to run without NumPy (and
 SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
@@ -130,7 +129,8 @@ SciPy) with exit 2 and a JSON message, and every script prints `--help` without 
   region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy at run time.
 - `periodicity_scan.py`: generalized Lomb-Scargle with a surrogate global p (white, AR(1), OU);
   `time_structure.py`: change points (toy-calibrated false alarms) and lags with surrogates. NumPy at run time.
-- Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
+- `calib_chain.py`, `calib_contract.py`, `calib_data.py`, `calib_deps.py`, `calib_use.py`: calibration.
+- hep-measurement inference scripts, pyhf/Combine starting points, the unbinned fit: [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 
 ## Not implemented

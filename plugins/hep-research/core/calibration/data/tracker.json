@@ -1,0 +1,340 @@
+{
+ "schema": "calibration-fixture/1",
+ "fixture": "tracker",
+ "description": "Silicon or gas tracker (section 3.1, derivation basis (2)) with a pair of overlapping layers (comparison node: position difference).",
+ "status": "synthetic",
+ "contract": {
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "particle",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ]
+    },
+    {
+     "id": "ionization",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "physics-process",
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "carriers",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "2",
+     "mechanisms": [
+      "yield",
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "drift",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "3",
+     "mechanisms": [
+      "transport-diffusion",
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "preamplifier",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4b",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "5",
+     "mechanisms": [
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "hits_a",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "hits_b",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "hit_residual",
+     "kind": "comparison",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "tracks",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7",
+     "mechanisms": [
+      "association"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "from": "particle",
+     "to": "ionization"
+    },
+    {
+     "from": "ionization",
+     "to": "carriers"
+    },
+    {
+     "from": "carriers",
+     "to": "drift"
+    },
+    {
+     "from": "drift",
+     "to": "preamplifier"
+    },
+    {
+     "from": "preamplifier",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "hits_a"
+    },
+    {
+     "from": "electronics",
+     "to": "hits_b"
+    },
+    {
+     "from": "hits_a",
+     "to": "hit_residual"
+    },
+    {
+     "from": "hits_b",
+     "to": "hit_residual"
+    },
+    {
+     "from": "hits_a",
+     "to": "tracks"
+    },
+    {
+     "from": "hits_b",
+     "to": "tracks"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "material_scale",
+    "role": "theta",
+    "nodes": [
+     "ionization"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "lorentz_angle",
+    "role": "theta",
+    "nodes": [
+     "drift"
+    ],
+    "mechanism": "transport-diffusion"
+   },
+   {
+    "name": "charge_sharing",
+    "role": "theta",
+    "nodes": [
+     "drift"
+    ],
+    "mechanism": "sharing-crosstalk"
+   },
+   {
+    "name": "preamp_gain",
+    "role": "theta",
+    "nodes": [
+     "preamplifier"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold"
+   },
+   {
+    "name": "alignment_a",
+    "role": "theta",
+    "nodes": [
+     "hits_a"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "alignment_b",
+    "role": "theta",
+    "nodes": [
+     "hits_b"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "gain_a",
+    "role": "theta",
+    "nodes": [
+     "hits_a"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain_b",
+    "role": "theta",
+    "nodes": [
+     "hits_b"
+    ],
+    "mechanism": "yield"
+   }
+  ],
+  "references": [
+   {
+    "id": "known_momentum",
+    "type": "known-input",
+    "edge": {
+     "into": "particle"
+    },
+    "observation": "tracks"
+   },
+   {
+    "id": "charge_injection",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "preamplifier",
+     "to": "electronics"
+    },
+    "observation": "hits_a",
+    "conversion": {
+     "relation": "injected charge to deposited charge",
+     "parameters": [
+      "injection_capacitance"
+     ]
+    }
+   },
+   {
+    "id": "layer_overlap",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "hit_residual"
+    },
+    "observation": "hit_residual"
+   }
+  ]
+ },
+ "plan": {
+  "kernels": {
+   "particle": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "ionization": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "carriers": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "drift": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "preamplifier": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "electronics": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "hits_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "hits_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "hit_residual": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "tracks": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  }
+ }
+}

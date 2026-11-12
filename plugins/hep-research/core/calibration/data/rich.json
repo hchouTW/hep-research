@@ -1,0 +1,287 @@
+{
+ "schema": "calibration-fixture/1",
+ "fixture": "rich",
+ "description": "Ring-imaging Cherenkov detector (section 3.1, derivation basis (1)): refractive index and focal length (the section 3.5 degeneracy), photon detection and gain.",
+ "status": "synthetic",
+ "contract": {
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "particle",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ]
+    },
+    {
+     "id": "radiator",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "physics-process",
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "photons",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "2",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "optics",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "3",
+     "mechanisms": [
+      "transport-diffusion",
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "pde",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4a",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "gain",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4b",
+     "mechanisms": [
+      "yield",
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "readout",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "5",
+     "mechanisms": [
+      "noise-threshold",
+      "time"
+     ]
+    },
+    {
+     "id": "light_spots",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6"
+    },
+    {
+     "id": "ring_angle",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7",
+     "mechanisms": [
+      "association"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "from": "particle",
+     "to": "radiator"
+    },
+    {
+     "from": "radiator",
+     "to": "photons"
+    },
+    {
+     "from": "photons",
+     "to": "optics"
+    },
+    {
+     "from": "optics",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "gain"
+    },
+    {
+     "from": "gain",
+     "to": "readout"
+    },
+    {
+     "from": "readout",
+     "to": "light_spots"
+    },
+    {
+     "from": "light_spots",
+     "to": "ring_angle"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "refractive_index",
+    "role": "theta",
+    "nodes": [
+     "radiator"
+    ],
+    "mechanism": "physics-process"
+   },
+   {
+    "name": "radiator_height",
+    "role": "theta",
+    "nodes": [
+     "radiator"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "focal_length",
+    "role": "theta",
+    "nodes": [
+     "optics"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "mirror_reflectivity",
+    "role": "theta",
+    "nodes": [
+     "optics"
+    ],
+    "mechanism": "transport-diffusion"
+   },
+   {
+    "name": "pde",
+    "role": "theta",
+    "nodes": [
+     "pde"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "readout"
+    ],
+    "mechanism": "noise-threshold"
+   }
+  ],
+  "references": [
+   {
+    "id": "known_momentum",
+    "type": "known-input",
+    "edge": {
+     "into": "particle"
+    },
+    "observation": "ring_angle"
+   },
+   {
+    "id": "single_photoelectron",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "pde",
+     "to": "gain"
+    },
+    "observation": "light_spots",
+    "conversion": {
+     "relation": "single photoelectron charge",
+     "parameters": []
+    }
+   }
+  ]
+ },
+ "plan": {
+  "kernels": {
+   "particle": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "radiator": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "photons": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "optics": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "pde": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "gain": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "readout": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "light_spots": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "ring_angle": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  }
+ }
+}
