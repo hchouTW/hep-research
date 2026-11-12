@@ -372,6 +372,13 @@
    "registered_at": "2026-11-12T15:27:55Z",
    "card_commit": "748230da",
    "reason": "wave 1 merged; execution log and open author items added; no run judged yet"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "ee11505118630096c69881d5b555b2da9109d075c68f696f4587c0e9e6ec0ff6",
+   "registered_at": "2026-11-12T22:42:20Z",
+   "card_commit": "f540af0d",
+   "reason": "campaign p3-cals configurations (rows 2004 P6 part, 2008, 2009) registered before any run"
   }
  ]
 }
