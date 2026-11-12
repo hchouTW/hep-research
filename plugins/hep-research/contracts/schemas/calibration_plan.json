@@ -85,7 +85,7 @@
   },
   "efficiency_map": {
    "type": "object",
-   "$comment": "section 6.7: {mode: fixed | varies-with-theta, R, linear_in_eps: [observable], u_construction: {observable: digitized | map_replica | linear}}; calib_design.py map-plan"
+   "$comment": "section 6.7: {mode: fixed | varies-with-theta, R, linear_in_eps: [observable], u_construction: {observable: digitized | map_replica | linear}, affected: [observable], through_surrogate: [observable]}; calib_design.py map-plan"
   },
   "pde_split": {
    "type": "object",

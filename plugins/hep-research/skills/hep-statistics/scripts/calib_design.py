@@ -30,8 +30,9 @@ Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the en
   calib_design.py theta-noise --input FILE   P5's theta-noise item: {surrogate (record), points: [{theta, V_G}],
                                              sigma_tot: {p: s}, U: [U_j] | Sigma, seeding}
   calib_design.py map-g6-size --input FILE   D84: {J, V_G, maps: {component: map}, J_eps, R, n_toys, alpha?, seed?}
-  calib_design.py map-plan    --plan FILE [--theta-noise FILE]   the mapping-run seeds (and the section 6.6 interval
-                                             check), the rejected map practices, the fixed-map U construction
+  calib_design.py map-plan    --plan FILE [--theta-noise FILE] [--contract FILE]   the mapping-run seeds (and the
+                                             section 6.6 interval check), the rejected map practices, the fixed-map U
+                                             construction, and (with --contract) the Gaussian-block rule
   calib_design.py map-primaries --primaries CSV CSV [...]   a shared-seed scan's primaries.csv agree event by event
   calib_design.py map-job-route --documents FILE --rows FILE --replica R [--readout NAME]   the job route with
                                              g4sim's replica r reproduces map_replica = r (documents {pipeline, map})
@@ -125,6 +126,7 @@ def main(argv=None) -> int:
     mp = sub.add_parser("map-plan")
     mp.add_argument("--plan", required=True)
     mp.add_argument("--theta-noise", help="the result of calib_design.py theta-noise for an independent-seed scan")
+    mp.add_argument("--contract", help="the contract whose observable blocks the map-varies-with-theta rule reads")
     sub.add_parser("map-primaries").add_argument("--primaries", nargs="+", required=True)
     jr = sub.add_parser("map-job-route")
     jr.add_argument("--documents", required=True)
@@ -363,7 +365,8 @@ def map_items(args, documents) -> dict:
         if args.cmd == "map-plan":
             plan = io.load_object(args.plan)
             tn = io.load_object(args.theta_noise) if args.theta_noise else None
-            f = DM.mapping_seed_findings(plan) + DM.map_plan_findings(plan, tn)
+            contract = io.load_object(args.contract) if args.contract else None
+            f = DM.mapping_seed_findings(plan) + DM.map_plan_findings(plan, tn, contract)
             iv = DG.interval_findings(plan)              # section 6.6 overlaps: design_g4sim's check, reused
             ok = not f and iv["status"] == "passed"
             return {"status": "passed" if ok else "failed", "findings": f, "intervals": iv}

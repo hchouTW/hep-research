@@ -26,7 +26,8 @@ fifth item, 14; D28, D83 (1), D84, D85 by approval A12; phase 3, WP-D).
 The plan's efficiency-map block (WP-D reading; Part B fixes no field names):
 
     plan["efficiency_map"] = {mode: fixed | varies-with-theta, R, linear_in_eps: [observable],
-                              u_construction: {observable: digitized | map_replica | linear}}           (fixed map)
+                              u_construction: {observable: digitized | map_replica | linear}           (fixed map),
+                              affected: [observable], through_surrogate: [observable]}     (map varies with theta)
     plan["mapping_scans"][scan] = {seeding: shared | independent, map_term: joint-pattern | analytic | g4sim-replicas
                                    | fallback (| common-uniforms | scan-key: rejected), points: [...], N_map, R,
                                    pattern_table: true | false}                                (map varies with theta)
@@ -199,9 +200,10 @@ def mapping_seed_findings(plan: dict) -> list:
     return out
 
 
-def map_plan_findings(plan: dict, theta_noise_result: dict | None = None) -> list:
-    """The practices section 6.7 rejects and the U-construction rules (remedy level plan)."""
-    out = []
+def map_plan_findings(plan: dict, theta_noise_result: dict | None = None, contract: dict | None = None) -> list:
+    """The practices section 6.7 rejects and the U-construction rules (remedy level plan). With the contract, also the
+    block rule of the mode where the map varies with theta (`block_findings`)."""
+    out = [] if contract is None else block_findings(plan, contract)
     em = plan.get("efficiency_map") or {}
     mode = em.get("mode")
     if mode not in (None, "fixed", "varies-with-theta"):
@@ -272,6 +274,33 @@ def map_plan_findings(plan: dict, theta_noise_result: dict | None = None) -> lis
         Rs = cfg.get("R")
         if term != "analytic" and Rs is not None and int(Rs) < efficiency_map.MINIMUM_REPLICAS:
             out.append(_finding("design.map_replicas", f"{where}: R = {Rs} < {efficiency_map.MINIMUM_REPLICAS}"))
+    return out
+
+
+def block_findings(plan: dict, contract: dict) -> list:
+    """Map varies with theta (section 6.7): an observable the map affects (efficiency_map.affected and the scans'
+    observables) is in a Gaussian block, or enters through a surrogate model with the error in the map term
+    (efficiency_map.through_surrogate); the MC nuisances of Poisson and binomial blocks carry only the noise of MC
+    counts and have no place for the map noise. Remedy level plan (convert to a Gaussian summary statistic, or predict
+    it through the surrogate)."""
+    em = plan.get("efficiency_map") or {}
+    if em.get("mode") != "varies-with-theta":
+        return []
+    affected = set(em.get("affected") or [])
+    for cfg in (plan.get("mapping_scans") or {}).values():
+        affected |= set(cfg.get("observables") or [])
+    via = set(em.get("through_surrogate") or [])
+    blocks = {o["name"]: o.get("block", "gaussian") for o in contract.get("observables") or []}
+    out = []
+    for name in sorted(affected):
+        if name not in blocks:
+            out.append(_finding("design.map_observable_unknown", f"{name}: affected by the map but not a contract "
+                                "observable"))
+        elif blocks[name] in ("poisson", "binomial") and name not in via:
+            out.append(_finding("design.map_nongaussian_block", f"{name}: a {blocks[name]} block affected by an "
+                                "efficiency map that varies with theta; its MC nuisances carry only the noise of MC "
+                                "counts, so it must be a Gaussian block (a Gaussian summary statistic) or enter "
+                                "through the surrogate model with the error in U(theta) phi_map (section 6.7)"))
     return out
 
 
