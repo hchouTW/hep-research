@@ -68,7 +68,8 @@ def raw_units(release_sha256: str, releases: dict) -> frozenset | None:
 def holdout_shares_units(calibration: list[str], validation: list[str], releases: dict) -> dict:
     """Section 9.5 "Holdout must not share events": compare by lineage, at lock and before opening. Returns
     {"confirmed": bool, "shared": [units]}; shared units are a contract error (exit 2, remedy level contract)."""
-    cal, val = set(), set()
+    cal: set[str] = set()
+    val: set[str] = set()
     for r in calibration:
         u = raw_units(r, releases)
         if u is None:
