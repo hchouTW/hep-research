@@ -1,0 +1,35 @@
+{
+ "id": "adapter:destriper",
+ "version": "0.1.0",
+ "status": "proposed",
+ "purpose": "T10's scan/global reference replay (finish-plan E1, option B2 of t10-options.md; decisions.md, the user's answer to U7) as a development binding in Python, recipe reco.scan.destriper/1, not a native backend, whose gap stays recorded as with U12 A: destriping as t11-cells.md F38 records it (joint fit of map and baselines, conjugate gradient for the baseline amplitudes, then binning), on the reduced baseline system restricted to the zero-sum subspace (the stated constraint that fixes the common offset m + c, a - c), the map by binning; a scan with an unobserved pixel or more than one connected component is refused; the product destriper-product/1 embeds a reconstruction-product/1 with reconstruction:scan-v1, subcase global (with the constraint: every value reported; without it: every parameter named unidentifiable and only differences and one sum reported), checked by contracts.reconstruction.read_sidecar; the method card names the unconstrained mode and its constraint (plan section 9.6, A34). On the scoring side: the synthetic fixture t10-destripe/1 (seed recorded; noiseless, noisy and a disconnected scan with a second null mode) with its negative variants (jitter, chunk average, a uniqueness claim without a constraint, a disconnected scan claimed determined), an independently written exact rational reference that shares no code with the solver, and the comparator with drafted K09 tolerances (noisy and noiseless), the stopping ladder (fix round 1, replacing the eps/2 halving gate, which stays a reading) and an a-posteriori bound as a reading; a runtime null-mode drift case without the constraint; synthetic data only, no map-making quality claim; optional, required by no skill",
+ "tools": [
+  {
+   "name": "destriper development binding (Python with NumPy)",
+   "status": "proposed",
+   "tested_versions": []
+  }
+ ],
+ "environment": "none declared: no job of record has run it; the stage 4 job is drafted (jobs/t10-replay, not submitted) for Python 3.13.18 with NumPy 2.4.6, the project's env/py313",
+ "assets": [
+  "assets/destriper.py",
+  "assets/destriper.method-card.json",
+  "assets/t10-replay.tolerance.json",
+  "assets/t10-replay-noiseless.tolerance.json",
+  "assets/destripe_recipe/__init__.py",
+  "assets/destripe_recipe/timestream.py",
+  "assets/destripe_recipe/solver.py",
+  "assets/destripe_recipe/product.py",
+  "assets/fixture_tools/t10_fixture.py",
+  "assets/fixture_tools/t10_exact_reference.py",
+  "assets/fixture_tools/t10_comparator.py",
+  "assets/fixture_tools/t10_replay.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_destriper_fixture.py",
+  "../../tests/adapters/test_destriper.py",
+  "../../tests/adapters/test_destriper_reference.py"
+ ],
+ "owner_skill": "hep-detector",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; proposed: the code and its unit tests exist and ran on the login node on hand-made systems and the fixture generator only; no job of record has run the replay, and the comparator's tolerance is drafted, not frozen (K09, the user's); a development binding, not a native backend (U7, U12 A); no map-making quality claim"
+}
