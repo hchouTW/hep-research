@@ -8,3 +8,4 @@
 *.npz binary
 *.cells binary
 *.readout binary
+*.t07data binary

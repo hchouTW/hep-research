@@ -8972,7 +8972,48 @@ Passing checks show software consistency, not physical validity.
 
 ## ACTS-TRACKING-T07 — 2026-11-10 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
 
-Adapter 0.2.0 (`adapters/acts-tracking`, task T07 of the detector reconstruction plan v9.2), first record of this adapter: status
+**Adapter 0.3.0 (D4 builds E2 and E5).** Adapter 0.3.0 adds two scoring-side tools for the Freeze-B run and changes no native code and no
+recipe file; its status stays `demonstrated-on-synthetic-data`, with the tested versions below. Job of record for adapter 0.3.0: job 7584388, the D4 E2 job
+(its result below). What changed: `assets/fixture_tools/t07_fake_rate.py`, the scorer of
+the noise fixture's fake rate per bin (`t04-values-v4.md` section 7's match rule; section 5.2's rate rule: `DEFF_hat`, `U_A`, `U_B`, the step 1
+lower bound; section 8.3's `r_dev`, `L_dev`, `U_dev` and the check `U_dev <= C`, C = 0.005), its record `t07-noise-fake-rate/1` with a refusing
+reader (at blocks 2 to 5 the check also needs all 12 noise bins; `L_dev` one-sided at 95 %, as Freeze A's closed form of F2,
+`calc-closed-form.py` lines 194-199), and the runner of the frozen generator and the finder (with the vertex step) on any tuning or Freeze-B
+block and event count, which deletes a noise data file only after its SHA-256 equals the finding record's and the truth file's (U-B11), in a
+second pass after every bin passed and the rate record was written and read back;
+`assets/fixture_tools/t07_negative_cases.py`, which writes section 11's negative-case input file once from block 1 (clean stratum 0, event 0),
+kept with its description and SHA-256 sums in `tests/adapters/data/t07-negative-cases/`, and which `tests/adapters/test_acts_finding.py`
+(class `NegativeCases`) now reads; the new unit
+module `tests/adapters/test_acts_fake_rate.py`. The job builds the native code, shows the binaries equal to job 7551619's and the block-1
+finding readings and records equal to that job's, runs the changed and new unit modules, the scorer on the 12 noise bins of block 1 at 3,000
+events (job 7551619's sample) and on one bin at 1,000 (the event-count argument; the Freeze-B size, 12,000, is the default and not
+run), the construction the builder replaced (read from git at `fd5abbf7`) against the kept case file, the agreement of `U_dev` with the frozen coding `calc-rate-rule.py`, the deletion,
+the negative-case file and the records test. Its `r_dev`, `L_dev` and `U_dev` are development readings of block 1, not the Freeze-B record.
+The earlier job of record is job 7551619 (adapter 0.2.0, below).
+
+Job 7584388: hpa-wn33 (AMD EPYC 9645), 2026-11-11 23:20:58-23:28:34 UTC (sacct), 7 min 36 s, COMPLETED, JOB RESULT PASS (log line 1036);
+19 steps, each exit 0; stderr empty. It ran commit `fd5abbf7` plus the uncommitted E2 change and the coordinator's records, build.sh
+`59a4607f…`, SOURCES.sha256 `718246ba…` (246 files). After the job its ID was written here, in `adapter.json` and the capability matrix,
+and its negative-case folder was copied into the tree (byte-equal to its evidence); these records differ from the job's manifest. Lines are
+those of the job's log.
+
+| Step | Result |
+|---|---|
+| code-unchanged, frozen-unchanged | 237 of 241 files of job 7551619's manifest equal the tree (46 native sources), the 4 changed and 5 added files exactly (lines 107-108); 31 frozen files unchanged (line 142) |
+| configure, build; binaries-equal | 9 programs byte-equal to job 7551619's (lines 228-236) |
+| negative-cases, negative-cases-old-code (E5) | 203 cases from block 1 clean stratum 0 event 0, case file `06a7741a…` (224,928 bytes), written twice byte-equal and read back, no host path (lines 240-247); the `fd5abbf7` construction gives the same bytes (line 252) |
+| `tests/adapters/test_acts_fake_rate.py` (hand-made events and counts, the frozen coding; `RecordedRunAgreement` in step agreement) | 60 run, OK (line 998) |
+| `tests/adapters/test_acts_tracking.py` (records test and pins among them) | 139 run, OK (line 999) |
+| `tests/adapters/test_acts_finding.py` (24 development strata, NegativeCases on the kept file) | 70 run, OK (line 1000); the 98 finding lines and the 41 negative-case lines equal job 7551619's (lines 808-809) |
+| rate-block1, rate-equal: 12 noise bins of block 1, 3,000 events each | `k` 0 in strata 0 to 10, 1 in stratum 11 (n 107,837); `k` and `n` equal job 7551619's in all 12 bins (lines 829-840); the records of strata 2, 5, 8, 11 equal its kept records but `product_id` (lines 841-844); no event without a track; `U_dev` 9.980790119965865e-4 in 11 bins and 1.0159522786237073e-3 in stratum 11 (`r_dev` 9.273255005239388e-6, `L_dev` 4.756458619725791e-7, `DEFF_hat` 1.0000082789058808), all `U_dev <= C` (0.005) (lines 814-826) |
+| rate-1000, arguments-equal | 1,000 events of stratum 0: the 3,000-event run's counts event by event (line 852); `n` 5,997, `k` 0, `U_dev` 2.991249545095295e-3 (line 853) |
+| agreement | `U_dev` equal to `calc-rate-rule.py`'s `bound` in all 13 bins, difference 0.0 (12 and 1 bins, lines 868, 876) |
+| deletion (U-B11) | 13 noise data files deleted after their hash matched, none left, 13 truth files kept (lines 885, 887) |
+| check-layering, check-naming | no violation; naming status pass |
+
+The block-1 `r_dev`, `L_dev` and `U_dev` are development readings, not the Freeze-B record (block 2, the user's). No tracking quality claim.
+
+**Adapter 0.2.0 (D1 stage 11).** Adapter 0.2.0 (`adapters/acts-tracking`, task T07 of the detector reconstruction plan v9.2), first record of this adapter: status
 `demonstrated-on-synthetic-data` and the tool's tested version. Job of record for adapter 0.2.0: job 7551619, the D1 stage 11 job, the build job of
 T07's close-out (`docs/dev/detector-reconstruction/t07-closeout.md`). It reruns every step below, with the A05 and A17 scenario module
 (`tests/adapters/test_acts_scenarios.py`), `examples/reconstruction-tracking` with its test, and an equality step against the run below.
@@ -9101,7 +9142,37 @@ as the close-out lists them.
 
 ## PHOTON-LIKELIHOOD-T09 — 2026-11-11 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
 
-Adapter 0.2.0 (`adapters/photon-likelihood`, task T09 of the detector reconstruction plan v9.2), first record of this adapter: status
+**Adapter 0.3.0 (D4 build E1).** Adapter 0.3.0 adds `t04-values-v4.md` section 9.4's two negative checks; its status stays
+`demonstrated-on-synthetic-data`, with the tested versions below. Job of record for adapter 0.3.0: job 7584387, the D4 E1 job. What changed: the single-photon-density variant (E1b), a whole configuration of its own
+(`assets/t09-sphere-1-single-photon.configuration.json`, the main file's constants under the format `light-likelihood-configuration/1-single-photon`)
+with `assets/light_recipe/single_photon.py` (the hit channel's time term one photon's arrival density in place of the first arrival; every
+other part the main recipe's) and its product `light-likelihood-product/3-single-photon` (`product.py`); the main reader takes an expected
+format (`configuration.py`), so each reader refuses the other's file; `photon_likelihood.py` builds the variant only from its file; and on the
+scoring side `assets/fixture_tools/t09_negative_checks.py`: the relabelling of the dead control's dead channels as live-unhit (E1a, the frozen
+recipe fitting it unchanged) and both fires rules, read as development readings, never a verdict before K09. The job runs the unit modules
+(the new `tests/adapters/test_photon_likelihood_negative.py` among them), the affected modules, the example's tests and the records test;
+refits the first 250 block-1 events of the dead control and of main B4 `r/R_s` [0.4, 0.7) with the main recipe, whose products must be
+byte-equal to job 7575617's but for the product id; and reads E1a and E1b on those events. The earlier job of record is job 7578442 (adapter
+0.2.0, below); the stage 4 chain (jobs 7575617, 7576269, 7576270) is the latest run of the strata.
+
+**Job of record (D4 E1).** Job 7584387 on hpa-wn33 (AMD EPYC 9645), 2026-11-11 from 23:20:58 to 23:41:35 (sacct), 20 min 37 s, COMPLETED,
+JOB RESULT PASS (`7584387.out` line 669), every step exit 0, stderr empty. It ran commit `fd5abbf7` plus the uncommitted D4 E1 and E2
+changes (receipt: `git diff HEAD` sha256 `5f5829a0…`, untracked contents sha256 `389fbf77…`), Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1,
+glibc 2.34 (lines 29-31); the source manifest of 832 files (`ad7afb75…`). Steps (line numbers of `7584387.out`): 7 frozen files unchanged
+(line 96); 818 of 828 files of job 7578442's manifest equal the tree, the others this build's or E2's, exactly 4 files added (lines
+110-111); the five unit modules 226 run, OK (line 420), the affected modules 43 run, OK (line 427); check-layering and check-naming exit 0
+(lines 436, 461); the main recipe's refits of the dead control and main B4 `r/R_s` [0.4, 0.7) (block 1, 250 events each): inputs, one-seed
+and multistart products equal to job 7575617's but for the product id, 6 PASS EQUAL (lines 463-476), check-product exit 0 on them and on
+array 7576269's recorded /4 (line 477); the relabelling, 200 channels in each of 250 events (line 480); the variant's product refused by the
+main reader (line 499); the example's tests 31 run, OK with a live run (line 541); the records test 21 run, OK (line 569). Readings, no
+verdict before K09 (lines 484-505): E1a, dead read as unhit, fires on z (centre -0.4207, |centre| - 1.645 se +0.3038) and t0 (+0.3087,
++0.2009), the masked fit does not fire; E1b, single-photon density, fires on t0 (centre -7.7058, +7.3301), the first-arrival fit does not
+fire (+0.0539). MaxRSS 1.09 GB (sacct), 44 MB of evidence.
+The close-out has 20 met, 15 met with readings, 2 open and 1 gap. Open at this record: the quality verdict and the calibration of the
+topology score at K09; the verdicts of v4 9.4's negative checks run on evaluation events at K09. BP06's original method sources are met with
+readings by the user-approved literature check (decisions.md U-W6; `t09-sources.md`).
+
+**Adapter 0.2.0 (D3 stage 5).** Adapter 0.2.0 (`adapters/photon-likelihood`, task T09 of the detector reconstruction plan v9.2), first record of this adapter: status
 `demonstrated-on-synthetic-data` for its one tool and the adapter, with the tested versions. Job of record for adapter 0.2.0: job 7578442, the D3 stage 5 job,
 T09's close-out job (`docs/dev/detector-reconstruction/t09-closeout.md`). It runs `examples/reconstruction-photon-likelihood` twice live (the
 recordings must be byte-equal), the example's test with a third live run, `tests/adapters/test_photon_likelihood_records.py`, the four unit
@@ -9156,8 +9227,9 @@ events (the two-source control: 500 events) and runs the topology readings; the 
 | `tests/adapters/test_photon_likelihood_time.py` (time term, t0, the fixed-point driver, product `/2`) | 47 run, OK |
 | `tests/adapters/test_photon_likelihood_multistart.py` (multistart, the truth-start comparator, product `/3`) | 37 run, OK |
 | `tests/adapters/test_photon_likelihood_topology.py` (H2, the topology choice, product `/4`, the two-source control's files, the readings) | 47 run, OK |
+| `tests/adapters/test_photon_likelihood_negative.py` (D4 E1: the single-photon density and its configuration, the relabelling of dead channels, the fires rules) | 34 run, OK (job 7584387, the D4 E1 job; `7584387.out` line 420, with the four modules above: 226 run) |
 | `tests/examples/test_reconstruction_photon_likelihood.py` (the example's replay, its checks on hand-made events, a live run) | 31 run, OK (job 7578442, the D3 stage 5 job) |
-| `tests/adapters/test_photon_likelihood_records.py` (the records agree; the code is the bytes the jobs of record ran) | 21 run, OK (job 7578442, the D3 stage 5 job) |
+| `tests/adapters/test_photon_likelihood_records.py` (the records agree; the code is the bytes the jobs of record ran) | 21 run, OK (job 7578442, the D3 stage 5 job); renewed for 0.3.0: 21 run, OK (job 7584387, the D4 E1 job; `7584387.out` line 569) |
 | `test_adapter_declarations`, `test_tool_contract`, `test_cli_robustness` | 43 run, OK |
 | frozen files, generator check, GOLDEN lines | 7 frozen files unchanged; all 61 GOLDEN lines equal job 7477787's |
 | v4 9.3 at the 50 fixed points (block 6), against an independent evaluation | likelihood check joint 1.819e-12, charge-only 9.095e-13 (limit 1e-9 absolute); per-channel sum 0 failures in 50,000 channels: 3 gates PASS |
@@ -9180,6 +9252,6 @@ them.
 
 Passing checks show software and interface consistency on synthetic data, not physical validity. The adapter is a development binding, not a
 native backend (U12 A; the gap stays open). No photon-likelihood quality or performance claim is made (R31). The development readings these jobs
-printed are not gates; T09's quality verdict waits for K09 at Freeze B. The close-out has 20 met, 13 met with readings, 4 open and 1 gap.
+printed are not gates; T09's quality verdict waits for K09 at Freeze B. At 0.2.0: the close-out had 20 met, 13 met with readings, 4 open and 1 gap.
 Open at this record, as the close-out lists them: v4 9.4's two negative checks, the quality verdict, the calibration of the topology score at K09, and BP06's original method
 sources (`source-unverified`).

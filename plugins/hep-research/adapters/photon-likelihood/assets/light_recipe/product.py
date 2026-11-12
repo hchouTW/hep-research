@@ -39,6 +39,13 @@ against the topology budget and H1's fit, the reported point against the rule, t
 statistic, lnL_2 and the choice recomputed from the recorded values, the penalty; given the model it recomputes every H2 start
 point from H1's fit and the data, every H2 start's ln L at its end point, and the check at H2's point. /1 to /3 are unchanged.
 
+light-likelihood-product/3-single-photon (D4 E1b) is the product of t04-values-v4.md section 9.4's single-photon-density variant
+(single_photon.py): /3's lines exactly, but for its format, its likelihood text (single_photon.LIKELIHOOD) and its configuration, which
+must be the variant's format (light-likelihood-configuration/1-single-photon). Every format names the configuration format it is made
+with, and the reader refuses a header whose configuration is another format's, so a variant product never reads as a main one and the
+reverse. Its writer path is /3's (header_document picks the variant from the configuration's format, and only with a multistart
+budget and the charge-time likelihood); /1 to /4 are unchanged.
+
 Any structural exception while the reader checks a field (KeyError, TypeError, IndexError, AttributeError, ValueError,
 OverflowError) is a ProductError: a malformed field is refused (status rejected), never an internal error (re-review N5). The
 recomputation keeps its own rule (a ValueError there is a ProductError; anything else is a defect of the recipe).
@@ -54,6 +61,7 @@ from pathlib import Path
 import numpy
 
 from . import LABEL, LABEL_MEANING, LIKELIHOOD, LIKELIHOOD_JOINT, PARAMETERS, PARAMETERS_JOINT, PARAMETER_UNITS, RECIPE, joint, multistart, readout, topology
+from . import configuration, single_photon
 from .fit import CALLBACK_STOP, FAILURES, JOINT_CHART_RADIUS, JOINT_ORIGINS, SETTINGS, FitResult, JointSeed, Seed
 from .likelihood import (EPSILON, HESSIAN_STEPS, TOLERANCE_FACTOR, TOLERANCE_RULE, EventData, frame, log_likelihood,
                          probability_check)
@@ -122,6 +130,7 @@ H2_KEYS = {"starts", "reported", "fit"}
 H2_START_KEYS = {"name", "start", "status", "failure", "ln_likelihood", "end", "iterations", "rounds"}
 H2_FIT_KEYS = {"status", "failure", "sources", "covariance", "uncertainty_status", "ln_likelihood", "gradient_norm",
                "newton_decrement", "iterations", "rounds"}
+FORMAT_SINGLE_PHOTON = "light-likelihood-product/3-single-photon"
 
 
 class ProductError(ValueError):
@@ -143,6 +152,7 @@ class Variant:
     failures: tuple = FAILURES
     hypothesis: str = HYPOTHESIS
     topology: bool = False
+    configuration_format: str = configuration.FORMAT
 
     @property
     def header_keys(self) -> set:
@@ -182,6 +192,10 @@ def header_document(product_id: str, rd, cfg, likelihood: str = "charge-only", b
     if budget is not None and likelihood != "charge-time":
         raise ValueError("multistart needs the charge-time likelihood")
     variant = MULTISTART if budget is not None else BY_LIKELIHOOD[likelihood]
+    if cfg.format == single_photon.FORMAT:
+        if variant is not MULTISTART:
+            raise ValueError("the single-photon variant is written by the multistart charge-time fit only")
+        variant = SINGLE_PHOTON
     extra = {} if budget is None else {"budget": budget.header()}
     return {**copy.deepcopy(variant.fixed_header()), **extra, "product_id": product_id,
             "input": {"format": rd.header["format"], "role": rd.header["role"], "sha256": rd.sha256, "events": rd.events,
@@ -397,6 +411,8 @@ def _check_header(header: dict, cfg, budget=None, topology_budget=None) -> Varia
     conf = header["configuration"]
     if not isinstance(conf, dict) or set(conf) != {"format", "sha256"}:
         raise ProductError("header configuration must have exactly format and sha256")
+    if conf["format"] != variant.configuration_format:
+        raise ProductError(f"header configuration format must be {variant.configuration_format} in a {variant.format} product")
     if cfg is not None and (conf["format"] != cfg.format or conf["sha256"] != cfg.sha256):
         raise ProductError("the product was made with another configuration than the one given")
     if variant.multistart:
@@ -968,5 +984,7 @@ MULTISTART = Variant(FORMAT_MULTISTART, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_
                      RETENTION_JOINT, True, True, multistart.FAILURES)
 TOPOLOGY = Variant(FORMAT_TOPOLOGY, LIKELIHOOD_JOINT, PARAMETERS_JOINT, NOT_ESTIMATED_JOINT, UNCERTAINTY_JOINT, SETTINGS_MULTISTART,
                    RETENTION_JOINT, True, True, multistart.FAILURES, HYPOTHESIS_TOPOLOGY, True)
-VARIANTS = {v.format: v for v in (CHARGE_ONLY, CHARGE_TIME, MULTISTART, TOPOLOGY)}
+SINGLE_PHOTON = Variant(FORMAT_SINGLE_PHOTON, single_photon.LIKELIHOOD, PARAMETERS_JOINT, NOT_ESTIMATED_JOINT, UNCERTAINTY_JOINT,
+                        SETTINGS_MULTISTART, RETENTION_JOINT, True, True, multistart.FAILURES, configuration_format=single_photon.FORMAT)
+VARIANTS = {v.format: v for v in (CHARGE_ONLY, CHARGE_TIME, MULTISTART, TOPOLOGY, SINGLE_PHOTON)}
 BY_LIKELIHOOD = {"charge-only": CHARGE_ONLY, "charge-time": CHARGE_TIME}

@@ -9,6 +9,12 @@ default the t09-multistart-1 budget beside this script). topology (D3 stage 4): 
 section 7 (H2 if and only if 2 (lnL_2 - lnL_1) >= 30), light-likelihood-product/4; H1 is read from the /3, never refitted. A
 development binding in Python, not a native backend.
 
+The single-photon-density variant (D4 E1b; t04-values-v4.md section 9.4's negative check) is a whole configuration, chosen by giving
+its file to --configuration (t09-sphere-1-single-photon.configuration.json, format light-likelihood-configuration/1-single-photon):
+fit with --likelihood charge-time --starts multistart only, writing light-likelihood-product/3-single-photon; check-product with the
+same file. topology refuses it. Without that file nothing of the variant runs: the main configuration, model and products are as
+before.
+
 Operations (contracts/tool_contracts/photon_likelihood.json):
   fit            readout -> product. Data side: it reads no truth and imports no generator.
   check-product  read a product back, refusing a malformed or incomplete one, recompute ln L and the per-channel probability
@@ -55,7 +61,8 @@ def parser() -> argparse.ArgumentParser:
     rec.add_argument("--readout", required=True, help="light-readout/1 file, role reconstruction-input")
     rec.add_argument("--product", required=True, help="light-likelihood-product/1 (charge-only) or /2 (charge-time) to write; not written on refusal, never overwritten")
     rec.add_argument("--product-id", required=True, help="the product's identity")
-    rec.add_argument("--configuration", help="light-likelihood-configuration/1; default the t09-sphere/1 configuration beside this script")
+    rec.add_argument("--configuration", help="light-likelihood-configuration/1, or the single-photon variant's file (D4 E1b: charge-time "
+                                             "multistart only); default the t09-sphere/1 configuration beside this script")
     rec.add_argument("--likelihood", choices=("charge-only", "charge-time"), default="charge-only",
                      help="charge-only (default; light-likelihood-product/1) or charge-time (joint with the first-arrival time, t0 "
                           "fitted; light-likelihood-product/2)")
@@ -65,9 +72,11 @@ def parser() -> argparse.ArgumentParser:
     rec.add_argument("--budget", help="light-likelihood-multistart/1 budget for --starts multistart; default the t09-multistart-1 "
                                       "budget beside this script")
     chk = sub.add_parser("check-product", help="read a product back and recompute ln L and the per-channel probability check")
-    chk.add_argument("--product", required=True, help="light-likelihood-product/1, /2, /3 or /4 to read")
-    chk.add_argument("--configuration", help="the configuration the product was made with; default as for fit")
-    chk.add_argument("--budget", help="the multistart budget a /3 or /4 product was made with (read for /3 and /4 only); default as for fit")
+    chk.add_argument("--product", required=True, help="light-likelihood-product/1, /2, /3, /3-single-photon or /4 to read")
+    chk.add_argument("--configuration", help="the configuration the product was made with (the single-photon variant's file for a "
+                                             "/3-single-photon product); default as for fit")
+    chk.add_argument("--budget", help="the multistart budget a /3, /3-single-photon or /4 product was made with (read for those only); "
+                                      "default as for fit")
     chk.add_argument("--topology-budget", help="the topology budget a /4 product was made with (read for /4 only); default the "
                                                "t09-topology-2 budget beside this script")
     top = sub.add_parser("topology", help="the two-source hypothesis H2 and the topology choice of every event of a readout, H1 from its /3")
@@ -83,7 +92,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 def fit_readout(args) -> int:
-    from light_recipe import LABEL, configuration, fit, joint, likelihood, multistart, product, readout
+    from light_recipe import LABEL, configuration, fit, joint, likelihood, multistart, product, readout, single_photon
     started = time.perf_counter()
     if not Path(args.readout).is_file():
         return report("fit", "rejected", f"no such input file: readout {args.readout}")
@@ -95,10 +104,13 @@ def fit_readout(args) -> int:
     if args.starts == "multistart" and args.likelihood != "charge-time":
         return report("fit", "rejected", "--starts multistart needs --likelihood charge-time")
     try:
-        cfg = configuration.load(args.configuration)
+        cfg = single_photon.load_any(args.configuration)
+        if cfg.format == single_photon.FORMAT and (args.likelihood, args.starts) != ("charge-time", "multistart"):
+            raise configuration.ConfigurationError("the single-photon configuration (t04-values-v4.md section 9.4's negative check) "
+                                                   "runs with --likelihood charge-time --starts multistart only")
         budget = multistart.load(args.budget) if args.starts == "multistart" else None
         rd = readout.read_file(args.readout)
-        model = likelihood.Model(cfg)
+        model = single_photon.model_for(cfg)
         if rd.header["threshold"] != cfg.charge_threshold:
             raise readout.ReadoutError(f"the readout's threshold {rd.header['threshold']} is not the configuration's "
                                        f"{cfg.charge_threshold}: hit flag and likelihood must share one threshold model")
@@ -166,15 +178,16 @@ def _event_probability_failure(doc) -> bool:
 
 
 def check_product(args) -> int:
-    from light_recipe import configuration, likelihood, multistart, product, topology
+    from light_recipe import configuration, multistart, product, single_photon, topology
     if not Path(args.product).is_file():
         return report("check-product", "rejected", f"no such input file: {args.product}")
     try:
-        cfg = configuration.load(args.configuration)
+        cfg = single_photon.load_any(args.configuration)
         kind = product.format_of(args.product)
-        budget = multistart.load(args.budget) if kind in (product.FORMAT_MULTISTART, product.FORMAT_TOPOLOGY) else None
+        budget = multistart.load(args.budget) if kind in (product.FORMAT_MULTISTART, product.FORMAT_TOPOLOGY,
+                                                          product.FORMAT_SINGLE_PHOTON) else None
         topology_budget = topology.load(args.topology_budget) if kind == product.FORMAT_TOPOLOGY else None
-        read = product.read_product(args.product, likelihood.Model(cfg), cfg, budget, topology_budget)
+        read = product.read_product(args.product, single_photon.model_for(cfg), cfg, budget, topology_budget)
     except (configuration.ConfigurationError, multistart.BudgetError, topology.BudgetError, product.ProductError) as exc:
         return report("check-product", "rejected", str(exc))
     bad = [doc["event"] for doc in read.events if _event_probability_failure(doc)]

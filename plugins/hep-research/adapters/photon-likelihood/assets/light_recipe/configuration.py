@@ -51,7 +51,9 @@ class Geometry:
         return self.positions.shape[0]
 
 
-def load(path=None) -> Configuration:
+def load(path=None, expected_format: str = FORMAT) -> Configuration:
+    """Read and check a configuration file. expected_format is FORMAT for the main recipe; the single-photon variant's reader
+    (single_photon.load, D4 E1b) passes its own format, so each reader refuses the other's file and no file carries a flag."""
     path = Path(path) if path is not None else DEFAULT
     try:
         content = path.read_bytes()
@@ -60,8 +62,8 @@ def load(path=None) -> Configuration:
         raise ConfigurationError(f"configuration cannot be read: {exc}") from None
     if not isinstance(doc, dict) or set(doc) != KEYS:
         raise ConfigurationError(f"configuration keys must be exactly {sorted(KEYS)}")
-    if doc["format"] != FORMAT:
-        raise ConfigurationError(f"configuration format must be {FORMAT}")
+    if doc["format"] != expected_format:
+        raise ConfigurationError(f"configuration format must be {expected_format}")
     if isinstance(doc["sensors"], bool) or not isinstance(doc["sensors"], int) or doc["sensors"] < 1:
         raise ConfigurationError("sensors must be a positive integer")
     for key in NUMBER_KEYS:

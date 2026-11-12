@@ -82,6 +82,7 @@ import acts_finding_record as finding_record  # noqa: E402
 import acts_native_product as native_product  # noqa: E402
 import t07_fixture_files as fixture_files  # noqa: E402
 import t07_truth_files as truth_files  # noqa: E402
+import t07_negative_cases as negative_cases  # noqa: E402
 from tests.adapters import test_acts_refit_field as refit_tests  # noqa: E402
 
 BUILD_DIR = os.environ.get("HEP_ACTS_TRACKING_BUILD", "")
@@ -89,6 +90,9 @@ WORKERS = int(os.environ.get("HEP_ACTS_TRACKING_WORKERS", "1"))
 FINDER = Path(BUILD_DIR) / "acts_tracking_finder"
 GENERATOR = Path(BUILD_DIR) / "t07_fixture_generator"
 BUILT = bool(BUILD_DIR) and FINDER.is_file() and GENERATOR.is_file()
+# D4 E5 (freeze-b-proposal.md, section 2.5): the negative-case input file, written once from block 1 by t07_negative_cases.py, kept and hashed. The kept
+# copy lives in tests/adapters/data/t07-negative-cases/; the job that writes it names its own folder by HEP_ACTS_TRACKING_NEGATIVE_CASES.
+NEGATIVE_CASES_FOLDER = Path(os.environ.get("HEP_ACTS_TRACKING_NEGATIVE_CASES", "") or ROOT / "tests" / "adapters" / "data" / "t07-negative-cases")
 NOT_BUILT = "HEP_ACTS_TRACKING_BUILD names no built finder: this test needs the T07 build job, which runs it"
 
 # Section 4.1 and 7.
@@ -107,9 +111,9 @@ RARE_RATE_LIMIT = 1e-4
 EVENTS_PER_BIN = 3000
 PRODUCT_EVENTS = 50
 TUNING_BLOCK = 1
-NEGATIVE_STRATUM = 0  # the lowest momentum bin at o1: the widest curvature window
-SHIFT_WRONG_HIT_MM = 1.0  # 50 hit sigmas
-EXPLOSION_EXTRA_HITS = 20
+NEGATIVE_STRATUM = negative_cases.SOURCE_STRATUM  # the lowest momentum bin at o1: the widest curvature window
+SHIFT_WRONG_HIT_MM = negative_cases.SHIFT_WRONG_HIT_MM  # 50 hit sigmas; D4 E5: the constants of the cases live with their builder
+EXPLOSION_EXTRA_HITS = negative_cases.EXPLOSION_EXTRA_HITS
 LOST_TO_THE_CHI2_CUT = 3  # Poisson 0.34: above this 5e-4 of the time
 LOST_ALONE_LIMIT = 12  # of 168: about 2 expected with the correlated prior, about 33 with the diagonal one, at o1 (D1 stage 5 report, Fix round 1)
 ALL_HITS_KEPT_SHARE = 0.95  # 8 x 3.4e-4 of tracks lose a hit to the chi2 cut: 0.27 %
@@ -972,9 +976,101 @@ def hit_tuples(data_event) -> list:
     return [(int(hit["plane"]), float(hit["loc0_mm"]), float(hit["loc1_mm"])) for hit in data_event["hits"]]
 
 
+class NegativeCaseFile(unittest.TestCase):
+    """D4 E5, on hand-made files: the builder writes the case file, its description and SHA256SUMS; the reader refuses any byte that does not follow
+    from the recorded block-1 source event, and a source that is not block 1's (section 11). No build is needed."""
+
+    def setUp(self):
+        from tests.adapters.test_acts_fake_rate import truth_file_bytes
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.work = Path(self.folder.name)
+        hits = [(plane, fixture_files.on_hit_grid(0.25 * plane + 3.0 * track).item(), fixture_files.on_hit_grid(-0.125 * plane).item())
+                for track in range(2) for plane in range(1, PLANES + 1)]
+        order = sorted(range(len(hits)), key=lambda index: hits[index])
+        self.source_data = self.work / "source.t07data"
+        self.source_data.write_bytes(fixture_files.encode_data_file(HIT_SIGMA_MM, [[hits[index] for index in order]]))
+        position = {index: rank for rank, index in enumerate(order)}
+        particles = [[position[track * PLANES + plane] for plane in range(PLANES)] for track in range(2)]
+        self.truth = self.work / "source.t07truth"
+        self.write_truth(truth_file_bytes, particles)
+
+    def write_truth(self, truth_file_bytes, particles, **identity) -> None:
+        identity = {"stratum": negative_cases.SOURCE_STRATUM, "block": negative_cases.SOURCE_BLOCK, "fixture_id": negative_cases.SOURCE_FIXTURE_ID, **identity}
+        self.truth.write_bytes(truth_file_bytes([particles], fixture_files.file_sha256(self.source_data), **identity))
+
+    def test_the_cases_and_their_order(self):
+        case_bytes, description = negative_cases.build(self.source_data, self.truth)
+        names = description["names"]
+        self.assertEqual(names[:7], ["honest", "one-wrong-plane", "three-wrong-planes", "branch-explosion", "no-triple", "two-planes", "seed-budget"])
+        self.assertEqual(names[7:35], [f"lost-{first}-{second}" for first, second in itertools.combinations(range(1, PLANES + 1), 2)])
+        self.assertEqual(len(names), 7 + 28 + 2 * 28)
+        cases = negative_cases.cases_of(description)
+        self.assertEqual(case_bytes, fixture_files.encode_data_file(HIT_SIGMA_MM, cases["events"]))
+        one_wrong = cases["events"][names.index("one-wrong-plane")]
+        self.assertEqual(sorted(hit for hit in one_wrong if hit[0] != 5), sorted(hit for hit in cases["events"][0] if hit[0] != 5))
+        self.assertEqual(len(cases["events"][names.index("seed-budget")]), 16 + 3 * 26)
+        self.assertEqual(len(cases["events"][names.index("branch-explosion")]), 16 + 2 * 2 * EXPLOSION_EXTRA_HITS)
+
+    def test_write_then_read(self):
+        description = negative_cases.write(self.work / "kept", self.source_data, self.truth)
+        read = negative_cases.read(self.work / "kept")
+        self.assertEqual(read["description"], description)
+        self.assertEqual(read["case_file"].read_bytes(), negative_cases.build(self.source_data, self.truth)[0])
+        self.assertEqual(read["description"]["source"]["block"], 1)
+        listed = (self.work / "kept" / negative_cases.SUMS_FILE).read_text(encoding="utf-8")
+        for name in (negative_cases.CASE_FILE, negative_cases.DESCRIPTION_FILE):
+            self.assertIn(f"{fixture_files.file_sha256(self.work / 'kept' / name)}  {name}\n", listed)
+
+    def test_one_changed_byte_or_a_missing_file_is_refused(self):
+        negative_cases.write(self.work / "kept", self.source_data, self.truth)
+        case = self.work / "kept" / negative_cases.CASE_FILE
+        raw = bytearray(case.read_bytes())
+        raw[-1] ^= 1
+        case.write_bytes(bytes(raw))
+        with self.assertRaises(negative_cases.NegativeCaseError):
+            negative_cases.read(self.work / "kept")
+        (self.work / "kept" / negative_cases.SUMS_FILE).unlink()
+        with self.assertRaises(negative_cases.NegativeCaseError):
+            negative_cases.read(self.work / "kept")
+        with self.assertRaises(negative_cases.NegativeCaseError):
+            negative_cases.read(self.work / "nowhere")
+
+    def test_a_case_file_that_does_not_follow_from_its_source_is_refused_even_with_matching_sums(self):
+        import json
+        negative_cases.write(self.work / "kept", self.source_data, self.truth)
+        kept = self.work / "kept"
+        description = json.loads((kept / negative_cases.DESCRIPTION_FILE).read_text(encoding="utf-8"))
+        description["hits"][0][1] += 2.0 ** -20
+        (kept / negative_cases.DESCRIPTION_FILE).write_text(json.dumps(description, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+        (kept / negative_cases.SUMS_FILE).write_text("".join(f"{fixture_files.file_sha256(kept / name)}  {name}\n" for name in (negative_cases.CASE_FILE, negative_cases.DESCRIPTION_FILE)), encoding="utf-8")
+        with self.assertRaises(negative_cases.NegativeCaseError):
+            negative_cases.read(kept)
+
+    def test_a_source_other_than_block_1_clean_stratum_0_or_a_truth_of_other_data_is_refused(self):
+        from tests.adapters.test_acts_fake_rate import truth_file_bytes
+        particles = [list(range(8)), list(range(8, 16))]
+        for identity in ({"block": 2}, {"block": 11}, {"stratum": 3}, {"fixture_id": 7002}):
+            with self.subTest(identity=identity):
+                self.write_truth(truth_file_bytes, particles, **identity)
+                with self.assertRaises(negative_cases.NegativeCaseError):
+                    negative_cases.build(self.source_data, self.truth)
+        self.truth.write_bytes(truth_file_bytes([particles], "0" * 64, stratum=0, block=1, fixture_id=7001))
+        with self.assertRaises(negative_cases.NegativeCaseError):
+            negative_cases.build(self.source_data, self.truth)
+
+    @unittest.skipUnless((NEGATIVE_CASES_FOLDER / negative_cases.SUMS_FILE).is_file(), "the kept negative-case file is written by the D4 E2 job and copied here after it passes")
+    def test_the_kept_file_reads_and_comes_from_block_1(self):
+        read = negative_cases.read(NEGATIVE_CASES_FOLDER)
+        source = read["description"]["source"]
+        self.assertEqual((source["fixture_id"], source["block"], source["stratum"], source["first_event"], source["count"]), (7001, 1, 0, 0, 1))
+
+
 @unittest.skipUnless(BUILT, NOT_BUILT)
 class NegativeCases(unittest.TestCase):
-    """Sheet, Acceptance: wrong hits, branch explosion, seed failure, from block 1 files (section 11). One data file; each event's meaning is its position."""
+    """Sheet, Acceptance: wrong hits, branch explosion, seed failure, from block 1 files (section 11). One data file; each event's meaning is its position.
+    D4 E5: the file is the kept one (NEGATIVE_CASES_FOLDER), read by t07_negative_cases.read; block 1's clean stratum 0, event 0, regenerated here, must
+    build it byte for byte, so the kept file is what the frozen generator gives today."""
 
     @classmethod
     def setUpClass(cls):
@@ -983,26 +1079,21 @@ class NegativeCases(unittest.TestCase):
         folder = Path(cls.folder.name)
         data_file, truth_file = generate(folder, "clean", NEGATIVE_STRATUM, 1)
         cls.clean_file, cls.truth_file = data_file, truth_file
-        cls.hits = hit_tuples(next(fixture_files.iter_data_events(data_file)))
-        cls.tracks = particles_of(next(truth_files.iter_truth_events(truth_file)))
+        kept = negative_cases.read(NEGATIVE_CASES_FOLDER)
+        built_bytes, built = negative_cases.build(data_file, truth_file)
+        if built_bytes != kept["case_file"].read_bytes() or built != kept["description"]:
+            raise AssertionError("block 1 clean stratum 0 event 0 no longer builds the kept negative-case file")
+        print(f"FINDING-NEGATIVE kept file {negative_cases.CASE_FILE} sha256 {fixture_files.file_sha256(kept['case_file'])}", flush=True)
+        cases = negative_cases.cases_of(kept["description"])
+        cls.hits = cases["hits"]
+        cls.tracks = [{"hit_keys": keys} for keys in cases["tracks"]]
         for index, track in enumerate(next(truth_files.iter_truth_events(truth_file))["tracks"]):
             print(f"FINDING-NEGATIVE track {index}: q/p {float(track['q_over_p']):+.4f} slope_u {float(track['slope_u']):+.4f} slope_v {float(track['slope_v']):+.4f}", flush=True)
-        events = {"honest": cls.hits, "one-wrong-plane": cls.shifted({5: SHIFT_WRONG_HIT_MM}), "three-wrong-planes": cls.shifted({3: SHIFT_WRONG_HIT_MM, 5: -SHIFT_WRONG_HIT_MM, 7: 2.0 * SHIFT_WRONG_HIT_MM}),
-                  "branch-explosion": cls.exploded((5, 6)), "no-triple": [hit for hit in cls.hits if hit[0] not in (2, 4, 7)], "two-planes": [hit for hit in cls.hits if hit[0] in (1, 2)],
-                  "seed-budget": cls.hits + cls.dense_patch()}
         cls.pairs = list(itertools.combinations(range(1, PLANES + 1), 2))
-        events.update({f"lost-{first}-{second}": [hit for hit in cls.hits if hit[0] not in (first, second)] for first, second in cls.pairs})
-        # One track loses two hits and the others keep theirs, as on the noise fixture. The lost-* cases above empty a plane, so they could not see a foreign hit taken in place of a hole.
-        cls.alone = {f"alone-{index}-{first}-{second}": [cls.hits[key] for key in particle["hit_keys"] if cls.hits[key][0] not in (first, second)]
-                     for index, particle in enumerate(cls.tracks) for first, second in cls.pairs}
-        for name, kept in cls.alone.items():
-            index, first, second = (int(part) for part in name.split("-")[1:])
-            dropped = {key for key in cls.tracks[index]["hit_keys"] if cls.hits[key][0] in (first, second)}
-            events[name] = [hit for key, hit in enumerate(cls.hits) if key not in dropped]
-        cls.names = list(events)
-        cls.events = [sorted_hits(hits) for hits in events.values()]
-        cls.case_file = folder / "negative.t07data"
-        cls.case_file.write_bytes(fixture_files.encode_data_file(HIT_SIGMA_MM, cls.events))
+        cls.alone = cases["alone"]
+        cls.names = cases["names"]
+        cls.events = cases["events"]
+        cls.case_file = kept["case_file"]
         cls.seed_file = folder / "negative.seeds"
         cls.finished, record_file, _ = find(folder, cls.case_file, "t07-negative-cases", 0, seed_file=cls.seed_file)
         cls.record = finding_record.parse_record(record_file.read_text(encoding="utf-8"))
@@ -1013,28 +1104,6 @@ class NegativeCases(unittest.TestCase):
             print(f"FINDING-NEGATIVE {name}: seeds_found {event['seeds_found']} seeds_truncated {event['seeds_truncated']} seed_budget {event['seed_budget_reached']} "
                   f"ambiguity_budget {event['ambiguity_budget_reached']} candidates {event['candidates']} "
                   f"selected {event['selected']} category {event['failure_category']}", flush=True)
-
-    @classmethod
-    def shifted(cls, shifts: dict) -> list:
-        """Each track's hit on a plane moved along u: a wrong hit, chi2 far over the cut once the track has converged."""
-        moved = list(cls.hits)
-        for particle in cls.tracks:
-            for key in particle["hit_keys"]:
-                plane, loc0_mm, loc1_mm = moved[key]
-                moved[key] = (plane, loc0_mm + shifts.get(plane, 0.0), loc1_mm)
-        return moved
-
-    @classmethod
-    def exploded(cls, planes) -> list:
-        """Compatible hits beside each true hit on the planes named: more branches than the limits allow."""
-        extra = [(plane, loc0_mm + 0.002 * (offset + 1), loc1_mm) for plane, loc0_mm, loc1_mm in cls.hits if plane in planes for offset in range(EXPLOSION_EXTRA_HITS)]
-        return cls.hits + extra
-
-    @classmethod
-    def dense_patch(cls) -> list:
-        """26 hits per plane in a corner of planes 1 to 3: 17,576 triples, over the seed budget."""
-        steps = [0.01 * step for step in range(26)]
-        return [(plane, 100.0 + step, 100.0 + step) for plane in (1, 2, 3) for step in steps]
 
     def event(self, name: str) -> dict:
         return self.record["events"][self.names.index(name)]

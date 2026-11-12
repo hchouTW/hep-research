@@ -1,4 +1,5 @@
-"""adapters/photon-likelihood, D3 stage 5 of T09: the adapter's records agree with one another and claim no more than the jobs ran.
+"""adapters/photon-likelihood, D3 stage 5 of T09, renewed in D4 build E1: the adapter's records agree with one another and claim no more
+than the jobs ran.
 
 It reads files only; no recipe, fixture or job runs here. The records are:
 - `adapters/photon-likelihood/adapter.json`: version, status, the tool's status and tested versions, environment, status rule;
@@ -12,16 +13,17 @@ What is checked:
   likelihood and the plugin's own earlier outputs, with no reference output from outside the plugin.
 - The tested versions are the ones the jobs of record logged, and the VALIDATION section states each of them.
 - adapter.json, the VALIDATION section, the matrix row and the close-out name one and the same job of record for the declared version:
-  the D3 stage 5 job (T07's ruling M3: a job's ID cannot sit in a file of its own manifest, so the records name the job, and after a PASS
-  the coordinator writes "job <ID>, the D3 stage 5 job" into each), and the T09 stage 4 chain (jobs 7575617, 7576269, 7576270) as the
-  latest run of the same code before it.
+  the D4 E1 job for adapter 0.3.0 (T07's ruling M3: a job's ID cannot sit in a file of its own manifest, so the records name the job, and
+  after a PASS the coordinator writes "job <ID>, the D4 E1 job" into each), the earlier job of record (job 7578442, the D3 stage 5 job,
+  adapter 0.2.0) and the T09 stage 4 chain (jobs 7575617, 7576269, 7576270) as the latest run of the strata.
 - Every declared test module, every asset `adapter.json` lists, and the example's `run.py` have the SHA-256 pinned below: for the stage
   1 to 4 files the values of job 7575617's manifest (`SOURCES.sha256` `0c4e5c9c...`, 822 files), for the example and its test the values
-  of the D3 stage 5 job's manifest. One changed byte in any of them makes this test fail, until a new job of record runs the changed
+  of the D3 stage 5 job's manifest (job 7578442), for the files D4 build E1 changes or adds the values of the D4 E1 job's manifest. One
+  changed byte in any of them makes this test fail, until a new job of record runs the changed
   files and the pins and the record are renewed. Exempt: this module and the records it reads (`adapter.json`, `VALIDATION.md`,
   `docs/capability-matrix.md`, `t09-closeout.md`). A file declared later without a pin fails too.
-- The VALIDATION table's test counts equal the test methods each declared module defines now; the two modules of this stage are named
-  as the D3 stage 5 job's.
+- The VALIDATION table's test counts equal the test methods each declared module defines now; the modules the D4 E1 job runs first
+  (the negative-check module and this one) are named as the D4 E1 job's until its ID is written.
 - The close-out's statuses are the four status words, every row not met says what would close it, its summary counts are its rows'
   counts, every part of the sheet has a row, and the rows the D3 stage 5 brief names are there with the status the rules give.
 - No absolute host path in these records.
@@ -48,39 +50,48 @@ HOST_PATH = re.compile(r"/ceph|/var/tmp|/tmp/|/dicos|/home/|/sharedfs")  # a nod
 THIS_MODULE = "tests/adapters/test_photon_likelihood_records.py"
 EXAMPLE_TEST = "tests/examples/test_reconstruction_photon_likelihood.py"
 EXAMPLE_RUN = "examples/reconstruction-photon-likelihood/run.py"
-STAGE5_JOB = "the D3 stage 5 job"
-STAGE4_CHAIN = ("7575617", "7576269", "7576270")
+NEGATIVE_MODULE = "tests/adapters/test_photon_likelihood_negative.py"
+JOB_NAME = "the D4 E1 job"                 # the job of record for the declared version (adapter 0.3.0)
+JOB_PATTERN = r"the\s+D4\s+E1\s+job"
+PENDING_MODULES = (THIS_MODULE, NEGATIVE_MODULE)
+EARLIER_RUNS = ("7578442", "7575617", "7576269", "7576270")   # the D3 stage 5 job (adapter 0.2.0) and the T09 stage 4 chain
 # The tool's tested versions, as job 7575617's receipt prints them ("Python 3.13.18", "numpy 2.4.6 scipy 1.17.1").
 TOOL_VERSIONS = (("Python 3.13.18", "NumPy 2.4.6", "SciPy 1.17.1"),)
 # The SHA-256 of each declared test module and adapter.json asset, and of the example's run.py (paths from the plugin root): the stage 1
-# to 4 files as job 7575617's manifest (SOURCES.sha256 0c4e5c9c...) has them, the example and its test as the D3 stage 5 job's manifest.
+# to 4 files as job 7575617's manifest (SOURCES.sha256 0c4e5c9c...) has them, the example and its test as the D3 stage 5 job's manifest
+# (job 7578442), the files D4 build E1 changes or adds (configuration.py, product.py, photon_likelihood.py; single_photon.py,
+# t09_negative_checks.py, the single-photon configuration, the negative-check module) as the D4 E1 job's manifest.
 JOB_OF_RECORD_PINS: dict = {
     "adapters/photon-likelihood/assets/fixture_tools/t09_fixed_points.py": "652af9311ec9ef51c1a7d2da715180e134264314b715b3b86efde48170ee1081",
     "adapters/photon-likelihood/assets/fixture_tools/t09_fixture_files.py": "20640f670329b249c3f81317976f8e5ddaeea9957f7c2a7d50c88359d184f4ed",
     "adapters/photon-likelihood/assets/fixture_tools/t09_independent_likelihood.py": "a12edcb26f754828012b90c69522545fe4cddae3a21f84d0454bc0aca2d18216",
     "adapters/photon-likelihood/assets/fixture_tools/t09_job_lines.py": "13137fc321379c7aa3507ba81a9ae41a9f4b18266ff093aff973c24347faebdd",
+    "adapters/photon-likelihood/assets/fixture_tools/t09_negative_checks.py": "bf539ab33baa4f14ca295679c2921e15d31dedf4b8a5b46b3739a557d9f14de8",
     "adapters/photon-likelihood/assets/fixture_tools/t09_readings.py": "beefb0076e7098a25ab1cd8bc2164fb7476601c4e6cc0a397c9357d3b0246355",
     "adapters/photon-likelihood/assets/fixture_tools/t09_topology_readings.py": "762d272ca05ea7c80a133731406e733d45f209c67cc241c01785ec1796fc7c4c",
     "adapters/photon-likelihood/assets/fixture_tools/t09_truth_start.py": "6e49246bcd02d6a2931a0360c5b95cec1639f706ba694767485ba2b2689f275e",
     "adapters/photon-likelihood/assets/light_recipe/__init__.py": "9d16d3ba5ba96a7c0bb2a919b2b9db9ce48020e3f4ef0ccafd358472ac3dbe60",
     "adapters/photon-likelihood/assets/light_recipe/arrival_response.py": "fcbb347d6bb3c04e366a0f28cd0a6f95749ffe71213ab25898d370a170feb14a",
     "adapters/photon-likelihood/assets/light_recipe/charge_response.py": "d619b7411ec8b70c24074d2a6fe9ab98c0ab404f4469f70b6f9bbcc5d4d4cda8",
-    "adapters/photon-likelihood/assets/light_recipe/configuration.py": "949aef67168e9051ce85dfb342181e974d9c95e524670bcd65410ce9244e13c3",
+    "adapters/photon-likelihood/assets/light_recipe/configuration.py": "1a3cf42d34a3acd081cc5a15af531b42a900844f112ee999b15ce583b619022f",
     "adapters/photon-likelihood/assets/light_recipe/fit.py": "30d92e448e461084556364e4d2fd4e036c69142dc88b91f08dbf8acfff71a476",
     "adapters/photon-likelihood/assets/light_recipe/joint.py": "aa67f3c5d35f5eac7f7cf5ec4522fb7379ce705822c3ef61e4d80b89e324806e",
     "adapters/photon-likelihood/assets/light_recipe/light_model.py": "c716d4fccb73b75a711033f8cd45f2fbe9640e4483e3339fa74064fc2814552b",
     "adapters/photon-likelihood/assets/light_recipe/likelihood.py": "1e839b9dbbbe04e5867547b3eb8d86b6cbaef06a2ba2025d41d9acb580e1a084",
     "adapters/photon-likelihood/assets/light_recipe/multistart.py": "5953620f7aa3b3b886b67e440a4b1235f983b2c6dc663e03aaed2ce862461449",
-    "adapters/photon-likelihood/assets/light_recipe/product.py": "a19d99ca19e680509c231f2696b210782c5d9d57939c41539a1dcd824e17e79f",
+    "adapters/photon-likelihood/assets/light_recipe/product.py": "8642c59a3bb7f4ca65a671ff388b7826b3c906e8e8ebe15e0974169051f1cee7",
     "adapters/photon-likelihood/assets/light_recipe/readout.py": "605debd51cb66dc266e16b56be08df7ef28479df577476d2ad531ea805d205ce",
+    "adapters/photon-likelihood/assets/light_recipe/single_photon.py": "dad0238dafeecdfb5ee75e884f540930f3ad512606b06dd6305d7e75beb8b889",
     "adapters/photon-likelihood/assets/light_recipe/topology.py": "79dc45a9b800936dd3f8288ffbca040fa6ed0487eb38da55d290be8ee8ae802e",
-    "adapters/photon-likelihood/assets/photon_likelihood.py": "801f0d3037b123ef495288aaf5426b80dadb397e420d86257bd492e09039aac1",
+    "adapters/photon-likelihood/assets/photon_likelihood.py": "8a4f4fd0e0f24231b56177693defa53c6514f578ded5ba46636c320562df07a6",
     "adapters/photon-likelihood/assets/t09-multistart-1.budget.json": "70220b7ddf1679d01d4a9c5397d1fdf124c6f0bd8ed4dca562d9c18e04180307",
+    "adapters/photon-likelihood/assets/t09-sphere-1-single-photon.configuration.json": "5aa052431facfd18c07e05d479b67fcfb717df4e3cd410c781f9d69a29daad98",
     "adapters/photon-likelihood/assets/t09-sphere-1.configuration.json": "ce4f430756f8ea0be1ab1b08eb638f9c38bf305968aa2d6d4e743d5fc68a1508",
     "adapters/photon-likelihood/assets/t09-topology-2.budget.json": "104262a1bfb0f5403a075884d9acd5f5ccbf1fc012d5237b578297f4d98ed7df",
     "examples/reconstruction-photon-likelihood/run.py": "4bc69a2ca5431d3b6bad39bc1d8cea71c15eab743a53840676fb8e50d462c6d5",
     "tests/adapters/test_photon_likelihood.py": "4a84003147fa7ad2b3e41b9ebb32ce4dcf2a2a9b40b67426ca3928b31f7b2472",
     "tests/adapters/test_photon_likelihood_multistart.py": "f77444ede6b99af7ab05337e2d0e5c5d1c7a342c69cb3d29b7279bce9f3da214",
+    "tests/adapters/test_photon_likelihood_negative.py": "58b0fec0ad352d67b38491b5aab70f9eee81da4113f94ececef15b2dfb14c049",
     "tests/adapters/test_photon_likelihood_time.py": "a28fc7c4d17dbc95bcb24838f5cb808402c361fd6f926113d1cc877bdbd05636",
     "tests/adapters/test_photon_likelihood_topology.py": "9c30bccbb4782e56232053d271df7fbec5192bd5d6d38199bd74cc45f988a746",
     "tests/examples/test_reconstruction_photon_likelihood.py": "9ded9bc715547308779fc9c7f3d82edf01d42992aad2772b42c83edf24bf0466",
@@ -90,9 +101,9 @@ SHEET_PARTS = ("Background / Objective", "Scope", "Non-goals", "Existing work ch
 # Rows the D3 stage 5 brief names, by a phrase of their label, and the status the rules give them.
 NAMED_ROWS = {
     "native backend": "gap",                              # U12 A: the user's decision, recorded as a gap in required delivery (K02)
-    "original method sources": "open",                    # source-unverified without network approval
+    "original method sources": "met with readings",       # the user-approved check by variant (U-W6, t09-sources.md)
     "quality per": "open",                                # K09 at Freeze B
-    "negative checks": "open",                            # v4 9.4's two negative checks, not built
+    "negative checks": "met with readings",               # v4 9.4's two negative checks: built in D4 E1, read on block 1 by job 7584387
 }
 
 
@@ -115,7 +126,7 @@ def matrix_row() -> str:
 
 def jobs_of_record(text: str, version: str) -> list:
     """Each naming of the declared version's job of record: the job's ID once the coordinator wrote it, else 'pending'."""
-    found = re.findall(rf"job\s+of\s+record\s+for\s+adapter\s+{re.escape(version)}:\s+(?:job\s+(\d+),\s+)?the\s+D3\s+stage\s+5\s+job",
+    found = re.findall(rf"job\s+of\s+record\s+for\s+adapter\s+{re.escape(version)}:\s+(?:job\s+(\d+),\s+)?{JOB_PATTERN}",
                        text, flags=re.IGNORECASE)
     return [job or "pending" for job in found]
 
@@ -218,10 +229,10 @@ class JobOfRecord(unittest.TestCase):
                 self.assertTrue(jobs, f"{name} names no job of record for adapter {version}")
         self.assertEqual(len({job for jobs in named.values() for job in jobs}), 1, named)
 
-    def test_every_record_names_the_stage_4_chain_as_the_latest_run_before_it(self):
+    def test_every_record_names_the_earlier_job_of_record_and_the_stage_4_chain(self):
         for name, text in self.records().items():
             with self.subTest(record=name):
-                for job in STAGE4_CHAIN:
+                for job in EARLIER_RUNS:
                     self.assertIn(job, text)
 
     def test_the_section_is_the_declared_version_s_first_record(self):
@@ -236,8 +247,8 @@ class JobOfRecord(unittest.TestCase):
         pending = jobs_of_record(section, declaration()["version"]) == ["pending"]
         for module in declared_tests():
             with self.subTest(module=module):
-                if module in (THIS_MODULE, EXAMPLE_TEST) and pending:   # the stage 5 job's modules, until its ID is written (review M4)
-                    self.assertRegex(section, rf"\| `{re.escape(module)}`[^\n]*{re.escape(STAGE5_JOB)}")
+                if module in PENDING_MODULES and pending:   # the D4 E1 job's new or changed modules, until its ID is written (review M4)
+                    self.assertRegex(section, rf"\| `{re.escape(module)}`[^\n]*{re.escape(JOB_NAME)}")
                     continue
                 found = re.search(rf"\| `{re.escape(module)}`[^|]*\| (\d+) run, OK", section)
                 self.assertIsNotNone(found, f"the section has no result row for {module}")
@@ -328,7 +339,9 @@ class CloseOut(unittest.TestCase):
                 self.assertEqual(len(rows), 1, f"one row whose label holds {phrase!r}")
                 self.assertEqual(rows[0]["Status"], status)
         sources = next(row for row in self.sheet if "original method sources" in self.label_of(row))
-        self.assertIn("`source-unverified`", sources["Evidence"])   # the evidence states the sources' state, not only the label
+        self.assertIn("t09-sources.md", sources["Evidence"])       # the evidence names the record of the check by variant
+        for variant in ("variant 1", "variant 2", "variant 3"):
+            self.assertIn(variant, sources["Evidence"])
         self.assertIn("U12 A", " ".join(next(row for row in self.sheet if "native backend" in self.label_of(row)).values()))
 
     def test_the_k09_user_item_on_undecided_two_source_events_is_recorded(self):

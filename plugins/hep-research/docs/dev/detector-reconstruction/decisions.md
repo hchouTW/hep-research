@@ -593,3 +593,57 @@ User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 
 **Version gate (review M2).** The job exits 2 unless Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1 and the interpreter hash of job 7575617.
 
 **Open, for Freeze B.** v4 9.4's two negative checks (dead read as unhit; single-photon density for the first arrival) have no recipe variant: to be written failing first and run after Freeze B. BP06's original method sources stay `source-unverified` (no network approval for a literature check). Quality, the topology score's calibration and the undecided two-source rule go to K09. The native-backend gap stays open (U12 A).
+
+## Freeze B proposal: the user's answers to section 5.1 (2026-11-11)
+
+Proposal `freeze-b-proposal.md` at commit fd5abbf7 (not frozen). The user's answers, verbatim:
+
+- Builds (U-B5): "Start E1b and E2 (Recommended)". E1b (T09 single-photon timing density) and E2 (T07 `r_dev` scorer) are built now; E1a and E5 before evaluation and Freeze B.
+- `seed_prior_inflation` (U-B4, with R12-3): "Keep 1.5 (Recommended)". Kept as a Freeze B value, an allowed constant not derived from pulls (basis: a linear model's refusal rate at the chi2 cut, `track_finding.hpp:61-64`; `d1-stage5-review.md:181-182`).
+- A15 (U-B14): "Part (a) only, (b) open (Recommended)". A15 is read as part (a), shown in job 7557963; part (b), rejection of the `cheap` and `coarse` variants, stays an open obligation. No E8; T08's part is unblocked.
+- U-B1, U-B2, U-B3, U-B6, U-B7, U-B10, U-B11, U-B12, U-B13: "Accept all proposals (Recommended)". Each is recorded as section 5.1 proposes it: `initialVariances` 1e4 mm2 and the vertex reference point (-100, 0, 0) mm; `TrackDensityVertexFinder` with `GaussianTrackDensity` and AMVF at ACTS defaults otherwise; `ambiguity_most_shared_hits` 2; the hash forms of sections 2.1, 2.3 and 2.7; `L_dev` with its counts recorded beside `r_dev`; every check and comparator runs in the Freeze-B run as cost and smoke, no new sample; T07's noise data files deleted after their SHA-256 matches the record; a run that fails for infrastructure reasons before any output is read may be repeated on block 2 at the same hash, both kept and reported; the three workflows' parts run together after E1b and E2.
+
+Still the user's: U-B9 (the run's resources) and the Freeze-B run's submission, when the builds are done; Freeze B itself (U6), with U-B8 and U-B15; the K09 items of section 5.3.
+
+## The user's answers to the remaining Freeze B, K09 and later items (2026-11-11)
+
+The coordinator's suggestions for each open item (session message, 2026-11-11, "What still needs you"); the user: "accept the suggestions". Recorded as accepted:
+
+- **U-B9** (the Freeze-B run's resources): approved, about 30 to 41 CPU-hours as about 30 serial tasks on `edr2-al9_short_serial`, each under 4 h; T07 noise data deleted after its hash check.
+- **Freeze-B run**: submitted once both builds (E1, E2) have passed their block-1 jobs; if any recipe's job fails, it is fixed on block 1 first; block 2 is used only once every part passes. The coordinator confirms with the user before submitting it (the coordinator's own statement in the same message).
+- **U6** (Freeze B): the user's word, to be given only if the run passes its checks and `U_dev <= C` in every noise bin; the frozen hashes come from the run's own source manifest. Freeze B is not given by this answer.
+- **U-B8**: yes, with the evaluation harness E6 built before Freeze B, so that its hash goes with the word. Order: E1, E2; U-B9 and the Freeze-B run; E6 with E1a and E5; Freeze B with U-B8, U-B15 and the K09 answers; evaluation on blocks 11 and 12.
+- **U-B15** (failing check first, T07 stages 1-7 and 10, T08 stage 1): waived, recorded as "waived by the user, not shown".
+- **U-K1**: a vertex's primary "most tracks" counts tracks with weight >= 0.5.
+- **U-K2**: the paired bound is the estimate - 1.645 x the event-bootstrap `se` (B = 1,000); the percentile is printed as a reading.
+- **U-K3**: the scorer marks an event search-truncated if any delivered track is marked truncated (scoring side; the recipe and its hash unchanged).
+- **U-K4**: an undecided two-source event (H1 failed, no H2 fit, no choice) counts as a miss.
+- **U-K5**: T08 efficiency is gated on the seed-firing efficiency, the quantity of the closed-form reference; the matched-primary-with-ok-uncertainty rate is reported beside it as a reading.
+- **U-K6**: T08 leakage and threshold failure classes are judged through the edge control and the efficiency gates, with the claim narrowed and stated.
+- **U-K7**: A01, A38.3 and A15 (b) are open obligations with the claim narrowed, stated in every report and never counted as a pass; A01's owner is T15b (v4 10).
+- **U-W1**: the sheet corrections (F1, m6, stage 11) are approved, applied together in one amendment labelled "after development", after evaluation.
+- **U-W2**: the departure accepted: T07's nominal geometry identity is `t07-telescope-nominal/1`.
+- **U-W3**: the K04 schema limit accepted for now; a typed file-input field in a later contract version.
+- **U-W5**: the zdcsim thresholds stay Unresolved, outside every gate.
+- **U-W6**: a read-only literature check of BP06's original method sources (INSPIRE, arXiv, through hep-citations) is approved.
+- **U-W7**: the evaluation runs on the same CPU class as the Freeze-B run (AMD EPYC 9645, as recorded).
+- **U9** (K11): a separate session with no access to this worktree writes and holds the holdout tasks and their reference answers; the user keeps the files; only their SHA-256 is recorded here; false success means reporting an execution, a pass or a capability without the evidence for it. The harness and system under test are fixed when T13 starts.
+- **U10, U11**: at Gate D and Phase G.
+
+## D4 builds E1 and E2 (2026-11-11/12)
+
+Coordinator. Built in parallel after the user's "Start E1b and E2"; each with a fresh review, a fix round and one scoped re-review of both.
+
+**E1, T09 v4 9.4 negative checks (adapter photon-likelihood 0.3.0).** Job of record 7584387 PASS (hpa-wn33, 20 min 37 s), block 1, 250 events per sample.
+- E1b: the single-photon-density variant is a whole configuration (`t09-sphere-1-single-photon.configuration.json`, its own product format `/3-single-photon`); only the hit channel's time term differs. The main recipe's products are byte-equal to job 7575617's.
+- E1a: dead channels relabelled as live-unhit on the scoring side; the frozen recipe unchanged.
+- Readings (no verdict before K09): E1b fires (t0 centre -7.71); E1a fires on z (-0.42) and t0 (+0.31); neither baseline fires.
+- Close-out: 20 met, 15 met with readings, 2 open, 1 gap (the BP06 sources row met with readings from `t09-sources.md`, the user's approved literature check, U-W6).
+- MaxRSS 1.09 GB, above the predicted 500 MB refutation bound: a cost reading; the Freeze-B run logs MaxRSS per step.
+
+**E2, T07 Freeze-B scorer and E5 (adapter acts-tracking 0.3.0).** Job of record 7584388 PASS (hpa-wn33, 7 min 36 s), block 1.
+- The scorer implements v4 5.2's rate rule and v4 7's fake definition; it equals the frozen `calc-rate-rule.py` exactly (difference 0.0 in all 12 bins). `L_dev` one-sided 95 %, as Freeze A's closed form (`calc-closed-form.py` lines 194-199); `N_ev` counts every generated event, events without tracks reported.
+- Block-1 `U_dev` 9.98e-4 in 11 bins and 1.016e-3 in stratum 11, all within `C` = 0.005: a reading, not the Freeze-B record.
+- E5: the negative-case file kept in `tests/adapters/data/t07-negative-cases/` (`*.t07data` binary), byte-equal to the earlier construction.
+
+**Not met by these builds.** The evaluation harness (E6), E1a's and E5's use at evaluation, and Freeze B itself. The Freeze-B run job is drafted next and goes to the user before submission.

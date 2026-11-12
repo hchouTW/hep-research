@@ -53,7 +53,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "the light-likelihood-product/1 (charge-only), /2 (charge-time) or /3 (charge-time, multistart) file to write, only when the run finishes; an existing file is refused, never overwritten"
+     "constraint": "the light-likelihood-product/1 (charge-only), /2 (charge-time), /3 (charge-time, multistart) or /3-single-photon (the single-photon variant's configuration) file to write, only when the run finishes; an existing file is refused, never overwritten"
     },
     {
      "name": "product_id",
@@ -67,7 +67,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": false,
-     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script; or the single-photon variant's file (format light-likelihood-configuration/1-single-photon, t04-values-v4.md section 9.4's negative check, D4 E1b), which runs with --likelihood charge-time --starts multistart only and writes light-likelihood-product/3-single-photon"
     },
     {
      "name": "likelihood",
@@ -232,14 +232,14 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a light-likelihood-product/1, /2, /3 or /4 file made with the configuration (and for /3 and /4 the budget, for /4 the topology budget) given"
+     "constraint": "a light-likelihood-product/1, /2, /3, /3-single-photon or /4 file made with the configuration (and for /3, /3-single-photon and /4 the budget, for /4 the topology budget) given"
     },
     {
      "name": "configuration",
      "kind": "path",
      "unit": "n/a",
      "required": false,
-     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script; for a /3-single-photon product the single-photon variant's file (light-likelihood-configuration/1-single-photon)"
     },
     {
      "name": "budget",
@@ -406,7 +406,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": false,
-     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script"
+     "constraint": "a light-likelihood-configuration/1 file with exactly the written constants of t04-values-v4.md section 4.3 the model needs; default the t09-sphere/1 configuration beside the script; the single-photon variant's file is refused (it has no topology step)"
     },
     {
      "name": "budget",

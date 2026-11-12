@@ -1039,7 +1039,9 @@ class HitBitsSayNothing(unittest.TestCase):
             self.assertIn("a coordinate is off the hit grid", fixture_files.data_file_defects(path))
 
 
-GENERATOR_SIDE_PYTHON = {"check_t07_generator", "t07_truth_files"}
+# D4 E2: the Freeze-B scorer of the noise fake rate and the builder of the negative-case file read truth, so they are on this side too: no data-side
+# module may import them (t07_fake_rate.py, t07_negative_cases.py).
+GENERATOR_SIDE_PYTHON = {"check_t07_generator", "t07_truth_files", "t07_fake_rate", "t07_negative_cases"}
 
 
 def generator_side_imports(source: str) -> list:
@@ -1228,17 +1230,120 @@ class WrapperForwardsAndReports(unittest.TestCase):
         section = validation[validation.index("\n## ACTS-TRACKING-T07 "):]
         section = section[:section.index("\n## ", 1)] if "\n## " in section[1:] else section
         version = declaration["version"]
-        record_pattern = rf"job of record for adapter {re.escape(version)}: (the D1 stage 11 job|job \d+)"
+        # D4 E2 (adapter 0.3.0): "the D4 E2 job" until the coordinator writes its ID after a PASS (ruling M3); job 7551619 stays cited for 0.2.0.
+        record_pattern = rf"job of record for adapter {re.escape(version)}: (the D1 stage 11 job|the D4 E2 job|job \d+)"
         in_declaration = re.findall(record_pattern, declaration["environment"] + " " + declaration["status_rule"], flags=re.IGNORECASE)
         in_validation = re.findall(record_pattern, section, flags=re.IGNORECASE)
         self.assertTrue(in_declaration and in_validation, "adapter.json and VALIDATION.md each name the job of record of the declared version")
         self.assertEqual(len(set(job.lower() for job in in_declaration + in_validation)), 1, (in_declaration, in_validation))
         self.assertNotEqual(in_declaration[0].lower(), "job 7548207")
+        self.assertNotEqual(in_declaration[0].lower(), "job 7551619", "job 7551619 ran adapter 0.2.0")
+        matrix_row = next(line for line in (ROOT / "docs" / "capability-matrix.md").read_text(encoding="utf-8").splitlines() if line.startswith("| `adapters/acts-tracking`"))
+        in_matrix = re.findall(record_pattern, matrix_row, flags=re.IGNORECASE)
+        self.assertEqual([job.lower() for job in in_matrix], [in_declaration[0].lower()], "the matrix row names the same job of record")
         self.assertIn(f"Adapter {version} ", section)
         for name, text in (("adapter.json", json.dumps(declaration)), ("VALIDATION.md", section)):
             with self.subTest(record=name):
                 self.assertEqual(text.count("7548207"), text.count("job 7548207 (adapter 0.1.0, proposed"), f"{name} cites job 7548207 other than for 0.1.0")
                 self.assertIn("job 7548207 (adapter 0.1.0, proposed", text)
+
+
+# D4 E2: the bytes of the job of record. Every asset and test file adapter.json declares has the SHA-256 that the D4 E2 job's manifest
+# (jobs/d4-e2/SOURCES.sha256, private) gives it. One changed byte in any of them fails here, until a new job of record runs the changed file and the
+# pins and the record are renewed. Exempt: this module, which holds the pins and the records test, and adapter.json, a record the coordinator
+# completes after the job (ruling M3). A file declared later without a pin fails too.
+JOB_OF_RECORD_PINS = {
+    "adapters/acts-tracking/assets/acts_tracking.py": "e401682833609f2f31171d4bd18935286f34283cd7389631f3d430310873af27",
+    "adapters/acts-tracking/assets/fixture_tools/acts_finding_record.py": "53476377ccd22c0257a38c310001019dca982ce896bad593dbe764872999c105",
+    "adapters/acts-tracking/assets/fixture_tools/acts_native_product.py": "7c6fb2cefca1c12045f7865e01e66a7a50ae7e6b20b9af42b06fae468867a76a",
+    "adapters/acts-tracking/assets/fixture_tools/check_t07_generator.py": "6d6b87ee3e3b5d4666dd14e2e2d7e2aa34d57f3f89f3c8fc71dbf89570db89da",
+    "adapters/acts-tracking/assets/fixture_tools/t07_alignment_payload.py": "42ef9fe323e25c45f2eb1d21ff961d376fbc8958c1771a779f8bf0b005148673",
+    "adapters/acts-tracking/assets/fixture_tools/t07_fake_rate.py": "4b4aa1addaf252e33091fab7c8487b882f2bb1c6718af7dc0efd24c7dbde5b6d",
+    "adapters/acts-tracking/assets/fixture_tools/t07_fixture_files.py": "c4cf5b870d8be9735143b3e8b2439e8f90fd227185d9533f4641e708b98a00ac",
+    "adapters/acts-tracking/assets/fixture_tools/t07_kalman_replica.py": "5d15d5447c195368efbceb1f47a2127d5ae97f1128f716bb515835ee2a03acb0",
+    "adapters/acts-tracking/assets/fixture_tools/t07_negative_cases.py": "1146d94b20b3b405b4bb520d5e5cbc0aa0b524114fc70b1dbc4f29a4b889e595",
+    "adapters/acts-tracking/assets/fixture_tools/t07_truth_files.py": "e421f2f3e677f801024b9752ec3f7b7d383685e5dfdf14d19be2a4c7da3f4741",
+    "adapters/acts-tracking/assets/native/CMakeLists.txt": "cd548af18cb528a33c5a9fcba5595c87ddd176d5f5ab9e84bc3d1f119448f503",
+    "adapters/acts-tracking/assets/native/acts_tracking_driver.cpp": "d8371a043d5789553c32b094f9a5e542a2cb27e11f3d01cf638dfbeea6b014b2",
+    "adapters/acts-tracking/assets/native/acts_tracking_finder.cpp": "41e054448b79959ff1bbf318b30e6e0c32e618d889e8106785e1d70e85fc5130",
+    "adapters/acts-tracking/assets/native/acts_truth_seeded_run.cpp": "0d9fe9d03a31cab5ee7cdbdbef13a0701e8b899baf462340e1f28c23a3259b87",
+    "adapters/acts-tracking/assets/native/alignment_payload.cpp": "79bdc237f0daf673fa91c923a3d926194a92eadc99ebb1295adb7ac5f3034ead",
+    "adapters/acts-tracking/assets/native/alignment_payload.hpp": "e9af27b75f1df854ebfb26c195c2c37c07eb9e9544d45ea966350be2b8e13ad1",
+    "adapters/acts-tracking/assets/native/cai_payload_probe.cpp": "15c46df63c6391b442e4039a0aee3675dc5d949993c285b5e1aeb7f522ba0b17",
+    "adapters/acts-tracking/assets/native/cai_refit_start_probe.cpp": "f8bd09afbc517fbbaf67da00f13c3a9080f6cf18f121b8cd71f3139aa1f8be06",
+    "adapters/acts-tracking/assets/native/cai_track_output_check.cpp": "8167bd8748f2069cf58f9f6790171b935e6610bf557e556fdee4328e24e3d7b1",
+    "adapters/acts-tracking/assets/native/kalman_refit.cpp": "91e522553c8f17d1729537049edf79237fa8838cd3b0ad4f0fea7cc72682d85c",
+    "adapters/acts-tracking/assets/native/kalman_refit.hpp": "d658f54202c602901ec272a0753b983f21ef526fd469e26cc6304652db54b2af",
+    "adapters/acts-tracking/assets/native/native_product.cpp": "63a00dfd27e58a78c69c662ac0811cdccfae0246e25c3b46dc65ee04662f71e8",
+    "adapters/acts-tracking/assets/native/native_product.hpp": "d074a47ac142a476a9968f276eab4b1f563344c605196cba2fcaf59ea0bd840c",
+    "adapters/acts-tracking/assets/native/payload_geometry.cpp": "f2509eebf8aef3b1854ddfd5884cad6147c274d45301752a05886e2d7414ad1f",
+    "adapters/acts-tracking/assets/native/payload_geometry.hpp": "2091e94a066a12e4c4f1a486d0efa8b7c8c6c6785bb951a2b086b988d5d68d2f",
+    "adapters/acts-tracking/assets/native/plane_hit_link.hpp": "0e307816f36b8ed0bf34f9401130b550e62d57676402c25c3e172442be88cca7",
+    "adapters/acts-tracking/assets/native/plane_propagation.cpp": "eb0188c2a1db53c067465fb75ec39a8653b9167cbeb95c68cb63f2997ed5815e",
+    "adapters/acts-tracking/assets/native/plane_propagation.hpp": "dbbaf9f994e57609d570528b7a71d13226cfdef0de052e0953d6b2311325876f",
+    "adapters/acts-tracking/assets/native/r33_product_outputs.hpp": "bdc743a5f79426717c69fcf4062d3cf858b4137c02a97e5231ba28dc5e54d01f",
+    "adapters/acts-tracking/assets/native/seed_start_probe.cpp": "791e94c559b700b56660047b305b93400ec6c7f7a09447430421b4ccbf60fd7c",
+    "adapters/acts-tracking/assets/native/sha256.cpp": "b05b177a84d686c10291ce792d770b379ac7fa968e8706eb6fbaa0047ae74dae",
+    "adapters/acts-tracking/assets/native/sha256.hpp": "1ec4cedd3989a767105bf36e1fb5e75b2d5c31decdb8600d095c25dd006483c2",
+    "adapters/acts-tracking/assets/native/t07_cai_constants.hpp": "ff006195a29bb74dad071b8076f4fe773d85ab2e363f51804fc3bba6cb281b99",
+    "adapters/acts-tracking/assets/native/t07_cai_event_generator.cpp": "eccc7c8f3708bc6ab03db40d73af2603bcc04a1c17ae676607a85528d11c956a",
+    "adapters/acts-tracking/assets/native/t07_cai_event_generator.hpp": "fef531d5ec42a3933e5fb780d7c9c4ecd40803669ff5a45d5f5f00635e1ed656",
+    "adapters/acts-tracking/assets/native/t07_cai_fixture_generator.cpp": "701ca62016421a78fafca9967ab35358b5c358268d26e5736e6c264a129ddc10",
+    "adapters/acts-tracking/assets/native/t07_data_file.cpp": "853581212292448bcff603923ac96b687793a1274336ca3b9483500c6785898e",
+    "adapters/acts-tracking/assets/native/t07_data_file.hpp": "c366cc2ad8a521aa11dfd1bcff28f965d72f3816b0f34d03ffdfcdc94b8ca2d8",
+    "adapters/acts-tracking/assets/native/t07_event_generator.cpp": "9a912b2ce99a585382a45e7393bb4a5fd1b436423ab235ce3057210905b6b2bf",
+    "adapters/acts-tracking/assets/native/t07_event_generator.hpp": "b3af519534dec359b4423e130fbf91612681dde529490a2dbe65408612d4b8f9",
+    "adapters/acts-tracking/assets/native/t07_fixture_constants.hpp": "47b85f612f7753be466bbb791d96f13229c1428a19ad1550672b8072e7491c04",
+    "adapters/acts-tracking/assets/native/t07_fixture_generator.cpp": "e22682ea20a55546aeec87ee77b3b92747fe9a6e68caf522d0fa498bc121ac0f",
+    "adapters/acts-tracking/assets/native/t07_generation_constants.hpp": "3b6c52398ac7820a51ccfe5f6d3cd1afa31320749bdd240e5042627bb530a0bf",
+    "adapters/acts-tracking/assets/native/t07_generators.cmake": "cd057420f8bc12b35a7c6b6f2de2fe14b0c55fc1d44e60c498deee0f558fde39",
+    "adapters/acts-tracking/assets/native/t07_seed_stream.cpp": "53b58eaa40e74ac6cc2357a80e68dfa1f5e9bdf25b1f766a77bfb0694874fa83",
+    "adapters/acts-tracking/assets/native/t07_seed_stream.hpp": "5857d705d99beb516ee72c8d9c52e3ac3f1c7038d2a2db4a5c960130af41e1cf",
+    "adapters/acts-tracking/assets/native/t07_truth_file.cpp": "902cef9cce0732afc01aab4bea2fa46f9fccf96fef9ce4d89021052ffdfcef9c",
+    "adapters/acts-tracking/assets/native/t07_truth_file.hpp": "a178ce64a19b4145c03b596252921a8df355aef5f45bfd2e3868fff8dfee792f",
+    "adapters/acts-tracking/assets/native/telescope_geometry.cpp": "20909da4ab246bd82316ac557a0b6cf05d1dedc6da5461404efa8b927dd8bfd6",
+    "adapters/acts-tracking/assets/native/telescope_geometry.hpp": "9060ffc252dbe7671eca6bf2942e3048349303de9de27bf792442195b7f5f247",
+    "adapters/acts-tracking/assets/native/track_finding.cpp": "a147d22eecf1f36a6aff57a14a7564d22ac0725c1df528c3fcc2cb20674132f3",
+    "adapters/acts-tracking/assets/native/track_finding.hpp": "4bc57f7c857ddeeb7aae82982204b9dd7cf5b20a45f8f866ed50d7cee1ba9b64",
+    "adapters/acts-tracking/assets/native/track_fit_outputs.hpp": "b8a5759d87370c1df434e1046bd74cc5bf3626b10adf4642c98cbb1e6fabd134",
+    "adapters/acts-tracking/assets/native/track_vertexing.cpp": "7f6209d57f1928ce93943faad9b06030150f30d5419f569cc8a66bd8d310896d",
+    "adapters/acts-tracking/assets/native/track_vertexing.hpp": "ef0e68f29380818d2efffeebca75027720974ad412c0b7349b7653ce9969f7f2",
+    "adapters/acts-tracking/assets/native/truth_seeded_search.cpp": "fb9a88237c461e7f5b2f7308033847a42b41489b723159090dc5bc7d413d9b46",
+    "tests/adapters/test_acts_cai_refit.py": "486cde56d208a0b4ea6b827d74cb617e236dc7cb7cdf6e89ae66b5b7b2834780",
+    "tests/adapters/test_acts_fake_rate.py": "570db9980b677895ecfc59ccdbed1f03e45695f3284e85a7f3417bb242162dfa",
+    "tests/adapters/test_acts_finding.py": "8133b94875b628faf575af552388eef783f69c8795b00d4e5616156d926676e0",
+    "tests/adapters/test_acts_finding_diagnosis.py": "a3b679fd55a3e917b5b2db21602fe94cb50c7d66b1ab7bc0abc3d67bee2164be",
+    "tests/adapters/test_acts_finding_r33.py": "847335fbc6c1c2ef843abfaaa0171feabf1bbe847fef94f350c965bff2b627ed",
+    "tests/adapters/test_acts_refit_field.py": "7dded1d135803f24cde2eca6ceb0b5cfc1630e4996de5dad624fe4f378a30b8c",
+    "tests/adapters/test_acts_scenarios.py": "b8316dba2eb01080aa1f1ec7ead1a17a9e8c66df3659e1e5f893fc5813a173c5",
+    "tests/adapters/test_acts_track_outputs.py": "e549809f2b09a69218b43f9ea30a3c6723c016d021450b0e778e9a8971707593",
+    "tests/adapters/test_acts_truth_seeded.py": "7acae551a3feff1e8a7f18283ab048d0912c5ce798d24d385f3f8a602b4c50a3",
+    "tests/adapters/test_acts_truth_seeded_diagnosis.py": "d94944001da3526d260e0240c08ebf118a6fa25ef2d47aa0db80a862e21c8caf",
+    "tests/adapters/test_acts_truth_seeded_replica.py": "13c43e92c736fb74f9b5eb7293c4f7d7ec81222789a90ede6a62bf472b76f8b8",
+    "tests/adapters/test_acts_vertexing.py": "9e6d5112ee60697fdc482e1daa372906499e73aa31fda28bff5c0bb376211196",
+    "tests/examples/test_reconstruction_tracking.py": "57b978f928dcce849664f31e453bdd4293b5d31ff436bb90190f0f3367f97378",
+}
+PIN_EXEMPT = {"tests/adapters/test_acts_tracking.py", "adapters/acts-tracking/adapter.json"}
+
+
+def declared_files() -> list:
+    declaration = json.loads((ADAPTER / "adapter.json").read_text(encoding="utf-8"))
+    paths = [f"adapters/acts-tracking/{asset}" for asset in declaration["assets"]] + [str(Path("adapters/acts-tracking", module)).replace("adapters/acts-tracking/../../", "") for module in declaration["tests"]]
+    return [path for path in paths if path not in PIN_EXEMPT]
+
+
+class DeclaredFilesAreTheJobOfRecordsBytes(unittest.TestCase):
+    def test_every_declared_file_is_pinned_and_unchanged(self):
+        files = declared_files()
+        self.assertEqual(sorted(files), sorted(JOB_OF_RECORD_PINS), "every declared asset and test has a pin, and no pin names an undeclared file")
+        for path in files:
+            with self.subTest(path=path):
+                self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), JOB_OF_RECORD_PINS[path])
+
+    def test_the_scorer_and_the_negative_case_builder_are_declared(self):
+        files = declared_files()
+        for path in ("adapters/acts-tracking/assets/fixture_tools/t07_fake_rate.py", "adapters/acts-tracking/assets/fixture_tools/t07_negative_cases.py", "tests/adapters/test_acts_fake_rate.py"):
+            self.assertIn(path, files)
 
 
 # D1 stage 10: the wrapper, the manifest and the tool contract carry the driver interfaces of stages 8 and 9, --alignment-payload on refit and

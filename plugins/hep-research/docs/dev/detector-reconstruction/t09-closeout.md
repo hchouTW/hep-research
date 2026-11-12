@@ -32,6 +32,12 @@ and shows the stage 4 code unchanged against job 7575617's manifest (`0c4e5c9c`,
 for adapter 0.2.0: job 7578442, the D3 stage 5 job (VALIDATION PHOTON-LIKELIHOOD-T09), with the stage 4 chain (jobs 7575617, 7576269, 7576270) the latest run
 of the same code before it. Those jobs ran `adapter.json` at 0.1.0, `proposed`.
 
+**Adapter record (D4 build E1).** Adapter 0.3.0, status `demonstrated-on-synthetic-data` unchanged; job of record for adapter 0.3.0: job 7584387, the D4 E1 job (VALIDATION PHOTON-LIKELIHOOD-T09; hpa-wn33, 20 min 37 s, JOB RESULT PASS). It adds v4 9.4's two negative checks
+(the row "the prereg's negative checks" below): the single-photon-density variant (E1b, recipe code, its own configuration) and the
+relabelling of dead channels as live-unhit (E1a, scoring side). The earlier job of record is job 7578442 (adapter 0.2.0); the stage 4
+chain (jobs 7575617, 7576269, 7576270) is the latest run of the strata. The D4 E1 job reran the unit modules, the example's tests and the
+records test, and refitted two block-1 strata with the main recipe: its products equal job 7575617's but for the product id.
+
 ## Summary
 
 The sheet table has 38 rows, each with a status.
@@ -39,8 +45,8 @@ The sheet table has 38 rows, each with a status.
 | Status | Rows |
 | --- | --- |
 | met | 20 |
-| met with readings | 13 |
-| open | 4 (the prereg's negative checks; quality; BP06's topology-score calibration; BP06's original method sources) |
+| met with readings | 15 |
+| open | 2 (quality; BP06's topology-score calibration) |
 | gap | 1 (the native backend, U12 A) |
 
 Each row that is not met, in one line:
@@ -48,12 +54,8 @@ Each row that is not met, in one line:
 - Non-goal, native backend (gap): no native backend is sought (U12 A, 2026-11-07); the development binding is not one. It closes only on the
   user's word, with a backend to integrate.
 - Quality pass or fail (open): by the sheet, after K09 at Freeze B.
-- The prereg's negative checks (open): v4 9.4's two required checks (dead read as unhit; first arrival under a single-photon density) are not
-  built; each needs a recipe variant, failing first, run on the evaluation events after Freeze B.
 - BP06 panel, multiple-topology scores calibrated for mis-ID and efficiency (open): the mis-ID rates are readings on block 1; their rate
   tests run at K09.
-- BP06 panel, original method sources (open): `source-unverified`; no network approval for a literature check is recorded. The user's approval
-  and a hep-citations check by variant close it, or it stays `source-unverified`.
 
 Every row marked met with readings states its reading in its last column.
 
@@ -102,11 +104,11 @@ Also open, though no sheet row carries it:
 | Acceptance: a hypothesis with more parameters is not preferred for a higher raw likelihood alone | met | The choice is v4 section 7's: H2 if and only if 2 (lnL_2 - lnL_1) >= 30, the frozen penalty (`topology.PENALTY`; the reader refuses any other value; `ChoiceRule`); H1 is H2's boundary, so the statistic is never below 0. Reading: H1-truth mis-ID 6 of 3,000 (`collect.log`, decisions.md, T09 stage 4) | |
 | Acceptance: no data-side truth (A09) | met | The readout header holds no truth, seed, stratum, block, fixture or generator name (`Readout`); the recipe imports no generator or scoring tool (`RecipeImportsNoGenerator`; `TruthUnreachable` in the stage 3 and 4 modules, an audit of the files `topology` opens); the truth-start fit runs on the scoring side, never written to a data-side product (`TruthStartFit`) | |
 | Acceptance: quality per `t04-values-v4.md` and `t04-prereg.md` | open | Development readings only (`d3-stage1-reading.md` to `d3-stage4-reading.md`; decisions.md, T09 stages 1 to 4) | By the sheet: K09 at Freeze B (finish-plan D4) |
-| Acceptance, quality: the prereg's negative checks (v4 9.4 and section 11: live-unhit against dead, with dead read as unhit; first-time readout under a single-photon density) | open | Neither is built: the recipe has no option that reads dead channels as unhit or uses a single-photon density in place of the first arrival. The arrival model is a separate class, so the second is not designed out (`d3-stage2-report.md`); the scoring-side gate on dead read as unhit exists (`ScoringSide.test_dead_gate_fails_on_dead_read_as_unhit`) | Required, outside the budget, on 12,000 evaluation events each (v4 9.4). Each needs a recipe variant (a whole configuration, never a flag on the frozen one), tested failing first, run after Freeze B; a check that does not fire is `failed` |
+| Acceptance, quality: the prereg's negative checks (v4 9.4 and section 11: live-unhit against dead, with dead read as unhit; first-time readout under a single-photon density) | met with readings | Built in D4 build E1 (adapter 0.3.0), failing checks first. E1b, first arrival under a single-photon density: a whole configuration of its own, `assets/t09-sphere-1-single-photon.configuration.json` (format `light-likelihood-configuration/1-single-photon`, the main file's constants; each reader refuses the other's file), with `light_recipe/single_photon.py`: the hit channel's time term is one photon's arrival density (signal and dark noise, the main recipe's intensity over its integral) in place of the first-arrival density, every other part the main recipe's (the fit, the multistart budget, the Hessian), its product `light-likelihood-product/3-single-photon`, whose reader refuses the main configuration and the main reader refuses it. E1a, dead read as unhit: `fixture_tools/t09_negative_checks.py relabel-dead` writes the dead control's dead channels as live-unhit and nothing else (scoring side, the readout alone); the frozen recipe fits the result unchanged. Both fires rules of v4 9.4 on the scoring side, `t09_negative_checks.py fires`. `tests/adapters/test_photon_likelihood_negative.py` (hand-made events). The D4 E1 job (job 7584387, the D4 E1 job, PASS) ran both on block 1, 250 events each (the dead control; main B4, `r/R_s` [0.4, 0.7)), and showed the main recipe's products equal to job 7575617's (6 PASS EQUAL, `7584387.out` lines 463-476) | Readings only, block 1, 250 events each (`7584387.out` lines 484-505; `<private>/evidence/d4-e1-7584387/e1a-fires.txt`, `e1b-fires.txt`): E1a fires on z (centre -0.4207, \|centre\| - 1.645 se +0.3038) and t0 (+0.3087, +0.2009), the masked fit does not fire; E1b fires on t0 (centre -7.7058, +7.3301), the first-arrival fit does not fire (+0.0539); no verdict. v4 9.4 requires each on 12,000 evaluation events, outside the budget; there a check that does not fire is `failed` (v4 10), with the gate's `se` from the evaluation harness (E6). The variant's configuration and code are Freeze B items (`freeze-b-proposal.md` 2.7) |
 | Open item: Section 16.1 names no A-ID for T09, so BP06's panel is its acceptance | met | `t05-task-sheets.md`: "T09 names no scenario in Section 16.1; its acceptance is BP06's". The panel's items are the acceptance rows above and the three rows below | |
 | Open item, BP06 panel: the time model must be compatible with cleaning | met with readings | t09-sphere/1's readout is not cleaned: every live channel's state, charge and first time is handed out (`t09_fixture_files.py`, v4 4.3), and the first-arrival density includes the dark rate over the whole window | Shown for an uncleaned readout only; a cleaned input would need the cleaning in the time model, which no T09 fixture has |
 | Open item, BP06 panel: multiple-topology scores require mis-ID and efficiency calibration | open | Mis-ID readings for H1 truth (6 of 3,000) and H2 truth (0 of 500); efficiency: T09 fits every event, so fit failure takes its place (v4 4.3): 0 of 3,500 multistart failures (job 7571207) | The two mis-ID rate tests and the fit-failure test run at K09 (v4 9.3, 9.4); until then the topology score has readings, not a calibration |
-| Open item, BP06 panel: P0 checks the original method sources by variant (network approval or `source-unverified`) | open | No network approval for a literature check is recorded: the only network approval of the task was "approve both jobs and the read-only network queries", for `conda search` of backends (`t03-selection.md`, "Queries run"). So the sources stay `source-unverified` | The user's network approval and a hep-citations check of the original sources per variant (all-channel likelihood, first-arrival time, topology hypotheses); without it the item stays `source-unverified` |
+| Open item, BP06 panel: P0 checks the original method sources by variant (network approval or `source-unverified`) | met with readings | The user approved a read-only literature check (decisions.md, U-W6); `docs/dev/detector-reconstruction/t09-sources.md` records it by variant, from the arXiv e-print sources of six papers (t09:S01 to S06, INSPIRE identifiers): variant 1, the all-channel likelihood with unhit channels and one threshold model, verified for the all-channel form (t09:S01, S02, S03); variant 2, the first-arrival time density with noise, partly (the first-arrival form verified, t09:S01); variant 3, topology hypotheses compared by likelihood with a penalty, partly (simulation-calibrated likelihood-ratio thresholds, t09:S02, S03) | Unsourced statements, named in `t09-sources.md`: censoring of saturated channels and the boundary-bias remark (variant 1); noise inside the first-arrival density and conditioning the time on the observed charge (variant 2); the penalty 30, a v4 design choice (v4 section 7), not a literature value (variant 3). Read levels are `page` (named sections) or `abstract+metadata`; a targeted lookup, not a systematic review |
 | Stop: per-channel hit and no-hit probabilities that do not sum to one | met | Not reached: in every job the charge-only, one-seed and multistart fits of the 14 strata ended ok (exit 0, which the stop never gives), their per-channel gates had 0 failures, and so did the fixed points and H2's points in 13 tasks; the stop is exit 1 with its record and the product written (`ExitCodes.test_the_stop_is_exit_1_with_its_record_and_the_product`), never an error | |
 
 ## Outside the sheet, recorded for the next reader
