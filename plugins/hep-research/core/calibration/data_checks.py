@@ -16,11 +16,9 @@ computed here, called by `calib_contract.py check` at the evaluation points and 
 """
 from __future__ import annotations
 
-import itertools
 import math
 
 import numpy as np
-from scipy import linalg
 
 from . import likelihood as L
 
@@ -454,7 +452,7 @@ def locking_report(contract: dict, release_declarations: dict, problem, n_scan: 
     if worst["ratio"] > ROUNDING_BOUND * (1 + 1e-12):
         findings.append({"code": "data.rounding", "ratio": worst["ratio"], "point": worst["point"]})
     conv = (contract.get("estimators") or {}).get("conventions") or {}
-    for j, nd in enumerate(val.get("N_d", []) + val.get("N_dc", [])):
+    for nd in val.get("N_d", []) + val.get("N_dc", []):
         obs = [n for n, v in nd["n"].items() if v]
         if obs and all(o in conv and "zero_events" in conv[o] for o in obs):
             lhs = sum(float(nd["n"][o]) * float(conv[o]["zero_events"]) for o in obs)

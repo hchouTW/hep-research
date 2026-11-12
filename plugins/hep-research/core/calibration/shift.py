@@ -17,8 +17,6 @@ predictor with the shift-mode phi set to phi_s (unit-normal coordinates) and `sh
 """
 from __future__ import annotations
 
-import math
-
 import numpy as np
 from scipy import linalg
 

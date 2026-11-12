@@ -234,7 +234,7 @@ def check_packages(packages: list, upstreams: dict, common_sources: dict | None 
     sets = {}
     for p in packages:
         s = source_set({"kind": "xi", "result": p["upstream"]}, upstreams)
-        for k, v in (p.get("zeta_updaters") or {}).items():
+        for v in (p.get("zeta_updaters") or {}).values():
             s |= source_set({"kind": "zeta", "updater": v}, upstreams)
         sets[p["id"]] = s
     ids = [p["id"] for p in packages]

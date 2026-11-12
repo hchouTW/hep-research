@@ -117,7 +117,7 @@ def run_estimation_ensemble(member, n_req: int, seeds, eps_max: float = EPS_MAX,
         try:
             s = next(it)
         except StopIteration:
-            raise FitError("fit.seeds", "the seed block is exhausted before the ensemble completed")
+            raise FitError("fit.seeds", "the seed block is exhausted before the ensemble completed") from None
         used.append(s)
         ok, val, rec = member(s)
         if ok:
@@ -139,7 +139,7 @@ def run_testing_ensemble(member, n: int, seeds, eps_max: float = EPS_MAX, carrie
         try:
             s = next(it)
         except StopIteration:
-            raise FitError("fit.seeds", "the seed block is exhausted before the testing ensemble completed")
+            raise FitError("fit.seeds", "the seed block is exhausted before the testing ensemble completed") from None
         used.append(s)
         ok, val, rec = member(s)
         (values.append(val) if ok else bad.append({"seed": s, **(rec or {})}))
@@ -784,7 +784,7 @@ def g6(problem, fit: Fit, toys, n_lin_check: int = 50, alpha: float = 0.01, allo
     T, X, lin_pts = [], 0, []
     lk = L.Likelihood(problem.layout, problem.observed, fit.ref)
     tpi = _tp_index(lk)
-    for i, (observed, pert, ref) in enumerate(toys):
+    for observed, pert, ref in toys:
         ok, D, b = linear_toy_fit(problem, fit, observed, pert, ref)
         if not ok:
             X += 1

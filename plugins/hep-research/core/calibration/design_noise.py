@@ -6,8 +6,6 @@ non-repeating seeds (for non-g4sim evaluators; the g4sim event-interval check is
 """
 from __future__ import annotations
 
-import math
-
 import numpy as np
 from scipy import linalg
 

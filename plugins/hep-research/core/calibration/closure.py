@@ -20,7 +20,7 @@ is its CLI.
 from __future__ import annotations
 
 import math
-from functools import lru_cache
+from functools import cache
 
 import numpy as np
 from scipy import stats
@@ -47,7 +47,7 @@ def n_bias(d: int, level: str, delta: float = 0.5, power: float = 0.8) -> int:
     return int(math.ceil((z / delta) ** 2))
 
 
-@lru_cache(maxsize=None)
+@cache
 def coverage_power(N: int, c0: float, p1: float, a: float) -> float:
     """Power of the one-tailed exact binomial test of undercoverage at level a, null c0, true coverage p1."""
     kc = int(stats.binom.ppf(a, N, c0))
@@ -97,8 +97,7 @@ def holm(pvals: dict, alpha: float = ALPHA_G8) -> dict:
 def decide(level: str, names: list, interior: dict, boundary: dict, sigma_design: np.ndarray) -> dict:
     """The G8 decision from the pseudo-data results. `interior`/`boundary` = {pulls?, errors: [N x d] theta-hat -
     truth, cover68: [N x d] bool, cover95: [N x d] bool, nontruth_basin: [N] bool}."""
-    d = len(names)
-    p, sig_bias = {}, {}
+    p = {}
     err = np.asarray(interior["errors"], float)
     N = err.shape[0]
     bbar = err.mean(0)

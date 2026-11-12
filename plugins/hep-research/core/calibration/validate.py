@@ -679,7 +679,6 @@ def cv_evidence(problem, folds, kappa: str, alpha: float, seed=20261171, n_chat:
     """T_cv (section 9.3): C-hat_{r,f} per fold from a cross-validation toy ensemble with replacement (n >= max(500,
     10 k_f)), T_cv on the data, and its reference from a separate ensemble without replacement; the G5 and ratio-test
     rules of cv_ensemble decide whether a p-value exists."""
-    n0 = len(problem.layout.theta) + len(problem.layout.phi_P)
     sub0, f0 = fold_fit(problem, np.arange(0), (F._seed_int(seed), 99), n_start=n_start)
     truth = f0.beta
     kmax = max(len(r) for r in folds)

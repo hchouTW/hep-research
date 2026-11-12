@@ -85,7 +85,6 @@ class LinearProblem:
         self.shift_names = [f"phi{l}" for l in range(cfg.phi_cols.shape[1])] if cfg.phi_cols is not None else []
         self.degeneracy_modes = list(cfg.degeneracy_modes)
         if cfg.poisson is not None:
-            K = len(cfg.poisson["a"])
             self.tau = np.asarray(cfg.poisson["tau"], float)
             # the MC estimate of the counts carries Poisson(tau) noise: f_k = m_k / tau_k
             self.mc_f = rng.poisson(self.tau) / np.where(self.tau > 0, self.tau, 1.0)
@@ -254,7 +253,6 @@ class LinearProblem:
         mu = self.mean(th)
         if nominal:            # toys: the true value is the nominal MC prediction at the truth point, m_nom = mu* + e_nom
             mu = mu + self.mc_noise(th)                    # (section 6.6); actual data and G8 use the analytic truth
-        n = c.J.shape[0]
         if c.U is not None:
             mu = mu + c.U @ nu
         if c.S is not None:
@@ -294,7 +292,7 @@ class LinearProblem:
         b = rng.multivariate_normal(np.zeros(nv), v["V_MC"])
         return (a - b) / math.sqrt(2.0)
 
-    def subset(self, rows) -> "LinearProblem":
+    def subset(self, rows) -> LinearProblem:
         """The problem restricted to the Gaussian calibration rows `rows` (a training fold, section 9.3): same truth,
         MC noise and data on those rows."""
         rows = np.asarray(rows, int)

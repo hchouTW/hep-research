@@ -28,7 +28,6 @@ from scipy import optimize, stats
 
 from . import fit as F
 from . import identify as I
-from . import likelihood as L
 
 LEVELS = {0.68: 1.0, 0.95: 3.841458820694124}
 
@@ -107,7 +106,6 @@ def toy_calibrated(problem, fit: F.Fit, i: int, grid, n_toys: int, seed, level: 
     `find_extremum` for its own theta-hat and its own profile at the scan point, with V-hat frozen at the nominal
     fit's convergence (section 7.3 "Toy data and V-hat"); scan points of the toys are not iterated."""
     alpha = 1.0 - level
-    d = len(problem.layout.theta)
     q_obs, X, n_all, inside, pvals = [], 0, 0, [], []
     for gi, v in enumerate(grid):
         ok, Dv = I.profile_point(problem, fit, i, float(v), seed)
@@ -184,7 +182,7 @@ def metropolis_posterior(log_post, x0: np.ndarray, scale: np.ndarray, n: int, se
     rng = np.random.default_rng(F._seed_int(seed))
     d = x0.size
     draws = []
-    for c in range(chains):
+    for _ in range(chains):
         x = x0 + scale * rng.normal(size=d)
         lp = log_post(x)
         ch = []
