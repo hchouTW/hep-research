@@ -9039,6 +9039,27 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.66.1 release check (2026-11-12, CI and E6)
+
+Release commit `6e0ccaf1` on `release/0.66.1`, based on main `09403241` (PRs #391 and #392 merged). Patch release: the hep-detector reference `dis-kinematic-reconstruction.md`, `experiment:eic` 0.6.1 and two EIC routing cases (issues #388, #389). Contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.1 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- a CHANGELOG `0.66.1` section (the former `Unreleased` entries).
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #391 at `ddd98d3c` and PR #392 at `28ad9ffa` | success (27 pass, 3 skipped; 29 pass, 3 skipped) |
+| CI `tests.yml` on PR #393 at `6e0ccaf1` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `6e0ccaf1`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7223 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `6e0ccaf1`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7223 tests, 0 failures, 402 skipped |
+
+Environment note as in the 0.66.0 release check. **E2 and E5 were not run for this release**; it changes no Geant4, g4sim or GPU path.
+
+Passing checks show software consistency, not physical validity.
+
 ## SCIFIX-HEX-WORDS (2026-11-11, E6 and CI; branch `release/0.66.0`)
 
 sci-fix BLINDING-HEX-WORDS (S2: a wrong verdict, a false alarm that fails the scan). Found by CI on PR #390:

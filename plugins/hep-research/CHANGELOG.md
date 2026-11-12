@@ -3,7 +3,9 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.66.1 (2026-11-12)
+
+Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged. Ships PRs #391 and #392 (issues #388 and #389): a new hep-detector reference on DIS kinematic reconstruction, `experiment:eic` 0.6.1, and two EIC routing cases that now expect the profile.
 
 - **hep-detector: DIS kinematic reconstruction** (#389). New `skills/hep-detector/references/dis-kinematic-reconstruction.md`: the electron, Jacquet-Blondel, mixed, double-angle, Sigma and e-Sigma estimators of x, y and Q^2 with their formulas (Bassler and Bernardi 1995, checked on exact four-vectors), what each is sensitive to (low and high y, energy scale, forward losses), QED radiation (ISR, FSR, the Sigma + Sigma_e window), the head-on frame for a crossing angle, purity and stability, SIDIS and Breit-frame variables, and learned reconstruction; sources read and Crossref-matched (Bassler and Bernardi 1995 and 1999, the EIC Yellow Report, Arratia et al. 2022), also in the bibliography. Linked from `event-reconstruction.md` (now a registered wiring hub), the hadron-structure hub and `dis-kinematics.md`. `experiment:eic` 0.6.1: a placement row and `facility/interaction-region.md` point to it (no number changed); the eic-profile-routing example output regenerated for the version only.
 - **EIC routing cases follow the profile** (#388): `th19-sat-1` (a dipole-model saturation prediction for e-Au at the EIC) binds `experiment:eic`, because its e-Au beam settings come from the profile's facility module, so the behavior harness expects the profile's index to be read instead of no experiment profile; the `eic-facility-1` note no longer says that no number is shipped. `tests/routing/cases.json` regenerated; a live routing run is a separate step.
