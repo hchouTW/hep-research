@@ -460,11 +460,64 @@ def bonferroni_z(M: int, alpha: float = ALPHA_P6) -> float:
     return float(stats.norm.ppf(1.0 - alpha / (2.0 * M)))
 
 
+def generalized_chi2_sf(t: float, lam) -> float:
+    """P(sum_i lam_i X_i > t), X_i independent chi2_1 (Imhof 1961, by numerical integration); lam >= 0."""
+    from scipy import integrate
+    lam = np.asarray(lam, float)
+    lam = lam[lam > 1e-12 * max(float(lam.max(initial=0.0)), 1e-300)]
+    if lam.size == 0:
+        return 1.0 if t > 0 else 0.0
+
+    def f(u):
+        th = 0.5 * float(np.sum(np.arctan(lam * u))) - 0.5 * t * u
+        rho = float(np.prod((1.0 + (lam * u) ** 2) ** 0.25))
+        return np.sin(th) / (u * rho)
+    v, _ = integrate.quad(f, 0.0, np.inf, limit=500)
+    return float(min(max(0.5 + v / np.pi, 0.0), 1.0))
+
+
+def joint_delta_covariance(fulls: list, design_results: list, weights, k: int, paired: bool = True) -> np.ndarray:
+    """The (Hk, Hk) MC covariance of surrogate - full simulation over all H held-out points, the B -> infinity limit of
+    the event bootstrap: held-out points share events through common random numbers, and every surrogate prediction
+    draws on the same design-point runs, so the differences are correlated across points (WP-G calibration of row
+    2004, 2026-11-12). weights (H, J): the surrogate's w_j at each held-out point. A run whose event count differs
+    between points contributes within each point only (no cross-point term)."""
+    W = np.atleast_2d(np.asarray(weights, float))
+    H = len(fulls)
+    fi = [_influence(f, k) for f in fulls]
+    di = [_influence(r, k) for r in design_results]
+    if any(not x for x in fi) or any(not x for x in di):
+        raise EmulatorError("p6.no_influence", "the joint covariance needs the evaluator's per-event contributions")
+    C = np.zeros((H * k, H * k))
+
+    def add(blocks):                              # blocks: list over h of (N_h, k) contributions of one source
+        if len({b.shape[0] for b in blocks}) == 1:
+            M = np.concatenate(blocks, axis=1)
+            C[:] += M.T @ M
+        else:
+            for h, b in enumerate(blocks):
+                s = slice(h * k, (h + 1) * k)
+                C[s, s] += b.T @ b
+    for run in fi[0]:
+        sur = [sum(W[h, j] * di[j][run] for j in range(len(di))) for h in range(H)]
+        full = [fi[h][run] for h in range(H)]
+        if paired:
+            add([s - f for s, f in zip(sur, full)])
+        else:
+            add(full)
+            add(sur)
+    return C
+
+
 def p6(delta_m, cov_delta, v_emu, v_data, alpha: float = ALPHA_P6, factor: float = DATA_FACTOR,
-       points=None, names=None) -> dict:
+       points=None, names=None, cov_joint=None, independent_points: bool = False) -> dict:
     """P6 on H held-out points and k observables: delta_m (H, k) = surrogate - full simulation; cov_delta (H, k, k) the
     MC covariance of the difference (sigma_Delta its root diagonal, by bootstrap); v_emu (H, k, k); v_data (k,) or
-    (H, k) the V^unc_data diagonal. |Delta m| part always; the pull chi2 (with cov_delta + V_emu) only for H >= 30."""
+    (H, k) the V^unc_data diagonal. |Delta m| part always; the pull chi2 (with cov_delta + V_emu) only for H >= 30.
+    The pull statistic is the sum over points of the per-point chi2; its reference is the exact null distribution
+    under the joint covariance cov_joint (Hk, Hk) of the differences (a weighted sum of chi2_1, generalized_chi2_sf),
+    because held-out points are correlated (common random numbers, shared design-point runs): the plain chi2 reference
+    is valid only for independent_points. Without either, the pull part is incomplete."""
     dm = np.atleast_2d(np.asarray(delta_m, float))
     H, k = dm.shape
     if H == 0 or k == 0:
@@ -504,18 +557,43 @@ def p6(delta_m, cov_delta, v_emu, v_data, alpha: float = ALPHA_P6, factor: float
             Ci = np.linalg.pinv(C, rcond=1e-12, hermitian=True)
             chi2 += float(dm[h] @ Ci @ dm[h])
             dof += int(np.linalg.matrix_rank(C, tol=1e-12 * max(float(np.abs(C).max()), 1e-300), hermitian=True))
-        p = float(stats.chi2.sf(chi2, dof)) if dof else 1.0
-        ok = p >= alpha
-        parts["pull_chi2"] = {"status": "passed" if ok else "failed", "chi2": chi2, "dof": dof, "p_value": p,
-                              "p_lower_tail": float(stats.chi2.cdf(chi2, dof)) if dof else 1.0, "alpha": alpha,
-                              "tail": "upper"}
-        if not ok:
+        ref = None
+        if cov_joint is not None:
+            try:
+                Cj = np.asarray(cov_joint, float).reshape(H * k, H * k)
+            except ValueError as exc:
+                raise EmulatorError("p6.input", f"cov_joint shape: {exc}") from None
+            Cj = 0.5 * (Cj + Cj.T)
+            B = np.zeros_like(Cj)
+            for h in range(H):
+                s = slice(h * k, (h + 1) * k)
+                Cj[s, s] += 0.5 * (ve[h] + ve[h].T)          # V_emu per point (its cross-point part is not modelled)
+                B[s, s] = Cj[s, s]
+            wb, Vb = np.linalg.eigh(B)
+            Bh = (Vb * np.where(wb > 1e-12 * max(float(wb.max()), 1e-300), wb, np.inf) ** -0.5) @ Vb.T
+            lam = np.clip(np.linalg.eigvalsh(Bh @ Cj @ Bh), 0.0, None)
+            p, ref = generalized_chi2_sf(chi2, lam), {"reference": "generalized chi2 under the joint covariance",
+                                                      "lambda_max": float(lam.max()), "lambda_sum": float(lam.sum())}
+        elif independent_points:
+            p, ref = (float(stats.chi2.sf(chi2, dof)) if dof else 1.0), {"reference": "chi2 (independent points)"}
+        else:
+            parts["pull_chi2"] = {"status": "incomplete", "chi2": chi2, "dof": dof, "reason": "the held-out points' "
+                                  "cross-point covariance is not given (cov_joint) and independence is not declared: "
+                                  "the chi2 reference would be invalid"}
+            p = None
+        if p is not None:
+            ok = p >= alpha
+            parts["pull_chi2"] = {"status": "passed" if ok else "failed", "chi2": chi2, "dof": dof, "p_value": p,
+                                  "alpha": alpha, "tail": "upper", **(ref or {})}
+        if p is not None and not ok:
             findings.append({"code": "p6.pull_chi2", "message": f"pull chi2 = {chi2:.1f} on {dof} (p = {p:.2g} < "
                              f"{alpha}): the surrogate's errors exceed sigma_Delta and V_emu (remedy: plan)"})
     else:
         parts["pull_chi2"] = {"status": "not-executed", "reason": f"{H} < {MIN_PULL_POINTS} held-out points: only "
                               "the |Delta m| part is decided (section 8.1; not incomplete)"}
-    return {"gate": "P6", "status": "failed" if findings else "passed", "parts": parts, "findings": findings,
+    incomplete = any(v.get("status") == "incomplete" for v in parts.values())
+    status = "failed" if findings else ("incomplete" if incomplete else "passed")
+    return {"gate": "P6", "status": status, "parts": parts, "findings": findings,
             "alpha": alpha, "n_held_out": H, "n_observables": k, "remedy": "plan" if findings else None,
             "flags": ["provisional-thresholds"]}
 
@@ -610,7 +688,7 @@ def p6_from_evaluator(evaluator, contract: dict, plan: dict, parameters=None, na
         return {"gate": "P6", "status": "incomplete", "reason": "held-back evaluations outstanding", **run}
     raws = [e["_raw"] for e in tr["state"]["entries"]]
     k = len(sur.names)
-    dms, cds, ves, vds = [], [], [], []
+    dms, cds, ves, vds, ws, fulls = [], [], [], [], [], []
     for e in st["entries"]:
         full = e["_raw"]
         pr = sur.predict(e["point"])
@@ -618,7 +696,10 @@ def p6_from_evaluator(evaluator, contract: dict, plan: dict, parameters=None, na
         cds.append(delta_covariance(full, raws, pr["weights"], k))
         ves.append(pr["V_emu"])
         vds.append(v_data_unc(contract, full))
-    out = p6(np.array(dms), np.array(cds), np.array(ves), np.array(vds), points=held, names=sur.names)
+        ws.append(pr["weights"])
+        fulls.append(full)
+    cj = joint_delta_covariance(fulls, raws, np.array(ws), k) if len(held) >= MIN_PULL_POINTS else None
+    out = p6(np.array(dms), np.array(cds), np.array(ves), np.array(vds), points=held, names=sur.names, cov_joint=cj)
     out.update({"surrogate": {"parameters": sur.parameters, "mode": sur.mode, "trend": sur.trend,
                               "length": sur.length.tolist(), "nugget": sur.nugget, "n_training": len(sur.points),
                               "domain": sur.domain()},
@@ -734,7 +815,8 @@ def spot_check_record(state: dict, surrogate, contract: dict | None = None, v_da
 # ------------------------------------------------------------------ CLI helper
 def p6_from_input(doc: dict) -> dict:
     """P6 from arrays (calib_emulator.py p6 --input): {names?, v_data, points: [{theta?, delta_m | (surrogate, full),
-    cov_delta | delta_replicas, V_emu?}], alpha?, required_spot_checks?, parameters?}."""
+    cov_delta | delta_replicas, V_emu?}], alpha?, required_spot_checks?, parameters?, cov_joint? (Hk x Hk, the
+    differences' covariance across points) | independent_points? (true only for independently seeded points)}."""
     pts = doc.get("points")
     if not isinstance(pts, list) or not pts or not all(isinstance(p, dict) for p in pts):
         raise EmulatorError("p6.input", "points: a non-empty list of objects")
@@ -775,4 +857,9 @@ def p6_from_input(doc: dict) -> dict:
         raise EmulatorError("p6.input", "alpha: a number") from None
     if not 0 < alpha < 1:
         raise EmulatorError("p6.input", "alpha in (0, 1)")
-    return p6(np.array(dms), np.array(cds), np.array(ves), doc["v_data"], alpha=alpha, names=doc.get("names"))
+    cj = doc.get("cov_joint")
+    ind = doc.get("independent_points", False)
+    if not isinstance(ind, bool):
+        raise EmulatorError("p6.input", "independent_points: true or false")
+    return p6(np.array(dms), np.array(cds), np.array(ves), doc["v_data"], alpha=alpha, names=doc.get("names"),
+              cov_joint=None if cj is None else np.asarray(cj, float), independent_points=ind)

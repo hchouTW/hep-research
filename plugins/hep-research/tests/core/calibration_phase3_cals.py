@@ -146,6 +146,11 @@ def _sqrt_psd(M: np.ndarray) -> np.ndarray:
     return Q * np.sqrt(np.clip(lam, 0.0, None))
 
 
+# second registration of row 2004 (2026-11-12): fresh seeds, because the first run's repetitions 0-499 at H = 40 were
+# used by the research that validated the joint-covariance reference
+P6_R_OFFSET = 1_000_000
+
+
 def p6_rep(H: int, r: int) -> dict:
     """One repetition: full simulation at the H held-back points (seed s_full) against a known-error toy surrogate
     (section 8.7 note 4): its prediction is an independent design-point MC at the same point (seed s_sur, weight 1)
@@ -153,20 +158,22 @@ def p6_rep(H: int, r: int) -> dict:
     event-bootstrap covariance of the difference with independent seeds (emulator.delta_covariance, paired=False)."""
     j = P6_H.index(H)
     c, _, ev, cfg, held, names = _p6_case(H)
-    full = _p6_eval(ev, held, cfg["theta_ref"], names, _int(1, r, j, 1))
-    sur = _p6_eval(ev, held, cfg["theta_ref"], names, _int(1, r, j, 2))
+    full = _p6_eval(ev, held, cfg["theta_ref"], names, _int(1, r + P6_R_OFFSET, j, 1))
+    sur = _p6_eval(ev, held, cfg["theta_ref"], names, _int(1, r + P6_R_OFFSET, j, 2))
     ev._other.clear()                    # the toy keeps every seeded sample: free them (memory per task stays flat)
     k = len(names)
     dm = np.array([np.asarray(s["pred"], float) - np.asarray(f["pred"], float) for f, s in zip(full, sur)])
     cd = np.array([EM.delta_covariance(f, [s], np.array([1.0]), k, paired=False) for f, s in zip(full, sur)])
+    # the joint covariance over the held-out points: each side shares its events across points (one seed per side)
+    cj = EM.joint_delta_covariance(full, sur, np.eye(H), k, paired=False) if H >= EM.MIN_PULL_POINTS else None
     vd = np.array([EM.v_data_unc(c, f) for f in full])
-    g = _rng(1, r, j, 3)
+    g = _rng(1, r + P6_R_OFFSET, j, 3)
     z = g.standard_normal((H, k))
     out = {"r": r}
     for v in P6_VEMU:
         ve = v * cd
         e = np.array([_sqrt_psd(ve[h]) @ z[h] if v else np.zeros(k) for h in range(H)])
-        res = EM.p6(dm + e, cd, ve, vd)
+        res = EM.p6(dm + e, cd, ve, vd, cov_joint=cj)
         sig = np.sqrt(np.einsum("hkk->hk", cd))
         zonly = bool(np.any(np.abs(dm + e) > EM.bonferroni_z(H * k) * sig))
         pc = res["parts"]["pull_chi2"]
@@ -200,15 +207,21 @@ def p6_judge(rows_by: dict, reps: int = P6_REPS, max_false_alarms: int = P6_MAX_
             rec["pull_chi2_size"] = sum(x["chi2_failed"] for x in chi) / len(chi)
             rec["pull_chi2_size_cp95"] = clopper_pearson(sum(x["chi2_failed"] for x in chi), len(chi))
             rec["v_emu_scale"] = float(np.mean([x["chi2"] / x["dof"] for x in chi]))   # mean chi2/dof: 1 if correct
-        rec["passed"] = bool(n >= reps and fa <= max_false_alarms)
-        ok = ok and rec["passed"]
+        # judged: the correct surrogate (v = 0, no error beyond MC noise; the user's decision of 2026-11-12); v = 1
+        # (an error drawn at V_emu) is P6's sensitivity to an emulation error, reported
+        rec["judged"] = float(v) == 0.0
+        rec["passed"] = bool(n >= reps and fa <= max_false_alarms) if rec["judged"] else None
+        ok = ok and (rec["passed"] is not False)
         out[key] = rec
+    ok = ok and any(r.get("judged") for r in out.values())          # at least one judged configuration
     return {"calibration": "p6", "row": 2004, "configurations": out, "passed": bool(ok), "flags": FLAGS,
             "rule": f"per configuration (H held-out points x 3 observables, V_emu scale v), P6 fails (either part) in "
                     f"<= {max_false_alarms} of {reps} repetitions with a correct surrogate (the phase-1 form of this "
                     "row's rule: "
                     f"pass probability >= 0.97 at a true false-alarm rate alpha = {P6_ALPHA}); the pull-chi2 size, the "
-                    "z-only rate and the V_emu scale (mean chi2/dof) are reported"}
+                    "z-only rate and the V_emu scale (mean chi2/dof) are reported; judged at v = 0 only (the user's decision of "
+                    "2026-11-12), v = 1 reported; the pull chi2 referenced to its exact null distribution under the "
+                    "joint covariance of the held-out points (emulator.p6 cov_joint)"}
 
 
 # ====================================================================== 2. row 2008, theta-noise bounds of P5

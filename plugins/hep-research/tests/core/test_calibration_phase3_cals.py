@@ -109,10 +109,15 @@ class Decisions(unittest.TestCase):
         ok = X.p6_judge({"40|0.0": p6_rows(2000, 29)})
         self.assertTrue(ok["passed"])
         self.assertAlmostEqual(ok["configurations"]["40|0.0"]["pull_chi2_size"], 29 / 2000)
-        bad = X.p6_judge({"40|0.0": p6_rows(2000, 29), "8|1.0": p6_rows(2000, 30)})
+        bad = X.p6_judge({"40|0.0": p6_rows(2000, 29), "8|0.0": p6_rows(2000, 30)})
         self.assertFalse(bad["passed"])
-        self.assertFalse(bad["configurations"]["8|1.0"]["passed"])
+        self.assertFalse(bad["configurations"]["8|0.0"]["passed"])
         self.assertTrue(bad["configurations"]["40|0.0"]["passed"])
+        # v = 1 (an error drawn at V_emu) is reported, not judged (the user's decision of 2026-11-12)
+        rep = X.p6_judge({"40|0.0": p6_rows(2000, 29), "8|1.0": p6_rows(2000, 300)})
+        self.assertTrue(rep["passed"])
+        self.assertEqual((rep["configurations"]["8|1.0"]["judged"], rep["configurations"]["8|1.0"]["passed"]),
+                         (False, None))
         self.assertFalse(X.p6_judge({"40|0.0": p6_rows(1999, 0)})["passed"])        # incomplete is not a pass
 
     def test_theta_pull_width_and_g8(self):

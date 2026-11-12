@@ -186,6 +186,55 @@ class AskTell(unittest.TestCase):
         self.assertEqual(r["status"], "ok")
 
 
+class P6JointReference(unittest.TestCase):
+    """The pull chi2 of P6 with correlated held-out points (common random numbers, shared design-point runs): the
+    plain chi2 reference of the summed per-point chi2 is oversized (the row-2004 calibration failure, 2026-11-12); the
+    exact reference under the joint covariance has its size. Without either input the pull part is incomplete."""
+
+    H, k = 40, 3
+
+    def joint(self, rho):
+        n = self.H * self.k
+        idx = np.arange(n) // self.k
+        C = rho ** np.abs(idx[:, None] - idx[None, :]).astype(float)
+        return C * (np.arange(n)[:, None] % self.k == np.arange(n)[None, :] % self.k) + \
+            np.eye(n) * 0.0
+
+    def rates(self, C, reps=400, seed=11):
+        rng = np.random.default_rng(seed)
+        L = np.linalg.cholesky(C + 1e-12 * np.eye(C.shape[0]))
+        blk = np.repeat(np.eye(self.k)[None], self.H, 0)
+        ve = np.zeros_like(blk)
+        plain = joint = 0
+        for _ in range(reps):
+            dm = (L @ rng.standard_normal(C.shape[0])).reshape(self.H, self.k)
+            plain += EM.p6(dm, blk, ve, np.full(self.k, 1e6), independent_points=True)["status"] == "failed"
+            joint += EM.p6(dm, blk, ve, np.full(self.k, 1e6), cov_joint=C)["status"] == "failed"
+        return plain / reps, joint / reps
+
+    def test_correlated_points_plain_reference_is_oversized_joint_is_not(self):
+        plain, joint = self.rates(self.joint(0.9))
+        self.assertGreater(plain, 0.05)                          # negative: the old reference on correlated points
+        self.assertLess(joint, 0.03)                             # the exact reference keeps its size (alpha = 0.01)
+
+    def test_independent_points_both_references_agree(self):
+        plain, joint = self.rates(self.joint(0.0), reps=300)     # control: no correlation -> both are chi2
+        self.assertLess(plain, 0.03)
+        self.assertLess(joint, 0.03)
+
+    def test_generalized_chi2_reduces_to_chi2(self):
+        from scipy import stats
+        for t in (50.0, 120.0, 160.0):
+            self.assertAlmostEqual(EM.generalized_chi2_sf(t, np.ones(120)), float(stats.chi2.sf(t, 120)), places=5)
+
+    def test_without_joint_covariance_the_pull_part_is_incomplete(self):
+        dm = np.zeros((self.H, self.k))
+        blk = np.repeat(np.eye(self.k)[None], self.H, 0)
+        r = EM.p6(dm, blk, np.zeros_like(blk), np.ones(self.k))
+        self.assertEqual((r["status"], r["parts"]["pull_chi2"]["status"]), ("incomplete", "incomplete"))
+
+
+
 class P6Arrays(unittest.TestCase):
     """P6 on synthetic arrays (section 8.2 note 4): the |Delta m| part, the pull chi2, Bonferroni z."""
 
@@ -217,16 +266,16 @@ class P6Arrays(unittest.TestCase):
         self.assertEqual(r["status"], "passed")
         self.assertEqual(r["parts"]["pull_chi2"]["status"], "not-executed")
         dm, cd, ve = self.arrays(30, scale=2.0)
-        self.assertEqual(EM.p6(dm, cd, ve, np.full(3, 100.0))["parts"]["pull_chi2"]["status"], "failed")
+        self.assertEqual(EM.p6(dm, cd, ve, np.full(3, 100.0), independent_points=True)["parts"]["pull_chi2"]["status"], "failed")
 
     def test_pull_chi2_catches_an_understated_v_emu(self):
         """>= 30 held-out points: differences twice sigma_Delta with V_emu = 0 fail the pull chi2 although each
         |Delta m| is within its bound; with the matching V_emu (= 3 sigma_Delta^2) they pass (positive control)."""
         dm, cd, ve = self.arrays(40, scale=2.0, seed=2)
-        r = EM.p6(dm, cd, ve, np.full(3, 100.0))
+        r = EM.p6(dm, cd, ve, np.full(3, 100.0), independent_points=True)
         self.assertEqual((r["parts"]["delta_m"]["status"], r["parts"]["pull_chi2"]["status"]), ("passed", "failed"))
         self.assertIn("p6.pull_chi2", {f["code"] for f in r["findings"]})
-        ok = EM.p6(dm, cd, np.repeat((3.0 * np.eye(3))[None], 40, 0), np.full(3, 100.0))
+        ok = EM.p6(dm, cd, np.repeat((3.0 * np.eye(3))[None], 40, 0), np.full(3, 100.0), independent_points=True)
         self.assertEqual(ok["status"], "passed")
 
     def test_no_held_out_points_is_rejected(self):
