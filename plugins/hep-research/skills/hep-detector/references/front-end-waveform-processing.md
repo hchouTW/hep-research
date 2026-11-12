@@ -169,3 +169,6 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   resolve the prompt part, the baseline estimate, the integration windows and their
   alignment to the pulse start, and saturation of large pulses. Simulate the shape variable
   through the same digitization chain, or calibrate its distribution on tagged data.
+- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. Neutron detectors beyond neutron-gamma pulse shape: no method text, no source read for
+  prompt-delayed (capture-gated) association, capture or recoil response and its parameter
+  estimation, position and direction, or energy from flight time.
