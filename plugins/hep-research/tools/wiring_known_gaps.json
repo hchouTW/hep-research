@@ -15,7 +15,8 @@
   "hep-detector": [
    "references/detector-simulation.md",
    "references/detector-design-principles.md",
-   "references/front-end-electronics-and-signal-processing.md"
+   "references/front-end-electronics-and-signal-processing.md",
+   "references/event-reconstruction.md"
   ],
   "hep-ml": [
    "references/deep-learning-guide.md"

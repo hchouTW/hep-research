@@ -1,7 +1,7 @@
 {
  "id": "experiment:eic",
  "kind": "experiment",
- "version": "0.6.0",
+ "version": "0.6.1",
  "scope": "Electron-Ion Collider (EIC) facility context and the ePIC experiment, from public documents only. Facility material (beam species, polarization, collision configurations, interaction region) and experiment material (ePIC detector subsystems, early-running proposals, software and data-format entry points) are kept in separate modules with separate scopes. The profile provides sourced design values (EIC facility design targets and requirements, ePIC construction parameters), each quoted from a cited claim, and a configuration checker for measurement- and theory-specs. It runs no ePIC software and ships no performance numbers, datasets or calibration constants.",
  "exclusions": [
   "Other EIC detector concepts and proposals (a second-IR detector, earlier proposals) unless a module names them with a source",
