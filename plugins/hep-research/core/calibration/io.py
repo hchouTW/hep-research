@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import tempfile
+from typing import Any
 from pathlib import Path
 
 from core.canonical import load_json_strict
@@ -49,7 +50,7 @@ def load_object(path: str, required=()) -> dict:
 
 def emit(out: dict) -> int:
     print(json.dumps(out, indent=1, sort_keys=False, default=sorted))
-    return EXIT.get(out.get("status"), 2)
+    return EXIT.get(str(out.get("status")), 2)
 
 
 def run(fn) -> int:
@@ -144,7 +145,8 @@ def systematics(release_path: str | None, extras: dict) -> list | None:
     r = load(release_path) if release_path else extras.get("release")
     if r is not None:
         try:
-            return data.provide(r, "systematic", opened=False, role="calibration")
+            systematic: Any = data.provide(r, "systematic", opened=False, role="calibration")
+            return systematic
         except (data.DataError, KeyError, TypeError) as exc:
             raise InputError(f"{release_path or 'the fixture release'}: no readable systematic component ({exc})") \
                 from None

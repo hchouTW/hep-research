@@ -66,7 +66,7 @@ def check_upstream_entries(entries) -> list[dict]:
             out.append({"code": "upstream.duplicate", "path": f"{p}.result_sha256",
                         "message": "the same upstream result is listed twice; list all its usages in one entry"})
         else:
-            seen.add(ref)
+            seen.add(str(ref))                  # a hash reference: a string
         try:
             role = derive_role(e.get("usages") or [])
         except ValueError as exc:

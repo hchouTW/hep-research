@@ -15,6 +15,7 @@ Roles come from core.calibration.deps (owner calib_deps.py). Standard library on
 from __future__ import annotations
 
 import itertools
+from typing import Any
 
 from core.calibration.deps import derive_role
 
@@ -163,7 +164,7 @@ def judge(c: dict, upstreams: list[dict]) -> dict:
                              "rejected (Appendix C.3)")
     eff, flags = effective(c, upstreams)
     _, vflags = inherited_flags(c, upstreams)
-    out = {"effective_grade": eff, "uses": sorted(allowed_uses(eff, flags)), "flags": sorted(flags),
+    out: dict[str, Any] = {"effective_grade": eff, "uses": sorted(allowed_uses(eff, flags)), "flags": sorted(flags),
            "variation_flags": sorted(vflags)}
     if is_pending(c):
         out["own_grade"] = None
