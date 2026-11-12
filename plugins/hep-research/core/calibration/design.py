@@ -8,6 +8,7 @@ Thresholds: f = 0.1 (section 6.7, a design value calibrated in phase 2), so ever
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
 from scipy.stats import qmc
@@ -219,9 +220,9 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
             and pars[p]["sampling_bounds"][1] > pars[p]["sampling_bounds"][0]]
     pts = sobol_points({p: pars[p]["sampling_bounds"] for p in scan}, n_scan, seed) if scan else [{}]
     rw = scan
-    missing = {}
+    missing: dict[int, list] = {}
     exposure = contract.get("exposure") or {}
-    worst = {"ess": (math.inf, None, None), "v_mc_diagonal": (-math.inf, None, None),
+    worst: dict[str, tuple] = {"ess": (math.inf, None, None), "v_mc_diagonal": (-math.inf, None, None),
              "matrix_condition": (-math.inf, None, None)}
     per_point = []
     for i, pt in enumerate(pts):
@@ -231,7 +232,7 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
             missing.setdefault(i, sorted(r["missing_support_runs"]))
         n_data = np.array([linear._exposure(exposure, o, r["runs"][k]) for k, o in enumerate(obs)], dtype=float)
         v_data = np.diag(r["s2"]) / n_data
-        row = {"point": pt}
+        row: dict[str, Any] = {"point": pt}
         if "ess" in items:
             if B > 0:                                          # the explicit event bootstrap (a check; slow)
                 s2k = np.array([_bootstrap_s2(x, w, kind, B, rng) for x, w, kind in r["samples"]])

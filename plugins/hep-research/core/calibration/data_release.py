@@ -12,6 +12,8 @@ A validation configuration is kappa = (contract hash, plan hash, engine version)
 """
 from __future__ import annotations
 
+from typing import Any
+
 from core.canonical import canonical_sha256
 
 
@@ -283,7 +285,7 @@ class Ledger:
         units = (release.get("lineage") or {}).get("raw_units")
         if not units:
             raise DataError("read.lineage", "the release has no raw-unit lineage: the read cannot be recorded")
-        values = provide(release, "values", opened=False, role="calibration")
+        values: Any = provide(release, "values", opened=False, role="calibration")
         seq = self.fit_read(h, units, channel, kappa)
         return values, seq
 

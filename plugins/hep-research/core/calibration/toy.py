@@ -357,7 +357,7 @@ def observe(model: Model, run_events: dict, run_weights: dict, names=None) -> di
     k = len(obs)
     pred = np.zeros(k)
     n_eff = np.zeros(k)
-    infl = {}                                                  # run -> (N_run, k) influence matrix
+    infl: dict = {}                                            # run -> (N_run, k) influence matrix
     s2 = np.zeros((k, k))
     per_event_var = np.zeros(k)
     weight_sum = {}
@@ -419,7 +419,7 @@ class ChainEvaluator:
         self.parameters = list(model.param_nodes)
         self.observables = [o.name for o in model.observables]
         self._nominal = None
-        self._other = {}
+        self._other: dict = {}
         self._validate()
 
     # ---- generation
@@ -472,7 +472,8 @@ class ChainEvaluator:
             n = run.n
             sizes = _sizes(n, [c["fraction"] for c in comps])
             comp_index = np.repeat(np.arange(len(comps)), sizes)
-            events, u = {}, {}
+            events: dict = {}
+            u: dict = {}
             for ni, node in enumerate(self.model.order):
                 kern = run.kernels.get(node)
                 if kern is None:
@@ -524,7 +525,7 @@ class ChainEvaluator:
         gen = sample["params"]
         comps = sample["comps"]
         base = nodes if nodes is not None else self.reweighted_nodes(target)
-        out = {}
+        out: dict = {}
         for rid, run in self.model.runs.items():
             reg = regenerated.get(rid, set()) if isinstance(regenerated, dict) else set(regenerated)
             ev = sample["runs"][rid]["events"]
