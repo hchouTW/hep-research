@@ -274,6 +274,13 @@
    "registered_at": "2026-11-12T02:01:19Z",
    "card_commit": "28c1ede1",
    "reason": "before its run: gate 1 on the toy detector re-registered after array 7584442 failed on v_shift (X 7.45%); v_shift's nominal MC 16000, every other item, seed and criterion unchanged"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "5494522c3e9b12ce5dbf1142c252eab0e1c04c13ddfb601457000aa3f9032fb7",
+   "registered_at": "2026-11-12T04:50:52Z",
+   "card_commit": "9b1a3e97",
+   "reason": "before its run: deferred section 8.7 calibrations batch A (2, 4, 8, 11, 15; the user's decisions of 2026-11-12), tasks of tests/core/calibration_phase2_cals.py at 9b1a3e97; tightening only"
   }
  ]
 }
