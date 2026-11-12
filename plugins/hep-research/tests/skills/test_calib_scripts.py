@@ -447,6 +447,37 @@ class Phase2Wiring(unittest.TestCase):
             code, out = run("calib_design.py", "p7", "--input", x)
             self.assertEqual((code, out["status"]), (0, st))
 
+    def test_design_g4sim_checks(self):
+        """Phase 3 (sections 6.1, 6.6): g4sim support and recording levels, event intervals, digitization jobs."""
+        import calibration_g4sim_fixtures as G
+        import test_calibration_design_g4sim as T
+        from core.calibration import design_g4sim as DG
+        docs = G.documents()
+        d = self.write("docs.json", {**{k: v for k, v in docs.items() if k != "run"}, "run": "run.json"})
+        self.write("run.json", docs["run"])
+        c, p = self.write("c.json", T.contract()), self.write("p.json", T.plan())
+        self.assertEqual(run("calib_design.py", "g4sim-support", "--contract", c, "--plan", p, "--documents", d)[0], 0)
+        moments = T.plan()
+        moments["node_binding"]["nodes"]["transport"]["recording"] = "moments"
+        code, out = run("calib_design.py", "g4sim-support", "--contract", c, "--plan", self.write("m.json", moments),
+                        "--documents", d)
+        self.assertEqual((code, out["infeasible"]), (1, ["birks"]))
+        self.assertEqual(run("calib_design.py", "intervals", "--plan", self.write("i.json", {"evaluations": T.GOOD}))[0],
+                         0)
+        bad = {"evaluations": T.GOOD + [T.ev("g8-2", "G8", 11, 0, 1000, set=2)]}
+        code, out = run("calib_design.py", "intervals", "--plan", self.write("i2.json", bad))
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.g8_interval_overlap"))
+        code, out = run("calib_design.py", "intervals", "--plan", self.write("i3.json", {**bad, "g8": {"run": False}}))
+        self.assertEqual((code, out["flags"]), (0, ["closure-not-tested"]))
+        job = DG.job_from_documents(docs["pipeline"], docs["maps"]["light"], "zdc", [0, 1], 11)
+        jp = {"evaluations": T.GOOD, "digi_jobs": [{"job": job, "evaluation": "fit@a", "map": "light"}]}
+        self.assertEqual(run("calib_design.py", "digi-jobs", "--plan", self.write("j.json", jp), "--documents", d)[0], 0)
+        jp["digi_jobs"][0]["job"] = dict(job, replica=1)
+        code, out = run("calib_design.py", "digi-jobs", "--plan", self.write("j2.json", jp), "--documents", d)
+        self.assertEqual((code, out["findings"][0]["code"]), (1, "design.digi_replica"))
+        code, out = run("calib_design.py", "intervals", "--plan", self.write("i4.json", {"evaluations": [{"x": 1}]}))
+        self.assertEqual((code, out["status"]), (2, "rejected"))
+
     def test_holdout_decision_is_computed(self):
         """calib_validate.py holdout on the toy detector: the fit, T_v with C_r^+ against chi2_k, and a decision
         record carrying the statistic (no outcome given by hand, review F4)."""
