@@ -524,6 +524,7 @@
   "tests.core.test_calibration_model_identity": 1.8,
   "tests.core.test_calibration_g4sim_binding": 0.1,
   "tests.core.test_calibration_map": 12.0,
-  "tests.core.test_calibration_map_patterns": 1.0
+  "tests.core.test_calibration_map_patterns": 1.0,
+  "tests.core.test_calibration_phase3_cals": 24.0
  }
 }
