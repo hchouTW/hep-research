@@ -712,3 +712,91 @@ section above); job of record 7591439 PASS (hpa-wn33, 24 min 42 s, batch MaxRSS 
 - Waiting for the user (K09, with Freeze B): at attempt 2, the paired bound's `z` (2.326 by v4 3.4, against U-K2's literal 1.645) and
   whether step 1 also uses 99 %. Carried: N1 (T07 refit ranges in the completeness check) and the pooled angle-slice identity to E6b;
   N3 (task scripts write `fit-started`) to E6c.
+
+## The user's answers: backup b21 and the F1 group 1 PR (2026-11-12)
+
+To the coordinator's two questions (backup b21 after commit a8388685; open the F1 group 1 PR): the user "yes"; asked to confirm the PR
+separately, since it publishes: "Open the PR now (Recommended)". The PR is of branch `t11/method-text-g1` (commit 9359950e) to the
+plugin's `main`.
+
+## The user's answers on the attempt-2 levels (K09, 2026-11-12)
+
+The coordinator's suggestions (session message, 2026-11-12: at attempt 2, v4 3.4's 99 % applies to the bounds that decide a pass;
+bounds that declare a fail keep 95 %); the user: "accept". Recorded as accepted, before any evaluation result exists:
+
+- **Paired bound (U-K2 at attempt 2):** `z` 2.326 at attempt 2 (v4 3.4, "on every test"); U-K2's 1.645 is the attempt-1 level. The
+  form stays U-K2's (estimate - z x the event-bootstrap `se`, B = 1,000; the percentile a reading).
+- **Step 1 of the pull and rate tests (the fail-first step):** 95 % (`z` 1.645; the Clopper-Pearson lower bound at 95 %) at both
+  attempts: it is a fail bound, and v4 3.4 moves only pass bounds.
+- **F2 (v4 8.3) at attempt 2:** the whole bound at 99 %: `U_eval` and `L_dev` both at 99 % (`L_dev` recomputed from the Freeze-B
+  record's `k`, `n`, `DEFF_hat`; at a return for attempt 2 from the block-5 Freeze-B run's record); attempt 1 stays v4 8.3's 95 %.
+- **E1a and E1b "fires" (v4 9.4 negative checks):** 1.645 at both attempts: they test that a check sees a known defect, are outside
+  the 1,260-test family, and their 1.645 is v4's sensitivity-screened value.
+
+## The user's approval of the evaluation's resources (2026-11-12)
+
+The user: "approval of the evaluation's resources", to the estimate the coordinator reported (E6c's closed form on E6a's layout with
+T07's measured refit memory): about 513 tasks and 171 CPU-hours on `edr2-al9_short_serial` (T07 87 tasks, 12.9 CPU-hours; T08 32, 1.3;
+T09 394, 156.6), longest chain about 0.77 h, each task under 4 h; T07 bin and refit tasks 2 CPUs x 7,900 MB, others 1 CPU x 6,000 MB;
+the AMD EPYC 9645 class (U-W7). For attempt 1 on block 11. This approves resources only: evaluation still waits for Freeze B (U6,
+the user's word). If the merged E6's final total is higher than this estimate, the coordinator asks again before submitting.
+
+## The user's answers: wrong minimum without a truth-start fit, and the source of the deterministic and CAI checks (K09, 2026-11-12)
+
+- **Wrong minimum when the truth-start comparator fit failed (T09, v4 9.3):** "Count as wrong minimum (Recommended)": such an event
+  counts as a wrong minimum (v4 5.1: "Objects with no result count in a failure rate"); the count is printed.
+- **Deterministic and CAI checks at evaluation (v4 10, 11; v4 3.2 blocks):** "Rerun at evaluation (Recommended)": they run once inside
+  the evaluation submission, at the frozen hash, on their own v4 3.2 blocks (1 and 6), and the summary reads that result.
+
+Coordinator's rulings recorded beside them: T08's efficiency reference is v4 4.2's bin integral R (settled by v4; bilinear only for
+`b_far`, `b_near`); U-K5's per-shower seed firing in far credits a cell to the shower with the largest truth deposit (listed for the
+user's information with Freeze B); a T07 primary with no plane-1 result counts as a failure in every gated rate (v4 5.1, 7); a failed
+T07 refit fit is counted and printed per bin as a reading.
+
+## The user's approval of a ceiling for the evaluation's resources (2026-11-12)
+
+E6c's fix round 1 recomputed the total for attempt 1 on block 11 as 526 tasks and 176.4 CPU-hours (T07 99 tasks, 12.9; T08 33, 2.0;
+T09 394, 161.5), longest chain 1.13 h, every task under 4 h: 5.4 CPU-hours above the approved estimate. The user, asked again: "Approve
+up to 200 CPU-h (Recommended)". A ceiling of 200 CPU-hours for attempt 1; the coordinator reports the final figure after the merge and
+asks again only if it exceeds 200. Evaluation still waits for Freeze B (U6).
+
+## The user's answers: parallel lanes and U8 (2026-11-12)
+
+The user suggested parallel work ("This could allow for highly parallel processing of the all reconstruction task, accelerating its
+completion time."). Asked which lanes to start beside the E6 merge and Freeze B, the user chose all four: "Short fake-rate rerun, F1
+remaining families, T12 reprocessing, T10 solver options". U8 (GPU for A13): "Use the site GPU partition". Read as: each lane in its
+own worktree and branch, fresh review before any commit; PRs, freezes and U7 stay the user's; Slurm jobs auto-submitted and reported
+(2026-11-09 rule); Freeze B and evaluation unchanged.
+
+## The user's answer to U7: T10's scan or global reference replay (2026-11-12)
+
+Options in `t10-options.md` (drafted from the records; the coordinator checked that `Acts::Experimental::Gx2Fitter` is in env/acts48's
+`Acts/TrackFitting/GlobalChiSquareFitter.hpp` and that the F38 quotes match `t11-cells.md`). The user: "B2 Python destriper
+(Recommended)"; asked whether a development binding counts as R14's "one K02 solver" and whether the comparator tolerance is frozen
+when drafted: "Counts; freeze tolerance later (Recommended)". Read as: T10's replay is a destriping solver (conjugate gradient with the
+zero-sum baseline constraint, from the F38 sources) written in the plugin in Python (env/py313) as a development binding, labelled not
+native, run once on a synthetic K03 timestream against an independently written exact rational reference; the native scan/global
+solver stays a recorded gap, as U12 A; the comparator tolerance (K09) is drafted by the stage and frozen by the user before the run.
+
+## The user's freeze of T10's replay comparator tolerance (K09, 2026-11-12)
+
+Asked with the values of `t10-replay.tolerance.json` (drafted, SHA-256 cfdf84c4a4584753163ac4a63076a3dad9d1947a0f2fd2f50d3eb4277a4d5c90)
+and `t10-replay-noiseless.tolerance.json` (drafted, 44edffe3374a766c2d82bafad51a6e685e95798474222e72ad12cac43ab31b54) in branch
+t10/replay, after a fresh review (t10-replay-review.md: tolerance sound with changes; kappa 24.4704 and G 0.87570 recomputed
+independently) and fix round 1: the user: "Freeze as proposed (Recommended)". Frozen values: noisy replay at eps 1e-10, baselines
+||a_cg - a_ref||_2 <= 2.5e-8 ||a_ref||_2, map <= 2.2e-8 ||a_ref||_2, zero sum |sum a_cg| <= 1e-13 sum |a_cg|; noiseless at eps 1e-13,
+2.5e-11 and 2.2e-11, zero sum 1e-13, no ladder; s = 10, kappa 24.47, G 0.8757 (recomputed by the comparator, a mismatched record
+refused); the stopping ladder eps_j 1e-2 to 1e-6, each within s kappa eps_j (map within s G kappa eps_j), the baseline difference strictly
+smaller when the iteration count rises, at least 2 such steps or incomplete; map shrinking, the eps/2 run and the a-posteriori bound are
+readings. Stated with it: expected differences about 1e-15 of ||a_ref||_2, so a PASS means only "below tau". The records are set
+frozen with these values, their final hashes entered here, before the job of record; any change after a result is a 2.3 amendment.
+Frozen records (only `state` and `frozen_by` changed from the drafts): `t10-replay.tolerance.json` 217a38bc40769da9c750ac347228b120476008b0227f025f4fcbc02ce9d3c35e,
+`t10-replay-noiseless.tolerance.json` 12738ebce579ae83057b69d8dca56cd3a626d5c5afe323863a56275de16da698; job manifest
+fba1bff9006775a800dd54d5478f47ff7b2b0273a1e8679621e8de2f86f3af52 (2,575 files); the exact reference 440a1e0d1a7bf169f5e1f8281d45b34739d37e4a0ea56c945a53501f694701db, never run on the fixture before the job of record.
+
+## The user's standing word on pushes, PRs and merges (2026-11-12)
+
+The user: "auto push, open PR, merge". Read as: the coordinator pushes reviewed, committed branches, opens their PRs and merges them
+without asking each time, each reported; a merge only after every CI check passes (merge commit, as PR #395), never with a failing or
+pending check, and only of work that passed its fresh review and job of record. Freezes (Freeze B, K09 values), installs, and new
+network sites stay the user's.
