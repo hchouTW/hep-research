@@ -29,6 +29,8 @@ import sys
 import time
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # before any plugin or sibling import (tests/skills/test_no_bytecode.py)
+
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[2]
 CARD = HERE / "destriper.method-card.json"
