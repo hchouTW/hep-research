@@ -37,13 +37,13 @@ def mixed_problem(seed=1):
                       S=rng.normal(size=(lay.n_link, 1)) * 0.03,
                       tau={"c": np.array([100, 50, 80, 0.0]), "q": np.array([40., 60.])},
                       n_eff={"e": (500., 300.)}).finalize()
-    data = L.Data(y_gauss=rng.normal(size=ng) * 0.1, counts={"c": np.array([9, 25, 33, 14]), "q": np.array([47, 85])},
+    observed = L.Observations(y_gauss=rng.normal(size=ng) * 0.1, counts={"c": np.array([9, 25, 33, 14]), "q": np.array([47, 85])},
                   binom={"e": (130, 200)}, phi0=np.array([0.0]), phi_cov=np.array([[1.0]]), aux_k={"e": (290, 505)})
-    return L.Likelihood(lay, data, ref), pred, rng
+    return L.Likelihood(lay, observed, ref), pred, rng
 
 
 def fd_columns(lk, pred, b, eps=1e-6):
-    tp = list(range(lk.sl["theta"].start, lk.sl["phi_P"].stop))
+    tp = list(range(lk.layout_slices["theta"].start, lk.layout_slices["phi_P"].stop))
     H = np.zeros((lk.layout.n_link, len(tp)))
     for j, i in enumerate(tp):
         bp, bm = b.copy(), b.copy()
@@ -58,7 +58,7 @@ class Score(unittest.TestCase):
         """The analytic gradient over every block and nuisance equals central differences of -2 ln L."""
         lk, pred, rng = mixed_problem()
         b = lk.initial_beta({"t1": 0.1, "t2": -0.2}) + rng.normal(size=lk.layout.n_beta) * 0.05
-        b[lk.sl["omega"]] = 60.0
+        b[lk.layout_slices["omega"]] = 60.0
         h = lk.model_link(pred(lk.theta_phi(b)))
         g, F = lk.score_fisher(b, h, fd_columns(lk, pred, b))
 
@@ -74,12 +74,12 @@ class Score(unittest.TestCase):
         """BB-lite and the auxiliary binomial term are functions of gamma and delta only (section 2.1)."""
         lk, pred, rng = mixed_problem()
         b = lk.initial_beta({"t1": 0.0, "t2": 0.0})
-        b[lk.sl["gamma"]] = 1.1
-        b[lk.sl["delta"]] = 0.2
+        b[lk.layout_slices["gamma"]] = 1.1
+        b[lk.layout_slices["delta"]] = 0.2
         aux = []
         for t in (-1.0, 0.0, 1.5):
             x = b.copy()
-            x[lk.sl["theta"]] = t
+            x[lk.layout_slices["theta"]] = t
             aux.append(lk.deviance(x, lk.model_link(pred(lk.theta_phi(x))), parts=True)[1]["aux"])
         self.assertTrue(np.allclose(aux, aux[0], rtol=1e-12))
 
@@ -203,7 +203,7 @@ class VModel(unittest.TestCase):
         L.check_psd(R0)
         self.assertEqual(np.abs(R0[:12, 12:]).max(), 0.0)
 
-    def test_clr_kernel_invariant_to_reference_category(self):
+    def test_centered_log_ratio_kernel_invariant_to_reference_category(self):
         """A kernel declared in clr gives the same quadratic forms in alr coordinates for any reference category
         (section 5.4): a^T (H R H^T)^+ a is invariant."""
         rng = np.random.default_rng(2)

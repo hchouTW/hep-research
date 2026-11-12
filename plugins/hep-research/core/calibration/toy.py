@@ -903,9 +903,13 @@ def toy_detector_subgraph(spec: dict, plan: dict) -> ChainEvaluator:
 def toy_detector_bimodal(spec: dict, plan: dict) -> ChainEvaluator:
     """The overlapping modules read out as a sum, S = a f + b (1 - f) + eps, f ~ Beta(alpha, beta), eps ~ N(0, s^2):
     a symmetric Beta gives two exactly degenerate mirror basins (section 15.1; used by G1 in phase 2)."""
-    alpha, beta = float(spec.get("alpha", 2.0)), float(spec.get("beta", 2.0))
-    s = float(spec.get("s", 0.05))
-    n = int(spec.get("events", 40_000))
+    return ChainEvaluator(build_bimodal(int(spec.get("events", 40_000)), float(spec.get("alpha", 2.0)),
+                                        float(spec.get("beta", 2.0)), float(spec.get("s", 0.05))), plan)
+
+
+def build_bimodal(n: int = 40_000, alpha: float = 2.0, beta: float = 2.0, s: float = 0.05) -> Model:
+    """The model of the bimodal variant (`toy_detector_bimodal`), for the toy-detector Problem of the section 7.4
+    calibration: alpha = beta is the exact mirror degeneracy, alpha != beta breaks it."""
 
     class Mix(Kernel):
         kind = "black-box"
@@ -921,8 +925,7 @@ def toy_detector_bimodal(spec: dict, plan: dict) -> ChainEvaluator:
     obs = [Observable("sum_mean", "sum", lambda ev: ev["modules"]["S"], "mean"),
            Observable("sum_width", "sum", lambda ev: ev["modules"]["S"], "std"),
            Observable("sum_m3", "sum", lambda ev: (ev["modules"]["S"] - ev["modules"]["S"].mean()) ** 3, "mean")]
-    return ChainEvaluator(Model(["modules"], {"sum": run}, obs, {"a": 1.0, "b": 0.6}, {"a": ["modules"],
-                                                                                         "b": ["modules"]}), plan)
+    return Model(["modules"], {"sum": run}, obs, {"a": 1.0, "b": 0.6}, {"a": ["modules"], "b": ["modules"]})
 
 
 # ------------------------------------------------------------------ small declared chains (tests, single gates)

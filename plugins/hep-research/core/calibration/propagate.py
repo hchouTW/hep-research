@@ -23,13 +23,13 @@ class PropagationError(ValueError):
 
 
 def export(theta_hat: np.ndarray, zeta_hat: np.ndarray, Sigma: np.ndarray, i_theta, i_zeta,
-           Sigma_boot: np.ndarray | None = None, w: float = 1.0, G_s: np.ndarray | None = None,
+           boot_cov: np.ndarray | None = None, w: float = 1.0, G_s: np.ndarray | None = None,
            zeta_keys: list | None = None) -> dict:
     """The export of one result: `Sigma` over beta, `Sigma_boot` over the same beta (or None), indices of theta and of
     zeta = (eta, phi_shared) in beta; `zeta_keys` their global keys (data release hash, source of phi, map hash)."""
     S = np.array(Sigma, float, copy=True)
-    if Sigma_boot is not None:
-        S = S + np.asarray(Sigma_boot, float) / w
+    if boot_cov is not None:
+        S = S + np.asarray(boot_cov, float) / w
     it, iz = np.asarray(i_theta, dtype=int), np.asarray(i_zeta, dtype=int)       # an empty zeta stays an index
     Stt, Stz, Szz = S[np.ix_(it, it)], S[np.ix_(it, iz)], S[np.ix_(iz, iz)]
     Gz = Stz @ linalg.inv(Szz) if iz.size else np.zeros((it.size, 0))

@@ -56,7 +56,7 @@ def main(argv=None) -> int:
         try:
             if args.cmd == "version":
                 return {"status": "ok", **P.version(io.load(args.payload))}
-            x = io.load(args.input)
+            x = io.load_object(args.input, ("theta_hat", "zeta_hat", "Sigma", "i_theta", "i_zeta"))
             pkg = P.export(np.asarray(x["theta_hat"], float), np.asarray(x["zeta_hat"], float),
                            np.asarray(x["Sigma"], float), x["i_theta"], x["i_zeta"],
                            None if x.get("Sigma_boot") is None else np.asarray(x["Sigma_boot"], float),

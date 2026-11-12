@@ -81,7 +81,7 @@ def main(argv=None) -> int:
             _, _, p = _problem(args)
             b = p.initial_beta()
             if args.cmd == "p3":
-                p.data = p.asimov(b)
+                p.observed = p.asimov(b)
                 return io.jsonable(identify.p3(p, b))
             fit = F.find_extremum(p, args.seed, b)
             return io.jsonable(identify.g5(p, fit, seed=args.seed))

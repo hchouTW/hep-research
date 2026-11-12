@@ -174,14 +174,14 @@ class Intervals(unittest.TestCase):
         self.assertEqual(r["inside"], [False, False, True, True, True, True, True, False, False])
         self.assertEqual(len(r["union"]), 1)
 
-    def test_mcmc_is_a_labeled_credible_interval(self):
-        r = Iv.mcmc(lambda x: -0.5 * float(x @ x), np.zeros(2), np.ones(2), 4000, 3, priors_declared={"t0": "N(0,1)"})
+    def test_metropolis_posterior_is_a_labeled_credible_interval(self):
+        r = Iv.metropolis_posterior(lambda x: -0.5 * float(x @ x), np.zeros(2), np.ones(2), 4000, 3, priors_declared={"t0": "N(0,1)"})
         self.assertEqual(r["label"], "credible-interval")
         self.assertLess(max(r["rhat"]), 1.05)
         self.assertAlmostEqual(r["c68"][0][1], 1.0, delta=0.15)
         self.assertEqual(Iv.inference_flags(r), ["credible-interval"])
         with self.assertRaises(F.FitError):
-            Iv.mcmc(lambda x: 0.0, np.zeros(1), np.ones(1), 10, 1)
+            Iv.metropolis_posterior(lambda x: 0.0, np.zeros(1), np.ones(1), 10, 1)
         with self.assertRaises(F.FitError):
             Iv.inference_flags({**r, "frequentist_coverage_claim": True})
 

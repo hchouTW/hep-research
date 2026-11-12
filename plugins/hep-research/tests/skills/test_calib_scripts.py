@@ -17,7 +17,7 @@ import calibration_fixtures as F  # noqa: E402
 import calibration_phase1 as H  # noqa: E402
 
 sys.path.insert(0, str(ROOT))
-from core.calibration import data_release as data  # noqa: E402
+from core.calibration import data_release as observed  # noqa: E402
 
 S = ROOT / "skills" / "hep-statistics" / "scripts"
 FIXTURE_DIR = ROOT / "core" / "calibration" / "data"
@@ -93,7 +93,7 @@ class Scripts(unittest.TestCase):
 
     def test_calib_contract(self):
         rels = F.releases()
-        cal, val = data.release_hash(rels[F.CAL]), data.release_hash(rels[F.VAL])
+        cal, val = observed.release_hash(rels[F.CAL]), observed.release_hash(rels[F.VAL])
         args = ["--release", self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL])]
         good = F.contract()
         good["data"] = {"calibration_releases": [cal], "validation_releases": [val]}
@@ -117,7 +117,7 @@ class Scripts(unittest.TestCase):
         k1, k2 = F.h("kappa-1"), F.h("kappa-2")
         rx = {"lineage": {"raw_units": ["x1", "x2"]}}
         ry = {"lineage": {"raw_units": ["y1"]}}
-        hx, hy = data.release_hash(rx), data.release_hash(ry)
+        hx, hy = observed.release_hash(rx), observed.release_hash(ry)
         relx, rely = self.put("rx.json", rx), self.put("ry.json", ry)
         x = self.put("x.json", ["x1", "x2"])
         ch1 = self.put("ch1.json", {"contract_sha256": F.h("c1")})
@@ -146,12 +146,12 @@ class Scripts(unittest.TestCase):
         self.assertEqual(out["earlier_failure_record"], "final")
         # a holdout whose releases share raw units, or an unmet opening condition: refused, nothing recorded
         rxy = self.put("rxy.json", {"lineage": {"raw_units": ["x2", "y9"]}})
-        hxy = data.release_hash({"lineage": {"raw_units": ["x2", "y9"]}})
+        hxy = observed.release_hash({"lineage": {"raw_units": ["x2", "y9"]}})
         before = json.loads(led.read_text())["seq"]
         rc, out = run("calib_data.py", "open", "--ledger", led, "--kappa", F.h("kappa-3"), "--vmode", "holdout",
                       "--release", relx, "--release", rxy, "--calibration", hx, "--validation", hxy, "--channel", ch1)
         self.assertEqual((rc, out["status"]), (2, "rejected"))
-        cond = self.put("cond.json", {c: True for c in data.OPENING_PRECONDITIONS} | {"p7_not_incomplete": False})
+        cond = self.put("cond.json", {c: True for c in observed.OPENING_PRECONDITIONS} | {"p7_not_incomplete": False})
         rc, out = run("calib_data.py", "open", "--ledger", led, "--kappa", F.h("kappa-4"), "--vmode", "holdout",
                       "--release", relx, "--release", rely, "--calibration", hx, "--validation", hy, "--channel", ch1,
                       "--conditions", cond)
@@ -217,8 +217,8 @@ class Phase1Scripts(unittest.TestCase):
         self.assertIn("provisional-thresholds", out["flags"])
         rels = F.releases()
         good = F.contract()
-        good["data"] = {"calibration_releases": [data.release_hash(rels[F.CAL])],
-                        "validation_releases": [data.release_hash(rels[F.VAL])]}
+        good["data"] = {"calibration_releases": [observed.release_hash(rels[F.CAL])],
+                        "validation_releases": [observed.release_hash(rels[F.VAL])]}
         rc, out = run("calib_contract.py", "check", "--contract", self.put("fc.json", good), "--release",
                       self.put("cal.json", rels[F.CAL]), "--release", self.put("val.json", rels[F.VAL]), "--design",
                       self.put("d.json", out))
@@ -264,7 +264,7 @@ class Phase1Scripts(unittest.TestCase):
         rel["content"] = {"values": linearity_example(0.035)}
         draft = F.contract()
         draft["thresholds"] = {"linearity": THRESHOLD}
-        draft["data"] = {"calibration_releases": [data.release_hash(rel)]}
+        draft["data"] = {"calibration_releases": [observed.release_hash(rel)]}
         led = self.d / "ledger.json"
         self.assertEqual(run("calib_data.py", "init", "--ledger", led)[0], 0)
         rc, out = run("calib_contract.py", "preflight", "--contract", self.put("draft.json", draft), "--release",
@@ -301,9 +301,9 @@ class Phase2Scripts(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def write(self, name, obj):
+    def write(self, name, record):
         p = self.d / name
-        p.write_text(json.dumps(obj))
+        p.write_text(json.dumps(record))
         return p
 
     def test_numeric_subcommands(self):
@@ -350,7 +350,7 @@ class Phase2Scripts(unittest.TestCase):
                       "--book", book)
         self.assertEqual(code, 0)
         state = json.loads(led.read_text())
-        L = data.Ledger(state)
+        L = observed.Ledger(state)
         L.open_validation(k["kappa"], "v" * 64, ["v1"], ["c1"], {"contract_sha256": "a" * 64})
         led.write_text(json.dumps(L.state))
         self.assertEqual(run("calib_validate.py", "abandon", "--book", book, "--ledger", led, "--kappa",
@@ -401,9 +401,9 @@ class Phase2Wiring(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def write(self, name, obj):
+    def write(self, name, record):
         p = self.d / name
-        p.write_text(json.dumps(obj))
+        p.write_text(json.dumps(record))
         return p
 
     def test_not_decided_exits_3(self):

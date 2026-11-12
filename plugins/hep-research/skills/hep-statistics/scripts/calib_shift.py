@@ -80,7 +80,7 @@ def main(argv=None) -> int:
             _, _, p = _problem(args)
             b = p.initial_beta()
             if args.cmd == "p8":
-                p.data = p.asimov(b)
+                p.observed = p.asimov(b)
                 return io.jsonable(shift.p8(p, b))
             p8 = shift.p8(p, b)
             fit = F.find_extremum(p, args.seed, b)

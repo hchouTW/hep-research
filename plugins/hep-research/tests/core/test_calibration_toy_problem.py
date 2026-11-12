@@ -67,7 +67,7 @@ class Fit(unittest.TestCase):
         width estimator changed by O(1/N): a marginal case, not a property this test checks)."""
         p = calorimeter(thickness_by_yield=True)
         truth = p.initial_beta({"light_yield": 100, "pde": 0.25, "gain": 10.0})
-        p.data = p.simulate(truth, np.random.default_rng(5), nominal=False)
+        p.observed = p.simulate(truth, np.random.default_rng(5), nominal=False)
         p.sigma_noise = TP.estimate_sigma_noise(p, truth)
         self.assertGreater(p.sigma_noise, 0.0)
         f = F.iterate(p, p.initial_beta(), lndet=False)
@@ -83,7 +83,7 @@ class Fit(unittest.TestCase):
         is evaluated by its equivalent yield (smooth); resimulated, the objective is a staircase below ~0.01 in t."""
         p = calorimeter(thickness_by_yield=True)
         truth = p.initial_beta({"light_yield": 100, "pde": 0.25, "gain": 10.0})
-        p.data = p.simulate(truth, np.random.default_rng(5), nominal=False)
+        p.observed = p.simulate(truth, np.random.default_rng(5), nominal=False)
         p.sigma_noise = TP.estimate_sigma_noise(p, truth)
         a = F.iterate(p, p.initial_beta({"light_yield": 85, "pde": 0.21, "gain": 8.5}), lndet=False)
         b = F.iterate(p, p.initial_beta({"light_yield": 115, "pde": 0.29, "gain": 11.5}), lndet=False)
@@ -132,10 +132,10 @@ class Fit(unittest.TestCase):
 
     def test_subset_restricts_the_rows(self):
         p = calorimeter()
-        p.data = p.asimov(p.initial_beta())
+        p.observed = p.asimov(p.initial_beta())
         s = p.subset([0, 2, 9])
         self.assertEqual(s.names, [NAMES[0], NAMES[2], NAMES[9]])
-        np.testing.assert_allclose(s.data.y_gauss, p.data.y_gauss[[0, 2, 9]])
+        np.testing.assert_allclose(s.observed.y_gauss, p.observed.y_gauss[[0, 2, 9]])
         np.testing.assert_allclose(s.h(p.initial_beta()[:4]), p.h(p.initial_beta()[:4])[[0, 2, 9]])
 
     def test_count_observables_with_bb_lite(self):
@@ -151,7 +151,7 @@ class Fit(unittest.TestCase):
         b = np.r_[[1.004, 1.05], np.zeros(p.layout.n_beta - 2)]
         totals = [p.simulate(b, np.random.default_rng([4, i]), nominal=False).counts["h"].sum() for i in range(3)]
         self.assertGreater(len(set(totals)), 1)                         # a Poisson total, not a fixed one
-        p.data = p.simulate(b, np.random.default_rng(5), nominal=False)
+        p.observed = p.simulate(b, np.random.default_rng(5), nominal=False)
         f = F.iterate(p, p.initial_beta())
         self.assertTrue(f.converged, f.reason)
         ratio = np.sqrt(np.diag(F.sigma_mc(p, f, None))[:2]) / f.sigma_tot

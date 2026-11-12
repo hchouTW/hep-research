@@ -104,6 +104,8 @@ def main(argv=None) -> int:
 
     def go():
         if args.cmd == "kstar":
+            if args.n < 1:
+                raise io.InputError(f"--n must be a positive integer, got {args.n}")
             return {"status": "ok", "n": args.n, "replacement": not args.no_replacement,
                     "k_star": F.k_star(args.n, not args.no_replacement)}
         if args.cmd == "g7":

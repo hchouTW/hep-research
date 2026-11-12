@@ -113,7 +113,7 @@ class LinearToyG8(unittest.TestCase):
             if bad:
                 def chi2(x):
                     r = p.reference(np.array([x]), None)
-                    return L.Likelihood(p.layout, p.data, r).deviance(np.r_[x], p.h(np.array([x])))
+                    return L.Likelihood(p.layout, p.observed, r).deviance(np.r_[x], p.h(np.array([x])))
                 th = optimize.minimize_scalar(chi2, bounds=(-2, 10), method="bounded").x
             err = np.array([th - p.truth[0]])
             st = f.sigma_tot

@@ -40,14 +40,14 @@ class _Extended:
         self.layout = L.Layout(lay.blocks, lay.n_link, lay.theta, list(lay.phi_P) + list(base.shift_names), lay.n_nu,
                                lay.n_eta, lay.omega, lay.gamma, lay.delta)
         self.n0 = len(lay.theta) + len(lay.phi_P)
-        d = base.data
+        d = base.observed
         phi0 = np.r_[np.zeros(0) if d.phi0 is None else d.phi0, np.zeros(q)]
         cov = np.zeros((len(phi0), len(phi0)))
         if d.phi_cov is not None:
             k = d.phi_cov.shape[0]
             cov[:k, :k] = d.phi_cov
         cov[len(phi0) - q:, len(phi0) - q:] = np.eye(q)
-        self.data = L.Data(d.y_gauss, d.counts, d.binom, phi0, cov, d.aux_m, d.aux_k, d.nu0, d.eta0)
+        self.observed = L.Observations(d.y_gauss, d.counts, d.binom, phi0, cov, d.aux_m, d.aux_k, d.nu0, d.eta0)
         self.center = center
 
     def h(self, tp):
@@ -66,7 +66,7 @@ def conditional_information(problem, beta: np.ndarray, ref: L.Reference | None =
     lay = problem.layout
     n0 = len(lay.theta) + len(lay.phi_P)
     q = ext.q
-    lk_e = L.Likelihood(ext.layout, ext.data, ref or problem.reference(beta[:n0], beta))
+    lk_e = L.Likelihood(ext.layout, ext.observed, ref or problem.reference(beta[:n0], beta))
     be = np.r_[beta[:n0], np.zeros(q), beta[n0:]]
     tpi = F._tp_index(lk_e)
     steps = np.r_[F.fd_steps(problem), np.full(q, 1e-3)]
@@ -76,8 +76,8 @@ def conditional_information(problem, beta: np.ndarray, ref: L.Reference | None =
         a[i] += s
         c[i] -= s
         cols.append((ext.h(a) - ext.h(c)) / (2 * s))
-    Hm = np.stack(cols, axis=1)
-    _, Fm = lk_e.score_fisher(be, ext.h(be[tpi]), Hm)
+    link_jacobian = np.stack(cols, axis=1)
+    _, Fm = lk_e.score_fisher(be, ext.h(be[tpi]), link_jacobian)
     Fm = 0.5 * Fm                                        # information of ln L
     ph = np.arange(n0, n0 + q)
     Fm[np.ix_(ph, ph)] -= np.eye(q)                      # exclude the phi's own external constraint

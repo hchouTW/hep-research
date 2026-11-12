@@ -161,18 +161,18 @@ def main(argv=None) -> int:
             if args.cmd == "required-lambda":
                 return {"status": "ok", "lambda": V.required_lambda(args.k, args.alpha)}
             if args.cmd == "statistic":
-                x = io.load(args.input)
+                x = io.load_object(args.input, ("C_r", "sigma0", "r"))
                 Cp, kk = V.c_r_plus(np.asarray(x["C_r"], float), np.asarray(x["sigma0"], float),
                                     [np.asarray(c, float) for c in x.get("constraints", [])])
                 return {"status": "ok", "T_v": V.t_v(np.asarray(x["r"], float), Cp), "k": kk}
             if args.cmd in ("holdout", "cv"):
                 return computed_decision(args)
             if args.cmd == "power":
+                x = io.load_object(args.input, ("cross_reps", "k"))       # bad input is refused before the book
                 with io.locked(args.book):
                     book = _book(args.book)
                     if args.kappa not in book.state["kappas"]:
                         raise V.ValidationError("validate.kappa_unregistered", "write kappa first")
-                    x = io.load(args.input)
                     reps = {a: (None if v is None else np.asarray(v, float)) for a, v in x["cross_reps"].items()}
                     alpha = book.state["kappas"][args.kappa].get("alpha", 0.05)
                     r = V.power_analytic(reps, int(x["k"]), alpha)
@@ -180,7 +180,7 @@ def main(argv=None) -> int:
                     io.write_json(args.book, io.jsonable(book.state))
                 return {**io.jsonable(rec), "status": r["status"]}
             if args.cmd == "declaration":
-                x = io.load(args.input)
+                x = io.load_object(args.input, ("C_r0", "sigma0"))
                 res = V.declaration_check(np.asarray(x["C_r0"], float), np.asarray(x["sigma0"], float),
                                           [np.asarray(c, float) for c in x.get("constraints", [])],
                                           [np.asarray(e, float) for e in x.get("expectations", [])])

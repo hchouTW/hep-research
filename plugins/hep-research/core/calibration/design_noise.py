@@ -18,7 +18,7 @@ from . import linear
 from . import validate as V
 
 F_DEFAULT = 0.1
-BJ_BOUND = 0.10                    # approval A9 (2026-11-11): tightened from Part B's 0.15 after calibration 7
+JACOBIAN_BIAS_BOUND = 0.10                    # approval A9 (2026-11-11): tightened from Part B's 0.15 after calibration 7
 
 
 class DesignError(ValueError):
@@ -46,8 +46,8 @@ def sigma_boot(problem, beta_ref: np.ndarray, seed, N_t: int = 10, K_b: int = 6,
     X, groups, bad = 0, [], []
     for t in range(N_t):
         rng = np.random.default_rng([F._seed_int(seed), t])
-        data = problem.simulate(beta_ref, rng)
-        toy = problem.with_data(data)
+        observed = problem.simulate(beta_ref, rng)
+        toy = problem.with_data(observed)
         vals = []
         r = 0
         while len(vals) < K_b:
@@ -72,10 +72,10 @@ def sigma_boot(problem, beta_ref: np.ndarray, seed, N_t: int = 10, K_b: int = 6,
             "eps_plus": eps_p, "nonconverged": bad}
 
 
-def p5_sigma_boot(Sigma_boot_theta: np.ndarray, w: float, Sigma_data: np.ndarray, f: float = F_DEFAULT) -> dict:
+def p5_sigma_boot(boot_cov_theta: np.ndarray, w: float, data_cov: np.ndarray, f: float = F_DEFAULT) -> dict:
     """P5: Sigma_boot / w <= f Sigma_data (the same matrix condition as for Sigma_MC, section 6.7, D7), at the
     design-stage theta_ref."""
-    lam = linear.matrix_condition(np.asarray(Sigma_boot_theta) / w, Sigma_data)
+    lam = linear.matrix_condition(np.asarray(boot_cov_theta) / w, data_cov)
     ok = lam <= f
     return {"item": "sigma_boot", "lambda_max": lam, "f": f, "w": w, "passed": ok,
             "finding": None if ok else "p5.sigma_boot", "remedy": "plan"}
@@ -95,7 +95,7 @@ def b_J(J: np.ndarray, W: np.ndarray, Ks: list) -> np.ndarray:
     return -Fi @ (t - u)
 
 
-def p5_b_J(points: list, bound: float = BJ_BOUND) -> dict:
+def p5_b_J(points: list, bound: float = JACOBIAN_BIAS_BOUND) -> dict:
     """P5's b_J item over the scan points: each point {J, W, K: [K_l], sigma_tot}; |b_J,i| <= BJ_BOUND sigma_tot,i^design
     at every point, the worst deciding (0.10 by approval A9; Part B's design value was 0.15). K_l = 0 passes."""
     worst = (0.0, None)
@@ -181,7 +181,7 @@ def fold_p3(problem, folds_rows: list, beta_ref: np.ndarray) -> list:
     for fi, rows in enumerate(folds_rows):
         sub = problem.subset(np.setdiff1d(np.arange(n), rows))
         if hasattr(sub, "cfg"):
-            lk = L.Likelihood(sub.layout, sub.data, sub.reference(beta_ref[:sub.d], None))
+            lk = L.Likelihood(sub.layout, sub.observed, sub.reference(beta_ref[:sub.d], None))
             b = lk.initial_beta(dict(zip(sub.layout.theta, beta_ref[:sub.d])))
         else:                                        # the toy detector: beta_ref restricted to the fold's layout
             b = np.asarray(beta_ref, float)[:sub.layout.n_beta]

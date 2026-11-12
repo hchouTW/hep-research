@@ -127,7 +127,7 @@ def logratio_inverse(a: np.ndarray, L: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 
-def clr_to(L: np.ndarray) -> np.ndarray:
+def centered_log_ratio_to(L: np.ndarray) -> np.ndarray:
     """H with coordinates = H clr(p) (H = L, since L annihilates 1 and clr = log p - mean log p): the map of the
     clr-declared correlation kernels into the contract's coordinates, R = H R_clr H^T (section 5.4)."""
     return L.copy()
@@ -358,7 +358,7 @@ def complement_basis(vectors, n: int) -> np.ndarray:
 
 
 @dataclass
-class Data:
+class Observations:
     """Observed calibration data: gaussian rows (link space; shapes already as log-ratios of n + 1/2), Poisson counts
     per block, binomial (k, N) per block."""
     y_gauss: np.ndarray
@@ -392,11 +392,11 @@ class Likelihood:
     predictions per block name: a scalar for gaussian-scalar and binomial blocks, the model shape (K values,
     any normalization) for gaussian-shape and free-omega poisson blocks, expected counts for absolute poisson."""
 
-    def __init__(self, layout: Layout, data: Data, ref: Reference):
-        self.layout, self.data, self.ref = layout, data, ref
+    def __init__(self, layout: Layout, observed: Observations, ref: Reference):
+        self.layout, self.observed, self.ref = layout, observed, ref
         if ref.W is None:
             ref.finalize()
-        self.sl = layout.slices()
+        self.layout_slices = layout.slices()
         self._g_rows = layout.gaussian_rows()
 
     # -- the link-space predictor h(theta, phi) from natural-space predictions
@@ -413,7 +413,7 @@ class Likelihood:
         return h
 
     def unpack(self, beta):
-        return {k: np.asarray(beta[s]) for k, s in self.sl.items()}
+        return {k: np.asarray(beta[s]) for k, s in self.layout_slices.items()}
 
     def theta_phi(self, beta) -> dict:
         p = self.unpack(beta)
@@ -433,7 +433,7 @@ class Likelihood:
         p = self.unpack(beta)
         z = self.eta_link(h, beta)
         D = {}
-        r = self.data.y_gauss - z[self._g_rows] if self._g_rows.size else np.zeros(0)
+        r = self.observed.y_gauss - z[self._g_rows] if self._g_rows.size else np.zeros(0)
         D["gaussian"] = float(r @ self.ref.W @ r) if r.size else 0.0
         D["poisson"] = D["aux"] = D["binomial"] = 0.0
         gi = {key: i for i, key in enumerate(self.layout.gamma)}
@@ -442,26 +442,26 @@ class Likelihood:
         for b in self.layout.blocks:
             if b.kind == "poisson":
                 mu = self._poisson_mu(b, z, p, oi, gi)
-                D["poisson"] += poisson_deviance(self.data.counts[b.name], mu)
+                D["poisson"] += poisson_deviance(self.observed.counts[b.name], mu)
                 if b.bb:
                     g = np.array([p["gamma"][gi[(b.name, k)]] for k in range(b.K)])
                     tau = np.asarray(self.ref.tau[b.name], float)
-                    m = np.asarray(self.data.aux_m.get(b.name, tau), float)
+                    m = np.asarray(self.observed.aux_m.get(b.name, tau), float)
                     keep = tau > 0
                     D["aux"] += poisson_deviance(m[keep], tau[keep] * g[keep])
             elif b.kind == "binomial":
                 dl = p["delta"][di[b.name]] if b.name in di else 0.0
                 eps = special.expit(z[b.index[0]] + dl)
-                k, N = self.data.binom[b.name]
+                k, N = self.observed.binom[b.name]
                 D["binomial"] += binomial_deviance(k, N, eps)
                 if b.name in di:
                     D["aux"] += self._aux_binomial(b, h, dl)[0]
-        nu0 = self.data.nu0 if self.data.nu0 is not None else np.zeros(self.layout.n_nu)
-        eta0 = self.data.eta0 if self.data.eta0 is not None else np.zeros(self.layout.n_eta)
+        nu0 = self.observed.nu0 if self.observed.nu0 is not None else np.zeros(self.layout.n_nu)
+        eta0 = self.observed.eta0 if self.observed.eta0 is not None else np.zeros(self.layout.n_eta)
         D["constraints"] = float(np.sum((p["nu"] - nu0) ** 2) + np.sum((p["eta"] - eta0) ** 2))
         if self.layout.phi_P:
-            dphi = p["phi_P"] - self.data.phi0
-            D["constraints"] += float(dphi @ linalg.solve(self.data.phi_cov, dphi, assume_a="pos"))
+            dphi = p["phi_P"] - self.observed.phi0
+            D["constraints"] += float(dphi @ linalg.solve(self.observed.phi_cov, dphi, assume_a="pos"))
         total = sum(D.values())
         return (total, D) if parts else total
 
@@ -471,7 +471,7 @@ class Likelihood:
         logit of the theta_ref MC estimate k_eff / n_eff. delta is a logit offset of the MC efficiency reused at every
         theta (as BB-lite's gamma, and as section 6.6 reuses f), so the term depends on delta only."""
         n_eff, k_eff = self.ref.n_eff[b.name]
-        ka, na = self.data.aux_k.get(b.name, (k_eff, n_eff))
+        ka, na = self.observed.aux_k.get(b.name, (k_eff, n_eff))
         c = float(special.logit(k_eff / n_eff))
         em = float(special.expit(c + dl))
         return binomial_deviance(ka, na, em), float(ka), float(na), em
@@ -493,21 +493,21 @@ class Likelihood:
         D = -2 ln L, with F the expected Hessian of D (Gauss-Newton for the Gaussian block)."""
         lay, p = self.layout, self.unpack(beta)
         nb = lay.n_beta
-        sl = self.sl
+        layout_slices = self.layout_slices
         z = self.eta_link(h, beta)
         # d z / d beta for the link rows
         Jz = np.zeros((lay.n_link, nb))
-        tp = np.r_[sl["theta"].start:sl["phi_P"].stop]
+        tp = np.r_[layout_slices["theta"].start:layout_slices["phi_P"].stop]
         Jz[:, tp] = H_theta
         if lay.n_nu:
-            Jz[:, sl["nu"]] = self.ref.U
+            Jz[:, layout_slices["nu"]] = self.ref.U
         if lay.n_eta:
-            Jz[:, sl["eta"]] = self.ref.S
+            Jz[:, layout_slices["eta"]] = self.ref.S
         g = np.zeros(nb)
         F = np.zeros((nb, nb))
         if self._g_rows.size:
             Jg = Jz[self._g_rows]
-            r = self.data.y_gauss - z[self._g_rows]
+            r = self.observed.y_gauss - z[self._g_rows]
             WJ = self.ref.W @ Jg
             g += -2.0 * WJ.T @ r
             F += 2.0 * Jg.T @ WJ
@@ -516,7 +516,7 @@ class Likelihood:
         di = {nm: i for i, nm in enumerate(lay.delta)}
         for b in lay.blocks:
             if b.kind == "poisson":
-                n = np.asarray(self.data.counts[b.name], float)
+                n = np.asarray(self.observed.counts[b.name], float)
                 mu = self._poisson_mu(b, z, p, oi, gi)
                 # d mu / d beta
                 dmu = np.zeros((b.K, nb))
@@ -526,52 +526,52 @@ class Likelihood:
                     Lp = np.linalg.pinv(b.L)                       # dx/da
                     dlogp_da = (np.eye(b.K) - pk[None, :].repeat(b.K, 0)) @ Lp
                     dmu += (mu[:, None] * dlogp_da) @ Jz[b.index]
-                    dmu[:, sl["omega"].start + oi[b.name]] = mu / p["omega"][oi[b.name]]
+                    dmu[:, layout_slices["omega"].start + oi[b.name]] = mu / p["omega"][oi[b.name]]
                 else:
                     dmu += mu[:, None] * Jz[b.index]
                 if b.bb:
                     for k in range(b.K):
-                        j = sl["gamma"].start + gi[(b.name, k)]
+                        j = layout_slices["gamma"].start + gi[(b.name, k)]
                         dmu[k, j] = mu[k] / p["gamma"][gi[(b.name, k)]]
                 g += 2.0 * dmu.T @ (1.0 - n / mu)
                 F += 2.0 * dmu.T @ (dmu / mu[:, None])
                 if b.bb:
                     tau = np.asarray(self.ref.tau[b.name], float)
-                    m = np.asarray(self.data.aux_m.get(b.name, tau), float)
+                    m = np.asarray(self.observed.aux_m.get(b.name, tau), float)
                     for k in range(b.K):
                         if tau[k] <= 0:
                             continue
-                        j = sl["gamma"].start + gi[(b.name, k)]
+                        j = layout_slices["gamma"].start + gi[(b.name, k)]
                         gk = p["gamma"][gi[(b.name, k)]]
                         g[j] += 2.0 * (tau[k] - m[k] / gk)
                         F[j, j] += 2.0 * tau[k] / gk
             elif b.kind == "binomial":
-                k, N = self.data.binom[b.name]
+                k, N = self.observed.binom[b.name]
                 dl = p["delta"][di[b.name]] if b.name in di else 0.0
                 eta = z[b.index[0]] + dl
                 eps = special.expit(eta)
                 row = Jz[b.index[0]].copy()
                 if b.name in di:
-                    row[sl["delta"].start + di[b.name]] = 1.0
+                    row[layout_slices["delta"].start + di[b.name]] = 1.0
                 g += -2.0 * (k - N * eps) * row
                 F += 2.0 * N * eps * (1 - eps) * np.outer(row, row)
                 if b.name in di:
                     _, ka, na, em = self._aux_binomial(b, h, dl)
-                    j = sl["delta"].start + di[b.name]
+                    j = layout_slices["delta"].start + di[b.name]
                     g[j] += -2.0 * (ka - na * em)
                     F[j, j] += 2.0 * na * em * (1 - em)
-        nu0 = self.data.nu0 if self.data.nu0 is not None else np.zeros(lay.n_nu)
-        eta0 = self.data.eta0 if self.data.eta0 is not None else np.zeros(lay.n_eta)
+        nu0 = self.observed.nu0 if self.observed.nu0 is not None else np.zeros(lay.n_nu)
+        eta0 = self.observed.eta0 if self.observed.eta0 is not None else np.zeros(lay.n_eta)
         if lay.n_nu:
-            g[sl["nu"]] += 2.0 * (p["nu"] - nu0)
-            F[sl["nu"], sl["nu"]] += 2.0 * np.eye(lay.n_nu)
+            g[layout_slices["nu"]] += 2.0 * (p["nu"] - nu0)
+            F[layout_slices["nu"], layout_slices["nu"]] += 2.0 * np.eye(lay.n_nu)
         if lay.n_eta:
-            g[sl["eta"]] += 2.0 * (p["eta"] - eta0)
-            F[sl["eta"], sl["eta"]] += 2.0 * np.eye(lay.n_eta)
+            g[layout_slices["eta"]] += 2.0 * (p["eta"] - eta0)
+            F[layout_slices["eta"], layout_slices["eta"]] += 2.0 * np.eye(lay.n_eta)
         if lay.phi_P:
-            Ci = linalg.inv(self.data.phi_cov)
-            g[sl["phi_P"]] += 2.0 * Ci @ (p["phi_P"] - self.data.phi0)
-            F[sl["phi_P"], sl["phi_P"]] += 2.0 * Ci
+            Ci = linalg.inv(self.observed.phi_cov)
+            g[layout_slices["phi_P"]] += 2.0 * Ci @ (p["phi_P"] - self.observed.phi0)
+            F[layout_slices["phi_P"], layout_slices["phi_P"]] += 2.0 * Ci
         return g, 0.5 * (F + F.T)
 
     def gaussian_full(self, beta, h) -> float:
@@ -581,19 +581,19 @@ class Likelihood:
     def initial_beta(self, theta0: dict, phi0: dict | None = None) -> np.ndarray:
         lay = self.layout
         b = np.zeros(lay.n_beta)
-        b[self.sl["theta"]] = [float(theta0[t]) for t in lay.theta]
+        b[self.layout_slices["theta"]] = [float(theta0[t]) for t in lay.theta]
         if lay.phi_P:
-            b[self.sl["phi_P"]] = self.data.phi0 if phi0 is None else [float(phi0[q]) for q in lay.phi_P]
+            b[self.layout_slices["phi_P"]] = self.observed.phi0 if phi0 is None else [float(phi0[q]) for q in lay.phi_P]
         for i, nm in enumerate(lay.omega):
-            b[self.sl["omega"].start + i] = max(float(np.sum(self.data.counts[nm])), 1.0)
-        b[self.sl["gamma"]] = 1.0
+            b[self.layout_slices["omega"].start + i] = max(float(np.sum(self.observed.counts[nm])), 1.0)
+        b[self.layout_slices["gamma"]] = 1.0
         return b
 
     def bounds(self):
         """Positivity of omega and gamma (free otherwise; theta bounds are the physical ones of fit.py)."""
         lo = np.full(self.layout.n_beta, -np.inf)
-        lo[self.sl["omega"]] = 1e-12
-        lo[self.sl["gamma"]] = 1e-12
+        lo[self.layout_slices["omega"]] = 1e-12
+        lo[self.layout_slices["gamma"]] = 1e-12
         return lo
 
 

@@ -15,7 +15,7 @@ from core.calibration import fit as F  # noqa: E402
 from core.calibration import toys_linear as T  # noqa: E402
 
 
-class BJ(unittest.TestCase):
+class JacobianBias(unittest.TestCase):
     def test_formula_matches_simulation(self):
         """MC noise of the nominal varying with theta (e = e0 (1 + g theta)): the bias of the fit with V fixed equals
         b_J within its simulation error (section 8.2 note 3, en/compute-19-13.md)."""
@@ -54,16 +54,16 @@ class SigmaBoot(unittest.TestCase):
         cfg = T.linear_config(n=30, d=3)
         cfg.bootstrap_B = 1500
         self.p = T.make(cfg, [0.5, -0.3, 1.0], 3, 4)
-        self.Sd = np.linalg.inv(cfg.J.T @ np.linalg.inv(cfg.V_data) @ cfg.J)
+        self.stat_cov = np.linalg.inv(cfg.J.T @ np.linalg.inv(cfg.V_data) @ cfg.J)
 
     def test_estimate_size_and_w(self):
         """Sigma_boot ~ (p - d) / B Sigma_data; nu_b = 50; w = 0.891 with all 60 converged (eps-hat+ = 1/61)."""
         sb = DN.sigma_boot(self.p, self.p.truth, 7)
         self.assertEqual((sb["status"], sb["nu_b"]), ("ok", 50))
         self.assertAlmostEqual(sb["w"], 0.891, places=3)
-        ratio = np.trace(sb["Sigma_boot"][:3, :3]) / np.trace(self.Sd)
+        ratio = np.trace(sb["Sigma_boot"][:3, :3]) / np.trace(self.stat_cov)
         self.assertAlmostEqual(ratio, 27 / 1500, delta=0.3 * 27 / 1500)
-        self.assertTrue(DN.p5_sigma_boot(sb["Sigma_boot"][:3, :3], sb["w"], self.Sd)["passed"])
+        self.assertTrue(DN.p5_sigma_boot(sb["Sigma_boot"][:3, :3], sb["w"], self.stat_cov)["passed"])
 
     def test_asimov_and_size_rules(self):
         with self.assertRaises(DN.DesignError):
@@ -74,7 +74,7 @@ class SigmaBoot(unittest.TestCase):
     def test_p5_negative_control(self):
         """Sigma_boot = 0.095 Sigma_data with w = 0.891 satisfies Sigma_boot <= f Sigma_data but must fail
         (section 15.3.9)."""
-        r = DN.p5_sigma_boot(0.095 * self.Sd, 0.891, self.Sd)
+        r = DN.p5_sigma_boot(0.095 * self.stat_cov, 0.891, self.stat_cov)
         self.assertFalse(r["passed"])
         self.assertEqual(r["finding"], "p5.sigma_boot")
 

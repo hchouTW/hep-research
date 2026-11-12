@@ -119,8 +119,8 @@ def main(argv=None) -> int:
                 arr = [{"J": np.asarray(p["J"], float), "W": np.asarray(p["W"], float),
                         "K": [np.asarray(k, float) for k in p["K"]], "sigma_tot": np.asarray(p["sigma_tot"], float)}
                        for p in pts]
-                if args.bound is not None and args.bound > DN.BJ_BOUND:
-                    raise io.InputError(f"--bound may only tighten {DN.BJ_BOUND} (approval A9)")
+                if args.bound is not None and args.bound > DN.JACOBIAN_BIAS_BOUND:
+                    raise io.InputError(f"--bound may only tighten {DN.JACOBIAN_BIAS_BOUND} (approval A9)")
                 r = DN.p5_b_J(arr, **({} if args.bound is None else {"bound": args.bound}))
                 return {"status": "passed" if r["passed"] else "failed", **r}
             if args.cmd == "p7":

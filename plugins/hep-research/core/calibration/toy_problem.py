@@ -63,7 +63,7 @@ class ToyProblem:
                  boot_seed=20261121, generation: dict | None = None, map_params=None, plan: dict | None = None,
                  shift: dict | None = None, thickness_by_yield: bool = False, val_names: list | None = None,
                  val_build=None, val_mc_seed=20261123, val_exposure: int | None = None, counts: dict | None = None,
-                 boot_exposure: int | None = None):
+                 boot_exposure: int | None = None, shift_response: dict | None = None):
         self.build = build
         self.names = list(names)
         self.theta_spec = dict(theta)
@@ -75,6 +75,12 @@ class ToyProblem:
         self.map_params = map_params
         self.shift_spec = dict(shift or {})              # shift-mode phi: {name: (centre, sigma)}
         self.shift_names = list(self.shift_spec)
+        # the response of a shift-mode parameter to its unit-normal phi: centre + sigma g(phi), g(phi) = phi + k2 phi^2
+        # + k3 phi^3 ({name: (k2, k3)}; linear when absent): the nonlinear phi responses of section 8.7 note 5
+        self.shift_response = {n: tuple(map(float, v)) for n, v in (shift_response or {}).items()}
+        unknown = set(self.shift_response) - set(self.shift_spec)
+        if unknown:
+            raise ValueError(f"shift_response names no shift-mode parameter: {sorted(unknown)}")
         # the material thickness evaluated as its equivalent light-yield factor: the deposition only rescales d by
         # exp(-(t - t0)/lambda) (event by event with the same uniforms), so the photon count depends on (LY, t) only
         # through LY exp(-(t - t0)/lambda); this is the section 3.6 rerun of the deterministic deposition with the
@@ -104,7 +110,7 @@ class ToyProblem:
         self.B = max(int(B or 0), L.bootstrap_size(p_max))
         self.boot_exposure = int(boot_exposure or exposure)  # != exposure only in a negative control (omega = 1)
         self.generation = dict(generation or {})
-        self.data = None
+        self.observed = None
         self.truth = None
         self.pert = np.zeros(len(self.names))
         self.sigma_noise = 0.0
@@ -247,7 +253,12 @@ class ToyProblem:
         return len(self.names)
 
     def _shift_params(self, phis):
-        return {n: c + s * float(v) for (n, (c, s)), v in zip(self.shift_spec.items(), np.atleast_1d(phis))}
+        out = {}
+        for (n, (c, s)), v in zip(self.shift_spec.items(), np.atleast_1d(phis)):
+            v = float(v)
+            k2, k3 = self.shift_response.get(n, (0.0, 0.0))
+            out[n] = c + s * (v + k2 * v * v + k3 * v ** 3)
+        return out
 
     def h_shift(self, tp, phis):
         """The predictor with the shift-mode phi at centre + sigma phi_s (unit-normal coordinates, section 5.5)."""
@@ -339,7 +350,7 @@ class ToyProblem:
         value is m_nom(truth) = mu* + e_nom) and its noise is the data's event-level noise."""
         return self._observe_weighted(self.ev, self.model, params, rng, self.names, self.exposure, self._to_link)
 
-    def simulate(self, beta_truth, rng, phis=None, nominal: bool = True) -> L.Data:
+    def simulate(self, beta_truth, rng, phis=None, nominal: bool = True) -> L.Observations:
         """Toy data at the truth. nominal=True (toys under the null hypothesis, section 6.6): drawn from the nominal MC
         weighted to the truth; nominal=False (actual data, G8 pseudo-data with an analytic truth): a fresh event sample
         generated at the truth."""
@@ -362,7 +373,7 @@ class ToyProblem:
         if lay.phi_P:                            # constraint centres sampled around the true phi (section 6.6)
             sig = np.array([s for _, s in self.phi_spec.values()])
             phi0 = rng.normal(beta_truth[sl["phi_P"]], sig)
-        return L.Data(y_gauss=y, counts=counts, phi0=phi0, phi_cov=self.phi_cov(),
+        return L.Observations(y_gauss=y, counts=counts, phi0=phi0, phi_cov=self.phi_cov(),
                       eta0=rng.normal(eta, 1.0) if lay.n_eta else None)
 
     def _observe_with_counts(self, params: dict, rng, nominal: bool):
@@ -545,9 +556,9 @@ class ToyProblem:
         obs = [{"name": n, "block": "gaussian", "link": p.links[n]} for n in p.names]
         p.layout = L.build_layout(obs, list(self.theta_spec), list(self.phi_spec), 0, len(self.eta_spec))
         p.pert = (np.asarray(self.pert)[rows] if np.ndim(self.pert) else self.pert)
-        if self.data is not None:
-            p.data = L.Data(y_gauss=np.asarray(self.data.y_gauss)[rows], phi0=self.data.phi0,
-                            phi_cov=self.data.phi_cov, eta0=self.data.eta0)
+        if self.observed is not None:
+            p.observed = L.Observations(y_gauss=np.asarray(self.observed.y_gauss)[rows], phi0=self.observed.phi0,
+                            phi_cov=self.observed.phi_cov, eta0=self.observed.eta0)
         p._cache = {}
         p._parent_rows = rows
         return p
@@ -556,10 +567,10 @@ class ToyProblem:
     def d(self):
         return len(self.layout.theta)
 
-    def with_data(self, data: L.Data, mc_seed=None):
+    def with_data(self, observed: L.Observations, mc_seed=None):
         p = ToyProblem.__new__(ToyProblem)
         p.__dict__.update(self.__dict__)
-        p.data = data
+        p.observed = observed
         p.pert = np.zeros(len(self.names))
         p.pert_val = np.zeros(len(self.val_names))
         if mc_seed is not None and mc_seed != self.mc_seed:
@@ -568,7 +579,7 @@ class ToyProblem:
             p._cache = {}
         return p
 
-    def asimov(self, beta: np.ndarray) -> L.Data:
+    def asimov(self, beta: np.ndarray) -> L.Observations:
         """Asimov data at beta (the prediction itself), for the design-stage gates."""
         lay = self.layout
         n0 = len(lay.theta) + len(lay.phi_P)
@@ -576,7 +587,7 @@ class ToyProblem:
         y = (self._to_link(self._predict(params)["pred"]) + shift) if self.names else np.zeros(0)
         cen = np.array([c for c, _ in self.phi_spec.values()]) if self.phi_spec else None
         counts = {n: v["mu"] for n, v in self.counts_pred(params).items()} if self.count_spec else {}
-        return L.Data(y_gauss=y, counts=counts, phi0=cen, phi_cov=self.phi_cov(),
+        return L.Observations(y_gauss=y, counts=counts, phi0=cen, phi_cov=self.phi_cov(),
                       eta0=np.zeros(lay.n_eta) if lay.n_eta else None)
 
     def initial_beta(self, theta0: dict | None = None) -> np.ndarray:
@@ -589,7 +600,7 @@ class ToyProblem:
             b[sl["phi_P"]] = [c for c, _ in self.phi_spec.values()]
         if lay.omega:                                     # free totals: the observed (or expected) total
             for i, n in enumerate(lay.omega):
-                tot = float(np.sum(self.data.counts[n])) if self.data is not None and n in self.data.counts else \
+                tot = float(np.sum(self.observed.counts[n])) if self.observed is not None and n in self.observed.counts else \
                     float(self.exposure)
                 b[sl["omega"].start + i] = max(tot, 1.0)
         if lay.gamma:
@@ -608,6 +619,6 @@ def estimate_sigma_noise(problem: ToyProblem, beta: np.ndarray, K: int = 5, seed
     ref = problem.reference(beta[:n0], beta)
     vals = []
     for k in range(K):
-        q = problem.with_data(problem.data, mc_seed=(_seed_int(seed), k))
-        vals.append(L.Likelihood(lay, problem.data, ref).deviance(beta, q.h(beta[:n0])))
+        q = problem.with_data(problem.observed, mc_seed=(_seed_int(seed), k))
+        vals.append(L.Likelihood(lay, problem.observed, ref).deviance(beta, q.h(beta[:n0])))
     return float(np.std(vals, ddof=1))

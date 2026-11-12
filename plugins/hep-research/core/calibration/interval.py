@@ -85,13 +85,13 @@ def profile_interval(problem, fit: F.Fit, i: int, level: float = 0.68, seed=None
     return out
 
 
-def total_halfwidth(sigma_q: float, level: float, shift_widening=None, Sigma_boot_ii: float = 0.0, w: float = 1.0,
+def total_halfwidth(sigma_q: float, level: float, shift_widening=None, boot_cov_ii: float = 0.0, w: float = 1.0,
                     toy_calibrated: bool = False) -> float:
     """The total half-width of section 7.5 in the Gaussian case. `shift_widening` = [max(|D+_l|, |D-_l|)] for the
     shift-mode phi (D52 (b)); toy-calibrated intervals get no Sigma_boot / w term (they already contain it)."""
     z = z_of(level)
     sw = float(np.sum(np.square(shift_widening))) if shift_widening is not None else 0.0
-    sb = 0.0 if toy_calibrated else float(Sigma_boot_ii) / w
+    sb = 0.0 if toy_calibrated else float(boot_cov_ii) / w
     return math.sqrt(sigma_q ** 2 + z * z * (sw + sb))
 
 
@@ -119,9 +119,9 @@ def toy_calibrated(problem, fit: F.Fit, i: int, grid, n_toys: int, seed, level: 
         qt, xg = [], 0
         for t in range(n_toys):
             rng = np.random.default_rng([F._seed_int(seed), i, gi, t])
-            data, pert = (make_toy(truth, rng) if make_toy else (problem.simulate(truth, rng),
+            observed, pert = (make_toy(truth, rng) if make_toy else (problem.simulate(truth, rng),
                                                                  problem.replica_pert(rng)))
-            v_toy = _toy_view(problem, data, pert)
+            v_toy = _toy_view(problem, observed, pert)
             ft = F.find_extremum(v_toy, (F._seed_int(seed), i, gi, t), truth, frozen=fit.ref, n_start=n_start)
             if not ft.converged:
                 xg += 1
@@ -170,11 +170,11 @@ def _with(beta, i, v):
     return b
 
 
-def _toy_view(problem, data, pert):
-    return F.view(problem, data=data, h=lambda tp, _p=pert: problem.h(tp) + _p)
+def _toy_view(problem, observed, pert):
+    return F.view(problem, observed=observed, h=lambda tp, _p=pert: problem.h(tp) + _p)
 
 
-def mcmc(log_post, x0: np.ndarray, scale: np.ndarray, n: int, seed, chains: int = 4, priors_declared=None) -> dict:
+def metropolis_posterior(log_post, x0: np.ndarray, scale: np.ndarray, n: int, seed, chains: int = 4, priors_declared=None) -> dict:
     """Random-walk Metropolis for a separately declared Bayesian posterior (section 7.5). `priors_declared` lists
     the priors of theta and of every nuisance; without them the request is refused. Output: credible intervals with
     split-R-hat and bulk ESS; never labeled a confidence interval."""

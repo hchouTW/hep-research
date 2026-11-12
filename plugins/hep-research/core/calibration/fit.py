@@ -163,7 +163,7 @@ class Minimum:
 
 
 def _tp_index(lk):
-    return np.r_[lk.sl["theta"].start:lk.sl["phi_P"].stop]
+    return np.r_[lk.layout_slices["theta"].start:lk.layout_slices["phi_P"].stop]
 
 
 def jacobian(problem, tp, steps):
@@ -194,7 +194,7 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
     positivity of omega and gamma; converged when EDM = 1/2 g^T F^-1 g over the free directions passes the G1
     criterion (section 8.2, D79) with a positive-definite curvature. `fixed` = {beta index: value} holds components
     (profile scan points, segment points, restricted fits)."""
-    lk = L.Likelihood(problem.layout, problem.data, ref)
+    lk = L.Likelihood(problem.layout, problem.observed, ref)
     tpi = _tp_index(lk)
     hfun = hfun or problem.h
     steps = fd_steps(problem)
@@ -213,14 +213,14 @@ def minimize(problem, ref: L.Reference, beta0: np.ndarray, max_steps: int = 200,
         h = hfun(tp)
         calls += 1
         if Hfun is not None:
-            Hm = Hfun(tp)
+            link_jacobian = Hfun(tp)
         elif hfun is problem.h:
-            Hm = jacobian(problem, tp, steps)
+            link_jacobian = jacobian(problem, tp, steps)
             calls += 2 * tp.size
         else:
-            Hm = _fd(hfun, tp, steps)
+            link_jacobian = _fd(hfun, tp, steps)
         D = lk.deviance(b, h)
-        g, F = lk.score_fisher(b, h, Hm)
+        g, F = lk.score_fisher(b, h, link_jacobian)
         free = np.ones(b.size, bool)
         for i in fixed:
             free[i] = False
@@ -296,8 +296,8 @@ def _beta_bounds(problem, lk):
     lo = lk.bounds()
     hi = np.full(lo.size, np.inf)
     for i, (a, b) in enumerate(problem.bounds()):
-        lo[lk.sl["theta"].start + i] = a
-        hi[lk.sl["theta"].start + i] = b
+        lo[lk.layout_slices["theta"].start + i] = a
+        hi[lk.layout_slices["theta"].start + i] = b
     return lo, hi
 
 
@@ -317,7 +317,7 @@ def covariance(F: np.ndarray) -> np.ndarray:
 class Fit:
     beta: np.ndarray
     theta: dict
-    Sigma_beta: np.ndarray
+    cov_beta: np.ndarray
     sigma_tot: np.ndarray
     D: float
     edm: float
@@ -342,15 +342,15 @@ class Fit:
                 "basins": self.basins, "nonidentified": self.nonidentified}
 
 
-def sigma_tot(Sigma_beta, d, Sigma_boot=None, w=1.0):
+def sigma_tot(cov_beta, d, boot_cov=None, w=1.0):
     """sqrt(Sigma_theta + Sigma_boot / w)_ii (section 8.1)."""
-    v = np.diag(Sigma_beta)[:d].copy()
-    if Sigma_boot is not None:
-        v = v + np.diag(np.asarray(Sigma_boot, float))[:d] / w
+    v = np.diag(cov_beta)[:d].copy()
+    if boot_cov is not None:
+        v = v + np.diag(np.asarray(boot_cov, float))[:d] / w
     return np.sqrt(v)
 
 
-def iterate(problem, beta0: np.ndarray, frozen=None, Sigma_boot=None, w_boot: float = 1.0,
+def iterate(problem, beta0: np.ndarray, frozen=None, boot_cov=None, w_boot: float = 1.0,
             limit: int = ITER_LIMIT, lndet: bool = True) -> Fit:
     """The section 7.3 iteration: reference quantities at the current fit point, minimize with V and u fixed,
     theta_ref <- theta-hat, until max_i |delta theta_i| / sigma_tot,i < 0.1 (sigma_tot from the curvature of the
@@ -359,7 +359,7 @@ def iterate(problem, beta0: np.ndarray, frozen=None, Sigma_boot=None, w_boot: fl
     lay = problem.layout
     d = len(lay.theta)
     b = np.asarray(beta0, float).copy()
-    probe = L.Likelihood(lay, problem.data, problem.reference(b[_tp_index_layout(lay)], b, frozen))
+    probe = L.Likelihood(lay, problem.observed, problem.reference(b[_tp_index_layout(lay)], b, frozen))
     tpi = _tp_index(probe)
     ref = probe.ref
     hist, calls, prev = [], 0, None
@@ -371,7 +371,7 @@ def iterate(problem, beta0: np.ndarray, frozen=None, Sigma_boot=None, w_boot: fl
             return Fit(m.beta, _theta(problem, m.beta), _safe_cov(m.F), np.full(d, np.nan), m.D, m.edm, False, it,
                        f"minimization: {m.reason}", ref, history=hist, calls=calls, F=m.F)
         S = covariance(m.F)
-        st = sigma_tot(S, d, Sigma_boot, w_boot)
+        st = sigma_tot(S, d, boot_cov, w_boot)
         b = m.beta
         hist.append({"theta": b[:d].tolist(), "D": m.D})
         if prev is not None and np.max(np.abs(b[:d] - prev) / st) < CONV_FRACTION:
@@ -393,7 +393,7 @@ def iterate(problem, beta0: np.ndarray, frozen=None, Sigma_boot=None, w_boot: fl
             return Fit(b, _theta(problem, b), S, st, m.D, m.edm, False, it,
                        f"reference quantities not computable at theta_ref: {type(exc).__name__}", ref, history=hist,
                        calls=calls, F=m.F)
-    return Fit(b, _theta(problem, b), covariance(m.F), sigma_tot(covariance(m.F), d, Sigma_boot, w_boot), m.D,
+    return Fit(b, _theta(problem, b), covariance(m.F), sigma_tot(covariance(m.F), d, boot_cov, w_boot), m.D,
                m.edm, False, limit, f"no convergence within {limit} iterations", ref, history=hist, calls=calls,
                F=m.F)
 
@@ -422,7 +422,7 @@ def lndet_diagnostic(problem, fit: Fit, frozen=None, rounds: int = 30) -> tuple[
     if not problem.layout.gaussian_rows().size or not getattr(problem, "V_depends_on_theta", True):
         return 0.0, 0
     d = len(problem.layout.theta)
-    lk0 = L.Likelihood(problem.layout, problem.data, fit.ref)
+    lk0 = L.Likelihood(problem.layout, problem.observed, fit.ref)
     tpi = _tp_index(lk0)
     vhat = fit.ref if frozen is None else frozen
     lo, hi = _beta_bounds(problem, lk0)
@@ -437,7 +437,7 @@ def lndet_diagnostic(problem, fit: Fit, frozen=None, rounds: int = 30) -> tuple[
         (e.g. a width that is not finite) is rejected like a worse point, never an exception."""
         try:
             r = r or ref_at(bb)
-            v = L.Likelihood(problem.layout, problem.data, r).deviance(bb, problem.h(bb[tpi])) + r.ln_det
+            v = L.Likelihood(problem.layout, problem.observed, r).deviance(bb, problem.h(bb[tpi])) + r.ln_det
         except (ValueError, linalg.LinAlgError, FloatingPointError, ZeroDivisionError):
             return math.inf
         return v if np.isfinite(v) else math.inf
@@ -446,7 +446,7 @@ def lndet_diagnostic(problem, fit: Fit, frozen=None, rounds: int = 30) -> tuple[
     fb = full(b)
     for _ in range(rounds):
         r = ref_at(b)
-        lk = L.Likelihood(problem.layout, problem.data, r)
+        lk = L.Likelihood(problem.layout, problem.observed, r)
         h = problem.h(b[tpi])
         g, F = lk.score_fisher(b, h, jacobian(problem, b[tpi], steps))
         calls += 2 + 2 * tpi.size
@@ -481,8 +481,8 @@ def lndet_diagnostic(problem, fit: Fit, frozen=None, rounds: int = 30) -> tuple[
     return float(np.max(np.abs(b[:d] - fit.beta[:d]) / fit.sigma_tot)), calls
 
 
-def lk_fixed_dev(problem, ref, beta, h):
-    return L.Likelihood(problem.layout, problem.data, ref).deviance(beta, h)
+def fixed_deviance(problem, ref, beta, h):
+    return L.Likelihood(problem.layout, problem.observed, ref).deviance(beta, h)
 
 
 # ------------------------------------------------------------------ section 7.4
@@ -512,7 +512,7 @@ def separated(problem, ref, a: np.ndarray, b: np.ndarray, tau_bar: float) -> boo
     """-2 ln L along the straight theta segment between two endpoints, at 19 interior points with V fixed at the
     representative's value and the nuisances profiled at each point, exceeds the larger endpoint value by more than
     tau_bar (section 7.4)."""
-    lk = L.Likelihood(problem.layout, problem.data, ref)
+    lk = L.Likelihood(problem.layout, problem.observed, ref)
     d = len(problem.layout.theta)
     Da = lk.deviance(a, problem.h(a[_tp_index(lk)]))
     Db = lk.deviance(b, problem.h(b[_tp_index(lk)]))
@@ -529,7 +529,7 @@ def separated(problem, ref, a: np.ndarray, b: np.ndarray, tau_bar: float) -> boo
     return False
 
 
-def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_boot=None, w_boot: float = 1.0,
+def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, boot_cov=None, w_boot: float = 1.0,
                   limit: int = ITER_LIMIT, n_start: int | None = None, extra_starts=None, fixed=None) -> Fit:
     """Section 7.4: max(2d, 16) scrambled-Sobol starts (seed from the fit's seed block), converged endpoints,
     admission sigma_tot,i <= R_admit sigma_prior,i, basins by the segment barrier tau_bar = max(0.1, 4 sigma_noise),
@@ -555,7 +555,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_bo
         if not m.converged:
             nonconv.append({"start": s.tolist(), "reason": m.reason})
             continue
-        st = sigma_tot(covariance(m.F), d, Sigma_boot, w_boot)
+        st = sigma_tot(covariance(m.F), d, boot_cov, w_boot)
         endpoints.append({"beta": m.beta, "D": m.D, "sigma_tot": st, "admitted": bool(np.all(st <= R_ADMIT * sp))})
     if not endpoints:                                   # D45 (A8): one further multi-start round before giving up
         for s in sobol_starts(problem, n_start or n_starts(d), (_seed_int(seed), 45)):
@@ -566,7 +566,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_bo
             if not m.converged:
                 nonconv.append({"start": s.tolist(), "reason": m.reason, "round": 2})
                 continue
-            st = sigma_tot(covariance(m.F), d, Sigma_boot, w_boot)
+            st = sigma_tot(covariance(m.F), d, boot_cov, w_boot)
             endpoints.append({"beta": m.beta, "D": m.D, "sigma_tot": st,
                               "admitted": bool(np.all(st <= R_ADMIT * sp))})
     if not endpoints:
@@ -579,7 +579,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_bo
               "sigma_ratio": (e["sigma_tot"] / sp).tolist()} for e in endpoints if not e["admitted"]]
     if not admitted:
         e = endpoints[0]
-        fit = iterate(problem, e["beta"], frozen, Sigma_boot, w_boot, limit)
+        fit = iterate(problem, e["beta"], frozen, boot_cov, w_boot, limit)
         fit.flags.append("no-admitted-endpoint")
         fit.nonidentified = nonid
         fit.calls += calls
@@ -591,7 +591,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, Sigma_bo
             reps.append(e)
     fits = []
     for r in reps:
-        f = iterate(problem, r["beta"], frozen, Sigma_boot, w_boot, limit)
+        f = iterate(problem, r["beta"], frozen, boot_cov, w_boot, limit)
         calls += f.calls
         f.full = f.D + f.ref.ln_det if f.converged else math.inf
         fits.append(f)
@@ -648,19 +648,19 @@ def sigma_mc(problem, fit: Fit, V_MC_link: np.ndarray | None = None) -> np.ndarr
     sandwiches of the auxiliary measurements (BB-lite counts, auxiliary binomial) (section 6.7: B_m)."""
     lay = problem.layout
     d = len(lay.theta)
-    lk = L.Likelihood(lay, problem.data, fit.ref)
+    lk = L.Likelihood(lay, problem.observed, fit.ref)
     Finv = linalg.inv(fit.F)
     S = np.zeros((lay.n_beta, lay.n_beta))
     rows = lay.gaussian_rows()
     if rows.size and V_MC_link is not None:
         tp = fit.beta[_tp_index(lk)]
-        Hm = jacobian(problem, tp, fd_steps(problem))
+        link_jacobian = jacobian(problem, tp, fd_steps(problem))
         Jz = np.zeros((lay.n_link, lay.n_beta))
-        Jz[:, _tp_index(lk)] = Hm
+        Jz[:, _tp_index(lk)] = link_jacobian
         if lay.n_nu:
-            Jz[:, lk.sl["nu"]] = fit.ref.U
+            Jz[:, lk.layout_slices["nu"]] = fit.ref.U
         if lay.n_eta:
-            Jz[:, lk.sl["eta"]] = fit.ref.S
+            Jz[:, lk.layout_slices["eta"]] = fit.ref.S
         A = 2.0 * Finv @ Jz[rows].T @ fit.ref.W
         S += A @ V_MC_link @ A.T
     p = lk.unpack(fit.beta)
@@ -668,13 +668,13 @@ def sigma_mc(problem, fit: Fit, V_MC_link: np.ndarray | None = None) -> np.ndarr
         tau = float(np.asarray(fit.ref.tau[bn])[k])
         if tau <= 0:
             continue
-        j = lk.sl["gamma"].start + i
+        j = lk.layout_slices["gamma"].start + i
         gk = p["gamma"][i]
         e = Finv[:, j] * (2.0 / gk)
         S += np.outer(e, e) * tau * gk
     for i, bn in enumerate(lay.delta):
         n_eff, k_eff = fit.ref.n_eff[bn]
-        j = lk.sl["delta"].start + i
+        j = lk.layout_slices["delta"].start + i
         c = math.log(k_eff / (n_eff - k_eff))
         em = 1.0 / (1.0 + math.exp(-(c + p["delta"][i])))
         e = Finv[:, j] * 2.0
@@ -682,7 +682,7 @@ def sigma_mc(problem, fit: Fit, V_MC_link: np.ndarray | None = None) -> np.ndarr
     return 0.5 * (S + S.T)[:d, :d]
 
 
-def g7(theta_hats: np.ndarray, Sigma_MC: np.ndarray, rel_tol: float = 1e-8, null_tol: float | None = None,
+def g7(theta_hats: np.ndarray, mc_cov: np.ndarray, rel_tol: float = 1e-8, null_tol: float | None = None,
        sigma_tot_ref: np.ndarray | None = None, alpha: float = 0.01) -> dict:
     """G7 (section 8.2 note 7): T = sum_i (theta_i - theta_bar)^T Sigma_MC^+ (theta_i - theta_bar) < chi2_{r(K-1),
     1-alpha}, r = rank Sigma_MC with the pre-locked tolerance rel_tol; any spread in the null space of Sigma_MC beyond
@@ -690,7 +690,7 @@ def g7(theta_hats: np.ndarray, Sigma_MC: np.ndarray, rel_tol: float = 1e-8, null
     X = np.asarray(theta_hats, float)
     K, d = X.shape
     dev = X - X.mean(0)
-    w, U = np.linalg.eigh(0.5 * (Sigma_MC + Sigma_MC.T))
+    w, U = np.linalg.eigh(0.5 * (mc_cov + mc_cov.T))
     keep = w > rel_tol * max(w.max(), 0.0) if w.max() > 0 else np.zeros_like(w, bool)
     r = int(keep.sum())
     nt = null_tol if null_tol is not None else (1e-6 * float(np.max(sigma_tot_ref)) if sigma_tot_ref is not None
@@ -716,26 +716,26 @@ class Linearized:
     """h(tp) ~ h(tp0) + H (tp - tp0) around a fit point: the locally linear model of section 8.5. `pert` adds a
     toy's MC perturbation in link space (replica difference, section 6.6)."""
 
-    def __init__(self, problem, tp0: np.ndarray, pert: np.ndarray | None = None):
+    def __init__(self, problem, point0: np.ndarray, pert: np.ndarray | None = None):
         self.p = problem
-        self.tp0 = tp0.copy()
-        self.h0 = problem.h(tp0)
-        self.Hm = jacobian(problem, tp0, fd_steps(problem))
+        self.point0 = point0.copy()
+        self.h0 = problem.h(point0)
+        self.link_jacobian = jacobian(problem, point0, fd_steps(problem))
         self.pert = np.zeros_like(self.h0) if pert is None else pert
 
     def h(self, tp):
-        return self.h0 + self.Hm @ (np.asarray(tp) - self.tp0) + self.pert
+        return self.h0 + self.link_jacobian @ (np.asarray(tp) - self.point0) + self.pert
 
     def H(self, tp):
-        return self.Hm
+        return self.link_jacobian
 
 
 class _View:
     """A problem with its predictor, data or reference replaced (toys and linearized fits)."""
 
-    def __init__(self, base, data=None, h=None, H=None, reference=None):
+    def __init__(self, base, observed=None, h=None, H=None, reference=None):
         self._b = base
-        self.data = data if data is not None else base.data
+        self.observed = observed if observed is not None else base.observed
         self._h, self._H, self._ref = h, H, reference
 
     def __getattr__(self, k):
@@ -760,14 +760,14 @@ def view(base, **kw):
 def linear_toy_fit(problem, fit: Fit, toy_data, pert, ref: L.Reference, start=None) -> tuple[bool, float, np.ndarray]:
     """One locally linear toy: the linearized predictor at the fit point plus the toy's MC perturbation, the toy data,
     V-hat from `ref`; returns (converged, D at the toy's minimum, beta*)."""
-    lk = L.Likelihood(problem.layout, problem.data, fit.ref)
-    tp0 = fit.beta[_tp_index(lk)]
+    lk = L.Likelihood(problem.layout, problem.observed, fit.ref)
+    point0 = fit.beta[_tp_index(lk)]
     lin = getattr(fit, "_lin", None)
     if lin is None:
-        lin = Linearized(problem, tp0)
+        lin = Linearized(problem, point0)
         fit._lin = lin
-    hl = (lambda tp, _l=lin, _p=pert: _l.h0 + _l.Hm @ (np.asarray(tp) - _l.tp0) + _p)
-    v = view(problem, data=toy_data, h=hl, H=lambda tp, _l=lin: _l.Hm)
+    hl = (lambda tp, _l=lin, _p=pert: _l.h0 + _l.link_jacobian @ (np.asarray(tp) - _l.point0) + _p)
+    v = view(problem, observed=toy_data, h=hl, H=lambda tp, _l=lin: _l.link_jacobian)
     m = minimize(v, ref, fit.beta if start is None else start, Hfun=v.H, hfun=hl)
     return m.converged, m.D, m.beta
 
@@ -782,10 +782,10 @@ def g6(problem, fit: Fit, toys, n_lin_check: int = 50, alpha: float = 0.01, allo
     toys or a quadratic model."""
     T_obs = fit.D
     T, X, lin_pts = [], 0, []
-    lk = L.Likelihood(problem.layout, problem.data, fit.ref)
+    lk = L.Likelihood(problem.layout, problem.observed, fit.ref)
     tpi = _tp_index(lk)
-    for i, (data, pert, ref) in enumerate(toys):
-        ok, D, b = linear_toy_fit(problem, fit, data, pert, ref)
+    for i, (observed, pert, ref) in enumerate(toys):
+        ok, D, b = linear_toy_fit(problem, fit, observed, pert, ref)
         if not ok:
             X += 1
             continue
@@ -799,7 +799,7 @@ def g6(problem, fit: Fit, toys, n_lin_check: int = 50, alpha: float = 0.01, allo
     Dl_hat = lk.deviance(fit.beta, lin.h(fit.beta[tpi]) - lin.pert)
     for b in lin_pts:
         full = lk.deviance(b, problem.h(b[tpi])) - D_hat
-        lin_d = lk.deviance(b, lin.h0 + lin.Hm @ (b[tpi] - lin.tp0)) - Dl_hat
+        lin_d = lk.deviance(b, lin.h0 + lin.link_jacobian @ (b[tpi] - lin.point0)) - Dl_hat
         diffs.append(abs(full - lin_d))
     frac = float(np.mean(np.asarray(diffs) > diff_threshold)) if diffs else 1.0
     lin_ok = len(diffs) >= n_lin_check and frac <= allowed_fraction
@@ -849,7 +849,7 @@ def g2_statistic(problem, fit: Fit, ref=None) -> dict:
     """The G2 statistic at a fit with active bounds: in the locally linear model at the restricted fit point, the
     decrease of -2 ln L when the active theta bounds are released, t = g_A^T (F^-1)_AA ... computed as
     D_restricted - min_unrestricted of the quadratic model; with the number of active constraints."""
-    lk = L.Likelihood(problem.layout, problem.data, ref or fit.ref)
+    lk = L.Likelihood(problem.layout, problem.observed, ref or fit.ref)
     d = len(problem.layout.theta)
     act = [i for i in fit.active if i < d]
     if not act:
@@ -860,8 +860,8 @@ def g2_statistic(problem, fit: Fit, ref=None) -> dict:
     # the unrestricted quadratic minimum relative to the restricted one: the free directions are already at their
     # optimum given the active ones, so t = 1/2 g_A^T S_AA g_A with S_AA the Schur complement inverse on A
     Finv = linalg.inv(F)
-    gA = g[act]
-    t = 0.5 * float(gA @ Finv[np.ix_(act, act)] @ gA)
+    g_active = g[act]
+    t = 0.5 * float(g_active @ Finv[np.ix_(act, act)] @ g_active)
     return {"t": t, "active": act}
 
 
@@ -875,12 +875,12 @@ def g2(problem, fit: Fit, toys, alpha: float = 0.01) -> dict:
         return {"gate": "G2", "status": "passed", "active": [], "flags": []}
     counts = np.zeros(len(st["active"]) + 1)
     X = 0
-    for data, pert, ref in toys:
-        ok, D, b = linear_toy_fit(problem, fit, data, pert, ref)
+    for observed, pert, ref in toys:
+        ok, D, b = linear_toy_fit(problem, fit, observed, pert, ref)
         if not ok:
             X += 1
             continue
-        lo, hi = _beta_bounds(problem, L.Likelihood(problem.layout, problem.data, ref))
+        lo, hi = _beta_bounds(problem, L.Likelihood(problem.layout, problem.observed, ref))
         j = sum(1 for i in st["active"] if (b[i] <= lo[i] + 1e-9 or b[i] >= hi[i] - 1e-9))
         counts[j] += 1
     n = counts.sum()
@@ -918,12 +918,12 @@ def null_toys(problem, fit: Fit, n: int, seed, truth: np.ndarray | None = None):
     a replica-difference MC perturbation per toy, and one independent bootstrap realization per toy when V_G holds a
     bootstrap block (section 8.2 note 9). Seeds are (seed, toy index): no stream is shared between toys."""
     b = fit.beta if truth is None else truth
-    lk = L.Likelihood(problem.layout, problem.data, fit.ref)
+    lk = L.Likelihood(problem.layout, problem.observed, fit.ref)
     tp = b[_tp_index(lk)]
     for i in range(n):
         rng = np.random.default_rng([_seed_int(seed), i])
-        data = problem.simulate(b, rng)
+        observed = problem.simulate(b, rng)
         pert = problem.replica_pert(rng, tp)
         ref = problem.reference(tp, b, None, bootstrap_seed=(_seed_int(seed), i)) \
             if getattr(problem, "has_bootstrap", False) else fit.ref
-        yield data, pert, ref
+        yield observed, pert, ref

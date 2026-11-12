@@ -24,9 +24,9 @@ P3_LAMBDA, P3_RATIO = 0.1, 0.4
 G5_LAMBDA, G5_RATIO, G5_PROFILE = 0.05, 0.5, 4.0
 
 
-def measures(Sigma_theta: np.ndarray, sigma_prior) -> dict:
-    s = np.sqrt(np.diag(Sigma_theta))
-    R = Sigma_theta / np.outer(s, s)
+def measures(cov_theta: np.ndarray, sigma_prior) -> dict:
+    s = np.sqrt(np.diag(cov_theta))
+    R = cov_theta / np.outer(s, s)
     w, V = np.linalg.eigh(0.5 * (R + R.T))
     return {"lambda_min": float(w.min()), "direction": V[:, 0].tolist(),
             "ratio": (s / np.asarray(sigma_prior, float)).tolist(), "sigma_post": s.tolist()}
@@ -35,7 +35,7 @@ def measures(Sigma_theta: np.ndarray, sigma_prior) -> dict:
 def information(problem, beta: np.ndarray, ref: L.Reference | None = None) -> np.ndarray:
     """The expected information over beta at beta (Asimov: F does not depend on the observed values), as the
     covariance Sigma_beta = 2 F^-1 of D = -2 ln L."""
-    lk = L.Likelihood(problem.layout, problem.data, ref or problem.reference(beta[F._tp_index_layout(problem.layout)],
+    lk = L.Likelihood(problem.layout, problem.observed, ref or problem.reference(beta[F._tp_index_layout(problem.layout)],
                                                                              beta))
     tpi = F._tp_index(lk)
     h = problem.h(beta[tpi])

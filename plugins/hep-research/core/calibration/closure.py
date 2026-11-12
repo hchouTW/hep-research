@@ -161,7 +161,7 @@ def run_point(make_pseudo, fit_and_cover, n_req: int, seeds, truth_basin=None) -
     """The pseudo-data of one injection point as an estimation ensemble with replacement (section 7.3).
     `make_pseudo(seed)` returns a problem with its pseudo-data and its own MC; `fit_and_cover(problem, seed)` returns
     (converged, error = theta-hat - truth, cover68, cover95, interval toys {n, X}, basin_ok)."""
-    errors, c68, c95, nontruth, toysX, toysN = [], [], [], [], 0, 0
+    errors, c68, c95, nontruth, toys_x, toys_n = [], [], [], [], 0, 0
 
     def member(s):
         pr = make_pseudo(s)
@@ -173,11 +173,11 @@ def run_point(make_pseudo, fit_and_cover, n_req: int, seeds, truth_basin=None) -
         c68.append(cv68)
         c95.append(cv95)
         nontruth.append(not basin_ok)
-        toysX += itoys.get("X", 0)
-        toysN += itoys.get("n", 0)
+        toys_x += itoys.get("X", 0)
+        toys_n += itoys.get("n", 0)
     return {"errors": np.array(errors), "cover68": np.array(c68), "cover95": np.array(c95),
             "nontruth_basin": np.array(nontruth), "X": res.X, "n_completed": res.n_completed,
-            "interval_toys": {"X": toysX, "n": toysN}, "seeds_used": res.seeds_used}
+            "interval_toys": {"X": toys_x, "n": toys_n}, "seeds_used": res.seeds_used}
 
 
 def g8(level: str, names, sigma_design, interior: dict, boundary: dict) -> dict:

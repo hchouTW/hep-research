@@ -71,7 +71,7 @@ class Iteration(unittest.TestCase):
         p = T.make(cfg, TRUTH, data_seed=3, mc_seed=4)
         f = F.iterate(p, T.initial_beta(p))
         W = np.linalg.inv(cfg.V_data)
-        th = np.linalg.solve(cfg.J.T @ W @ cfg.J, cfg.J.T @ W @ (p.data.y_gauss - cfg.m0))
+        th = np.linalg.solve(cfg.J.T @ W @ cfg.J, cfg.J.T @ W @ (p.observed.y_gauss - cfg.m0))
         # within the declared minimizer tolerance (EDM < 0.002 tol, tol = 0.01: |delta| ~ 0.01 sigma, D79)
         np.testing.assert_allclose(f.beta[:3], th, atol=0.02 * f.sigma_tot.min())
         np.testing.assert_allclose(f.sigma_tot, np.sqrt(np.diag(np.linalg.inv(cfg.J.T @ W @ cfg.J))), rtol=1e-6)
@@ -83,7 +83,7 @@ class Iteration(unittest.TestCase):
 
         def full(th):
             r = p.reference(th, None)
-            return L.Likelihood(p.layout, p.data, r).deviance(np.r_[th], p.h(th)) + r.ln_det
+            return L.Likelihood(p.layout, p.observed, r).deviance(np.r_[th], p.h(th)) + r.ln_det
         o = optimize.minimize(full, f.beta[:3], method="Nelder-Mead",
                               options=dict(xatol=1e-9, fatol=1e-11, maxiter=40000))
         shift, _ = F.lndet_diagnostic(p, f)
@@ -163,7 +163,7 @@ class G7(unittest.TestCase):
             f0 = F.iterate(p0, T.initial_beta(p0), lndet=False)
             th = []
             for k in range(K):
-                p = T.LinearProblem(cfg, mc_seed=10_000 * r + k + 7, data=p0.data)
+                p = T.LinearProblem(cfg, mc_seed=10_000 * r + k + 7, observed=p0.observed)
                 th.append(F.iterate(p, T.initial_beta(p), lndet=False).beta[:3])
             det += F.g7(np.array(th), F.sigma_mc(p0, f0, cfg.V_MC / factor))["status"] == "failed"
         return det / reps
@@ -202,7 +202,7 @@ class G6(unittest.TestCase):
     def test_missing_effect_fails(self):
         """The simulation lacks one effect (section 15.3.1)."""
         p = T.make(self.cfg, TRUTH, data_seed=3, mc_seed=4)
-        p.data.y_gauss = p.data.y_gauss + np.r_[np.zeros(10), np.full(10, 1.5)]
+        p.observed.y_gauss = p.observed.y_gauss + np.r_[np.zeros(10), np.full(10, 1.5)]
         f = F.iterate(p, T.initial_beta(p))
         r = F.g6(p, f, F.null_toys(p, f, 500, 99))
         self.assertEqual(r["finding"], "g6.p_value")
@@ -243,7 +243,7 @@ class G6(unittest.TestCase):
         f = F.iterate(p, T.initial_beta(p))
         r = F.g6_full(p, f, 200, 98)
         self.assertEqual((r["status"], r["construction"]), ("passed", "full-toys"))
-        p.data.y_gauss = p.data.y_gauss + np.r_[np.zeros(10), np.full(10, 1.5)]
+        p.observed.y_gauss = p.observed.y_gauss + np.r_[np.zeros(10), np.full(10, 1.5)]
         f = F.iterate(p, T.initial_beta(p))
         self.assertEqual(F.g6_full(p, f, 200, 98)["finding"], "g6.p_value")
 

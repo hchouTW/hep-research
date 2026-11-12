@@ -75,6 +75,6 @@ def from_inputs(contract: dict, plan: dict, values: dict | None = None, systemat
         if missing:
             raise ProblemError("problem.values", f"no calibration value for {missing}")
         y = np.array([L.link(np.array([float(values[n])]), links[n])[0] for n in names])
-        p.data = L.Data(y_gauss=y, phi0=np.array([c for c, _ in phi.values()]) if phi else None,
+        p.observed = L.Observations(y_gauss=y, phi0=np.array([c for c, _ in phi.values()]) if phi else None,
                         phi_cov=p.phi_cov(), eta0=np.zeros(len(eta)) if eta else None)
     return p

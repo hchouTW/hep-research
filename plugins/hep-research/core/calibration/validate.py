@@ -91,12 +91,12 @@ def declaration_check(C_r0: np.ndarray, s: np.ndarray, constraints: list, expect
     return out
 
 
-def residual_covariance(V_vv, J_v, Sigma_beta, A=None, V_cv=None, d_cols=None, omit=()) -> np.ndarray:
+def residual_covariance(V_vv, J_v, cov_beta, A=None, V_cv=None, d_cols=None, omit=()) -> np.ndarray:
     """C_r = V_vv + J_v Sigma_beta J_v^T - J_v A V_cv - V_vc A^T J_v^T + sum_l d_l d_l^T (section 9.2); V_cv = 0 in
     holdout. `omit` drops terms (negative controls only): 'propagation', 'cross', 'shift'."""
     C = np.array(V_vv, float, copy=True)
     if "propagation" not in omit:
-        C = C + J_v @ Sigma_beta @ J_v.T
+        C = C + J_v @ cov_beta @ J_v.T
     if A is not None and V_cv is not None and "cross" not in omit:
         X = J_v @ A @ V_cv
         C = C - X - X.T
@@ -140,8 +140,8 @@ def holdout_pieces(problem, fit, y_v: np.ndarray, d_cols=None, omit=()) -> dict:
     U_v nu-hat + S_v eta-hat); J_v over (theta, phi_P, nu, eta) and zeros for the other nuisances; V_vv = validation
     V_data + V_MC; s_i from the validation V_data (sigma_i^(0))."""
     lay = problem.layout
-    lk = L.Likelihood(lay, problem.data, fit.ref)
-    sl = lk.sl
+    lk = L.Likelihood(lay, problem.observed, fit.ref)
+    sl = lk.layout_slices
     tpi = F._tp_index(lk)
     tp = fit.beta[tpi]
     v = problem.cfg.val if hasattr(problem, "cfg") else problem.val
@@ -164,7 +164,7 @@ def holdout_pieces(problem, fit, y_v: np.ndarray, d_cols=None, omit=()) -> dict:
     mu = hv + (U @ fit.beta[sl["nu"]] if lay.n_nu else 0.0) + (S @ fit.beta[sl["eta"]] if lay.n_eta else 0.0)
     r = np.asarray(y_v, float) - mu
     V_vv = np.asarray(v["V_data"], float) + np.asarray(v["V_MC"], float)
-    C = residual_covariance(V_vv, Jv, fit.Sigma_beta, d_cols=d_cols, omit=omit)
+    C = residual_covariance(V_vv, Jv, fit.cov_beta, d_cols=d_cols, omit=omit)
     s = np.sqrt(np.diag(np.asarray(v["V_data"], float)))
     return {"r": r, "C_r": C, "s": s, "J_v": Jv, "constraints": list(v.get("constraints", []))}
 
@@ -426,8 +426,8 @@ class DecisionBook:
 
 
 # ------------------------------------------------------------------ the toy path (sections 9.2, 9.4, 6.6, 7.3)
-def _toy_problem(problem, data, pert):
-    return F.view(problem, data=data, h=lambda tp, _p=pert: problem.h(tp) + _p)
+def _toy_problem(problem, observed, pert):
+    return F.view(problem, observed=observed, h=lambda tp, _p=pert: problem.h(tp) + _p)
 
 
 def holdout_toy(problem, fit, truth, rng, shift_prior: bool = True, alt_shift=None, n_start=None, seed=None):
@@ -438,15 +438,15 @@ def holdout_toy(problem, fit, truth, rng, shift_prior: bool = True, alt_shift=No
     (converged, residual, toy fit)."""
     q = len(getattr(problem, "shift_names", []) or [])
     phis = rng.normal(size=q) if (q and shift_prior) else None
-    data = problem.simulate(truth, rng, phis) if phis is not None else problem.simulate(truth, rng)
+    observed = problem.simulate(truth, rng, phis) if phis is not None else problem.simulate(truth, rng)
     yv = problem.simulate_val(truth, rng, phis)
     if alt_shift is not None:
         dc, dv = alt_shift
-        data.y_gauss = data.y_gauss + dc
+        observed.y_gauss = observed.y_gauss + dc
         yv = yv + dv
     pert = problem.replica_pert(rng)
     pv = problem.replica_pert_val(rng)
-    tp = _toy_problem(problem, data, pert)
+    tp = _toy_problem(problem, observed, pert)
     tp.h_val = lambda x, phis=None, _p=pv: problem.h_val(x) + _p
     ft = F.find_extremum(tp, seed if seed is not None else int(rng.integers(2 ** 31)), truth, frozen=fit.ref,
                          n_start=n_start) if n_start != 0 else F.iterate(tp, truth, frozen=fit.ref)
@@ -535,7 +535,7 @@ def _n_rows(problem) -> int:
 def sub_initial(sub):
     if not hasattr(sub, "cfg"):                      # a toy-detector fold: its own initial point
         return sub.initial_beta()
-    lk = L.Likelihood(sub.layout, sub.data, sub.reference(np.zeros(len(sub.layout.theta)), None))
+    lk = L.Likelihood(sub.layout, sub.observed, sub.reference(np.zeros(len(sub.layout.theta)), None))
     return lk.initial_beta(dict(zip(sub.layout.theta, np.zeros(len(sub.layout.theta)))))
 
 
@@ -550,7 +550,7 @@ def out_of_fold_residual(problem, sub, f, rows):
             params, _ = problem.params_of(f.beta[:n0])
             S = problem.eta_columns(problem._predict(params)["pred"])
             mu = mu + S[rows] @ f.beta[sl["eta"]]
-        return problem.data.y_gauss[rows] - mu
+        return problem.observed.y_gauss[rows] - mu
     c = problem.cfg
     th = f.beta[:sub.d]
     mu = c.m0[rows] + c.J[rows] @ th + problem.e0[rows] + (problem.pert[rows] if np.ndim(problem.pert) else 0.0)
@@ -558,7 +558,7 @@ def out_of_fold_residual(problem, sub, f, rows):
         mu = mu + c.U[rows] @ f.beta[sl["nu"]]
     if c.S is not None:
         mu = mu + c.S[rows] @ f.beta[sl["eta"]]
-    return problem.data.y_gauss[rows] - mu
+    return problem.observed.y_gauss[rows] - mu
 
 
 def cv_statistic(problem, folds, seed, Cplus: dict, factors: dict, n_start=None, g5=None) -> dict:
@@ -582,9 +582,9 @@ def cv_toy(problem, folds, truth, rng, seed, n_start=None, g5=None, frozen_by_fo
     """One cross-validation toy: data at the truth, its own replica perturbation reused at the theta of every fold
     (section 6.6), every fold refitted with that fold's V-hat frozen (section 7.3). Returns (status, residuals by
     fold)."""
-    data = problem.simulate(truth, rng)
+    observed = problem.simulate(truth, rng)
     pert = problem.replica_pert(rng)
-    tp = problem.with_data(data)
+    tp = problem.with_data(observed)
     tp.pert = pert
     res, conv, g5s = [], [], []
     for fi, rows in enumerate(folds):
@@ -711,7 +711,7 @@ def cv_evidence(problem, folds, kappa: str, alpha: float, seed=20261171, n_chat:
 
 
 # ------------------------------------------------------------------ shapes conditioned on the total (section 2.1)
-def shape_holdout_pieces(counts, p_hat, G, Sigma_beta, other=None) -> dict:
+def shape_holdout_pieces(counts, p_hat, G, cov_beta, other=None) -> dict:
     """The holdout residual of a free-omega validation shape conditioned on its observed total N_obs (section 2.1 "C_r
     and the observed total in holdout"): r = n - N_obs p(beta-hat), C = N_obs (diag p - p p^T) + N_obs^2 G Sigma_beta
     G^T (G = dp/dbeta); with another validation observable o (`other` = {r, V, J}): the cross term N_obs G Sigma_beta
@@ -724,14 +724,14 @@ def shape_holdout_pieces(counts, p_hat, G, Sigma_beta, other=None) -> dict:
     G = np.asarray(G, float)
     K = n.size
     r = n - N * p
-    C = N * (np.diag(p) - np.outer(p, p)) + N * N * G @ Sigma_beta @ G.T
+    C = N * (np.diag(p) - np.outer(p, p)) + N * N * G @ cov_beta @ G.T
     s = np.sqrt(np.maximum(N, 1.0) * p * (1 - p))
     cons = [np.r_[np.ones(K), np.zeros(0)]]
     if other is not None:
         ro, Vo, Jo = (np.asarray(other[k], float) for k in ("r", "V", "J"))
         m = ro.size
-        X = N * G @ Sigma_beta @ Jo.T
-        C = np.block([[C, X], [X.T, Vo + Jo @ Sigma_beta @ Jo.T]])
+        X = N * G @ cov_beta @ Jo.T
+        C = np.block([[C, X], [X.T, Vo + Jo @ cov_beta @ Jo.T]])
         r = np.r_[r, ro]
         s = np.r_[s, np.sqrt(np.diag(Vo))]
         cons = [np.r_[np.ones(K), np.zeros(m)]]

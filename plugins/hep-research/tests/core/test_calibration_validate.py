@@ -288,7 +288,7 @@ class ShiftModeResidual(unittest.TestCase):
             p = T.make(cfg, [0.5, -0.3], data_seed=10 + s, mc_seed=1)
             rng = np.random.default_rng([s, 9])
             phi = rng.normal(size=1)
-            p.data = p.simulate(p.truth, rng, phi, nominal=False)
+            p.observed = p.simulate(p.truth, rng, phi, nominal=False)
             yv = p.simulate_val(p.truth, rng, phi, nominal=False)
             f = F.iterate(p, T.initial_beta(p), lndet=False)
             rf = Sh.refits(p, f, multistart=False)

@@ -34,6 +34,19 @@ def load(path: str):
         raise InputError(f"{path} is not valid JSON: {exc}") from None
 
 
+
+def load_object(path: str, required=()) -> dict:
+    """`load` for an input that must be a JSON object with the `required` keys: anything else is bad input (exit 2),
+    never a traceback."""
+    x = load(path)
+    if not isinstance(x, dict):
+        raise InputError(f"{path}: expected a JSON object, got {type(x).__name__}")
+    missing = [k for k in required if k not in x]
+    if missing:
+        raise InputError(f"{path}: missing key(s) {', '.join(missing)}")
+    return x
+
+
 def emit(out: dict) -> int:
     print(json.dumps(out, indent=1, sort_keys=False, default=sorted))
     return EXIT.get(out.get("status"), 2)

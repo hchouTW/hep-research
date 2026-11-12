@@ -193,14 +193,14 @@ def rebuild_order(versions: dict) -> list[str]:
 
 
 # ------------------------------------------------------------------ conflict rules over packages (section 10.4, 15.3a)
-def source_set(obj: dict, upstreams: dict) -> set:
+def source_set(uncertainty: dict, upstreams: dict) -> set:
     """The source set of an uncertainty object: xi of result U is {U} union the central closure of U; a shared nuisance
     version has its lineage (the updater and its central closure)."""
-    if obj["kind"] == "xi":
-        return {obj["result"]} | central_closure(obj["result"], upstreams)
-    if obj["kind"] == "zeta":
-        return {obj["updater"]} | central_closure(obj["updater"], upstreams)
-    raise DependencyError("deps.object", f"unknown uncertainty object kind {obj['kind']!r}", "kind")
+    if uncertainty["kind"] == "xi":
+        return {uncertainty["result"]} | central_closure(uncertainty["result"], upstreams)
+    if uncertainty["kind"] == "zeta":
+        return {uncertainty["updater"]} | central_closure(uncertainty["updater"], upstreams)
+    raise DependencyError("deps.object", f"unknown uncertainty object kind {uncertainty['kind']!r}", "kind")
 
 
 def check_packages(packages: list, upstreams: dict, common_sources: dict | None = None) -> list:

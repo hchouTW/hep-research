@@ -97,16 +97,16 @@ class Segment2:
 
     def __init__(self, pkg, Gx, Gz, zmean, Sz, theta2_spec, exposure, mc, seeds, B):
         self.pkg = dict(theta_hat=pkg["theta_hat"], Gx=Gx, Gz=Gz, zmean=zmean)
-        nx = Gx.shape[1]
-        phi = {f"xi{i}": (0.0, 1.0) for i in range(nx)}
+        n_x = Gx.shape[1]
+        phi = {f"xi{i}": (0.0, 1.0) for i in range(n_x)}
         phi["zeta_eta"] = (float(zmean[0]), float(np.sqrt(Sz[0, 0])))
         phi["zeta_phi"] = (float(zmean[1]), float(np.sqrt(Sz[1, 1])))
-        self.nx = nx
+        self.n_x = n_x
         eta_rel = np.array([ETA_R if (n == "eop_mean") else 0.0 for n in TRK])
         th1 = list(THETA1)
 
         def map_params(d):
-            xi = np.array([d[f"xi{i}"] for i in range(nx)])
+            xi = np.array([d[f"xi{i}"] for i in range(n_x)])
             z = np.array([d["zeta_eta"], d["zeta_phi"]])
             t1 = self.pkg["theta_hat"] + Gx @ xi + Gz @ (z - zmean)
             params = {k: v for k, v in d.items() if k in THETA2}
@@ -115,9 +115,9 @@ class Segment2:
             return params, eta_rel * z[0]                      # log links: a relative shift r eta is r eta in link space
         self.problem = TP.ToyProblem(build, TRK, theta2_spec, exposure, mc, seeds[0], phi, None, None, B, seeds[1],
                                      map_params=map_params, thickness_by_yield=True)
-        cov = np.zeros((nx + 2, nx + 2))
-        cov[:nx, :nx] = np.eye(nx)
-        cov[nx:, nx:] = Sz
+        cov = np.zeros((n_x + 2, n_x + 2))
+        cov[:n_x, :n_x] = np.eye(n_x)
+        cov[n_x:, n_x:] = Sz
         self.problem.phi_cov = lambda _c=cov: _c
 
 
@@ -135,44 +135,44 @@ def gate_segmented(out: Path, smoke: bool, probe: bool = False):
                           seeds[1], thickness_by_yield=True)
     truth = joint.initial_beta({**{k: toy.TOY_NOMINAL[k] for k in THETA1}, **{k: toy.TOY_NOMINAL[k] for k in THETA2}})
     rng = np.random.default_rng(SEED + 2)
-    data = joint.simulate(truth, rng, nominal=False)          # the actual data: the analytic truth
-    joint.data = data
+    observed = joint.simulate(truth, rng, nominal=False)          # the actual data: the analytic truth
+    joint.observed = observed
     joint.sigma_noise = TP.estimate_sigma_noise(joint, truth)
     fj = F.find_extremum(joint, (SEED, 0), joint.initial_beta())
     # joint: theta order th1 + th2, then phi, then eta
     ij = list(range(len(THETA1) + len(THETA2)))
-    bj, Cj = fj.beta[ij], fj.Sigma_beta[np.ix_(ij, ij)]
+    bj, Cj = fj.beta[ij], fj.cov_beta[np.ix_(ij, ij)]
     # segment 1
     rows1 = [joint.names.index(n) for n in CAL]
     seg1 = TP.ToyProblem(build, CAL, th1, exposure, mc, seeds[0], PHI, eta_spec(CAL), None, B, seeds[1],
                          thickness_by_yield=True)
-    seg1.data = L.Data(y_gauss=data.y_gauss[rows1], phi0=data.phi0, phi_cov=seg1.phi_cov(), eta0=data.eta0)
+    seg1.observed = L.Observations(y_gauss=observed.y_gauss[rows1], phi0=observed.phi0, phi_cov=seg1.phi_cov(), eta0=observed.eta0)
     seg1.sigma_noise = TP.estimate_sigma_noise(seg1, seg1.initial_beta())
     f1 = F.find_extremum(seg1, (SEED, 1), seg1.initial_beta())
     # beta of seg1: theta1, phi (1), eta (1): zeta = (eta, phi)
     n1 = len(THETA1)
     i_th, i_z = list(range(n1)), [n1 + 1, n1]
-    pkg = P.export(f1.beta[i_th], f1.beta[i_z], f1.Sigma_beta, i_th, i_z, zeta_keys=["eta:energy_scale",
+    pkg = P.export(f1.beta[i_th], f1.beta[i_z], f1.cov_beta, i_th, i_z, zeta_keys=["eta:energy_scale",
                                                                                      "phi:material_thickness"])
     rows2 = [joint.names.index(n) for n in TRK]
 
     def seg2_fit(Gx, Gz, zmean, Sz, label):
         s2 = Segment2(pkg, Gx, Gz, zmean, Sz, th2, exposure, mc, seeds, B)
         p2 = s2.problem
-        p2.data = L.Data(y_gauss=data.y_gauss[rows2], phi0=np.r_[np.zeros(s2.nx), zmean], phi_cov=p2.phi_cov())
+        p2.observed = L.Observations(y_gauss=observed.y_gauss[rows2], phi0=np.r_[np.zeros(s2.n_x), zmean], phi_cov=p2.phi_cov())
         p2.sigma_noise = TP.estimate_sigma_noise(p2, p2.initial_beta())
         f2 = F.find_extremum(p2, (SEED, 2, label), p2.initial_beta())
-        nx = s2.nx
+        n_x = s2.n_x
         # (theta2 (2), xi (nx), zeta (2)) -> (theta1, theta2)
-        idx = list(range(2 + nx + 2))
-        S = f2.Sigma_beta[np.ix_(idx, idx)]
+        idx = list(range(2 + n_x + 2))
+        S = f2.cov_beta[np.ix_(idx, idx)]
         n1 = len(THETA1)
-        T = np.zeros((n1 + 2, 2 + nx + 2))
-        T[:n1, 2:2 + nx] = Gx
-        T[:n1, 2 + nx:] = Gz
+        T = np.zeros((n1 + 2, 2 + n_x + 2))
+        T[:n1, 2:2 + n_x] = Gx
+        T[:n1, 2 + n_x:] = Gz
         T[n1, 0] = T[n1 + 1, 1] = 1.0
-        xi = f2.beta[2:2 + nx]
-        z = f2.beta[2 + nx:2 + nx + 2]
+        xi = f2.beta[2:2 + n_x]
+        z = f2.beta[2 + n_x:2 + n_x + 2]
         t1 = pkg["theta_hat"] + Gx @ xi + Gz @ (z - zmean)
         return np.r_[t1, f2.beta[:2]], T @ S @ T.T, f2
     seg, Cs, f2 = seg2_fit(pkg["G_xi"], pkg["G_zeta"], pkg["zeta_hat"], pkg["Sigma_zeta"], 0)
@@ -180,8 +180,8 @@ def gate_segmented(out: Path, smoke: bool, probe: bool = False):
     sp, Cp, fp = seg2_fit(pkg["G_xi"], pkg["G_zeta"], np.zeros(2) + np.array([0.0, 1.0]), np.diag([1.0, 0.05 ** 2]),
                          1)
     res["counterexample_prior"] = agree(sp, Cp, bj, Cj)
-    Gm = P.marginal_regressions(f1.Sigma_beta, i_th, [i_z[0]], [i_z[1]])
-    D = np.diag(np.diag(f1.Sigma_beta)[i_z])
+    Gm = P.marginal_regressions(f1.cov_beta, i_th, [i_z[0]], [i_z[1]])
+    D = np.diag(np.diag(f1.cov_beta)[i_z])
     sm, Cm, fm = seg2_fit(pkg["G_xi"], Gm, pkg["zeta_hat"], D, 2)
     res["counterexample_marginal"] = agree(sm, Cm, bj, Cj)
     passed = res["joint_posterior"]["agree"] and not res["counterexample_prior"]["agree"] and \
@@ -310,7 +310,7 @@ def cal5_g7(reps: int = 1000) -> dict:
                 f0 = F.iterate(p0, T.initial_beta(p0), lndet=False)
                 th = []
                 for k in range(K):
-                    p = T.LinearProblem(cfg, mc_seed=cal_seed(5, 3) + 100 * r + k, data=p0.data)
+                    p = T.LinearProblem(cfg, mc_seed=cal_seed(5, 3) + 100 * r + k, observed=p0.observed)
                     th.append(F.iterate(p, T.initial_beta(p), lndet=False).beta[:3])
                 det += F.g7(np.array(th), F.sigma_mc(p0, f0, cfg.V_MC / factor))["status"] == "failed"
             out[f"K={K},factor={factor}"] = det / reps
@@ -318,7 +318,7 @@ def cal5_g7(reps: int = 1000) -> dict:
     return {"calibration": 5, "row": 2005, "rates": out, "passed": ok, "reps": reps}
 
 
-def cal7_bj(reps: int = 10_000) -> dict:
+def cal7_jacobian_bias(reps: int = 10_000) -> dict:
     """Calibration 7: the linear Gaussian configuration with MC noise varying with theta (e = e0 (1 + g theta)),
     scaled so that max_i |b_J,i| / sigma_tot,i = 0.05, 0.10, 0.15, 0.25; >= 10^4 repetitions per point; the extra
     68% and 95% undercoverage of the interval +-z sigma_tot relative to the same configuration with K_l = 0 is <= 0.01
@@ -361,7 +361,7 @@ def cal7_bj(reps: int = 10_000) -> dict:
         d68, d95 = c0[0] - cv[0], c0[1] - cv[1]
         out[f"bJ={target}"] = {"scale": sc, "cover68": cv[0], "cover95": cv[1], "extra_under68": d68,
                               "extra_under95": d95}
-        if target <= DN.BJ_BOUND + 1e-12 and (d68 > 0.01 or d95 > 0.01):
+        if target <= DN.JACOBIAN_BIAS_BOUND + 1e-12 and (d68 > 0.01 or d95 > 0.01):
             ok = False
     return {"calibration": 7, "row": 2007, "results": out, "passed": ok, "reps": reps}
 
@@ -475,7 +475,7 @@ def cal12_replica(reps: int = 10_000, n_ref: int = 20_000) -> dict:
     return {"calibration": 12, "row": 2015, "results": out, "passed": bool(ok), "reps": reps, "n_ref": n_ref}
 
 
-CALS = {"rounding": cal9_rounding, "replica": cal12_replica, "chat": cal13_chat, "lambda-bound": cal14_lower_bound, "lambda": cal3_lambda, "g7": cal5_g7, "bj": cal7_bj}
+CALS = {"rounding": cal9_rounding, "replica": cal12_replica, "chat": cal13_chat, "lambda-bound": cal14_lower_bound, "lambda": cal3_lambda, "g7": cal5_g7, "bj": cal7_jacobian_bias}
 
 
 # ------------------------------------------------------------------ gate 3: the negative tests of P8 and G9 (card)
@@ -568,7 +568,7 @@ def _toy_p3(names, theta_names, i, modes=None, exposure=2000, mc=20000):
     p = TP.ToyProblem(build, names, th, exposure, mc, SEED_GATE1 + i, None, None, None, None, SEED_GATE1 + 100 + i)
     p.degeneracy_modes = modes or []
     b = p.initial_beta()
-    p.data = p.asimov(b)
+    p.observed = p.asimov(b)
     return I.p3(p, b)
 
 
@@ -740,7 +740,7 @@ def gate1_g7_bblite(reps: int = 40, seed: int = SEED_GATE1 + 70) -> dict:
     bb = zero = 0
     for r in range(reps):
         th = np.array([F.iterate(q, T.initial_beta(q), lndet=False).beta[:1] for q in
-                       (T.LinearProblem(cfg, mc_seed=seed + 10_000 + 100 * r + k, data=p.data) for k in range(10))])
+                       (T.LinearProblem(cfg, mc_seed=seed + 10_000 + 100 * r + k, observed=p.observed) for k in range(10))])
         bb += F.g7(th, S)["status"] == "failed"
         zero += F.g7(th, np.zeros((1, 1)), sigma_tot_ref=f.sigma_tot)["status"] == "failed"
     return {"case": "G7 Poisson-only with BB-lite", "fail_rate_bb": bb / reps, "fail_rate_zero": zero / reps,
@@ -772,7 +772,7 @@ def gate1_g8_lndet(reps: int = 50, seed: int = SEED_GATE1 + 80) -> dict:
                 if kind == "bad":
                     def chi2(x):
                         rf = p.reference(np.array([x]), None)
-                        return Lk.Likelihood(p.layout, p.data, rf).deviance(np.r_[x], p.h(np.array([x])))
+                        return Lk.Likelihood(p.layout, p.observed, rf).deviance(np.r_[x], p.h(np.array([x])))
                     th = optimize.minimize_scalar(chi2, bounds=(-2, 10), method="bounded").x
                 err = np.array([th - p.truth[0]])
                 return f.converged, err, np.abs(err) <= f.sigma_tot, np.abs(err) <= 1.96 * f.sigma_tot, {"n": 0, "X": 0}, True
@@ -850,7 +850,7 @@ def gate1_shape_total(reps: int = 2000, seed: int = SEED_GATE1 + 110) -> dict:
         def __init__(s, counts):
             s.layout = Lk.build_layout([{"name": "c", "block": "poisson", "bins": K, "free_omega": True}], ["t0", "t1"],
                                        [], 0, 0)
-            s.data = Lk.Data(y_gauss=np.zeros(0), counts={"c": counts})
+            s.observed = Lk.Observations(y_gauss=np.zeros(0), counts={"c": counts})
             s.sigma_noise, s.edm_tol = 0.0, 0.01
 
         def h(s, tp):
@@ -879,13 +879,13 @@ def gate1_shape_total(reps: int = 2000, seed: int = SEED_GATE1 + 110) -> dict:
         for r in range(reps):
             rng = np.random.default_rng([seed, Nobs, r])
             sh = Shape(rng.multinomial(500, p0))
-            lk = Lk.Likelihood(sh.layout, sh.data, sh.reference(None, None))
+            lk = Lk.Likelihood(sh.layout, sh.observed, sh.reference(None, None))
             f = F.iterate(sh, lk.initial_beta({"t0": 0, "t1": 0}), lndet=False)
             th = f.beta[:2]
             Gm = np.stack([(sh.p(th + e_) - sh.p(th - e_)) / 2e-5 for e_ in np.eye(2) * 1e-5], axis=1)
-            Gb = np.zeros((K, f.Sigma_beta.shape[0]))
+            Gb = np.zeros((K, f.cov_beta.shape[0]))
             Gb[:, :2] = Gm
-            pc = V.shape_holdout_pieces(rng.multinomial(Nobs, p0), sh.p(th), Gb, f.Sigma_beta)
+            pc = V.shape_holdout_pieces(rng.multinomial(Nobs, p0), sh.p(th), Gb, f.cov_beta)
             Cp, kk = V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
             rej += V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, kk)
         sizes[Nobs] = rej / reps
@@ -930,7 +930,7 @@ def t1_v_cross_terms(reps: int = 2000, seed: int = SEED_T1 + 10, r0: int = 0) ->
         p = track_problem(r, cal, val, seed=seed)
         rng = np.random.default_rng([seed, r])
         truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
-        p.data = p.simulate(truth, rng, nominal=False)
+        p.observed = p.simulate(truth, rng, nominal=False)
         yv = p.simulate_val(truth, rng, nominal=False)
         f = F.iterate(p, p.initial_beta())
         if not f.converged:
@@ -977,7 +977,7 @@ def t1_v_shift(reps: int = 2000, seed: int = SEED_T1 + 20, r0: int = 0, exposure
         rng = np.random.default_rng([seed, r])
         truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
         phi = rng.normal(size=1)
-        p.data = p.simulate(truth, rng, phi, nominal=False)
+        p.observed = p.simulate(truth, rng, phi, nominal=False)
         yv = p.simulate_val(truth, rng, phi, nominal=False)
         f = F.iterate(p, p.initial_beta())
         if not f.converged:
@@ -1022,9 +1022,9 @@ def _track_fit(r, seed, cal=None, truth=TRACK_TRUTH, theta=None, links=None, dat
     if data_params:
         params, _ = p.params_of(b[:len(truth)])
         y = p.observe_at({**params, **data_params}, int(rng.integers(2 ** 62)))
-        p.data = L.Data(y_gauss=y)
+        p.observed = L.Observations(y_gauss=y)
     else:
-        p.data = p.simulate(b, rng, nominal=False)
+        p.observed = p.simulate(b, rng, nominal=False)
     p.sigma_noise = TP.estimate_sigma_noise(p, p.initial_beta()) if kw.get("sigma_noise", True) else 0.0
     return p
 
@@ -1118,7 +1118,7 @@ def t1_g7(reps: int = 40, K: int = 10, seed: int = SEED_T1 + 70) -> dict:
         p = _track_fit(r, seed, cal=cal, truth=np.r_[TRACK_TRUTH, 0.52], theta=th3, sigma_noise=False)
         th, Smc = [], None
         for k in range(K):
-            q = p.with_data(p.data, mc_seed=(seed, r, 100 + k))
+            q = p.with_data(p.observed, mc_seed=(seed, r, 100 + k))
             f = F.iterate(q, q.initial_beta())
             if Smc is None:
                 J = F.jacobian(q, f.beta[:3], F.fd_steps(q))
@@ -1154,7 +1154,7 @@ def _g8_problem(truth, seed_tuple, exposure=400, mc=200):
     p = TP.ToyProblem(track_build, G8_CAL, G8_THETA, exposure=exposure, mc_events=mc, mc_seed=(*st, 1),
                       boot_seed=(*st, 2), links=G8_LINKS)
     b = np.r_[truth, np.zeros(p.layout.n_beta - len(truth))]
-    p.data = p.simulate(b, np.random.default_rng([*st, 3]), nominal=False)
+    p.observed = p.simulate(b, np.random.default_rng([*st, 3]), nominal=False)
     p.truth = b
     return p
 
@@ -1166,7 +1166,7 @@ def _nolndet_fit(p, start):
 
     def chi2(x):
         rf = p.reference(np.asarray(x), None)
-        return Lk.Likelihood(p.layout, p.data, rf).deviance(np.asarray(x), p.h(np.asarray(x)))
+        return Lk.Likelihood(p.layout, p.observed, rf).deviance(np.asarray(x), p.h(np.asarray(x)))
     m = optimize.minimize(chi2, start, method="Nelder-Mead", options={"xatol": 1e-7, "fatol": 1e-7, "maxiter": 2000})
     return bool(m.success), m.x
 
@@ -1304,7 +1304,7 @@ def _p7_problem(mc=4000, seed=SEED_T1 + 100):
     (the layer-b sum term moved by delta: not theta, nu, eta or phi here)."""
     p = track_problem(0, TRACK_CAL, P7_VAL, mc=mc, seed=seed)
     b = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
-    p.data = p.asimov(b)
+    p.observed = p.asimov(b)
     f = F.iterate(p, b)
     p.set_val_point(f.beta[:2])
     pc = V.holdout_pieces(p, f, p.h_val(f.beta[:2]))
@@ -1364,7 +1364,7 @@ def t1_p7_cross(pool: int = 16000, seed: int = SEED_T1 + 102) -> dict:
     big = DN.p7("holdout", 5, {"a": np.einsum("ri,ij,rj->r", E4[0::2], Cp, E4[1::2])}, "analytic", 5)
     p1 = track_problem(0, TRACK_CAL, ["track2_p_mean"], seed=SEED_T1 + 100)
     b = np.r_[TRACK_TRUTH, np.zeros(p1.layout.n_beta - 2)]
-    p1.data = p1.asimov(b)
+    p1.observed = p1.asimov(b)
     f1 = F.iterate(p1, b)
     p1.set_val_point(f1.beta[:2])
     pc1 = V.holdout_pieces(p1, f1, p1.h_val(f1.beta[:2]))
@@ -1435,7 +1435,7 @@ def t1_propagation(seed: int = SEED_T1 + 120) -> dict:
     from core.calibration import deps
     p = _track_fit(0, seed, sigma_noise=False)
     f = F.iterate(p, p.initial_beta())
-    S = f.Sigma_beta[:2, :2]
+    S = f.cov_beta[:2, :2]
     th = f.beta[:2]
     p1 = P.export(th[[0]], np.zeros(0), S, [0], [])
     p2 = P.export(th[[1]], th[[0]], S, [1], [0])
@@ -1473,10 +1473,10 @@ def t1_g7_bblite(reps: int = 40, K: int = 10, seed: int = SEED_T1 + 130) -> dict
         p = TP.ToyProblem(track_build, [], TRACK_THETA, exposure=2000, mc_events=20000, mc_seed=(seed, r, 1),
                           boot_seed=(seed, r, 2), counts=counts)
         b = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
-        p.data = p.simulate(b, np.random.default_rng([seed, r]), nominal=False)
+        p.observed = p.simulate(b, np.random.default_rng([seed, r]), nominal=False)
         th, S, st = [], None, None
         for k in range(K):
-            q = p.with_data(p.data, mc_seed=(seed, r, 100 + k))
+            q = p.with_data(p.observed, mc_seed=(seed, r, 100 + k))
             f = F.iterate(q, q.initial_beta())
             if S is None:
                 S = F.sigma_mc(q, f, None)[:2, :2]
@@ -1512,7 +1512,7 @@ def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200,
             p = track_problem(r, TRACK_CAL, [], seed=seed + 1)     # each repetition its own calibration MC
             rng = np.random.default_rng([seed, Nobs, r])
             truth = np.r_[TRACK_TRUTH, np.zeros(p.layout.n_beta - 2)]
-            p.data = p.simulate(truth, rng, nominal=False)
+            p.observed = p.simulate(truth, rng, nominal=False)
             f = F.iterate(p, p.initial_beta())
             if not f.converged:
                 X += 1
@@ -1526,9 +1526,9 @@ def t1_shape_total(reps: int = 2000, seed: int = SEED_T1 + 140, nobs=(300, 1200,
             n = vp._hist(data_model, evs, "p2_shape")[0]
             steps = np.array([1e-5, 1e-3])
             Gm = np.stack([(pshape(th + e) - pshape(th - e)) / (2 * s) for e, s in zip(np.diag(steps), steps)], 1)
-            Gb = np.zeros((len(n), f.Sigma_beta.shape[0]))
+            Gb = np.zeros((len(n), f.cov_beta.shape[0]))
             Gb[:, :2] = Gm
-            pc = V.shape_holdout_pieces(n, pshape(th), Gb, f.Sigma_beta)
+            pc = V.shape_holdout_pieces(n, pshape(th), Gb, f.cov_beta)
             Cp, kk = V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
             rej += V.t_v(pc["r"], Cp) > stats.chi2.ppf(0.95, kk)
         sizes[str(Nobs)] = {"rej": int(rej), "X": X, "reps": reps, "size": rej / max(reps - X, 1)}
@@ -1561,7 +1561,7 @@ def t1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: in
     (iii) two periods (track 5 and track 2, efficiencies about 0.6 and 0.8; true fraction 0.5, model 0.45):
     conditioned on (N1, N2) size within alpha +- 25%; conditioned on N1 + N2 with the model fraction > alpha + 25%."""
     pool5, pool2 = _p_pool("track5", 200_000, (seed, 1)), _p_pool("track2", 200_000, (seed, 2))
-    data5, data2 = _p_pool("track5", 200_000, (seed, 3)), _p_pool("track2", 200_000, (seed, 4))
+    sample5, sample2 = _p_pool("track5", 200_000, (seed, 3)), _p_pool("track2", 200_000, (seed, 4))
     W5, W2 = 0.044, 0.0269
     edges = np.linspace(4.95, 5.05, 4)
 
@@ -1588,7 +1588,7 @@ def t1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: in
     pv_ok, pv_om = [], []
     for r in range(reps):
         rng = np.random.default_rng([seed, 10, r])
-        y = gun_summary(draw(data5, 400, rng))
+        y = gun_summary(draw(sample5, 400, rng))
         pv_ok.append(pval(y, gun, [400], r, 11))
         pv_om.append(pval(y, gun, [800], r, 12))
     a, c = _rate(pv_ok), _rate(pv_om)
@@ -1599,7 +1599,7 @@ def t1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: in
     pw, pw_np = [], []
     for r in range(reps):
         rng = np.random.default_rng([seed, 20, r])
-        pd = draw(data5, 400, rng)
+        pd = draw(sample5, 400, rng)
         keep = rng.random(400) >= q
         y = gun_summary(pd, keep)
         pw.append(pval(y, gun, [400], r, 21))
@@ -1627,7 +1627,7 @@ def t1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: in
     for r in range(reps):
         rng = np.random.default_rng([seed, 30, r])
         n1 = int(rng.binomial(800, 0.5))
-        a5, a2 = draw(data5, n1, rng), draw(data2, 800 - n1, rng)
+        a5, a2 = draw(sample5, n1, rng), draw(sample2, 800 - n1, rng)
         k1, k2 = int(np.sum(np.abs(a5 - 5.0) < W5)), int(np.sum(np.abs(a2 - 2.0) < W2))
         y = np.array([k1 / n1, k2 / (800 - n1), (k1 + k2) / 800])
         pv_c.append(pval(y, periods_summary, [n1, 800 - n1], r, 31))
