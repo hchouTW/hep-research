@@ -566,13 +566,14 @@ TOY_CONFIGS = {
     # name: calibration, row, MC / exposure, truth, V_MC factor in the fit, G8 replicates, judged
     "cal1": {"cal": 1, "row": 2000, "mcr": 20, "truth": "analytic", "fit_scale": 1.0, "reps": 1000, "judged": True,
              "power": True, "inject": True},
-    "cal6": {"cal": 6, "row": 2006, "mcr": 10, "truth": "analytic", "fit_scale": 1.0, "reps": 1000, "judged": True,
+    # calibration 12 folded into calibration 6 (the user's reduction of 2026-11-12, registered before any run): one
+    # configuration at MC 10x with the shared truth MC, judged for rows 2006 and 2015
+    "cal6": {"cal": 6, "row": 2006, "rows": [2006, 2015], "mcr": 10, "truth": "shared-mc", "fit_scale": 1.0,
+             "reps": 1000, "judged": True,
              "power": True, "inject": False},
-    "cal12": {"cal": 12, "row": 2015, "mcr": 10, "truth": "shared-mc", "fit_scale": 1.0, "reps": 1000,
-              "judged": True, "power": False, "inject": False},
-    "cal12_vmc2_r10": {"cal": 12, "row": 2015, "mcr": 10, "truth": "analytic", "fit_scale": 0.5, "reps": 500,
+    "cal12_vmc2_r10": {"cal": 12, "row": 2015, "mcr": 10, "truth": "analytic", "fit_scale": 0.5, "reps": 200,
                        "judged": False, "power": False, "inject": False},
-    "cal12_vmc2_r33": {"cal": 12, "row": 2015, "mcr": 33, "truth": "analytic", "fit_scale": 0.5, "reps": 500,
+    "cal12_vmc2_r33": {"cal": 12, "row": 2015, "mcr": 33, "truth": "analytic", "fit_scale": 0.5, "reps": 200,
                        "judged": False, "power": False, "inject": False},
 }
 TOY_PER_POINT, TOY_CHUNK = 500, 100           # N_full(d = 2) = 483 plus 17 spare for replacement and injection
@@ -779,9 +780,9 @@ def toy_g8_judge(name: str, reps_rows: list, reps: int | None = None) -> dict:
 
 # ------------------------------------------------------------------ toy_g8_mm: calibration 15's G8 item on the toy
 MM_TRUTH = np.array([1.0, 0.6])               # the exact-degeneracy variant (Beta(2, 2)): mirror basin at (0.6, 1.0)
-MM = {"exposure": 2000, "mc": 8000, "toys": 200, "per_point": 520, "chunk": 1}
+MM = {"exposure": 2000, "mc": 8000, "toys": 100, "per_point": 520, "chunk": 1}   # 100 toys: the user's reduction
 MM_RULE = ("closure.decide at the full level (d = 2, N_c = 483 per point, the first 483 pseudo-data whose fit converged "
-           "and whose toy-calibrated intervals were formed) on the toy-calibrated intervals (200 toys at the truth "
+           "and whose toy-calibrated intervals were formed) on the toy-calibrated intervals (100 toys at the truth "
            "scan point; covered when p > 0.32 at 68%, p > 0.05 at 95%) of section 7.4 fits of the bimodal toy; the "
            "error taken to the nearer of the truth and its mirror point")
 

@@ -145,7 +145,7 @@ class ToyG8Judge(unittest.TestCase):
         self.assertEqual(r["status"], "exposure-condition-not-met")
 
     def test_missing_replicates_and_reported_configurations(self):
-        r = H.toy_g8_judge("cal12", self.decisions("cal12", reps=5), reps=self.REPS)
+        r = H.toy_g8_judge("cal6", self.decisions("cal6", reps=5), reps=self.REPS)
         self.assertEqual(r["status"], "incomplete")
         r = H.toy_g8_judge("cal12_vmc2_r10", self.decisions("cal12_vmc2_r10", reps=5), reps=5)
         self.assertEqual((r["status"], r["passed"]), ("reported", None))
