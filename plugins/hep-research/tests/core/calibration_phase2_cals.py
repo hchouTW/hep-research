@@ -620,7 +620,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--task", type=int)
     ap.add_argument("--merge")
-    ap.add_argument("--local", choices=sorted(LOCAL))
+    ap.add_argument("--local", dest="item", choices=sorted(LOCAL))
     ap.add_argument("--smoke", choices=sorted(SMOKE))
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
@@ -632,9 +632,9 @@ def main(argv=None) -> int:
         r = merge(Path(a.merge), Path(a.out))
         print(json.dumps({"complete": r["complete"], "passed": r["passed"], "missing": len(r["missing_tasks"])}))
         return 0 if r["complete"] and all(r["passed"].values()) else 1
-    if a.local:
+    if a.item:
         t0 = time.time()
-        r = LOCAL[a.local]()
+        r = LOCAL[a.item]()
         r.update(seconds=time.time() - t0, provenance=G.provenance(), label="synthetic")
         io.write_json(a.out, io.jsonable(r))
         print(json.dumps({"calibration": r["calibration"], "passed": r["passed"], "seconds": r["seconds"]}))

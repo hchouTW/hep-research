@@ -128,7 +128,7 @@ Marked scripts exit 2 with a JSON message without NumPy (and SciPy); all print `
   region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy at run time.
 - `periodicity_scan.py`: generalized Lomb-Scargle with a surrogate global p (white, AR(1), OU);
   `time_structure.py`: change points (toy-calibrated false alarms) and lags with surrogates. NumPy at run time.
-- Simulator parameter calibration ([README](../README.md); engine `core/calibration/`, SciPy at run time): `calib_chain.py`, `calib_contract.py`, `calib_data.py`, `calib_deps.py`, `calib_emulator.py`, `calib_kernel_check.py`, `calib_reweight.py`, `calib_use.py`; `calib_closure.py` (needs NumPy), `calib_design.py` (needs NumPy), `calib_fit.py` (needs NumPy), `calib_identify.py` (needs NumPy), `calib_interval.py` (needs NumPy), `calib_likelihood.py` (needs NumPy), `calib_propagate.py` (needs NumPy), `calib_shift.py` (needs NumPy), `calib_validate.py` (needs NumPy).
+- Calibration ([README](../README.md), `core/calibration/`): `calib_chain.py`, `calib_contract.py`, `calib_data.py`, `calib_deps.py`, `calib_emulator.py`, `calib_kernel_check.py`, `calib_reweight.py`, `calib_use.py`; with (needs NumPy): `calib_closure.py` (needs NumPy), `calib_design.py` (needs NumPy), `calib_fit.py` (needs NumPy), `calib_identify.py` (needs NumPy), `calib_interval.py` (needs NumPy), `calib_likelihood.py` (needs NumPy), `calib_propagate.py` (needs NumPy), `calib_shift.py` (needs NumPy), `calib_validate.py` (needs NumPy).
 - Inference scripts elsewhere (hep-measurement, pyhf/Combine, unbinned fit): [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 
