@@ -128,6 +128,11 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Transfers**: drift-plus-readout concept to noble-liquid TPCs
   ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)) and any imaging detector;
   does not transfer: gas-specific diffusion and ion-backflow numerology.
+- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. **No method text, no source read**: signal extraction from the pad or wire waveforms of
+  a gaseous TPC (deconvolution of the field and electronics response); the liquid-argon
+  processing in
+  [front-end waveform processing](front-end-waveform-processing.md#lar-tpc-signal-processing)
+  is not stated for gas.
 
 ## MWPCs, straw tubes, and RPCs
 
@@ -156,6 +161,10 @@ path length, saturation, gain, and attachment ([particle identification](particl
   voltage. **Data sample**: cosmic/collision muons for efficiency versus voltage
   (efficiency-plateau scan).
 - **Transfers**: plateau-scan concept (efficiency vs voltage) to every gas detector.
+- **No method text, no source read** (wire, proportional and ionization chambers): hit
+  finding and association beyond the wire-crossing ghosts above; the energy or
+  identifiable quantity (count versus integrated charge or current, rate nonlinearity and
+  saturation, integration window); particle identification.
 
 ## Micro-pattern gaseous detectors (GEM, Micromegas, and relatives)
 
@@ -179,7 +188,7 @@ effects** (space charge, gain drop), and time resolution set by gap and gas.
 - **Tails**: discharge events, gain-nonuniformity-induced position biases.
 - **Data sample**: cosmic/test-beam and in-situ tracks for gain map.
 - **Transfers**: charge-centroid/micro-TPC to other segmented gas detectors.
-- **Identification**: Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. MPGD dE/dx or topology for
+- **Identification**: MPGD dE/dx or topology for
   particle identification: no method text, no source read. In a muon system the identification is the system's
   ([muon systems](muon-systems.md#reconstruction-chain)).
 
