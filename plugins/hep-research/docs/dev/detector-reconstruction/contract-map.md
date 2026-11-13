@@ -19,7 +19,7 @@ Each semantic need takes the first option that works (Section 8.1): existing fie
 | Existing item | Reconstruction need | Decision | Reason |
 | --- | --- | --- | --- |
 | `ext_response.json` | Typed instrument response | **Reuse** for matrix and parametrized forms; typed native reference for effective areas, PSFs and transfer operators until T02 shows an extension is needed | Section 11.2: not every response is a migration matrix |
-| `run_workflow.py` | Native execution identity | **Reuse** its argv, step and receipt handling; native binaries, libraries and configurations enter as declared inputs | G05: `script_sha256` covers `.py` entries only |
+| `run_workflow.py` | Native execution identity | **Reuse** its argv, step and receipt handling; native binaries, libraries and configurations enter as declared inputs | G05: `script_sha256` covers `.py` entries only. T12 stage 2 (drafted, not yet merged): a step's `native_inputs` are hashed afresh before every skip decision (`extension.native_sha256`, receipt `native_inputs`); an undeclared executable in argv disables the skip |
 | `ext_computational_run.json` | Run records | **Reuse.** g4sim S2 extended this schema; re-checked at 3.20.0, last section | Overlap found in the parallel-run review |
 | `geometry_ir.json`, `detector_spec.json`, `core/geometry` | Nominal geometry identity in payloads (R32) | **Reuse** `geometry_id`; do not define a second identity | D2 |
 | Calibration reference, N11 naming | Conditions payload naming | **Reuse** | R01, R32 |
