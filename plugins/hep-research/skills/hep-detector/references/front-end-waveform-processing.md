@@ -169,6 +169,44 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   resolve the prompt part, the baseline estimate, the integration windows and their
   alignment to the pulse start, and saturation of large pulses. Simulate the shape variable
   through the same digitization chain, or calibrate its distribution on tagged data.
-- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. Neutron detectors beyond neutron-gamma pulse shape: no method text, no source read for
-  prompt-delayed (capture-gated) association, capture or recoil response and its parameter
-  estimation, position and direction, or energy from flight time.
+<!-- example: source citation (instruments named as the source of a method) -->
+- **One single-phase liquid-argon cell** with two photomultipliers (Lippincott et al., Phys.
+  Rev. C 78 (2008) 035801, arXiv:0801.1531v4, secs. II.B-C, III.B; an erratum, Phys. Rev. C
+  81 (2010) 039901, was not read, and its effect on the values given here is unknown).
+  Selection and association: the trigger time is where the trace first crosses 20% of its maximum; an event is kept if the two trigger
+  times agree within 20 ns, neither photomultiplier saturates, and the top-bottom asymmetry
+  excludes light made in a photomultiplier window; calibration events are tagged by
+  coincidence with an external detector (for neutrons, at a time of flight that separates
+  them from gamma rays). Parameters: the prompt fraction is the trace integral from 50 ns
+  before the trigger to `xi` over that to 9 us, with `xi` = 90 ns chosen to minimize the
+  electronic-recoil contamination; the triplet lifetime is fitted (exponential plus
+  baseline, 1-7 us) to averaged traces of a calibration peak. Energy: photoelectrons from
+  integrals of 50 ns regions around threshold crossings, the single-photoelectron area from
+  isolated late photoelectrons, the yield per keV electron-equivalent from the 122 keV 57Co
+  peak (checked at 511 keV); light yield and triplet lifetime are tracked daily for purity.
+- **Heat-pulse shape in scintillating bolometers** (CaMoO4, ZnMoO4, MgMoO4, ZnSe; Arnaboldi
+  et al., Astropart. Phys. 34 (2011) 797, arXiv:1011.5415v3, abstract, secs. 3.2, 4, 6).
+  Besides the optimum-filter amplitude, pulse-shape parameters (rise and decay times, and the
+  rms differences between the filtered pulse and the filtered reference pulse, left and right
+  of its maximum) separate alpha from beta/gamma events in the heat channel alone, explained there by the different partition of energy
+  between heat and a scintillation slow enough at low temperature to shape the heat rise.
+  The events were labelled by a coupled light detector; purely thermal detectors had shown
+  no such result, and the alpha heat response differs slightly from the gamma calibration.
+- **Capture-gated neutron association** (plastic-scintillator cells wrapped in cadmium: Liu et
+  al., Chin. Phys. C 40 (2016) 076201, arXiv:1603.03529v1, secs. 2.D, 3, 4.B). A fast neutron gives a prompt
+  recoil-proton signal and, microseconds later, a capture signal from cascade gamma rays.
+  True coincidences have an exponential delay set by the capture time; random coincidences
+  of proton, capture and background signals add to the distribution of intervals between
+  adjacent signals. A fit of that distribution gives the capture-gated (neutron) rate, the
+  capture time and the total rate; summing counts in an early and a late region is the
+  simpler choice at low statistics. An exponential fit of the early region alone
+  overestimates the capture time.
+- **Position and energy in a segmented capture detector** (PROSPECT: Ashenfelter et al., Nucl.
+  Instrum. Methods A 922 (2019) 287, arXiv:1808.00097v2, secs. 11.3-11.4, 14.1-14.4). Each segment has a
+  photomultiplier at each end; the position along it comes from the time difference of the
+  two pulses, and the energy from the geometric mean of the two pulse heights with a fitted
+  residual position dependence. Captures on 6Li are selected by the pulse tail fraction, in
+  delayed coincidence with a prompt signal.
+<!-- /example -->
+- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. Position from the light pattern in single-phase noble liquids; neutron
+  direction; energy of neutrons from flight time: no method text, no source read.

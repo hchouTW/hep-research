@@ -128,9 +128,18 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Transfers**: drift-plus-readout concept to noble-liquid TPCs
   ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)) and any imaging detector;
   does not transfer: gas-specific diffusion and ion-backflow numerology.
-- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. **No method text, no source read**: signal extraction from the pad or wire waveforms of
-  a gaseous TPC (deconvolution of the field and electronics response); the liquid-argon
-  processing in
+<!-- example: source citation -->
+- **Signal extraction in a gaseous TPC with wire-chamber readout** (the ALICE TPC: Alme et al.,
+  Nucl. Instrum. Methods A 622 (2010) 316, arXiv:1001.1950v1, secs. 1, 4.1, 4.3). Each pad signal is shaped and
+  digitized; a processor per channel removes low-frequency perturbations and trigger-correlated
+  effects (a stored pedestal pattern is subtracted), cancels the pulse tail with a third-order
+  filter whose coefficients are programmable per channel (to follow gas, anode voltage, ageing
+  and channel-to-channel differences), corrects the baseline with a moving average, and
+  zero-suppresses below a threshold, keeping pre- and post-samples and requiring several
+  samples above threshold. Tail and baseline correction must come before zero suppression.
+<!-- /example -->
+- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. **No method text, no source read**: deconvolution of the field
+  response from gaseous-TPC waveforms; the liquid-argon processing in
   [front-end waveform processing](front-end-waveform-processing.md#lar-tpc-signal-processing)
   is not stated for gas.
 
@@ -161,10 +170,17 @@ path length, saturation, gain, and attachment ([particle identification](particl
   voltage. **Data sample**: cosmic/collision muons for efficiency versus voltage
   (efficiency-plateau scan).
 - **Transfers**: plateau-scan concept (efficiency vs voltage) to every gas detector.
+- **Collected charge in an integrating ionization chamber** (parallel-plate chambers in
+  clinical ion beams: Christensen et al., Med. Phys. 43 (2016) 5484, arXiv:1610.06749v1, abstract and sec. I).
+  Fewer ion pairs are collected than released, because charges recombine within one track
+  (initial recombination) and between tracks (general recombination); the measured charge is
+  corrected by a recombination factor; the paper's code computes it, in principle, for the
+  beam's particle-energy spectrum and time structure (pulsed or continuous). The protocols give no universal correction when both
+  types occur, in ion beams heavier than protons.
 - **No method text, no source read** (wire, proportional and ionization chambers): hit
-  finding and association beyond the wire-crossing ghosts above; the energy or
-  identifiable quantity (count versus integrated charge or current, rate nonlinearity and
-  saturation, integration window); particle identification.
+  finding and association beyond the wire-crossing ghosts above; count versus integrated
+  charge or current, rate nonlinearity and saturation (wire and proportional chambers), and
+  the integration window; particle identification.
 
 ## Micro-pattern gaseous detectors (GEM, Micromegas, and relatives)
 
@@ -188,8 +204,17 @@ effects** (space charge, gain drop), and time resolution set by gap and gas.
 - **Tails**: discharge events, gain-nonuniformity-induced position biases.
 - **Data sample**: cosmic/test-beam and in-situ tracks for gain map.
 - **Transfers**: charge-centroid/micro-TPC to other segmented gas detectors.
-- **Identification**: MPGD dE/dx or topology for
-  particle identification: no method text, no source read. In a muon system the identification is the system's
+<!-- example: source citation -->
+- **Identification in a TPC read out by Micromegas** (the T2K near-detector TPCs: Abgrall et al.,
+  Nucl. Instrum. Methods A 637 (2011) 25, arXiv:1012.0865v1, sec. 7.3). The charge of a cluster, summed over its
+  pads and corrected for gas temperature and pressure, is divided by the track length in its
+  pad column; clusters at a module edge or near the central cathode are dropped, since part of
+  their charge was not collected. The lowest 70% of these values give a truncated mean,
+  corrected for the number of clusters used, and its pull from the value expected per species
+  at the measured momentum identifies the particle.
+<!-- /example -->
+- **Identification** with MPGD planes outside a TPC, and topology: no method text, no source
+  read. In a muon system the identification is the system's
   ([muon systems](muon-systems.md#reconstruction-chain)).
 
 ## Scintillating-fiber trackers

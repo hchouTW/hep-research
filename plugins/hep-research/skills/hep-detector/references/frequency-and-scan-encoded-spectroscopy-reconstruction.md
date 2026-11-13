@@ -2,8 +2,8 @@
 
 Owner: hep-detector. This page gives reconstruction method text for three readout families that the general pages
 do not cover: cyclotron-radiation emission spectroscopy (CRES), resonant and coherent-field readout (haloscopes),
-and retarding and scan-encoded spectroscopy. Every method statement comes from a source read on 2026-11-06 and is
-scoped to the experiment or study that source describes; it is not a family-wide method. Sources and their read
+and retarding and scan-encoded spectroscopy. Every method statement comes from a source read on 2026-11-06 or
+2026-11-13 and is scoped to the experiment or study that source describes; it is not a family-wide method. Sources and their read
 levels are under [Sources read](#sources-read): a source read at `page` level supports only its named sections.
 Where no source read gives a method, the text says "no method text: no source read", and that stays a gap.
 
@@ -23,7 +23,7 @@ where a source below combines them under stated conditions.
 <!-- example: source citation (experiments named as the source of a method) -->
 Scope: Project 8 only. Phase I (rectangular waveguide, 83mKr) and Phase II (circular waveguide, 83mKr and T2). The
 2022 tritium letter (arXiv:2212.05048) was read in full; the 2023 paper (arXiv:2303.12055) and the 2017 Phase I
-paper (arXiv:1703.02037) at `page` level. Outputs are a start frequency per event and a binned spectrum. No other
+paper (arXiv:1703.02037) and a 2020 classification paper (arXiv:1909.08115) at `page` level. Outputs are a start frequency per event and a binned spectrum. No other
 CRES apparatus was read.
 
 - **Signal extraction** (2212.05048 apparatus paragraphs, spectrogram caption; 2303.12055 Radio-frequency system).
@@ -42,9 +42,11 @@ CRES apparatus was read.
   resolution `I` and the energy-loss function `L`; Bayesian fits for tritium (2303.12055 Bayesian analysis
   procedure). A fit that ignores the scatter peaks misses the low-energy tail from undetected
   first tracks.
-- **Space and direction.** No method text: no source read. The sections read (and a keyword search for pitch
-  angle) give no position or pitch-angle estimator per event, only a Phase I cut on event start against trigger
-  time; pitch and radius enter through simulation and efficiency. A frequency-time track is not a spatial track.
+- **Space and direction.** Position per event: no method text, no source read. Pitch angle, in Phase I krypton
+  data (Ashtari Esfahani et al. 2020, secs. 2.1, 2.3): band power depends on pitch angle, so a track is a main band
+  at high or low pitch angle, or a sideband; the axial frequency is the band spacing over the sideband order, and
+  a lone main band gives the pitch angle from its slope once high and low are told apart. It only classifies
+  tracks. A frequency-time track is not a spatial track.
 - **Energy** (2212.05048 energy-to-frequency equation; 2303.12055 Test of the frequency-energy relation; 1703.02037
   CRES section). `f_c = |e| B / (2 pi (m_e + E_kin / c^2))`, with the mean field `B` from 83mKr lines; the energy at
   decay follows from the start frequency. Voigt fits to the krypton conversion lines test the relation with `B`
@@ -143,7 +145,21 @@ spheres coupled to a cavity mode, a spin-magnetometer readout. Not extended to o
 
 ### Circuit readout
 
-No method text: no source read, for any of the seven axes.
+<!-- example: source citation -->
+Scope: ABRACADABRA-10 cm, one letter at `page` level (Salemi et al. 2021).
+
+- **Signal extraction.** Flux in the toroid bore reaches a pickup read by a SQUID; output
+  band-passed, digitized on a rubidium-locked clock, stored as averaged spectra.
+- **Finding.** A likelihood-ratio statistic per mass; a candidate must pass 5 sigma, look-elsewhere corrected.
+- **Parameter estimation.** Per sliding window, a fixed-shape signal over a background linear in frequency; a
+  nuisance parameter tuned at 4 sigma absorbs non-Gaussian noise.
+- **Space and direction.** Not applicable as read: spectra from one pickup only.
+- **Identifiable quantity.** Frequency gives mass; power gives the coupling via simulated geometric coupling,
+  field volume and maximum field.
+- **PID or topology.** Single-bin spikes drifting between spectra, and magnet-off excesses, are vetoed.
+- **Uncertainty and quality.** Loop injections give the gain, a factor 1.8 off the calculation; the procedure
+  was fixed on 10% of an earlier run before unblinding.
+<!-- /example -->
 
 ### Broadband haloscopes
 
@@ -155,17 +171,27 @@ Photosensor technologies and Sensitivity sections). The paper has no data; this 
   sensor, read either by a bolometer with time-modulated input (a chopper, shifting the signal to where 1/f noise
   is subdominant) or by a photon counter with thresholding and pulse fitting. A bolometer on a static signal is
   limited by 1/f noise.
-- **Every other axis.** No method text: no source read. The sections read give projections, sensitivity scaling
-  and assumed SNR and efficiency only, not a reconstruction.
+- **Other axes.** Projections only.
+
+Scope: the GigaBREAD dish antenna, a preprint at `page` level (Yu et al. 2026).
+
+- **Signal extraction.** Time-stamped spectra less a Savitzky-Golay baseline; radiometer-equation noise.
+- **Finding.** A test statistic per mass against a Monte Carlo global threshold.
+- **Parameter estimation.** Gaussian likelihood of residuals for amplitude, lineshape and projection.
+- **Direction and time.** A fixed polarization's projection on the antenna axis varies with sidereal time
+  (time stamp, site, axis); a random one averages to 1/3.
+- **Identifiable quantity.** Power to kinetic mixing via conversion power per area and dark-matter density.
+- **Uncertainty and quality.** Toy Monte Carlo Neyman limits, worst case over polarizations, coverage tests.
+- **PID or topology.** No method text: no source read.
 <!-- /example -->
 
 Failure modes (all variants): adjacent bins treated as independent candidates; correlation or filter attenuation
 left uncorrected; a coupling limit without per-setting response; a spin result from cavity constants;
 independence between settings assumed without a record of the raw intervals.
 
-No method text, no source read: the circuit variant; spin systems other than ferromagnetic YIG; combination of
+No method text, no source read: other circuit readouts; spin systems other than ferromagnetic YIG; combination of
 overlapping spin runs (fifty-six runs at fixed field are reported, no combination rule); a rescan in the spin
-variant; cavity variants other than the one read; a broadband analysis beyond sensor signal processing; an LO sign
+variant; cavity variants other than the one read; other broadband instruments; an LO sign
 error on the RF/IF axis (the cavity analysis aligns bins by coercing the LO to the bin grid and defines the IF-to-RF
 map, but does not treat a sign error); reuse of the same raw interval between settings.
 
@@ -228,7 +254,7 @@ is mentioned for high-rate electron-gun measurements only); a link to general ma
 ## Sources read
 
 <!-- example: source citation (experiments named as the source of a method) -->
-Each source was read on 2026-11-06 from its arXiv e-print. Identifiers are as recorded when reading. `full-text`:
+Each source was read from its arXiv e-print on 2026-11-06, the last three on 2026-11-13. `full-text`:
 the whole body was read; `page`: only the sections named, some long paragraphs only up to a length cut-off.
 
 - Project 8 Collaboration, "Tritium Beta Spectrum and Neutrino Mass Limit from Cyclotron Radiation Emission
@@ -258,8 +284,14 @@ the whole body was read; `page`: only the sections named, some long paragraphs o
 - A. Fulst et al., "Time-Focusing Time-of-Flight, a new method to turn a MAC-E-filter into a quasi-differential
   spectrometer" (2020), arXiv:2007.01020, DOI 10.1140/epjc/s10052-020-08484-9. `page`: abstract; General Idea;
   Time-of-Arrival beta-Spectrum; opening of Sensitivity Analysis; keyword-selected sentences elsewhere.
+- A. Ashtari Esfahani et al., "Cyclotron radiation emission spectroscopy signal classification with machine
+  learning in Project 8" (2020), arXiv:1909.08115v2, DOI 10.1088/1367-2630/ab71bd. `page`: abstract; secs. 2.1-2.3.
+- C. P. Salemi et al., "The search for low-mass axion dark matter with ABRACADABRA-10 cm" (2021), arXiv:2102.06722v1,
+  DOI 10.1103/PhysRevLett.127.081801. `page`: detector, data collection, data analysis and results; Figs. 1-3.
+- J. Yu et al., "First broadband search for fixed-polarization dark photon dark matter with GigaBREAD" (2026),
+  arXiv:2611.07426v1, a preprint. `page`: secs. I, II.A-B, parts of III.A-C, IV.A.
 <!-- /example -->
 
 **Done when:** the variant and the setting or frequency axis are stated, every method used is one of those above
 with its source section, and each quantity a source does not support (a per-event position or pitch angle, a
-per-electron energy, an event-level signal label, a result for the circuit variant) is reported as unknown.
+per-electron energy, an event-level signal label, a result for an instrument not read) is reported as unknown.

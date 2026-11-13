@@ -3,7 +3,7 @@
 Owner: hep-detector. This page gives reconstruction method text for four instrument families that the general
 pages do not cover: Compton telescopes and cameras, pair-conversion gamma-ray telescopes, coded-aperture imaging,
 and radiation polarimetry (photoelectric and Compton). Every method statement comes from a source read on
-2026-11-06 and is scoped to the instrument, code or study that source describes; it is not a family-wide method.
+2026-11-06 or 2026-11-13 and is scoped to the instrument, code or study that source describes; it is not a family-wide method.
 Sources and their read levels are under [Sources read](#sources-read): a source read at `page` level supports only
 its named sections. Where no source read gives a method, the text says "no method text: no source read", and that
 stays a gap.
@@ -128,13 +128,18 @@ calorimeter-only classes (proposals in Pass 8).
 Scope: the coded-mask variant only, two-dimensional, source at infinity, from one review read at `page` level
 (Braga 2019): the Introduction through Masks and antimasks, the Signal-to-noise ratio section to the flux
 definitions, and the start of the one-dimensional cameras section. Near-field use is excluded by the review.
+Source finding comes from the INTEGRAL IBIS analysis paper, read at `page` level (Goldwurm et al. 2003).
 
 - **Signal extraction** (The concept, Image formation, Masks and antimasks). The detector event map, in counts per
   pixel for an energy range and integration time, is the shadowgram `D`. Flat-field factors from equal illumination
   correct multiplicative pixel sensitivity per energy range; additive background variation cannot be flat-fielded
   out.
-- **Finding and association.** No method text: no source read. The sections read give no source-finding or peak
-  selection algorithm, only that a source gives a peak.
+- **Finding and association** (INTEGRAL IBIS: Goldwurm et al. 2003, sec. 4.3). Peaks above a set signal-to-noise
+  level are searched iteratively, optionally only for catalogue sources: the first significant peak is fitted with an analytic
+  point-spread function for position and flux, its modelled shadowgram is decoded, scaled to the excess and
+  subtracted, and the search repeats; each main peak is then restored and its secondary lobes excluded. With eight
+  ghosts per source the search depends on the threshold, more so if the background is not fully corrected. The
+  shadowgram model has geometric absorption only.
 - **Parameter estimation** (Image formation). `D = S (x) M + B`, with `S` the sky, `M` the mask and `B` the
   background; the sky is reconstructed by cross-correlation with a decoding array `G`, often by FFT. For URA and
   MURA patterns `M (x) G` is a delta function, so the fully coded field has no intrinsic sidelobes; ghost peaks come
@@ -178,10 +183,15 @@ The general polarimeter row (analyzing power) is in
 Scope: IXPE as described by ixpeobssim, read at `page` level (Baldini et al. 2022; sections listed under Sources
 read). ixpeobssim is a simulation and high-level analysis framework built on parametrized response; its input is
 reconstructed level-2 events, and it does not reconstruct tracks. Do not read it as the instrument's reconstruction.
+The track reconstruction below comes from a second source, a preprint read at `page` level (Ferrazzoli et al. 2026).
 
-- **Signal extraction and finding.** No method text: no source read. Level-1 track images exist, but the code
-  cannot generate them and no image processing, track axis or absorption-point reconstruction is given (Output data
-  format, Event weights).
+- **Signal extraction.** No method text: no source read. Level-1 track images exist, but the code cannot generate
+  them and gives no image processing (Output data format, Event weights).
+- **Finding and association** (Ferrazzoli et al. 2026, preprint, Introduction and sec. 2.1). The standard moment
+  analysis estimates the emission angle and the impact point from the shape of the track. A hybrid variant takes
+  the impact point from a convolutional network on the track image and reruns the moment analysis; it needs its
+  own spurious-modulation maps and modulation-factor curves from calibration, and shows hexagonal-grid modes in
+  the angle distribution at low energy.
 - **Parameter estimation** (Introduction, Basic polarization analysis). Event Stokes parameters
   `q_i = 2 cos 2 phi_i`, `u_i = 2 sin 2 phi_i` are summed over a subset of events and corrected by the effective
   area and the modulation factor, with optional weights. The Stokes form avoids the dependence between polarization
@@ -204,7 +214,8 @@ reconstructed level-2 events, and it does not reconstruct tracks. Do not read it
 
 <!-- example: source citation (instruments and experiments named as the source of a method) -->
 Scope: POLAR, one paper on a channel-level correction, read at `page` level (Xiao et al., arXiv:1507.04474);
-polarization reconstruction there is summarized and referred to other papers.
+polarization reconstruction there is summarized and referred to other papers. Space and direction come from the
+burst catalog, also read at `page` level (Kole et al. 2020).
 
 - **Signal extraction** (abstract, start of Crosstalk and response non-uniformity modeling, Conclusion). One matrix
   for crosstalk and non-uniformity, from mono-energetic calibration, applied by a linear transformation from channel
@@ -214,8 +225,10 @@ polarization reconstruction there is summarized and referred to other papers.
   is a proxy, not the true scatter sequence.
 - **Parameter estimation** (POLAR instrument). The modulation curve `K {1 + mu cos[2 (xi - xi_0)]}` is fitted over
   all detected photons of a burst, and `p = mu / mu_100`.
-- **Space and direction.** No method text: no source read. Only the detector-frame angle is given; the
-  detector-to-sky rotation was not read.
+- **Space and direction** (Kole et al. 2020, secs. 3.1-3.2). The response is simulated for the burst's incoming
+  direction, taken from other instruments, and the scattering-angle distribution is fitted against it, jointly with
+  the spectrum, with the background modelled rather than subtracted. The detector-to-sky rotation is not stated in
+  the sections read.
 - **Energy** (abstract, Conclusion). The energy deposition per bar from the transformation, with energy
   calibration.
 - **PID or topology.** No method text: no source read.
@@ -233,7 +246,7 @@ Failure modes (all variants): a single event or track read as a measured polariz
 modulation factor or `mu_100`; a sky angle without the detector-to-sky rotation; weighted Stokes sums treated as
 counting statistics; a simulation framework read as the instrument's reconstruction.
 
-No method text, no source read: photoelectric track reconstruction and absorption point; Compton scatter ordering
+No method text, no source read: the steps of the photoelectric moment analysis (named only); Compton scatter ordering
 and multi-site reconstruction beyond the two-bar proxy (the link to [Compton telescopes](#compton-telescopes-and-cameras)
 was not assessed); Compton beam polarimeters on electron beams; unpolarized and rotated controls (the correction is
 named, its procedure is in a reference not read); the detector-to-sky rotation for the Compton polarimeter.
@@ -241,7 +254,7 @@ named, its procedure is in a reference not read); the detector-to-sky rotation f
 ## Sources read
 
 <!-- example: source citation (instruments and experiments named as the source of a method) -->
-Each source was read on 2026-11-06 from its arXiv e-print. Identifiers are as recorded when reading; no DOI was
+Each source was read from its arXiv e-print on 2026-11-06, the last three on 2026-11-13; no DOI was
 recorded for arXiv:1604.03805 and arXiv:1303.3514. `full-text`: the whole body was read; `page`: only the sections
 named.
 
@@ -265,6 +278,12 @@ named.
 - H. Xiao et al., "A crosstalk and non-uniformity correction method for the space-borne Compton polarimeter POLAR"
   (arXiv 2015), arXiv:1507.04474, DOI 10.1016/j.astropartphys.2016.06.007. `page`: abstract, Introduction, POLAR
   instrument, the start of Crosstalk and response non-uniformity modeling, Conclusion.
+- A. Goldwurm et al., "The INTEGRAL / IBIS scientific data analysis" (2003), arXiv:astro-ph/0311172v1, DOI
+  10.1051/0004-6361:20031395. `page`: end of sec. 4, secs. 4.1-4.3.
+- M. Kole et al., "The POLAR Gamma-Ray Burst Polarization Catalog" (2020), arXiv:2009.04871v1, DOI
+  10.1051/0004-6361/202037915. `page`: secs. 3-3.2 and the opening of 3.3.
+- R. Ferrazzoli et al., "Comparison of Hybrid and Standard Reconstruction Methods on IXPE Astrophysical Data"
+  (2026), arXiv:2610.35087v1, a preprint. `page`: abstract, Introduction, sec. 2.1.
 <!-- /example -->
 
 **Done when:** the instrument variant is stated, every method used is one of those above with its source section,
