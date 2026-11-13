@@ -1408,6 +1408,18 @@ class TaskTimedOut(RuntimeError):
     produced is recorded, and the task is incomplete (exit 3, RESULT incomplete), never failed and never ok."""
 
 
+class TaskCrashed(RuntimeError):
+    """Harness fix round 1, I1 (the coordinator, revising ruling 4): a program of a task was killed by a signal (a negative return code, or one
+    above 128: SIGKILL from an OOM kill, SIGBUS or SIGSEGV from a node or I/O fault), or the program's output does not read although it ended
+    0 (a record truncated by ENOSPC): a crash, exit 3, incomplete; repeatable under the check-task rule. An ordinary non-zero exit (1 to 127)
+    of the frozen program is TaskFailed and stands."""
+
+
+def signal_exit(returncode: int) -> bool:
+    """A return code that is a signal (subprocess: negative; a shell's 128 + N), never the program's own exit."""
+    return returncode < 0 or returncode > 128
+
+
 def _run(command, log) -> float:
     import subprocess
     import time
@@ -1418,6 +1430,9 @@ def _run(command, log) -> float:
             done = subprocess.run([str(c) for c in command], stdout=stream, stderr=subprocess.STDOUT, timeout=limit)
         except subprocess.TimeoutExpired:
             raise TaskTimedOut(f"{Path(str(command[0])).name} timed out after {limit:.0f} s (the task's deadline; log {Path(log).name})") from None
+    if signal_exit(done.returncode):
+        raise TaskCrashed(f"{Path(str(command[0])).name} ended by a signal, return code {done.returncode} (log {Path(log).name}): a crash, "
+                          "not a failure of the recipe")
     if done.returncode != 0:
         raise TaskFailed(f"{Path(str(command[0])).name} exited {done.returncode} (log {Path(log).name})")
     return time.monotonic() - started
@@ -1584,12 +1599,16 @@ def negative_task(block: int, *, build, folder, out) -> tuple:
     negative_case_checks; writes negative-checks.json (CheckResults)."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
+    mark(out, DRAWS_STARTED)   # fix/harness-carried (review I3): before anything is read, so a refusal or a failed check stands (NOT-REPEATABLE)
     description = check_negative_case_folder(folder)
     command = fake_rate.finder_command(Path(build) / "acts_tracking_finder", Path(folder) / negative_cases.CASE_FILE, "evaluation-negative-cases",
                                        out / "negative.product", out / "negative.record", 0)
     command = [c for c in command if c not in ("--vertex-recipe", finding_record.VERTEX_RECIPE)] + ["--seed-file", out / "negative.seeds"]
     seconds = _run(command, out / "finder.log")
-    record = finding_record.parse_record((out / "negative.record").read_text(encoding="utf-8"))
+    try:
+        record = finding_record.parse_record((out / "negative.record").read_text(encoding="utf-8"))
+    except finding_record.RecordFormatError as error:   # harness fix round 1, m2: the finder ended 0, so its record was cut (ENOSPC, EIO)
+        raise TaskCrashed(f"the finder ended 0 but its record does not read ({error}): an I/O failure, a crash") from None
     if record["header"]["data_sha256"] != NEGATIVE_CASE_SHA256 or record["header"]["configuration_sha256"] != FREEZE_B_CONFIGURATION_SHA256:
         raise ScoringError("the finder's record is not of the kept case file at the configuration fixed at Freeze B (v4 11)")
     checks = negative_case_checks(description, record, list(finding_record.iter_seed_events(out / "negative.seeds")))
@@ -1607,6 +1626,9 @@ class ChecksCrashed(RuntimeError):
 SETUP_ERRORS = tuple(sorted(name for name, value in vars(builtins).items() if isinstance(value, type) and issubclass(value, (ImportError, OSError))))
 
 
+# Harness fix round 1, I1: how the check modules' program helpers report a program's return code (test_acts_finding.py:844,
+# test_acts_cai_refit.py:601, test_acts_track_outputs.py:1039: "<program> exit <code>: ..."), for a negative code or one above 128 (a signal).
+SIGNAL_EXIT = r"\S+ exit (-\d+|129|1[3-9]\d|2[0-5]\d):"
 UNITTEST_RAN = r"^Ran \d+ tests? in [\d.]+s$"
 UNITTEST_SUMMARY = r"^(OK|FAILED)( \((failures|errors|skipped|expected failures|unexpected successes)=\d+(, (failures|errors|skipped|expected failures|unexpected successes)=\d+)*\))?$"
 
@@ -1634,6 +1656,9 @@ def module_crash(module: str, text: str, verdict: str) -> None:
         raise ChecksCrashed(f"{module}: {verdict}, a test skipped (a setup gap: a crash, never a pass or a fail; re-review N1)")
     if counts.get("errors", 0) and not counts.get("failures", 0):
         raise ChecksCrashed(f"{module}: {verdict}, errors with no failure (a crash, not a negative)")
+    killed = re.search(SIGNAL_EXIT, text, flags=re.M)
+    if killed:   # harness fix round 1, I1: the modules' helpers say "<program> exit <code>:"; a signal is a crash, never a failed check
+        raise ChecksCrashed(f"{module}: a program it ran ended by a signal ({killed.group(0).strip()}): a crash, not a negative: {verdict}")
     pattern = r"^(?:[A-Za-z_][\w.]*\.)?(" + "|".join(SETUP_ERRORS) + r")(?::|$)"
     found = re.search(pattern, text, flags=re.M)
     if "Traceback (most recent call last)" in text and found:
@@ -1649,6 +1674,8 @@ def checks_task(block: int, *, build, out, workers: int = 1, module_runner=None)
     import subprocess
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
+    mark(out, DRAWS_STARTED)   # fix/harness-carried (review I3): before the first module draws its block-1 or block-6 events, so a failed
+    #                            check (exit 1) stands (NOT-REPEATABLE) and a crash (exit 3) is REPEATABLE (the user, 2026-11-13)
     def run_module(module):
         environment = dict(os.environ, HEP_ACTS_TRACKING_BUILD=str(build), HEP_ACTS_TRACKING_EVIDENCE=str(out / "evidence"),
                            HEP_ACTS_TRACKING_WORKERS=str(workers))
@@ -2021,7 +2048,7 @@ def _task_command(arguments) -> int:
     except TaskFailed as error:
         _result(operation, "failed", str(error))
         return EXIT_NEGATIVE
-    except (ChecksCrashed, TaskTimedOut) as error:   # E6 merge review I2; integration: a check module that could not run, or a program past
+    except (ChecksCrashed, TaskTimedOut, TaskCrashed) as error:   # E6 merge review I2; integration: a check module that could not run, or a program past
         if isinstance(error, TaskTimedOut):           # the task's deadline, is a crash (incomplete), never a failed check or a failed task;
             Path(arguments.out).mkdir(parents=True, exist_ok=True)   # a stop at the deadline is the attempt's milestone (review M1)
             mark(arguments.out, layout.STOPPED_AT_DEADLINE)

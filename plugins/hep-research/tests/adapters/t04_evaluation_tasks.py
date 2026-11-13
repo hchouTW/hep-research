@@ -375,7 +375,7 @@ def t07_summary(block: int, scores: Path, collection: Path, out: Path, *, attemp
                                      "slices (no draw)")
         files = []
         for name, operation, file in T07_CHECK_TASKS:
-            folder = counted_single(attempts, name, block, state_of)
+            folder = counted_single(attempts, name, block, state_of, standing=(operation, file))   # harness fix round 1, I3
             task_result(folder, operation)
             if not (folder / file).exists():
                 raise Incomplete(f"{name} in {folder} left no {file}; rerun it")
@@ -668,11 +668,17 @@ def t09_range(block: int, index: int, range_index: int, generation: Path, out: P
         run_script(like, ["fit", "--readout", files["readout"], "--product", single, "--product-id", f"{name}-single-photon", "--configuration", config,
                           "--likelihood", "charge-time", "--starts", "multistart"], out / "fit-single-photon.log")
         checked(single, "check-single-photon.log", ("--configuration", config))
-        code, _, _ = run_script(like, ["check-product", "--product", single], out / "check-single-photon-main.log", ok=(2,))
-        if code != 2:
-            raise StepFailed("the main reader did not refuse the single-photon product")
+        # fix/harness-carried (audit finding 2): the main reader's own refusal, its "rejected" status line (exit 2), as the Freeze-B run's
+        # t09-ms.sh required; any other exit-2 line is not that refusal ("error", the catch-all, is a crash: layout.classify_script_run)
+        # harness fix round 1, m1: and for its own reason, the product of another configuration (light_recipe/product.py:417)
+        code, line, _ = run_script(like, ["check-product", "--product", single], out / "check-single-photon-main.log", ok=(2,))
+        if code != 2 or layout.result_status(line) != "rejected" or layout.result_field(line, "reason") != SINGLE_PHOTON_REFUSAL:
+            raise StepFailed(f"the main reader did not refuse the single-photon product: {line}")
         record("single-photon", single, entry["readout_sha256"])
     return EXIT_OK
+
+
+SINGLE_PHOTON_REFUSAL = "the product was made with another configuration than the one given"   # light_recipe/product.py:417 (frozen)
 
 
 def t09_fixed_points(block: int, out: Path, paths: Paths) -> int:
@@ -769,20 +775,34 @@ def sacct_state(job: str, *, timeout: float = SACCT_TIMEOUT_SECONDS, attempts: i
     raise Incomplete(f"sacct did not answer for {job} in {attempts} attempts (last: {why}); rerun the task (no draw), never a state guessed")
 
 
-def counted_folder(rows, block: int, state_of, *, check_task: bool = False, notes: list | None = None) -> Path:
+def counted_folder(rows, block: int, state_of, *, check_task: bool = False, notes: list | None = None, standing=None) -> Path:
     """The folder of a task's counted attempt (layout.select_attempt over its attempts, classified from sacct and the milestones file);
-    check_task: a named check task's rule (layout.select_attempt; the user, 2026-11-13); notes: each attempt that rule let precede the counted
-    one, as (index, job, verdict), and the counted one's (index, job)."""
+    check_task: a named check task's rule (layout.select_attempt and layout.classify_check_attempt; the user, 2026-11-13; harness fix round 1,
+    I2); notes: each attempt that rule let precede the counted one, as (index, job, verdict), and the counted one's (index, job).
+    standing (harness fix round 1, I3; a check task only): a callable of a folder, true when that attempt is a failed check that stands (its
+    task ended "failed" with its checks file written). The first such NOT-REPEATABLE attempt, after attempts the rule allows, is the counted
+    one, so its fail reaches the summary; a later attempt is never counted over it (noted as (index, job, "after-standing"))."""
+    classify = layout.classify_check_attempt if check_task else layout.classify_attempt
     verdicts = []
     for job, folder in rows:
         state, code, elapsed = state_of(job)
         marks = Milestones(folder)
-        verdicts.append(layout.classify_attempt(state, code, elapsed, marks.names() if marks.path.exists() else None)[0])
+        verdicts.append(classify(state, code, elapsed, marks.names() if marks.path.exists() else None)[0])
     if not rows:
         raise layout.LayoutError("the task has no attempt")
-    index = layout.select_attempt(verdicts, block=block, check_task=check_task)
+    allowed = layout.allowed_before(block, check_task)
+    index = None
+    if check_task and standing is not None:
+        for i, verdict in enumerate(verdicts):
+            if verdict == "NOT-REPEATABLE" and standing(Path(rows[i][1])) and all(v in allowed for v in verdicts[:i]):
+                index = i
+                break
+    if index is None:
+        index = layout.select_attempt(verdicts, block=block, check_task=check_task)
     if notes is not None:
-        notes += [(i, rows[i][0], v) for i, v in enumerate(verdicts[:index]) if v in layout.CHECK_TASK_REPEATS] + [(index, rows[index][0], None)]
+        notes += [(i, rows[i][0], v) for i, v in enumerate(verdicts[:index]) if v in layout.CHECK_TASK_REPEATS]
+        notes += [(index, rows[index][0], None)]
+        notes += [(i, rows[i][0], "after-standing") for i in range(index + 1, len(rows))]
     return Path(rows[index][1])
 
 
@@ -1077,23 +1097,36 @@ def scoring_module(workflow: str):
 REPEATABLE_CHECK_TASKS = ("T08 checks", "T07 checks", "T07 negative cases")   # the user, 2026-11-13: check tasks drawing from blocks 1 and 6 only
 
 
-def counted_single(attempts: dict, name: str, block: int, state_of) -> Path:
+def counted_single(attempts: dict, name: str, block: int, state_of, *, standing=None) -> Path:
     """The counted attempt's folder of a single task (the fixed points, the T08 checks; fix round 1, M3), or Incomplete. Fix round 2, R4: an
     attempt whose generator check failed (milestone generator-check-failed, NOT-REPEATABLE) goes to the user (v4 18, generator-check rows 2 to
-    4); it is never "rerun"."""
+    4); it is never "rerun". standing (harness fix round 1, I3): (operation, checks file) of a check task whose failed check exits 1 (the
+    T07 check tasks): an attempt that ended "failed" (its step log) with that file written is a failed check that stands and is counted
+    (counted_folder), so the summary reads its fail; a T08 checks task records its fail with exit 0 and needs none."""
     rows = attempts.get(name, [])
     if any("generator-check-failed" in Milestones(folder).names() for _, folder in rows):
         raise Incomplete(f"{name}: the generator check failed (NOT-REPEATABLE): it goes to the user (v4 18, generator-check rows 2 to 4), "
                          "no rerun")
     repeatable = name in REPEATABLE_CHECK_TASKS   # the user, 2026-11-13, "Count it: block 1/6 only"; never a recipe task, never the fixed points
     notes = []
+
+    def failed_with_checks(folder) -> bool:
+        operation, file = standing
+        try:
+            return task_result(folder, operation) == "failed" and (Path(folder) / file).is_file()
+        except Incomplete:
+            return False
     try:
-        folder = counted_folder(rows, block, state_of, check_task=repeatable, notes=notes)
+        folder = counted_folder(rows, block, state_of, check_task=repeatable, notes=notes,
+                                standing=failed_with_checks if standing is not None else None)
     except layout.LayoutError as error:
         raise Incomplete(f"{name}: {error}; rerun it (block 6 or block 1 only, its declared role)") from None
-    counted = notes[-1]
-    for index, job, verdict in notes[:-1]:
-        print(f"CLASSIFY {name} attempt {index} ({job}): {verdict}, {layout.REPEATED_CHECK_TASK}; counted: attempt {counted[0]} ({counted[1]})")
+    counted = next(note for note in notes if note[2] is None)
+    for index, job, verdict in notes:
+        if verdict == "after-standing":
+            print(f"CLASSIFY {name} attempt {index} ({job}): after the standing failure of attempt {counted[0]} ({counted[1]}), not counted")
+        elif verdict is not None:
+            print(f"CLASSIFY {name} attempt {index} ({job}): {verdict}, {layout.REPEATED_CHECK_TASK}; counted: attempt {counted[0]} ({counted[1]})")
     return folder
 
 

@@ -399,19 +399,19 @@ class ScriptRuns(unittest.TestCase):
         self.assertEqual(layout.classify_script_run(2, "RESULT t07-scoring summary rejected: x\n", pattern)[0], "negative")
 
     def test_the_result_lines_match_the_scripts_own(self):
+        """Each example is a line its script prints (fix/harness-carried: the rereco example was invented, "RESULT RECORDED"; the static check
+        over every script's own source is test_e6_harness_carried.ResultLinesAreTheScriptsOwn)."""
         examples = {"t07_fake_rate.py run": "RESULT ok: 12 clean bins produced; no rate", "t07_fake_rate.py check": "OK every noise bin within C",
                     "t08_fixture_files.py": '{"block": 1, "events": 600, "status": "ok"}', "calo_cluster.py": '{"chain": [], "status": "ok"}',
                     "t09_fixture_files.py": '{"files": {}, "status": "ok"}', "photon_likelihood.py": '{"exit_code": 0, "status": "ok"}',
-                    "t09_truth_start.py": 'RESULT {"exit_code": 0, "status": "ok"}', "fbrun_tools.py classify": "CLASSIFY job 1 NO-DRAW: x",
-                    "fbrun_tools.py t07-comparator": "RESULT comparator ok: 1 of 1 noise bins",
+                    "t09_truth_start.py": 'RESULT {"exit_code": 0, "status": "ok"}',
                     "t09_negative_checks.py relabel-dead": '{"format": "t09-dead-as-unhit/1", "status": "ok"}',
                     "t08_scenarios.py accounting": "GATE main-E3-iso selection-and-accounting PASS: 0 of 3000 events with a defect",
                     "t08_scenarios.py reference-selection": "GATE reference-selection PASS: the reference clusterer's W, SN, Q, TC, TS and ITERS",
                     "t08_cai.py payloads": '{"files": {}, "status": "ok"}',
                     "t08_cai.py fixed-membership": "CAI-T08-1 main-E3-iso-multiply RESULT PASS",
-                    "t08_cai.py rereco": "CAI-T08-2 main-E3-iso-multiply RESULT RECORDED",
+                    "t08_cai.py rereco": "CAI-T08-2 main-E3-iso-multiply RECORD recorded without a numeric assertion (R37)",   # t08_cai.py:333
                     "t09_fixed_points.py": "GATE per-channel sum at the fixed points (v4 9.3, the T09 stop): points 50, failures 0: PASS",
-                    "check_generators.py": "RESULT PASS",
                     "t07_evaluation_scoring.py": "RESULT t07-scoring score-bin ok: T07 fixture 7001 block 11 stratum 0: 57 records written",
                     "t04_evaluation_tasks.py": "RESULT score ok"}
         self.assertEqual(set(examples), set(layout.RESULT_LINES))

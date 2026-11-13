@@ -247,16 +247,17 @@ def missing_bin_records(identity, gates, reason: str) -> list:
 # implies -P (safe path), so the folder is dropped and a sibling import fails (job 7590464, t07-memory; the Freeze-B run's rate-check).
 SCRIPT_FLAGS = ("-B", "-s", "-E")
 # Each script's result line (the line that says how the run ended), for the tasks and collections of the evaluation (E6c).
+# fix/harness-carried (audit finding 4): only scripts of this tree, each matching a verdict line its source prints (test_e6_harness_carried);
+# fbrun_tools.py (jobs/freeze-b-run) and check_generators.py (the frozen generators) are outside the tree and started by no run_script call,
+# so their entries are removed; t07_fake_rate.py run's refusal of its arguments (REJECTED, exit 2) is its own line, never a crash.
 RESULT_LINES = {
-    "t07_fake_rate.py run": r"^RESULT (ok|failed|refused):",
+    "t07_fake_rate.py run": r"^(RESULT (ok|failed|refused):|REJECTED )",
     "t07_fake_rate.py check": r"^(OK|REFUSED|REJECTED) ",
     "t08_fixture_files.py": r'^\{.*"status": "[a-z-]+"',
     "calo_cluster.py": r'^\{.*"status": "[a-z-]+"',
     "t09_fixture_files.py": r'^\{.*"status": "[a-z-]+"',
     "photon_likelihood.py": r'^\{.*"status": "[a-z-]+"',
     "t09_truth_start.py": r"^RESULT \{",
-    "fbrun_tools.py classify": r"^CLASSIFY job ",
-    "fbrun_tools.py t07-comparator": r"^RESULT comparator (ok|failed):",
     # E6c fix round 1 (review M9): the scripts the evaluation's tasks also start, and E6b's T07 scoring command line
     "t09_negative_checks.py relabel-dead": r'^\{.*"status": "[a-z-]+"|^REFUSED ',
     "t08_scenarios.py accounting": r"^(GATE .* selection-and-accounting (PASS|FAIL)|REFUSED )",
@@ -267,7 +268,6 @@ RESULT_LINES = {
     # assertion (R37)" (t08_cai.py:333; the tool is unchanged, Freeze B's calo-cluster manifest); the earlier alternatives are kept
     "t08_cai.py rereco": r"^(CAI-T08-2 .* RESULT (PASS|FAIL|RECORDED)|CAI-T08-2 \S+ RECORD recorded without a numeric assertion \(R37\)$|GATE |REFUSED )",
     "t09_fixed_points.py": r"^(GATE per-channel sum at the fixed points|REFUSED |ERROR )",
-    "check_generators.py": r"^RESULT (PASS|FAIL)",
     "t07_evaluation_scoring.py": r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected|incomplete):",   # E6 merge stage: the summary's incomplete
     "t04_evaluation_tasks.py": r"^RESULT [a-z0-9-]+ (ok|failed|rejected|crashed|incomplete)",
 }
@@ -279,14 +279,44 @@ def classify_script_run(exit_code: int, run_text: str, result_pattern: str) -> t
     or when the exit code is outside core/status.py's 0-3 (core/status.py: the run's outcome cannot be classified, incomplete, exit 3); else "ok"
     at exit 0, "incomplete" at exit 3 with its result line (core/status.py: a missing dependency or an incomplete run; E6 merge review, nit:
     never a negative reading), and "negative" at exit 1 or 2 with its result line (a refusal or a failed check the script itself reports). A
-    ModuleNotFoundError at import is a crash, never a negative reading."""
+    ModuleNotFoundError at import is a crash, never a negative reading. Fix/harness-carried (audit finding 3): a result line whose JSON says
+    "status": "error" (photon_likelihood.py's and t09_truth_start.py's catch-alls, exit 2: an unexpected exception, an ImportError or a
+    ModuleNotFoundError inside an operation; core/status.py maps "error" to exit 2) is a crash too, never a negative reading."""
     import re
     lines = run_text.splitlines()
     found = [line for line in lines if re.search(result_pattern, line)]
     if "Traceback (most recent call last)" in run_text or not found or exit_code not in (0, 1, 2, 3):
         why = "a traceback" if "Traceback (most recent call last)" in run_text else ("no result line" if not found else f"exit {exit_code}")
         return "crashed", why
+    if result_status(found[-1]) == "error":
+        return "crashed", 'the script\'s own status "error" (an unexpected exception: a crash, never a negative)'
+    reason = result_field(found[-1], "reason")
+    if result_status(found[-1]) == "rejected" and isinstance(reason, str) and reason.startswith(CRASH_REASONS):
+        return "crashed", f"an I/O failure the script reports as rejected ({reason}): a crash, never a refusal"
     return {0: "ok", 3: "incomplete"}.get(exit_code, "negative"), found[-1]
+
+
+# Harness review m2 (round 1; as I1, harness side only, the recipes are frozen): reasons of a "rejected" line that are an I/O failure of the
+# node, not a refusal of the input: photon_likelihood.py :158-160 and :256-258 and calo_cluster.py :102 ("product cannot be written: <strerror>",
+# an OSError such as ENOSPC or EIO while writing the product).
+CRASH_REASONS = ("product cannot be written",)
+
+
+def result_field(line: str, key: str):
+    """A top-level field of a result line that carries a JSON object ({...} or RESULT {...}), or None."""
+    start = line.find("{")
+    if start < 0:
+        return None
+    try:
+        document = json.loads(line[start:])
+    except ValueError:
+        return None
+    return document.get(key) if isinstance(document, dict) else None
+
+
+def result_status(line: str) -> str | None:
+    """The "status" of a result line that carries a JSON object ({...} or RESULT {...}), or None."""
+    return result_field(line, "status")
 
 
 # ---- Earlier attempts.
@@ -325,8 +355,25 @@ def classify_attempt(state: str, exit_code: int, elapsed: str, milestones) -> tu
     return "NOT-REPEATABLE", f"Slurm state {state}, exit {exit_code}: a step of compute or a check failed, not infrastructure"
 
 
-CHECK_TASK_REPEATS = ("REPEATABLE",)   # the user, 2026-11-13, "Count it: block 1/6 only" (block-11 job 7613402): see select_attempt's check_task
+# the user, 2026-11-13, "Count it: block 1/6 only" (block-11 job 7613402): see select_attempt's check_task. Harness fix round 1, I2 (the
+# coordinator): a check task's Slurm TIMEOUT, OUT_OF_MEMORY or deadline stop (REPEATABLE-WITH-NEW-REQUEST) and its CANCELLED or NODE_FAIL
+# (classify_check_attempt) are repeatable too: it draws only from blocks 1 and 6.
+CHECK_TASK_REPEATS = ("REPEATABLE", "REPEATABLE-WITH-NEW-REQUEST")
 REPEATED_CHECK_TASK = "repeated check task (block 1/6 only; user 2026-11-13)"
+
+
+def classify_check_attempt(state: str, exit_code: int, elapsed: str, milestones) -> tuple:
+    """classify_attempt for a check task that draws only from blocks 1 and 6 (t04_evaluation_tasks REPEATABLE_CHECK_TASKS; harness fix round 1,
+    I2): a cancellation after draws started is repeatable (REPEATABLE), not the user's to rule on; every other verdict is classify_attempt's."""
+    verdict, why = classify_attempt(state, exit_code, elapsed, milestones)
+    if verdict == "NOT-REPEATABLE" and state.split()[0] == "CANCELLED":
+        return "REPEATABLE", f"Slurm state {state}: a cancelled check task (blocks 1 and 6 only; the coordinator, harness fix round 1, I2)"
+    return verdict, why
+
+
+def allowed_before(block: int, check_task: bool = False) -> tuple:
+    """The verdicts that may precede the counted attempt of a task on this block (select_attempt)."""
+    return NOTHING_DRAWN + (REPEATS_ON_FREEZE_B if block in FREEZE_B_BLOCKS else ()) + (CHECK_TASK_REPEATS if check_task else ())
 
 
 def select_attempt(verdicts, *, block: int, check_task: bool = False) -> int:
@@ -334,12 +381,13 @@ def select_attempt(verdicts, *, block: int, check_task: bool = False) -> int:
     (NO-DRAW, NEVER-RAN); on a Freeze-B block (U-B12) a REPEATABLE one is accepted too. On blocks 11 and 12 no repeat after a draw or a fit
     started (v4 3.4, "A failure stands"; O6, settled): never looser than block 2. check_task (the user, 2026-11-13: "Count it: block 1/6
     only"; block-11 job 7613402): a check task that draws only from blocks 1 and 6, never 11 or 12 (the caller names them: t04_evaluation_tasks
-    REPEATABLE_CHECK_TASKS), may be repeated after a harness crash (REPEATABLE: exit 3 or infrastructure), and the latest attempt is counted;
-    a failed check (NOT-REPEATABLE) still stands. Never for a recipe task of blocks 11 and 12."""
+    REPEATABLE_CHECK_TASKS), may be repeated after a harness crash or a Slurm stop (CHECK_TASK_REPEATS: exit 3, a signal, infrastructure, a
+    resource or deadline stop; a cancellation through classify_check_attempt), and the latest attempt is counted; a failed check
+    (NOT-REPEATABLE) still stands: t04_evaluation_tasks.counted_folder counts it (its standing rule). Never for a recipe task of blocks 11 and 12."""
     verdicts = list(verdicts)
     if not verdicts or verdicts[-1] != "NO-FAILURE":
         raise LayoutError("missing range: the last attempt of the task did not complete, a failed task (top-up never)")
-    allowed = NOTHING_DRAWN + (REPEATS_ON_FREEZE_B if block in FREEZE_B_BLOCKS else ()) + (CHECK_TASK_REPEATS if check_task else ())
+    allowed = allowed_before(block, check_task)
     for index, verdict in enumerate(verdicts[:-1]):
         if verdict not in allowed:
             raise LayoutError(f"missing range: attempt {index} is {verdict}; on block {block} only {', '.join(allowed)} may precede the counted attempt")

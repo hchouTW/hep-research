@@ -118,15 +118,66 @@ class SingleCheckTaskRerun(unittest.TestCase):
         with redirect_stdout(io.StringIO()):
             self.assertEqual(tasks.counted_single({"T07 checks": rows}, "T07 checks", 11, states.get), rows[2][1])
 
+    def real_t07_attempt(self, job, operation, bad):
+        """A T07 check task's folder with the milestones its real command writes (review I3: never hand-written): the checks task with each
+        module's output given, or the negative-cases task with its kept-folder check replaced; bad: the checks crash (no unittest
+        summary), the negative cases are refused (no kept folder, exit 2)."""
+        import functools
+        from tests.adapters import t07_evaluation_scoring as scoring
+        folder = self.base / job
+        with redirect_stdout(io.StringIO()):
+            if operation == "checks-task":
+                text = "Traceback (most recent call last):\nKilled\n" if bad else "Ran 1 test in 0.1s\n\nOK\n"
+                original = scoring.checks_task
+                scoring.checks_task = functools.partial(original, module_runner=lambda module: text)
+                try:
+                    code = scoring.main(["checks-task", "--block", "11", "--build", str(self.base / "build"), "--out", str(folder)])
+                finally:
+                    scoring.checks_task = original
+            else:
+                # review m3: the real negative_task in both cases (its own milestones); bad: no kept folder (refused, exit 2); good: the kept
+                # folder's check, the finder, its record and v4 11's checks replaced by passing stand-ins (no build, no kept case file here)
+                saved = {name: getattr(scoring, name) for name in ("check_negative_case_folder", "_run", "negative_case_checks")}
+                saved_record = (scoring.finding_record.parse_record, scoring.finding_record.iter_seed_events)
+                if bad:
+                    scoring.check_negative_case_folder = lambda kept: saved["check_negative_case_folder"](self.base / "no-kept-folder")
+                else:
+                    def finder(command, log):
+                        Path(command[command.index("--record-file") + 1]).write_text("stand-in\n")
+                        return 0.0
+                    scoring.check_negative_case_folder = lambda kept: {}
+                    scoring._run = finder
+                    scoring.negative_case_checks = lambda description, record, seeds: [
+                        scoring.core.CheckResult(name, "negative", "pass") for name in scoring.NEGATIVE_CHECK_NAMES]
+                    scoring.finding_record.parse_record = lambda text: {"header": {"data_sha256": scoring.NEGATIVE_CASE_SHA256,
+                                                                                   "configuration_sha256": scoring.FREEZE_B_CONFIGURATION_SHA256}}
+                    scoring.finding_record.iter_seed_events = lambda path: iter(())
+                try:
+                    code = tasks.main(["t07-negative-cases", "--block", "11", "--t07-build", str(self.base / "build"), "--out", str(folder)])
+                finally:
+                    for name, value in saved.items():
+                        setattr(scoring, name, value)
+                    scoring.finding_record.parse_record, scoring.finding_record.iter_seed_events = saved_record
+        return (job, folder), code
+
     def test_the_t07_check_tasks_follow_the_same_rule(self):
-        for name in ("T07 checks", "T07 negative cases"):
-            with self.subTest(name=name):
-                crashed, rerun = self.attempt(f"{name[-6:].strip()}-1".replace(" ", ""), ["draws-started"]), self.attempt(f"{name[-6:].strip()}-2".replace(" ", ""), ["draws-started"])
-                states = {crashed[0]: ("FAILED", 3, "00:05:00"), rerun[0]: ("COMPLETED", 0, "00:05:00")}
-                with redirect_stdout(io.StringIO()):
-                    self.assertEqual(tasks.counted_single({name: [crashed, rerun]}, name, 11, states.get), rerun[1])
-                for folder in (crashed[1], rerun[1]):
-                    __import__("shutil").rmtree(folder)
+        crashed, code = self.real_t07_attempt("checks-1", "checks-task", bad=True)
+        rerun, _ = self.real_t07_attempt("checks-2", "checks-task", bad=False)
+        self.assertEqual(code, 3)
+        states = {"checks-1": ("FAILED", 3, "00:05:00"), "checks-2": ("COMPLETED", 0, "00:05:00")}
+        self.assertEqual(layout.classify_attempt(*states["checks-1"], tasks.Milestones(crashed[1]).names())[0], "REPEATABLE")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(tasks.counted_single({"T07 checks": [crashed, rerun]}, "T07 checks", 11, states.get), rerun[1])
+
+    def test_a_refused_t07_negative_cases_task_stands(self):
+        refused, code = self.real_t07_attempt("negative-1", "negative-task", bad=True)
+        rerun, rerun_code = self.real_t07_attempt("negative-2", "negative-task", bad=False)
+        self.assertEqual((code, rerun_code), (2, 0))
+        self.assertEqual(tasks.Milestones(rerun[1]).names(), ["draws-started"])
+        states = {"negative-1": ("FAILED", 2, "00:05:00"), "negative-2": ("COMPLETED", 0, "00:05:00")}
+        self.assertEqual(layout.classify_attempt(*states["negative-1"], tasks.Milestones(refused[1]).names())[0], "NOT-REPEATABLE")
+        with self.assertRaises(tasks.Incomplete):
+            tasks.counted_single({"T07 negative cases": [refused, rerun]}, "T07 negative cases", 11, states.get)
 
     def test_the_fixed_points_are_not_named_by_the_ruling(self):
         crashed, rerun = self.attempt("7613448", ["draws-started"]), self.attempt("7613499", ["draws-started"])
