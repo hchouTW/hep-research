@@ -800,3 +800,12 @@ The user: "auto push, open PR, merge". Read as: the coordinator pushes reviewed,
 without asking each time, each reported; a merge only after every CI check passes (merge commit, as PR #395), never with a failing or
 pending check, and only of work that passed its fresh review and job of record. Freezes (Freeze B, K09 values), installs, and new
 network sites stay the user's.
+
+## Freeze B (U6, 2026-11-13)
+
+Asked with `freeze-b.md` at commit c328d447, SHA-256 cfea4fc7c906cdcfa9f30b7db562786b4e3a67a51cd01348f376920e5c3b063d (the T07, T08
+and T09 recipes by adapter manifest and file hashes, rechecked unchanged at d65323ee; the effective configurations and budgets by hash
+(K10); `r_dev` per noise bin; the T07 negative-case inputs; Freeze A unchanged; E6 at 0e310d34 with the evaluation manifest d98f5e6f;
+the K09 reading rules), the user: "Freeze B as listed". FREEZE B GIVEN. Any change to a frozen item is a return to Freeze B (v4 3.4: a new
+recipe hash, a new Freeze-B run on block 5, the user's word). Evaluation attempt 1 on block 11 may now be submitted (resources approved,
+ceiling 200 CPU-hours). In the same answer: backup b22 approved ("Approve the backup (Recommended)").
