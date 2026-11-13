@@ -196,14 +196,16 @@ def _tail_check(contract, names):
                          "defined yet, so no P5 or G4 decision is made on them (approval A7, D41)")
 
 
-def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v_mc_diagonal", "matrix_condition"),
+def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v_mc_diagonal", "matrix_condition",
+                                                                     "birks_discretization"),
        f: float = F_DEFAULT, n_scan: int | None = None, seed: int | None = None, scan_parameters=None) -> dict:
     """P5 on one set of Sobol points within the prior (section 3.6: the prior range is scanned; by default every theta
     with sampling bounds, or the `scan_parameters` given, the others at theta_ref): the ESS item (N_eff,k >= N_req,k =
     s_k^2 / (f V^unc_data,kk), N_eff over the events entering observable k, D41), the per-observable item
     V_MC,kk <= f V^unc_data,kk for Gaussian blocks (D42), and the matrix condition Sigma_MC <= f Sigma_data point by
     point with that point's Asimov; the worst point of each item decides. Missing support at any point (an event not
-    recorded at a reweighted node) fails P5. Sigma_boot and b_J (phase 2) and the theta-noise item (phase 3) are listed
+    recorded at a reweighted node) fails P5. With a k_B rerun, the class-discretization item of section 5.4
+    (birks_discretization). Sigma_boot and b_J (phase 2) and the theta-noise item (phase 3) are listed
     under `deferred`."""
     obs = linear.calibration_observables(contract)
     names = [o["name"] for o in obs]
@@ -286,12 +288,66 @@ def p5(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v
         findings.append({"code": "p5.missing_support", "message": f"events not recorded at a reweighted node in runs "
                          f"{missing[i0]} at {pts[i0]} (and {len(missing) - 1} more points): missing support, the "
                          "reweighting cannot be used there (section 6.1; remedy: plan)"})
+    bd = birks_discretization(evaluator, contract, plan, theta_ref=theta_ref, names=names) \
+        if "birks_discretization" in items else None
+    if bd is not None:
+        result_items["birks_discretization"] = {k: v for k, v in bd.items() if k != "findings"}
+        findings += bd["findings"]
     status = "failed" if findings else "passed"
     return {"gate": "P5", "status": status, "items": result_items, "findings": findings, "f": f,
             "scan": {"n": len(pts), "seed": seed, "parameters": rw}, "per_point": per_point,
             "deferred": ["sigma_boot (section 2.1, phase 2)", "b_J (section 8.2 note 3, phase 2)",
                          "theta-noise s_i, kappa_i (mode where the map varies with theta, phase 3)"],
             "flags": ["provisional-thresholds"]}
+
+
+BIRKS_BOUND = 0.1                              # section 5.4: the propagated bound <= 0.1 sigma_tot^design
+
+
+def birks_discretization(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None, names=None) -> dict | None:
+    """Section 5.4 (Part B line 1041), P5 feasibility of the k_B rerun from edep_by_dedx_class: the class-
+    discretization bound (g4sim_simulate.reweighting_bound) at the largest k_B within the prior, propagated to theta
+    via the design-stage A, must be <= 0.1 sigma_tot^design for every theta_i, else the rerun is infeasible and k_B is
+    resimulated. The bound moves each (event, volume) visible energy by +-bound (the evaluator's birks_bound_shift);
+    the larger of the two propagated shifts decides. None when the evaluator has no k_B rerun."""
+    kb = getattr(evaluator, "birks_parameter", lambda: None)()
+    if kb is None or not hasattr(evaluator, "birks_bound_shift"):
+        return None
+    pars = {p["name"]: p for p in contract.get("parameters", [])}
+    bounds = (pars.get(kb) or {}).get("sampling_bounds")
+    if not bounds:
+        return {"status": "failed", "parameter": kb, "findings": [{"code": "p5.birks_prior", "message": f"{kb}: no "
+                "sampling_bounds, so the largest k_B within the prior is not known (section 5.4; remedy: contract)"}]}
+    obs = linear.calibration_observables(contract)
+    names = list(names or [o["name"] for o in obs])
+    d = linear.design(evaluator, contract, plan, theta_ref=theta_ref, names=names)
+    at = np.asarray(d["A_theta"], float)
+    sig = np.asarray(d["sigma_tot"], float)
+    point = {**(d.get("theta_ref") or {}), kb: float(max(bounds))}
+    base = np.asarray(evaluator.evaluate(point, names=names)["pred"], float)
+    worst: tuple[float, int | None, int | None] = (-math.inf, None, None)
+    shifts = {}
+    for sign in (1, -1):
+        moved = np.asarray(evaluator.birks_bound_shift(point, sign, names=names)["pred"], float)
+        delta = np.array([math.log(m / b) if link == "log" else m - b
+                          for m, b, link in zip(moved, base, d["links"])])
+        ratio = np.abs(at @ delta) / sig
+        shifts[sign] = {"delta_link": delta.tolist(), "ratio": ratio.tolist()}
+        k = int(np.argmax(ratio))
+        if ratio[k] > worst[0]:
+            worst = (float(ratio[k]), k, sign)
+    ok = worst[0] <= BIRKS_BOUND
+    theta_names = list(d.get("theta") or [])
+    rec = {"status": "passed" if ok else "failed", "parameter": kb, "k_B_max": point[kb], "max_ratio": worst[0],
+           "theta": theta_names[worst[1]] if worst[1] is not None and worst[1] < len(theta_names) else worst[1],
+           "sign": worst[2], "bound": BIRKS_BOUND, "shifts": {str(k): v for k, v in shifts.items()},
+           "findings": [], "flags": ["provisional-thresholds"]}
+    if not ok:
+        rec["findings"].append({"code": "p5.birks_discretization", "message": f"the class-discretization bound at "
+                                f"{kb} = {point[kb]:.6g} (the largest k_B in the prior) moves {rec['theta']} by "
+                                f"{worst[0]:.3g} sigma_tot^design > {BIRKS_BOUND} via A: the rerun from "
+                                "edep_by_dedx_class is infeasible, k_B is resimulated (section 5.4; remedy: plan)"})
+    return rec
 
 
 # ------------------------------------------------------------------ feasibility and the final method (section 3.6)
@@ -328,8 +384,14 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
                     chosen[p] = m
                     break
             elif m == "rerun":
-                log.append({"parameter": p, "method": m, "feasible": bool(storage_ok)})
-                if storage_ok:
+                bd = birks_discretization(evaluator, contract, plan) if p == getattr(
+                    evaluator, "birks_parameter", lambda: None)() else None
+                feasible = bool(storage_ok) and (bd is None or bd["status"] == "passed")
+                log.append({"parameter": p, "method": m, "feasible": feasible,
+                            **({"birks_discretization": {k: bd[k] for k in ("status", "max_ratio", "k_B_max")}}
+                               if bd and "max_ratio" in bd else {}),
+                            **({"reason": bd["findings"]} if bd and bd["findings"] else {})})
+                if feasible:
                     chosen[p] = m
                     break
             elif m == "resimulation":
@@ -375,7 +437,7 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
 
 
 def p5_with_final_methods(evaluator, contract: dict, plan: dict, systematics=None, items=("ess", "v_mc_diagonal",
-                          "matrix_condition"), f: float = F_DEFAULT) -> dict:
+                          "matrix_condition", "birks_discretization"), f: float = F_DEFAULT) -> dict:
     """P5 as section 3.6 step 2 has it: the final method first (an infeasible reweighting moves to the next tier
     automatically), then the P5 items with the final methods (review F5)."""
     m = final_methods(evaluator, contract, plan, f=f)
