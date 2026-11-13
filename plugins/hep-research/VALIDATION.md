@@ -9255,3 +9255,54 @@ native backend (U12 A; the gap stays open). No photon-likelihood quality or perf
 printed are not gates; T09's quality verdict waits for K09 at Freeze B. At 0.2.0: the close-out had 20 met, 13 met with readings, 4 open and 1 gap.
 Open at this record, as the close-out lists them: v4 9.4's two negative checks, the quality verdict, the calibration of the topology score at K09, and BP06's original method
 sources (`source-unverified`).
+
+## TIMING-PID-T10 — 2026-11-13 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+**Adapter 0.2.0 (T10 close-out).** First record of `adapters/timing-pid` (task T10 of the detector reconstruction plan v9.2, recipe
+`reco.timing.time-chain/1`, a development binding, not a native backend): status `demonstrated-on-synthetic-data` for its one tool and the
+adapter, Python 3.13.18 with NumPy 2.4.6 (the project's env/py313). The jobs ran `adapter.json` at 0.1.0, `proposed`; 0.2.0 changes records
+only (`adapter.json`, this section, the capability matrix row, `docs/dev/detector-reconstruction/t10-closeout.md`).
+
+**Job of record, stage 1.** Job 7593003 on hpa-wn33 (AMD EPYC 9645), 2026-11-12, 4 min 56 s, JOB RESULT PASS, stderr empty; script
+`t10-timing.sh` (cc701385…), manifest `SOURCES.sha256` (90e0925b…, 4,951 files), run from a checked copy; Python 3.13.18, NumPy 2.4.6 and
+SciPy 1.17.1 gated, glibc 2.34. Units: `test_timing_chain` 29, `test_timing_cai` 14, `test_adapter_declarations` 3, OK. `t10_cai.py run`
+on 10,000 seeded synthetic events: CAI-T10-1a to f and CAI-T10-2 PASS (largest time deviation 5.690e-15 ns against 1e-12; β error ratio
+0.4962 to 0.4988); the ten controls each failed their item in 200 of 200 events; the repeat byte-equal; check-layering and check-naming exit 0.
+
+**Job of record, stage 2.** Job 7627284 on hpa-wn34 (AMD EPYC 9645), 2026-11-13, 26 min 17 s, JOB RESULT PASS, stderr empty; script
+`t10-stage2-r1.sh` (7f31e360…), manifest `SOURCES-r1.sha256` (333aef85…, 5,636 files), a clone of base `4c08da43` with the manifest's files
+copied over it and checked; the interpreter gated by its SHA-256 and Python 3.13.18 (NumPy not gated separately: the same interpreter as
+job 7593003). Units: `test_timing_chain` 36, `test_timing_cai` 14, `test_timing_pid` 16, `test_timing_a37` 18, `test_timing_counts` 7,
+`test_adapter_declarations` 3, OK, no skip. Stage 1 regression (10,000 events) PASS and its ten controls with their exact failed items;
+`t10_stage2.py` pid (2,000 events), counts (2,000 events) and a37 (T07's run record of CAI-T07-4, job 7546791, `cai-refit.log` SHA-256
+pinned in the tool) PASS, and the eleven stage 2 controls each failing only its own item (the counts controls with their exact contract
+codes). Readings: pid largest log-likelihood deviation 5.97e-13; migration on 8,942 tracks, 722 outside support, P(sel b | true b) 0.9826,
+P(true b | sel b) 0.9823 and 0.7445 at the two stated compositions; A37 witness 8 cells, smallest q/p change 4.9543 σ, largest |Δχ²/ndf|/se
+1.753; g×E rank 9 of 10 without and 10 with the named constraint. The full suite: units fail only on the LCG ID and on `test_no_bytecode`
+with exactly `calo_cluster.py` and `photon_likelihood.py` (held, base 4c08da43); static 31 pass.
+
+Not claimed: any timing, TOF, PID, dE/dx, calibration or counting quality; a native timing backend (gap, as U12 A). Open at this record:
+the cross-system TOF example (no flight-path length to a timing plane in the records), A20 to A24 (recorded gaps), and the native scan or
+global solver (U7 B2; the replay is `adapters/destriper`, section DESTRIPER-T10).
+
+## DESTRIPER-T10 — 2026-11-13 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+**Adapter 0.2.0 (T10 close-out).** First record of `adapters/destriper` (T10's scan/global reference replay, U7 option B2, recipe
+`reco.scan.destriper/1`, a development binding, not a native backend): status `demonstrated-on-synthetic-data` for its one tool and the
+adapter, Python 3.13.18 with NumPy 2.4.6. The jobs ran `adapter.json` at 0.1.0, `proposed`; 0.2.0 changes records only.
+
+**Tolerance.** Frozen by the user on 2026-11-12, "Freeze as proposed (Recommended)" (decisions.md): noisy replay at eps 1e-10, baselines
+within 2.5e-8 and map within 2.2e-8 of ||a_ref||_2, zero sum within 1e-13 Σ|a|; noiseless at eps 1e-13 (2.5e-11, 2.2e-11); records
+`t10-replay.tolerance.json` (217a38bc…) and `t10-replay-noiseless.tolerance.json` (12738ebc…); the exact reference 440a1e0d…
+
+**Job of record.** Job 7596623, the replay's attempt 3, on hpa-wn33 (AMD EPYC 9645), 2026-11-12 from 23:40:38 UTC (about two minutes by its
+step timestamps), JOB RESULT PASS, stderr empty; script `t10-replay.sh` (73587671…), manifest `SOURCES.sha256` (cd29f627…, 2,575 files) after
+the bytecode line in `destriper.py`; Python 3.13.18 and NumPy 2.4.6 gated. Units: `test_destriper_fixture` 9, `test_destriper` 18,
+`test_destriper_reference` 15, `test_adapter_declarations` 3, OK. Comparator PASS: noisy baselines 6.847e-16 and map 4.666e-16 of
+||a_ref||_2 in 15 iterations; noiseless 3.136e-16 and 1.729e-16; the stopping ladder with 4 informative steps (at least 2 needed); the zero
+sum; the noiseless reference equal to the truth exactly; every negative variant refused with its codes on every product; the runtime
+null-mode drift without the constraint shown. Its values are bit-identical to attempt 2, job 7594892 (PASS, 1 min 20 s, 64 MB). Attempt 1,
+job 7593065, crashed on a test defect (the freeze was foreseeable) with every replay step run; method and frozen values unchanged.
+
+Not claimed: map-making quality; a native scan or global solver (recorded gap, U7 B2, as U12 A); the RF and retarding W7 subcases at run
+time (they stay T06 contract checks).

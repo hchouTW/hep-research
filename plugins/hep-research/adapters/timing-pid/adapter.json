@@ -1,16 +1,18 @@
 {
  "id": "adapter:timing-pid",
- "version": "0.1.0",
- "status": "proposed",
+ "version": "0.2.0",
+ "status": "demonstrated-on-synthetic-data",
  "purpose": "T10 timing as a development binding in Python, recipe reco.timing.time-chain/1 (as decisions.md U12 A for T08 and T09; not a native backend, whose gap stays open), stage 1 (docs/dev/detector-reconstruction/t10-timing-stage-plan.md): the conditions payload timing-payload/1, one per chain step (offset, amplitude-dependent walk, propagation along the counter) keyed by the channel map timing-channel-map/1, with derived payloads that record their source; the time chain of single-ended and two-ended counters with, per hit, the value before and after each step in chain order with its payload identity, the amplitude, both ends' times or the position with its source, and the path length (plan R35), with a reader that refuses a broken chain and recomputes every applied value from its parameter and, given them, the payloads; external, common linear, per-track leave-one-out linear (every hit of the track excluded) and median event times that record source, estimator, hits and weights; time of flight and beta, each TOF naming its event time; and on the scoring side the calibration-interface checks CAI-T10-1 and CAI-T10-2 of plan R37 with planted-defect controls on the check side and the recipe side; stage 2 (t10-timing-stage-plan.md section 6): each event-time hit entry carries its track_id and tof() refuses a leave-one-out start that lists or does not exclude its own hit (re-review R1, R2); dE/dx with every sample, path length and saturation flag kept before truncation and normalization, recomputable by a reader (R35); TOF species hypotheses with Gaussian time likelihoods, LLRs labelled not a probability, support per hypothesis pair, the working point, probabilities only with stated priors, and missing-input records without numbers; P(selected | true) and P(true | selected) with its stated composition kept apart (BP07); the method card timing-method-card/1 with each unconstrained mode, its witness, its named external constraint and its independent observables (section 9.6, A37); counter counts with thresholds and per-channel valid exposure as a T06 counts product (W6, A19); and on the scoring side the stage 2 checks (fixture_tools/t10_stage2.py, fixture_tools/t10_a37.py: PID diagnostics, the g x E degeneracy, T07's weak-mode run record read) with planted-defect controls; synthetic constants only, no timing, TOF, PID, dE/dx, calibration or counting quality claim; optional, required by no skill",
  "tools": [
   {
    "name": "timing-pid development binding (Python with NumPy; the counts product read by the plugin's contracts)",
-   "status": "proposed",
-   "tested_versions": []
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "Python 3.13.18 with NumPy 2.4.6 (the project's env/py313) on NSTCCore Slurm workers of partition edr2-al9_short_serial (AMD EPYC 9645, glibc 2.34): job 7593003 gated the interpreter's SHA-256, Python 3.13.18 and NumPy 2.4.6 (with SciPy 1.17.1, which the recipe does not import); job 7627284 gated the same interpreter by its SHA-256 and Python 3.13.18, not the NumPy version separately"
+   ]
   }
  ],
- "environment": "none declared",
+ "environment": "NSTCCore (ASGC/TWGrid) Slurm, a worker of partition edr2-al9_short_serial (glibc 2.34; the job is not pinned to a node); Python 3.13.18 with NumPy 2.4.6, the project's env/py313. Jobs of record: stage 1, job 7593003 (t10-timing.sh cc701385, hpa-wn33, 2026-11-12, 4 min 56 s, JOB RESULT PASS): the time chain, event times and the CAI-T10-1 and CAI-T10-2 checks on 10,000 seeded synthetic events with ten controls; stage 2, job 7627284 (t10-stage2-r1.sh 7f31e360, manifest SOURCES-r1 333aef85, 5,636 files; hpa-wn34, 2026-11-13, 26 min 17 s, JOB RESULT PASS): the five timing modules, the stage 1 regression and its ten controls, the PID, dE/dx, counts and A37 checks with eleven controls (A37's weak-mode witness read from T07's run record, job 7546791), and the full suite, failing only on the LCG ID and the held test_no_bytecode on base 4c08da43. The stage 1 job ran adapter.json at 0.1.0, proposed; so did the stage 2 job; 0.2.0 changes records only (this file, VALIDATION.md section TIMING-PID-T10, the capability matrix row and docs/dev/detector-reconstruction/t10-closeout.md)",
  "assets": [
   "assets/fixture_tools/t10_a37.py",
   "assets/fixture_tools/t10_cai.py",
@@ -33,5 +35,5 @@
   "../../tests/adapters/test_timing_pid.py"
  ],
  "owner_skill": "hep-detector",
- "status_rule": "the adapter status is the lowest of its tools' statuses; proposed until a job of record runs it; hand-made and seeded synthetic hits on the login node only so far; interface tests of plan R37 with no quality claim"
+ "status_rule": "the adapter status is the lowest of its tools' statuses; demonstrated-on-synthetic-data: the recipe and its scoring-side tools ran in jobs 7593003 (stage 1) and 7627284 (stage 2) on seeded synthetic events and hand-made inputs only, against expectations computed independently in the tests and tools (R37's formulas, the stage plan's derived two-ended and diagnostic expectations), planted-defect controls on the check and recipe sides, T06's contract reader and T07's recorded run; not tested-in-declared-environment, because no run read real or simulated detector data and no reference output from outside the plugin was compared; a development binding, not a native backend, whose gap stays open (as U12 A); interface tests of plan R37 and BP07 diagnostics with no timing, TOF, PID, dE/dx, calibration or counting quality claim"
 }
