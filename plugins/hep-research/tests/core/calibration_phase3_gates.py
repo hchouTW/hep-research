@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -47,6 +48,7 @@ for _p in (str(ROOT), str(HERE), str(ROOT / "adapters" / "geant4" / "assets")):
 import calibration_phase2_cals as CA  # noqa: E402
 import calibration_phase2_cals_c as CC  # noqa: E402
 import calibration_phase2_gates as G  # noqa: E402
+import calibration_phase3_g4 as P3  # noqa: E402
 
 from core.calibration import closure as C  # noqa: E402
 from core.calibration import emulator as EM  # noqa: E402
@@ -65,6 +67,7 @@ SEED = 20261300
 FILES = ["core/calibration/" + f for f in ("closure.py", "emulator.py", "evaluator_problem.py", "fit.py", "interval.py",
                                             "likelihood.py", "shift.py", "toy.py", "toy_problem.py")] + \
     ["adapters/geant4/assets/g4sim_calib_eval.py", "tests/core/calibration_zdc_fixture.py",
+     "tests/core/calibration_phase3_g4.py",
      "tests/core/calibration_phase3_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-3.md"]
 
 
@@ -131,6 +134,7 @@ UNIT_ITEMS = {
                   EMULATOR_TESTS + "G8Hook.test_spot_check_seeds_independent_of_training": "negative"}},
     "g4sim_zdc_positive": {
         "part": "g4sim positive tests on the synthetic ZDC fixture (section 15.2)",
+        "env": {P3.PRODUCTS_ENV: str(P3.OUT_ROOT)},     # the Geant4 products of campaign p3-g4 (unset: they skip)
         "tests": {PROBLEM_TESTS + "ResponseParametersP0": "positive",
                   PROBLEM_TESTS + "BirksRerunAgainstResimulation": "positive",
                   PROBLEM_TESTS + "CalorimeterProblem": "positive",
@@ -220,7 +224,25 @@ def judge_units(item: str, outcomes: dict, names=None) -> dict:
 
 
 def units_block(item: str) -> dict:
-    return {"outcomes": run_tests(list(UNIT_ITEMS[item]["tests"]))}
+    """The item's tests run with its `env` set for the run (a value already in the environment wins: a gate run may
+    name another products root), restored after; the products root and its tell.json SHA-256 recorded."""
+    env = {k: os.environ.get(k) or v for k, v in UNIT_ITEMS[item].get("env", {}).items()}
+    saved = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        rec = {"outcomes": run_tests(list(UNIT_ITEMS[item]["tests"]))}
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+    if env:
+        tells = {k: Path(v) / "tell.json" for k, v in env.items()}
+        rec["env"] = env
+        rec["tell_sha256"] = {k: hashlib.sha256(t.read_bytes()).hexdigest() if t.is_file() else None
+                              for k, t in tells.items()}
+    return rec
 
 
 # ================================================================== zdc_fit: the ZDC response-layer parameters
