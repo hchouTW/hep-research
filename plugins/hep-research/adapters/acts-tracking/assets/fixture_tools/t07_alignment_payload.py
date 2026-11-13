@@ -198,6 +198,11 @@ def payload_sidecar(text: str, tag: str, source: str, parent_sidecar: dict | Non
         raise PayloadFormatError("a derived payload's sidecar names its parent's sidecar, and only a derived payload's")
     nonzero = [(plane, [name for name, value in zip(PLANE_PARAMETERS, values) if value != 0.0]) for plane, values in sorted(payload["deltas"].items())]
     freedoms = [{"structure": f"plane-{plane}", "parameters": names, "frame": "local", "level": "sensor"} for plane, names in nonzero if names]
+    if not freedoms:  # post-freeze fix (the user, 2026-11-13): a payload that moves nothing states every plane at nominal (R32 needs the section)
+        if payload["derived_against"] != nominal_geometry_id():
+            raise PayloadFormatError("a payload that moves nothing states the nominal geometry's planes, and this one is derived against another geometry")
+        planes = int(next(line.split()[1] for line in nominal_geometry_text().splitlines() if line.startswith("planes ")))
+        freedoms = [{"structure": f"plane-{plane}", "parameters": list(PLANE_PARAMETERS), "frame": "local", "level": "sensor"} for plane in range(1, planes + 1)]
     sidecar = {"schema": "conditions-payload/1", "payload_id": "", "tag": tag, "kind": "alignment-parameters", "producer": {"kind": "external", "source": source},
                "iov": {"predicates": [{"coordinate": "run", "start": 0, "end": iov_end, "closure": "half-open"}]},
                "parametrization": {"name": PARAMETRIZATION[0].split("/")[0], "version": PARAMETRIZATION[0].split("/")[1]},
