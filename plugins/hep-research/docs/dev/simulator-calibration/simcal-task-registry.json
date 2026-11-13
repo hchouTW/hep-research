@@ -463,6 +463,13 @@
    "registered_at": "2026-11-13T12:33:30Z",
    "card_commit": "04c11c0f",
    "reason": "gate part D (campaign p3-gates-d, A19) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "6671aa5af3b0a49beeca253fcd55fb576e959631009fe149f53778eadbedec62",
+   "registered_at": "2026-11-13T20:41:19Z",
+   "card_commit": "337fffd9",
+   "reason": "gate part E (campaign p3-gates-e, A20) registered before any run"
   }
  ]
 }
