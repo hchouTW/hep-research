@@ -199,7 +199,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 9 | - | 338f8d78 2026-10-19 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c0 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 7 | - | 9257d7b5 2026-10-15 |
-| `calibration-and-alignment.md` | hep-detector | 24.6 | yes | 27 | hep-computing | 5e3b104e 2026-10-29 |
+| `calibration-and-alignment.md` | hep-detector | 24.6 | yes | 28 | hep-computing | 5e3b104e 2026-10-29 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 16.3 | yes | 12 | - | 7cfaea3d 2026-11-06 |
 | `charge-confusion.md` | hep-detector | 12.3 | yes | 6 | - | 4c1cb871 2026-10-17 |
 | `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 11.3 | no | 10 | hep-citations | a1267715 2026-10-25 |
