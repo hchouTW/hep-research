@@ -25,7 +25,7 @@ until Freeze B fixes K09.
 | 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (K09 gates); T10 for T10's recipe |
 | 5 | A13: recorded `blocked-by-resource` (R14; Q1 answered 2026-11-13); no GPU job. The CPU measurements of stage 4 (T12-14) are recorded beside it | Stage 4 |
 | 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | T10 for T10's part; question Q3 |
-| 7 | A10, A26-A36 runtime (R20: T11 design, T12 runtime) | T11 design (F1); a backend per family, else a recorded gap |
+| 7 | A10, A26-A36 runtime (R20: T11 design, T12 runtime) | T11 design (F1, done); drafted on `t12/stage7` from `28763f50`, see "Stage 7" and its fix round 1: 3 executed (A32 with a harness-side pairing check), 8 recorded gaps (P4 execution incomplete) |
 
 ## Obligations
 
@@ -291,6 +291,140 @@ a missing default, and that the identity changes with a limit.
 - R9' (M7, I5). The scope check also reports a namespace package whose search locations lie under a live root, and the running
   interpreter (`sys.executable`, resolved) under a live root. In the job it imports the modules under test (`--import`) and takes the live
   roots from `git worktree list --porcelain` of the checkout.
+
+## Stage 7: A26-A36 at run time and A10 (fixed before the tests were written)
+
+**Scope.** T12-20 (R20: A26-A36 were designed in T11; T12 owes the run time: one executed case per scenario on a backend that covers it,
+otherwise a recorded gap that keeps P4 execution incomplete) and T12-21 (A10, §16.1 row T12). Branch `t12/stage7` from `28763f50` (Gate D:
+Freeze B given, T10 done). No new backend is built (the brief; R14): where none covers a scenario, the gap is recorded with its reason and
+the scenario is never narrowed to what a backend happens to do. Synthetic fixtures and read-only frozen files only; no quality claim.
+Sources read: plan v9.2 §13 (A10, A26-A36), §8.3, §10.2, §10.5, §14.1-14.2, §16.1 row T12, R14, R20; `t11-cells.md` (bindings of F10,
+F11, F28, F30, F34-F38); `t10-closeout.md` (W6 and W7 rows, A20-A24 recorded as gaps in the same way); `t08-scenarios.md` (A32, T08's part);
+`freeze-b.md`; `contract-map.md`; STATE.md.
+
+**Files.** `tests/contracts/t12_runtime.py` (the harness: the scenario table, the executed cases, the A10 reprocessing, the record) and
+`tests/contracts/test_t12_runtime.py`. They import the backends' own modules and run their command lines; no backend file, recipe, frozen
+file or entry of `jobs/evaluation/SOURCES.sha256` changes.
+
+**Which backend covers which scenario.** The backends in this repository are the T07-T10 development bindings (`adapters/acts-tracking`,
+`calo-cluster`, `photon-likelihood`, `timing-pid`, `destriper`); the T11 cells give every family below binding `none` except where named.
+The scenario text is plan §13's, pinned literally in the harness.
+
+| Scenario | Run time | Backend, or the reason for the gap |
+| --- | --- | --- |
+| A26 injection before filtering | gap | No backend filters a signal: the destriper solves baselines, its method card says "no filtering or transfer function", and T11 F38 records "signal injection before filtering remain gaps"; F35 (HAYSTAC: SG filter attenuation, synthetic injections) has binding `none` |
+| A27 per-setting scan conditions, dwell and merge weights | gap | No scan-setting backend: F35 (RF/IF map per setting) and F36 (retarding potential) have binding `none`; RF and retarding are T06 contract checks, not run time (`t10-closeout.md`, W7 row) |
+| A28 per-channel exposure, readout generating signals | executed | `adapters/timing-pid` counts (`timing_recipe/counts.py`, T10 W6): per-channel valid exposure from the read intervals and dead time |
+| A29 angle bases, periods, axial-vs-vector conventions | gap | No polarimetry or angle-basis backend: F37 has binding `none`; the destriper timestream has pixel and value only, no polarization angle |
+| A30 first CRES segment undetected | gap | No CRES backend: F34 binding `none` |
+| A31 averaged or filtered spectra are not raw counts | gap | No backend reads averaged or filtered spectra: F35 (HAYSTAC averaged spectra) binding `none` |
+| A32 cuts, cleaning, model or multiplicity changed: no unchecked IRF reuse | executed (fix round 1: E32R) | `adapters/calo-cluster` (T08) and `skills/hep-detector/scripts/build_response.py`: a response built from frozen-configuration products is refused against the variant configuration's product by identity (a harness-side check; see fix round 1, I1). Round 0 wrote "executed, with a remainder" here |
+| A33 scintillation insufficient for energy: veto or partial quantities only | gap | No backend measures scintillation against an energy domain: F10 binding `none`; F11 is bound to simreco (`adapters/geant4/assets/simreco/simreco.cc`: TOF station times and β on simulated element_sim events), adjacent, not a cover (no light-yield, quenching or energy model, no energy-domain or veto-only statement; corrected in fix round 1, I2); the photon likelihood (T09) fits one light model and has no veto-only mode; the timing counts (`per_event_energy` false, A19) are counting, not a scintillation veto: adjacent, not a cover |
+| A34 null modes in global maps or fits | executed | `adapters/destriper` (T10 replay binding, U7 B2): the common offset named, or fixed by the stated zero-sum constraint |
+| A35 same frame name, other projection or focal length: off-axis controls | gap | No imaging backend: F30 and F28 bindings `none` |
+| A36 injection into real data: injection location, synthetic components, derived labels | gap | No backend injects into recorded data and none holds real data; the T08 product /3 carries an input label and provenance (`simulated-unvalidated`), a simulation label, not an injection record: adjacent, not a cover |
+
+So P4 execution stays incomplete for A26, A27, A29, A30, A31, A33, A35, A36 (round 0 also listed A32's IRF part; fix round 1, I1, executes it). The record states this, and the harness's
+exit 0 means only that every expectation below held, gaps included; it never means P4 is complete.
+
+**Executed cases (all comparisons exact unless a tolerance is named).**
+- E28 (A28, timing counts). Channel `ch-a`: threshold 3 mV; intervals [0, 10) s and [10, 20) s, each read, dead 1 s; pulses (1 s, 5 mV),
+  (2 s, 1 mV), (12 s, 7 mV). Channel `ch-b`: threshold 3 mV; [0, 10) s read, dead 0.5 s; [10, 20) s not read; pulse (3 s, 4 mV).
+  Expectations: the T06 reader accepts the product (no error code); valid exposures 18 s and 9.5 s, run time 20 s; counts `ch-a` 1 and 1,
+  `ch-b` 1 and the interval [10, 20) absent with no count; each rate's denominator is its channel's valid exposure. Negatives, each with
+  exactly its codes: N28a every rate on the run time (`reconstruction.counts.run_time_denominator`); N28b every rate on 20 s labelled as a
+  valid exposure (`reconstruction.counts.exposure_mismatch`); N28c a consistent single run-level exposure (every channel's valid exposure
+  and rate set to 20 s): the reader cannot see it, so the harness recomputes each channel's exposure from the native intervals and reports
+  both channels. All values are sums of binary-exact numbers, so exact equality is the tolerance.
+- E32 (A32, calo-cluster). Two hand-made events on the 40 x 40 grid (closed-form shower images, as `tests/adapters/test_calo_scenarios.py`:
+  one shower 2000 MeV at (12.3, 20.1); two showers 2000 MeV at (18.4, 20.2) and 1500 MeV at (21.9, 20.6)), pedestal 0, gain 1. Products made
+  by `calo_cluster.py reconstruct` with the frozen configuration (read by SHA-256 `5fbbea3b…`) and with a whole variant file
+  (`cell_threshold_mev` 1.2, as T08's A32 test). Expectations: each header names its own configuration SHA-256 and the two differ; the
+  frozen-configuration consumer (`t08_scenarios.py accounting`, default configuration) refuses the variant's product with exit 2 and a reason
+  naming the configuration, accepts it (exit 0) with the variant file, and accepts the frozen product (exit 0).
+- E34 (A34, destriper). Fixture `t10_fixture.py` seed 20260, variants noiseless and disconnected. `destriper.py solve` with
+  `--constraint zero-sum --stopping 1e-13`: written; `check-product` exit 0; the constraint statement is named; the map and baselines equal
+  the fixture's truth within the frozen noiseless tolerance (`t10-replay-noiseless.tolerance.json`, SHA-256 `12738ebc…`: τ_baselines
+  2.5e-11 and τ_map 2.2e-11 of ‖a_truth‖₂, the user's freeze, decisions.md 2026-11-12). With `--constraint none`: written, `check-product`
+  exit 0, every one of the 48 parameters listed unidentifiable, no reported item a single parameter, constraint null, no uniqueness claim.
+  The disconnected scan is refused (exit 1, two components; one constraint cannot fix two null modes). Negative variants on the zero-sum
+  product (`t10_fixture.negative_variant`): `jitter`, `chunk-average`, `unique-without-constraint` each refused with exactly its code.
+
+**A10 inside a T12 reprocessing (T12-21; plan §8.3, A10, R34).** The reprocessing is a recalibration: a new gain payload G1 (1.1,
+measured, derived against the pedestal payload) for E32's frozen-configuration product P0, made with G0 (1.0). Its step `trace-rerun`
+needs the readout's raw values (`raw`): the cell chain and clustering rerun from the readout. The harness describes P0 by a
+reconstruction-product/1 sidecar (`t08_sidecar`) that the T06 reader must accept: `conditions_used` from P0's chain (payload identities
+as the chain records them; the T08 payloads carry no tag, so the tag is the harness's label `t08-chain-<step>`, and invalidation compares
+identities, R32); retention mapped from P0's header and the files retained beside it:
+- `raw`: `reproducible` when the readout whose SHA-256 the header names is retained, otherwise `removed`. The raw values P0 keeps for the
+  cells of kept components never make `raw` kept: a trace rerun needs every cell, and removed information is not inferred from summaries
+  (§8.3);
+- `waveform`: `removed` (calo-cells/1 holds one value per cell, no samples), so a waveform-requiring step is refused in every case;
+- `conditions_snapshot`: `reproducible` when both payload files are retained and their identities equal the chain's, otherwise `removed`;
+- `truth`: `not-applicable` (a data-side product); `candidates`: `kept` (components, candidates and kept peaks are in P0);
+- `lost_recalibrations`: P0's own statement plus "pulse-shape or timing recalibration (no samples in calo-cells/1)".
+The planner admits a step only when `contracts.reconstruction.can_recompute(sidecar, level)` is true. Expectations:
+- K1 (input retained): `can_recompute` raw true; `trace-rerun` runs and writes a new product P1 whose gain step names G1's identity; P0's
+  bytes are unchanged; a rerun under P0's own payloads reproduces P0's bytes exactly (byte reproducibility, §14.1: deterministic fixture).
+- K2 (input not retained: raw retention removed): `can_recompute` raw false; `trace-rerun` is refused (`can_recompute: false`, outcome
+  "refused: the readout is not retained, so a trace rerun is infeasible"), nothing is written at its target; the higher-level parameters stay
+  usable: every object of P0 is read back (energy, position and their uncertainties) with the gain payload it was made with (G0), labelled
+  not recalibrated.
+- K3 (another readout given, SHA-256 not the header's): raw `removed`, refused as K2.
+- K4: a step needing `waveform` is refused even with the input retained.
+- K5: the sidecar is accepted by `read_sidecar`; without `lost_recalibrations` it is refused with `reconstruction.retention.loss_unstated`.
+
+**Record and exit codes (core/status.py).** `t12_runtime.py run --out FILE` runs E28, E32, E34 and K1-K5 in a scratch folder and writes
+one JSON record: each scenario with its run-time state (`executed` with its items and readings, or `gap` with its reason and the T11
+families), the A10 items, `p4_execution: incomplete` with the gap list, synthetic, no quality claim. Status `ok` exit 0: every expectation
+above holds; `failed` 1: one does not; `rejected` 2: the output file exists (a record is never overwritten) or its folder is missing;
+`incomplete` 3: a backend could not run or the record could not be written.
+
+**Amendment 1 (after green-1, before the job; disclosed, not hidden).** E34's negatives were written as "each refused with exactly its
+code". Green-1 refuted that wording, not the behaviour: on the zero-sum product, `jitter` and `unique-without-constraint` remove the
+constraint while single parameters stay reported and `uniqueness_claim` stays true, so the reader also raises
+`reconstruction.scan.unidentifiable_reported`, `.unidentifiable_unnamed` and `.unique_claim`, which follow from the change itself. T10's
+job of record judged these same variants by "the variant's code is among the refusal codes" (`t10_replay.py`, `negatives`). Stage 7 now
+uses that rule: each variant's code is among the codes, the unmodified product passes, and the full code lists are kept as readings in
+the record. No other expectation changed.
+
+### Stage 7, fix round 1 (review `jobs/t12-stage7/REVIEW.md`, NOT READY 0/2/5/3; written before the changed tests)
+
+Job 7636499 failed only on a frozen test that reads the real `SLURM_JOB_END_TIME` (`test_t04_evaluation_layout`, task deadline under one
+hour); that test is not edited, and the redrafted job (`t12-stage7-r1.sh`) asks for 3 h. All findings are adopted.
+
+- **I1 (A32's IRF reuse).** `skills/hep-detector/scripts/build_response.py` can build a response from T08 products: it takes a matched
+  truth/reco sample and writes a contract artifact that `contracts/validate.py` accepts. It has no structured field for the product or
+  configuration it was made from; its `--provenance` text is carried into `extension.provenance`. So the case is executed, with the pairing
+  check on the harness side (like E28's recomputation), and the absence of a structured identity in `build_response.py` is an open item.
+  E32R: four hand-made single showers on the 40 x 40 grid, (600, 20.3, 19.8), (1400, 19.6, 20.4), (2200, 20.5, 20.5), (3000, 19.4, 19.6)
+  [MeV, cell, cell], pedestal 0, gain 1; products with the frozen configuration and with the variant (`cell_threshold_mev` 1.2). The matched
+  sample per event: truth the shower energy, reco the sum of the event's object energies, selected when the event has an object. Response:
+  truth and reco edges 0, 1000, 2000, 3000, 4000 MeV, unweighted, `conditional_on_generated`, `inside_matrix`, residual `ratio`,
+  `forward_folding`, provenance "T12 stage 7 matched sample from calo-cluster product sha256 P configuration sha256 C". Expectations:
+  R1 the frozen response is written (exit 0) and its validation is `contracts_validate: ok`; R2 the pairing check accepts the frozen response
+  with the frozen product; R3 it refuses it with the variant's product, naming both configuration identities; R4 a response whose provenance
+  names no configuration identity is refused as unbound; readings: the variant's response, and whether its matrix differs from the frozen
+  one. Stage 2's R4 (T12-25) showed the response step rerunning when the T08 configuration digest changes, on a synthetic DAG; E32R adds a
+  real response artifact and the refusal to reuse it. A32 is `executed`; "A32 IRF reuse" leaves the gap list.
+- **I2 (A33).** The reason is corrected as in the table above: F11's energy axis is bound to simreco (β), which is adjacent, not a cover.
+- **M1 (A28, readout generating signals).** Two more negatives: N28d a pulse in a channel's unread interval is refused by the recipe
+  (`counts.py`: "lies in an interval that was not read"), so no signal is counted where no readout was; N28e an unread interval given a count
+  of 0 is refused by the reader (`reconstruction.counts.absent_filled`).
+- **M2.** A10's reprocessing is the harness's planner (`plan_step`), not the shared runner: `run_workflow.py` has no retention gate. Open
+  item, recorded in the record: "no runner-level retention gate".
+- **M3.** `trace-rerun` needs `raw` and `conditions_snapshot`; it is admitted only when `can_recompute` allows both. K6: readout retained,
+  pedestal payload not retained: refused ("the conditions snapshot is not retained"), nothing written. K2's decision lists both levels.
+- **M4.** The job's scope step keeps stage 2's negative control (an evidence path under the live tree: exit 2) and imports the modules the
+  harness loads lazily (`tests.contracts.t12_runtime`, `calo_recipe.product`, `calo_recipe.cell_input`, `timing_recipe.counts`,
+  `t10_fixture`, `contracts.reconstruction`) as well as the test module.
+- **M5.** The red-1 and green-1 test files were rebuilt exactly (SHA-256 equal to their logs' headers) and kept with their diffs in
+  `jobs/t12-stage7/red/`.
+- **N1.** N28c: the T06 reader's codes for a consistent single run-level exposure are a reading, not an assertion; the recomputation finding
+  both channels is the expectation.
+- **N2.** The A32 refusal must name the variant's and the frozen configuration identities in the accounting tool's words ("made with
+  configuration V, not the one given (F)"); the zero-sum statement must equal the destriper's text exactly.
+- **N3.** E34's item count (11) is listed by name in the test.
 
 ## A13: recorded blocked-by-resource (stage 5; no GPU job)
 
