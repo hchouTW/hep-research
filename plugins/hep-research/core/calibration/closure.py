@@ -238,10 +238,10 @@ def pseudo_data_source(samples: list) -> dict:
 
 
 def gap_record(source: dict) -> dict:
-    """G8 recorded as a `gap` (D6, A12): no pseudo-data, no decision."""
+    """G8 recorded as a `gap` (D6, A12): no pseudo-data, no decision; graded as an untested closure (A16 (vii))."""
     return {"gate": "G8", "status": "gap", "finding": source.get("finding", "g8.no_positive_truth_sample"),
             "message": source.get("message"), "skipped_negative_weights": source.get("skipped_negative_weights", []),
-            "reading": "D6 as approved in A12"}
+            "reading": "D6 as approved in A12", "flags": ["closure-not-tested"]}
 
 
 def pseudo_data_size(sampling: dict, rng) -> int:

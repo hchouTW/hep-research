@@ -163,6 +163,7 @@ class WeightedTruthD6(unittest.TestCase):
         self.assertEqual((gap["status"], gap["finding"]), ("gap", "g8.no_positive_truth_sample"))
         r = C.g8("standard", ["a"], np.ones(1), synthetic(99, 1, seed=4), synthetic(99, 1, seed=5), source=gap)
         self.assertEqual((r["gate"], r["status"]), ("G8", "gap"))
+        self.assertIn("closure-not-tested", r["flags"])                   # A16 (vii): graded as an untested closure
         ok = C.pseudo_data_source([{"name": "nlo", "weights": w}, {"name": "lo", "weights": None}])
         self.assertEqual((ok["status"], ok["sample"], ok["kind"], ok["skipped_negative_weights"]),
                          ("ok", "lo", "unweighted", ["nlo"]))

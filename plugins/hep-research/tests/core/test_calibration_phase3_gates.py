@@ -6,10 +6,12 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -41,7 +43,13 @@ class TaskTable(unittest.TestCase):
         self.assertEqual(fam["g8_3m"], 2 * H.M3["per_point"] // H.M3["chunk"])
         self.assertEqual(fam["g8_3m_spot"], 1)
         for name, cfg in H.TOY_CONFIGS.items():
-            self.assertEqual(fam[f"toy_g8|{name}"], cfg["reps"] * 2 * H.TOY_PER_POINT // H.TOY_CHUNK)
+            self.assertEqual(fam[f"toy_g8|{name}"], cfg["reps"] * 2 * H.TOY_PER_POINT // H.toy_chunk(cfg))
+        first = [i for i, (f, kw) in enumerate(H.TASKS) if f == "toy_g8" and H.TOY_CONFIGS[kw["config"]].get("second")]
+        mm = [i for i, (f, _) in enumerate(H.TASKS) if f == "toy_g8_mm"]
+        self.assertEqual((mm[0], mm[-1]), (24124, 25163))      # the registered p3-toy-g8 indices stay where they were
+        self.assertGreater(min(first), mm[-1])
+        self.assertEqual(H.toy_truth_batches(H.TOY_CONFIGS["cal6b"]), 200)
+        self.assertEqual(H.toy_truth_batches(H.TOY_CONFIGS["cal6"]), H.TOY_TRUTH_BATCHES)
         json.dumps(H.TASKS)                                   # every task's arguments are plain JSON
         self.assertEqual(H.cal_seed(1, 7), H.cal_seed(1, 7))
         self.assertNotEqual(H.cal_seed(1, 7), H.cal_seed(6, 7))
@@ -80,6 +88,30 @@ class UnitItems(unittest.TestCase):
         self.assertFalse(H.judge_units("p6_negatives", {two[0]: {"outcome": "passed"}}, names=two)["passed"])
         self.assertFalse(H.judge_units("p6_negatives", good)["passed"])          # the full item: tests not run
 
+    def test_units_block_sets_the_products_root_for_the_run(self):
+        """g4sim_zdc_positive runs its tests with $SIMCAL_G4_PRODUCTS set (an existing value wins) and restores the
+        environment after; the other items set nothing."""
+        seen = []
+
+        def fake(ids):
+            seen.append(os.environ.get(H.P3.PRODUCTS_ENV))
+            return {i: {"outcome": "passed"} for i in ids}
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(H, "run_tests", fake), \
+                mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop(H.P3.PRODUCTS_ENV, None)
+            r = H.units_block("g4sim_zdc_positive")
+            self.assertEqual(r["env"], {H.P3.PRODUCTS_ENV: str(H.P3.OUT_ROOT)})
+            self.assertNotIn(H.P3.PRODUCTS_ENV, os.environ)
+            (Path(d) / "tell.json").write_text("{}")
+            os.environ[H.P3.PRODUCTS_ENV] = d
+            r = H.units_block("g4sim_zdc_positive")
+            self.assertEqual(r["env"], {H.P3.PRODUCTS_ENV: d})
+            self.assertEqual(len(r["tell_sha256"][H.P3.PRODUCTS_ENV]), 64)
+            self.assertEqual(os.environ[H.P3.PRODUCTS_ENV], d)
+            os.environ.pop(H.P3.PRODUCTS_ENV)
+            self.assertNotIn("env", H.units_block("p6_negatives"))
+        self.assertEqual(seen, [str(H.P3.OUT_ROOT), d, None])
+
     def test_runner_records_outcomes(self):
         out = H.run_tests([H.EMULATOR_TESTS + "P6Arrays.test_bonferroni_z", "test_calibration_emulator.NoSuchClass"])
         self.assertEqual(out[H.EMULATOR_TESTS + "P6Arrays.test_bonferroni_z"]["outcome"], "passed")
@@ -95,12 +127,16 @@ class ThreeMethodJudge(unittest.TestCase):
         return [{"point": pt, "rows": _rows(n, sd, bias if pt == "interior" else 0.0, seed=k, nonconv=(3,)),
                  "sigma_design": sd.tolist(), "theta": [0, 0, 0]} for k, pt in enumerate(("interior", "boundary"))]
 
-    def test_unbiased_passes_and_the_spot_check_does_not_decide(self):
-        spot = {"spot_check": {"status": "not-decided"}}
-        r = H.g8_3m_judge(self.blocks(), spot)
-        self.assertEqual((r["status"], r["spot_check_status"]), ("passed", "not-decided"))
+    def test_unbiased_passes_only_with_a_passing_spot_check(self):
+        """A16 (i): the spot check, decided by P6's rule, enters the verdict."""
+        r = H.g8_3m_judge(self.blocks(), {"spot_check": {"status": "passed"}})
+        self.assertEqual((r["status"], r["spot_check_status"]), ("passed", "passed"))
         self.assertEqual(r["g8"]["full"]["N_c"], 518)
-        self.assertIn("spot check", r["not_judged"])
+        r = H.g8_3m_judge(self.blocks(), {"spot_check": {"status": "failed"}})
+        self.assertEqual((r["status"], r["passed"]), ("failed", False))
+        for st in ("incomplete", "missing"):
+            r = H.g8_3m_judge(self.blocks(), {"spot_check": {"status": st}} if st != "missing" else None)
+            self.assertEqual((r["status"], r["passed"]), ("incomplete", False))
 
     def test_biased_fails(self):
         r = H.g8_3m_judge(self.blocks(bias=0.5), None)
@@ -180,7 +216,7 @@ class Local(unittest.TestCase):
         self.assertEqual(rec["label"], "smoke (not evidence)")
         res = rec["results"]
         self.assertTrue(res["units"]["passed"])
-        self.assertEqual(res["g8_3m_spot"], "not-decided")
+        self.assertIn(res["g8_3m_spot"], ("passed", "failed"))     # decided by P6's rule (A16 (i))
         self.assertEqual(len(res["toy_g8_rows"]), 2)
         self.assertEqual({b["point"] for b in res["g8_3m_rows"]}, {"interior", "boundary"})
 

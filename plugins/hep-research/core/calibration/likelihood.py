@@ -330,6 +330,10 @@ def projected_inverse(V, constraints, V_std=None, with_logdet=False):
     n = V.shape[0]
     if n == 0:
         return (np.zeros((0, 0)), 0.0) if with_logdet else np.zeros((0, 0))
+    if not (np.all(np.isfinite(V)) and (V_std is None or np.all(np.isfinite(np.asarray(V_std, float))))):
+        # e.g. a bootstrap resample whose summary is undefined (an empty selection): a numerical failure of this
+        # evaluation, reported as such so that the fit is recorded as not converged (section 7.3; approval A18)
+        raise linalg.LinAlgError("likelihood.nonfinite: the Gaussian covariance has non-finite entries")
     s = np.sqrt(np.diag(V if V_std is None else V_std))
     if np.any(s <= 0):
         raise LikelihoodError("likelihood.sigma0", "a Gaussian observable has sigma^(0) = 0 (section 5.2: express its "

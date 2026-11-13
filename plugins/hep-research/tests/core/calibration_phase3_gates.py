@@ -17,7 +17,7 @@ Families (one task each unless stated; every task a few minutes):
   surrogate model (P6) with phi profiled.
 - `g8_3m` (+ `g8_3m_spot`): G8 at the full level for the three-method combination (reweighting, rerun, resimulation by
   the surrogate model) with the section 19-5 reading of A12: surrogate pseudo-data for the bulk, a full-simulation spot
-  check at the injection points with independent seeds (reported `not-decided`: A12 gives no rule).
+  check at the injection points with independent seeds (decided by P6's rule, A16 (i)).
 - `toy_g8`: the toy-detector G8 rows carried from phase 2 (calibrations 1, 6, 10, 12) at exposure 8000 per run, and
   `toy_g8_mm` the G8 item of calibration 15 on the bimodal variant.
 
@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -47,6 +48,7 @@ for _p in (str(ROOT), str(HERE), str(ROOT / "adapters" / "geant4" / "assets")):
 import calibration_phase2_cals as CA  # noqa: E402
 import calibration_phase2_cals_c as CC  # noqa: E402
 import calibration_phase2_gates as G  # noqa: E402
+import calibration_phase3_g4 as P3  # noqa: E402
 
 from core.calibration import closure as C  # noqa: E402
 from core.calibration import emulator as EM  # noqa: E402
@@ -65,6 +67,7 @@ SEED = 20261300
 FILES = ["core/calibration/" + f for f in ("closure.py", "emulator.py", "evaluator_problem.py", "fit.py", "interval.py",
                                             "likelihood.py", "shift.py", "toy.py", "toy_problem.py")] + \
     ["adapters/geant4/assets/g4sim_calib_eval.py", "tests/core/calibration_zdc_fixture.py",
+     "tests/core/calibration_phase3_g4.py",
      "tests/core/calibration_phase3_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-3.md"]
 
 
@@ -131,6 +134,7 @@ UNIT_ITEMS = {
                   EMULATOR_TESTS + "G8Hook.test_spot_check_seeds_independent_of_training": "negative"}},
     "g4sim_zdc_positive": {
         "part": "g4sim positive tests on the synthetic ZDC fixture (section 15.2)",
+        "env": {P3.PRODUCTS_ENV: str(P3.OUT_ROOT)},     # the Geant4 products of campaign p3-g4 (unset: they skip)
         "tests": {PROBLEM_TESTS + "ResponseParametersP0": "positive",
                   PROBLEM_TESTS + "BirksRerunAgainstResimulation": "positive",
                   PROBLEM_TESTS + "CalorimeterProblem": "positive",
@@ -220,7 +224,25 @@ def judge_units(item: str, outcomes: dict, names=None) -> dict:
 
 
 def units_block(item: str) -> dict:
-    return {"outcomes": run_tests(list(UNIT_ITEMS[item]["tests"]))}
+    """The item's tests run with its `env` set for the run (a value already in the environment wins: a gate run may
+    name another products root), restored after; the products root and its tell.json SHA-256 recorded."""
+    env = {k: os.environ.get(k) or v for k, v in UNIT_ITEMS[item].get("env", {}).items()}
+    saved = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        rec = {"outcomes": run_tests(list(UNIT_ITEMS[item]["tests"]))}
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+    if env:
+        tells = {k: Path(v) / "tell.json" for k, v in env.items()}
+        rec["env"] = env
+        rec["tell_sha256"] = {k: hashlib.sha256(t.read_bytes()).hexdigest() if t.is_file() else None
+                              for k, t in tells.items()}
+    return rec
 
 
 # ================================================================== zdc_fit: the ZDC response-layer parameters
@@ -367,8 +389,8 @@ M3 = {"exposure": 2000, "mc": 20_000, "truth_batches": 20, "truth_batch_factor":
       "per_point": 540, "chunk": 10}
 M3_RULE = ("G8 at the full level (section 8.4; d = 3, N_c = 518 per point, Holm over 5d = 15 tests, alpha_G8 = 0.05, "
            "the bias rule and the summed ratio test) on surrogate pseudo-data (A12, section 19-5): passes when "
-           "closure.g8 passes; the full-simulation spot check is reported `not-decided` (A12 gives no rule) and does "
-           "not enter the verdict")
+           "closure.g8 passes and the full-simulation spot check passes, the spot check decided by P6's rule on its "
+           "P6-form statistics (A16 (i)); a spot check not complete makes the item incomplete")
 
 
 def _m3_build(n):
@@ -479,7 +501,7 @@ def g8_3m_spot(sizes: dict | None = None) -> dict:
     """The full-simulation spot check (A12): the threshold resimulated at each injection point with a truth-batch-size
     MC and its own seed, independent of every truth surrogate's training seed (emulator.spot_check_plan checks each
     training state), compared with the pseudo-data centre (the mean truth surrogate combined with the inner methods);
-    reported `not-decided` with the P6-form statistics."""
+    decided by P6's rule on the P6-form statistics (A16 (i))."""
     sz = {**M3, **(sizes or {})}
     d = m3_design(sz)
     inj = [dict(zip(M3_THETA, map(float, d["points"][n]["theta"]))) for n in ("interior", "boundary")]
@@ -547,10 +569,14 @@ def g8_3m_judge(blocks: list, spot: dict | None, d: int = 3) -> dict:
                       "bias_over_sigma": (pts["interior"]["errors"].mean(0) / sd).tolist()}
     out["g8"] = res
     out["spot_check"] = (spot or {}).get("spot_check") or {"status": "missing"}
-    out["spot_check_status"] = "not-decided"
-    out["not_judged"] = ("the full-simulation spot check, the gate for the surrogate's error (A12): no decision rule "
-                         "in Part B or A12 (open author item); its P6-form statistics are reported")
-    out["status"] = res["full"]["status"] if out["design_consistent"] else "failed"
+    sp = out["spot_check_status"] = out["spot_check"].get("status", "missing")
+    g = res["full"]["status"]
+    if not out["design_consistent"] or g == "failed" or sp == "failed":
+        out["status"] = "failed"
+    elif g == "passed" and sp == "passed":
+        out["status"] = "passed"
+    else:
+        out["status"] = "incomplete"
     out["passed"] = out["status"] == "passed"
     return out
 
@@ -575,6 +601,12 @@ TOY_CONFIGS = {
                        "judged": False, "power": False, "inject": False},
     "cal12_vmc2_r33": {"cal": 12, "row": 2015, "mcr": 33, "truth": "analytic", "fit_scale": 0.5, "reps": 200,
                        "judged": False, "power": False, "inject": False},
+    # the second registration of rows 2006 and 2015 (2026-11-13, approval A15; the first, cal6, failed and stands as
+    # recorded): the shared truth MC at 100 x the fit MC (1000 x the exposure at MC 10x), fresh replicates (offset
+    # 10^6), one task per replicate and point so the truth is generated once; its tasks follow every earlier task
+    "cal6b": {"cal": 6, "row": 2006, "rows": [2006, 2015], "mcr": 10, "truth": "shared-mc", "truth_factor": 1000,
+              "chunk": 500, "r_offset": 1_000_000, "second": True, "fit_scale": 1.0, "reps": 1000, "judged": True,
+              "power": True, "inject": False},
 }
 TOY_PER_POINT, TOY_CHUNK = 500, 100           # N_full(d = 2) = 483 plus 17 spare for replacement and injection
 TOY_TRUTH_FACTOR = 100                        # the shared truth MC of calibration 12: 100 x the exposure (section 8.4)
@@ -616,11 +648,26 @@ def toy_design(name: str, exposure: int = TOY_EXPOSURE) -> tuple:
 TOY_TRUTH_BATCHES = 20                        # the shared truth MC generated in batches (memory of one batch)
 
 
-def _truth_pseudo_data(p, params: dict, n_total: int, exposure: int, seed, draws: dict) -> dict:
+def toy_chunk(cfg: dict) -> int:
+    return int(cfg.get("chunk", TOY_CHUNK))
+
+
+def toy_truth_factor(cfg: dict) -> int:
+    return int(cfg.get("truth_factor", TOY_TRUTH_FACTOR))
+
+
+def toy_truth_batches(cfg: dict) -> int:
+    """The batch count of the shared truth MC: TOY_TRUTH_BATCHES at 100 x the exposure, and the same batch size for a
+    larger truth (so the memory stays that of one batch)."""
+    return TOY_TRUTH_BATCHES * toy_truth_factor(cfg) // TOY_TRUTH_FACTOR
+
+
+def _truth_pseudo_data(p, params: dict, n_total: int, exposure: int, seed, draws: dict,
+                       n_batches: int = TOY_TRUTH_BATCHES) -> dict:
     """Pseudo-data resampled with replacement from one shared truth MC of n_total events per run at `params`
     (section 8.4), generated in TOY_TRUTH_BATCHES batches with seeds (seed, batch): draws {s: {run: event indices in
     [0, n_total)}}; returns {s: Observations}."""
-    nb = TOY_TRUTH_BATCHES
+    nb = int(n_batches)
     per = n_total // nb
     m = G.track_build(per)
     ev = toy.ChainEvaluator(m, {"seeds": {"nominal": 1}})
@@ -652,16 +699,16 @@ def toy_g8_block(config: str, r: int, point: str, start: int, n: int, exposure: 
     k = ("interior", "boundary").index(point)
     sd, pts = toy_design(config, exposure)
     truth = np.asarray(pts[k], float)
-    base = (cal_seed(cfg["cal"], r), j, k)
+    base = (cal_seed(cfg["cal"], r + int(cfg.get("r_offset", 0))), j, k)
     shared = None
     if cfg["truth"] == "shared-mc":
         p0 = _toy_problem(cfg, (*base, start, 1), (*base, start, 2), exposure)
         runs = sorted({o.run for o in p0.model.observables if o.name in p0.names})
-        n_total = TOY_TRUTH_FACTOR * exposure
+        n_total = toy_truth_factor(cfg) * exposure
         draws = {s: {rid: _rng(*base, s, 3, jr).integers(n_total, size=exposure) for jr, rid in enumerate(runs)}
                  for s in range(start, start + n)}
         shared = _truth_pseudo_data(p0, dict(zip(TOY_THETA, map(float, truth))), n_total, exposure, (*base, 999),
-                                    draws)
+                                    draws, toy_truth_batches(cfg))
     rows = []
     for s in range(start, start + n):
         p = _toy_problem(cfg, (*base, s, 1), (*base, s, 2), exposure)
@@ -864,13 +911,20 @@ def _tasks() -> list:
     for pt in ("interior", "boundary"):
         t += [("g8_3m", {"point": pt, "start": s, "n": M3["chunk"]}) for s in range(0, M3["per_point"], M3["chunk"])]
     t.append(("g8_3m_spot", {}))
-    for name, cfg in TOY_CONFIGS.items():
-        for r in range(cfg["reps"]):
-            for pt in ("interior", "boundary"):
-                t += [("toy_g8", {"config": name, "r": r, "point": pt, "start": s, "n": TOY_CHUNK})
-                      for s in range(0, TOY_PER_POINT, TOY_CHUNK)]
+    def toy(second: bool) -> list:
+        out = []
+        for name, cfg in TOY_CONFIGS.items():
+            if bool(cfg.get("second")) != second:
+                continue
+            for r in range(cfg["reps"]):
+                for pt in ("interior", "boundary"):
+                    out += [("toy_g8", {"config": name, "r": r, "point": pt, "start": s, "n": toy_chunk(cfg)})
+                            for s in range(0, TOY_PER_POINT, toy_chunk(cfg))]
+        return out
+    t += toy(False)
     for pt in ("interior", "boundary"):
         t += [("toy_g8_mm", {"point": pt, "start": s, "n": MM["chunk"]}) for s in range(0, MM["per_point"], MM["chunk"])]
+    t += toy(True)                             # second registrations, after every earlier task (indices unchanged)
     return t
 
 
@@ -967,7 +1021,7 @@ def merge(out_dir: Path, out: Path) -> dict:
                [TASKS[i] for i in missing]), "commits": sorted(commits), "dirty": dirty,
            "commits_by_family": {f: sorted(v["commits"]) for f, v in by_family.items()}, "items": items,
            "passed": {k: v.get("passed") for k, v in items.items()},
-           "not_judged": ["g8_3m: the full-simulation spot check (A12 gives no decision rule)"],
+           "not_judged": [],
            "task_seconds": {i: r["seconds"] for i, r in recs.items() if r}, "provenance": provenance(),
            "label": LABEL}
     io.write_json(str(out), io.jsonable(rep))

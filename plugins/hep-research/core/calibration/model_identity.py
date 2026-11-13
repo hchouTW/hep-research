@@ -110,6 +110,11 @@ def _number_text(value) -> str:
 
 
 def _leaf(value, kind, where):
+    if kind == "decimal-string" and isinstance(value, str):
+        try:                                   # A16 (iii): one spelling per value ("0.05" and "0.050" alike)
+            return normalize_decimal(value)
+        except CanonicalError as err:
+            raise IdentityError("identity.number", f"{where}: {err}") from None
     if isinstance(value, bool) or not isinstance(value, (int, float, decimal.Decimal)):
         return value
     text = _number_text(value)
@@ -279,10 +284,15 @@ def spec_hash(spec: dict, pointers=()) -> str:
     return _hash(mask(body, pointers))
 
 
+OVERLAY_DECIMAL_STRINGS = {"/shifts/*/delta_mm/*": "decimal-string", "/shifts/*/rotation/zyx_deg/*": "decimal-string"}
+
+
 def overlay_hash(overlay, table: dict, pointers=()) -> str:
     """Masked hash of an alignment-overlay/1 without description and source_of_facts (D86, section 5.1); only the
-    delta_mm and zyx_deg entries holding theta or phi are masked."""
-    doc = normalize(overlay, table)
+    delta_mm and zyx_deg entries holding theta or phi are masked. The schema types those entries as plain strings
+    ("decimal strings"); A16 (iii) reads them as decimals, so each is canonicalized before hashing and two spellings
+    of one value give one model identity (g4sim's own geometry_id still differs: reported upstream, D83)."""
+    doc = normalize(overlay, {**table, **OVERLAY_DECIMAL_STRINGS})
     _schema(doc, "alignment-overlay")
     return _hash(mask({k: v for k, v in doc.items() if k not in LABELS}, pointers))
 

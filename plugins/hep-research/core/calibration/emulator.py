@@ -779,8 +779,9 @@ def spot_check_record(state: dict, surrogate, contract: dict | None = None, v_da
     """The spot check's comparison at each injection point: Delta m = surrogate - full simulation, its MC covariance
     (independent seeds: V_MC of the full simulation plus the surrogate's interpolated V_MC) and V_emu. `predict`
     (point -> {pred, V_MC, V_emu}; default the surrogate with its training values) lets an evaluator combine inner
-    methods (section 6.5). The decision rule is not stated by Part B or A12: `not-decided`, with the P6-form statistics
-    reported for the author."""
+    methods (section 6.5). Decision (A16 (i)): the spot check passes when its P6-form statistics pass P6's rule (the
+    |Delta m| bound with the Bonferroni z, and the pull chi2 under its reference when there are >= 30 points); its
+    status is P6's."""
     _check_state(state)
     if not complete(state):
         return {"gate": "G8-spot-check", "status": "incomplete",
@@ -807,9 +808,9 @@ def spot_check_record(state: dict, surrogate, contract: dict | None = None, v_da
                      "sigma_delta": np.sqrt(np.clip(np.diag(cd), 0.0, None)),
                      "sqrt_v_emu": np.sqrt(np.clip(np.diag(ves[-1]), 0.0, None))})
     form = p6(np.array(dms), np.array(cds), np.array(ves), np.array(vds), names=surrogate.names)
-    return {"gate": "G8-spot-check", "status": "not-decided", "points": rows,
-            "reason": "the spot check is the gate for the surrogate's error (A12, section 19-5); its decision rule is "
-            "the author's (not stated by Part B or A12)", "p6_form": form, "flags": ["provisional-thresholds"]}
+    return {"gate": "G8-spot-check", "status": form["status"], "points": rows,
+            "reason": "the spot check is the gate for the surrogate's error (A12, section 19-5), decided by P6's rule "
+            "(A16 (i))", "p6_form": form, "flags": ["provisional-thresholds"]}
 
 
 # ------------------------------------------------------------------ CLI helper

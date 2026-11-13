@@ -161,6 +161,18 @@ class Gaussian(unittest.TestCase):
         with self.assertRaises(L.LikelihoodError):
             L.projected_inverse(np.diag([1.0, 0.0]), [])
 
+    def test_nonfinite_covariance_is_a_linalg_error(self):
+        """A18: a NaN in V_G or V_std (an empty bootstrap resample) raises LinAlgError, the fit-failure path, not the
+        ValueError of the Cholesky's finiteness check; a finite V is unaffected (positive control)."""
+        V = np.eye(2)
+        V_nan = V.copy()
+        V_nan[1, 1] = np.nan
+        with self.assertRaises(np.linalg.LinAlgError):
+            L.projected_inverse(V_nan, [])
+        with self.assertRaises(np.linalg.LinAlgError):
+            L.projected_inverse(V, [], V_nan, with_logdet=True)
+        np.testing.assert_allclose(L.projected_inverse(V, []), V)
+
 
 class WeightedBinomial(unittest.TestCase):
     def test_reduces_when_ratios_equal(self):

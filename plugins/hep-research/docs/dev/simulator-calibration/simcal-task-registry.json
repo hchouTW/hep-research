@@ -407,6 +407,48 @@
    "registered_at": "2026-11-13T00:57:28Z",
    "card_commit": "7bb555f0",
    "reason": "re-registration before the judged p3-g4 evidence arrays (card changed at 7bb555f0: execution log only)"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "c080ccdc981bb5bc86789eec8bf6bfe81a52ab2748d6bb2745d8d9fd5bd8e536",
+   "registered_at": "2026-11-13T04:59:09Z",
+   "card_commit": "6e801242",
+   "reason": "campaign p3-toy-g8b registered before any run (second registration of rows 2006/2015, truth at 100x the fit MC, A15)"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "77012fe36655bbcf4a4df982e88226919574b16158b57394eba8b09462ae975a",
+   "registered_at": "2026-11-13T05:13:10Z",
+   "card_commit": "f32dd0bc",
+   "reason": "gate runs part A (campaign p3-gates tasks 0-14) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "83bf34fbf245a1a78b2d1eb347eaa8f813d3358ca1df1a826ddfab5f15cf0a01",
+   "registered_at": "2026-11-13T07:33:33Z",
+   "card_commit": "dc8a1d9a",
+   "reason": "gate runs part B (campaign p3-gates-b tasks 0-123) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "26dda2c711c465639b04db485f5e7ad75d4c95c71e2e69e062995c28f4a5cdcc",
+   "registered_at": "2026-11-13T07:48:44Z",
+   "card_commit": "b9a8535a",
+   "reason": "campaign p3g-p6 (Geant4 version of row 2004) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "125fe969310d047b49bf439a8d9490b9fc607ba21bc2cf3728dc793fd9597803",
+   "registered_at": "2026-11-13T09:20:53Z",
+   "card_commit": "84dd7e03",
+   "reason": "gate part C (campaign p3-gates-c, A18) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "3926a8c2299743118108cbdb441cbd75d0d20e5713e56ffdc335ab2bcce3419f",
+   "registered_at": "2026-11-13T10:06:09Z",
+   "card_commit": "a72cf7fb",
+   "reason": "execution log: PR #403 CI fix recorded"
   }
  ]
 }

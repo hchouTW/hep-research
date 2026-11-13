@@ -3,7 +3,8 @@
 engine, node-0 reweighting with source-density/1 and the external-source rejection (section 17, S3/S4), the Birks
 deterministic rerun from edep_by_dedx_class with its bound (D75), re-digitization through digitize.py on the
 g4sim-digi-job/1 path with a job that passes calib_design's job check, common random numbers (section 15.2), independent
-batches, and resimulation requests through ask/tell. Items that need a Geant4 run are skipped and say so."""
+batches, and resimulation requests through ask/tell. Items that need a Geant4 run read the products of campaign p3-g4
+under $SIMCAL_G4_PRODUCTS (calibration_phase3_g4.calo_evidence) and are skipped, saying so, when it is unset."""
 from __future__ import annotations
 
 import copy
@@ -22,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import calibration_fixtures as F  # noqa: E402
 import calibration_g4sim_eval_fixtures as G  # noqa: E402
+import calibration_phase3_g4 as P3  # noqa: E402
 import g4sim_calib_eval as E  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
 
@@ -125,9 +127,19 @@ class Birks(unittest.TestCase):
         k = lo["names"].index("pe_mean")
         self.assertGreater(lo["pred"][k], hi["pred"][k])                 # more quenching, fewer photoelectrons
 
-    @unittest.skip("requires Geant4: resimulation with the new k_B written into the detector-spec (section 15.2)")
     def test_rerun_agrees_with_resimulation_at_the_new_birks(self):
-        pass
+        """Resimulation with the new k_B written into the detector-spec (the g4sim_runs 'kB-low', 'kB-centre', 'kB-high'
+        of campaign p3-g4, $SIMCAL_G4_PRODUCTS): the evaluator's rerun at that k_B agrees with the run's edep_visible,
+        per (event, volume) and in vis_mean, within the D75 bound; both fall as k_B grows."""
+        rows = P3.calo_evidence("zdc-birks-rerun")["rows"]
+        self.assertEqual(len(rows), 3)
+        for r in rows:
+            self.assertEqual(r["within"], r["pairs"], r)
+            self.assertTrue(r["mean_within"], r)
+            self.assertLessEqual(abs(r["mean_rerun"] - r["mean_run"]), r["mean_bound"], r)
+        by_kb = sorted(rows, key=lambda r: r["birks"])
+        for key in ("mean_rerun", "mean_run"):
+            self.assertTrue(all(a[key] > b[key] for a, b in zip(by_kb, by_kb[1:])), key)
 
 
 class Redigitization(unittest.TestCase):
@@ -167,9 +179,18 @@ class Redigitization(unittest.TestCase):
         self.assertLess(crn.var(ddof=1), 0.25 * ind.var(ddof=1))
         np.testing.assert_allclose(e.evaluate({"light_yield": 200.0}, seeds={"batch": "b3"})["pred"], a[3]["pred"])
 
-    @unittest.skip("requires Geant4: re-digitization against a full g4sim_run plus response at theta (P0, section 15.2)")
     def test_p0_against_full_simulation(self):
-        pass
+        """P0 of the light yield by re-digitization against a full g4sim_run plus response at theta (the light-yield
+        extremes 'LY-low', 'LY-high' of campaign p3-g4, $SIMCAL_G4_PRODUCTS): the rows at the full runs come from
+        transport, and P0 passes there and overall."""
+        r = P3.calo_evidence("zdc-p0-response")["result"]
+        self.assertEqual(r["status"], "passed", r["points"])
+        full = [row for row in r["points"] if row["rerun_from"] == ["transport"]]
+        self.assertEqual(sorted(row["point"]["light_yield"] for row in full), [180.0, 220.0])
+        for row in full:
+            self.assertIn("spot_check", row)
+            self.assertEqual((row["failing"], row["missing_support_runs"]), ([], []), row)
+            self.assertLess(row["max_ratio"], 1.0, row)
 
 
 class AskTell(unittest.TestCase):

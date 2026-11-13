@@ -319,6 +319,26 @@ def covariance(F: np.ndarray) -> np.ndarray:
     return 0.5 * (S + S.T)
 
 
+def curvature_covariance(F: np.ndarray) -> np.ndarray:
+    """`covariance`, except that an exactly singular curvature (a direction of theta the data do not constrain, e.g.
+    two degenerate parameters) gives unbounded variance: the diagonal is +inf for every parameter with a component
+    along the null space and the rows and columns of those parameters are NaN off the diagonal; the rest from the
+    pseudo-inverse. A nearly singular F already gives huge variances through `covariance`; this keeps the exactly
+    singular case (which depends on rounding) on the same side instead of raising (sigma_tot = inf: not admitted)."""
+    try:
+        return covariance(F)
+    except linalg.LinAlgError:
+        F = 0.5 * (np.asarray(F, float) + np.asarray(F, float).T)
+        w, U = np.linalg.eigh(F)
+        null = np.abs(w) <= max(float(np.max(np.abs(w))), 1e-300) * F.shape[0] * np.finfo(float).eps
+        S = 2.0 * np.linalg.pinv(F, hermitian=True)
+        hit = np.any(np.abs(U[:, null]) > 1e-12, axis=1)
+        S[hit, :] = np.nan
+        S[:, hit] = np.nan
+        S[hit, hit] = np.inf
+        return S
+
+
 # ------------------------------------------------------------------ section 7.3
 @dataclass
 class Fit:
@@ -381,7 +401,7 @@ def iterate(problem, beta0: np.ndarray, frozen=None, boot_cov=None, w_boot: floa
         if not m.converged:
             return Fit(m.beta, _theta(problem, m.beta), _safe_cov(m.F), np.full(d, np.nan), m.D, m.edm, False, it,
                        f"minimization: {m.reason}", ref, history=hist, calls=calls, F=m.F)
-        S = covariance(m.F)
+        S = curvature_covariance(m.F)
         st = sigma_tot(S, d, boot_cov, w_boot)
         b = m.beta
         hist.append({"theta": b[:d].tolist(), "D": m.D})
@@ -404,7 +424,8 @@ def iterate(problem, beta0: np.ndarray, frozen=None, boot_cov=None, w_boot: floa
             return Fit(b, _theta(problem, b), S, st, m.D, m.edm, False, it,
                        f"reference quantities not computable at theta_ref: {type(exc).__name__}", ref, history=hist,
                        calls=calls, F=m.F)
-    return Fit(b, _theta(problem, b), covariance(m.F), sigma_tot(covariance(m.F), d, boot_cov, w_boot), m.D,
+    return Fit(b, _theta(problem, b), curvature_covariance(m.F),
+               sigma_tot(curvature_covariance(m.F), d, boot_cov, w_boot), m.D,
                m.edm, False, limit, f"no convergence within {limit} iterations", ref, history=hist, calls=calls,
                F=m.F)
 
@@ -566,7 +587,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, boot_cov
         if not m.converged:
             nonconv.append({"start": s.tolist(), "reason": m.reason})
             continue
-        st = sigma_tot(covariance(m.F), d, boot_cov, w_boot)
+        st = sigma_tot(curvature_covariance(m.F), d, boot_cov, w_boot)
         endpoints.append({"beta": m.beta, "D": m.D, "sigma_tot": st, "admitted": bool(np.all(st <= R_ADMIT * sp))})
     if not endpoints:                                   # D45 (A8): one further multi-start round before giving up
         for s in sobol_starts(problem, n_start or n_starts(d), (_seed_int(seed), 45)):
@@ -577,7 +598,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, boot_cov
             if not m.converged:
                 nonconv.append({"start": s.tolist(), "reason": m.reason, "round": 2})
                 continue
-            st = sigma_tot(covariance(m.F), d, boot_cov, w_boot)
+            st = sigma_tot(curvature_covariance(m.F), d, boot_cov, w_boot)
             endpoints.append({"beta": m.beta, "D": m.D, "sigma_tot": st,
                               "admitted": bool(np.all(st <= R_ADMIT * sp))})
     if not endpoints:

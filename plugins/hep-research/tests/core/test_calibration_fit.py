@@ -65,6 +65,25 @@ class RatioTest(unittest.TestCase):
         self.assertTrue(r.ratio_failed)
 
 
+class CurvatureCovariance(unittest.TestCase):
+    def test_exactly_singular_curvature_gives_unbounded_variance(self):
+        """Two degenerate parameters (F of rank 1) plus an independent one: the degenerate pair gets +inf variance
+        (sigma_tot = inf, never admitted) instead of the LinAlgError of `covariance`; the third keeps 2/F_33."""
+        F_ = np.zeros((3, 3))
+        F_[:2, :2] = [[4.0, 4.0], [4.0, 4.0]]
+        F_[2, 2] = 8.0
+        with self.assertRaises(np.linalg.LinAlgError):
+            F.covariance(F_)
+        S = F.curvature_covariance(F_)
+        self.assertTrue(np.all(np.isinf(np.diag(S)[:2])))
+        self.assertAlmostEqual(S[2, 2], 0.25)
+        self.assertTrue(np.all(np.isinf(F.sigma_tot(S, 2))))
+
+    def test_regular_curvature_unchanged(self):
+        F_ = np.array([[4.0, 1.0], [1.0, 3.0]])
+        np.testing.assert_allclose(F.curvature_covariance(F_), F.covariance(F_))
+
+
 class Iteration(unittest.TestCase):
     def test_equals_gls_on_the_linear_gaussian(self):
         cfg = T.linear_config(n=20, d=3)

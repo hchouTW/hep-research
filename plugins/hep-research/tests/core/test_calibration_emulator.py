@@ -436,7 +436,8 @@ class G8Hook(unittest.TestCase):
         self.assertEqual(EM.spot_check_record(sp, self.tr["surrogate"], self.c)["status"], "incomplete")
         EM.drive(self.ev, sp)
         rec = EM.spot_check_record(sp, self.tr["surrogate"], self.c)
-        self.assertEqual(rec["status"], "not-decided")
+        self.assertEqual(rec["status"], rec["p6_form"]["status"])       # A16 (i): P6's rule decides
+        self.assertIn(rec["status"], ("passed", "failed"))
         self.assertEqual(rec["p6_form"]["gate"], "P6")
         self.assertEqual(len(rec["points"]), 2)
 

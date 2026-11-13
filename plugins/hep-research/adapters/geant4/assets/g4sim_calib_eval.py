@@ -373,6 +373,29 @@ class G4simEvaluator:
         bname, batch = self._batch(seeds, values)
         return self._observe(values, bname, batch, names)
 
+    def birks_parameter(self):
+        """The k_B parameter evaluated by the deterministic rerun (section 5.4), or None."""
+        kb_pars = [p for p, m in self.methods.items() if m == "rerun"]
+        return kb_pars[0] if kb_pars else None
+
+    def birks_bound_shift(self, theta: dict, sign: int, names=None, seeds: dict | None = None) -> dict:
+        """The prediction at theta with every (event, volume) visible energy moved by sign x its class-discretization
+        bound (g4sim_simulate.reweighting_bound at theta's k_B; section 5.4), carried into the scintillation bins
+        the same way as the rerun itself; the P5 feasibility item of section 5.4 compares it with the plain one."""
+        if sign not in (-1, 1):
+            raise DG.CheckError("evaluator.birks_bound", "sign is +1 or -1")
+        self._bound_sign = int(sign)
+        try:
+            return self.evaluate(theta, seeds=seeds, names=names)
+        finally:
+            self._bound_sign = 0
+
+    def _kb_visible(self, rows, kb):
+        """edep_visible of one (event, volume) at k_B, moved by the bound when birks_bound_shift asks for it."""
+        v = simulate.reweighted(rows, kb)
+        s = getattr(self, "_bound_sign", 0)
+        return v + s * simulate.reweighting_bound(rows, kb) if s else v
+
     def _observe(self, values: dict, bname: str, batch: dict, names=None, given=None) -> dict:
         tab = batch_tables(batch, self.scorers)
         events = np.arange(tab["first"], tab["first"] + tab["n"])
@@ -443,7 +466,7 @@ class G4simEvaluator:
         """edep_visible per (event, volume) from edep_by_dedx_class at k_B, with the section 5.4 discretization bound."""
         vis, bound = {}, {}
         for key, rows in tab["dedx"].items():
-            vis[key] = simulate.reweighted(rows, kb)
+            vis[key] = self._kb_visible(rows, kb)
             bound[key] = simulate.reweighting_bound(rows, kb)
         return vis, bound
 
@@ -452,7 +475,7 @@ class G4simEvaluator:
         docs = DG.apply_theta(self.documents, self.plan, {p: v for p, v in values.items()
                                                           if self.methods.get(p) == "re-digitization" and p != pde})
         rows = tab["split"]
-        if kb is not None and not _same(kb, kb0):
+        if kb is not None and (not _same(kb, kb0) or getattr(self, "_bound_sign", 0)):
             scaled = []
             for e, v, b, L, S, k in rows:
                 d = tab["dedx"].get((e, v))
@@ -460,7 +483,7 @@ class G4simEvaluator:
                     raise DG.CheckError("evaluator.birks", f"event {e}, volume {v}: no edep_by_dedx_class rows to carry "
                                         "a k_B change into the scintillation bins")
                 r0 = simulate.reweighted(d, kb0)
-                f = simulate.reweighted(d, kb) / r0 if r0 > 0 else 1.0
+                f = self._kb_visible(d, kb) / r0 if r0 > 0 else 1.0
                 scaled.append((e, v, b, L * f, S * f, k))
             rows = scaled
         snapshot = docs.get("conditions")
