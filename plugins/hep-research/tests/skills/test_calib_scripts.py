@@ -80,6 +80,29 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["version_id"]), (0, v["version_id"]))
         self.assertEqual(json.loads((self.d / "final.json").read_text())["result_sha256"], out["result_sha256"])
 
+    def test_calib_deps_invalidation(self):
+        """Phase 4: section 10.3 upstream invalidation and the A21 (section 19-g7) identity decision through the CLI;
+        the engine cases are in tests/core/test_calibration_deps.py."""
+        import test_calibration_deps as TD
+        up, down = TD.result(TD.H[0]), TD.result(TD.H[1], upstream=[(TD.H[0], ["xi"])])
+        x = {"results": [down], "changes": [{"old": up, "new": TD.result(TD.H[3], contract=4)}]}
+        rc, out = run("calib_deps.py", "invalidate", "--input", self.put("i.json", x))
+        self.assertEqual((rc, out["status"], list(out["redo"])), (1, "failed", [TD.H[1]]))
+        rc, out = run("calib_deps.py", "invalidate", "--input", self.put("i0.json", dict(x, changes=[])))
+        self.assertEqual((rc, out["status"]), (0, "ok"))                            # control
+        rc, out = run("calib_deps.py", "invalidate", "--input", self.put("ib.json", {"results": 1}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        res = {"result_sha256": TD.H[5], "model_identities": TD.ids()}
+        y = {"result": res, "current": TD.ids("cd"), "basis": TD.BASIS}
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y.json", y))
+        self.assertEqual((rc, out["decision"]), (1, "redo"))                        # no T2 record
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y1.json", dict(y, record=TD.t2())))
+        self.assertEqual((rc, out["decision"], out["flags"][0]), (0, "carried-over", "identity-carried-over"))
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y2.json", dict(y, record=TD.t2(shift=0.5))))
+        self.assertEqual((rc, out["decision"]), (1, "redo"))
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y3.json", dict(y, record={"schema": 1})))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+
     def test_calib_chain(self):
         for name in ("ecal", "rich", "tracker"):
             rc, out = run("calib_chain.py", "candidates", "--contract", FIXTURE_DIR / f"{name}.json")
