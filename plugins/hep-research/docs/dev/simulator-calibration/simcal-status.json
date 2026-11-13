@@ -46,7 +46,7 @@
    "state": "in-progress",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-3",
    "branch": "simcal/phase-3",
-   "task_card_sha256": "3926a8c2299743118108cbdb441cbd75d0d20e5713e56ffdc335ab2bcce3419f",
+   "task_card_sha256": "6a66fd1570d5987e8196c6368013d9c183f0b1da1a014f049d42f9ce2efaac79",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-3.md",
    "blocked_on": [],
    "note": "started 2026-11-12 from origin/main ca70a606 (phases 0-2 merged as #385, #386, #396); the eight author items unblocked by approval A12, 2026-11-12; blocked 2026-11-12 by the failed row-2004 calibration, unblocked the same day by the user's decisions (A13) and the P6 fix; blocked 2026-11-13 by the failed folded calibration 6/12 (rows 2006, 2015), unblocked the same day by the user's decision A15 (second registration at 100x the fit MC)"
@@ -85,5 +85,5 @@
   },
   "note": "Phase 3 (checked 2026-11-12): S1, S3, S4, S5, S7, S8, S9 merged. Gate records read: S7 is partially complete, gate 3 (TR yield) a recorded gap; no phase-3 item uses a TR yield. The RICH replica fixture is the S7 reference case ams02-rich-replica (expressed at 210b1685, evaluated 2026-11-08, job 7523520, synthetic); the S7 record's 'not yet expressed' belongs to its first judged run's open items. check-spec on the case returns ok at f93841c3. S8 and S9 gates-recorded with all gates passing."
  },
- "updated": "2026-11-13T10:06:09Z"
+ "updated": "2026-11-13T11:09:16Z"
 }
