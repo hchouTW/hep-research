@@ -111,7 +111,21 @@ The frozen values are the full-precision rate record `noise/noise-b2.rate.record
 | --- | --- |
 | the T07 truth-seeded comparator binary acts_truth_seeded_run | `1a6515960e8bb09a657534a518c09edc5d6b2b1c86aeec745a16b81f55a9654b` |
 | the T09 truth-start comparator | `6e49246bcd02d6a2931a0360c5b95cec1639f706ba694767485ba2b2689f275e` |
-| The evaluation harness E6 (U-B8: built before Freeze B) | **to be filled from E6's commit of record and its integration job, after its review** |
+| The evaluation harness E6 (U-B8: built before Freeze B) | branch commit `0e310d34` (feature/detector-reconstruction; E6 code last changed in `d65323ee`, fix/integration); modules: t04_evaluation_core.py `265eb12426f0e16ce3a0cb0caf9925a816cf3114e5cdf7a80f7638241fce3f6f`; t04_evaluation_layout.py `185574f8e12e0c6b1ee6c5ae8682cc67319eab757ca9c65bff786998782eb7aa`; t04_evaluation_tasks.py `27048b07d9250434a2e0d35fef206c490d5a884da1f5b9fafbf01ab448233f53`; t07_evaluation_scoring.py `6102c2ef3363359c10af13142141940c043a040335ada2e33ea5779b0f1d6ce3`; t08_scoring.py `f1dde545c959b947fa09e4662f3f2ac9aee5b8faa676a2a62ef3fdf42363fa15`; t09_scoring.py `b20bd656e6870889fe85e25e3d9c2d1f14f2e4381d07185bea69b7b527077c39`; evaluation manifest `jobs/evaluation/SOURCES.sha256` `d98f5e6f49f85ea4ba66bc5d5d91b5ee39aa5a5e85c28fd493af4d8940f0768a` (915 files, pinned in the 14 task scripts), `submit.sh` `2fd84fe976cc004af001f903cf661bcab313265db92291af4ffda9e7c24acbfc`, `lib.sh` `bd7c2a98df8017fdf0d285aecab04447f0e325e9f41a3ce7b74c0d2cb4b3724d`; jobs of record 7593002 and 7594893 (E6 merge), 7601521 (integration, PASS; its checked manifest equals d98f5e6f apart from the path prefix); full-suite checkpoint 7606257 PASS at the branch; plan for attempt 1 on block 11: 526 tasks, 174.4 CPU-hours (ceiling 200); fresh reviews d4-e6-merge-review.md, integ-review.md and their re-reviews |
+
+## Changes since this candidate was drafted (2026-11-13, for the user's information)
+
+- Recheck at the branch tip `d65323ee` (proposal 2.1's command): the three adapter manifests, the six recipe and test files above and the
+  Freeze A files are unchanged, so the evaluated recipes are byte-identical to the Freeze-B run's.
+- E6 changed after its merge, before this word, by review: an errored or skipped check module is a crash, never a fail; the verdict is
+  read from unittest's own summary; every subprocess is bounded by min(start + task limit, `SLURM_JOB_END_TIME`) - 120 s and a timeout is
+  incomplete (exit 3); a sacct error, empty answer or foreign row is retried, then incomplete, never a guessed state (review C1, which
+  would otherwise have turned a completed task into "required output missing"); a deadline stop after draws has its own reason and is
+  never repeated on blocks 11 and 12.
+- Accepted minors (fail-safe, before any draw): an unreadable `SLURM_JOB_END_TIME` ends the task with exit 3 through a traceback, not
+  "rejected"; a `nan` or `inf` value is ignored and a past end gives the 1 s minimum timeout.
+- Held by the user until after D4: `sys.dont_write_bytecode` in `calo_cluster.py` and `photon_likelihood.py` (Freeze B items);
+  `test_no_bytecode` is the one allowed failing test besides the LCG one, with exactly those two offenders.
 
 ## Freeze A, unchanged
 
