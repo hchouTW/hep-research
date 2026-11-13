@@ -224,10 +224,28 @@ class BirksSpotChecks(unittest.TestCase):
                             spot_checks=self.req[0]["points"], required=self.req)
         self.assertEqual(r["status"], "incomplete")
 
-    @unittest.skip("requires Geant4: the same check with g4sim_run products at the k_B extremes (PRODUCTION_RUNS "
-                   "kB-low, kB-high of calibration_zdc_fixture; Slurm, the user's approval)")
     def test_with_geant4_products(self):
-        pass
+        """The same check with g4sim_run products at the k_B extremes and the centre ('kB-low', 'kB-centre', 'kB-high'
+        of campaign p3-g4, $SIMCAL_G4_PRODUCTS; the evaluator's default coupling): the spot checks DETECT the kernel's
+        bias at the k_B extremes (approvals A14, A17): P0 fails with p0.kernel_inconsistent at one or both extremes and
+        nowhere else. On these products the bias is the rerun's class discretization, not the nominal-split width
+        bias, which photon statistics too small to see here hide (A17; the split bias is shown on the synthetic
+        fixture). Which extreme is not asserted."""
+        import calibration_phase3_g4 as P3
+        import calibration_zdc_fixture as Z
+        r = P3.calo_evidence("zdc-p0-birks")["result"]
+        self.assertEqual(r["status"], "failed", r["points"])
+        self.assertIn("p0.kernel_inconsistent", [f["code"] for f in r["findings"]])
+        rows = {round(row["point"]["birks"], 12): row for row in r["points"]}
+        extremes = set(Z.BIRKS_PRIOR)
+        self.assertEqual(set(rows), extremes | {0.21})
+        failing = {kb for kb, row in rows.items() if row["failing"]}
+        self.assertTrue(failing and failing <= extremes, failing)
+        for kb in failing:
+            self.assertEqual(rows[kb]["failing"], ["birks"])
+            self.assertIn("spot_check", rows[kb])
+            self.assertEqual(rows[kb]["rerun_from"], ["transport"])        # full g4sim_run plus response
+            self.assertGreater(rows[kb]["max_ratio"], 1.0)
 
 
 class SpotCheckApplicability(unittest.TestCase):

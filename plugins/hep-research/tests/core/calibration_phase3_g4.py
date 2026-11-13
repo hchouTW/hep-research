@@ -29,6 +29,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 import resource
 import shutil
 import socket
@@ -531,6 +532,44 @@ def ev_calo_p0_birks(root: Path) -> dict:
     r = kernel_check.p0(ev, c, p, linear.design(ev, c, p), [{"birks": BIRKS_CENTRE}], 3, spot_checks=req[0]["points"],
                         required=req)
     return {"item": "zdc-p0-birks", "result": r, "passed": r["status"] == "passed", "flags": [PROVISIONAL]}
+
+
+# ------------------------------------------------------------------ the ZDC items as unit tests
+PRODUCTS_ENV = "SIMCAL_G4_PRODUCTS"      # the products root the Geant4 unit tests read (unset: they skip)
+GEANT4_SKIP = "requires Geant4"          # the reason prefix the gate harness records as `requires-geant4`
+CALO_EVIDENCE = {"zdc-p0-response": (ev_calo_p0_response, ("nominal", "reference", "LY-low", "LY-high")),
+                "zdc-birks-rerun": (ev_calo_birks_rerun, ("nominal", "kB-low", "kB-centre", "kB-high")),
+                "zdc-p0-birks": (ev_calo_p0_birks, ("nominal", "kB-low", "kB-centre", "kB-high"))}
+_CALO_CACHE: dict = {}
+
+
+def products_root(item: str) -> tuple:
+    """(root, None) when $SIMCAL_G4_PRODUCTS names a products root with the tell state (tell.json) and the told ZDC
+    states `item` needs; otherwise (None, reason), the reason starting 'requires Geant4'."""
+    env = os.environ.get(PRODUCTS_ENV, "")
+    if not env:
+        return None, f"{GEANT4_SKIP}: g4sim_run products of campaign p3-g4 (set {PRODUCTS_ENV} to their root)"
+    root = Path(env)
+    if not (root / "tell.json").is_file():
+        return None, f"{GEANT4_SKIP}: {PRODUCTS_ENV}={env} holds no tell state (tell.json; run --tell)"
+    lacking = [n for n in CALO_EVIDENCE[item][1] if not (root / CALO / "state" / f"{n}.json").is_file()]
+    if lacking:
+        return None, f"{GEANT4_SKIP}: {PRODUCTS_ENV}={env} lacks the told ZDC states {lacking}"
+    return root, None
+
+
+def calo_evidence(item: str) -> dict:
+    """The evidence item `item` (ev_calo_*) on the products under $SIMCAL_G4_PRODUCTS, computed once per process and
+    root (the unit tests and the gate's units task share it); raises unittest.SkipTest('requires Geant4: ...') when
+    the products are not there."""
+    import unittest
+    root, why = products_root(item)
+    if root is None:
+        raise unittest.SkipTest(why)
+    key = (item, str(root.resolve()))
+    if key not in _CALO_CACHE:
+        _CALO_CACHE[key] = CALO_EVIDENCE[item][0](root)
+    return _CALO_CACHE[key]
 
 
 # ------------------------------------------------------------------ evidence: the RICH items

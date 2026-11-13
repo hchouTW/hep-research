@@ -6,10 +6,12 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -85,6 +87,30 @@ class UnitItems(unittest.TestCase):
         self.assertFalse(H.judge_units("p6_negatives", skip, names=two)["passed"])
         self.assertFalse(H.judge_units("p6_negatives", {two[0]: {"outcome": "passed"}}, names=two)["passed"])
         self.assertFalse(H.judge_units("p6_negatives", good)["passed"])          # the full item: tests not run
+
+    def test_units_block_sets_the_products_root_for_the_run(self):
+        """g4sim_zdc_positive runs its tests with $SIMCAL_G4_PRODUCTS set (an existing value wins) and restores the
+        environment after; the other items set nothing."""
+        seen = []
+
+        def fake(ids):
+            seen.append(os.environ.get(H.P3.PRODUCTS_ENV))
+            return {i: {"outcome": "passed"} for i in ids}
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(H, "run_tests", fake), \
+                mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop(H.P3.PRODUCTS_ENV, None)
+            r = H.units_block("g4sim_zdc_positive")
+            self.assertEqual(r["env"], {H.P3.PRODUCTS_ENV: str(H.P3.OUT_ROOT)})
+            self.assertNotIn(H.P3.PRODUCTS_ENV, os.environ)
+            (Path(d) / "tell.json").write_text("{}")
+            os.environ[H.P3.PRODUCTS_ENV] = d
+            r = H.units_block("g4sim_zdc_positive")
+            self.assertEqual(r["env"], {H.P3.PRODUCTS_ENV: d})
+            self.assertEqual(len(r["tell_sha256"][H.P3.PRODUCTS_ENV]), 64)
+            self.assertEqual(os.environ[H.P3.PRODUCTS_ENV], d)
+            os.environ.pop(H.P3.PRODUCTS_ENV)
+            self.assertNotIn("env", H.units_block("p6_negatives"))
+        self.assertEqual(seen, [str(H.P3.OUT_ROOT), d, None])
 
     def test_runner_records_outcomes(self):
         out = H.run_tests([H.EMULATOR_TESTS + "P6Arrays.test_bonferroni_z", "test_calibration_emulator.NoSuchClass"])

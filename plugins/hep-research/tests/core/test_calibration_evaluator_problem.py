@@ -1,8 +1,9 @@
 """The synthetic ZDC fixture of Part B section 15.2 as a calibration problem (phase 3, WP-F): core/calibration/
 evaluator_problem.py over the g4sim evaluator, on products of the fixture's SYNTHETIC TRANSPORT STAND-IN (tests/core/
 calibration_zdc_fixture.py; no Geant4). The section 15.2 "g4sim (synthetic ZDC)" items runnable without Geant4, the G8
-pseudo-data path of D6 (A12) on the fixture's events, and the Geant4 production the real fixture needs (not run).
-Items that need Geant4 are skipped and say so."""
+pseudo-data path of D6 (A12) on the fixture's events, and the Geant4 production the real fixture needs. Items that need
+Geant4 run on the products of campaign p3-g4 under $SIMCAL_G4_PRODUCTS (calibration_phase3_g4.calo_evidence) and are
+skipped, saying so, when it is unset."""
 from __future__ import annotations
 
 import sys
@@ -17,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
 
+import calibration_phase3_g4 as P3  # noqa: E402
 import calibration_zdc_fixture as Z  # noqa: E402
 import g4sim_calib_eval as E  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
@@ -64,10 +66,17 @@ class ResponseParametersP0(unittest.TestCase):
         self.assertEqual(r["status"], "failed")
         self.assertEqual([row["point"]["light_yield"] for row in r["points"] if row["failing"]], [220.0])
 
-    @unittest.skip("requires Geant4: re-digitization against g4sim_run plus response with Geant4 products "
-                   "(calibration_zdc_fixture.production_runs 'reference', 'LY-low', 'LY-high'; Slurm)")
     def test_with_geant4(self):
-        pass
+        """The same P0 on the Geant4 products of campaign p3-g4 ($SIMCAL_G4_PRODUCTS; production 'reference', 'LY-low',
+        'LY-high'): re-digitization of the nominal run against the full g4sim_runs plus response at the light-yield
+        extremes passes, as does the comparison with the independent reference events."""
+        r = P3.calo_evidence("zdc-p0-response")["result"]
+        self.assertEqual(r["status"], "passed", r["points"])
+        self.assertEqual(r["findings"], [])
+        froms = {row["point"]["light_yield"]: row["rerun_from"] for row in r["points"]}
+        self.assertEqual(froms, {Z.LIGHT_YIELD0: ["response"], 195.0: ["response"], 180.0: ["transport"],
+                                 220.0: ["transport"]})
+        self.assertTrue(all(not row["failing"] and row["max_ratio"] < 1.0 for row in r["points"]))
 
 
 class BirksRerunAgainstResimulation(unittest.TestCase):
@@ -103,10 +112,18 @@ class BirksRerunAgainstResimulation(unittest.TestCase):
         k = r["names"].index("vis_mean")
         self.assertLessEqual(abs(r["pred"][k] - truth), r["birks_bound_MeV"]["vis_mean"])
 
-    @unittest.skip("requires Geant4: the edep_visible scorer of a g4sim_run at the new k_B (production 'kB-low', "
-                   "'kB-high', with an edep_visible scorer added; Slurm)")
     def test_with_geant4(self):
-        pass
+        """The edep_visible scorer of the g4sim_runs at k_B' = 0.02, 0.21, 0.4 (production 'kB-low', 'kB-centre',
+        'kB-high'; $SIMCAL_G4_PRODUCTS) against the rerun of the nominal run's edep_by_dedx_class at k_B': within
+        reweighting_bound for every (event, volume), the same (event, volume) set, and the mean within its bound."""
+        rows = P3.calo_evidence("zdc-birks-rerun")["rows"]
+        self.assertEqual([round(r["birks"], 12) for r in rows], [Z.BIRKS_PRIOR[0], 0.21, Z.BIRKS_PRIOR[1]])
+        for r in rows:
+            self.assertGreater(r["pairs"], 0, r)
+            self.assertEqual((r["within"], r["unmatched"]), (r["pairs"], 0), r)
+            self.assertLessEqual(r["max_ratio"], 1.0, r)
+            self.assertLessEqual(abs(r["mean_rerun"] - r["mean_run"]), r["mean_bound"], r)
+            self.assertTrue(r["passed"], r)
 
 
 class CalorimeterProblem(unittest.TestCase):
