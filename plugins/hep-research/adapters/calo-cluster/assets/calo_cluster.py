@@ -32,6 +32,7 @@ import sys
 import time
 from pathlib import Path
 
+sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 EXIT_FAILED, EXIT_INVALID, EXIT_MISSING = 1, 2, 3
 

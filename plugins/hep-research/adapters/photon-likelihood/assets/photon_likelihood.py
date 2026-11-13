@@ -38,6 +38,7 @@ import sys
 import time
 from pathlib import Path
 
+sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[2]
 for _entry in (str(PLUGIN), str(HERE)):

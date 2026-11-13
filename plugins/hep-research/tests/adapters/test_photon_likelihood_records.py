@@ -356,6 +356,21 @@ class CloseOut(unittest.TestCase):
         self.assertIn(f"`{record['status']}`", self.text)
 
 
+# The recorded post-D4 change (2026-11-13, D4 closed): the held bytecode line, "sys.dont_write_bytecode = True" before the first plugin or
+# sibling import (as adapters/geant4/assets/g4sim_run.py), so tests/skills/test_no_bytecode passes. The file at this digest is the bytes the job
+# of record ran plus that one line, and nothing else: job_of_record_digest removes the line before comparing with its pin.
+POST_D4_LINE = b"sys.dont_write_bytecode = True\n"
+POST_D4_CHANGES = {"adapters/photon-likelihood/assets/photon_likelihood.py": "532260bd261dff01aed4a2455ce391da7e365563a8ee4f68d1632b1088978608"}
+
+
+def job_of_record_digest(path: str, file_bytes: bytes) -> str:
+    """The SHA-256 of the bytes the job of record ran, read from a file's current bytes: its own digest, or, for a file of POST_D4_CHANGES at
+    its recorded digest, the digest of the file with the one post-D4 line removed."""
+    if path in POST_D4_CHANGES and hashlib.sha256(file_bytes).hexdigest() == POST_D4_CHANGES[path] and file_bytes.count(POST_D4_LINE) == 1:
+        file_bytes = file_bytes.replace(POST_D4_LINE, b"", 1)
+    return hashlib.sha256(file_bytes).hexdigest()
+
+
 class CodeAsTheJobOfRecordRanIt(unittest.TestCase):
     def pinned_files(self) -> list:
         record = declaration()
@@ -367,8 +382,18 @@ class CodeAsTheJobOfRecordRanIt(unittest.TestCase):
         for path in self.pinned_files():
             with self.subTest(path=path):
                 self.assertIn(path, JOB_OF_RECORD_PINS, f"{path} is declared but has no pin from the job of record")
-                digest = hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+                digest = job_of_record_digest(path, (ROOT / path).read_bytes())   # the recorded post-D4 change only
                 self.assertEqual(digest, JOB_OF_RECORD_PINS[path], f"{path} differs from the bytes the job of record ran")
+        # The recorded post-D4 change (the held bytecode line, released after D4): the file at its recorded digest is the bytes the job of
+        # record ran plus that one line; any other change, or the line at another digest, is never read as those bytes.
+        post_d4 = "adapters/photon-likelihood/assets/photon_likelihood.py"
+        file_bytes = (ROOT / post_d4).read_bytes()
+        self.assertEqual(hashlib.sha256(file_bytes).hexdigest(), POST_D4_CHANGES[post_d4])
+        self.assertEqual(file_bytes.count(POST_D4_LINE), 1)
+        self.assertEqual(job_of_record_digest(post_d4, file_bytes), JOB_OF_RECORD_PINS[post_d4])
+        for changed in (file_bytes + b"# another change\n", file_bytes.replace(POST_D4_LINE, POST_D4_LINE * 2)):
+            self.assertNotEqual(job_of_record_digest(post_d4, changed), JOB_OF_RECORD_PINS[post_d4])
+        self.assertEqual(sorted(POST_D4_CHANGES), ["adapters/photon-likelihood/assets/photon_likelihood.py"])
 
     def test_no_pin_is_left_for_a_file_no_longer_declared(self):
         self.assertEqual(sorted(set(JOB_OF_RECORD_PINS) - set(self.pinned_files())), [])
