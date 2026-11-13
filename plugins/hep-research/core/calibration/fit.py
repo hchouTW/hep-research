@@ -380,11 +380,15 @@ def sigma_tot(cov_beta, d, boot_cov=None, w=1.0):
 
 
 def iterate(problem, beta0: np.ndarray, frozen=None, boot_cov=None, w_boot: float = 1.0,
-            limit: int = ITER_LIMIT, lndet: bool = True) -> Fit:
+            limit: int = ITER_LIMIT, lndet: bool = True, require_identified: bool = True) -> Fit:
     """The section 7.3 iteration: reference quantities at the current fit point, minimize with V and u fixed,
     theta_ref <- theta-hat, until max_i |delta theta_i| / sigma_tot,i < 0.1 (sigma_tot from the curvature of the
     current fit, D51) within `limit` iterations; then the ln det diagnostic, max_i |theta_lndet,i - theta_i| /
-    sigma_tot,i < 0.2. `frozen` is the V-hat of the fit a toy imitates (it is then not regenerated)."""
+    sigma_tot,i < 0.2. `frozen` is the V-hat of the fit a toy imitates (it is then not regenerated).
+    A converged point with sigma_tot,i > R_admit sigma_prior,i for some theta_i (or not finite) is a non-identified
+    stationary point (section 7.4 admission; review F5): it is flagged `not-identified` and, with
+    `require_identified`, reported as not converged (it supplies no theta-hat); find_extremum's no-admitted path,
+    where section 7.4 takes theta-hat at the lowest such point and G5 fails there, passes require_identified=False."""
     lay = problem.layout
     d = len(lay.theta)
     b = np.asarray(beta0, float).copy()
@@ -408,6 +412,14 @@ def iterate(problem, beta0: np.ndarray, frozen=None, boot_cov=None, w_boot: floa
         if prev is not None and np.max(np.abs(b[:d] - prev) / st) < CONV_FRACTION:
             fit = Fit(b, _theta(problem, b), S, st, m.D, m.edm, True, it, "", ref, history=hist, calls=calls,
                       active=m.active, F=m.F)
+            sp = sigma_prior(problem)
+            if not np.all(np.isfinite(st) & (st <= R_ADMIT * sp)):
+                fit.flags.append("not-identified")
+                if require_identified:
+                    fit.converged = False
+                    fit.reason = ("not identified: sigma_tot,i > R_admit sigma_prior,i at the converged point "
+                                  "(section 7.4 admission)")
+                    return fit
             if lndet:
                 shift, c2 = lndet_diagnostic(problem, fit, frozen)
                 fit.lndet_shift = shift
@@ -611,7 +623,7 @@ def find_extremum(problem, seed, beta_nominal: np.ndarray, frozen=None, boot_cov
               "sigma_ratio": (e["sigma_tot"] / sp).tolist()} for e in endpoints if not e["admitted"]]
     if not admitted:
         e = endpoints[0]
-        fit = iterate(problem, e["beta"], frozen, boot_cov, w_boot, limit)
+        fit = iterate(problem, e["beta"], frozen, boot_cov, w_boot, limit, require_identified=False)
         fit.flags.append("no-admitted-endpoint")
         fit.nonidentified = nonid
         fit.calls += calls

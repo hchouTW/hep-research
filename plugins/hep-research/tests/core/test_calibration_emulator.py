@@ -217,6 +217,23 @@ class P6JointReference(unittest.TestCase):
         self.assertGreater(plain, 0.05)                          # negative: the old reference on correlated points
         self.assertLess(joint, 0.03)                             # the exact reference keeps its size (alpha = 0.01)
 
+    def test_joint_reference_catches_an_understated_covariance_on_correlated_points(self):
+        """Negative (review F8, A13): the held-out differences scatter with four times the stated joint covariance
+        (an emulation error the stated covariance omits) on strongly correlated points (rho 0.9); the joint reference
+        fails P6 in most repetitions (about 0.95; at twice the covariance only about 0.33: strong correlation leaves
+        few effective degrees of freedom). Positive control: the size test above."""
+        C = self.joint(0.9)
+        rng = np.random.default_rng(12)
+        L = np.linalg.cholesky(4.0 * C + 1e-12 * np.eye(C.shape[0]))
+        blk = np.repeat(np.eye(self.k)[None], self.H, 0)
+        ve = np.zeros_like(blk)
+        fails = 0
+        for _ in range(200):
+            dm = (L @ rng.standard_normal(C.shape[0])).reshape(self.H, self.k)
+            r = EM.p6(dm, blk, ve, np.full(self.k, 1e6), cov_joint=C)
+            fails += r["status"] == "failed"
+        self.assertGreater(fails / 200, 0.8)
+
     def test_independent_points_both_references_agree(self):
         plain, joint = self.rates(self.joint(0.0), reps=300)     # control: no correlation -> both are chi2
         self.assertLess(plain, 0.03)

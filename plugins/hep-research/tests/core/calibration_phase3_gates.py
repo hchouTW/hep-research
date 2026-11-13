@@ -131,7 +131,12 @@ UNIT_ITEMS = {
                   EMULATOR_TESTS + "P6Toy.test_spot_checks_are_held_back_and_mandatory": "negative",
                   EMULATOR_TESTS + "FinalMethod.test_surrogate_tier_decided_by_p6": "negative",
                   EMULATOR_TESTS + "SurrogateModel.test_query_outside_the_domain_is_rejected": "negative",
-                  EMULATOR_TESTS + "G8Hook.test_spot_check_seeds_independent_of_training": "negative"}},
+                  EMULATOR_TESTS + "G8Hook.test_spot_check_seeds_independent_of_training": "negative",
+                  EMULATOR_TESTS + "P6JointReference.test_correlated_points_plain_reference_is_oversized_joint_is_not":
+                      "negative",
+                  EMULATOR_TESTS + "P6JointReference.test_joint_reference_catches_an_understated_covariance_on_"
+                                   "correlated_points": "negative",
+                  EMULATOR_TESTS + "P6JointReference.test_independent_points_both_references_agree": "positive"}},
     "g4sim_zdc_positive": {
         "part": "g4sim positive tests on the synthetic ZDC fixture (section 15.2)",
         "env": {P3.PRODUCTS_ENV: str(P3.OUT_ROOT)},     # the Geant4 products of campaign p3-g4 (unset: they skip)
@@ -250,10 +255,14 @@ CALO_THETA = ("light_yield", "resolution")
 CALO_OBS = ("pe_mean", "pe_std")
 CALO_TRUTH = {"light_yield": 205.0, "resolution": 0.6}
 CALO_MC, CALO_EXPOSURE, CALO_TRUTH_MC = 2500, 500, 10_000      # V_MC / V_data ~ 0.2; the truth sample 20 x the data
-CALO_REPS = 10
+CALO_REPS = 40                                           # part D (A19): 40 fresh repetitions, 4 per task
+CALO_PER_TASK, CALO_R0 = 4, 1000                         # repetitions per task; seed offset (part C used r = 0-9)
 CALO_RULE = ("each repetition: P3 passes at the prior centre, the fit converges, G1 passes with sigma_noise from 5 "
             "independent batches (section 8.1), |theta-hat_i - truth_i| <= 4 sigma_tot,i; the item passes when every "
-            "repetition does")
+            "repetition does and, for each theta_i, the pull chi2 over the repetitions (sum of pull_i^2) is at most the "
+            "0.99 quantile of chi2 with that many degrees of freedom (tightened by A19, review F1)")
+CALO_G4_RULE = ("CALO_RULE on the p3-g4 Geant4 products by re-digitization (A19, review F1): theta = light yield (the "
+                "resolution scale is not identifiable there: P3 fails for both, recorded), 40 repetitions")
 
 
 def calo_fit_block(r0: int, reps: int, n_mc: int = CALO_MC, exposure: int = CALO_EXPOSURE,
@@ -292,12 +301,83 @@ def calo_fit_block(r0: int, reps: int, n_mc: int = CALO_MC, exposure: int = CALO
     return rows
 
 
-def calo_fit_judge(rows: list, reps: int = CALO_REPS) -> dict:
+def calo_fit_judge(rows: list, reps: int = CALO_REPS, item: str = "zdc_fit", rule: str = CALO_RULE,
+                   label: str = f"{LABEL}; ZDC transport stand-in") -> dict:
+    from scipy import stats
     ok_rows = [x for x in rows if x["p3"] == "passed" and x["converged"] and x.get("g1") == "passed"
                and max(abs(v) for v in x["pull"]) <= 4.0]
-    return {"item": "zdc_fit", "part": "the response-layer parameters of ZDC Phase 3", "rule": CALO_RULE,
-            "reps": len(rows), "passing": len(ok_rows), "rows": rows, "label": f"{LABEL}; ZDC transport stand-in",
-            "passed": bool(len(rows) == reps and len(ok_rows) == reps)}
+    pulls = np.array([x["pull"] for x in rows if x.get("pull")], float)
+    chi2 = (pulls ** 2).sum(0).tolist() if pulls.size else []
+    limit = float(stats.chi2.ppf(0.99, len(pulls))) if pulls.size else None
+    chi2_ok = bool(pulls.size) and all(c <= limit for c in chi2)
+    return {"item": item, "part": "the response-layer parameters of ZDC Phase 3", "rule": rule,
+            "reps": len(rows), "passing": len(ok_rows), "pull_chi2": chi2, "pull_chi2_limit": limit,
+            "pull_rms": np.sqrt((pulls ** 2).mean(0)).tolist() if pulls.size else [],
+            "rows": rows, "label": label,
+            "passed": bool(len(rows) == reps and len(ok_rows) == reps and chi2_ok)}
+
+
+CALO_G4_THETA = ("light_yield",)
+CALO_G4_BLOCK, CALO_G4_BLOCKS = 2500, 8                  # the fit MC size of the stand-in; 8 blocks of the 20,000 nominal
+
+
+def sub_batch(b: dict, first: int, n: int) -> dict:
+    """Events first..first+n-1 of a told g4sim batch (its cells and primaries), as a batch of its own."""
+    lo, hi = first, first + n
+    out = {k: v for k, v in b.items() if k not in ("cells", "primaries")}
+    out.update(first_event=lo, events=n, cells=[r for r in b["cells"] if lo <= int(r[0]) < hi],
+               primaries=[p for p in b.get("primaries", []) if lo <= int(p[0]) < hi])
+    return out
+
+
+def calo_fit_g4_block(r0: int, reps: int, exposure: int = CALO_EXPOSURE, root: Path | None = None,
+                      thetas=CALO_G4_THETA) -> list:
+    """The response-layer item on the p3-g4 Geant4 products by re-digitization (review F1; A19): repetition r fits with
+    nominal block r mod 8 (2500 events) as the MC, the next five blocks as the sigma-noise sets, and pseudo-data of
+    `exposure` events resampled from the independent `reference` run (20,000 Geant4 events) digitized at the truth;
+    theta = `thetas` (the light yield: RESOLUTIONSCALE is not identifiable on these products, whose pe_std is shower-
+    dominated; P3 fails for both, recorded); the fit from the prior centre. Blocks are shared across repetitions."""
+    import calibration_zdc_fixture as Z
+    import g4sim_calib_eval  # noqa: F401  (registers the g4sim evaluator)
+
+    from core.calibration import evaluator
+    from core.calibration import evaluator_problem as EP
+    root = Path(root or os.environ.get(P3.PRODUCTS_ENV) or P3.OUT_ROOT)
+    nom = P3.told_batch(root, P3.CALO, "nominal")
+    ref = P3.told_batch(root, P3.CALO, "reference")
+    for b in (nom, ref):
+        b.pop("point", None)
+    rows = []
+    for r in range(r0, r0 + reps):
+        ks = [(r + j) % CALO_G4_BLOCKS for j in range(6)]
+        bs = {"nominal": {**sub_batch(nom, ks[0] * CALO_G4_BLOCK, CALO_G4_BLOCK), "use": "fit", "set": "s"},
+              "truth": {**ref, "use": "G8-truth"}}
+        bs.update({f"s{j}": {**sub_batch(nom, k * CALO_G4_BLOCK, CALO_G4_BLOCK), "use": "sigma-noise", "set": j}
+                   for j, k in enumerate(ks[1:])})
+        c = Z.contract(thetas=tuple(thetas), observables=CALO_OBS, exposure=exposure)
+        p = P3.calo_plan(bs, observables=CALO_OBS)
+        p["evaluator"]["nominal"] = "nominal"
+        ev = evaluator.make(p, c)
+        pr = EP.EvaluatorProblem(ev, c, seeds={"batch": "nominal"})
+        events = Z.truth_events(ev, CALO_TRUTH, "truth")
+        q = pr.with_data(pr.pseudo_data(events, {"kind": "fixed", "events": exposure}, _rng(cal_seed(42, r), 1)))
+        tv = np.array([CALO_TRUTH[t] for t in thetas])
+        q.sigma_noise = EP.estimate_sigma_noise(q, tv, [f"s{j}" for j in range(5)])
+        centre = np.array([0.5 * sum(Z.PRIORS[t]) for t in thetas])
+        lk = L.Likelihood(q.layout, q.observed, q.reference(centre, None))
+        b0 = lk.initial_beta(dict(zip(thetas, centre)))
+        p3 = identify.p3(q, b0)["status"]
+        f = F.iterate(q, b0)
+        row = {"r": r, "thetas": list(thetas), "blocks": ks, "p3": p3, "converged": bool(f.converged), "coupling": ev.coupling,
+               "sigma_noise": float(q.sigma_noise)}
+        if f.converged:
+            d = len(thetas)
+            row.update(g1=F.g1(f, q)["status"], pull=((f.beta[:d] - tv) / f.sigma_tot[:d]).tolist(),
+                       sigma_tot=f.sigma_tot[:d].tolist())
+        else:
+            row["reason"] = f.reason
+        rows.append(row)
+    return rows
 
 
 # ================================================================== phi_resim: a resimulation-level phi (section 5.5)
@@ -318,11 +398,16 @@ def _phi_build(n):
     return toy.build_toy(n, "full", runs_subset=PHI_RUNS)
 
 
-def phi_resim_block(case: str, exposure: int = 500, mc: int = 5000, n_design: int = 12, held_back: int = 8) -> dict:
+PHI_EXPOSURE, PHI_MC, PHI_SEED_ROUND = 4000, 40_000, 1   # part E (A20): identified fits (pilot 7647759: sigma_tot /
+#   sigma_prior 0.47-0.50 at 4000, 0.67-0.71 at 2000, 1.2-1.4 at part C/D's 500); fresh seeds (round 1; the pilot used 0)
+
+
+def phi_resim_block(case: str, exposure: int = PHI_EXPOSURE, mc: int = PHI_MC, n_design: int = 12, held_back: int = 8,
+                    seed_round: int = PHI_SEED_ROUND) -> dict:
     """The material thickness phi resimulated with common random numbers (not the light-yield equivalence)."""
     sig = PHI_CASES[case]
     truth = np.array([0.25, 10.0])
-    base = cal_seed(41, list(PHI_CASES).index(case))
+    base = cal_seed(41, list(PHI_CASES).index(case) + 100 * seed_round)
     sp = _Problem(_phi_build, PHI_NAMES, PHI_THETA, exposure, mc, mc_seed=(base, 1), boot_seed=(base, 2),
                        shift={"material_thickness": (1.0, sig)})
     b = np.r_[truth, np.zeros(sp.layout.n_beta - 2)]
@@ -906,7 +991,8 @@ def toy_g8_mm_judge(blocks: list) -> dict:
 # ================================================================== the task table, tasks, merge
 def _tasks() -> list:
     t = [("units", {"item": k}) for k in UNIT_ITEMS]
-    t += [("zdc_fit", {"r0": r, "reps": 1}) for r in range(CALO_REPS)]
+    t += [("zdc_fit", {"r0": CALO_R0 + CALO_PER_TASK * i, "reps": CALO_PER_TASK})
+          for i in range(CALO_REPS // CALO_PER_TASK)]                  # indices 3-12 as before
     t += [("phi_resim", {"case": c}) for c in PHI_CASES]
     for pt in ("interior", "boundary"):
         t += [("g8_3m", {"point": pt, "start": s, "n": M3["chunk"]}) for s in range(0, M3["per_point"], M3["chunk"])]
@@ -925,12 +1011,15 @@ def _tasks() -> list:
     for pt in ("interior", "boundary"):
         t += [("toy_g8_mm", {"point": pt, "start": s, "n": MM["chunk"]}) for s in range(0, MM["per_point"], MM["chunk"])]
     t += toy(True)                             # second registrations, after every earlier task (indices unchanged)
+    t += [("zdc_fit_g4", {"r0": CALO_PER_TASK * i, "reps": CALO_PER_TASK})
+          for i in range(CALO_REPS // CALO_PER_TASK)]                  # part D (A19): after every earlier task
     return t
 
 
 TASKS = _tasks()
 BLOCKS = {"units": units_block, "zdc_fit": calo_fit_block, "phi_resim": phi_resim_block, "g8_3m": g8_3m_block,
-          "g8_3m_spot": g8_3m_spot, "toy_g8": toy_g8_block, "toy_g8_mm": toy_g8_mm_block}
+          "g8_3m_spot": g8_3m_spot, "toy_g8": toy_g8_block, "toy_g8_mm": toy_g8_mm_block,
+          "zdc_fit_g4": calo_fit_g4_block}
 
 
 def family_counts(tasks=None) -> dict:
@@ -964,7 +1053,12 @@ def decide_all(recs: dict, tasks=None, toy_reps: dict | None = None) -> dict:
             {"item": kw["item"], "passed": False, "status": "missing"}
     if "zdc_fit" in by:
         rows = [x for _, res in by["zdc_fit"] if res for x in res]
-        items["zdc_fit"] = calo_fit_judge(rows, reps=len(by["zdc_fit"]))
+        items["zdc_fit"] = calo_fit_judge(rows, reps=sum(kw["reps"] for kw, _ in by["zdc_fit"]))
+    if "zdc_fit_g4" in by:
+        rows = [x for _, res in by["zdc_fit_g4"] if res for x in res]
+        items["zdc_fit_g4"] = calo_fit_judge(rows, reps=sum(kw["reps"] for kw, _ in by["zdc_fit_g4"]),
+                                             item="zdc_fit_g4", rule=CALO_G4_RULE,
+                                             label=f"{LABEL}; p3-g4 Geant4 products, re-digitization")
     if "phi_resim" in by:
         items["phi_resim"] = phi_resim_judge([res for _, res in by["phi_resim"] if res])
     if "g8_3m" in by:
@@ -972,6 +1066,16 @@ def decide_all(recs: dict, tasks=None, toy_reps: dict | None = None) -> dict:
         spot = next((res for _, res in by.get("g8_3m_spot", []) if res), None)
         items["g8_3m"] = g8_3m_judge(blocks, spot) if blocks else {"item": "g8_3m", "passed": False,
                                                                    "status": "missing"}
+        if blocks:                             # the non-converged pseudo-data and their reasons (review F7)
+            nc: dict = {}
+            for b in blocks:
+                for x in b["rows"]:
+                    if not x.get("converged"):
+                        e = nc.setdefault(b["point"], {"n": 0, "reasons": {}})
+                        e["n"] += 1
+                        key = str(x.get("reason", ""))[:80]
+                        e["reasons"][key] = e["reasons"].get(key, 0) + 1
+            items["g8_3m"]["non_converged"] = nc
     toy: dict = {}
     for kw, res in by.get("toy_g8", []):
         if res:
@@ -987,7 +1091,15 @@ def decide_all(recs: dict, tasks=None, toy_reps: dict | None = None) -> dict:
     return items
 
 
-GATE_ITEMS = ("units|p6_negatives", "units|g4sim_zdc_positive", "units|response_phi", "zdc_fit", "phi_resim", "g8_3m")
+GATE_ITEMS = ("units|p6_negatives", "units|g4sim_zdc_positive", "units|response_phi", "zdc_fit", "zdc_fit_g4",
+              "phi_resim", "g8_3m")
+
+
+def _products_record() -> dict:
+    """The Geant4 products the units and zdc_fit_g4 items read: their root and the tell state's SHA-256 (review F7)."""
+    root = Path(os.environ.get(P3.PRODUCTS_ENV) or P3.OUT_ROOT)
+    tell = root / "tell.json"
+    return {"root": str(root), "tell_sha256": hashlib.sha256(tell.read_bytes()).hexdigest() if tell.is_file() else None}
 
 
 def merge(out_dir: Path, out: Path) -> dict:
@@ -1012,15 +1124,19 @@ def merge(out_dir: Path, out: Path) -> dict:
         if not clean and v.get("passed"):
             v.update(passed=False, status="not-from-one-clean-commit")
     gate = [k for k in GATE_ITEMS if k in items]
-    gate_fams = ("units", "zdc_fit", "phi_resim", "g8_3m", "g8_3m_spot")
+    gate_fams = ("units", "zdc_fit", "zdc_fit_g4", "phi_resim", "g8_3m", "g8_3m_spot")
     gate_commits = {c for f in gate_fams if f in by_family for c in by_family[f]["commits"]}
     gate_ok = len(gate_commits) == 1 and len(gate) == len(GATE_ITEMS) and all(items[k].get("passed") for k in gate)
     rep = {"gate": "phase 3 (section 17): P6 negative tests; G8 for the three-method combination; g4sim positive tests "
                    "on the synthetic ZDC fixture; the response-layer parameters and phi at the resimulation level",
            "gate_status": "passed" if gate_ok else "failed", "missing_tasks_by_family": family_counts(
                [TASKS[i] for i in missing]), "commits": sorted(commits), "dirty": dirty,
-           "commits_by_family": {f: sorted(v["commits"]) for f, v in by_family.items()}, "items": items,
-           "passed": {k: v.get("passed") for k, v in items.items()},
+           "commits_by_family": {f: sorted(v["commits"]) for f, v in by_family.items()},
+           "items": {k: v for k, v in items.items() if k in GATE_ITEMS},
+           "passed": {k: v.get("passed") for k, v in items.items() if k in GATE_ITEMS},
+           "other_items": {k: v for k, v in items.items() if k not in GATE_ITEMS},
+           "other_items_note": "not gate items: the toy calibration rows, judged in their own campaigns (review F7)",
+           "products": _products_record(),
            "not_judged": [],
            "task_seconds": {i: r["seconds"] for i, r in recs.items() if r}, "provenance": provenance(),
            "label": LABEL}

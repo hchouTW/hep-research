@@ -391,10 +391,11 @@ class G4simEvaluator:
             self._bound_sign = 0
 
     def _kb_visible(self, rows, kb):
-        """edep_visible of one (event, volume) at k_B, moved by the bound when birks_bound_shift asks for it."""
+        """edep_visible of one (event, volume) at k_B, moved by the bound when birks_bound_shift asks for it (the
+        downward move stops at 0: a visible energy is never negative)."""
         v = simulate.reweighted(rows, kb)
         s = getattr(self, "_bound_sign", 0)
-        return v + s * simulate.reweighting_bound(rows, kb) if s else v
+        return max(v + s * simulate.reweighting_bound(rows, kb), 0.0) if s else v
 
     def _observe(self, values: dict, bname: str, batch: dict, names=None, given=None) -> dict:
         tab = batch_tables(batch, self.scorers)

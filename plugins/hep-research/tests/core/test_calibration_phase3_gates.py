@@ -48,6 +48,12 @@ class TaskTable(unittest.TestCase):
         mm = [i for i, (f, _) in enumerate(H.TASKS) if f == "toy_g8_mm"]
         self.assertEqual((mm[0], mm[-1]), (24124, 25163))      # the registered p3-toy-g8 indices stay where they were
         self.assertGreater(min(first), mm[-1])
+        zd = [i for i, (f, _) in enumerate(H.TASKS) if f == "zdc_fit"]
+        self.assertEqual((zd[0], zd[-1]), (3, 12))              # part D's 40 repetitions keep tasks 3-12 (4 each)
+        self.assertEqual(sum(kw["reps"] for f, kw in H.TASKS if f == "zdc_fit"), H.CALO_REPS)
+        g4 = [i for i, (f, _) in enumerate(H.TASKS) if f == "zdc_fit_g4"]
+        self.assertEqual((g4[0], g4[-1]), (27164, 27173))       # appended after every earlier task (A19)
+        self.assertIn("zdc_fit_g4", H.GATE_ITEMS)
         self.assertEqual(H.toy_truth_batches(H.TOY_CONFIGS["cal6b"]), 200)
         self.assertEqual(H.toy_truth_batches(H.TOY_CONFIGS["cal6"]), H.TOY_TRUTH_BATCHES)
         json.dumps(H.TASKS)                                   # every task's arguments are plain JSON
@@ -194,6 +200,15 @@ class OtherJudges(unittest.TestCase):
         self.assertFalse(H.calo_fit_judge([dict(good, r=0), dict(good, r=1, g1="failed")], reps=2)["passed"])
         self.assertFalse(H.calo_fit_judge([dict(good, r=0, pull=[4.5, 0.0])], reps=1)["passed"])
         self.assertFalse(H.calo_fit_judge([dict(good, r=0)], reps=2)["passed"])                 # a missing repetition
+        # the pull chi2 rule (A19, review F1): 40 pulls of rms 1.0 pass; of rms 1.5 (each within 4 sigma) fail
+        rng = np.random.default_rng(3)
+        ok = [dict(good, r=i, pull=[float(x), float(y)]) for i, (x, y) in enumerate(rng.normal(0, 1.0, (40, 2)))]
+        wide = [dict(good, r=i, pull=[float(np.clip(x, -3.9, 3.9)), 0.0])
+                for i, x in enumerate(rng.normal(0, 1.5, 40))]
+        j_ok, j_wide = H.calo_fit_judge(ok, reps=40), H.calo_fit_judge(wide, reps=40)
+        self.assertTrue(j_ok["passed"], j_ok["pull_chi2"])
+        self.assertFalse(j_wide["passed"], j_wide["pull_chi2"])
+        self.assertEqual(j_wide["passing"], 40)                                               # caught by chi2 alone
         cases = [{"case": "small", "ok": True}, {"case": "large", "ok": True}]
         self.assertTrue(H.phi_resim_judge(cases)["passed"])
         self.assertFalse(H.phi_resim_judge(cases[:1])["passed"])

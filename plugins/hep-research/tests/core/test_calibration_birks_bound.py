@@ -73,6 +73,18 @@ class BirksDiscretization(unittest.TestCase):
         with self.assertRaises(g4sim_calib_eval.DG.CheckError):
             ev.birks_bound_shift(pt, 2)
 
+    def test_the_downward_shift_never_makes_a_visible_energy_negative(self):
+        """On the Geant4 ZDC products some (event, volume) bounds exceed their visible energy; -bound stops at 0."""
+        ev, c, p = setup()
+        ev._bound_sign = -1
+        try:
+            rows = [(60, 0.5)]                       # (dE/dx class, energy): a high-dE/dx class, bound >> visible
+            sim = g4sim_calib_eval.simulate
+            self.assertLess(sim.reweighted(rows, 0.4) - sim.reweighting_bound(rows, 0.4), 0.0)   # the case exists
+            self.assertEqual(ev._kb_visible(rows, 0.4), 0.0)
+        finally:
+            ev._bound_sign = 0
+
     def test_no_rerun_no_item(self):
         ev, c, p = setup(thetas=("light_yield",))
         self.assertIsNone(design.birks_discretization(ev, c, p))

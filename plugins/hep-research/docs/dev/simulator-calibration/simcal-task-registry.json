@@ -449,6 +449,27 @@
    "registered_at": "2026-11-13T10:06:09Z",
    "card_commit": "a72cf7fb",
    "reason": "execution log: PR #403 CI fix recorded"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "6a66fd1570d5987e8196c6368013d9c183f0b1da1a014f049d42f9ce2efaac79",
+   "registered_at": "2026-11-13T11:09:16Z",
+   "card_commit": "3583ca53",
+   "reason": "execution log: gate part C and the section 5.4 decision recorded"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "4e6a3ac2d45c78af6cc0e69065ba537b7b4138577fa006d869c028b985323a19",
+   "registered_at": "2026-11-13T12:33:30Z",
+   "card_commit": "04c11c0f",
+   "reason": "gate part D (campaign p3-gates-d, A19) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "6671aa5af3b0a49beeca253fcd55fb576e959631009fe149f53778eadbedec62",
+   "registered_at": "2026-11-13T20:41:19Z",
+   "card_commit": "337fffd9",
+   "reason": "gate part E (campaign p3-gates-e, A20) registered before any run"
   }
  ]
 }
