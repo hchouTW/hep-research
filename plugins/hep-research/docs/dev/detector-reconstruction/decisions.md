@@ -894,3 +894,16 @@ confirmation); the per-event seed form S = H("t15b-k16-1601", "block-<b>", speci
 user's earlier "Draft spec, digitization off (Recommended)"). The user also confirmed the K16 reading: "Yes, it covers them (Recommended)":
 the 2026-11-06 acceptance of section 16 covers section 13's hard gates, quality objective, tie rule and none-passes rule (R02). Resources
 approved with the freeze: about 1.6 CPU-h for the 96,000-event sample on block 21.
+
+## T15b: K16 selection, attempt 1 on block 21 (2026-11-13)
+
+Job of record 7627683 (jobs/t15b-k16/t15b-k16.sh c9a635b0, manifest 015690d6, scorer c3ab9825; reviews REVIEW.md, REREVIEW.md), run as frozen
+on the user's word ("Run as frozen (Recommended)"), the fake reading by the user's ruling ("Count them as fakes (Recommended)": a candidate
+row with at least 4 hits and no true plane is a reconstructed track and a fake): **K16 SELECTION: no qualified candidate** (no candidate passes
+every required gate; gates are not lowered, section 13). Each candidate fails 13 of 96 required tests: the rho_pull tail rate (1.5-2.0 % in bins
+0-2, mixed, proton and antiproton; antiproton in bin 3) and the fake rate in bins 1-3 (1.5-2.6 %), against L 1 %. Efficiency, charge flip,
+centres and widths pass. The tie interval includes 0 (moot). The claim is scoped to the declared baseline and tested domain (simulated
+element_sim events, J15, digitization off); no post-selection quality claim without K18 confirmation data (block 23 untouched). Recorded with
+it, for the user's information: the fake reading; the pull and charge-flip population (fit_ok and selected with at least 4 true planes); the
+attempt-2 level the scorer would take on block 22 (K09's rule, the user's call if ever needed). The pilot's development readings (7627279)
+had shown the same tail and fake pattern.
