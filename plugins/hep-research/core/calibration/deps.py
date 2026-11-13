@@ -1,16 +1,22 @@
 """Dependencies between calibration results (Part B sections 5.2 clause 5, 10.2, 10.3, 10.4; owner calib_deps.py).
 
 Phase 0 content (section 17): hash references, cycle checks, derivation of upstream roles from usage, and the
-acyclic computation of version ids. Upstream invalidation (section 10.3) and the conflict rules of section 10.4 are
-later phases. Standard library only.
+acyclic computation of version ids; phase 2: the conflict rules of section 10.4; phase 4: upstream invalidation and the
+change of simulation identity (section 10.3) with the T2 carry-over of approval A21 (section 19-g7). Standard library
+only.
 
 Roles are derived, never declared (section 10.2): any central usage makes the upstream `central`; only variation sets
 or envelopes make it `variation`; no usage is rejected. A role written in the contract must equal the derived one.
 """
 from __future__ import annotations
 
+import math
 import re
+from datetime import datetime
+from statistics import NormalDist
 
+from core.calibration import model_identity
+from core.calibration.data_release import kappa_id
 from core.canonical import canonical_sha256
 
 # Section 5.2 clause 5: the usages an upstream reference can declare, and the role each implies (section 10.2).
@@ -251,3 +257,284 @@ def check_packages(packages: list, upstreams: dict, common_sources: dict | None 
                 out.append({"code": "deps.common_source", "packages": [a, b],
                             "sources": sorted(common_sources[a] & common_sources[b])})
     return out
+
+
+# ------------------------------------------------------------------ upstream invalidation (section 10.3)
+GRADE_RANK = {"incomplete": -1, "failed": 0, "projection": 1, "calibrated-unvalidated": 2, "validated-in-scope": 3}
+
+
+def _result_hash(r, where: str) -> str:
+    if not isinstance(r, dict) or not is_hash_reference(r.get("result_sha256")):
+        raise DependencyError("invalidate.result_hash", "a result is identified by its result_sha256", where)
+    return r["result_sha256"]
+
+
+def kappa(r: dict) -> str:
+    """kappa of a result (section 9.5): its `kappa` field, else the hash of (contract hash, plan hash, engine version)
+    (core.calibration.data_release.kappa_id)."""
+    if r.get("kappa"):
+        return r["kappa"]
+    parts = [r.get(k) for k in ("contract_sha256", "plan_sha256", "engine_version")]
+    if not all(isinstance(x, str) and x for x in parts):
+        raise DependencyError("invalidate.kappa", "a result states kappa or its contract, plan hashes and engine "
+                              "version", "$.kappa")
+    return kappa_id(str(parts[0]), str(parts[1]), str(parts[2]))
+
+
+def _standing(r: dict) -> tuple:
+    g = r.get("grade") or {}
+    return g.get("effective_grade"), frozenset(g.get("uses") or ())
+
+
+def upstream_change(old, successor) -> dict:
+    """Classify the successor `new` of an upstream result `old` (section 10.3): `rejudgment` when the same kappa is
+    re-judged after the records it waited for are resolved (old had pending inputs: no own grade, waiting records)
+    and the (effective grade, use) is unchanged, which is not an upstream revision; otherwise `downgrade` when the
+    effective grade falls or uses are lost, else `revision`; `none` for the same result."""
+    a, b = _result_hash(old, "$.old"), _result_hash(successor, "$.new")
+    out = {"old": a, "new": b, "kappa_old": kappa(old), "kappa_new": kappa(successor)}
+    if a == b:
+        return dict(out, kind="none")
+    (ga, ua), (gb, ub) = _standing(old), _standing(successor)
+    if ga not in GRADE_RANK or gb not in GRADE_RANK:
+        raise DependencyError("invalidate.grade", "each result states grade.effective_grade", "$.grade")
+    pending = (old.get("grade") or {}).get("own_grade") is None and bool(old.get("waiting_records"))
+    if out["kappa_old"] == out["kappa_new"] and pending and (gb, ub) == (ga, ua):
+        return dict(out, kind="rejudgment")
+    return dict(out, kind="downgrade" if GRADE_RANK[gb] < GRADE_RANK[ga] or not ua <= ub else "revision")
+
+
+def invalidate(downstreams: list, changes: list, marked=()) -> dict:
+    """Section 10.3: a downstream citing (upstream[]) a revised or downgraded upstream is marked as needing a redo; a
+    re-judgment of the same kappa is not a revision and is recorded as earlier and later decisions of that kappa;
+    `marked` (e.g. results whose simulation identity changed, `identity_decision`) are marked too. A result citing a
+    result marked for a redo is marked in turn (its upstream will be revised). changes: [{old, new}] result documents.
+    Returns {redo: {result: [reasons]}, same_kappa: [{downstream, kappa, earlier, later}], changes: [...]}."""
+    classified = {}
+    for i, c in enumerate(changes):
+        if not isinstance(c, dict):
+            raise DependencyError("invalidate.change", "a change is {old, new}", f"$.changes[{i}]")
+        change = upstream_change(c.get("old"), c.get("new"))
+        classified[change["old"]] = change
+    ups = {}
+    for i, r in enumerate(downstreams):
+        h = _result_hash(r, f"$.results[{i}]")
+        entries = r.get("upstream") or []
+        if check_upstream_entries(entries):
+            raise DependencyError("invalidate.upstream", "the upstream[] entries are not valid (calib_deps.py roles)",
+                                  f"$.results[{i}].upstream")
+        ups[h] = entries
+    redo: dict[str, list] = {}
+    same: list = []
+    for m in marked:
+        if not is_hash_reference(m):
+            raise DependencyError("invalidate.marked", "a marked result is cited by its SHA-256", "$.marked")
+        redo.setdefault(m, []).append({"code": "marked"})
+    for h, entries in sorted(ups.items()):
+        for e in entries:
+            ch = classified.get(e["result_sha256"])
+            if ch is None or ch["kind"] == "none":
+                continue
+            if ch["kind"] == "rejudgment":
+                same.append({"downstream": h, "kappa": ch["kappa_old"], "earlier": ch["old"], "later": ch["new"]})
+            else:
+                redo.setdefault(h, []).append({"code": f"upstream.{ch['kind']}", "upstream": ch["old"],
+                                               "successor": ch["new"], "role": derive_role(e["usages"])})
+    grown = True
+    while grown:
+        grown = False
+        for h, entries in sorted(ups.items()):
+            hit = sorted(e["result_sha256"] for e in entries if e["result_sha256"] in redo)
+            if hit and h not in redo:
+                redo[h] = [{"code": "upstream.needs_redo", "upstream": u} for u in hit]
+                grown = True
+    return {"redo": dict(sorted(redo.items())), "same_kappa": same,
+            "changes": [classified[k] for k in sorted(classified)]}
+
+
+# ------------------------------------------------------------------ change of simulation identity (10.3, A21 19-g7)
+CARRIED_OVER = "identity-carried-over"
+PROVISIONAL = "provisional-thresholds"
+T2_MARGIN = 0.1            # x sigma_tot^design per observable: provisional threshold of A21 (section 19-g7)
+T2_ALPHA = 0.05            # TOST level per observable; all must pass (intersection-union test)
+T2_SCHEMA = "calibration-identity-equivalence/1"
+THETA_HAT = "theta-hat"
+
+
+def _identities(value, where: str) -> dict:
+    """[{model, identity}] as {model: identity}."""
+    if not isinstance(value, list) or not all(isinstance(x, dict) and isinstance(x.get("model"), str)
+                                              and isinstance(x.get("identity"), dict) for x in value):
+        raise DependencyError("identity.shape", "model identities are [{model, identity: {the five items}}]", where)
+    out = {x["model"]: x["identity"] for x in value}
+    if len(out) != len(value):
+        raise DependencyError("identity.shape", "a model is listed twice", where)
+    return out
+
+
+def identity_changes(recorded: dict, current: dict) -> dict:
+    """{model: [changed items]} between the identities a result recorded and the current ones (the five masked items
+    of section 5.1, model_identity.changed_items); a model added or removed is a change of every item."""
+    out = {}
+    for m in sorted(set(recorded) | set(current)):
+        items = model_identity.changed_items(recorded.get(m) or {}, current.get(m) or {})
+        if items:
+            out[m] = items
+    return out
+
+
+def _time(value, where: str):
+    try:
+        t = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        t = None
+    if t is None or t.tzinfo is None:
+        raise DependencyError("t2.time", "a time is ISO 8601 with a time zone", where)
+    return t
+
+
+def _number(value, where: str, positive=False) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) \
+            or value < 0 or (positive and value == 0):
+        raise DependencyError("t2.number", "a finite number" + (" > 0" if positive else " >= 0"), where)
+    return float(value)
+
+
+def _real(value, where: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise DependencyError("t2.number", "a finite number", where)
+    return float(value)
+
+
+def tost(before: float, after: float, se_old: float, se_new: float, margin: float, alpha: float = T2_ALPHA) -> dict:
+    """Two one-sided tests of |after - before| < margin with independent Gaussian MC errors: equivalence when both
+    one-sided nulls are rejected at alpha, i.e. the (1 - 2 alpha) interval of the difference lies inside
+    (-margin, margin). p is the larger one-sided p-value."""
+    d, se = after - before, math.hypot(se_old, se_new)
+    if se == 0:
+        p = 0.0 if abs(d) < margin else 1.0
+    else:
+        nd = NormalDist()
+        p = max(1 - nd.cdf((d + margin) / se), 1 - nd.cdf((margin - d) / se))
+    return {"difference": d, "se": se, "margin": margin, "p": p, "equivalent": p < alpha}
+
+
+def _record_shape(record) -> None:
+    if not isinstance(record, dict) or record.get("schema") != T2_SCHEMA or not isinstance(
+            record.get("registration"), dict) or not isinstance(record.get("outcome"), dict):
+        raise DependencyError("t2.shape", f"a T2 record is {{schema: {T2_SCHEMA}, registration, outcome}}", "$.record")
+    reg = record["registration"]
+    for k in ("result_sha256", "old_identities", "new_identities", "points", "observables", "mc_events",
+              "margin_fraction", "alpha", "registered_at"):
+        if k not in reg:
+            raise DependencyError("t2.shape", f"the registration lacks {k}", "$.record.registration")
+    if not isinstance(reg["points"], list) or not all(isinstance(p, dict) and isinstance(p.get("label"), str)
+                                                      and isinstance(p.get("theta"), dict) for p in reg["points"]):
+        raise DependencyError("t2.shape", "registration points are [{label, theta: {name: value}}]",
+                              "$.record.registration.points")
+    if not isinstance(reg["observables"], list) or not all(
+            isinstance(o, dict) and isinstance(o.get("name"), str) for o in reg["observables"]):
+        raise DependencyError("t2.shape", "registration observables are [{name, sigma_tot_design}]",
+                              "$.record.registration.observables")
+    if not isinstance(record["outcome"].get("points"), list):
+        raise DependencyError("t2.shape", "the outcome lists its points", "$.record.outcome.points")
+
+
+def t2_check(record: dict, basis: dict) -> dict:
+    """The T2 equivalence record of approval A21 (section 19-g7) against the result it would carry over. basis:
+    result_sha256, recorded (the result's identities {model: identity}), current (the current ones), theta_hat {name: value},
+    spot_checks [{name: value}] (the section 5.4 points of the result), observables [calibration observable names],
+    mc_events (the result's own MC size per evaluation), new_build_first_run (ISO time of the new build's first run,
+    from the execution record; None if unknown). Returns {passed, reasons, tests}: a record that is registered after
+    the new build ran, loosens the margin or alpha, does not cover theta-hat, every spot-check point and every
+    calibration observable at the result's MC size, or fails a TOST, does not pass."""
+    _record_shape(record)
+    reg, outcome = record["registration"], record["outcome"]
+    reasons = []
+
+    def no(code, message):
+        reasons.append({"code": code, "message": message})
+
+    if reg["result_sha256"] != basis["result_sha256"]:
+        no("t2.other_result", "the record is registered for another result")
+    if _identities(reg["old_identities"], "$.record.registration.old_identities") != basis["recorded"] \
+            or _identities(reg["new_identities"], "$.record.registration.new_identities") != basis["current"]:
+        no("t2.identities", "the record's old and new identities are not the result's recorded and the current ones")
+    registered = _time(reg["registered_at"], "$.record.registration.registered_at")
+    if basis.get("new_build_first_run") is None:
+        no("t2.order_unknown", "the new build's first run time is not given: registration before it is not shown")
+    elif registered >= _time(basis["new_build_first_run"], "$.new_build_first_run"):
+        no("t2.registered_late", "the record was registered after the new build ran (A21: registered before)")
+    margin = _number(reg["margin_fraction"], "$.record.registration.margin_fraction", positive=True)
+    alpha = _number(reg["alpha"], "$.record.registration.alpha", positive=True)
+    if margin > T2_MARGIN or alpha > T2_ALPHA:
+        no("t2.loosened", f"margin {margin} sigma_tot^design and alpha {alpha} may be tightened from "
+                          f"{T2_MARGIN} and {T2_ALPHA}, never loosened")
+    labels = [p["label"] for p in reg["points"]]
+    if len(set(labels)) != len(labels):
+        raise DependencyError("t2.shape", "point labels are unique", "$.record.registration.points")
+    thetas = [p["theta"] for p in reg["points"]]
+    hat = [p["theta"] for p in reg["points"] if p["label"] == THETA_HAT]
+    if hat != [basis.get("theta_hat")]:
+        no("t2.theta_hat", "the record has no theta-hat point equal to the result's theta-hat")
+    missing = [s for s in basis.get("spot_checks") or () if s not in thetas]
+    if missing:
+        no("t2.spot_checks", f"the section 5.4 spot-check points {missing} are not in the record")
+    sig = {o["name"]: _number(o.get("sigma_tot_design"), "$.record.registration.observables", positive=True)
+           for o in reg["observables"]}
+    if set(sig) != set(basis.get("observables") or ()):
+        no("t2.observables", f"the record's observables {sorted(sig)} are not the calibration observables "
+                             f"{sorted(basis.get('observables') or ())}")
+    if reg["mc_events"] != basis.get("mc_events"):
+        no("t2.mc_size", f"registered at {reg['mc_events']} MC events, the result's own size is "
+                         f"{basis.get('mc_events')}")
+    if outcome.get("registration_sha256") != canonical_sha256(reg):
+        no("t2.outcome_unbound", "the outcome is not bound to this registration (registration_sha256)")
+    got = {p.get("label"): p for p in outcome["points"] if isinstance(p, dict)}
+    tests = []
+    for label in labels:
+        p = got.get(label)
+        if p is None:
+            no("t2.outcome_missing", f"no outcome at point {label!r}")
+            continue
+        if p.get("mc_events") != {"old": reg["mc_events"], "new": reg["mc_events"]}:
+            no("t2.mc_size", f"point {label!r} was not evaluated at the registered MC size for both identities")
+        obs = p.get("observables") or {}
+        for name in sorted(sig):
+            o = obs.get(name)
+            if not isinstance(o, dict):
+                no("t2.outcome_missing", f"no outcome for {name!r} at point {label!r}")
+                continue
+            w = f"$.record.outcome.points[{label}].{name}"
+            t = tost(_real(o.get("old"), w), _real(o.get("new"), w), _number(o.get("se_old"), w),
+                     _number(o.get("se_new"), w), margin * sig[name], alpha)
+            tests.append(dict(t, point=label, observable=name))
+            if not t["equivalent"]:
+                no("t2.not_equivalent", f"{name} at {label!r}: |difference| {abs(t['difference']):.4g} not shown "
+                                        f"< {t['margin']:.4g} (TOST p = {t['p']:.3g} >= {alpha})")
+    return {"passed": not reasons, "reasons": reasons, "tests": tests}
+
+
+def identity_decision(result: dict, current: list, record: dict | None = None, basis: dict | None = None) -> dict:
+    """Section 10.3 change of simulation identity with approval A21 (section 19-g7). result: a calibration-result
+    with result_sha256 and model_identities [{model, identity}]; current: the current [{model, identity}] (from
+    model_identity.identity). Unchanged identities (theta, phi values and provenance_id are masked, section 5.1):
+    `unchanged`. A changed item: `redo`, unless a T2 record (t2_check with basis) passes, which keeps the result
+    flagged identity-carried-over, with the new identities, labelled provisional-thresholds (the margin is
+    provisional)."""
+    h = _result_hash(result, "$.result")
+    old = _identities(result.get("model_identities"), "$.result.model_identities")
+    now = _identities(current, "$.current")
+    changed = identity_changes(old, now)
+    out = {"result_sha256": h, "changed": changed}
+    if not changed:
+        return dict(out, status="ok", decision="unchanged")
+    if record is None:
+        return dict(out, status="failed", decision="redo",
+                    reasons=[{"code": "t2.missing", "message": "the identity changed and no T2 equivalence record "
+                                                               "was registered (A21: redo)"}])
+    t2 = t2_check(record, dict(basis or {}, result_sha256=h, recorded=old, current=now))
+    if not t2["passed"]:
+        return dict(out, status="failed", decision="redo", reasons=t2["reasons"], tests=t2["tests"])
+    return dict(out, status="ok", decision="carried-over", flags=[CARRIED_OVER, PROVISIONAL],
+                model_identities=[{"model": m, "identity": now[m]} for m in sorted(now)], tests=t2["tests"])
