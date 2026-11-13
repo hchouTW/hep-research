@@ -442,6 +442,13 @@
    "registered_at": "2026-11-13T09:20:53Z",
    "card_commit": "84dd7e03",
    "reason": "gate part C (campaign p3-gates-c, A18) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "3926a8c2299743118108cbdb441cbd75d0d20e5713e56ffdc335ab2bcce3419f",
+   "registered_at": "2026-11-13T10:06:09Z",
+   "card_commit": "a72cf7fb",
+   "reason": "execution log: PR #403 CI fix recorded"
   }
  ]
 }
