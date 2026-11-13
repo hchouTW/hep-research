@@ -12,7 +12,9 @@ input), written (exit 0) for finalize. Standard library only. Phase 0 (section 1
 rules (`packages`) phase 2; invalidation comes later.
   calib_deps.py packages --input FILE      {packages, upstreams, common_sources?}: the section 10.4 decision
                                             (package split, version conflict, source overlap, common source,
-                                            theta/nu split); failed (exit 1) with findings
+                                            theta/nu split, a version of xi); failed (exit 1) with
+                                            findings; forced_joint_fits lists each joint fit the conflict
+                                            rules force (A21, section 19-g8: xi has no versions)
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -68,7 +70,8 @@ def main(argv=None) -> int:
                     raise io.InputError("--input: {packages: [...], upstreams: {...}, common_sources?: {...}}")
                 cs = {k: set(v) for k, v in (x.get("common_sources") or {}).items()}
                 findings = deps.check_packages(x["packages"], x.get("upstreams") or {}, cs or None)
-                return {"status": "failed" if findings else "ok", "findings": findings}
+                return {"status": "failed" if findings else "ok", "findings": findings,
+                        "forced_joint_fits": deps.forced_joint_fits(x["packages"], findings)}
             payload = io.load(args.payload)
             if args.cmd == "version":
                 return {"status": "ok", "update_digest": deps.update_digest(payload),

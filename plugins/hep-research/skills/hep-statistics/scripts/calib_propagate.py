@@ -15,6 +15,11 @@ Phase 3 (efficiency-map bases, section 6.7, D28, 15.3a; the engine in core/calib
                      analytic covariance and, with R, the joint-pattern replicas and their registration key
   calib_propagate.py map-cross --input FILE   {a, b} two studies on one basis: U_a U_b^T (a per-study PCA joined by
                      index is rejected)
+Phase 4 (section 10.4 "Feeding back to g4sim", A21 19-g6; the engine propagate.export_g4sim):
+  calib_propagate.py g4sim --template FILE --result FILE --contract FILE --use USE [--values FILE] [--out FILE]
+                     the result's theta-hat written into a condition-snapshot/1 or alignment-overlay/1 at the
+                     contract's bindings, source_of_facts carrying the result's hash, effective grade, uses, flags
+                     and the stated use; validated against the contracts schema (check it with calib_use.py export)
 Output: one JSON object; ok (exit 0), rejected (exit 2). The conflict rules over packages are calib_deps.py's. The
 engine needs NumPy and SciPy. Phase 2 (section 17).
 """
@@ -67,12 +72,19 @@ def main(argv=None) -> int:
     mb.add_argument("--predictions")
     sub.add_parser("joint-pattern").add_argument("--input", required=True)
     sub.add_parser("map-cross").add_argument("--input", required=True)
+    g4 = sub.add_parser("g4sim")
+    for a in ("--template", "--result", "--contract", "--use"):
+        g4.add_argument(a, required=True)
+    g4.add_argument("--values")
+    g4.add_argument("--out")
     args = ap.parse_args(argv)
 
     def go():
         try:
             if args.cmd in ("map-basis", "joint-pattern", "map-cross"):
                 return map_command(args)
+            if args.cmd == "g4sim":
+                return g4sim_command(args)
             if args.cmd == "version":
                 return {"status": "ok", **P.version(io.load(args.payload))}
             x = io.load_object(args.input, ("theta_hat", "zeta_hat", "Sigma", "i_theta", "i_zeta"))
@@ -82,9 +94,24 @@ def main(argv=None) -> int:
                            float(x.get("w", 1.0)), None if x.get("G_s") is None else np.asarray(x["G_s"], float),
                            x.get("zeta_keys"))
             return io.jsonable({"status": "ok", **pkg, "variance": P.variance(pkg)})
-        except (deps.DependencyError, MB.BasisError) as exc:
+        except (deps.DependencyError, MB.BasisError, P.PropagationError) as exc:
             return {"status": "rejected", "code": exc.code, "error": str(exc)}
     return io.run(go)
+
+
+def g4sim_command(args) -> dict:
+    from contracts.schema import validate
+    values = None if args.values is None else io.load_object(args.values)
+    record = P.export_g4sim(io.load_object(args.template, ("schema",)), io.load_object(args.result),
+                            io.load_object(args.contract), args.use, values)
+    name = {"condition-snapshot/1": "condition_snapshot.json", "alignment-overlay/1": "alignment_overlay.json"}
+    errors = [f.as_dict() for f in validate(record, name[record["schema"]]).errors]
+    if errors:
+        return {"status": "rejected", "code": "export.schema", "errors": errors}
+    if args.out:
+        io.write_json(args.out, record)
+        return {"status": "written", "out": args.out, "record": record}
+    return {"status": "ok", "record": record}
 
 
 def _maps(path):

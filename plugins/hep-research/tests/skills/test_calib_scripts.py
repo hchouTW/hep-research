@@ -768,5 +768,68 @@ class Phase3MapScripts(unittest.TestCase):
         self.assertEqual((code, out["code"]), (2, "map_term.fixed"))
 
 
+
+class Phase4ExportScripts(unittest.TestCase):
+    """Phase 4, WP-N: calib_propagate.py g4sim writes the exported condition snapshot or alignment overlay;
+    calib_use.py export checks it (section 10.4, 15.3.19, A21 19-g6); calib_deps.py packages lists each forced joint
+    fit (A21 19-g8)."""
+
+    def setUp(self):
+        import test_calibration_export as export_tests
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+        self.export_tests = export_tests
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, record):
+        p = self.d / name
+        p.write_text(json.dumps(record, default=sorted))
+        return p
+
+    def test_export_and_check(self):
+        r, c = self.export_tests.result(), self.export_tests.contract()
+        res, con = self.write("r.json", r), self.write("c.json", c)
+        for name, tpl in (("snap", G4.snapshot()), ("over", G4.overlay())):
+            with self.subTest(name):
+                out_path = self.d / f"{name}.out.json"
+                code, out = run("calib_propagate.py", "g4sim", "--template", self.write(f"{name}.json", tpl),
+                                "--result", res, "--contract", con, "--use", "production", "--out", out_path)
+                self.assertEqual((code, out["status"]), (0, "written"))
+                code, chk = run("calib_use.py", "export", "--record", out_path, "--result", res)
+                self.assertEqual((code, chk["status"], chk["findings"]), (0, "accepted", []))
+                bare = {k: v for k, v in json.loads(out_path.read_text()).items() if k != "source_of_facts"}
+                code, chk = run("calib_use.py", "export", "--record", self.write(f"{name}.bare.json", bare),
+                                "--result", res)
+                self.assertEqual((code, [f["code"] for f in chk["findings"]]), (2, ["export.source_of_facts"]))
+        proj = self.export_tests.result(real_data=False)
+        pres = self.write("proj.json", proj)
+        code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s.json", G4.snapshot()),
+                        "--result", pres, "--contract", con, "--use", "production")
+        self.assertEqual(code, 0)
+        code, chk = run("calib_use.py", "export", "--record", self.write("pr.json", out["record"]), "--result", pres)
+        self.assertEqual((code, [f["code"] for f in chk["findings"]]), (2, ["export.use"]))
+        bad = dict(G4.snapshot(), iovs=[])                                   # minItems 1: the contracts schema
+        code, chk = run("calib_use.py", "export", "--record", self.write("b.json", bad), "--result", res)
+        self.assertIn("export.contracts_schema", [f["code"] for f in chk["findings"]])
+        nohash = {k: v for k, v in r.items() if k != "result_sha256"}
+        code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s2.json", G4.snapshot()),
+                        "--result", self.write("nh.json", nohash), "--contract", con, "--use", "production")
+        self.assertEqual((code, out["code"]), (2, "export.no_hash"))
+
+    def test_forced_joint_fits_listed(self):
+        x = self.write("x.json", {"packages": [{"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
+                                               {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v2"}}],
+                                  "upstreams": {}})
+        code, out = run("calib_deps.py", "packages", "--input", x)
+        self.assertEqual((code, [g["packages"] for g in out["forced_joint_fits"]]), (1, [["p1", "p2"]]))
+        y = self.write("y.json", {"packages": [{"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
+                                               {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v1"}}],
+                                  "upstreams": {}})
+        code, out = run("calib_deps.py", "packages", "--input", y)
+        self.assertEqual((code, out["forced_joint_fits"]), (0, []))
+
+
 if __name__ == "__main__":
     unittest.main()
