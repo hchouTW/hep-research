@@ -188,6 +188,17 @@ class D86(unittest.TestCase):
         self.assertEqual(ident(masks, alignment_overlay=G.overlay("0"))["detector_spec"],
                          ident(masks)["detector_spec"])
 
+    def test_decimal_spellings_of_a_shift_give_one_identity(self):
+        """A16 (iii): delta_mm entries are decimal strings; "0.05" and "0.050" are one value, one model identity;
+        a different value still differs (positive control)."""
+        self.assertEqual(ident(alignment_overlay=G.overlay("0.050"))["detector_spec"],
+                         ident(alignment_overlay=G.overlay("0.05"))["detector_spec"])
+        self.assertNotEqual(ident(alignment_overlay=G.overlay("0.051"))["detector_spec"],
+                            ident(alignment_overlay=G.overlay("0.05"))["detector_spec"])
+        with self.assertRaises(mi.IdentityError) as caught:
+            ident(alignment_overlay=G.overlay("five"))
+        self.assertEqual(caught.exception.code, "identity.number")
+
     def test_an_aligned_model_without_overlay_is_refused(self):
         masks = dict(MASKS, **{"alignment-overlay": ["/shifts/0/delta_mm/0"]})
         with self.assertRaises(mi.IdentityError) as caught:

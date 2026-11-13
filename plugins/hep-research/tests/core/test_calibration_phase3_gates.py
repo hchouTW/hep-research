@@ -101,12 +101,16 @@ class ThreeMethodJudge(unittest.TestCase):
         return [{"point": pt, "rows": _rows(n, sd, bias if pt == "interior" else 0.0, seed=k, nonconv=(3,)),
                  "sigma_design": sd.tolist(), "theta": [0, 0, 0]} for k, pt in enumerate(("interior", "boundary"))]
 
-    def test_unbiased_passes_and_the_spot_check_does_not_decide(self):
-        spot = {"spot_check": {"status": "not-decided"}}
-        r = H.g8_3m_judge(self.blocks(), spot)
-        self.assertEqual((r["status"], r["spot_check_status"]), ("passed", "not-decided"))
+    def test_unbiased_passes_only_with_a_passing_spot_check(self):
+        """A16 (i): the spot check, decided by P6's rule, enters the verdict."""
+        r = H.g8_3m_judge(self.blocks(), {"spot_check": {"status": "passed"}})
+        self.assertEqual((r["status"], r["spot_check_status"]), ("passed", "passed"))
         self.assertEqual(r["g8"]["full"]["N_c"], 518)
-        self.assertIn("spot check", r["not_judged"])
+        r = H.g8_3m_judge(self.blocks(), {"spot_check": {"status": "failed"}})
+        self.assertEqual((r["status"], r["passed"]), ("failed", False))
+        for st in ("incomplete", "missing"):
+            r = H.g8_3m_judge(self.blocks(), {"spot_check": {"status": st}} if st != "missing" else None)
+            self.assertEqual((r["status"], r["passed"]), ("incomplete", False))
 
     def test_biased_fails(self):
         r = H.g8_3m_judge(self.blocks(bias=0.5), None)
@@ -186,7 +190,7 @@ class Local(unittest.TestCase):
         self.assertEqual(rec["label"], "smoke (not evidence)")
         res = rec["results"]
         self.assertTrue(res["units"]["passed"])
-        self.assertEqual(res["g8_3m_spot"], "not-decided")
+        self.assertIn(res["g8_3m_spot"], ("passed", "failed"))     # decided by P6's rule (A16 (i))
         self.assertEqual(len(res["toy_g8_rows"]), 2)
         self.assertEqual({b["point"] for b in res["g8_3m_rows"]}, {"interior", "boundary"})
 

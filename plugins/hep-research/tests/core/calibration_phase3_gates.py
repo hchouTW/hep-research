@@ -17,7 +17,7 @@ Families (one task each unless stated; every task a few minutes):
   surrogate model (P6) with phi profiled.
 - `g8_3m` (+ `g8_3m_spot`): G8 at the full level for the three-method combination (reweighting, rerun, resimulation by
   the surrogate model) with the section 19-5 reading of A12: surrogate pseudo-data for the bulk, a full-simulation spot
-  check at the injection points with independent seeds (reported `not-decided`: A12 gives no rule).
+  check at the injection points with independent seeds (decided by P6's rule, A16 (i)).
 - `toy_g8`: the toy-detector G8 rows carried from phase 2 (calibrations 1, 6, 10, 12) at exposure 8000 per run, and
   `toy_g8_mm` the G8 item of calibration 15 on the bimodal variant.
 
@@ -367,8 +367,8 @@ M3 = {"exposure": 2000, "mc": 20_000, "truth_batches": 20, "truth_batch_factor":
       "per_point": 540, "chunk": 10}
 M3_RULE = ("G8 at the full level (section 8.4; d = 3, N_c = 518 per point, Holm over 5d = 15 tests, alpha_G8 = 0.05, "
            "the bias rule and the summed ratio test) on surrogate pseudo-data (A12, section 19-5): passes when "
-           "closure.g8 passes; the full-simulation spot check is reported `not-decided` (A12 gives no rule) and does "
-           "not enter the verdict")
+           "closure.g8 passes and the full-simulation spot check passes, the spot check decided by P6's rule on its "
+           "P6-form statistics (A16 (i)); a spot check not complete makes the item incomplete")
 
 
 def _m3_build(n):
@@ -479,7 +479,7 @@ def g8_3m_spot(sizes: dict | None = None) -> dict:
     """The full-simulation spot check (A12): the threshold resimulated at each injection point with a truth-batch-size
     MC and its own seed, independent of every truth surrogate's training seed (emulator.spot_check_plan checks each
     training state), compared with the pseudo-data centre (the mean truth surrogate combined with the inner methods);
-    reported `not-decided` with the P6-form statistics."""
+    decided by P6's rule on the P6-form statistics (A16 (i))."""
     sz = {**M3, **(sizes or {})}
     d = m3_design(sz)
     inj = [dict(zip(M3_THETA, map(float, d["points"][n]["theta"]))) for n in ("interior", "boundary")]
@@ -547,10 +547,14 @@ def g8_3m_judge(blocks: list, spot: dict | None, d: int = 3) -> dict:
                       "bias_over_sigma": (pts["interior"]["errors"].mean(0) / sd).tolist()}
     out["g8"] = res
     out["spot_check"] = (spot or {}).get("spot_check") or {"status": "missing"}
-    out["spot_check_status"] = "not-decided"
-    out["not_judged"] = ("the full-simulation spot check, the gate for the surrogate's error (A12): no decision rule "
-                         "in Part B or A12 (open author item); its P6-form statistics are reported")
-    out["status"] = res["full"]["status"] if out["design_consistent"] else "failed"
+    sp = out["spot_check_status"] = out["spot_check"].get("status", "missing")
+    g = res["full"]["status"]
+    if not out["design_consistent"] or g == "failed" or sp == "failed":
+        out["status"] = "failed"
+    elif g == "passed" and sp == "passed":
+        out["status"] = "passed"
+    else:
+        out["status"] = "incomplete"
     out["passed"] = out["status"] == "passed"
     return out
 
@@ -995,7 +999,7 @@ def merge(out_dir: Path, out: Path) -> dict:
                [TASKS[i] for i in missing]), "commits": sorted(commits), "dirty": dirty,
            "commits_by_family": {f: sorted(v["commits"]) for f, v in by_family.items()}, "items": items,
            "passed": {k: v.get("passed") for k, v in items.items()},
-           "not_judged": ["g8_3m: the full-simulation spot check (A12 gives no decision rule)"],
+           "not_judged": [],
            "task_seconds": {i: r["seconds"] for i, r in recs.items() if r}, "provenance": provenance(),
            "label": LABEL}
     io.write_json(str(out), io.jsonable(rep))
