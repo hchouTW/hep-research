@@ -454,9 +454,16 @@ def g4_inputs(evaluator, contract: dict, theta: dict, f: float = F_DEFAULT) -> t
     """The inputs of G4 at one parameter point (section 6.7, D41): the event-level product weights of the events
     entering each calibration observable, and N_req,k = s_k^2 / (f V^unc_data,kk) with s_k^2 the weighted influence
     variance. Returns (weights_by_obs, n_req, missing_support_runs); `calib_reweight.py g4` decides with reweight.g4."""
-    obs = linear.calibration_observables(contract)
-    names = [o["name"] for o in obs]
-    r = evaluator.evaluate(theta, names=names)
+    names = [o["name"] for o in linear.calibration_observables(contract)]
+    return g4_inputs_from(evaluator.evaluate(theta, names=names), contract, f)
+
+
+def g4_inputs_from(r: dict, contract: dict, f: float = F_DEFAULT) -> tuple[dict, dict, list]:
+    """g4_inputs from an evaluation already made (r["names"] are contract observables): also used by calib_contrib
+    on every evaluated subset of effects (section 10.5)."""
+    by_name = {o["name"]: o for o in contract.get("observables", [])}
+    names = list(r["names"])
+    obs = [by_name[n] for n in names]
     exposure = contract.get("exposure") or {}
     n_data = np.array([linear._exposure(exposure, o, r["runs"][k]) for k, o in enumerate(obs)], dtype=float)
     v_data = np.diag(r["s2"]) / n_data

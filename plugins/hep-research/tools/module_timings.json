@@ -505,6 +505,7 @@
   "tests.core.test_calibration_kernel_check": 95.0,
   "tests.core.test_calibration_preflight": 1.7,
   "tests.core.test_calibration_closure": 4.0,
+  "tests.core.test_calibration_contrib": 3.6,
   "tests.core.test_calibration_data_checks": 0.8,
   "tests.core.test_calibration_design_noise": 6.6,
   "tests.core.test_calibration_design_g4sim": 0.2,

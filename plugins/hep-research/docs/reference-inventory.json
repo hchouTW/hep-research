@@ -40,7 +40,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 209680,
+   "bytes": 209685,
    "uncited": 0
   },
   "hep-theory": {
@@ -2134,7 +2134,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9359950e 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2289,7 +2289,7 @@
     "skills/hep-detector/references/timestream-to-map-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9359950e 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/front-end-calibration.md",
@@ -2351,7 +2351,7 @@
     "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2bcebda1 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
@@ -2363,7 +2363,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9359950e 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2386,7 +2386,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "2bcebda1 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2530,7 +2530,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2bcebda1 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2586,7 +2586,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "da7df3d1 2026-11-12"
+   "last_commit": "81c8d4f6 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -4289,7 +4289,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14794,
+   "bytes": 14799,
    "lines": 102,
    "linked_from_skill_md": true,
    "cited_by": [

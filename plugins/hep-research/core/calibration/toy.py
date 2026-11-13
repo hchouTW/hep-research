@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 from scipy import special, stats
 
-from core.calibration import reweight
+from core.calibration import evaluator, reweight
 
 STATUS = ["synthetic"]
 
@@ -607,12 +607,15 @@ class ChainEvaluator:
                  effects_off=(), seeds: dict | None = None, names=None) -> dict:
         """Prediction at theta with the plan's methods, outside to inside (section 6.5): resimulation from the most
         upstream resimulated node (common random numbers with the nominal events of seeds['nominal']), rerun of
-        deterministic kernels, reweighting of the remaining density nodes."""
+        deterministic kernels, reweighting of the remaining density nodes. effects_off ({effect: {parameter: value
+        after removal}}, section 10.5) sets those parameters last, evaluated with the same methods."""
         if model != "nominal":
             raise ValueError("alternative models of the toy detector are phase 2")
-        if effects_off:
-            raise ValueError("effects_off (the contribution decomposition of section 10.5) is phase 4")
-        target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {})}
+        removal = evaluator.removal_values(effects_off)           # section 10.5: the declared values after removal
+        unknown = sorted(set(removal) - set(self.model.nominal) - set(self.model.param_nodes))
+        if unknown:
+            raise ValueError(f"effects_off removes parameters {unknown} that this evaluator does not have")
+        target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {}), **removal}
         sur = self.surrogate
         if sur is not None and any(self.default_method(p) == "surrogate-model" for p in sur.parameters):
             return self._evaluate_surrogate(target, seeds, names)

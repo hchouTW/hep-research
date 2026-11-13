@@ -155,6 +155,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/calib_closure.py": ["decide", "--results", M],
     "skills/hep-statistics/scripts/calib_validate.py": ["statistic", "--input", M],
     "skills/hep-statistics/scripts/calib_propagate.py": ["export", "--input", M],
+    "skills/hep-statistics/scripts/calib_contrib.py": ["decompose", "--contract", M, "--plan", M, "--theta", M, "--observable", "x", "--object", "variance"],
     "skills/hep-statistics/scripts/calib_reweight.py": ["weights", "--contract", M, "--plan", M, "--theta", M],
     "skills/hep-statistics/scripts/calib_use.py": ["judge", "--inputs", M],
     "skills/hep-statistics/scripts/combine_measurements.py": [M],
