@@ -435,6 +435,13 @@
    "registered_at": "2026-11-13T07:48:44Z",
    "card_commit": "b9a8535a",
    "reason": "campaign p3g-p6 (Geant4 version of row 2004) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "125fe969310d047b49bf439a8d9490b9fc607ba21bc2cf3728dc793fd9597803",
+   "registered_at": "2026-11-13T09:20:53Z",
+   "card_commit": "84dd7e03",
+   "reason": "gate part C (campaign p3-gates-c, A18) registered before any run"
   }
  ]
 }
