@@ -100,7 +100,7 @@ jobs:
   checks:
     name: checks (Python ${{ matrix.python }}, ${{ matrix.part.name }})
     needs: plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # pinned: on ubuntu-26.04 test_design_space_spectrometer differs in one last digit (PR #404)
     timeout-minutes: 30
     strategy:
       fail-fast: false
