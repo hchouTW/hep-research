@@ -81,7 +81,7 @@ Store, continuity, export: [storage and continuity](references/storage-continuit
 |---|---|
 | Any review: lifecycle, tiers, outcomes, flags, the CLI commands | [workflow and tiers](references/workflow-and-tiers.md) |
 | R0 quick look in chat, nothing stored | `review.py r0 --bundle FILE`; [workflow and tiers](references/workflow-and-tiers.md) |
-| Statistics or computing obligations: questions, evidence, positive and negative cases | [domain cards](references/domains/index.md) |
+| Statistics, computing or simulator-calibration (detector) obligations: questions, evidence, cases | [domain cards](references/domains/index.md) |
 | Findings, adoption policy, conflicts, verification, adjudication, author responses | [evidence and adjudication](references/evidence-and-adjudication.md) |
 | A revised version: obligation_map, downgrades refused at commit, carry-over of results | [evidence and adjudication](references/evidence-and-adjudication.md) |
 | Host capabilities, the R2 floor bases, packets, dispatch order, submission fidelity | [host and trust boundaries](references/host-and-trust-boundaries.md) |

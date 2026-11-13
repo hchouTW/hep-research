@@ -11,10 +11,10 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-authoring | 49 | 359 | 0 |
 | hep-citations | 11 | 84 | 0 |
 | hep-computing | 41 | 404 | 0 |
-| hep-detector | 49 | 803 | 0 |
+| hep-detector | 58 | 845 | 0 |
 | hep-measurement | 12 | 125 | 0 |
 | hep-ml | 42 | 195 | 0 |
-| hep-review | 9 | 29 | 0 |
+| hep-review | 10 | 34 | 0 |
 | hep-statistics | 14 | 210 | 0 |
 | hep-theory | 31 | 244 | 0 |
 
@@ -212,7 +212,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-measurement-framework.md` | hep-detector | 15.4 | yes | 16 | hep-citations, hep-measurement | 9ff83cdf 2026-10-30 |
 | `detector-principles-bibliography.md` | hep-detector | 24.5 | no | 3 | - | 81c8d4f6 2026-11-13 |
 | `detector-principles-summary.md` | hep-detector | 15.1 | yes | 5 | - | 485e96cb 2026-10-17 |
-| `detector-simulation.md` | hep-detector | 15.0 | yes | 14 | hep-ml, hep-theory | d3ee1c15 2026-11-01 |
+| `detector-simulation.md` | hep-detector | 15.2 | yes | 14 | hep-ml, hep-theory | d3ee1c15 2026-11-01 |
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 15 | hep-measurement | 9257d7b5 2026-10-15 |
 | `dis-kinematic-reconstruction.md` | hep-detector | 12.0 | no | 6 | hep-theory | 28ad9ffa 2026-11-12 |
 | `event-reconstruction.md` | hep-detector | 25.3 | no | 14 | hep-computing | 9359950e 2026-11-12 |
@@ -240,6 +240,15 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `response-and-forward-folding.md` | hep-detector | 15.9 | yes | 16 | hep-computing, hep-measurement, hep-statistics | e03c0396 2026-10-22 |
 | `sensor-and-gas-transport-tools.md` | hep-detector | 25.4 | no | 2 | hep-computing | f035491a 2026-11-02 |
 | `signal-formation-and-readout.md` | hep-detector | 19.3 | no | 12 | hep-citations | a1267715 2026-10-25 |
+| `simulation-calibration/dirc.md` | hep-detector | 4.0 | no | 2 | - | untracked |
+| `simulation-calibration/ecal.md` | hep-detector | 5.7 | no | 3 | - | untracked |
+| `simulation-calibration/hcal.md` | hep-detector | 4.5 | no | 17 | - | untracked |
+| `simulation-calibration/index.md` | hep-detector | 5.8 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-measurement, hep-ml, hep-review, hep-statistics, hep-theory | untracked |
+| `simulation-calibration/muon-detector.md` | hep-detector | 4.6 | no | 2 | - | untracked |
+| `simulation-calibration/rich.md` | hep-detector | 4.2 | no | 2 | - | untracked |
+| `simulation-calibration/tof.md` | hep-detector | 4.3 | no | 2 | - | untracked |
+| `simulation-calibration/tracker.md` | hep-detector | 4.8 | no | 2 | - | untracked |
+| `simulation-calibration/trd.md` | hep-detector | 3.9 | no | 2 | - | untracked |
 | `space-based-direct-detection.md` | hep-detector | 20.9 | yes | 17 | hep-citations, hep-measurement, hep-statistics | c90b601b 2026-10-22 |
 | `system-design-workflow.md` | hep-detector | 30.6 | no | 5 | - | bbeb133f 2026-10-25 |
 | `threshold-and-quantum-sensor-reconstruction.md` | hep-detector | 19.1 | no | 1 | - | 9359950e 2026-11-12 |
@@ -302,8 +311,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transformer-architectures.md` | hep-ml | 5.5 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
 | `domains/computing.md` | hep-review | 1.8 | no | 3 | - | dbebc92c 2026-10-29 |
-| `domains/index.md` | hep-review | 1.8 | yes | 96 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
-| `domains/statistics.md` | hep-review | 2.1 | no | 24 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `domains/detector.md` | hep-review | 4.8 | no | 5 | hep-detector | untracked |
+| `domains/index.md` | hep-review | 1.9 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `domains/statistics.md` | hep-review | 2.1 | no | 25 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
 | `evaluation-and-claims.md` | hep-review | 3.8 | yes | 2 | - | 92975d12 2026-10-29 |
 | `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 2 | - | dbebc92c 2026-10-29 |
 | `host-and-trust-boundaries.md` | hep-review | 3.8 | yes | 2 | - | 1dfb15fa 2026-10-29 |
