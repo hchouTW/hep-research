@@ -33,6 +33,21 @@ Simulator parameter calibration workflow, phase 2 (engine and validation; on the
 - **Scripts** refuse malformed JSON input with exit 2 (`io.load_object`); `calib_fit.py kstar` refuses n < 1.
 - **Calibrations** (§8.7, phase 2; `docs/dev/simulator-calibration/simcal-gates/phase-2.md`): thirteen design values confirmed on the toy detector or the linear toys, row 2007 tightened to 0.10 (approval A9), the G8 rows confirmed on the linear configurations (approval A11); rows 2013 (the Σ_boot spread) and 2018 (basin stability with an independent MC sample per reseeding) failed and keep `provisional-thresholds`.
 
+Simulator parameter calibration workflow, phase 3 (surrogate model and g4sim evaluator). Proposed: part of the same minor release as phases 0–2; version numbers are assigned at merge.
+
+- **`core/calibration/`**:
+  - `emulator`: the surrogate model of Part B §7.1 (ask/tell, interpolation and regression modes, V_emu); P6 with the |Δm| part, the Bonferroni z and the pull χ² judged against its exact null distribution under the joint covariance of the held-out points (generalized χ², approval A13); the full-simulation spot check decided by P6's rule (A16).
+  - `design_g4sim`, `evaluator_problem`, `model_identity`: the g4sim binding and model identity of §5.1/§15.3a (masked hashes, decimal spellings, overlays).
+  - `design`: P5 feasibility of the k_B rerun from `edep_by_dedx_class` (the §5.4 class-discretization bound; A17).
+  - `map_basis`, `map_term`, `design_map`, `pde_split`: the efficiency-map φ of §6.7 (joint-pattern replicas, the map term, the θ-noise item of P5, the PDE split).
+  - `cherenkov_standin`: a Cherenkov stand-in for the RICH replica tests.
+  - `fit`: a converged point that the data do not constrain (σ_tot,i > R_admit σ_prior,i, §7.4) is reported as not converged; an exactly singular curvature gives unbounded variance instead of an error.
+  - `likelihood`: a non-finite Gaussian covariance is reported as a fit failure (A18).
+- **Geant4 adapter** `adapters/geant4/assets/g4sim_calib_eval.py`: the g4sim evaluator (re-digitization of response parameters with common random numbers, the deterministic Birks rerun, the §6.1 support and recording-level checks, the §6.6 event-interval check, the Birks bound shift of §5.4); `g4sim_map_patterns.py`.
+- **Scripts**: `calib_emulator.py` (no longer a stub), with phase-3 additions to `calib_chain.py`, `calib_closure.py`, `calib_contract.py`, `calib_design.py`, `calib_kernel_check.py`, `calib_likelihood.py`, `calib_propagate.py`.
+- **Schemas**: `calibration_contract`, `calibration_plan` and `calibration_fixture` gain the g4sim evaluator, bindings and map fields.
+- **Evidence** (`docs/dev/simulator-calibration/simcal-gates/phase-3.md`): every phase-3 gate item passes on the toy detector, the synthetic ZDC fixture and Geant4 products of the ZDC fixture and the AMS-02 RICH replica (`synthetic`, `provisional-thresholds`).
+
 ## 0.66.1 (2026-11-12)
 
 Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged. Ships PRs #391 and #392 (issues #388 and #389): a new hep-detector reference on DIS kinematic reconstruction, `experiment:eic` 0.6.1, and two EIC routing cases that now expect the profile.
