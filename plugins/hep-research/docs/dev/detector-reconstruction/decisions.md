@@ -867,3 +867,19 @@ The candidate switches stay on branch t07/vz-diagnosis only (never merged: they 
 
 D4 closes: T07 failed at attempt 1; T08 and T09 passed at attempt 1 (narrowed claims). Next: the held bytecode line as a recorded post-D4
 change (calo_cluster.py, photon_likelihood.py; T08 and T09 outcomes stay final at their frozen hashes in freeze-b.md), then Gate D.
+
+## The held bytecode line, a recorded post-D4 change (2026-11-13)
+
+Branch fix/bytecode-post-d4, job of record 7626930 PASS (full suite: only the LCG test fails). calo_cluster.py 31b362e5 -> 4119bf47,
+photon_likelihood.py 8a4f4fd0 -> 532260bd; adapter manifests calo-cluster cb0153ba -> 9a142a46, photon-likelihood 060e967a -> 9049c337.
+freeze-b.md keeps the Freeze B hashes (cb0153ba, 060e967a): T08 and T09 were evaluated at those bytes and their outcomes stay final there.
+The records tests check each file as its job-of-record bytes plus exactly the one line.
+
+## Recorded for the record (2026-11-13)
+
+- K12 (U10): the user, "Adopt the draft (Recommended)": k12-targets-draft.md (SHA-256 679a1a12...) on branch gate-d/prep, frozen by hash.
+- F1 steps 2-3: the user allowed read-only lookups on INSPIRE, arXiv and ADS ("Allow read-only lookups (Recommended)").
+- A13 (T12 Q1): "Record blocked-by-resource (Recommended)" (R14; CPU measurements recorded; no GPU job).
+- Phase G: "Agree with both (Recommended)": U11, no real data for this plan (K03 synthetic only; the data-control layer stays incomplete
+  and open, R14, R21); T13 prepared now (writer brief, frozen scorer), the holdout written and kept off this account and host, T13 run last.
+- T15b: "Draft spec, digitization off (Recommended)": the K16 element_sim spec drafted for the user's freeze by hash.
