@@ -428,6 +428,13 @@
    "registered_at": "2026-11-13T07:33:33Z",
    "card_commit": "dc8a1d9a",
    "reason": "gate runs part B (campaign p3-gates-b tasks 0-123) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "26dda2c711c465639b04db485f5e7ad75d4c95c71e2e69e062995c28f4a5cdcc",
+   "registered_at": "2026-11-13T07:48:44Z",
+   "card_commit": "b9a8535a",
+   "reason": "campaign p3g-p6 (Geant4 version of row 2004) registered before any run"
   }
  ]
 }
