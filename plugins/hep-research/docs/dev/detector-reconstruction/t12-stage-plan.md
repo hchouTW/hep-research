@@ -21,7 +21,7 @@ until Freeze B fixes K09.
 | 0 | This plan | none |
 | 1 | `CAI-T12-1`, `CAI-T12-2`: the synthetic two-round loop (R37), below | none |
 | 2 | Conditions invalidation and identity: A04, A40, A42, A14, G05, §9.3, §9.8-9.9 (T12-05 to T12-09, T12-24 to T12-27) | Freeze B (given); drafted, see "Stage 2" |
-| 3 | Partitioning, recovery and boundaries: A11, A12, §10.2 items 3-7 | Stage 2; Freeze B for the T07-T09 recipes' quality |
+| 3 | Partitioning, recovery and boundaries: A11, A12, §10.2 items 3-7 (T12-10 to T12-12) | Stage 2 (done); Freeze B for the T07-T09 recipes' quality; drafted on `t12/stage3` (from `28763f50`), see "Stage 3" |
 | 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (K09 gates); T10 for T10's recipe |
 | 5 | A13: recorded `blocked-by-resource` (R14; Q1 answered 2026-11-13); no GPU job. The CPU measurements of stage 4 (T12-14) are recorded beside it | Stage 4 |
 | 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | T10 for T10's part; question Q3 |
@@ -291,6 +291,181 @@ a missing default, and that the identity changes with a limit.
 - R9' (M7, I5). The scope check also reports a namespace package whose search locations lie under a live root, and the running
   interpreter (`sys.executable`, resolved) under a live root. In the job it imports the modules under test (`--import`) and takes the live
   roots from `git worktree list --porcelain` of the checkout.
+
+## Stage 3: partitioning, recovery and boundaries (fixed before the tests were written)
+
+**Scope.** T12-10 (A11; §10.2 items 4-6), T12-11 (A12; §10.2 item 7, §10.5) and T12-12 (§10.2 item 3), and stage 2's concern (1): a
+recorded T07 refit product. Nothing here is a quality claim: Freeze B's gates judge the recipes' quality, and this stage asks only whether
+ranges, attempts and accounts lose, duplicate or invent observations. A13 stays `blocked-by-resource` (Q1).
+
+**Files.** `tests/contracts/t12_partition.py` (the harness) and `tests/contracts/test_t12_partition.py`. No production file changes:
+the runner cases (K5-K8) characterise `skills/hep-computing/scripts/run_workflow.py` as it is at `28763f50`, and the range and attempt
+rules come from the E6 evaluation layout `tests/adapters/t04_evaluation_layout.py` (fix round 1, m4: SHA-256 `0cf7e2c1a8e4e645...` at
+`28763f50`; Freeze B recorded its earlier state `185574f8...` beside the freeze, and the file changed after it), imported, never edited:
+`EventRange`, `check_ranges`, `RangeRecord`, `classify_attempt`, `select_attempt`, `classify_t07_by_index` (which calls
+`compare_t07_by_index`).
+The harness adds what the layout does not have: object keys for the T07 refit product and for the JSON Lines products, a merge by key
+with a header rule, a range collection that also reads the T07 refit product, per-event accounts and exposure.
+
+**Inputs, read only, by SHA-256.**
+- Recorded single-pass products, tracked (two events each): `examples/reconstruction-tracking/recorded/refit.product` (T07,
+  `reco.track.acts-kf-refit/1`, 12 tracks; `a02d04b0b9d522eec9d6923fe79b406ab95477906eb3e3af23eac3231875495b`),
+  `examples/reconstruction-calorimetry/recorded/events.product` (T08; `1107dcec6509d236f13954439d650384f389bab0a32096df6bb82f76fd729cc8`),
+  `examples/reconstruction-photon-likelihood/recorded/main.multistart.product` (T09 /3;
+  `9d44ae712dc4b758cc9cbd4311c17fd1e31568cccd6377250c65aeaa60eee6b1`) and `main.topology.product` (T09 /4;
+  `b42cb36ace58a8a31c24fb8b8af0d0502d188dd8fad91e8598ee5b2ef1133150`). The unit tests cut each into ranges by the harness and merge
+  them back: this exercises the keys, the merge and the collection on the recipes' real formats; it does not show that a recipe run on a
+  range equals the full run (a cut of one run cannot).
+- Block-1 range runs, private evidence, for the job of record only (`t12_partition.py recorded`): the E6a job 7591439 (folder
+  `d4-e6a-7591439`), where each recipe ran on the full sample and on separate ranges: T07 clean and noise (`acts-ckf-planar`, block 1
+  stratum 2, 150 events, ranges 0:50, 50:70, 120:30; two full runs), T08 main (600 events: 0:200, 200:250, 450:150) and dead (300 events:
+  0:100, 100:200), T09 main stratum 9 multistart and topology (40 events: 0:13, 13:18, 31:9); and the E6b job 7591993 (folder
+  `d4-e6b-7591993`), T07 clean block 1 stratum 4: three refit range products (`acts-kf-refit`, events 0-999, 1000-1999, 2000-2999) and
+  the collection file naming them. Each file's SHA-256 is pinned in the harness (`RECORDED`); a different or missing file is `rejected`.
+  The E6b job is round 0 (its round 1, 7592299, deleted its refit products); no single-pass refit of those 3,000 events was kept, so the
+  refit ranges are checked for completeness and disjointness by key, not against a single pass.
+
+**Object keys (M1).**
+- T07 refit (`acts-tracking-product/2`): an object line is one of the seven sections `track`, `state`, `parameters`, `track_output`,
+  `residual`, `measurement_output`, `residual_covariance`; its key is (section, its second token, e.g. `event-1000-track-3`, and its
+  occurrence among the lines of that section and token, in file order); its event is the integer after `event-`; its value is the line.
+  The end line `end c1 ... c7` must give each section's line count in that order (the recorded refit products follow it); otherwise the
+  product is truncated and refused. Refit range products key events globally (E6b), so no renumbering.
+- JSON Lines (T08 `calo-cluster-product/1`, T09 `light-likelihood-product/3` and `/4`): header, event lines numbered 0, 1, ... in order,
+  end line whose `events` is their count (else refused, as `layout.product_events`). Event line i of the range from f has key
+  (`event`, f + i) and value the parsed object with `event` set to f + i (parsed values compared, so number formatting cannot hide or
+  invent a difference; JSON floats round-trip exactly).
+- T07 finding products (`acts-ckf-planar`): the generator writes each file in an order of its own, so the key is the truth file's event
+  index; the harness uses `layout.classify_t07_by_index` (job only; fix round 1, n2).
+- Headers: the range identity may differ between a range and the single pass (T07 refit: `product_id`, `data_product`, `data_sha256`,
+  `hit_sets_sha256`; JSON Lines: `product_id`, `input`, `events`, `h1_product`, the keys found to differ in the E6a products); every other
+  header field must be equal (it carries the recipe, configuration, budget and conventions), else a header defect.
+
+**Merge (T12-10, M2).** `merge_by_key(single, parts)` returns five lists, all empty when the merged ranges equal the single pass: `omitted`
+(a key of the single pass in no range), `duplicated` (a key in two ranges or twice in one), `differing` (same key, other value), `extra`
+(a key the single pass does not have) and `header`. Tolerance: none, exact equality. The products are declared deterministic and the E6a
+job read them equal line for line (`PASS EQUAL` for T08 and T09, `CLASS ... equal` for T07, job 7591439); §14.1's numerical and
+statistical comparators, with their tolerances, are stage 4's (T12-13).
+
+**Range collection (T12-10, T12-11).** `collect_ranges(identity, kind, total, planned, attempts)`: the planned ranges must cover events 0 to
+total - 1 once (`layout.check_ranges`; otherwise `rejected`: a plan, not a result). For each range, in order:
+1. no attempt: failure, "missing range";
+2. any attempt's (fix round 1, m2: not only the last one's) Slurm state is not final (`RUNNING`, `PENDING`, `REQUEUED`, `RESIZING`, `SUSPENDED`, `COMPLETING`, `UNKNOWN`) or its
+   termination is `unconfirmed`: **unconfirmed**, "check before resubmitting" (§10.2 item 7, §14.2 "Stopping"), never failure or success;
+3. the attempts' verdicts (`layout.classify_attempt`) and the counted one (`layout.select_attempt` for the block): a refusal is a failure
+   with the layout's reason (on blocks 11 and 12 no repeat after a draw; on a Freeze-B block a `REPEATABLE` attempt may precede);
+4. the counted attempt must have left a `RangeRecord` of this range and bin that names that attempt's own id (fix round 1, I1: `Attempt`
+   carries its Slurm id; a record an earlier attempt left is a failure even when the product matches it), and the product file's SHA-256
+   must be the record's: a file a killed attempt left, or an earlier attempt's file under the same name, is not the one its record names and
+   is a failure;
+5. the product must read as complete for its kind (M1) and hold no object outside its range: otherwise a failure.
+A range that passes 1-5 is a success. The bin is `complete` when every range succeeds; otherwise `missing`, and every failed or
+unconfirmed range is listed as "required output missing" with its reason (Freeze A section 10's words, as `layout.missing_bin_records`;
+top-up never). An empty collection (an event with no objects inside a successful range) is never a failure. For JSON Lines products it is
+a success: every event read writes an event line, so an event line with no objects is an empty collection and a missing line is refused.
+
+**Format gap, T07 refit (fix round 1, I2).** The T07 refit product declares no events read: its end line counts lines per section, and
+neither the E6b range files (the hit-sets input, the run log `{"status", "tracks", "failed", ...}`) nor the `RangeRecord` says how many
+events the program read. A range stopped early but closed properly cannot be told from one whose last events are empty collections. So,
+for that kind only, an event of a successful range that holds no object is **unconfirmed** ("T07 refit format gap"), and the bin is not
+complete; T12-12's "an empty collection is not a failure" is shown for JSON Lines only and stays open for the T07 refit product until the
+format (or its record) declares the events read. The hit-sets input declares the objects to refit, so "every hit set has a track line" is
+a possible object-level remedy; it is not implemented here.
+
+**Accounts and exposure (T12-12, A11).** Each source event has one stable scope, `<workflow>/<fixture>/b<block>/s<stratum>/e<event>`, and
+exactly one category: `success` (its range succeeded and it is not excluded), `excluded` (its range succeeded and the caller excludes it,
+with a non-empty reason: a selection or a boundary flag such as insufficient neighbourhood, §10.2 item 5), `failure` or `unconfirmed`
+(its range's outcome). `check_accounts` reports an event in two categories, an event of the bin in none, an event outside it, and an
+exclusion without a reason. Original data gaps (events never recorded) are not source events: `exposure` lists them apart, with their
+observable scope, and never counts them as failures (§10.2 item 4). `exposure(accounts, total, gaps)` gives the counts per category and
+`exposure = success / total`: excluded, failed and unconfirmed events lower it and nothing is invented (§10.2 item 6). Fix round 1, m1: it
+refuses accounts that fail `check_accounts`, a gap without a reason or a span (`first`, `count` in the stream's own numbering), and two
+overlapping gaps; it returns the use of each category in the denominator (success: numerator and denominator; excluded, failure,
+unconfirmed: denominator only; original gaps: neither). These are the
+fixture's accounting categories (§10.5: mapped to the existing vocabulary, not new public statuses).
+
+**Expectations (unit tests, on the four recorded examples unless named).**
+- P1. The recorded files have their pinned SHA-256; each reads with the expected keys (T07 refit: 12 `track` keys, end counts `12 96 288
+  12 384 96 12`; JSON Lines: events 0 and 1).
+- P2. Each product cut into the ranges [0, 1) and [1, 2) merges back equal (five empty lists), in either order of the parts.
+- P3. Dropping the range [1, 2): `omitted` is exactly event 1's keys; the collection is `missing` with "missing range" for [1, 2); event 1
+  is `failure`, event 0 `success`; exposure 1/2.
+- P4. The range [0, 1) given twice: `duplicated` is exactly event 0's keys. A range product with one value changed (T07: the last field of
+  `event-1`'s first `track` line; JSON Lines: in event 1, the first number met in a depth-first walk of its keys in sorted order, `event`
+  left out, increased by 1): `differing` names exactly that key.
+- P5. A changed configuration header field (T07 `start_prior`; T08 `configuration`; T09 `budget`) is a header defect; a changed range
+  identity field is not.
+- P6. A range product truncated (its end line removed, or a T07 end count off by one) is refused by the reader and is a failure at the
+  collection; an object of event 1 inside the range [0, 1) is refused (outside its range).
+- P7. Empty collection (fix round 1, I2: for T07, event 1 is unconfirmed and the bin missing, the merge still equal): T07, the single pass
+  and the range both without event 1's objects (end line recounted); T08, event 1's `objects`
+  emptied in both: the merge is equal and event 1 is `success`.
+- P8. Accounts: every event in exactly one category in P2-P7 and K1-K4; `check_accounts` reports a hand-made event in two categories, an
+  event in none, and an exclusion with an empty reason; an excluded event lowers the exposure; an original gap is listed apart and the
+  total of the categories is still the bin's source events.
+
+**Recovery (T12-11).**
+- K1. A range whose last attempt is `TIMEOUT`, `OUT_OF_MEMORY` or `CANCELLED` after draws (milestone `draws-started`) and which left a
+  partial product and no record: failure; the bin is `missing`; no event of that range is a success.
+- K2. A later attempt `COMPLETED` exit 0 whose record names a fresh product, but the file found is the earlier attempt's partial file:
+  failure ("not the one its record names"). On a Freeze-B block (2) a `TIMEOUT` attempt before a completed one with its own product is
+  accepted (`REPEATABLE-WITH-NEW-REQUEST`); on block 11 the same history is a failure ("A failure stands").
+- K3. Last attempt `RUNNING`, or `COMPLETED` with termination `unconfirmed`: `unconfirmed`, not failure; the bin is `missing`.
+- K4. A product that reads complete but has no record (a killed attempt that had written everything): failure, never counted.
+- K5 (runner). A step that writes part of its output and then outlives `timeout_s` (1 s): exit 1, step `end_status` `timeout`, later steps
+  not run.
+- K6 (runner). A step that writes part of its output and then kills itself with SIGKILL (an OOM stand-in): exit 1, `end_status`
+  `failure`, `exit_status` -9.
+- K7 (runner, resubmission). After K5, `--incremental` does not skip the step (`exit_status` changed); a resubmitted program that keeps the
+  partial file and exits 0 fails ("existed before and were not written by this run"); one that rewrites the output succeeds.
+- K8 (runner, retries). A failing step runs exactly once per runner invocation (an invocation counter file); with `"retries": 3` in the
+  step it still runs once (the runner has no retry; an unknown key is ignored, see "Findings").
+
+**Job of record (`recorded`).** `t12_partition.py recorded --evidence DIR` (DIR holds `d4-e6a-7591439` and `d4-e6b-7591993`): every
+`RECORDED` file's SHA-256, then R1 T07 clean and noise: the two full runs equal and the ranges equal the full run by event index
+(`classify_t07_by_index` gives `equal`); R2 T08 main and dead, T09 multistart and topology: `merge_by_key` of the range products against the
+full product, five empty lists, header rule included; R3 the T07 refit ranges: each reads complete, events 0-2999 each in exactly one
+range by key, no key in two ranges, headers equal except the range identity, each product's `data_sha256` its record's `stratum_sha256`
+and its `hit_sets_sha256` its record's `input_sha256` (fix round 1, m3), and `collect_ranges` gives `complete` with all 3,000 events
+`success`; with range 0's file found under the middle range's name, `missing` with 1000-1999 `failure` (fix round 1, n3: a real refusal
+by SHA-256, replacing a dropped range, which was true by construction). The attempt history of R3 is synthetic: one completed attempt per
+range, its id the E6b record's own `attempt` (I1); the PASS line says so. Status and exit (core/status.py): `ok` 0, every comparison as
+expected; `failed` 1, one differs; `rejected` 2, a file missing or not its pinned SHA-256; `incomplete` 3, a crash, including a refusal
+of a pinned file after its hash matched (fix round 1, m6).
+
+**What the recorded runs show (fix round 1, concern 4).** The merge by object key on real, separately run ranges against a full run is shown
+only for T08 and T09 (R2). T07 finding products are compared by the layout's event-index comparison (R1), not by `merge_by_key`. The T07
+refit ranges (R3) have no kept single pass: they show completeness, disjointness and the tie to their records, not equality with a full
+run. The unit tests cut one recorded run into ranges, which cannot show range independence.
+
+**Open item against `skills/hep-computing/scripts/run_workflow.py` (fix round 1, concern 2; the runner is not changed in this stage).**
+The runner ignores step keys it does not know, so `"retries"` is silently ignored and the step is never retried: safe under §10.5
+("without retry configuration, do not retry automatically"), but a declared retry count is neither honoured nor refused, and §10.2 item 7's
+"bounded retry" does not exist in the runner. Owner: the coordinator (a shared-runner change needs its own review, as stage 2's did).
+
+**Finding (not a defect of this stage).** On a timeout or kill with confirmed termination, the
+failed run record and the receipt list the partial output's SHA-256 (with `end_status` `timeout` or `failure`): a consumer must read
+`end_status`; the layout's collection never admits it (K1, K4).
+
+**Test order (M4 of stage 2's review, kept).** The 29 tests of P1-P8 and K1-K8 were written before the harness (red-1: a stub harness
+with the names only, 28 errors; the one pass, `test_recorded_lists_every_file_once`, passes vacuously on the stub's empty `RECORDED`).
+Added after green-1, not test-first: two tests of the job's R2 and R3 functions on files cut from the examples (`RecordedDriver`), and,
+after mutation-1 (mutant M7 survived), one test of a JSON Lines product that lost an event line but kept its end line (P6). New
+behaviour: M1, M2, the collection's steps 4-5 on the T07 refit product, accounts and exposure (P1-P8, K1-K4). Characterising: K5-K8
+(the runner at `28763f50`) and, inside the collection, the layout's attempt rules (steps 1-3).
+
+**Fix round 1 (review `jobs/t12-stage3/REVIEW.md`, 0/2/7/4; written with the fixes).** The tests for I1, I2, m1, m2 and m5 (class
+`FixRound1`) were written before the harness change and run red twice: red-2 (5 errors: `Attempt` had no `attempt` field) and red-3 with the
+field only, no rule (5 failures, each on its behaviour). The changed expectations: P7's T07 case (I2), the gap form in P8 (m1), every test
+`Attempt` with its id (I1). Tests added with the fixes, not red first: n1 (RECORDED pins exactly the files `recorded` reads; replaces the
+vacuous uniqueness test), m3 (`refit_ranges` with records), m6 (a refusal after the hashes is exit 3).
+
+**Plan changes after the first green (fix round 1, m7).** The tests of the first round were written against this plan at SHA-256
+`14100006c654165ece6dc1d16889c67443da600da06a0570b7577ba3261f1044` (reconstructed byte for byte by removing the "Test order"
+paragraph; `jobs/t12-stage3/plan-at-green-14100006.md`). Change 1, after green-3 and before static-2: the "Test order" paragraph added
+(`2f3c15a2...`; diff `jobs/t12-stage3/plan-diff-14100006-2f3c15a2.diff`, 8 lines, no rule or expectation changed). Change 2, fix round 1:
+the edits marked "fix round 1" in this section (m4, n2, m2, I1, I2, m1, P7, m3, n3, m6, concern 4, concern 2, this record), made after
+red-3 and before green; the hash at the fix round's green run is in `jobs/t12-stage3/green/green-*-fix-round-1.log`.
 
 ## A13: recorded blocked-by-resource (stage 5; no GPU job)
 
