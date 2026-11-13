@@ -632,6 +632,167 @@ class T07Markers(unittest.TestCase):
         self.assertFalse(self.collection.exists())                       # no earlier collection.json beside rewritten bin documents
 
 
+class TimedOutIsIncomplete(unittest.TestCase):
+    """Integration fix round: a script that outlives its task's deadline is stopped and its task is incomplete (exit 3, RESULT incomplete),
+    never failed and never ok; sacct is asked with a short timeout and a bounded retry, and no answer is incomplete."""
+
+    def tearDown(self):
+        layout.reset_task()
+
+    def test_a_script_past_the_deadline_is_stopped_and_incomplete(self):
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            script = Path(folder) / "t07_fake_rate.py"
+            script.write_text("import time\nprint('started', flush=True)\ntime.sleep(60)\nprint('RESULT ok: never')\n")
+            layout.start_task("t08-sample", now=__import__("time").monotonic() - 1800)   # the deadline has passed
+            started = __import__("time").monotonic()
+            with self.assertRaises(tasks.Incomplete) as caught:
+                tasks.run_script(script, ["run"], Path(folder) / "run.log")
+            self.assertLess(__import__("time").monotonic() - started, 30)
+            self.assertIn("timed out", str(caught.exception))
+            self.assertIn("started", (Path(folder) / "run.log").read_text())          # what it printed is kept
+
+    def test_the_runner_reads_a_timeout_as_incomplete(self):
+        original = tasks.t08_sample
+
+        def timing_out(*arguments, **keywords):
+            raise tasks.Incomplete("calo_cluster.py ['reconstruct'] timed out after 1680 s (the task's deadline)")
+        tasks.t08_sample = timing_out
+        try:
+            code, text = run_main(["t08-sample", "--block", 11, "--index", 0, "--out", "/nonexistent-timeout"])
+        finally:
+            tasks.t08_sample = original
+        self.assertEqual(code, 3)
+        self.assertIn("RESULT t08-sample incomplete", text)
+
+    def test_the_task_command_line_sets_the_deadline_from_its_operation(self):
+        layout.reset_task()
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(tasks.task_main(["names", "--block", "11"]), 0)
+        self.assertLessEqual(layout.subprocess_timeout(), layout.TASK_LIMIT_SECONDS["names"] - layout.RECORD_MARGIN_SECONDS)
+        layout.reset_task()
+        with redirect_stdout(io.StringIO()):
+            tasks.main(["names", "--block", "11"])                                     # in-process: no deadline of its own
+        self.assertGreater(layout.subprocess_timeout(), layout.TASK_LIMIT_SECONDS["names"])
+
+    def fake_sacct(self, folder, body):
+        sacct = Path(folder) / "sacct"
+        sacct.write_text("#!/bin/sh\n" + body)
+        sacct.chmod(0o755)
+        return {**os.environ, "PATH": f"{folder}:{os.environ.get('PATH', '/usr/bin:/bin')}"}
+
+    def test_sacct_has_a_short_timeout_and_a_bounded_retry(self):
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            environment = self.fake_sacct(folder, "sleep 30\n")
+            original = os.environ.copy()
+            os.environ.update(environment)
+            try:
+                started = __import__("time").monotonic()
+                with self.assertRaises(tasks.Incomplete) as caught:
+                    tasks.sacct_state("901_3", timeout=0.5, attempts=2, pause=0)
+                self.assertLess(__import__("time").monotonic() - started, 10)
+                self.assertIn("sacct did not answer", str(caught.exception))
+                counter = Path(folder) / "n"
+                (Path(folder) / "sacct").write_text(f"#!/bin/sh\nif [ -e {counter} ]; then echo '901_3|COMPLETED|0:0|00:02:00'; else touch {counter}; sleep 30; fi\n")
+                self.assertEqual(tasks.sacct_state("901_3", timeout=0.5, attempts=2, pause=0), ("COMPLETED", 0, "00:02:00"))
+            finally:
+                os.environ.clear()
+                os.environ.update(original)
+        self.assertEqual((tasks.SACCT_TIMEOUT_SECONDS, tasks.SACCT_ATTEMPTS), (30, 3))
+
+
+class SacctNoAnswerIsIncomplete(unittest.TestCase):
+    """Integration review C1 and M2: an error answer of sacct (a non-zero exit, an error on stderr) or no row for the job is no answer, the same
+    as a timeout: retried within the bound, then Incomplete; a state is never guessed. The retries and the pause keep to the task's deadline."""
+
+    def setUp(self):
+        self.folder = Path(tempfile.mkdtemp(dir=TEMPORARY_ROOT, prefix="sacct-"))
+        self.addCleanup(__import__("shutil").rmtree, self.folder, True)
+        self.addCleanup(layout.reset_task)
+        self.original = os.environ.copy()
+        self.addCleanup(lambda: (os.environ.clear(), os.environ.update(self.original)))
+        os.environ["PATH"] = f"{self.folder}:{os.environ.get('PATH', '/usr/bin:/bin')}"
+        self.calls = self.folder / "calls"
+
+    def sacct(self, body):
+        script = self.folder / "sacct"
+        script.write_text(f"#!/bin/sh\necho x >> {self.calls}\n" + body)
+        script.chmod(0o755)
+
+    def count(self):
+        return len(self.calls.read_text().splitlines()) if self.calls.exists() else 0
+
+    def test_an_error_exit_is_no_answer(self):
+        self.sacct("echo 'sacct: error: Problem talking to the database: Connection refused' >&2\nexit 1\n")
+        with self.assertRaises(tasks.Incomplete) as caught:
+            tasks.sacct_state("901_3", timeout=5, attempts=3, pause=0)
+        self.assertIn("sacct did not answer", str(caught.exception))
+        self.assertEqual(self.count(), 3)
+
+    def test_an_error_on_stderr_is_no_answer(self):
+        self.sacct("echo '901_3|COMPLETED|0:0|00:02:00'\necho 'sacct: error: slurmdbd: partial answer' >&2\n")
+        with self.assertRaises(tasks.Incomplete):
+            tasks.sacct_state("901_3", timeout=5, attempts=2, pause=0)
+
+    def test_no_row_for_the_job_is_no_answer(self):
+        self.sacct("exit 0\n")
+        with self.assertRaises(tasks.Incomplete):
+            tasks.sacct_state("901_3", timeout=5, attempts=3, pause=0)
+        self.sacct("echo '901_4|COMPLETED|0:0|00:02:00'\n")                          # another task's row only
+        with self.assertRaises(tasks.Incomplete):
+            tasks.sacct_state("901_3", timeout=5, attempts=2, pause=0)
+
+    def test_a_row_on_the_third_attempt_is_read(self):
+        self.sacct(f"[ \"$(wc -l < {self.calls})\" -ge 3 ] && echo '901_3|COMPLETED|0:0|00:02:00'\nexit 0\n")
+        self.assertEqual(tasks.sacct_state("901_3", timeout=5, attempts=3, pause=0), ("COMPLETED", 0, "00:02:00"))
+        self.assertEqual(self.count(), 3)
+
+    def test_past_the_deadline_sacct_is_not_asked(self):
+        self.sacct("echo '901_3|COMPLETED|0:0|00:02:00'\n")
+        layout.start_task("collect", now=__import__("time").monotonic() - 3600)
+        with self.assertRaises(tasks.Incomplete) as caught:
+            tasks.sacct_state("901_3", timeout=5, attempts=3, pause=10)
+        self.assertIn("deadline", str(caught.exception))
+        self.assertEqual(self.count(), 0)
+
+
+class DeadlineStops(unittest.TestCase):
+    """Integration review M1 and M4: a task stopped at its deadline writes the milestone stopped-at-deadline (its attempt is classified with
+    that reason); the T08 and T09 collection removes an earlier collection.json first, as T07's."""
+
+    def tearDown(self):
+        layout.reset_task()
+
+    def test_a_stop_at_the_deadline_is_a_milestone_of_the_task(self):
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            original = tasks.t08_sample
+
+            def stopped(*arguments, **keywords):
+                raise tasks.DeadlineReached("calo_cluster.py ['reconstruct'] timed out after 1680 s (the task's deadline)")
+            tasks.t08_sample = stopped
+            try:
+                code, text = run_main(["t08-sample", "--block", 11, "--index", 0, "--out", folder])
+            finally:
+                tasks.t08_sample = original
+            self.assertEqual(code, 3)
+            self.assertIn("RESULT t08-sample incomplete", text)
+            self.assertIn(layout.STOPPED_AT_DEADLINE, tasks.Milestones(folder).names())
+
+    def test_the_collection_removes_an_earlier_collection_first(self):
+        with tempfile.TemporaryDirectory(dir=TEMPORARY_ROOT) as folder:
+            out = Path(folder) / "current"
+            out.mkdir()
+            (out / "collection.json").write_text('{"finished": true}\n')
+            name = next(n for kind, _, _, n in tasks.task_names() if kind == "t08-sample")
+            (Path(folder) / "attempts.tsv").write_text(f"{name}\t901_0\t{folder}\n")   # an attempt, so sacct is asked and does not answer
+
+            def no_answer(job):
+                raise tasks.Incomplete("sacct did not answer")
+            with redirect_stdout(io.StringIO()):
+                with self.assertRaises(tasks.Incomplete):
+                    tasks.collect("T08", 11, Path(folder) / "attempts.tsv", out, state_of=no_answer)
+            self.assertFalse((out / "collection.json").exists())
+
+
 class ExitThreeIsIncomplete(unittest.TestCase):
     """E6 merge review (nit): a script that ends with its own result line and exit 3 (core/status.py: incomplete) makes its task incomplete
     (exit 3, rerun), never a failed step."""

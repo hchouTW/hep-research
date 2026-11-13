@@ -25,6 +25,7 @@ UNFOLD_IN = {"response": [[0.8, 0.1], [0.1, 0.8]], "data": [10.0, 12.0]}
 ARGS = {
     "adapters/calo-cluster/assets/calo_cluster.py": (["check-product", "--product", "@TMP/product.json"], {}),
     "adapters/photon-likelihood/assets/photon_likelihood.py": (["check-product", "--product", "@TMP/product.json"], {}),
+    "adapters/destriper/assets/destriper.py": (["check-product", "--product", "@TMP/product.json"], {}),
     "adapters/cr-propagation/assets/emulator_provider.py": (
         ["--request", "@TMP/request.json", "--response", "@TMP/response.json"], {}),
     "adapters/cr-propagation/assets/dragon2_to_prediction.py": (

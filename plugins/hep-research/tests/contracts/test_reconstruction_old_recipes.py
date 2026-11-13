@@ -18,8 +18,8 @@ from contracts.recipe_semantics import canonical_sha256  # noqa: E402
 from core.stats.validate_response import validate_response  # noqa: E402
 
 RECORDED = Path(__file__).with_name("old_recipe_results.json")
-# tool contracts of the reconstruction development bindings, added after the record (T07 stage 1, T08 stage 1, T09 stage 1)
-RECONSTRUCTION_CONTRACTS = frozenset({"acts_tracking.json", "calo_cluster.json", "photon_likelihood.json"})
+# tool contracts of the reconstruction development bindings, added after the record (T07 stage 1, T08 stage 1, T09 stage 1, T10's destriper)
+RECONSTRUCTION_CONTRACTS = frozenset({"acts_tracking.json", "calo_cluster.json", "photon_likelihood.json", "destriper.json"})
 RESPONSE_GLOBS = ("contracts/fixtures/artifacts/valid/response*.json", "examples/*/output/artifacts/response*.json")
 
 

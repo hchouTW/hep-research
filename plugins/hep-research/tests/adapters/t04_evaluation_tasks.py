@@ -97,6 +97,11 @@ class Incomplete(RuntimeError):
     """A harness task's output is absent or not finished: the summary is incomplete (exit 3), never a workflow fail."""
 
 
+class DeadlineReached(Incomplete):
+    """A subprocess of the task outlived the task's deadline (layout.subprocess_timeout) and was stopped: incomplete, and the milestone
+    stopped-at-deadline is written (integration review M1)."""
+
+
 def check_block(block) -> int:
     """v4 3.2: blocks 11 and 12 are evaluation attempts 1 and 2; any other block is refused before anything is read or drawn. Returns the
     attempt (core.ATTEMPT_OF_BLOCK)."""
@@ -409,7 +414,13 @@ def run_script(script: Path, arguments, log: Path, *, ok=(0,)) -> tuple:
     arguments = [str(a) for a in arguments]
     pattern = result_pattern(Path(script), arguments[0] if arguments else "")
     started = time.monotonic()
-    done = subprocess.run([sys.executable, *layout.SCRIPT_FLAGS, str(script), *arguments], capture_output=True, text=True)
+    limit = layout.subprocess_timeout()
+    try:
+        done = subprocess.run([sys.executable, *layout.SCRIPT_FLAGS, str(script), *arguments], capture_output=True, text=True, timeout=limit)
+    except subprocess.TimeoutExpired as expired:   # the task's deadline (layout.start_task): incomplete, never failed, nothing marked done
+        partial = "".join(x.decode(errors="replace") if isinstance(x, bytes) else x for x in (expired.stdout or "", expired.stderr or ""))
+        Path(log).write_text(partial + f"\nTIMED OUT after {limit:.0f} s (the task's deadline)\n", encoding="utf-8")
+        raise DeadlineReached(f"{Path(script).name} {arguments[:1]} timed out after {limit:.0f} s (the task's deadline); log {log}") from None
     seconds = time.monotonic() - started
     text = done.stdout + done.stderr
     Path(log).write_text(text, encoding="utf-8")
@@ -725,14 +736,37 @@ def read_attempts(path: Path) -> dict:
     return found
 
 
-def sacct_state(job: str) -> tuple:
-    """(state, exit code, elapsed) of one job or array task, from sacct."""
-    done = subprocess.run(["sacct", "-j", job, "-n", "-P", "-X", "-o", "JobID,State,ExitCode,Elapsed"], capture_output=True, text=True)
-    for line in done.stdout.splitlines():
-        fields = line.split("|")
-        if len(fields) == 4 and fields[0] == job:
-            return fields[1], int(fields[2].split(":")[0]), fields[3]
-    return "PENDING", 0, "00:00:00"
+SACCT_TIMEOUT_SECONDS = 30   # one sacct query answers in about a second; the slurmdbd being slow is the case this bounds
+SACCT_ATTEMPTS = 3           # then no answer: the collection or summary is incomplete (rerun, no draw), never a state guessed
+SACCT_PAUSE_SECONDS = 10
+
+
+def sacct_state(job: str, *, timeout: float = SACCT_TIMEOUT_SECONDS, attempts: int = SACCT_ATTEMPTS, pause: float = SACCT_PAUSE_SECONDS) -> tuple:
+    """(state, exit code, elapsed) of one job or array task, from sacct: each query bounded by a short timeout (and the task's deadline), at
+    most `attempts` queries; with no answer, Incomplete."""
+    why = "no query made"
+    for attempt in range(attempts):
+        left = layout.subprocess_timeout()
+        if left <= layout.MINIMUM_TIMEOUT_SECONDS:   # review M2: past the task's deadline, no query and no pause
+            raise Incomplete(f"sacct not asked for {job}: the task's deadline has passed ({why}); rerun the task (no draw)")
+        try:
+            done = subprocess.run(["sacct", "-j", job, "-n", "-P", "-X", "-o", "JobID,State,ExitCode,Elapsed"], capture_output=True, text=True,
+                                  timeout=min(timeout, left))
+        except subprocess.TimeoutExpired:
+            why = f"no answer in {min(timeout, left):.0f} s"
+        else:   # review C1: an error answer or no row for the job is no answer, never a state
+            rows = [line.split("|") for line in done.stdout.splitlines()]
+            found = [fields for fields in rows if len(fields) == 4 and fields[0] == job]
+            if done.returncode != 0 or done.stderr.strip():
+                why = f"exit {done.returncode}: {done.stderr.strip()[:200]}"
+            elif not found:
+                why = "no row for the job"
+            else:
+                fields = found[0]
+                return fields[1], int(fields[2].split(":")[0]), fields[3]
+        if attempt + 1 < attempts:
+            time.sleep(max(0.0, min(pause, layout.subprocess_timeout() - layout.MINIMUM_TIMEOUT_SECONDS)))
+    raise Incomplete(f"sacct did not answer for {job} in {attempts} attempts (last: {why}); rerun the task (no draw), never a state guessed")
 
 
 def counted_folder(rows, block: int, state_of) -> Path:
@@ -758,6 +792,8 @@ def _stops(rows) -> list:
 
 def collect(workflow: str, block: int, attempts_file: Path, out: Path, *, state_of=sacct_state) -> int:
     check_block(block)
+    if (Path(out) / "collection.json").exists():   # integration review M4: a rerun that stops early leaves no earlier collection.json, as T07's
+        (Path(out) / "collection.json").unlink()
     attempts = read_attempts(attempts_file)
     bins = {}
     for key, label, spans, kinds in planned_bins(workflow):
@@ -1256,6 +1292,9 @@ def main(argv=None) -> int:
         print(f"RESULT {op} failed", flush=True)
         return EXIT_FAILED
     except Incomplete as error:
+        if isinstance(error, DeadlineReached) and getattr(args, "out", None):   # review M1: the attempt's own reason at the collection
+            Path(args.out).mkdir(parents=True, exist_ok=True)
+            Milestones(Path(args.out)).mark(layout.STOPPED_AT_DEADLINE)
         print(f"INCOMPLETE {op}: {error}")
         print(f"RESULT {op} incomplete", flush=True)
         return EXIT_CRASHED
@@ -1272,5 +1311,15 @@ def main(argv=None) -> int:
     return code
 
 
+def task_main(argv=None) -> int:
+    """The command line of an evaluation task (the job scripts start this file): the task's deadline is set from its operation's Slurm limit
+    (layout.start_task; integration fix round) before main, so every subprocess of the task is bounded by it. In-process callers (tests, the
+    development wrapper) call main and keep their own deadline, or none."""
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] in layout.TASK_LIMIT_SECONDS:
+        layout.start_task(argv[0])
+    return main(argv)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(task_main())

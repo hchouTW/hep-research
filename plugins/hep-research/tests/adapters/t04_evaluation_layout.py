@@ -313,6 +313,9 @@ def classify_attempt(state: str, exit_code: int, elapsed: str, milestones) -> tu
         return "REPEATABLE", f"Slurm state {state}: an infrastructure failure, no output read"
     if base in RESOURCE:
         return "REPEATABLE-WITH-NEW-REQUEST", f"Slurm state {state}: the request was too small, no output read; the new request is the user's (K10)"
+    if STOPPED_AT_DEADLINE in marks:   # integration review M1: as a resource stop (Slurm TIMEOUT before the deadline existed)
+        return "REPEATABLE-WITH-NEW-REQUEST", ("stopped at its deadline after draws started: the request was too short; the new request is the "
+                                               "user's (K10)")
     if exit_code == 3:
         return "REPEATABLE", "exit 3: the task could not set itself up, no output read"
     if base == "CANCELLED":
@@ -780,6 +783,60 @@ T07_SLICE_TASKS = 10
 T07_NEGATIVE_CASES_SECONDS = 300       # E5 on the kept file (finder, no vertex step, then negative-cases): a budget
 COLLECTION_SECONDS = 300   # per workflow: sacct, every product hashed and read (an assumption)
 SUMMARY_SECONDS = 120
+
+# ---- The task deadline (integration fix round; tests/tools/test_subprocess_timeouts.py): every subprocess an evaluation task starts (a recipe
+# or fixture script, a T07 program, a check module, sacct) is bounded by the task's own Slurm limit, so a child that hangs stops before Slurm
+# kills the task and the runner can still record its result: the task is then incomplete (exit 3, RESULT incomplete), never failed, never ok.
+# TASK_LIMIT_SECONDS: each runner operation's Slurm --time in its task script under <private>/jobs/evaluation/ (the integration job checks the
+# two agree); plan and names have no Slurm task (submit.sh runs them on login), their 1,800 s only bounds a stray subprocess. The deadline
+# (integration review I1) is min(the runner's start plus that limit, the job's own end SLURM_JOB_END_TIME when Slurm sets it) less
+# RECORD_MARGIN_SECONDS: with the job's end, everything a task script does before the runner (its checks, lib.sh's opening, the v4 2.1
+# generator check) is inside the deadline, and the margin covers only the runner's own recording after the child stops (its logs, the RESULT
+# line; under 30 s) and lib.sh's finish, with ample room. A subprocess gets the time left to the deadline, at least MINIMUM_TIMEOUT_SECONDS.
+TASK_LIMIT_SECONDS = {"t08-sample": 1800, "t08-checks": 1800, "t09-generate": 1800, "t09-range": 5400, "t09-fixed-points": 1800, "collect": 3600,
+                      "score": 3600, "summary": 1800, "plan": 1800, "names": 1800, "t07-bin": 3600, "t07-refit": 1800, "t07-slices": 1800,
+                      "t07-negative-cases": 1800, "t07-checks": 3600}
+RECORD_MARGIN_SECONDS = 120
+MINIMUM_TIMEOUT_SECONDS = 1.0
+_TASK_DEADLINE = None
+
+
+STOPPED_AT_DEADLINE = "stopped-at-deadline"   # the milestone of a task whose subprocess was stopped at the deadline (integration review M1)
+
+
+def start_task(operation: str, *, now: float | None = None) -> float:
+    """Set this process's task deadline once (the runner at its start; E6b's commands, run inside it, keep it): min(start + the operation's
+    limit, the job's end from SLURM_JOB_END_TIME, epoch seconds, if set) less the margin, on the monotonic clock. Returns the deadline."""
+    import os
+    import time
+    global _TASK_DEADLINE
+    if operation not in TASK_LIMIT_SECONDS:
+        raise LayoutError(f"no Slurm limit is known for the task {operation!r}")
+    if _TASK_DEADLINE is None:
+        start = time.monotonic() if now is None else now
+        end = start + TASK_LIMIT_SECONDS[operation]
+        job_end = os.environ.get("SLURM_JOB_END_TIME")
+        if job_end is not None:
+            try:
+                end = min(end, start + (float(job_end) - time.time()))
+            except ValueError:
+                raise LayoutError(f"SLURM_JOB_END_TIME {job_end!r} is not a time: the deadline cannot be set") from None
+        _TASK_DEADLINE = end - RECORD_MARGIN_SECONDS
+    return _TASK_DEADLINE
+
+
+def reset_task() -> None:
+    global _TASK_DEADLINE
+    _TASK_DEADLINE = None
+
+
+def subprocess_timeout(*, now: float | None = None) -> float:
+    """The timeout of the next subprocess: the time left to the task's deadline (none set: the longest task limit from now), at least
+    MINIMUM_TIMEOUT_SECONDS, so a child started past the deadline stops at once."""
+    import time
+    now = time.monotonic() if now is None else now
+    deadline = _TASK_DEADLINE if _TASK_DEADLINE is not None else now + max(TASK_LIMIT_SECONDS.values()) - RECORD_MARGIN_SECONDS
+    return max(MINIMUM_TIMEOUT_SECONDS, deadline - now)
 T07_BUILD_SECONDS, T07_BUILD_CPUS = 86 + 7 + 60, 6    # job 7584388: configure 7 s, build 86 s on 6 CPUs, and its checks
 T09_RANGE_EVENTS = 500
 T07_RANGE_EVENTS = 12000

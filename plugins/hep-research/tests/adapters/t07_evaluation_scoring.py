@@ -1403,12 +1403,21 @@ def bin_files(folder, fixture_id: int, block: int, stratum: int) -> dict:
         {"truth-seeded": Path(f"{stem}.truth-seeded.record"), "truth-seeded-product": Path(f"{stem}.truth-seeded.product")}
 
 
+class TaskTimedOut(RuntimeError):
+    """A program of a task outlived the task's deadline (layout.subprocess_timeout; integration fix round): it is stopped, nothing it would have
+    produced is recorded, and the task is incomplete (exit 3, RESULT incomplete), never failed and never ok."""
+
+
 def _run(command, log) -> float:
     import subprocess
     import time
     started = __import__("time").monotonic()
+    limit = layout.subprocess_timeout()
     with open(log, "w", encoding="utf-8") as stream:
-        done = subprocess.run([str(c) for c in command], stdout=stream, stderr=subprocess.STDOUT)
+        try:
+            done = subprocess.run([str(c) for c in command], stdout=stream, stderr=subprocess.STDOUT, timeout=limit)
+        except subprocess.TimeoutExpired:
+            raise TaskTimedOut(f"{Path(str(command[0])).name} timed out after {limit:.0f} s (the task's deadline; log {Path(log).name})") from None
     if done.returncode != 0:
         raise TaskFailed(f"{Path(str(command[0])).name} exited {done.returncode} (log {Path(log).name})")
     return time.monotonic() - started
@@ -1437,8 +1446,12 @@ def bin_task(block: int, fixture_id: int, stratum: int, *, build, out, first: in
     import subprocess
     with open(files["stderr"], "w", encoding="utf-8") as stream:
         started = __import__("time").monotonic()
-        done = subprocess.run([str(c) for c in fake_rate.finder_command(build / "acts_tracking_finder", files["t07data"], f"evaluation-{FIXTURES[fixture_id]}-b{block}-s{stratum}",
-                                                                         files["product"], files["record"], count)], stdout=subprocess.DEVNULL, stderr=stream)
+        limit = layout.subprocess_timeout()
+        try:
+            done = subprocess.run([str(c) for c in fake_rate.finder_command(build / "acts_tracking_finder", files["t07data"], f"evaluation-{FIXTURES[fixture_id]}-b{block}-s{stratum}",
+                                                                             files["product"], files["record"], count)], stdout=subprocess.DEVNULL, stderr=stream, timeout=limit)
+        except subprocess.TimeoutExpired:
+            raise TaskTimedOut(f"acts_tracking_finder timed out after {limit:.0f} s (the task's deadline)") from None
     if done.returncode != 0:
         raise TaskFailed(f"the finder exited {done.returncode}")
     lines.append(f"COST t07 bin {FIXTURES[fixture_id]} s{stratum} find {count} events: {__import__('time').monotonic() - started:.1f} s")
@@ -1640,7 +1653,15 @@ def checks_task(block: int, *, build, out, workers: int = 1, module_runner=None)
         environment = dict(os.environ, HEP_ACTS_TRACKING_BUILD=str(build), HEP_ACTS_TRACKING_EVIDENCE=str(out / "evidence"),
                            HEP_ACTS_TRACKING_WORKERS=str(workers))
         (out / "evidence").mkdir(exist_ok=True)
-        done = subprocess.run([sys.executable, "-B", "-m", "unittest", "-v", module], cwd=str(ROOT), env=environment, capture_output=True, text=True)
+        limit = layout.subprocess_timeout()
+        log = out / f"{module.rsplit('.', 1)[1]}.log"
+        try:
+            done = subprocess.run([sys.executable, "-B", "-m", "unittest", "-v", module], cwd=str(ROOT), env=environment, capture_output=True, text=True,
+                                  timeout=limit)
+        except subprocess.TimeoutExpired as expired:   # the task's deadline: a crash of the checks (incomplete), never a failed check
+            partial = "".join(x.decode(errors="replace") if isinstance(x, bytes) else x for x in (expired.stdout or "", expired.stderr or ""))
+            log.write_text(partial + f"\nTIMED OUT after {limit:.0f} s (the task's deadline)\n", encoding="utf-8")   # review M3
+            raise ChecksCrashed(f"{module} timed out after {limit:.0f} s (the task's deadline): a crash, not a negative") from None
         (out / f"{module.rsplit('.', 1)[1]}.log").write_text(done.stdout + done.stderr, encoding="utf-8")
         return done.stdout + done.stderr
     run = module_runner or run_module
@@ -2000,7 +2021,10 @@ def _task_command(arguments) -> int:
     except TaskFailed as error:
         _result(operation, "failed", str(error))
         return EXIT_NEGATIVE
-    except ChecksCrashed as error:   # E6 merge review I2: a check module that could not run is a crash, never a failed check
+    except (ChecksCrashed, TaskTimedOut) as error:   # E6 merge review I2; integration: a check module that could not run, or a program past
+        if isinstance(error, TaskTimedOut):           # the task's deadline, is a crash (incomplete), never a failed check or a failed task;
+            Path(arguments.out).mkdir(parents=True, exist_ok=True)   # a stop at the deadline is the attempt's milestone (review M1)
+            mark(arguments.out, layout.STOPPED_AT_DEADLINE)
         _result(operation, "incomplete", str(error))
         return EXIT_INCOMPLETE
     except (ScoringError, core.CoreError, layout.LayoutError, finding_record.RecordFormatError) as error:
@@ -2071,6 +2095,11 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+TASK_OF_COMMAND = {"bin-task": "t07-bin", "refit-task": "t07-refit", "collect": "collect", "negative-task": "t07-negative-cases",
+                   "checks-task": "t07-checks", "score-bin": "score", "score-slices": "t07-slices", "negative-cases": "t07-negative-cases",
+                   "summary": "summary", "count": "plan"}
+
+
 def main(argv=None) -> int:
     parser = build_parser()
     try:
@@ -2095,5 +2124,7 @@ def main(argv=None) -> int:
     return command_of[arguments.operation](arguments)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # run alone as a command: its own task's deadline (in the runner's process, the runner's is kept)
+    if sys.argv[1:2] and sys.argv[1] in TASK_OF_COMMAND:
+        layout.start_task(TASK_OF_COMMAND[sys.argv[1]])
     sys.exit(main())

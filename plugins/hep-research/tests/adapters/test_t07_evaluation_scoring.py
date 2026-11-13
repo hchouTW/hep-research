@@ -1419,6 +1419,77 @@ class MergeStage(unittest.TestCase):
         self.assertIn("RESULT t07-scoring summary incomplete:", line)
 
 
+class TimedOutProgram(unittest.TestCase):
+    """Integration fix round: a T07 program or check module that outlives its task's deadline is stopped; the task is incomplete (exit 3,
+    RESULT incomplete), with no record or checks file written, never failed and never ok."""
+
+    def setUp(self):
+        self.folder = Path(tempfile.mkdtemp(prefix="t07-timeout-"))
+        self.addCleanup(shutil.rmtree, self.folder)
+        self.addCleanup(layout.reset_task)
+
+    def test_a_program_past_the_deadline_is_stopped(self):
+        layout.start_task("t07-bin", now=__import__("time").monotonic() - 3600)
+        with self.assertRaises(scoring.TaskTimedOut) as caught:
+            scoring._run(["sleep", "60"], self.folder / "sleep.log")
+        self.assertIn("timed out", str(caught.exception))
+
+    def test_a_check_module_past_the_deadline_is_a_crash_with_no_checks_file(self):
+        layout.start_task("t07-checks", now=__import__("time").monotonic() - 3600)
+        minimum, layout.MINIMUM_TIMEOUT_SECONDS = layout.MINIMUM_TIMEOUT_SECONDS, 0.001   # no module can start in a millisecond
+        self.addCleanup(setattr, layout, "MINIMUM_TIMEOUT_SECONDS", minimum)
+        with self.assertRaises(scoring.ChecksCrashed) as caught:
+            scoring.checks_task(11, build=self.folder, out=self.folder / "checks")
+        self.assertIn("timed out", str(caught.exception))
+        self.assertFalse((self.folder / "checks" / "deterministic-checks.json").exists())
+
+    def test_a_timed_out_check_module_keeps_its_partial_output(self):
+        layout.start_task("t07-checks", now=__import__("time").monotonic() - 3600)
+        minimum, layout.MINIMUM_TIMEOUT_SECONDS = layout.MINIMUM_TIMEOUT_SECONDS, 0.02
+        self.addCleanup(setattr, layout, "MINIMUM_TIMEOUT_SECONDS", minimum)
+        with self.assertRaises(scoring.ChecksCrashed):
+            scoring.checks_task(11, build=self.folder, out=self.folder / "checks")
+        log = (self.folder / "checks" / "test_acts_scenarios.log").read_text()          # review M3: where it stopped is kept
+        self.assertIn("TIMED OUT after", log)
+
+    def test_a_program_past_the_deadline_leaves_no_record_and_a_milestone(self):
+        """Review N2: the real bin task, its generator a program that outlives the deadline: no records/*.json, the milestone stopped-at-deadline
+        after draws-started (review M1)."""
+        build = self.folder / "build"
+        build.mkdir()
+        generator = build / "t07_fixture_generator"
+        generator.write_text("#!/bin/sh\nsleep 60\n")
+        generator.chmod(0o755)
+        layout.start_task("t07-bin", now=__import__("time").monotonic() - 3600)
+        import contextlib
+        import io
+        out = self.folder / "bin"
+        with contextlib.redirect_stdout(io.StringIO()) as stream:
+            code = scoring.main(["bin-task", "--block", "11", "--fixture-id", "7001", "--stratum", "0", "--build", str(build), "--out", str(out)])
+        self.assertEqual(code, scoring.EXIT_INCOMPLETE)
+        self.assertIn("RESULT t07-scoring bin-task incomplete:", stream.getvalue())
+        self.assertFalse(list(out.rglob("records/*.json")))
+        marks = [line.split(" ", 1)[0] for line in (out / "milestones.txt").read_text().splitlines()]
+        self.assertEqual(marks, ["draws-started", layout.STOPPED_AT_DEADLINE])
+
+    def test_the_task_command_reads_a_timeout_as_incomplete(self):
+        import contextlib
+        import io
+        original = scoring.bin_task
+
+        def timing_out(*arguments, **keywords):
+            raise scoring.TaskTimedOut("acts_tracking_finder timed out after 3480 s (the task's deadline)")
+        scoring.bin_task = timing_out
+        try:
+            with contextlib.redirect_stdout(io.StringIO()) as stream:
+                code = scoring.main(["bin-task", "--block", "11", "--fixture-id", "7001", "--stratum", "0", "--build", "b", "--out", str(self.folder)])
+        finally:
+            scoring.bin_task = original
+        self.assertEqual(code, scoring.EXIT_INCOMPLETE)
+        self.assertIn("RESULT t07-scoring bin-task incomplete:", stream.getvalue())
+        self.assertFalse(list(self.folder.rglob("records/*.json")))                     # no product marked done
+
+
 class MergeFixRound(unittest.TestCase):
     """Fix round 1 of the E6 merge review (d4-e6-merge-review.md, the coordinator's rulings): a check module that errors with no failure, or
     whose output holds an import or OS error, is a crash (exit 3), never a failed check (I2); a record defect is refused, apart from an absent

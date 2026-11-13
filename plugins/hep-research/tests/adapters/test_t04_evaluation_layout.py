@@ -612,6 +612,72 @@ class PooledBins(unittest.TestCase):
             layout.pool_status(pool, {3: ("complete", ""), 4: ("complete", "")})
 
 
+class TaskDeadline(unittest.TestCase):
+    """Integration fix round (tests/tools/test_subprocess_timeouts.py): every subprocess of an evaluation task is bounded by the task's own Slurm
+    limit (the task scripts' --time), less a margin in which the runner records the result: the timeout is the time left to that deadline."""
+
+    def tearDown(self):
+        layout.reset_task()
+
+    def test_every_runner_operation_has_its_scripts_limit(self):
+        from tests.adapters import t04_evaluation_tasks as tasks
+        self.assertTrue(set(tasks.OPERATIONS) <= set(layout.TASK_LIMIT_SECONDS))
+        self.assertEqual(layout.TASK_LIMIT_SECONDS["t09-range"], 5400)                  # t09-range.sh --time=01:30:00
+        self.assertEqual(layout.TASK_LIMIT_SECONDS["t07-checks"], 3600)                 # t07-checks.sh --time=01:00:00
+        self.assertEqual(layout.TASK_LIMIT_SECONDS["t08-sample"], 1800)                 # t08-sample.sh --time=00:30:00
+        self.assertGreaterEqual(layout.RECORD_MARGIN_SECONDS, max(layout.START_UP_SECONDS.values()) + 30)
+        for operation, limit in layout.TASK_LIMIT_SECONDS.items():                      # every planned task fits its limit with the margin
+            with self.subTest(operation=operation):
+                self.assertGreater(limit - layout.RECORD_MARGIN_SECONDS, 0)
+
+    def test_the_timeout_is_the_time_left_to_the_deadline(self):
+        layout.start_task("t07-checks", now=100.0)
+        self.assertEqual(layout.subprocess_timeout(now=100.0), 3600 - layout.RECORD_MARGIN_SECONDS)
+        self.assertEqual(layout.subprocess_timeout(now=1100.0), 2600 - layout.RECORD_MARGIN_SECONDS)
+        layout.start_task("t08-sample", now=1100.0)                                     # a task's deadline is set once (E6b's commands run inside)
+        self.assertEqual(layout.subprocess_timeout(now=1100.0), 2600 - layout.RECORD_MARGIN_SECONDS)
+        self.assertEqual(layout.subprocess_timeout(now=10 ** 6), layout.MINIMUM_TIMEOUT_SECONDS)   # past the deadline: the child stops at once
+        with self.assertRaises(layout.LayoutError):
+            layout.reset_task(); layout.start_task("no-such-task")
+
+    def test_the_jobs_own_end_bounds_the_deadline(self):
+        """Integration review I1: the deadline is min(runner start + limit, SLURM_JOB_END_TIME) - margin, so the time a task script spends
+        before the runner (its checks, the generator check) is inside it."""
+        import os
+        import time
+        saved = os.environ.get("SLURM_JOB_END_TIME")
+        self.addCleanup(lambda: os.environ.__setitem__("SLURM_JOB_END_TIME", saved) if saved is not None else os.environ.pop("SLURM_JOB_END_TIME", None))
+        os.environ["SLURM_JOB_END_TIME"] = str(int(time.time()) + 1000)                 # the job ends in 1,000 s: earlier than start + 1,800 s
+        layout.reset_task()
+        layout.start_task("t08-sample")
+        left = layout.subprocess_timeout()
+        self.assertLessEqual(left, 1000 - layout.RECORD_MARGIN_SECONDS + 1)
+        self.assertGreater(left, 1000 - layout.RECORD_MARGIN_SECONDS - 10)
+        os.environ["SLURM_JOB_END_TIME"] = str(int(time.time()) + 10 ** 6)              # a later job end: the layout's limit stands
+        layout.reset_task()
+        layout.start_task("t08-sample")
+        self.assertLessEqual(layout.subprocess_timeout(), 1800 - layout.RECORD_MARGIN_SECONDS)
+        os.environ["SLURM_JOB_END_TIME"] = "not-a-time"                                  # unreadable: refused, never ignored
+        layout.reset_task()
+        with self.assertRaises(layout.LayoutError):
+            layout.start_task("t08-sample")
+        self.assertEqual((layout.RECORD_MARGIN_SECONDS, layout.MINIMUM_TIMEOUT_SECONDS), (120, 1.0))
+
+    def test_a_stop_at_the_deadline_after_draws_started_has_its_own_reason(self):
+        verdict, why = layout.classify_attempt("FAILED", 3, "00:28:00", ["draws-started", layout.STOPPED_AT_DEADLINE])
+        self.assertIn("stopped at its deadline after draws started", why)
+        self.assertNotIn("could not set itself up", why)
+        for block in (11, 12):
+            with self.assertRaises(layout.LayoutError):                                 # never repeated on blocks 11 and 12
+                layout.select_attempt([verdict, "NO-FAILURE"], block=block)
+        self.assertEqual(layout.classify_attempt("FAILED", 3, "00:00:40", [layout.STOPPED_AT_DEADLINE])[0], "NO-DRAW")   # before any draw
+
+    def test_without_a_task_the_longest_limit_applies(self):
+        layout.reset_task()
+        self.assertLessEqual(layout.subprocess_timeout(), max(layout.TASK_LIMIT_SECONDS.values()) - layout.RECORD_MARGIN_SECONDS)
+        self.assertGreater(layout.subprocess_timeout(), 0)
+
+
 class EvaluationPlan(unittest.TestCase):
     """The evaluation on blocks 11 and 12 as arrays of short tasks, its task count, CPU-hours and wall by the closed form."""
 
