@@ -689,6 +689,31 @@
    "type": "object",
    "$comment": "expected number of data events per sample (design stage, section 6.7 and 8.2 note 5: metadata only, no data values)"
   },
+  "effects": {
+   "type": "array",
+   "$comment": "section 7.1, 10.5: the effects of the contribution decomposition, each with its value after removal (calib_contrib.py; core/calibration/contrib.py)",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "removal"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string",
+      "minLength": 1
+     },
+     "removal": {
+      "type": "object",
+      "$comment": "{parameter: value after removal}, at least one (calib_contrib checks)",
+      "additionalProperties": {
+       "type": "number"
+      }
+     }
+    }
+   }
+  },
   "pde_split": {
    "type": "object",
    "$comment": "section 6.7 PDE split (g4sim): {parameters, model: scale | table, applied_as, table: {energy_eV, value}, angle_dependent, ties, sensor_surfaces, map_mode}; core/calibration/pde_split.contract_findings"

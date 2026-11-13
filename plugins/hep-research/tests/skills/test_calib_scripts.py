@@ -346,6 +346,25 @@ class Phase1Scripts(unittest.TestCase):
         rc, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points", pts, "--seed", 11)
         self.assertEqual((rc, out["status"]), (0, "passed"))
 
+    def test_calib_contrib(self):
+        """Phase 4 (section 10.5, 15.3.18): a decomposition (exit 0), no decomposition when a subset is below the ESS
+        threshold of G4 (exit 1), the object required (exit 2)."""
+        import test_calibration_contrib as TC
+        th = self.put("th.json", {})
+        c, p = self.chain(TC.chain(2)[:2])
+        args = ("decompose", "--contract", c, "--plan", p, "--theta", th, "--observable", "res", "--bootstrap", 50)
+        rc, out = run("calib_contrib.py", *args, "--object", "variance")
+        self.assertEqual((rc, out["status"], out["object"], out["method"]), (0, "ok", "variance", "exhaustive"))
+        self.assertAlmostEqual(out["sum_of_terms"], out["total"], places=10)
+        rc, out = run("calib_contrib.py", *args)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        self.assertIn("contrib.object", out["error"])
+        c, p = self.chain(TC.chain(2, method="analytic-reweighting", removal=0.4, n_data=320)[:2])
+        rc, out = run("calib_contrib.py", "decompose", "--contract", c, "--plan", p, "--theta", th, "--observable",
+                      "res", "--object", "resolution", "--bootstrap", 50)
+        self.assertEqual((rc, out["status"], out["finding"]), (1, "failed", "contrib.ess"))
+        self.assertNotIn("terms", out)
+
     def test_calib_reweight(self):
         c, p = self.chain(H.gaussian_chain())
         rc, out = run("calib_reweight.py", "weights", "--contract", c, "--plan", p, "--theta", self.put("t.json", {}))

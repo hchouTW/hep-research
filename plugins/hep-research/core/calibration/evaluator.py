@@ -17,7 +17,11 @@ run_ids)` returns {run_id: result} for those done (each once; pending ones are a
 
 tiers() and domain() are not the adapter's: candidate methods come from calib_chain, feasibility and the final method
 from calib_design (section 7.1). The engine knows the evaluators of this registry by the plan's `evaluator.kind`; the
-g4sim evaluator (adapters/geant4, phase 3) is not imported by core (layering)."""
+g4sim evaluator (adapters/geant4, phase 3) is not imported by core (layering).
+
+effects_off (section 10.5, phase 4): {effect: {parameter: value after removal}}, the values the contract's `effects`
+declare (`removal_values` merges them); evaluating with it is evaluating at those parameter values, with the plan's
+methods. An evaluator that cannot remove effects raises (calib_contrib reports `incomplete`)."""
 from __future__ import annotations
 
 from typing import Protocol
@@ -43,6 +47,26 @@ class Evaluator(Protocol):
     def ask(self, requests: list) -> list: ...
 
     def tell(self, run_ids=None) -> dict: ...
+
+
+def removal_values(effects_off) -> dict:
+    """The parameter values of `effects_off` ({effect: {parameter: value}}, section 10.5) merged into one point; a
+    bare list of effect names (no declared values) or two effects removing one parameter to different values is a
+    ValueError."""
+    if not effects_off:
+        return {}
+    if not isinstance(effects_off, dict) or not all(isinstance(v, dict) for v in effects_off.values()):
+        raise ValueError("effects_off is {effect: {parameter: value after removal}} (section 10.5): every effect "
+                         "carries its declared value after removal")
+    out: dict = {}
+    for name, removal in effects_off.items():
+        for par, value in removal.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f"effect {name!r}: the value after removal of {par!r} is not a number")
+            if par in out and out[par] != float(value):
+                raise ValueError(f"parameter {par!r} is removed to different values by two effects")
+            out[par] = float(value)
+    return out
 
 
 _REGISTERED: dict = {}

@@ -1086,6 +1086,13 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_contrib.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/calib_data.py",
    "depth": 3,
    "skills": [
@@ -2036,7 +2043,7 @@
   }
  ],
  "counts": {
-  "scripts": 216,
+  "scripts": 217,
   "unresolved": 70,
   "named_without_main": 28
  }
