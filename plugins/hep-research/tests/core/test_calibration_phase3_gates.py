@@ -41,7 +41,13 @@ class TaskTable(unittest.TestCase):
         self.assertEqual(fam["g8_3m"], 2 * H.M3["per_point"] // H.M3["chunk"])
         self.assertEqual(fam["g8_3m_spot"], 1)
         for name, cfg in H.TOY_CONFIGS.items():
-            self.assertEqual(fam[f"toy_g8|{name}"], cfg["reps"] * 2 * H.TOY_PER_POINT // H.TOY_CHUNK)
+            self.assertEqual(fam[f"toy_g8|{name}"], cfg["reps"] * 2 * H.TOY_PER_POINT // H.toy_chunk(cfg))
+        first = [i for i, (f, kw) in enumerate(H.TASKS) if f == "toy_g8" and H.TOY_CONFIGS[kw["config"]].get("second")]
+        mm = [i for i, (f, _) in enumerate(H.TASKS) if f == "toy_g8_mm"]
+        self.assertEqual((mm[0], mm[-1]), (24124, 25163))      # the registered p3-toy-g8 indices stay where they were
+        self.assertGreater(min(first), mm[-1])
+        self.assertEqual(H.toy_truth_batches(H.TOY_CONFIGS["cal6b"]), 200)
+        self.assertEqual(H.toy_truth_batches(H.TOY_CONFIGS["cal6"]), H.TOY_TRUTH_BATCHES)
         json.dumps(H.TASKS)                                   # every task's arguments are plain JSON
         self.assertEqual(H.cal_seed(1, 7), H.cal_seed(1, 7))
         self.assertNotEqual(H.cal_seed(1, 7), H.cal_seed(6, 7))

@@ -575,6 +575,12 @@ TOY_CONFIGS = {
                        "judged": False, "power": False, "inject": False},
     "cal12_vmc2_r33": {"cal": 12, "row": 2015, "mcr": 33, "truth": "analytic", "fit_scale": 0.5, "reps": 200,
                        "judged": False, "power": False, "inject": False},
+    # the second registration of rows 2006 and 2015 (2026-11-13, approval A15; the first, cal6, failed and stands as
+    # recorded): the shared truth MC at 100 x the fit MC (1000 x the exposure at MC 10x), fresh replicates (offset
+    # 10^6), one task per replicate and point so the truth is generated once; its tasks follow every earlier task
+    "cal6b": {"cal": 6, "row": 2006, "rows": [2006, 2015], "mcr": 10, "truth": "shared-mc", "truth_factor": 1000,
+              "chunk": 500, "r_offset": 1_000_000, "second": True, "fit_scale": 1.0, "reps": 1000, "judged": True,
+              "power": True, "inject": False},
 }
 TOY_PER_POINT, TOY_CHUNK = 500, 100           # N_full(d = 2) = 483 plus 17 spare for replacement and injection
 TOY_TRUTH_FACTOR = 100                        # the shared truth MC of calibration 12: 100 x the exposure (section 8.4)
@@ -616,11 +622,26 @@ def toy_design(name: str, exposure: int = TOY_EXPOSURE) -> tuple:
 TOY_TRUTH_BATCHES = 20                        # the shared truth MC generated in batches (memory of one batch)
 
 
-def _truth_pseudo_data(p, params: dict, n_total: int, exposure: int, seed, draws: dict) -> dict:
+def toy_chunk(cfg: dict) -> int:
+    return int(cfg.get("chunk", TOY_CHUNK))
+
+
+def toy_truth_factor(cfg: dict) -> int:
+    return int(cfg.get("truth_factor", TOY_TRUTH_FACTOR))
+
+
+def toy_truth_batches(cfg: dict) -> int:
+    """The batch count of the shared truth MC: TOY_TRUTH_BATCHES at 100 x the exposure, and the same batch size for a
+    larger truth (so the memory stays that of one batch)."""
+    return TOY_TRUTH_BATCHES * toy_truth_factor(cfg) // TOY_TRUTH_FACTOR
+
+
+def _truth_pseudo_data(p, params: dict, n_total: int, exposure: int, seed, draws: dict,
+                       n_batches: int = TOY_TRUTH_BATCHES) -> dict:
     """Pseudo-data resampled with replacement from one shared truth MC of n_total events per run at `params`
     (section 8.4), generated in TOY_TRUTH_BATCHES batches with seeds (seed, batch): draws {s: {run: event indices in
     [0, n_total)}}; returns {s: Observations}."""
-    nb = TOY_TRUTH_BATCHES
+    nb = int(n_batches)
     per = n_total // nb
     m = G.track_build(per)
     ev = toy.ChainEvaluator(m, {"seeds": {"nominal": 1}})
@@ -652,16 +673,16 @@ def toy_g8_block(config: str, r: int, point: str, start: int, n: int, exposure: 
     k = ("interior", "boundary").index(point)
     sd, pts = toy_design(config, exposure)
     truth = np.asarray(pts[k], float)
-    base = (cal_seed(cfg["cal"], r), j, k)
+    base = (cal_seed(cfg["cal"], r + int(cfg.get("r_offset", 0))), j, k)
     shared = None
     if cfg["truth"] == "shared-mc":
         p0 = _toy_problem(cfg, (*base, start, 1), (*base, start, 2), exposure)
         runs = sorted({o.run for o in p0.model.observables if o.name in p0.names})
-        n_total = TOY_TRUTH_FACTOR * exposure
+        n_total = toy_truth_factor(cfg) * exposure
         draws = {s: {rid: _rng(*base, s, 3, jr).integers(n_total, size=exposure) for jr, rid in enumerate(runs)}
                  for s in range(start, start + n)}
         shared = _truth_pseudo_data(p0, dict(zip(TOY_THETA, map(float, truth))), n_total, exposure, (*base, 999),
-                                    draws)
+                                    draws, toy_truth_batches(cfg))
     rows = []
     for s in range(start, start + n):
         p = _toy_problem(cfg, (*base, s, 1), (*base, s, 2), exposure)
@@ -864,13 +885,20 @@ def _tasks() -> list:
     for pt in ("interior", "boundary"):
         t += [("g8_3m", {"point": pt, "start": s, "n": M3["chunk"]}) for s in range(0, M3["per_point"], M3["chunk"])]
     t.append(("g8_3m_spot", {}))
-    for name, cfg in TOY_CONFIGS.items():
-        for r in range(cfg["reps"]):
-            for pt in ("interior", "boundary"):
-                t += [("toy_g8", {"config": name, "r": r, "point": pt, "start": s, "n": TOY_CHUNK})
-                      for s in range(0, TOY_PER_POINT, TOY_CHUNK)]
+    def toy(second: bool) -> list:
+        out = []
+        for name, cfg in TOY_CONFIGS.items():
+            if bool(cfg.get("second")) != second:
+                continue
+            for r in range(cfg["reps"]):
+                for pt in ("interior", "boundary"):
+                    out += [("toy_g8", {"config": name, "r": r, "point": pt, "start": s, "n": toy_chunk(cfg)})
+                            for s in range(0, TOY_PER_POINT, toy_chunk(cfg))]
+        return out
+    t += toy(False)
     for pt in ("interior", "boundary"):
         t += [("toy_g8_mm", {"point": pt, "start": s, "n": MM["chunk"]}) for s in range(0, MM["per_point"], MM["chunk"])]
+    t += toy(True)                             # second registrations, after every earlier task (indices unchanged)
     return t
 
 
