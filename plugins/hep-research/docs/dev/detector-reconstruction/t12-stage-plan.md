@@ -24,7 +24,7 @@ until Freeze B fixes K09.
 | 3 | Partitioning, recovery and boundaries: A11, A12, §10.2 items 3-7 | Stage 2; Freeze B for the T07-T09 recipes' quality |
 | 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (K09 gates); T10 for T10's recipe |
 | 5 | A13: recorded `blocked-by-resource` (R14; Q1 answered 2026-11-13); no GPU job. The CPU measurements of stage 4 (T12-14) are recorded beside it | Stage 4 |
-| 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | T10 for T10's part; question Q3 |
+| 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | none (Q3 answered, Q5 moot: T10 done); drafted on branch `t12/stage6`, see "Stage 6" |
 | 7 | A10, A26-A36 runtime (R20: T11 design, T12 runtime) | T11 design (F1); a backend per family, else a recorded gap |
 
 ## Obligations
@@ -292,6 +292,163 @@ a missing default, and that the identity changes with a limit.
   interpreter (`sys.executable`, resolved) under a live root. In the job it imports the modules under test (`--import`) and takes the live
   roots from `git worktree list --porcelain` of the checkout.
 
+## Stage 6: A37 and §9.6 in T12 (fixed before the tests were written)
+
+**Scope.** T12-18 (the g×E degeneracy) and T12-19 (the weak-mode witness), A37 and §9.6 as R31 keeps them in T12. Both are
+identifiability tests on synthetic fixtures: no constant is derived, no alignment or calibration quality is claimed (R31), and nothing
+here waits for a K09 threshold (R37). Q3 is answered (T12 runs its own reprocessing of 7003 and 7004) and Q5 is moot (T10 done).
+
+**Files.** `tests/contracts/t12_degeneracy.py` (the harness: the g×E fit and its report, the reprocessing of 7003 and 7004, the T12
+method card, the checks, the assessments, the command line) and `tests/contracts/test_t12_degeneracy.py`. They live in `tests/` for the
+reason stage 1 gives (they import the contracts, the control layer, T10's fixture tool and T07's test arithmetic). No production file,
+recipe, adapter asset, frozen file or file of `jobs/evaluation/SOURCES.sha256` changes; T10's `t10_a37.py` and T07's
+`test_acts_cai_refit.py` are imported, never edited.
+
+**Fixture form shared with T10 (T12-18).** T10's `fixture_tools/t10_a37.py`: the design `gxe_design(C, E)` (one row per channel and
+event, `ln A = ln g_c + ln E_e`), `exact_rank` (rational elimination), and its tolerances `GAUGE_TOLERANCE = 1e-12` (relative, for
+amplitudes, identifiable combinations and recovered values) and `CONVERGED = 1e-20` (sum of squared log residuals), set in
+`t10-timing-stage-plan.md` section 6.1 (row A37-T10) and used by job 7627284. All values below are exact inputs, without noise, so
+every check is deterministic (R37: numerical tolerances), and there is no `n σ` in T12-18.
+
+- Two-parameter case (the brief's "two-parameter synthetic fit of `y = gE`"): one channel, one source, `N = 6` observations of the same
+  type, `g = 1.25`, `E = 2.0`, so `gE = 2.5`; `gxe_design(1, 1)` repeated `N` times. Gauge `a = 3`.
+- T10's form: `C = 8` channels, `g_c = 1 + 0.05 c`; `E = 5` events, `E_e = (1, 2, 3, 5, 8)`; reference event 2; gauge `a = 3`.
+- The named external scale: `constraint.external-energy-reference`, the energy of the reference source or event is known.
+
+**T12-18 expectations (`gxe`).**
+- G1 (rank). Exact rank of the design: 1 of 2 parameters (two-parameter case), `C + E - 1 = 12` of 13 (T10's form); with the named
+  constraint row, 2 and 13.
+- G2 (report). Without a constraint the fit reports exactly the identifiable combinations and no absolute value: the two-parameter case
+  `reported == {"gE"}` with `gE = 2.5` (1e-12 relative); T10's form the gain ratios `g_c / g_0` and the products `g_c E_e` (1e-12
+  relative to the truth's); `g` and `E` are listed as `unidentified` with the gauge `g -> a g, E -> E / a`.
+- G3 (gauges, convergence). The two gauges `(g, E)` and `(a g, E / a)` give the same `y` (1e-12 relative); fits with `ln g_0 = 0` and
+  `ln g_0 = ln a` both converge (residual at most 1e-20) and their scales differ by `ln a` (1e-12); the reported combinations agree in
+  both gauges (1e-12). Convergence does not identify the scale.
+- G4 (holdout). A same-type holdout (two-parameter case: the last observation; T10's form: the last event, its energy refitted from its
+  own amplitudes with the gains held) closes in both gauges (residual at most 1e-20). Claims judged: "absolute scale validated by a
+  same-type holdout" and "absolute scale identified by convergence" are refused (listed in `claims_refused`); the record says
+  `same-type holdout: not validation (A37)`.
+- G5 (named external scale). With `constraint.external-energy-reference` the rank is full and the fit reports `g` and `E` (1e-12 relative
+  to the truth), naming the constraint as the identifying information; a constraint whose identifier does not start with `constraint.`
+  is not a named constraint and identifies nothing.
+- G6 (R32 record). The fit's payload sidecar (`conditions-payload/1`, built as stage 1's): without a constraint
+  `unconstrained_modes == ["mode.global-gain-scale"]`, `constraints_used == []`; with it `constraints_used ==
+  ["constraint.external-energy-reference"]`, `unconstrained_modes == []`; in both `independent_validation` names neither the constraint
+  nor a same-type holdout, and `check_validation_claim(payload, constraint)` refuses the constraint as validation
+  (`conditions.constraint_as_validation`, CAI-T06-3's rule).
+
+**Planted defects (`gxe`, each detected, exit 1, failed set exact).** `report-absolute` (the fit reports `g` and `E` without a constraint):
+`{G2}`. `holdout-as-validation` (the harness accepts the same-type holdout claim): `{G4}`. `constraint-as-validation` (the constrained
+sidecar lists the constraint in `independent_validation`): `{G6}`. `unnamed-constraint` (the constraint is recorded as the text "the
+energy is known", not a `constraint.` identifier): `{G5, G6}`.
+
+**The reprocessing of 7003 and 7004 (T12-19).** Through the stage-1 loop machinery: a fixture contract validated by the control layer's
+`validate_contract`, every step admitted by `dv.admit` with its computational identity, a receipt per step, the checks by digest as
+`check_result` facts, the control-layer labels and `publish`; the identity-keyed cache lookup with `reuse_decision` acted on only through
+`dv.admit(..., reuse_source=...)`; R32 records checked with `check_used`. It has no outer-round family: nothing is derived (R31), so a
+round family would need a fake derivation; the loop's round rules are stage 1's (T12-01 to T12-04). Contract (session mode M1, steps in
+order):
+`nominal-alignment` (the zero payload `encode_payload({}, geometry, "nominal")` and its R32 sidecar, `t07_alignment_payload.py`),
+`generate-7003` and `generate-7004` (the frozen CAI generator `t07_cai_fixture_generator generate --fixture cai-clean|cai-sagitta
+--block 1 --stratum s --first-event 0 --count 3000`, s = 0..3, exactly as `CaiFiles` in `test_acts_cai_refit.py`), `refit-7003` and
+`refit-7004` (the frozen driver `acts_tracking_driver refit` at nominal geometry, field 1 T, hit sets from truth with the truth `q/p`
+assumed, no payload argument, no vertex or beam constraint: CAI-T07-4's fits), `witness` (checked; required: the weak-mode check and the
+method-card check). Deliverable `weak-mode-witness` (`witness`), tier T2. The executed order is nominal-alignment, generate-7003,
+refit-7003, generate-7004, refit-7004, witness. The command line runs the native programs inside the steps; the unit tests also run the
+same contract with a toy executor (Gaussian toys from `weak_mode_toys` of `test_acts_cai_refit.py`), which tests the plumbing only.
+
+**Native identity (G05 form).** Pinned SHA-256: driver `7556beb828f3a9029a79a34f41c938e7f9ff328281855800d21d655649ece958` (Freeze B
+item "T07 built binary acts_tracking_driver"); CAI generator `f1c7309a804ba71a8e54a1ff55f16685a4255703142e130624fe290e77888931` (the
+build of job 7546791, which wrote T07's record, and of the Freeze-B run 7585954, byte for byte). Each is hashed afresh when the run
+starts and recorded in each step's document. The T07 record: job 7546791 `cai-refit.log`, SHA-256 `0f60e9ac…` as pinned in `t10_a37.py`
+(`T07_LOG_SHA256`), read only.
+
+**Tolerances (T12-19).** `k = 4.5` and `n = 4.5` are CAI-T07-4's (`K_WEAK`, `WEAK_N_SIGMA` in `test_acts_cai_refit.py`;
+`calibration-alignment-interfaces.md`, T07; R37: `k` a fixed threshold, `n` times the se from the fixture's statistics); the cells,
+units and se are `weak_mode_self_check`'s, imported. The agreement with T07's record is at the record's printed precision: track counts
+exact, per-track and stated ratios within 1e-4 (printed to 4 decimals), the change in mean χ²/ndf and its se within 1e-5 (printed to 5
+decimals). The generator and the driver are the same bytes and deterministic, so the two runs should agree to that precision; a larger
+difference is a finding, not a tolerance to widen.
+
+**T12-19 expectations (`witness`).**
+- W1 (native identity). The driver and the generator hash to the pinned values (otherwise the command refuses: `rejected`, exit 2, before
+  any step); `acts_tracking_driver geometry-id` equals the nominal payload's `derived_against.geometry_id`
+  (`nominal_geometry_id()`), and each native step's document records both hashes.
+- W2 (records). Every step ran once, in the order above; the fixture headers say 7003 and 7004, block 1, strata 0-3, 3000 events each;
+  every track is fitted (none failed); each refit product records the nominal alignment payload (slot `alignment`, origin nominal, round
+  null) and `check_used` passes; both refits consumed the same payload identity, and their data inputs differ.
+- W3 (cache). Before each refit the harness asks of every cached product of the same recipe (`t12.cai-refit/1`) whether its data input is
+  the same and what `reuse_decision` says with the payload resolved afresh. For `refit-7004` against `refit-7003` the payload is the
+  same (`reuse_decision`: reuse true) but the data differ, so it is not a hit, nothing is acted on and the step is computed. Positive
+  control: `refit-7004` requested again (same data, same payload) is a hit, acted on through admission, and the control layer records a
+  `reuse` of `refit-7004`'s own artifact. A control-layer reuse of `refit-7003`'s product as `refit-7004` is refused at admission.
+- W4 (the weak mode). In all 8 cells (charge ±1 × bending bins 0-3), the change in `q/p` is at least `k` per-track σ and at least `k`
+  stated σ (0.00412 per GeV), and the change in mean χ²/ndf is within `n` se, in every cell and over all tracks.
+- W5 (reuse of T07's fixture). The 8 cells reproduce CAI-T07-4's record (job 7546791) within the tolerances above.
+- W6 (χ² is blind to it). A χ²-only judge (the change in mean χ²/ndf over all tracks within `n` se, the form of a "residuals converged"
+  check) passes on 7004 against 7003 while W4's bias holds: the record states that χ²/ndf is essentially unchanged while `q/p` is biased.
+- W7 (method card). The T12 reprocessing's method card (`t12-method-card/1`, the rules of `timing_recipe/method_card.py`: every mode has
+  a witness, named constraining information and independent observables, the two identifier sets disjoint, `constraints_used` only this
+  mode's constraints and never an observable) lists the mode `mode.sagitta-like-deformation` (description "sagitta-like deformation"),
+  with `constraint.vertex-or-beam` among its constraining information (R37 names it), `constraints_used == []` (nothing derived), and
+  `not_satisfying_a37` naming the T12 loop placeholders, convergence of a fit and closure on a same-type holdout. The card check passes.
+- W8 (labels, release, claims). Every step is labelled `ok`; the deliverable is published at T2 naming the witness artifact; the record's
+  claims are `{label: synthetic, quality: none, a37: "weak-mode witness reproduced in a T12 reprocessing (identifiability); no
+  alignment quality", control_rules: "not qualified (G07, mode M1)"}`.
+
+With the toy executor W1 and W5 cannot hold (no binaries, no T07 numbers): an honest toy run fails exactly `{W1, W5}`, and each plant
+below fails `{W1, W5}` plus its own set.
+
+**Planted defects (`witness`, each detected, exit 1, failed set exact).** `no-deformation` (the witness step compares `refit-7003`
+with itself): the weak-mode check fails, `witness` is `held`, nothing is published: `{W4, W5, W6, W8}`. `visible-chi2` (every 7004
+χ²/ndf raised by 0.1, a visible deformation, about 18 se over all tracks): the same `{W4, W5, W6, W8}`. `card-without-constraint` (the
+mode's constraining information emptied): the card check fails, `held`, nothing published: `{W7, W8}`. `constraint-as-validation`
+(`constraint.vertex-or-beam` also offered as an independent observable): `{W7, W8}`. `reuse-across-data` (the lookup ignores the data
+input, so `refit-7004` gets a hit on `refit-7003`'s product, acts on it, is refused at admission and computes): `{W3}`.
+
+**Exit codes (core/status.py).** `t12_degeneracy.py gxe [--plant P] --out FILE` and `t12_degeneracy.py witness --build DIR --t07-record
+FILE --work DIR [--plant P] --out FILE`: `ok` 0, every expectation holds; `failed` 1, one does not; `rejected` 2, bad input (unknown plant,
+an output that exists, a missing folder, a work folder that is not empty, a binary or the T07 record not the pinned bytes); `incomplete`
+3, a crash, a native program that fails, or a record that cannot be written. Exit codes from `core.status.exit_code`.
+
+**Found while implementing (after the red run; no expectation changed).** `t07_alignment_payload.payload_sidecar` lists only the
+degrees of freedom a payload moves, so the zero payload's sidecar has no `alignment` section and the R32 reader refuses it
+(`conditions.alignment_incomplete`, seen as W2's `check_used` error). The harness completes the nominal sidecar (every plane's parameters
+of the parametrization, all at nominal) and seals its identity again; T07's tool is not changed (a frozen adapter asset). The check
+digests of the witness step are recorded in each record (`check_digests`), not pinned in the test.
+
+### Stage 6, fix round 1 (review `jobs/t12-stage6/REVIEW.md`, 0/1/5/3; written before the changed tests)
+
+Job 7636529 failed only on `tests.adapters.test_t04_evaluation_layout.TaskDeadline` (a latent frozen test that reads the job's real
+`SLURM_JOB_END_TIME` and fails with under an hour left); it is not edited, and the redrafted job `t12-stage6-r1.sh` asks for 3 h.
+
+- **I1 (open finding against T07, no stage-6 code change).** `t07_alignment_payload.payload_sidecar` (a frozen adapter asset) writes no
+  `alignment` section for a payload that moves nothing, and the R32 reader refuses such a sidecar (`conditions.alignment_incomplete`,
+  `contracts/conditions.py`). The harness's completion of the nominal sidecar stays a workaround, not a fix: the defect is recorded as a
+  post-freeze change request in `calibration-alignment-interfaces.md` ("Open, not gaps"), for the coordinator to put to the user.
+- **m1 (claims).** Four claims are judged: "absolute scale validated" by the same-type holdout, "absolute scale identified" by
+  convergence, "absolute scale identified" by the constraint used, and "absolute scale validated" by the constraint used. Only the third
+  is accepted: a constraint the fit used identifies the scale but is never its validation (§9.6, CAI-T06-3). G4 requires the holdout and
+  convergence claims refused; G5 requires exactly the "identified" claim by the constraint accepted and the "validated" one refused.
+- **m2 (holdout gauges).** Each holdout fit records its `ln g_0`; G4 requires the two to differ by `ln a` (1e-12), so the closures are
+  shown in two different gauges, not twice in one.
+- **m3 (what the driver applied).** The driver is run as CAI-T07-4 ran it, with no payload argument (unchanged). Each refit product now
+  records the native product header's `alignment_payload` per stratum (none expected: nothing applied, `applied: "driver nominal
+  geometry, no payload argument"`) and cites T07's evidence that the zero payload through the placement route gives the plain geometry's
+  records: the line "CAI-T07-3 zero payload through the placement route: /1 records equal" of job 7546791's `cai-refit.log`, which W5 now
+  also requires. W2 requires the header value to be none in every stratum. So the nominal payload in `conditions_used` stands for the
+  driver's built-in nominal geometry, and the record says so.
+- **m4 (native identity per step).** The executor rehashes the driver and the generator at every native step (never a stored value), and
+  the cache keys on it: a hit needs the same data input, `reuse_decision`'s reuse and the same native identity as the cached product's
+  step. Each cache entry records `same_native`; W3's expected entry gains `same_native: true`. A test changes the identity after the run:
+  the lookup for `refit-7004` then finds no hit (`same_native: false`).
+- **m5 (job).** The job runs stage 2's scope check (`t12_reprocessing.py scope-check`) with `--import tests.contracts.test_t12_degeneracy`
+  against every live root (exit 0) and its control, an evidence path in the live tree (exit 2); the receipt holds `ldd` of both binaries
+  and the SHA-256 of every library they resolve to.
+- **n2.** The nominal sidecar's planes come from the nominal geometry text (`planes N` of `nominal_geometry_text()`), not a literal 8.
+- n1 (W6 restates part of W4) and n3 (`visible-chi2` run natively) are not taken: W6 keeps its own statement (the χ²-only judge), and the
+  χ² side's power is shown on toys.
+
 ## A13: recorded blocked-by-resource (stage 5; no GPU job)
 
 The user answered Q1 on 2026-11-13: "Record blocked-by-resource (Recommended)". No T07-T09 recipe has a GPU subchain (the ACTS build,
@@ -305,9 +462,11 @@ are the CPU measurements recorded beside A13.
 - **Q1 (A13 subchain): answered** by the user, 2026-11-13: "Record blocked-by-resource (Recommended)". A13 is `blocked-by-resource`
   (R14), no GPU job; CPU measurements recorded (T12-14, T12-17).
 - **Q2 (A13 reproducibility): moot** while A13 is `blocked-by-resource` (Q1); it returns with a GPU subchain.
-- **Q3 (A37 in T12).** R31 says the weak-mode witness is the T07 fixture "reused in T10 and T12". Does T12's part need its own reprocessing
-  run of fixtures 7003 and 7004 through the T12 loop machinery, or is citing `CAI-T07-4` with a T12 g×E fixture enough? Owner: the coordinator.
+- **Q3 (A37 in T12): answered** by the coordinator, 2026-11-13: T12's part needs its own reprocessing run of fixtures 7003 and 7004
+  through the T12 loop machinery, because T12-19's acceptance says "inside a T12 reprocessing" and R31 says "reused", not cited. Stage 6
+  (T12-19) runs it; T10's reading of the recorded log (`t10_a37.py` `witness_check`) is not T12's evidence.
 - **Q4 (the previous-round link): closed** (coordinator, fix round 1, reversing the stage-0 reading). The schema has the fields:
   `derived_against.upstream_payloads` and `derived_from` hold the previous round's payload, and `producer.step_id` the producing step's
   identity (Stage 1, "Synthetic fixture"). No contracts change is needed.
-- **Q5 (T10).** T12 depends on T07-T10. Which T12 rows may close before T10 is done, with T10's part listed open? Owner: the coordinator.
+- **Q5 (T10): moot** (coordinator, 2026-11-13): T10 is done (`t10-closeout.md`), so no T12 row waits for T10's part. Stage 6 shares
+  T10's A37 fixture form (`t10_a37.py`) without changing it.

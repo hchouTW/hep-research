@@ -1893,6 +1893,7 @@
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/propagate_scale_distortion.py",
     "skills/hep-detector/scripts/stability_monitor.py",
+    "tests/contracts/t12_degeneracy.py",
     "tests/skills/hep_detector/test_adding_layer_d6.py",
     "tools/skill_scripts.json"
    ],
