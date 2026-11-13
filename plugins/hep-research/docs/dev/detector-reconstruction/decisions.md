@@ -830,3 +830,20 @@ Submitted after Freeze B with jobs/evaluation/submit.sh (2fd84fe9; manifest d98f
     `"status": "rejected"` by hand (audit finding 2).
 - Carried to attempt 2 or later: audit findings 2 to 4 (e6-result-lines-audit.md), T07 check tasks writing no milestones (review I3), the
   held bytecode line. Attempt 2 for T07 only after a recorded method change, a return to Freeze B (v4 3.4); the user's word.
+
+## After evaluation attempt 1: the user's word, the T07 diagnosis and the harness fixes (2026-11-13)
+
+- The user, on the coordinator's suggestion: "do your recommendation": a bounded T07 diagnosis of the vertex pull z tail on development data
+  only, the harness fixes now, the bytecode line held until the T07 decision. Then, after the diagnosis confirmed the merge mechanism on
+  fresh block-1 events (job 7623497): "Test candidates on block 1 (Recommended)": C1, C2, C3 in that order, stopping at the first meeting
+  every criterion of the pre-registration `jobs/t07-vz-diag/t07-vz-candidates-prereg.md` (SHA-256 ac3cd0b3...), then the user decides on a
+  return to Freeze B.
+- Diagnosis (t07-vz-diagnosis.md, review t07-vz-diagnosis-review.md): AMVF merges close 3-track vertex pairs (dv 5-7.5 u_v); pure vertices
+  have a Gaussian-like z tail (0.23-0.29 %); every occupancy-1 bin sits near 0.9 % on blocks 1 and 2 (the Freeze-B run scored no pulls).
+  Process note: the block-2 reading was a Python pass over kept records on the login node (no draw); a strict reading of Q8 is crossed.
+- C1 (job 7623624, trial 1 of 3): K8 met, K1 and K2 not met (o1 z tail 0.888 % noise, 0.849 % clean). C2 running.
+- Harness fixes (fix/harness-carried, REPORT.md, REVIEW.md, REREVIEW.md; job of record 7624491): the coordinator's ruling 4 is revised: a
+  signal or kill is a crash; an ordinary non-zero exit of a frozen program stands. The check-task rule extends to resource, deadline and
+  cancellation stops. A refused T07 negative-cases attempt or one with no checks file stays INCOMPLETE and goes to the user. These change
+  three E6 modules recorded beside Freeze B: recorded deviations, re-listed at any return to Freeze B.
+- Backup b22: backup/20261113T024535Z (bundle at 268e5bd4); tar warned that evidence changed during the read (folders of running jobs).
