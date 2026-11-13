@@ -281,8 +281,11 @@ def plane_radii(photons: Path, primaries: Path, detector: dict, first: int, n: i
 
 
 # ------------------------------------------------------------------ the Geant4 task
+G4_TIMEOUT_S = 3 * 3600 + 40 * 60     # inside the 3 h 55 min Slurm limit (the slowest pilot took 58 min)
+
+
 def _simulate(cmd: list) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, capture_output=True, text=True, check=False)
+    return subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=G4_TIMEOUT_S)
 
 
 def run_geant4_task(k: int, root: Path, out: Path, runner=None, program: Path = G.PROGRAM,
