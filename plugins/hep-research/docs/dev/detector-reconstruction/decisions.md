@@ -883,7 +883,7 @@ T09 passed) stay final there. Neither change alters a recipe, a scorer or a prod
 
 1. `tests/adapters/test_t04_evaluation_layout.py`, TaskDeadline.test_the_timeout_is_the_time_left_to_the_deadline: the test passed a fake
    clock (`now=100`) while `start_task` also read the real `SLURM_JOB_END_TIME`, so inside any Slurm job with less than an hour left it failed
-   (3153.7 != 3480 in jobs 7636529 and 7636499; 476.0 in red log jobs/postfreeze-fix/red/red-1). The test now clears that variable for its own
+   (3153.7 != 3480 in job 7636529, 2820.7 in 7636499; 476.0 in red log jobs/postfreeze-fix/red/red-1). The test now clears that variable for its own
    duration. `t04_evaluation_layout.py` itself is unchanged.
 2. `adapters/acts-tracking/assets/fixture_tools/t07_alignment_payload.py`, `payload_sidecar` (found by T12 stage 6, review I1): a payload
    that moves nothing (the zero payload) got no `alignment` section, which the R32 reader refuses (`conditions.alignment_incomplete`). It now
