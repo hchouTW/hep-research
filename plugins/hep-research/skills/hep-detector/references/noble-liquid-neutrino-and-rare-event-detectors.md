@@ -54,6 +54,12 @@ Field non-uniformity displaces the drifting electrons, so the reconstructed `S2`
 is mapped back to the interaction position with a field-distortion map, which enters the
 fiducial volume.
 
+**Light-only (single-phase scintillation) detectors.** No method text, no source read for
+pulse finding, position from the light pattern, other parameter estimation, or energy from
+the light alone: the passage read (PDG RPP 2025, sec. 36.4 opening) covers TPCs, where
+position comes from `S2` and the drift time. Pulse-shape discrimination is in
+[front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
+
 ### Imaging reconstruction in single-phase LArTPCs
 
 The input is the deconvolved charge on each wire versus drift time
@@ -213,6 +219,24 @@ fiducialization, and energy scale** dominate the result.
   assumed; near threshold, noise triggers and pileup with small pulses enter the
   low-energy event rate. Pileup in fast germanium readout is handled by the fast channel of
   [digital pulse processing](front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy).
+- **Time origin of a thermal pulse.** The mean-time and chi-square tests are summed from
+  the start of each pulse, and the best front-edge variant measures from it, so the start
+  is reconstructed first. In Chernyak et al. (2014, sec. 4.1) the steps are: a coarse
+  search for a sample above a set level, typically about one third of the pulse maximum;
+  the standard deviation of the baseline;
+  then the start, as the sample where the signal exceeds a set number of baseline standard
+  deviations and, for the heat signal, the amplitude rises sample by sample over the next
+  several samples. For the light signal, whose signal-to-noise ratio is lower, 2 to 6
+  adjacent samples are summed first. The thresholds are tuned per data set to the sampling
+  rate, the time structure of signal and noise, and the signal-to-noise ratio. The output
+  is a time per pulse, not a position. Failure modes reported there (secs. 4.2, 5 and 6):
+  the start of two coinciding pulses is found less reliably than that of a single pulse,
+  and a wrong start moves pileup events into the single-event region, most at low
+  signal-to-noise ratio; too low a sampling rate leaves too few samples on the rising edge.
+  The loss due to start finding is separated from that of the shape test by repeating the
+  test on pulses whose start is known from their generation. The study uses pulses
+  generated from pulse profiles fitted to measured pulses and from measured noise
+  baselines of one ZnMoO4 scintillating bolometer, not recorded coincidences.
 - **Position from phonons.** With several fast sensors of athermal phonons (for example
   superconducting transition-edge sensors), rather than thermistors that respond mainly to
   the thermal phonons, the early (athermal) part of the signal is shared among the sensors
@@ -242,6 +266,10 @@ fiducialization, and energy scale** dominate the result.
   [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
   Segmented detectors add position from which segment collects the charge and from the
   transient signals induced on its neighbours.
+- **No method text, no source read**: particle identification from a single thermal
+  channel (the recoil-type ratio of the rare-event section needs a second channel); in
+  multisignal devices, the joint estimate across channels (channel covariance, a combined
+  energy, a restricted estimate when one signal is missing).
 
 **Check:** The pileup resolving time and its rejection efficiency versus pulse separation
 are measured with superposed pulses, and the position or fiducial cut states its
