@@ -847,3 +847,23 @@ Submitted after Freeze B with jobs/evaluation/submit.sh (2fd84fe9; manifest d98f
   cancellation stops. A refused T07 negative-cases attempt or one with no checks file stays INCOMPLETE and goes to the user. These change
   three E6 modules recorded beside Freeze B: recorded deviations, re-listed at any return to Freeze B.
 - Backup b22: backup/20261113T024535Z (bundle at 268e5bd4); tar warned that evidence changed during the read (folders of running jobs).
+
+## T07: failed at attempt 1 (the user, 2026-11-13); D4 closes
+
+The three pre-registered candidates (t07-vz-candidates-prereg.md, SHA-256 ac3cd0b3...), each a valid trial (K8 met), on the same block-1
+events (7623497's digests):
+- C1, maxVertexChi2 18.42 -> 9 (job 7623624): K1 and K2 not met (o1 z tail 0.888 % noise, 0.849 % clean).
+- C2, annealing cutOff 9 -> 4 (job 7624555): K1, K2 (noise s9), K4 and K6 not met (z tail 0.69 %, every pull width narrowed 4-8 %,
+  merges rose, vertex finding -0.6 %).
+- C3, tracksMaxSignificance 5 -> 3 (job 7625490): K1, K2, K3, K5 met (z tail 0.33-0.37 %); K4, K6 and K7 not met (vertex finding 0.968-0.969,
+  x and y widths -6 to -11 %, o3 z tail 0.27 % -> 0.82 %).
+
+By the pre-registration no method change is justified. The user: "T07 failed at attempt 1 (Recommended)". T07's outcome for this plan is
+**failed at attempt 1** (v4 3.4: the failure stands; no attempt 2). The cause, from the diagnosis (t07-vz-diagnosis.md and its review):
+AMVF merges close 3-track vertex pairs (dv 5-7.5 u_v); about two thirds of the absorbed clusters are never seeded; pure vertices have a
+Gaussian-like z tail; every occupancy-1 bin sits near 0.9 % against the 1 % limit. A remedy would need a different vertex seeding or
+splitting method, or a Freeze A amendment to the far range: new design work, outside this plan's attempt-2 path, the user's to start.
+The candidate switches stay on branch t07/vz-diagnosis only (never merged: they touch a frozen recipe file).
+
+D4 closes: T07 failed at attempt 1; T08 and T09 passed at attempt 1 (narrowed claims). Next: the held bytecode line as a recorded post-D4
+change (calo_cluster.py, photon_likelihood.py; T08 and T09 outcomes stay final at their frozen hashes in freeze-b.md), then Gate D.

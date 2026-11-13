@@ -105,3 +105,11 @@ Also open, though no sheet row carries it:
 - Deviation 10: earlier jobs' manifests missed files the whole-tree scans read. Stage 10's manifest and receipt cover them
   (`deviations.md`).
 - The R32 row of `calibration-alignment-interfaces.md` now names the T07 evidence for `conditions_used` (A17 above): the mapping, tested on synthetic documents.
+
+## Evaluation outcome (2026-11-13)
+
+T07 **failed at attempt 1** on block 11 (summary 7613452): 1,259 of 1,260 records pass, 46 of 47 gates; the failing record is fixture 7002,
+stratum 9, `vertex pull z`, tail rate 1.058 % (U 1.189 %) against L 1 %. Diagnosis on development data (t07-vz-diagnosis.md): AMVF merges
+close 3-track vertex pairs; every occupancy-1 bin sits near 0.9 % on blocks 1 and 2. Three pre-registered candidates (C1-C3) all failed their
+criteria; by the user's decision no attempt 2 is made (decisions.md, "T07: failed at attempt 1"). A remedy needs a different vertex seeding
+or splitting method: new design work.
