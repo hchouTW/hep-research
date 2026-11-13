@@ -398,11 +398,16 @@ def _phi_build(n):
     return toy.build_toy(n, "full", runs_subset=PHI_RUNS)
 
 
-def phi_resim_block(case: str, exposure: int = 500, mc: int = 5000, n_design: int = 12, held_back: int = 8) -> dict:
+PHI_EXPOSURE, PHI_MC, PHI_SEED_ROUND = 4000, 40_000, 1   # part E (A20): identified fits (pilot 7647759: sigma_tot /
+#   sigma_prior 0.47-0.50 at 4000, 0.67-0.71 at 2000, 1.2-1.4 at part C/D's 500); fresh seeds (round 1; the pilot used 0)
+
+
+def phi_resim_block(case: str, exposure: int = PHI_EXPOSURE, mc: int = PHI_MC, n_design: int = 12, held_back: int = 8,
+                    seed_round: int = PHI_SEED_ROUND) -> dict:
     """The material thickness phi resimulated with common random numbers (not the light-yield equivalence)."""
     sig = PHI_CASES[case]
     truth = np.array([0.25, 10.0])
-    base = cal_seed(41, list(PHI_CASES).index(case))
+    base = cal_seed(41, list(PHI_CASES).index(case) + 100 * seed_round)
     sp = _Problem(_phi_build, PHI_NAMES, PHI_THETA, exposure, mc, mc_seed=(base, 1), boot_seed=(base, 2),
                        shift={"material_thickness": (1.0, sig)})
     b = np.r_[truth, np.zeros(sp.layout.n_beta - 2)]
