@@ -883,3 +883,14 @@ The records tests check each file as its job-of-record bytes plus exactly the on
 - Phase G: "Agree with both (Recommended)": U11, no real data for this plan (K03 synthetic only; the data-control layer stays incomplete
   and open, R14, R21); T13 prepared now (writer brief, frozen scorer), the holdout written and kept off this account and host, T13 run last.
 - T15b: "Draft spec, digitization off (Recommended)": the K16 element_sim spec drafted for the user's freeze by hash.
+
+## T15b: the K16 element_sim sample spec frozen (the user, 2026-11-13)
+
+Asked with `t15b-element-sim-spec.md` (SHA-256 99a678e5e06ed9d30860a963d86ed170ee78da6a5bb19493bc84054fe44aec99; reviews
+jobs/gate-d/T15B-REVIEW.md and T15B-REREVIEW.md; pilot of record 7627279 PASS on block 1: 500 events per bin, chunk-merge equal to the whole
+run; Geant4 43.7 and 59.7 CPU-ms per event; ~1.6 CPU-h for the full sample): the user, "Freeze as listed (Recommended)". Frozen with it, as
+Choices outside v4 3.2 and not amendments of Freeze A: fixture_id 1601; blocks 21 (sample), 22 (attempt 2), 23 (reserved for K18
+confirmation); the per-event seed form S = H("t15b-k16-1601", "block-<b>", species) (deviations.md row 11); noise-digitization off (the
+user's earlier "Draft spec, digitization off (Recommended)"). The user also confirmed the K16 reading: "Yes, it covers them (Recommended)":
+the 2026-11-06 acceptance of section 16 covers section 13's hard gates, quality objective, tie rule and none-passes rule (R02). Resources
+approved with the freeze: about 1.6 CPU-h for the 96,000-event sample on block 21.
