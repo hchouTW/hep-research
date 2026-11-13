@@ -407,6 +407,13 @@
    "registered_at": "2026-11-13T00:57:28Z",
    "card_commit": "7bb555f0",
    "reason": "re-registration before the judged p3-g4 evidence arrays (card changed at 7bb555f0: execution log only)"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "c080ccdc981bb5bc86789eec8bf6bfe81a52ab2748d6bb2745d8d9fd5bd8e536",
+   "registered_at": "2026-11-13T04:59:09Z",
+   "card_commit": "6e801242",
+   "reason": "campaign p3-toy-g8b registered before any run (second registration of rows 2006/2015, truth at 100x the fit MC, A15)"
   }
  ]
 }
