@@ -95,7 +95,7 @@ class SingleEndedRecipe(unittest.TestCase):  # CAI-T10-1, the recipe against the
             self.assertLessEqual(abs(k_after["steps"][0]["applied_ns"] - (OFFSETS[self.channel] + delta)), TIME_TOL_NS)
 
     def tofs(self, records, start_of):
-        return {r["hit_id"]: event_time.tof(r, start_of(r))["tof_ns"] for r in records}
+        return {r["hit_id"]: event_time.tof(r, start_of(r), records)["tof_ns"] for r in records}
 
     def test_external_event_time(self):  # 1b
         before, after = self.run_pair(DELTA_NS)
@@ -193,11 +193,11 @@ class SeveralHits(unittest.TestCase):  # fix round 1: M7 (two hits on the change
         start = event_time.external(T0_EXTERNAL, "fixture start counter")
         for h in track:
             with self.subTest(hit=h):
-                self.assertLessEqual(abs((event_time.tof(a[h], ea)["tof_ns"] - event_time.tof(b[h], eb)["tof_ns"]) - (dt[h] - common)),
+                self.assertLessEqual(abs((event_time.tof(a[h], ea, after)["tof_ns"] - event_time.tof(b[h], eb, before)["tof_ns"]) - (dt[h] - common)),
                                      TIME_TOL_NS)
                 lb = event_time.leave_one_out(before, weights, BETA_HYP, track_id=track[h])
                 la = event_time.leave_one_out(after, weights, BETA_HYP, track_id=track[h])
-                self.assertLessEqual(abs((event_time.tof(a[h], la)["tof_ns"] - event_time.tof(b[h], lb)["tof_ns"])
+                self.assertLessEqual(abs((event_time.tof(a[h], la, after)["tof_ns"] - event_time.tof(b[h], lb, before)["tof_ns"])
                                          - (dt[h] - loo[track[h]])), TIME_TOL_NS)
                 self.assertLessEqual(abs((event_time.tof(a[h], start)["tof_ns"] - event_time.tof(b[h], start)["tof_ns"]) - dt[h]),
                                      TIME_TOL_NS)
@@ -277,11 +277,18 @@ class CheckTool(unittest.TestCase):  # the scoring-side check: PASS on the recip
                     "stale-event-time": "CAI-T10-1c", "loo-keeps-own-hit": "CAI-T10-1d",
                     "recipe-offset-twice": "CAI-T10-1a", "recipe-loo-common": "CAI-T10-1d"}   # recipe-side plants (fix round 1, M4)
         self.assertEqual(dict(t10_cai.SINGLE_PLANTS), expected)
+        self.assertEqual(t10_cai.PLANT_FAILED_ITEMS, {          # stage 2 fix round 1, I4: fixed before the change to t10_cai.py
+            "offset-twice": {"CAI-T10-1a", "CAI-T10-1f"}, "offset-sign": {"CAI-T10-1a", "CAI-T10-1f"},
+            "external-uses-hits": {"CAI-T10-1b", "CAI-T10-1f"}, "stale-event-time": {"CAI-T10-1c"}, "loo-keeps-own-hit": {"CAI-T10-1d"},
+            "recipe-offset-twice": {"CAI-T10-1a", "CAI-T10-1b", "CAI-T10-1c", "CAI-T10-1d", "CAI-T10-1f"}, "recipe-loo-common": {"CAI-T10-1d"},
+            "position-no-half": {"CAI-T10-2"}, "mean-one-end": {"CAI-T10-2"}, "recipe-position-no-half": {"CAI-T10-2"}})
         for plant, item in expected.items():
             with self.subTest(plant=plant):
                 result = self.single(plant)
                 self.assertEqual(result["verdict"], "FAIL")
                 self.assertEqual(result["items"][item]["verdict"], "FAIL")
+                failed = sorted(k for k, v in result["items"].items() if v["verdict"] == "FAIL")
+                self.assertEqual(failed, sorted(t10_cai.PLANT_FAILED_ITEMS[plant]))     # stage 2 fix round 1, I4: the exact set
         two_expected = {"position-no-half": "CAI-T10-2", "mean-one-end": "CAI-T10-2", "recipe-position-no-half": "CAI-T10-2"}
         self.assertEqual(dict(t10_cai.TWO_PLANTS), two_expected)
         for plant, item in two_expected.items():
@@ -289,6 +296,8 @@ class CheckTool(unittest.TestCase):  # the scoring-side check: PASS on the recip
                 result = self.two(plant)
                 self.assertEqual(result["verdict"], "FAIL")
                 self.assertEqual(result["items"][item]["verdict"], "FAIL")      # N2: the item, not only the verdict
+                failed = sorted(k for k, v in result["items"].items() if v["verdict"] == "FAIL")
+                self.assertEqual(failed, sorted(t10_cai.PLANT_FAILED_ITEMS[plant]))
 
     def test_recipe_plants_leave_the_recipe_unchanged_afterwards(self):  # a plant is undone after its run
         self.single("recipe-offset-twice")
@@ -317,6 +326,7 @@ class CheckTool(unittest.TestCase):  # the scoring-side check: PASS on the recip
             self.assertEqual(planted.returncode, 1, planted.stdout + planted.stderr)
             self.assertIn("RESULT t10-cai FAIL", planted.stdout)
             self.assertIn("PLANT offset-sign item CAI-T10-1a failed in 5 of 5 events", planted.stdout)   # M4
+            self.assertIn("RESULT t10-cai FAIL events 5 failed 5 plant offset-sign items CAI-T10-1a,CAI-T10-1f\n", planted.stdout)
             bad = subprocess.run([sys.executable, "-B", str(script), "run", "--seed", "7", "--events", "0", "--out", str(Path(scratch) / "b")],
                                  capture_output=True, text=True, timeout=120)
             self.assertEqual(bad.returncode, 2)

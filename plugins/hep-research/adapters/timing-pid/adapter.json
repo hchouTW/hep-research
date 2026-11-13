@@ -2,25 +2,35 @@
  "id": "adapter:timing-pid",
  "version": "0.1.0",
  "status": "proposed",
- "purpose": "T10 timing as a development binding in Python, recipe reco.timing.time-chain/1 (as decisions.md U12 A for T08 and T09; not a native backend, whose gap stays open), stage 1 (docs/dev/detector-reconstruction/t10-timing-stage-plan.md): the conditions payload timing-payload/1, one per chain step (offset, amplitude-dependent walk, propagation along the counter) keyed by the channel map timing-channel-map/1, with derived payloads that record their source; the time chain of single-ended and two-ended counters with, per hit, the value before and after each step in chain order with its payload identity, the amplitude, both ends' times or the position with its source, and the path length (plan R35), with a reader that refuses a broken chain and recomputes every applied value from its parameter and, given them, the payloads; external, common linear, per-track leave-one-out linear (every hit of the track excluded) and median event times that record source, estimator, hits and weights; time of flight and beta, each TOF naming its event time; and on the scoring side the calibration-interface checks CAI-T10-1 and CAI-T10-2 of plan R37 with planted-defect controls on the check side and the recipe side; synthetic constants only, no timing, TOF or PID quality claim; optional, required by no skill",
+ "purpose": "T10 timing as a development binding in Python, recipe reco.timing.time-chain/1 (as decisions.md U12 A for T08 and T09; not a native backend, whose gap stays open), stage 1 (docs/dev/detector-reconstruction/t10-timing-stage-plan.md): the conditions payload timing-payload/1, one per chain step (offset, amplitude-dependent walk, propagation along the counter) keyed by the channel map timing-channel-map/1, with derived payloads that record their source; the time chain of single-ended and two-ended counters with, per hit, the value before and after each step in chain order with its payload identity, the amplitude, both ends' times or the position with its source, and the path length (plan R35), with a reader that refuses a broken chain and recomputes every applied value from its parameter and, given them, the payloads; external, common linear, per-track leave-one-out linear (every hit of the track excluded) and median event times that record source, estimator, hits and weights; time of flight and beta, each TOF naming its event time; and on the scoring side the calibration-interface checks CAI-T10-1 and CAI-T10-2 of plan R37 with planted-defect controls on the check side and the recipe side; stage 2 (t10-timing-stage-plan.md section 6): each event-time hit entry carries its track_id and tof() refuses a leave-one-out start that lists or does not exclude its own hit (re-review R1, R2); dE/dx with every sample, path length and saturation flag kept before truncation and normalization, recomputable by a reader (R35); TOF species hypotheses with Gaussian time likelihoods, LLRs labelled not a probability, support per hypothesis pair, the working point, probabilities only with stated priors, and missing-input records without numbers; P(selected | true) and P(true | selected) with its stated composition kept apart (BP07); the method card timing-method-card/1 with each unconstrained mode, its witness, its named external constraint and its independent observables (section 9.6, A37); counter counts with thresholds and per-channel valid exposure as a T06 counts product (W6, A19); and on the scoring side the stage 2 checks (fixture_tools/t10_stage2.py, fixture_tools/t10_a37.py: PID diagnostics, the g x E degeneracy, T07's weak-mode run record read) with planted-defect controls; synthetic constants only, no timing, TOF, PID, dE/dx, calibration or counting quality claim; optional, required by no skill",
  "tools": [
   {
-   "name": "timing-pid development binding (Python with NumPy)",
+   "name": "timing-pid development binding (Python with NumPy; the counts product read by the plugin's contracts)",
    "status": "proposed",
    "tested_versions": []
   }
  ],
  "environment": "none declared",
  "assets": [
+  "assets/fixture_tools/t10_a37.py",
+  "assets/fixture_tools/t10_cai.py",
+  "assets/fixture_tools/t10_stage2.py",
+  "assets/timing-method-card.json",
   "assets/timing_recipe/__init__.py",
+  "assets/timing_recipe/counts.py",
+  "assets/timing_recipe/dedx.py",
   "assets/timing_recipe/event_time.py",
+  "assets/timing_recipe/method_card.py",
+  "assets/timing_recipe/pid.py",
   "assets/timing_recipe/time_chain.py",
-  "assets/timing_recipe/timing_payload.py",
-  "assets/fixture_tools/t10_cai.py"
+  "assets/timing_recipe/timing_payload.py"
  ],
  "tests": [
+  "../../tests/adapters/test_timing_a37.py",
   "../../tests/adapters/test_timing_cai.py",
-  "../../tests/adapters/test_timing_chain.py"
+  "../../tests/adapters/test_timing_chain.py",
+  "../../tests/adapters/test_timing_counts.py",
+  "../../tests/adapters/test_timing_pid.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; proposed until a job of record runs it; hand-made and seeded synthetic hits on the login node only so far; interface tests of plan R37 with no quality claim"

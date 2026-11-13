@@ -1,0 +1,54 @@
+{
+ "format": "timing-method-card/2",
+ "recipe": "reco.timing.time-chain/1",
+ "scope": "T10 development binding (stage 2): the time chain, event times, TOF and beta, TOF species hypotheses, dE/dx retention and counter counts; synthetic data only; no calibration, alignment or PID quality claim (plan R31, R37)",
+ "sources": ["plan v9.2 section 9.6 and A37", "skills/hep-detector/references/calibration-and-alignment.md (alignment and weak modes; calibration standards; outer loops)", "skills/hep-detector/references/particle-identification.md (time of flight)"],
+ "rule": "an item that constrains a mode is never one of its independent observables (section 9.6): the constraint.* and observable.* identifiers of a mode are disjoint, and constraints_used names constraint identifiers of that mode only",
+ "unconstrained_modes": [
+  {
+   "mode": "mode.amplitude-scale",
+   "description": "the gain x energy gauge of section 9.6: amplitudes A = g E are unchanged under g -> a g, E -> E / a; the walk coefficient a_c / sqrt(A) is defined against the amplitude scale in use (A -> lambda A with a_c -> a_c sqrt(lambda) leaves every corrected time unchanged)",
+   "witness": "t10_a37.py gxe_check: exact rank C + E - 1, two gauges with identical amplitudes, convergence and a same-type holdout equal in both; test_timing_a37 ChainGauge",
+   "constraining_information": [
+    {"id": "constraint.known-energy-event", "text": "a reference event or source of known energy (an external energy scale)"},
+    {"id": "constraint.test-pulse", "text": "a test pulse of known charge on a channel"}
+   ],
+   "independent_observables": [
+    {"id": "observable.mip-most-probable-value", "text": "the most probable deposit of minimum-ionizing tracks at a known path length, not used in the derivation"}
+   ],
+   "constraints_used": [],
+   "identifiable_combinations": ["gain ratios g_c / g_c'", "products g_c E_e (the amplitudes)"]
+  },
+  {
+   "mode": "mode.common-time-offset",
+   "description": "a common offset of every channel with an internal (common or leave-one-out) event time leaves every TOF unchanged, because the event time moves with it",
+   "witness": "t10_stage2.py pid, item shared-clock: external-time TOF moves by -delta, internal-time TOF by 0",
+   "constraining_information": [
+    {"id": "constraint.external-start-time", "text": "an external start time (a start counter or the bunch clock)"}
+   ],
+   "independent_observables": [
+    {"id": "observable.known-species-tof", "text": "the TOF of a species of known mass at a momentum where its beta is known"}
+   ],
+   "constraints_used": [],
+   "identifiable_combinations": ["time differences between channels", "internal-time TOF"]
+  },
+  {
+   "mode": "mode.curvature-offset",
+   "description": "the momentum source's weak mode (a sagitta-like curvature offset): q/p biased while the track chi2/ndf is essentially unchanged; it moves every t_pred and mass hypothesis of the TOF PID",
+   "witness": "CAI-T07-4, fixture 7004 against 7003, job 7546791 (cai-refit.log, SHA-256 pinned in t10_a37.py): in all 8 cells the q/p change is at least 4.5 per-track sigma while the mean chi2/ndf change is within 4.5 se",
+   "constraining_information": [
+    {"id": "constraint.vertex-or-beam", "text": "vertex or beam constraint (R37 names it as constraining the T07 mode)"},
+    {"id": "constraint.cosmic-or-halo-halves", "text": "cosmic-ray or halo tracks fitted as two independent halves"},
+    {"id": "constraint.field-reversal", "text": "field-reversal or detector-inversion running"}
+   ],
+   "independent_observables": [
+    {"id": "observable.resonance-mass-symmetry", "text": "a resonance mass versus charge, direction and momentum"},
+    {"id": "observable.electron-positron-e-over-p", "text": "electron and positron E/p"},
+    {"id": "observable.independent-subdetectors", "text": "comparison of independent subdetectors measuring the same track"}
+   ],
+   "constraints_used": [],
+   "identifiable_combinations": ["charge-symmetric quantities insensitive to a curvature offset (at first order)"]
+  }
+ ],
+ "not_satisfying_a37": ["the placeholder convergence and unconstrained-mode checks of the T12 loop fixture", "convergence of a fit", "closure on a same-type holdout"]
+}

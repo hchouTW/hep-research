@@ -1868,6 +1868,7 @@
    "lines": 335,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/timing-pid/assets/timing-method-card.json",
     "contracts/naming/surfaces.json",
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/hep-computing/references/research-workflow-control.md",
@@ -2498,6 +2499,9 @@
    "lines": 287,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/timing-pid/assets/timing-method-card.json",
+    "adapters/timing-pid/assets/timing_recipe/dedx.py",
+    "adapters/timing-pid/assets/timing_recipe/pid.py",
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
