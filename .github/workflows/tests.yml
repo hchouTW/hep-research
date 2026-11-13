@@ -142,6 +142,10 @@ jobs:
         if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
         working-directory: .
         run: python -m unittest discover -s evals/research_communication/tests -t evals/research_communication/tests
+      - name: T13 holdout scorer tests (synthetic fake fixtures, no model calls)
+        if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
+        working-directory: .
+        run: python -m unittest discover -s evals/reconstruction-holdout/tests -t evals/reconstruction-holdout/tests
       - name: Behavioral-harness tests, case validation and invariant coverage (fake host, no model calls)
         if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
         working-directory: .
