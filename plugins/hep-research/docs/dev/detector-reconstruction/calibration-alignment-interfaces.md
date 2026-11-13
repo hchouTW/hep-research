@@ -26,7 +26,7 @@ Status words: **tested** means the interface has checks that pass on synthetic f
 | R34 | Chain order of applied payloads | Written for T08 (job 7552825): each cell-chain step records its payload identity in chain order; exactness under a gain change is CAI-T08-1, tested in D2 stage 2 (job 7554028, below) | T07, T08 | `chain_record` in `adapters/calo-cluster/assets/calo_recipe/cell_chain.py` | `CAI-T08-1`, `CAI-T08-2` |
 | R32, R34, R37 | Gain payload of the cell chain with its channel map; derived payloads with their own identity and source; the product records the gain payload it consumed and is never overwritten; fixed-membership re-evaluation under another gain payload | Tested (D2 stage 2, job 7554028 PASS, on synthetic data): every refusal of the job exits 2 and writes nothing; 15 development products `calo-cluster-product/1`, 12 CAI products `/2` | T08 | `adapters/calo-cluster/assets/calo_recipe/gain_payload.py`, `calo_recipe/recalibration.py`, the gain step of the product header (`calo_recipe/cell_chain.py`, `calo_recipe/product.py`), `reconstruct` in `calo_cluster.py`; checks in `fixture_tools/t08_cai.py` | `tests/adapters/test_calo_cai.py`; `CAI-T08-1`, `CAI-T08-2` on t08-grid/1 block 1 (below) |
 | R34 | Stable channel identifiers, cluster track associations, cell path lengths | Partly written (job 7552825): stable channel IDs and per-cluster sharing fractions in the calo-cluster product; track associations and cell path lengths not written (no tracks in t08-grid/1) | T08 | `adapters/calo-cluster/assets/calo_recipe/product.py` | `CAI-T08-1`, `CAI-T08-2` |
-| R35 | Time hits before and after each correction step, event-time source and weights, dE/dx samples | Time chain and event times written in the T10 timing lane, stage 1 (`t10-timing-stage-plan.md`), checked by unit tests on the login node only; its stage job is drafted, not run, so not yet Tested. dE/dx samples: Designed (stage 2) | T10 | `adapters/timing-pid/assets/timing_recipe/time_chain.py`, `timing_recipe/event_time.py`, `timing_recipe/timing_payload.py` (`timing-payload/1`) | `CAI-T10-1`, `CAI-T10-2` in `adapters/timing-pid/assets/fixture_tools/t10_cai.py`; `tests/adapters/test_timing_chain.py`, `tests/adapters/test_timing_cai.py` |
+| R35 | Time hits before and after each correction step, event-time source and weights, dE/dx samples | Time chain and event times: Tested (T10 timing stage 1, job 7593003 PASS, synthetic). Event-time hits with their `track_id` (stage 2, R1) and dE/dx samples kept before truncation and normalization (`timing_recipe/dedx.py`): written in stage 2 (`t10-timing-stage-plan.md` section 6), login unit tests only, its job drafted, not run | T10 | `adapters/timing-pid/assets/timing_recipe/time_chain.py`, `timing_recipe/event_time.py`, `timing_recipe/timing_payload.py` (`timing-payload/1`) | `CAI-T10-1`, `CAI-T10-2` in `adapters/timing-pid/assets/fixture_tools/t10_cai.py`; `tests/adapters/test_timing_chain.py`, `tests/adapters/test_timing_cai.py` |
 | R36 | Rounds are separable: a payload records its family and round, a product the round it consumed, checked against the payload, and reuse follows identity only, with a new dependency also invalidating | Tested | T06 | `loop` in `conditions_payload.json`, `round` in `conditions_used`, `check_used`, `reuse_decision` | `test_rounds_are_separable`, `ConsumedRound`, `test_added_dependency_invalidates` |
 | R36 | Final-round delivery and iteration status of non-final outputs | Designed (tested on login, job of record pending; T12 stage 1, fix round 1), on synthetic data: the fixture contract fixes the final round at 2 and both placeholder checks by digest; converging, both outputs are published and the earlier rounds are labelled `superseded_by_iteration` and `iteration_internal`; non-converging, the final step is `held`, nothing is published and the failure stays in the history. The placeholder checks never satisfy A37. Each round payload names the previous round's payload in `derived_against.upstream_payloads` and `derived_from`, and its producing step's identity as `producer.step_id`, so no contracts change is needed (t12-stage-plan.md, Q4 closed); two control-layer findings are open below | T12 | `tests/contracts/t12_outer_loop.py` (harness: the existing `contracts/conditions.py` and the control layer's derivation); the fixed final-round rule stays in `skills/hep-detector/references/calibration-and-alignment.md` (G06) | `CAI-T12-1`, `CAI-T12-2` in `tests/contracts/test_t12_outer_loop.py`; t12-stage-plan.md, Stage 1 |
 
@@ -130,7 +130,7 @@ Cases R37's stated expectations do not cover (its last paragraph), recorded befo
 
 ## T10 acceptance items (timing lane stage 1; conventions and expectations fixed before the job, R37)
 
-Status: written; login unit tests and a seeded check-tool run only, its stage job drafted and not run, so neither item is Tested yet.
+Status: Tested (job 7593003 PASS, synthetic; stage 1). Stage 2 additions below: written, login only, its job drafted, not run.
 Full text: `t10-timing-stage-plan.md` sections 2 and 3. Everything in this section that R37 does not state is **derived here, not from
 a source**, and is recorded here before the check runs (R37's recording rule).
 
@@ -147,8 +147,30 @@ a source**, and is recorded here before the check runs (R37's recording rule).
 
 | ID | Status | Fixture and check |
 | --- | --- | --- |
-| `CAI-T10-1` | Written, login only | single-ended counters; `adapters/timing-pid/assets/fixture_tools/t10_cai.py`, `tests/adapters/test_timing_cai.py` |
-| `CAI-T10-2` | Written, login only | a two-ended counter; same files |
+| `CAI-T10-1` | Tested (job 7593003 PASS) | single-ended counters; `adapters/timing-pid/assets/fixture_tools/t10_cai.py`, `tests/adapters/test_timing_cai.py` |
+| `CAI-T10-2` | Tested (job 7593003 PASS) | a two-ended counter; same files |
+
+### T10 stage 2 additions (recorded before its job; derived here, not from a source, where R37 and BP07 do not state them)
+
+Full text: `t10-timing-stage-plan.md` section 6.
+
+- **Event-time hits (re-review R1, R2):** each hit entry of an event-time record carries its `track_id`; a leave-one-out record listing a
+  hit of its own track is refused; `tof()` refuses a leave-one-out start that lists the hit or does not exclude it. Fix round 1 (I1):
+  `check(record, event)` and `tof(record, start, event)` check an internal start against the event's hit records (tracks, the full
+  excluded set, and `estimates_ns` and `value_ns` recomputed exactly), so a relabelled or stale start is refused.
+- **dE/dx (R35; fixture rule):** sort by deposit over path, drop the highest `floor(f n)` samples, average the rest; flags `few-samples`
+  (n < 4) and `saturated-in-kept`; every sample, the kept and dropped sets and the normalization source kept, recomputable by a reader.
+- **Shared clock (derived here):** a common offset `δ` of every channel moves an external-time TOF by `−δ` and an internal (common or
+  leave-one-out, weights summing to 1) TOF by 0. **Wrong bunch:** the external time late by `b` moves every residual by `−b`. **Wrong
+  path:** `L(1+ε)` scales every `t_pred` by `(1+ε)`.
+- **A37 (§9.6):** the artificial g×E model in logarithms has rational rank `C + E − 1`; two gauges, convergence and a same-type holdout
+  are equal, and only a named external constraint (an event of known energy) fixes the scale. The weak-mode witness is T07's run record
+  of `CAI-T07-4` (job 7546791, `cai-refit.log` SHA-256 `0f60e9ac0ebe9114c0ba1f64369926027b7b130d9c43884ddcd458bf73316a90`), read, not
+  rerun: q/p change ≥ 4.5 per-track σ and mean χ²/ndf change within 4.5 se in all 8 cells. The method card
+  `adapters/timing-pid/assets/timing-method-card.json` lists the amplitude scale, the common time offset and the momentum source's
+  curvature offset, each with its named external constraint and independent observables (`timing-method-card/2`, fix round 1, I3:
+  every item has an identifier, and per mode the constraint and observable identifiers are disjoint). T07's SHA-256 and job are pinned
+  in `fixture_tools/t10_a37.py` itself (I2), with the record's own outcome required (M9). T12's placeholder checks are not used.
 
 ## Boundaries for the C&A plan
 

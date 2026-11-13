@@ -343,7 +343,8 @@ class EventTimeRecords(unittest.TestCase):  # R35-5
     def test_common_linear_records_hits_and_weights(self):
         rec = event_time.common_linear(self.records, self.weights, BETA_HYP)
         self.assertEqual((rec["source"], rec["estimator"]), ("internal", "linear-fixed-weights"))
-        self.assertEqual(rec["hits"], [{"hit_id": h, "weight": w} for h, w in sorted(self.weights.items())])
+        tracks = {10: 1, 11: 2, 12: 3, 13: 4}
+        self.assertEqual(rec["hits"], [{"hit_id": h, "weight": w, "track_id": tracks[h]} for h, w in sorted(self.weights.items())])  # R1
         self.assertEqual(rec["beta_hypothesis"], BETA_HYP)
         self.assertIsNone(rec["excluded_track"])
         self.assertEqual(rec["excluded_hits"], [])
@@ -380,7 +381,7 @@ class EventTimeRecords(unittest.TestCase):  # R35-5
         with self.assertRaises(event_time.InputError):
             event_time.common_linear([], {}, BETA_HYP)
         rec = event_time.leave_one_out(self.records, self.weights, BETA_HYP, track_id=3)
-        rec["hits"].append({"hit_id": 12, "weight": 0.0})
+        rec["hits"].append({"hit_id": 12, "weight": 0.0, "track_id": 3})
         with self.assertRaises(event_time.InputError):
             event_time.check(rec)                                                                     # own hit used
 
@@ -395,16 +396,47 @@ class EventTimeRecords(unittest.TestCase):  # R35-5
                                              "value_ns": 3.25, "hit_ids": [], "identity": canonical_identity(start)})
         self.assertEqual(tof["path_length_cm"], 320.0)
         with self.assertRaises(event_time.InputError):
-            event_time.tof(self.records[2], event_time.leave_one_out(self.records, self.weights, BETA_HYP, track_id=2))
+            event_time.tof(self.records[2], event_time.leave_one_out(self.records, self.weights, BETA_HYP, track_id=2), self.records)
 
     def test_tof_names_its_event_time(self):  # fix round 1 M8: a stale event time is distinguishable
         common = event_time.common_linear(self.records, self.weights, BETA_HYP)
-        tof = event_time.tof(self.records[0], common)
+        tof = event_time.tof(self.records[0], common, self.records)
         self.assertEqual(tof["event_time"]["value_ns"], common["value_ns"])
         self.assertEqual(tof["event_time"]["hit_ids"], [10, 11, 12, 13])
         self.assertEqual(tof["event_time"]["identity"], canonical_identity(common))
         other = event_time.common_linear(self.records, {10: 0.4, 11: 0.3, 12: 0.2, 13: 0.1}, BETA_HYP)
-        self.assertNotEqual(event_time.tof(self.records[0], other)["event_time"]["identity"], tof["event_time"]["identity"])
+        self.assertNotEqual(event_time.tof(self.records[0], other, self.records)["event_time"]["identity"], tof["event_time"]["identity"])
+
+    def test_an_internal_start_needs_the_event(self):  # stage 2 fix round 1, I1
+        common = event_time.common_linear(self.records, self.weights, BETA_HYP)
+        with self.assertRaises(event_time.InputError):
+            event_time.tof(self.records[0], common)                   # no event: the start cannot be checked against its hits
+        event_time.check(common, self.records)
+
+    def test_check_recomputes_value_and_estimates(self):  # stage 2 fix round 1, I1
+        common = event_time.common_linear(self.records, self.weights, BETA_HYP)
+        for name, change in {"value": lambda r: r.__setitem__("value_ns", r["value_ns"] + 0.5),
+                             "estimate": lambda r: r["estimates_ns"][0].__setitem__(1, r["estimates_ns"][0][1] + 0.5),
+                             "a hit left out": lambda r: (r["hits"].pop(), r["estimates_ns"].pop()),
+                             "beta hypothesis": lambda r: r.__setitem__("beta_hypothesis", 0.9)}.items():
+            bad = copy.deepcopy(common)
+            change(bad)
+            with self.subTest(case=name), self.assertRaises(event_time.InputError):
+                event_time.check(bad, self.records)
+        median = event_time.median(self.records, BETA_HYP)
+        event_time.check(median, self.records)
+        median["value_ns"] += 1.0
+        with self.assertRaises(event_time.InputError):
+            event_time.check(median, self.records)
+        with self.assertRaises(event_time.InputError):                # a stale start: the event's times have changed
+            later = copy.deepcopy(self.records)
+            for r in later:
+                r["raw_time_ns"] += 1.0
+                for step in r["steps"]:
+                    step["before_ns"] += 1.0
+                    step["after_ns"] += 1.0
+                r["corrected_time_ns"] += 1.0
+            event_time.check(common, later)
 
 
 def two_hit_track_records():
@@ -424,17 +456,68 @@ class LeaveOneOutByTrack(unittest.TestCase):  # fix round 1 I1
         self.assertEqual([h["hit_id"] for h in rec["hits"]], [12, 13])
         for h in rec["hits"]:
             self.assertLessEqual(abs(h["weight"] - self.weights[h["hit_id"]] / 0.7), 1e-15)
-        event_time.check(rec)
+        event_time.check(rec, records)
         for record in records[:2]:                                    # both hits of track 1 may use it
-            event_time.tof(record, rec)
+            event_time.tof(record, rec, records)
         with self.assertRaises(event_time.InputError):
-            event_time.tof(records[2], rec)                           # track 3 may not
+            event_time.tof(records[2], rec, records)                  # track 3 may not
 
     def test_a_record_listing_a_hit_of_its_own_track_is_refused(self):
         rec = event_time.leave_one_out(two_hit_track_records(), self.weights, BETA_HYP, track_id=1)
-        rec["hits"].append({"hit_id": 11, "weight": 0.0})
+        rec["hits"].append({"hit_id": 11, "weight": 0.0, "track_id": 1})
         with self.assertRaises(event_time.InputError):
             event_time.check(rec)
+
+    def forged(self):
+        """The stage 1 re-review's R1 record: excluded track 1 with excluded_hits [10] only, and hit 11 (track 1) listed."""
+        records = two_hit_track_records()
+        rec = event_time.leave_one_out(records, self.weights, BETA_HYP, track_id=1)
+        rec["excluded_hits"] = [10]
+        rec["hits"].append({"hit_id": 11, "weight": 0.0, "track_id": 1})
+        return records, rec
+
+    def test_r1_forged_record_listing_a_same_track_hit_is_refused(self):  # stage 2, R1
+        _, rec = self.forged()
+        with self.assertRaises(event_time.InputError):
+            event_time.check(rec)
+
+    def test_r1_tof_refuses_a_leave_one_out_start_listing_its_own_hit(self):  # stage 2, R1
+        records = two_hit_track_records()
+        rec = event_time.leave_one_out(records, self.weights, BETA_HYP, track_id=1)
+        rec["hits"] = [h for h in rec["hits"]] + [{"hit_id": 10, "weight": 0.0, "track_id": 3}]   # forged: hit 10 with a wrong track
+        with self.assertRaises(event_time.InputError):
+            event_time.tof(records[0], rec, records)
+
+    def test_r2_tof_refuses_a_start_that_does_not_exclude_the_hit(self):  # stage 2, re-review R2
+        records = two_hit_track_records()
+        rec = event_time.leave_one_out(records, self.weights, BETA_HYP, track_id=1)
+        rec["excluded_hits"] = [10]
+        with self.assertRaises(event_time.InputError):
+            event_time.tof(records[1], rec, records)                  # hit 11 of track 1 is not in excluded_hits
+
+    def test_relabelled_forgery_is_refused_against_the_event(self):  # stage 2 fix round 1, I1: the review's forgery
+        records = two_hit_track_records()
+        rec = event_time.leave_one_out(records, self.weights, BETA_HYP, track_id=1)
+        rec["excluded_hits"] = [10]
+        rec["hits"] = [{"hit_id": 11, "weight": 1 / 3, "track_id": 3}, {"hit_id": 12, "weight": 1 / 3, "track_id": 3},
+                       {"hit_id": 13, "weight": 1 / 3, "track_id": 4}]
+        rec["value_ns"] -= 0.25
+        event_time.check(rec)                                         # self-consistent labels: the record alone cannot show it
+        with self.assertRaises(event_time.InputError):
+            event_time.check(rec, records)                            # hit 11 is track 1's; excluded_hits misses it
+        with self.assertRaises(event_time.InputError):
+            event_time.tof(records[0], rec, records)
+        with self.assertRaises(event_time.InputError):
+            event_time.tof(records[0], rec)                           # an internal start without the event is refused
+
+    def test_r1_hit_entries_carry_their_track(self):  # stage 2, R1
+        rec = event_time.leave_one_out(two_hit_track_records(), self.weights, BETA_HYP, track_id=1)
+        self.assertEqual([(h["hit_id"], h["track_id"]) for h in rec["hits"]], [(12, 3), (13, 4)])
+        self.assertEqual(set(rec["hits"][0]), {"hit_id", "weight", "track_id"})
+        missing = copy.deepcopy(rec)
+        del missing["hits"][0]["track_id"]
+        with self.assertRaises(event_time.InputError):
+            event_time.check(missing)
 
     def test_unknown_track_is_refused(self):
         with self.assertRaises(event_time.InputError):

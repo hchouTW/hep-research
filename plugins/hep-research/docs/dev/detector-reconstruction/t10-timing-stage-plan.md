@@ -104,9 +104,9 @@ stage 5, after them (fix round 1, I2).
 | CAI-T10-1f | R37 (deterministic checks) | the step Δ and its half are recorded; every linear expectation holds at both and the step-halving bound of section 3 holds; β's forward difference passes the ratio window | none beyond 1a-1d | section 3 | 1 |
 | CAI-T10-2 | R37 T10, derived here (section 2) | two-ended counter: raising one end's offset by Δ moves the mean time and `t_0` by −Δ/2 and x by ∓vΔ/2 (end 0: −, end 1: +); other counters exactly 0; under an external event time the affected track's TOF changes by −Δ/2; step halving as section 3 | controls that must FAIL item CAI-T10-2: the position change without the 1/2 (check side and recipe-side); the mean taken as one end's time | R35-3 | 1 |
 | A37-T10 | A37, §9.6, §0.5.8 | artificial g×E degeneracy and the T07 weak-mode fixture (7004 vs 7003) reused, with the method card naming the unconstrained mode and its external constraint | a convergence or same-type holdout cited as absolute calibration | T07 fixtures (closed out) | 2 |
-| W6-T10 | §3.3, W6, BP12, R20 (A19-A24) | a native non-hit (counts with thresholds and exposure) example through a recipe: a valid zero, an absent interval, per-channel valid exposure | absent filled with zero; run time as both denominators | T06 `count_witness` | 3 |
+| W6-T10 | §3.3, W6, BP12, R20 (A19-A24) | a native non-hit (counts with thresholds and exposure) example through a recipe: a valid zero, an absent interval, per-channel valid exposure | absent filled with zero; run time as both denominators | T06 `count_witness` | 2 (moved from 3 by the stage 2 scope) |
 | R35-X / BP15 | §16.1 T10, BP07, BP15 | TOF/β with path and momentum from the T07 ACTS recipe and times from this chain, with a shared-clock nuisance and partial delivery (a missing subsystem by a validated missing-input method, never zeros) | missing clock alignment read as zero offset | **Open.** Checked in the records for this plan: the T07 product keeps per track state `path_length_mm` (ACTS `pathLength()`, `kalman_refit.cpp`; read by `acts_native_product.py`) on the eight telescope planes, and `q/p` among the parameters. There is no timing plane in the T07 geometry, and the origin of `pathLength()` (from which point it counts) is not stated in the records read. So a flight path to a timing plane is not available; a difference between two telescope planes is formable but its use as a flight path is undecided. `t10-options.md` concern 5 stands | 4 |
-| PID-T10 | §16.1 T10 "Timing/PID", BP07 | BP07's deliverables: β (this stage), and charge or species likelihoods or classification scores with their support domains, from TOF with a supplied path and momentum (a TOF hypothesis residual `t_meas − t_pred(p, m, L)`, F12), with the final working point and the species or charge priors kept. BP07's diagnostics, each a case: shared-clock shifts (a common offset of all channels moves an external-time TOF, cancels in an internal one); wrong bunch or wrong path; few samples; saturation; overlapping species and migration; `P(selected as B | true A)` reported apart from `P(true A | selected as B)`, the latter with its population composition stated | a score or LLR labelled a probability; the two conditional probabilities exchanged; a common-clock term averaged away; a missing subsystem filled with zeros instead of a validated missing-input method | stage 1's TOF and β; momentum and path from the fixture (from T07 only through R35-X) | 5 (after 2 to 4; fix round 1, I2) |
+| PID-T10 | §16.1 T10 "Timing/PID", BP07 | BP07's deliverables: β (this stage), and charge or species likelihoods or classification scores with their support domains, from TOF with a supplied path and momentum (a TOF hypothesis residual `t_meas − t_pred(p, m, L)`, F12), with the final working point and the species or charge priors kept. BP07's diagnostics, each a case: shared-clock shifts (a common offset of all channels moves an external-time TOF, cancels in an internal one); wrong bunch or wrong path; few samples; saturation; overlapping species and migration; `P(selected as B | true A)` reported apart from `P(true A | selected as B)`, the latter with its population composition stated | a score or LLR labelled a probability; the two conditional probabilities exchanged; a common-clock term averaged away; a missing subsystem filled with zeros instead of a validated missing-input method | stage 1's TOF and β; momentum and path from the fixture (from T07 only through R35-X) | 2 (moved from 5 by the stage 2 scope; fix round 1, I2) |
 | W7 subcases | §16.1 T10 "W7 subcases", W7, R14 | the global subcase (`y_i = s + b`) at run time is the other lane's replay (U7 B2, destriping with its stated constraint); the RF and retarding subcases stay W7 contract checks (T06), recorded in that lane as not run at run time (`t10-options.md`, option B "does not prove") | a W7 contract pass read as a native backend run (W7, §12.1) | U7 answer (B2) | other lane (fix round 1, I2) |
 | R14 replay | R14, U7 | the other T10 lane (U7 B2) | | | other lane |
 
@@ -119,3 +119,138 @@ stage 5, after them (fix round 1, I2).
 3. A stage job, drafted and not submitted, that runs both test modules and `t10_cai.py` on a seeded synthetic fixture from a checked
    copy (the snapshot rule of `jobs/d4-e6c/e6c.sh`), with predictions fixed in the lane report.
 4. `calibration-alignment-interfaces.md`, R35 row: from Designed to written in stage 1 (login unit tests only; tested after the job).
+
+## 6. Stage 2 (branch `t10/stage2` from `4c08da43`; written before its tests and code)
+
+Scope given by the coordinator (2026-11-13): the carried re-review item R1; R35's dE/dx part (row R35-6); the PID rows (PID-T10);
+A37 for T10 (row A37-T10); the W6 native non-hit example (row W6-T10) if its prerequisites are met. Rows R35-6, A37-T10, W6-T10 and
+PID-T10 move to stage 2. The cross-system example (R35-X) stays **open**: no record read for this stage settles a flight-path length
+to a timing plane (searched: `docs/dev/detector-reconstruction/`, `adapters/acts-tracking/`; only this plan, `t10-options.md`,
+`t11-cells.md` and `coverage.md` mention one). Synthetic data only; no PID, dE/dx, calibration or counting quality claim.
+Sources read for this stage: plan v9.2 R35, R37, §9.6, BP07, A19-A24, A37; `skills/hep-detector/references/particle-identification.md`
+(common principle, TOF, dE/dx, combining many samples, combining measurements, deliverables) and `calibration-and-alignment.md`
+(alignment and weak modes, calibration standards, outer loops); the T07 record `calibration-alignment-interfaces.md` rows
+`CAI-T07-4`; `tests/contracts/reconstruction_fixtures.py` `count_witness` and `contracts/reconstruction.py` counts checks.
+
+### 6.1 Conventions (fixed now; marked where they are fixture choices)
+
+- **R1 (re-review of stage 1).** Every hit entry of an event-time record carries its `track_id`. A leave-one-out record lists no
+  hit of its excluded track (checked by `track_id`, not only against `excluded_hits`), and `tof()` refuses a leave-one-out start
+  that lists the record's own hit or whose `excluded_hits` does not contain it (re-review R2). A common or median start lists the
+  hit's own hit by definition (R37's `(1 − w_k)Δt_k`) and stays allowed.
+- **dE/dx (R35; particle-identification.md "Ionization energy loss").** Each sample keeps its identifier, layer, deposit [MeV],
+  path length [cm] and saturation flag; per sample `dE/dx_i = deposit_i / path_i`. Truncation (fixture rule): sort ascending by
+  `dE/dx_i` (ties by sample identifier), drop the highest `floor(f·n)` samples (the reference: "discard the highest-loss fraction"),
+  keep the rest, at least one; the truncated mean is the mean of the kept values. Normalization divides by a stated reference value
+  with its source (a fixture constant; the reference names MIP calibration on the most probable value). The record keeps every
+  sample, the kept and dropped identifiers, `f`, `n`, the truncated mean and the normalized value, and a reader recomputes all of it
+  from the samples. Flags (fixture thresholds): `few-samples` when `n < 4`; `saturated-in-kept` when a kept sample is saturated (its
+  deposit is a lower bound, so the mean is biased low); a saturated sample is never silently treated as a value.
+- **TOF species hypotheses (particle-identification.md "The common principle", "Time of flight").** For a hypothesis of mass `m`
+  and a supplied momentum `p` (fixture value with its source and that source's unconstrained modes, see A37):
+  `β_h = p / sqrt(p² + m²)`, `t_pred = L / (c β_h)`, residual `r = TOF − t_pred`, a Gaussian time likelihood with a stated
+  `σ_t` (fixture choice): `ln L_h = −r²/(2σ_t²) − ln(σ_t sqrt(2π))`. LLR between two hypotheses is `ln L_a − ln L_b`, recorded as
+  "log-likelihood ratio, not a probability" (the reference: "A likelihood ratio becomes a probability only with a prior"). A
+  probability is written only with stated priors (summing to 1): `P(h) = π_h L_h / Σ π L`. Support: for each hypothesis pair the
+  separation `|t_pred,a − t_pred,b| / σ_t` and whether it reaches `k = 3` (fixture choice); a pair below it is outside support (the
+  momentum ceiling). Working point (kept in the record): select B over A when `ln L_B − ln L_A ≥ x`, with `x` stated.
+- **Migration and composition.** From a labelled synthetic population: `P(selected as B | true A) = n(A→B) / n(A)` per true species;
+  `P(true A | selected as B) = P(sel B | A) π_A / Σ_A' P(sel B | A') π_A'`, with the composition `π` stated. The two are separate
+  fields and never exchanged (BP07).
+- **Missing input.** A track without a TOF gives a PID record with status `missing-input` and no likelihood numbers (null), never
+  zeros (BP07: "A missing subsystem permits only a validated missing-input method, not zeros").
+- **Diagnostics, derived here from stage 1's chain (not from a source):** raising every channel's offset by `δ` (a shared clock)
+  changes every corrected time by `−δ`; under an external event time every TOF changes by `−δ`; under a common or leave-one-out
+  linear internal time the event time also changes by `−δ` (weights sum to 1), so every TOF changes by 0. A wrong bunch (the
+  external time late by the bunch spacing `b`, fixture `b = 2 ns`) changes every TOF and residual by `−b`. A wrong path `L(1+ε)`
+  scales every `t_pred` by `(1+ε)` and changes each residual by `−ε t_pred` (the TOF is unchanged).
+- **A37 and §9.6, g×E (artificial, §9.6's own example).** Amplitudes `A_ce = g_c E_e` (channel gain times event energy, the
+  amplitude stage 1's walk step uses). In logarithms the design has one exact null vector (+1 on every `ln g`, −1 on every `ln E`),
+  so `(a g, E/a)` gives the same amplitudes for every `a > 0`. The check shows: the exact (rational) rank is `C + E − 1`; two gauges
+  give identical amplitudes; a least-squares fit converges to zero residual in both gauges and a same-type holdout (other events'
+  amplitudes) fits both equally, so neither convergence nor the holdout fixes the scale (A37); the identifiable combinations
+  (`g_c / g_c'`, `g_c E_e`) are equal in both gauges; one named external constraint (a reference event of known energy, the
+  reference's "an absolute scale still needs a reference") makes the rank full and the scale unique. In stage 1's chain the walk
+  coefficient is defined against the amplitude scale in use (`a_c / sqrt(A)` with `A → λA` equals `(a_c / sqrt(λ)) / sqrt(A)`): the
+  same gauge, recorded on the method card.
+- **A37, the weak-mode witness reused.** T07's record of `CAI-T07-4` (job 7546791, `cai-refit.log`, SHA-256 `0f60e9ac…16a90`) is
+  read, not rerun: in each of its 8 cells the change in `q/p` is at least `k = 4.5` per-track σ while the change in mean χ²/ndf is
+  within 4.5 of its standard error (R37's self-check, T07's threshold). The PID record carries the momentum source's unconstrained
+  mode, because a curvature offset biases `p` and so every `t_pred` and mass hypothesis.
+- **Method card** (`timing-method-card/1`, an asset): for each unconstrained mode its name, its witness, the named external
+  information that constrains it, the independent observables that can confirm it, and the constraints used in the derivation, which
+  are never independent observables (§9.6; CAI-T06-3 carries the contract part). Modes on the card: the amplitude scale (g×E), the
+  common time offset under an internal event time (constrained by an external start time), and the momentum source's curvature
+  offset (constrained by information beyond the track residuals: a resonance of known mass, E/p of electrons and positrons, cosmic
+  or halo tracks, independent subdetectors, field reversal; and a vertex or beam constraint, which R37 names as constraining the
+  T07 mode). A placeholder convergence or unconstrained-mode check (T12's loop fixture) never satisfies A37 here.
+- **W6 native non-hit (prerequisites met: T06 `reconstruction:counts-v1` and its checks exist).** Native input: per channel, a
+  threshold selection, readout intervals each read or not read with start, end and dead time [s], and pulse amplitudes and times.
+  The recipe counts pulses at or above the channel's threshold in each read interval (a zero is a count), marks an unread interval
+  `absent` with no count, sets each channel's valid exposure to the sum over its read intervals of (end − start − dead time), the run
+  time to the span of all intervals, and each rate's denominator to the channel's own valid exposure; it delivers no per-event
+  energy (A19). The product must pass `contracts.reconstruction.read_sidecar`. Rate readings `Σ counts / valid exposure` are
+  recorded beside the product. A20 to A24 other than A19 are not covered by this class (no coded image, Compton, acoustic, prompt-
+  delayed or energy-resolving sensor): recorded gaps.
+
+### 6.2 Tolerances (fixed now)
+
+| Quantity | Tolerance |
+| --- | --- |
+| dE/dx truncated mean and normalized value against the test's own computation | 1e-12 relative; the reader recomputes with the same formula, exact |
+| `t_pred`, residuals, TOF changes in the diagnostics | 1e-12 ns absolute |
+| `ln L`, LLR | 1e-12 absolute |
+| posterior sum | within 1e-12 of 1 |
+| migration fractions and composition-weighted purity | exact integer counts; fractions within 1e-15 |
+| g×E: amplitudes under two gauges; holdout residuals; identifiable combinations | 1e-12 relative; rank exact (rational arithmetic) |
+| fitted residual "converged" | sum of squared log residuals ≤ 1e-20 |
+| W6 counts, exposures | exact |
+
+### 6.3 Stage 2 obligations
+
+| ID | Acceptance | Negative case (each a control that must FAIL or a refusal) |
+| --- | --- | --- |
+| R1 | hit entries carry `track_id`; a forged leave-one-out record listing a hit of its own track is refused; `tof()` refuses a leave-one-out start listing its own hit or not excluding it | the re-review's forged record |
+| R35-6 | every sample, path, flag, the kept and dropped sets, `f`, the truncated mean and the normalized value retained and recomputable | a truncated value without its samples; a mean that does not follow from them; a missing or non-positive path |
+| PID-T10a | hypothesis likelihoods, LLR labelled not a probability, support per pair, working point kept, probability only with priors | `llr-as-probability` |
+| PID-T10b | diagnostics: shared clock (external −δ, internal 0), wrong bunch, wrong path, few samples, saturation | `clock-not-cancelled` (internal time not recomputed) |
+| PID-T10c | `P(sel B | true A)` and `P(true A | sel B)` kept apart, the latter with its composition; overlapping species flagged outside support | `purity-as-efficiency` |
+| PID-T10d | missing input: status `missing-input`, no numbers | `zero-filled-missing` |
+| A37-T10 | g×E: rank `C+E−1`, gauge invariance, convergence and holdout equal in both gauges, identifiable combinations equal, the named constraint fixes the scale; weak-mode witness from T07's record in all 8 cells; method card complete, no constraint used as validation | `holdout-as-proof`, `no-constraint`, `validation-is-constraint`, `placeholder-witness` |
+| W6-T10 | product passes `read_sidecar`; zero kept, absent without count, per-channel valid exposure denominators, no per-event energy | `absent-as-zero`, `run-time-denominator` (the contract codes) |
+
+The stage job (`jobs/t10-stage2/`) runs the timing modules, the stage 1 check tool as a regression, the stage 2 tool on seeded
+synthetic data and on T07's pinned log, every control, and the full suite, judged as `jobs/t12-stage1/t12-stage1.sh` judges it.
+
+### 6.4 Stage 2 fix round 1 (review `jobs/t10-stage2/REVIEW.md`, 0/5/9/4; fixed before its tests and code)
+
+- **I1.** `event_time.check(record, event)` and `event_time.tof(record, start, event)` take the event's hit records. For an internal
+  start the event is required: every listed hit and its `track_id` must be the event's, `excluded_hits` must equal all hits of
+  `excluded_track`, the listed hits must be all the event's hits (common, median) or all but the excluded track's (leave-one-out), and
+  `estimates_ns` and `value_ns` are recomputed exactly from the event (same formulas as the recipe). A stale start (computed on other
+  times) is therefore refused. The review's forgery (hit 11 relabelled as track 3, `excluded_hits` [10], weights 1/3, value edited) is a
+  test. The scoring tools count a refused start as a failure of the item that used it.
+- **I2.** `t10_a37.py` pins T07's record itself: SHA-256 `0f60e9ac0ebe9114c0ba1f64369926027b7b130d9c43884ddcd458bf73316a90`, job
+  7546791; any other text fails on the witness's `source` sub-item, and `--expected-sha256`, if given, must repeat the pin (else
+  rejected, exit 2). The `placeholder-witness` control feeds a real placeholder text (eight valid-looking cell lines that are not T07's
+  record). M9: the record must also show its own outcome (`test_cai_t07_4_self_check` followed by `ok`, and `OK` at the end).
+- **I3.** Method card `timing-method-card/2`: every item of `constraining_information` (ids `constraint.*`) and of
+  `independent_observables` (ids `observable.*`) has an identifier and a text; the two id sets are disjoint per mode, so information used
+  to constrain a mode is never offered as its validation (§9.6); `constraints_used` lists ids of that mode's constraints and may not name
+  an observable. The curvature-offset mode keeps the vertex or beam constraint, cosmic or halo tracks and field reversal as constraints,
+  and a resonance mass versus charge, direction and momentum, electron and positron E/p and independent subdetectors as observables.
+- **I4.** The job requires, for every control, the tool's RESULT line with exactly its failed items, and exactly 10 stage 1 and 11 stage 2
+  `PASS control` lines. Stage 1's exact failed sets, fixed now from its rules (`t10_cai.py`, section 3): offset-twice, offset-sign and
+  recipe-offset-twice fail 1a and 1f (β's forward-difference derivative presumes Δt_k = −Δ); external-uses-hits fails 1b and 1f; the
+  others only their own item. **Corrected after its first run:** recipe-offset-twice fails 1a, 1b, 1c, 1d and 1f, because the reader
+  refuses its records, so 1b to 1d are not formed from them and report FAIL with no checks (the stage 1 re-review's R3); the
+  prediction above for it was wrong. `t10_cai.py`'s RESULT line gains its failed-items field (`items ...`).
+- **I5.** Red is rerun on the final test files against stubs in a scratch copy, with hashes.
+- **Minors and nits.** M2: a chain-level gauge test (amplitudes ×λ with walk coefficients ×√λ give identical corrected times). M3: a
+  claim of identification by holdout or convergence is judged and refused (item `claims`). M4: a missing-input record has exactly its
+  keys and a non-empty reason. M5: the momentum's `unconstrained_modes` is a non-empty list of names and `source` a name; the PID record
+  keeps the TOF record's β, which must equal `L/(c TOF)`. M6: the record marks whether the working-point pair is within support, and the
+  tool keeps the migration inside and outside support separately. M7: the counts controls print their contract codes (`PLANT-CODES`),
+  which the job requires exactly. M8: every control command reads `/dev/null`, and the cases are counted. N1: the adapter declarations'
+  test count is required. N2: `-s` on the bytecode step. N3: the dE/dx record carries its `track_id`. N4: priors that weigh nothing are
+  refused, never a division by zero.

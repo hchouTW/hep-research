@@ -68,6 +68,15 @@ SINGLE_PLANTS = {"offset-twice": "CAI-T10-1a", "offset-sign": "CAI-T10-1a", "ext
                  "stale-event-time": "CAI-T10-1c", "loo-keeps-own-hit": "CAI-T10-1d",
                  "recipe-offset-twice": "CAI-T10-1a", "recipe-loo-common": "CAI-T10-1d"}
 TWO_PLANTS = {"position-no-half": "CAI-T10-2", "mean-one-end": "CAI-T10-2", "recipe-position-no-half": "CAI-T10-2"}
+# stage 2 fix round 1, I4: the exact failed items of each control, fixed from the rules above before the change. A plant that moves the
+# affected TOF other than by -D also breaks beta's forward-difference derivative (1f), which presumes Delta t_k = -D.
+# recipe-offset-twice: the reader refuses the records, so 1b to 1d are not formed from them and report FAIL with no checks
+# (the stage 1 re-review's R3); corrected after its first run in fix round 1, which had predicted 1a and 1f only.
+PLANT_FAILED_ITEMS = {"offset-twice": {"CAI-T10-1a", "CAI-T10-1f"}, "offset-sign": {"CAI-T10-1a", "CAI-T10-1f"},
+                      "external-uses-hits": {"CAI-T10-1b", "CAI-T10-1f"}, "stale-event-time": {"CAI-T10-1c"},
+                      "loo-keeps-own-hit": {"CAI-T10-1d"}, "recipe-offset-twice": {"CAI-T10-1a", "CAI-T10-1b", "CAI-T10-1c", "CAI-T10-1d", "CAI-T10-1f"},
+                      "recipe-loo-common": {"CAI-T10-1d"}, "position-no-half": {"CAI-T10-2"}, "mean-one-end": {"CAI-T10-2"},
+                      "recipe-position-no-half": {"CAI-T10-2"}}
 CHANGE_SOURCE = "CAI-T10 synthetic offset change (t10-timing-stage-plan.md section 3); no measurement (R31)"
 NOMINAL_SOURCE = "T10 timing lane synthetic fixture constants, seeded; no measurement (R31)"
 
@@ -141,6 +150,15 @@ def _changed(contents: dict, channel: int, step: float) -> dict:
     return {**contents, "offset": timing_payload.derive(contents["offset"], {channel: value}, CHANGE_SOURCE)}
 
 
+def _tof_change(after_record, after_start, after_event, before_record, before_start, before_event):
+    """TOF(after) - TOF(before), or None when the recipe refuses a start against its event (fix round 1, I1)."""
+    try:
+        return (event_time.tof(after_record, after_start, after_event)["tof_ns"]
+                - event_time.tof(before_record, before_start, before_event)["tof_ns"])
+    except event_time.InputError:
+        return None
+
+
 def _by_hit(records: list) -> dict:
     return {r["hit_id"]: r for r in records}
 
@@ -208,7 +226,7 @@ def _check_single_ended(hits, contents, channel, delta, weights, beta_hypothesis
         # 1b
         start_after = event_time.common_linear(after, weights, beta_hypothesis) if plant == "external-uses-hits" else start
         for h in b:
-            tb, ta = event_time.tof(b[h], start), event_time.tof(a[h], start_after)
+            tb, ta = event_time.tof(b[h], start, before), event_time.tof(a[h], start_after, after)
             if h in affected:
                 items["CAI-T10-1b"].near(ta["tof_ns"] - tb["tof_ns"], dt[h])
                 want = b[h]["path_length_cm"] / (event_time.SPEED_OF_LIGHT_CM_PER_NS * (tb["tof_ns"] + dt[h]))
@@ -224,7 +242,10 @@ def _check_single_ended(hits, contents, channel, delta, weights, beta_hypothesis
         common_change = math.fsum(weights[k] * dt[k] for k in affected)
         items["CAI-T10-1c"].near(ea["value_ns"] - eb["value_ns"], common_change)
         for h in b:
-            change = event_time.tof(a[h], ea)["tof_ns"] - event_time.tof(b[h], eb)["tof_ns"]
+            change = _tof_change(a[h], ea, after, b[h], eb, before)
+            if change is None:                          # the recipe refused the start (a stale one is refused: fix round 1, I1)
+                items["CAI-T10-1c"].holds(False)
+                continue
             items["CAI-T10-1c"].near(change, dt[h] - common_change)
             q[("common", h)] = change / step
         # 1d
@@ -238,14 +259,17 @@ def _check_single_ended(hits, contents, channel, delta, weights, beta_hypothesis
             norm = math.fsum(w for i, w in weights.items() if track[i] != j)
             loo_change = math.fsum(weights[k] / norm * dt[k] for k in affected if track[k] != j)
             for h in (i for i in b if track[i] == j):
-                change = event_time.tof(a[h], la)["tof_ns"] - event_time.tof(b[h], lb)["tof_ns"]
+                change = _tof_change(a[h], la, after, b[h], lb, before)
+                if change is None:
+                    items["CAI-T10-1d"].holds(False)
+                    continue
                 items["CAI-T10-1d"].near(change, dt[h] - loo_change)
                 q[("leave-one-out", h)] = change / step
         # 1e: recorded only
         mb, ma = event_time.median(before, beta_hypothesis), event_time.median(after, beta_hypothesis)
         recorded[str(step)] = {"event_time_change_ns": ma["value_ns"] - mb["value_ns"],
                                "delta_t_ns": {str(k): dt[k] for k in affected},
-                               "tof_change_ns": {str(h): event_time.tof(a[h], ma)["tof_ns"] - event_time.tof(b[h], mb)["tof_ns"] for h in b}}
+                               "tof_change_ns": {str(h): _tof_change(a[h], ma, after, b[h], mb, before) for h in b}}
     for key, value in quotients[delta].items():
         if key in quotients[delta / 2]:
             halving.near(value, quotients[delta / 2][key])
@@ -308,7 +332,7 @@ def _check_two_ended(hits, contents, channel, delta, external_t0, plant) -> dict
             if plant == "position-no-half":
                 position_change *= 2.0
             time_change = a[h]["corrected_time_ns"] - b[h]["corrected_time_ns"]
-            tof_change = event_time.tof(a[h], start)["tof_ns"] - event_time.tof(b[h], start)["tof_ns"]
+            tof_change = event_time.tof(a[h], start, None)["tof_ns"] - event_time.tof(b[h], start, None)["tof_ns"]
             if h in affected:
                 for value in (mean_change, time_change, tof_change):
                     time_item.near(value, -step / 2)
@@ -447,7 +471,10 @@ def main(argv=None) -> int:
     if args.plant:
         item, item_failed, total = plant_reading(record)
         print(f"PLANT {args.plant} item {item} failed in {item_failed} of {total} events")
-    print(f"RESULT t10-cai {verdict} events {args.events} failed {len(failed)} plant {args.plant or 'none'}")
+    failed_items = sorted({name for e in record["events"] for side in ("single_ended", "two_ended")
+                           for name, item in e[side]["items"].items() if item["verdict"] != "PASS"})
+    print(f"RESULT t10-cai {verdict} events {args.events} failed {len(failed)} plant {args.plant or 'none'} "
+          f"items {','.join(failed_items) or 'none'}")
     print(json.dumps({"status": "failed" if failed else "ok", "status_label": "synthetic", "events": args.events, "failed_events": len(failed),
                       "record": str(args.out / "t10-cai.json")}, sort_keys=True))
     return 1 if failed else 0
