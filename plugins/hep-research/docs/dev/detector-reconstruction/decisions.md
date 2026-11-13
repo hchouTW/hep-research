@@ -875,6 +875,26 @@ photon_likelihood.py 8a4f4fd0 -> 532260bd; adapter manifests calo-cluster cb0153
 freeze-b.md keeps the Freeze B hashes (cb0153ba, 060e967a): T08 and T09 were evaluated at those bytes and their outcomes stay final there.
 The records tests check each file as its job-of-record bytes plus exactly the one line.
 
+## Two recorded post-freeze changes (the user, 2026-11-13: "fix 'Two items for you, no rush'")
+
+Branch fix/postfreeze-tests-sidecar (from 28763f50). Both files are in the frozen evaluation manifest (`jobs/evaluation/SOURCES.sha256`,
+d98f5e6f). That manifest and freeze-b.md keep their hashes: evaluation attempt 1 ran at those bytes, and its outcomes (T07 failed, T08 and
+T09 passed) stay final there. Neither change alters a recipe, a scorer or a product format.
+
+1. `tests/adapters/test_t04_evaluation_layout.py`, TaskDeadline.test_the_timeout_is_the_time_left_to_the_deadline: the test passed a fake
+   clock (`now=100`) while `start_task` also read the real `SLURM_JOB_END_TIME`, so inside any Slurm job with less than an hour left it failed
+   (3153.7 != 3480 in jobs 7636529 and 7636499; 476.0 in red log jobs/postfreeze-fix/red/red-1). The test now clears that variable for its own
+   duration. `t04_evaluation_layout.py` itself is unchanged.
+2. `adapters/acts-tracking/assets/fixture_tools/t07_alignment_payload.py`, `payload_sidecar` (found by T12 stage 6, review I1): a payload
+   that moves nothing (the zero payload) got no `alignment` section, which the R32 reader refuses (`conditions.alignment_incomplete`). It now
+   states every plane of the nominal geometry with every parameter of the parametrization, and refuses such a payload derived against another
+   geometry. A payload that moves something keeps listing only what it moves, so every sidecar built before this change keeps its identity.
+   Test: `tests/adapters/test_acts_cai_refit.py` DerivedPayloadIdentity.test_the_zero_payload_sidecar_states_every_plane_at_nominal.
+
+The records test `tests/adapters/test_acts_tracking.py` keeps the job-of-record pins (42ef9fe3, 486cde56) and reads each changed file as its
+pinned bytes plus exactly one recorded block of whole lines (POST_FREEZE_CHANGES: 0d415979, 08338c1d), as the bytecode line was recorded.
+Red and green logs in jobs/postfreeze-fix/.
+
 ## Recorded for the record (2026-11-13)
 
 - K12 (U10): the user, "Adopt the draft (Recommended)": k12-targets-draft.md (SHA-256 679a1a12...) on branch gate-d/prep, frozen by hash.

@@ -1332,13 +1332,44 @@ def declared_files() -> list:
     return [path for path in paths if path not in PIN_EXEMPT]
 
 
+# The recorded post-freeze change (the user, 2026-11-13, found by T12 stage 6): payload_sidecar states every plane of the nominal geometry for
+# a payload that moves nothing (its sidecar had no alignment section, which the R32 reader refuses), with its test. Each file at its recorded
+# digest is the bytes the job of record ran plus one block of whole lines, and nothing else: job_of_record_digest removes that block.
+POST_FREEZE_CHANGES = {
+    "adapters/acts-tracking/assets/fixture_tools/t07_alignment_payload.py":
+        ("0d415979f8c5e64e79eb0ecd9f813979787812eb860bdb568b6775be675c74f3", "    if not freedoms:  # post-freeze fix (the user, 2026-11-13)", 5),
+    "tests/adapters/test_acts_cai_refit.py":
+        ("08338c1dbd6e2c2126b2839c335e67b1123479de5bb9828b0e894ef241283326", "    def test_the_zero_payload_sidecar_states_every_plane_at_nominal(self):", 16),
+}
+
+
+def job_of_record_digest(path: str, file_bytes: bytes) -> str:
+    """The SHA-256 of the bytes the job of record ran, read from a file's current bytes: its own digest, or, for a file of POST_FREEZE_CHANGES
+    at its recorded digest, the digest with the recorded block (its first line, once, and the recorded number of lines) removed."""
+    if path in POST_FREEZE_CHANGES and hashlib.sha256(file_bytes).hexdigest() == POST_FREEZE_CHANGES[path][0]:
+        _, first, count = POST_FREEZE_CHANGES[path]
+        lines = file_bytes.decode("utf-8").splitlines(keepends=True)
+        starts = [index for index, line in enumerate(lines) if line.startswith(first)]
+        if len(starts) == 1:
+            file_bytes = "".join(lines[:starts[0]] + lines[starts[0] + count:]).encode("utf-8")
+    return hashlib.sha256(file_bytes).hexdigest()
+
+
 class DeclaredFilesAreTheJobOfRecordsBytes(unittest.TestCase):
     def test_every_declared_file_is_pinned_and_unchanged(self):
         files = declared_files()
         self.assertEqual(sorted(files), sorted(JOB_OF_RECORD_PINS), "every declared asset and test has a pin, and no pin names an undeclared file")
         for path in files:
             with self.subTest(path=path):
-                self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), JOB_OF_RECORD_PINS[path])
+                self.assertEqual(job_of_record_digest(path, (ROOT / path).read_bytes()), JOB_OF_RECORD_PINS[path])   # the recorded post-freeze change only
+
+    def test_the_post_freeze_change_is_read_as_the_job_of_records_bytes_only_at_its_digest(self):
+        for path, (digest, first, count) in POST_FREEZE_CHANGES.items():
+            with self.subTest(path=path):
+                file_bytes = (ROOT / path).read_bytes()
+                self.assertEqual(hashlib.sha256(file_bytes).hexdigest(), digest, "the post-freeze file is at its recorded digest")
+                self.assertEqual(job_of_record_digest(path, file_bytes + b"# another change\n"), hashlib.sha256(file_bytes + b"# another change\n").hexdigest())
+                self.assertNotEqual(job_of_record_digest(path, file_bytes + b"# another change\n"), JOB_OF_RECORD_PINS[path])
 
     def test_the_scorer_and_the_negative_case_builder_are_declared(self):
         files = declared_files()

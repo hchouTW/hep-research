@@ -459,6 +459,22 @@ class DerivedPayloadIdentity(unittest.TestCase):
         with self.assertRaises(alignment_payload.PayloadFormatError):
             alignment_payload.payload_sidecar(child_text, "cai-t07-3-loc0", "synthetic", child_sidecar)
 
+    def test_the_zero_payload_sidecar_states_every_plane_at_nominal(self):
+        """Post-freeze fix (the user, 2026-11-13; found by T12 stage 6): the zero payload moves nothing, and its sidecar used to have no
+        alignment section, which the R32 reader refuses (conditions.alignment_incomplete). It now states every plane of the nominal
+        geometry with every parameter of the parametrization; a payload that moves something keeps listing only what it moves."""
+        zero = alignment_payload.encode_payload({}, self.geometry, "nominal")
+        sidecar = alignment_payload.payload_sidecar(zero, "nominal", "nominal geometry: the zero payload, no plane moved")
+        self.assertEqual([finding.code for finding in read_sidecar(sidecar).errors], [])
+        self.assertEqual(sidecar["payload_id"], payload_identity(sidecar))
+        planes = int(next(line.split()[1] for line in alignment_payload.nominal_geometry_text().splitlines() if line.startswith("planes ")))
+        self.assertEqual(sidecar["alignment"]["degrees_of_freedom"],
+                         [{"structure": f"plane-{plane}", "parameters": list(alignment_payload.PLANE_PARAMETERS), "frame": "local", "level": "sensor"}
+                          for plane in range(1, planes + 1)])
+        self.assertEqual([finding.code for finding in check_binding(sidecar, {"origin": "nominal", "geometry_id": self.geometry}).errors], [])
+        with self.assertRaises(alignment_payload.PayloadFormatError):   # a zero payload against another geometry: its planes are unknown here
+            alignment_payload.payload_sidecar(alignment_payload.encode_payload({}, "0" * 64, "nominal"), "nominal", "synthetic")
+
     def test_a_subset_of_what_the_parent_lacks_is_refused(self):
         with self.assertRaises(alignment_payload.PayloadFormatError):
             alignment_payload.derive_subset(self.parent, {5: ["shift-loc0"]})

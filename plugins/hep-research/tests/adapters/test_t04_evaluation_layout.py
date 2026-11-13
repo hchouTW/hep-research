@@ -631,6 +631,10 @@ class TaskDeadline(unittest.TestCase):
                 self.assertGreater(limit - layout.RECORD_MARGIN_SECONDS, 0)
 
     def test_the_timeout_is_the_time_left_to_the_deadline(self):
+        import os                                                                         # post-freeze fix (the user, 2026-11-13): a fake
+        saved = os.environ.pop("SLURM_JOB_END_TIME", None)                                # clock with the real job end read gave 3153.7
+        self.addCleanup(lambda: os.environ.__setitem__("SLURM_JOB_END_TIME", saved) if saved is not None else None)  # in jobs with < 1 h left
+        layout.reset_task()
         layout.start_task("t07-checks", now=100.0)
         self.assertEqual(layout.subprocess_timeout(now=100.0), 3600 - layout.RECORD_MARGIN_SECONDS)
         self.assertEqual(layout.subprocess_timeout(now=1100.0), 2600 - layout.RECORD_MARGIN_SECONDS)
