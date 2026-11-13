@@ -414,6 +414,13 @@
    "registered_at": "2026-11-13T04:59:09Z",
    "card_commit": "6e801242",
    "reason": "campaign p3-toy-g8b registered before any run (second registration of rows 2006/2015, truth at 100x the fit MC, A15)"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "77012fe36655bbcf4a4df982e88226919574b16158b57394eba8b09462ae975a",
+   "registered_at": "2026-11-13T05:13:10Z",
+   "card_commit": "f32dd0bc",
+   "reason": "gate runs part A (campaign p3-gates tasks 0-14) registered before any run"
   }
  ]
 }
