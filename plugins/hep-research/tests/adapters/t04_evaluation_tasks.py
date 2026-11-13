@@ -769,8 +769,10 @@ def sacct_state(job: str, *, timeout: float = SACCT_TIMEOUT_SECONDS, attempts: i
     raise Incomplete(f"sacct did not answer for {job} in {attempts} attempts (last: {why}); rerun the task (no draw), never a state guessed")
 
 
-def counted_folder(rows, block: int, state_of) -> Path:
-    """The folder of a task's counted attempt (layout.select_attempt over its attempts, classified from sacct and the milestones file)."""
+def counted_folder(rows, block: int, state_of, *, check_task: bool = False, notes: list | None = None) -> Path:
+    """The folder of a task's counted attempt (layout.select_attempt over its attempts, classified from sacct and the milestones file);
+    check_task: a named check task's rule (layout.select_attempt; the user, 2026-11-13); notes: each attempt that rule let precede the counted
+    one, as (index, job, verdict), and the counted one's (index, job)."""
     verdicts = []
     for job, folder in rows:
         state, code, elapsed = state_of(job)
@@ -778,7 +780,10 @@ def counted_folder(rows, block: int, state_of) -> Path:
         verdicts.append(layout.classify_attempt(state, code, elapsed, marks.names() if marks.path.exists() else None)[0])
     if not rows:
         raise layout.LayoutError("the task has no attempt")
-    return Path(rows[layout.select_attempt(verdicts, block=block)][1])
+    index = layout.select_attempt(verdicts, block=block, check_task=check_task)
+    if notes is not None:
+        notes += [(i, rows[i][0], v) for i, v in enumerate(verdicts[:index]) if v in layout.CHECK_TASK_REPEATS] + [(index, rows[index][0], None)]
+    return Path(rows[index][1])
 
 
 def _stops(rows) -> list:
@@ -1069,6 +1074,9 @@ def scoring_module(workflow: str):
     return t09_scoring
 
 
+REPEATABLE_CHECK_TASKS = ("T08 checks", "T07 checks", "T07 negative cases")   # the user, 2026-11-13: check tasks drawing from blocks 1 and 6 only
+
+
 def counted_single(attempts: dict, name: str, block: int, state_of) -> Path:
     """The counted attempt's folder of a single task (the fixed points, the T08 checks; fix round 1, M3), or Incomplete. Fix round 2, R4: an
     attempt whose generator check failed (milestone generator-check-failed, NOT-REPEATABLE) goes to the user (v4 18, generator-check rows 2 to
@@ -1077,10 +1085,16 @@ def counted_single(attempts: dict, name: str, block: int, state_of) -> Path:
     if any("generator-check-failed" in Milestones(folder).names() for _, folder in rows):
         raise Incomplete(f"{name}: the generator check failed (NOT-REPEATABLE): it goes to the user (v4 18, generator-check rows 2 to 4), "
                          "no rerun")
+    repeatable = name in REPEATABLE_CHECK_TASKS   # the user, 2026-11-13, "Count it: block 1/6 only"; never a recipe task, never the fixed points
+    notes = []
     try:
-        return counted_folder(rows, block, state_of)
+        folder = counted_folder(rows, block, state_of, check_task=repeatable, notes=notes)
     except layout.LayoutError as error:
         raise Incomplete(f"{name}: {error}; rerun it (block 6 or block 1 only, its declared role)") from None
+    counted = notes[-1]
+    for index, job, verdict in notes[:-1]:
+        print(f"CLASSIFY {name} attempt {index} ({job}): {verdict}, {layout.REPEATED_CHECK_TASK}; counted: attempt {counted[0]} ({counted[1]})")
+    return folder
 
 
 def task_result(folder: Path, operation: str) -> str:

@@ -263,7 +263,9 @@ RESULT_LINES = {
     "t08_scenarios.py reference-selection": r"^(GATE reference-selection (PASS|FAIL)|REFUSED )",
     "t08_cai.py payloads": r'^\{.*"status": "[a-z-]+"|^REFUSED ',
     "t08_cai.py fixed-membership": r"^(CAI-T08-1 .* RESULT (PASS|FAIL)|REFUSED )",
-    "t08_cai.py rereco": r"^(CAI-T08-2 .* RESULT (PASS|FAIL|RECORDED)|GATE |REFUSED )",
+    # block-11 deviation (job 7613402): t08_cai.py's rereco verdict is its last line "CAI-T08-2 <label> RECORD recorded without a numeric
+    # assertion (R37)" (t08_cai.py:333; the tool is unchanged, Freeze B's calo-cluster manifest); the earlier alternatives are kept
+    "t08_cai.py rereco": r"^(CAI-T08-2 .* RESULT (PASS|FAIL|RECORDED)|CAI-T08-2 \S+ RECORD recorded without a numeric assertion \(R37\)$|GATE |REFUSED )",
     "t09_fixed_points.py": r"^(GATE per-channel sum at the fixed points|REFUSED |ERROR )",
     "check_generators.py": r"^RESULT (PASS|FAIL)",
     "t07_evaluation_scoring.py": r"^RESULT t07-scoring [a-z-]+ (ok|failed|rejected|incomplete):",   # E6 merge stage: the summary's incomplete
@@ -323,14 +325,21 @@ def classify_attempt(state: str, exit_code: int, elapsed: str, milestones) -> tu
     return "NOT-REPEATABLE", f"Slurm state {state}, exit {exit_code}: a step of compute or a check failed, not infrastructure"
 
 
-def select_attempt(verdicts, *, block: int) -> int:
+CHECK_TASK_REPEATS = ("REPEATABLE",)   # the user, 2026-11-13, "Count it: block 1/6 only" (block-11 job 7613402): see select_attempt's check_task
+REPEATED_CHECK_TASK = "repeated check task (block 1/6 only; user 2026-11-13)"
+
+
+def select_attempt(verdicts, *, block: int, check_task: bool = False) -> int:
     """The index of the counted attempt of one task: the last, which must be NO-FAILURE. Earlier attempts must have drawn and fitted nothing
     (NO-DRAW, NEVER-RAN); on a Freeze-B block (U-B12) a REPEATABLE one is accepted too. On blocks 11 and 12 no repeat after a draw or a fit
-    started (v4 3.4, "A failure stands"; O6, settled): never looser than block 2."""
+    started (v4 3.4, "A failure stands"; O6, settled): never looser than block 2. check_task (the user, 2026-11-13: "Count it: block 1/6
+    only"; block-11 job 7613402): a check task that draws only from blocks 1 and 6, never 11 or 12 (the caller names them: t04_evaluation_tasks
+    REPEATABLE_CHECK_TASKS), may be repeated after a harness crash (REPEATABLE: exit 3 or infrastructure), and the latest attempt is counted;
+    a failed check (NOT-REPEATABLE) still stands. Never for a recipe task of blocks 11 and 12."""
     verdicts = list(verdicts)
     if not verdicts or verdicts[-1] != "NO-FAILURE":
         raise LayoutError("missing range: the last attempt of the task did not complete, a failed task (top-up never)")
-    allowed = NOTHING_DRAWN + (REPEATS_ON_FREEZE_B if block in FREEZE_B_BLOCKS else ())
+    allowed = NOTHING_DRAWN + (REPEATS_ON_FREEZE_B if block in FREEZE_B_BLOCKS else ()) + (CHECK_TASK_REPEATS if check_task else ())
     for index, verdict in enumerate(verdicts[:-1]):
         if verdict not in allowed:
             raise LayoutError(f"missing range: attempt {index} is {verdict}; on block {block} only {', '.join(allowed)} may precede the counted attempt")
