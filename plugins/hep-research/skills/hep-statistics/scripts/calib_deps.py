@@ -12,7 +12,9 @@ input), written (exit 0) for finalize. Standard library only. Phase 0 (section 1
 rules (`packages`) phase 2; invalidation (section 10.3, approval A21) phase 4.
   calib_deps.py packages --input FILE      {packages, upstreams, common_sources?}: the section 10.4 decision
                                             (package split, version conflict, source overlap, common source,
-                                            theta/nu split); failed (exit 1) with findings
+                                            theta/nu split, a version of xi); failed (exit 1) with
+                                            findings; forced_joint_fits lists each joint fit the conflict
+                                            rules force (A21, section 19-g8: xi has no versions)
   calib_deps.py invalidate --input FILE    {results, changes: [{old, new}], marked?}: downstreams of a revised or
                                             downgraded upstream need a redo, a same-kappa re-judgment does not
                                             (section 10.3); failed (exit 1) when any result needs a redo
@@ -78,7 +80,8 @@ def main(argv=None) -> int:
                     raise io.InputError("--input: {packages: [...], upstreams: {...}, common_sources?: {...}}")
                 cs = {k: set(v) for k, v in (x.get("common_sources") or {}).items()}
                 findings = deps.check_packages(x["packages"], x.get("upstreams") or {}, cs or None)
-                return {"status": "failed" if findings else "ok", "findings": findings}
+                return {"status": "failed" if findings else "ok", "findings": findings,
+                        "forced_joint_fits": deps.forced_joint_fits(x["packages"], findings)}
             if args.cmd == "invalidate":
                 x = io.load(args.input)
                 if not isinstance(x, dict) or not isinstance(x.get("results"), list) \

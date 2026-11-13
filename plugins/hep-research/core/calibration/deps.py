@@ -219,11 +219,15 @@ def check_packages(packages: list, upstreams: dict, common_sources: dict | None 
       parent-child) unless an explicit joint factor covers them;
     - `deps.common_source`: disjoint source sets but a shared raw-data lineage, MC sample, external measurement,
       shared prior or efficiency-map basis (`common_sources` = {package id: set of keys}); disjointness is not proof;
-    - `deps.theta_nu_split`: theta and nu of one upstream exported separately.
-    A package: {id, upstream, xi_version, zeta: {key: version}, exported_zeta: {key: version}, joint_factor?,
+    - `deps.theta_nu_split`: theta and nu of one upstream exported separately;
+    - `deps.xi_version`: a package citing a version of xi: xi has no versions (A21, section 19-g8); a downstream that
+      pulls an upstream xi is handled by the conflict rule (a joint fit), see forced_joint_fits().
+    A package: {id, upstream, zeta: {key: version}, exported_zeta: {key: version}, zeta_updaters?, joint_factor?,
     exports?}. The same key and version create one variable and one constraint only."""
     out = []
     for p in packages:
+        if p.get("xi_version") is not None:
+            out.append({"code": "deps.xi_version", "package": p["id"]})
         if p.get("exports") and {"theta", "nu"} <= set(p["exports"]):
             out.append({"code": "deps.theta_nu_split", "package": p["id"]})
         if p.get("exported_zeta") is not None and p.get("zeta") is not None:
@@ -538,3 +542,48 @@ def identity_decision(result: dict, current: list, record: dict | None = None, b
         return dict(out, status="failed", decision="redo", reasons=t2["reasons"], tests=t2["tests"])
     return dict(out, status="ok", decision="carried-over", flags=[CARRIED_OVER, PROVISIONAL],
                 model_identities=[{"model": m, "identity": now[m]} for m in sorted(now)], tests=t2["tests"])
+
+
+# Findings of check_packages that force a joint fit (section 10.4 rules 2 to 4): the packages cannot be multiplied
+# independently. package_split, theta_nu_split and xi_version are refusals of one package, not joint fits.
+JOINT_FIT_CODES = {"deps.version_conflict": "rule 2: the same shared nuisance constrained with different versions",
+                   "deps.source_overlap": "rule 3: intersecting source sets",
+                   "deps.common_source": "rules 3 and 4: a common random source outside the result lineage"}
+
+
+def forced_joint_fits(packages: list, findings: list) -> list[dict]:
+    """Each joint fit the conflict rules force (A21, section 19-g8: xi has no versions, so a downstream pull of an
+    upstream xi is made correct by these joint fits, and each one is reported). Packages linked by a forcing finding
+    are fitted together: one entry per connected group, {packages, reasons: [{code, rule, packages, key | sources}],
+    xi_involved}. xi_involved is true when the group joins packages through their xi source sets (source overlap),
+    the case versions of xi would otherwise address. Sorted by the packages' ids; empty when nothing is forced."""
+    parent = {p["id"]: p["id"] for p in packages}
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    reasons = []
+    for f in findings:
+        if f["code"] not in JOINT_FIT_CODES:
+            continue
+        if f["code"] == "deps.version_conflict":
+            members = sorted(p["id"] for p in packages if f["key"] in (p.get("zeta") or {}))
+            r = {"key": f["key"], "versions": f["versions"]}
+        else:
+            members = sorted(f["packages"])
+            r = {"sources": f["sources"]}
+        for a in members[1:]:
+            parent[find(a)] = find(members[0])
+        reasons.append({"code": f["code"], "rule": JOINT_FIT_CODES[f["code"]], "packages": members, **r})
+    groups: dict = {}
+    for r in reasons:
+        groups.setdefault(find(r["packages"][0]), []).append(r)
+    out = []
+    for rs in groups.values():
+        members = sorted({m for r in rs for m in r["packages"]})
+        out.append({"packages": members, "reasons": rs,
+                    "xi_involved": any(r["code"] == "deps.source_overlap" for r in rs)})
+    return sorted(out, key=lambda g: g["packages"])

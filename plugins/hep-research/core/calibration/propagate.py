@@ -10,10 +10,16 @@ exported separately, nor theta and nu apart.
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 import numpy as np
 from scipy import linalg
 
-from . import deps
+from core.geometry import alignment
+from core.geometry.numbers import GeometryError
+from core.simulation import conditions
+
+from . import chain, deps, design_g4sim
 
 
 class PropagationError(ValueError):
@@ -82,3 +88,83 @@ def marginal_regressions(Sigma: np.ndarray, i_theta, i_eta, i_phi) -> np.ndarray
     Ge = Sigma[np.ix_(it, ie)] @ linalg.inv(Sigma[np.ix_(ie, ie)])
     Gp = Sigma[np.ix_(it, ip)] @ linalg.inv(Sigma[np.ix_(ip, ip)])
     return np.concatenate([Ge, Gp], axis=1)
+
+
+# ------------------------------------------------------------------ feeding back to g4sim (section 10.4, A21 19-g6)
+# A calibration result is written back into a g4sim condition-snapshot/1 (per-channel conditions) or alignment-overlay/1
+# (shifts and small rotations) at the fields its theta parameters are bound to (contract parameters[].bindings). Both
+# S9 schemas leave source_of_facts optional, so the export writes it itself (accepted 2026-11-09): the key
+# `calibration_result` holds the result's hash, effective grade, uses, flags and the stated use of the record (A21:
+# "exported records state the effective grade and use"); each written pointer maps to "calibration-result:<hash>", the
+# template's own entries stay for the values not written. calib_use.py checks it offline (use.check_export).
+EXPORT_SCHEMAS = {"condition-snapshot/1": "condition-snapshot", "alignment-overlay/1": "alignment-overlay"}
+SOURCE_KEY = "calibration_result"
+SOURCE_PREFIX = "calibration-result:"
+
+
+def _decimal_text(value: float) -> str:
+    """A decimal string without an exponent (alignment-overlay/1 holds delta_mm and zyx_deg as decimal strings)."""
+    if not np.isfinite(value):
+        raise PropagationError("export.value", f"value {value!r} is not finite")
+    text = format(Decimal(repr(float(value))), "f")
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
+def export_g4sim(template: dict, result: dict, contract: dict, use: str, values: dict | None = None) -> dict:
+    """The g4sim record of a calibration result: `template` (the condition-snapshot/1 or alignment-overlay/1 the
+    contract's bindings point into) with the theta-hat of every theta bound to it written at its pointer, and
+    source_of_facts carrying the result's hash, effective grade, uses, flags and `use` (the use the record is exported
+    for). `values` maps a parameter name to its value; default the result's `beta_hat`. Refuses (PropagationError) a
+    result without its hash or with no grade (incomplete cannot be cited), a binding outside Table 2 or a pointer that
+    does not resolve, a missing value, and a template with no theta bound to it. The use matrix is calib_use.py's."""
+    kind = EXPORT_SCHEMAS.get(str(template.get("schema")))
+    if kind is None:
+        raise PropagationError("export.schema", f"exports are {sorted(EXPORT_SCHEMAS)}, not {template.get('schema')!r}")
+    sha = result.get("result_sha256")
+    if not deps.is_hash_reference(sha):
+        raise PropagationError("export.no_hash", "the result has no result_sha256: an exported record cites the "
+                               "result by its hash (section 10.4)")
+    grade = result.get("grade") or {}
+    if grade.get("effective_grade") not in ("failed", "projection", "calibrated-unvalidated", "validated-in-scope"):
+        raise PropagationError("export.no_grade", "the result has no effective grade (incomplete results cannot be "
+                               "cited, section 10.2 rule 0)")
+    values = result.get("beta_hat") if values is None else values
+    if not isinstance(values, dict):
+        raise PropagationError("export.values", "values (or the result's beta_hat) map parameter names to values")
+    out = dict(template)
+    written: dict[str, str] = {}
+    for par in contract.get("parameters", []):
+        if par.get("role") != "theta":
+            continue
+        for b in par.get("bindings") or []:
+            if b.get("document") != kind:
+                continue
+            row, why = chain.binding_row(b)
+            if row is None:
+                raise PropagationError("export.binding", f"{par.get('name')!r} at {b.get('pointer')}: {why}")
+            if par.get("name") not in values:
+                raise PropagationError("export.values", f"no value for the theta {par.get('name')!r}")
+            v = float(values[par["name"]])
+            written_value = _decimal_text(v) if kind == "alignment-overlay" else v
+            try:
+                out = design_g4sim.pointer_set(out, b["pointer"], written_value)
+            except design_g4sim.CheckError as exc:
+                raise PropagationError("export.pointer", str(exc)) from None
+            written[b["pointer"]] = par["name"]
+    if not written:
+        raise PropagationError("export.nothing", f"no theta of the contract is bound to the {kind}")
+    sof = {k: v for k, v in (template.get("source_of_facts") or {}).items() if k != SOURCE_KEY}
+    sof.update({p: SOURCE_PREFIX + str(sha) for p in sorted(written)})
+    sof[SOURCE_KEY] = {"result_sha256": sha, "effective_grade": grade["effective_grade"],
+                       "uses": sorted(grade.get("uses") or []), "flags": sorted(grade.get("flags") or []),
+                       "variation_flags": sorted(grade.get("variation_flags") or []), "use": use,
+                       "parameters": {p: written[p] for p in sorted(written)}}
+    out["source_of_facts"] = sof
+    try:
+        if kind == "condition-snapshot":
+            conditions.check_snapshot(out)
+        else:
+            alignment.check_overlay(out)
+    except (conditions.ConditionError, GeometryError) as exc:
+        raise PropagationError("export.record", f"{kind}: {exc}") from None
+    return out
