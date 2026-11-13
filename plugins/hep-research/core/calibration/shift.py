@@ -58,8 +58,9 @@ class _Extended:
         return getattr(self.b, k)
 
 
-def conditional_information(problem, beta: np.ndarray, ref: L.Reference | None = None) -> np.ndarray:
-    """I_phiphi.rest of the data for the shift-mode phi (lnL units), the phi's own constraint excluded."""
+def conditional_information(problem, beta: np.ndarray, ref: L.Reference | None = None, with_columns: bool = False):
+    """I_phiphi.rest of the data for the shift-mode phi (lnL units), the phi's own constraint excluded. With
+    with_columns, also the finite-difference derivative columns of the predictions in each shift-mode phi."""
     ext = _Extended(problem, beta)
     lay = problem.layout
     n0 = len(lay.theta) + len(lay.phi_P)
@@ -82,14 +83,24 @@ def conditional_information(problem, beta: np.ndarray, ref: L.Reference | None =
     rest = np.setdiff1d(np.arange(Fm.shape[0]), ph)
     I = Fm[np.ix_(ph, ph)] - Fm[np.ix_(ph, rest)] @ linalg.solve(Fm[np.ix_(rest, rest)], Fm[np.ix_(rest, ph)],
                                                                assume_a="pos")
-    return 0.5 * (I + I.T)
+    I = 0.5 * (I + I.T)
+    if with_columns:
+        return I, link_jacobian[:, n0:n0 + q]
+    return I
 
 
 def p8(problem, beta_ref: np.ndarray, c: float = C_INFO) -> dict:
     """P8 at theta_ref with Asimov data (section 8.2): largest eigenvalue <= c; not applicable without shift phi."""
     if not getattr(problem, "shift_names", None):
         return {"gate": "P8", "status": "not-applicable"}
-    I = conditional_information(problem, beta_ref)
+    I, cols = conditional_information(problem, beta_ref, with_columns=True)
+    flat = [problem.shift_names[l] for l in range(cols.shape[1]) if not np.any(cols[:, l])]
+    if flat:
+        # an exactly flat derivative is not "no information": a resimulated phi under common random numbers is a
+        # staircase in phi, and a step below its resolution reads zero (WP-H finding, 2026-11-12); P8 cannot decide
+        return {"gate": "P8", "status": "incomplete", "finding": "p8.derivative_unresolved", "parameters": flat,
+                "remedy": "plan", "reason": "the predictions do not change over the finite-difference step in these "
+                "shift-mode phi; use an evaluator smooth in phi (or a surrogate model, section 5.5)"}
     lam = float(np.linalg.eigvalsh(I).max())
     ok = lam <= c
     return {"gate": "P8", "status": "passed" if ok else "failed", "lambda_max": lam, "c": c,

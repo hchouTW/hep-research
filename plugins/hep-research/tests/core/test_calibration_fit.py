@@ -76,6 +76,30 @@ class Iteration(unittest.TestCase):
         np.testing.assert_allclose(f.beta[:3], th, atol=0.02 * f.sigma_tot.min())
         np.testing.assert_allclose(f.sigma_tot, np.sqrt(np.diag(np.linalg.inv(cfg.J.T @ W @ cfg.J))), rtol=1e-6)
 
+    def test_minimize_uses_the_problems_analytic_jacobian(self):
+        """A problem with H(tp) has its analytic Jacobian used by minimize (it was never used: a bound method is a new
+        object on each access, so `hfun is problem.h` was always False); control: the same problem without H falls
+        back to finite differences and reaches the same minimum."""
+        cfg = T.linear_config(n=20, d=3)
+        base = T.make(cfg, TRUTH, data_seed=3, mc_seed=4)
+
+        class WithH:
+            def __init__(self, p):
+                self.p, self.calls = p, 0
+
+            def __getattr__(self, name):
+                return getattr(self.p, name)
+
+            def H(self, tp):
+                self.calls += 1
+                return np.asarray(cfg.J, float)
+        p = WithH(base)
+        ref = base.reference(np.asarray(TRUTH, float), None)
+        m = F.minimize(p, ref, T.initial_beta(base))
+        self.assertGreater(p.calls, 0)
+        m0 = F.minimize(base, ref, T.initial_beta(base))
+        np.testing.assert_allclose(m.beta[:3], m0.beta[:3], atol=1e-3)
+
     def test_lndet_diagnostic_matches_direct_minimization(self):
         cfg = T.linear_config(n=20, d=3, count_c=0.5)
         p = T.make(cfg, [2.0, -2.0, 2.0], data_seed=3, mc_seed=4)

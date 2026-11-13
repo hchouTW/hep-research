@@ -372,6 +372,41 @@
    "registered_at": "2026-11-12T15:27:55Z",
    "card_commit": "748230da",
    "reason": "wave 1 merged; execution log and open author items added; no run judged yet"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "ee11505118630096c69881d5b555b2da9109d075c68f696f4587c0e9e6ec0ff6",
+   "registered_at": "2026-11-12T22:42:20Z",
+   "card_commit": "f540af0d",
+   "reason": "campaign p3-cals configurations (rows 2004 P6 part, 2008, 2009) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "d6ee1345e0c39e97e99974b828c762764e203e746a36fba15a306f8212faeaed",
+   "registered_at": "2026-11-12T22:54:18Z",
+   "card_commit": "78f65933",
+   "reason": "campaign p3-g4 (Geant4 production ZDC and RICH, evidence rules) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "e031e31236afb13481ac9af83db64dc4892d86c6f9b99a093e25855e84482a5a",
+   "registered_at": "2026-11-12T23:40:14Z",
+   "card_commit": "424c7b00",
+   "reason": "second registration of row 2004 (campaign p3-cals-p6) after the P6 fix and A13"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "2462cf14475ba37d117e93bacaed4cd78ca841b8e433f2d140b38df7cc613cee",
+   "registered_at": "2026-11-12T23:51:04Z",
+   "card_commit": "6932de94",
+   "reason": "campaign p3-toy-g8 registered before any run (reduced: cal 12 folded into cal 6, curves 200, bimodal 100 toys)"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "7365ae576f8cc7ca36e30daa7d10eda5868616a93ad861a6bc83d06917c58e86",
+   "registered_at": "2026-11-13T00:57:28Z",
+   "card_commit": "7bb555f0",
+   "reason": "re-registration before the judged p3-g4 evidence arrays (card changed at 7bb555f0: execution log only)"
   }
  ]
 }

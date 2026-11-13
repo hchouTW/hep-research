@@ -82,6 +82,18 @@ class Shift(unittest.TestCase):
             self.assertEqual(r["status"], status)
             self.assertAlmostEqual(r["lambda_max"], info, places=6)
 
+    def test_p8_flat_staircase_is_incomplete(self):
+        """A shift-mode phi whose predictions are a staircase coarser than P8's finite-difference step (a resimulated
+        phi under common random numbers) reads an exactly flat derivative: P8 is incomplete (p8.derivative_unresolved),
+        not a vacuous pass (WP-H finding). Control: the same size of effect, smooth in phi, is decided."""
+        J0 = T.linear_config(n=20, d=3).J[:, 0]
+        stair = self.config(0.0, lambda ph, tp: J0 * 0.5 * np.round(np.asarray(ph)[0] / 0.5) * 0.5)
+        r = Sh.p8(T.make(stair, TRUTH, 3, 4), T.initial_beta(T.make(stair, TRUTH, 3, 4)))
+        self.assertEqual((r["status"], r["finding"]), ("incomplete", "p8.derivative_unresolved"))
+        smooth = self.config(0.0, lambda ph, tp: J0 * 0.5 * np.asarray(ph)[0])
+        p = T.make(smooth, TRUTH, 3, 4)
+        self.assertIn(Sh.p8(p, T.initial_beta(p))["status"], ("passed", "failed"))
+
     def responses(self):
         p0 = T.make(self.config(0.05), TRUTH, 3, 4)
         st = F.iterate(p0, T.initial_beta(p0)).sigma_tot[0]
