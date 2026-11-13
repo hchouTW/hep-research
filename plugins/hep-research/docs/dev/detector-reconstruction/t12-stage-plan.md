@@ -22,7 +22,7 @@ until Freeze B fixes K09.
 | 1 | `CAI-T12-1`, `CAI-T12-2`: the synthetic two-round loop (R37), below | none |
 | 2 | Conditions invalidation and identity: A04, A40, A42, A14, G05, §9.3, §9.8-9.9 (T12-05 to T12-09, T12-24 to T12-27) | Freeze B (given); drafted, see "Stage 2" |
 | 3 | Partitioning, recovery and boundaries: A11, A12, §10.2 items 3-7 (T12-10 to T12-12) | Stage 2 (done); Freeze B for the T07-T09 recipes' quality; drafted on `t12/stage3` (from `28763f50`), see "Stage 3" |
-| 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (K09 gates); T10 for T10's recipe |
+| 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (given), T10 (done); part A (T12-13, T12-15) done: job of record 7648553 PASS after a fresh review and two fix rounds, merged into feature, see "Stage 4"; part B (T12-14) planned, stage 3 done |
 | 5 | A13: recorded `blocked-by-resource` (R14; Q1 answered 2026-11-13); no GPU job. The CPU measurements of stage 4 (T12-14) are recorded beside it | Stage 4 |
 | 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | none (Q3 answered, Q5 moot: T10 done); drafted on branch `t12/stage6`, see "Stage 6" |
 | 7 | A10, A26-A36 runtime (R20: T11 design, T12 runtime) | T11 design (F1); a backend per family, else a recorded gap |
@@ -467,6 +467,219 @@ paragraph; `jobs/t12-stage3/plan-at-green-14100006.md`). Change 1, after green-3
 the edits marked "fix round 1" in this section (m4, n2, m2, I1, I2, m1, P7, m3, n3, m6, concern 4, concern 2, this record), made after
 red-3 and before green; the hash at the fix round's green run is in `jobs/t12-stage3/green/green-*-fix-round-1.log`.
 
+## Stage 4: comparators and quality before speed (fixed before the tests were written)
+
+**Split.** Part A takes T12-13 (§14.1) and T12-15 (A15, A50, §16.1 "quality before speed"), on branch `t12/stage4` from `28763f50`
+(Freeze B given, T10 done). Part B, T12-14 (§14.2, the CPU engineering benchmark), needs stage 3's partitioned products and stays out of
+this lane: it is only planned below. Before this section was written, one feasibility probe ran on login (the destriper solved on the
+fixture and on a reordered copy; the planted pull samples gated once); its numbers are the readings quoted in N2 and Q1-Q2 below, and no
+test existed then.
+
+**Files.** `tests/contracts/t12_comparators.py` (the harness: the per-recipe declarations, the three comparators, the fixed gate and the
+quality-before-speed report, and a command line) and `tests/contracts/test_t12_comparators.py`. It lives in `tests/` because it imports
+an adapter's recipe modules and the E6 statistics core (`tests/adapters/t04_evaluation_core.py`, E2's `t07_fake_rate.py`), which an adapter
+or `core/` may not (`tools/check_layering.py`). No production file, recipe, frozen file or file of `jobs/evaluation/SOURCES.sha256` changes.
+Frozen files are read by SHA-256 only. No quality claim: every fixture is synthetic, and a pass of a comparator says the two products
+agree within the stated tolerance, nothing about either product's quality.
+
+**Where the tolerances come from (the only sources).** Freeze B (`freeze-b.md`) fixes recipe identities, configurations, budgets and
+`r_dev` "for test F2"; its "Not in this freeze" names tolerances as Freeze A's (`t04-values-v4.md`, `92f71f56…` in freeze-b.md "Freeze A,
+unchanged"). The K09 rulings of freeze-b.md "Readings and rules" set levels, not reproducibility tolerances. T10's frozen tolerance is the
+replay comparator's (decisions.md, "The user's freeze of T10's replay comparator tolerance", 2026-11-12; t10-closeout.md, replay row).
+Searched: no recipe document of T07-T10 declares `reproducibility` (`grep -rn reproducibility` over `adapters/acts-tracking`,
+`calo-cluster`, `photon-likelihood`, `timing-pid`, `destriper`: no match). So:
+
+| Recipe | Byte | Numerical | Statistical |
+| --- | --- | --- | --- |
+| T07 CKF `reco.track.acts-ckf-planar/1` | B | open (OI-1) | fake rate per noise bin: F2 (S1); every other quantity open (OI-2) |
+| T07 AMVF `reco.vertex.acts-amvf/1` | B | open (OI-3) | open (OI-3) |
+| T07 refit `reco.track.acts-kf-refit/1` | B | open (OI-4) | open (OI-4) |
+| T08 `reco.calo.cell-cluster/1` | open (OI-11, fix round 1) | open (OI-5) | open (OI-5) |
+| T09 `reco.light.channel-likelihood/1` | B | open (OI-6) | open (OI-6) |
+| T10 `reco.timing.time-chain/1` | B | open (OI-7) | open (OI-7) |
+| T10 `reco.scan.destriper/1` | B | the frozen replay tolerance (N1), under the OI-8 ruling (fix round 1) | not applicable: one-to-one comparison is possible (§14.1) |
+
+- **B (every recipe).** Byte equality of the whole file, nothing excluded as non-scientific metadata (§14.1: "define in advance whether
+  bitwise identity is assessed after excluding nonscientific metadata": declared here, nothing is excluded). No tolerance exists to
+  choose. Same node class only (U-W7, AMD EPYC 9645, freeze-b.md "Node class"); byte equality across classes is not claimed (as Freeze A
+  says of the generators). Readings that support it, not proofs: T07 outputs byte-equal across jobs 7502411, 7503215 and 7512409
+  (decisions.md, 2026-11-08); t09-closeout.md "Reproducibility"; t10-closeout.md "Reproducibility". t08-closeout.md records no byte rerun
+  of the recipe's products.
+- **N1 (destriper, numerical).** The frozen records, read by SHA-256: `adapters/destriper/assets/t10-replay.tolerance.json`
+  (`217a38bc…`; stopping 1e-10: baselines `||a_c - a_r||_2 <= 2.5e-8 ||a_r||_2`, map `||m_c - m_r||_2 <= 2.2e-8 ||a_r||_2`) and
+  `t10-replay-noiseless.tolerance.json` (`12738ebc…`; stopping 1e-13: 2.5e-11 and 2.2e-11); zero sum `|sum a_c| <= 1e-13 sum |a_c|` in
+  both. The record is chosen by the products' stopping value; a product whose stopping value is in neither record, or two products with
+  different stopping values, is rejected (the tolerance was derived for that stopping value). The reading T12 makes: the records were
+  frozen for the solver against the exact rational reference; here the reference role is taken by a reference product of the same recipe
+  (an open question for the coordinator, OI-8, not a choice of a new value).
+- **S1 (T07 CKF fake rate per noise bin, statistical).** F2's rule and tolerance, unchanged: `(r_c - r_r) + sqrt((U_c - r_c)^2 + (r_r - L_r)^2)
+  <= tau`, `tau` = 0.0025 (t04-values-v4.md §8.3, fixed at Freeze A), `U_c` and `L_r` section 5.2's 95 % bounds (E2's `rate_rule`, the
+  attempt-1 level; the 99 % of K09's attempt 2 is an evaluation-attempt rule, and a T12 comparison is no evaluation attempt). `r_r`, `L_r`
+  come from the reference sample (in evaluation, the Freeze-B record `ebf2aa0e…`). As frozen, F2 is one-sided: a lower candidate rate
+  passes.
+- **OI-1 to OI-7 (open, not chosen).** Freeze B fixes no numerical or statistical reproducibility tolerance for these recipes and
+  quantities; each comparator answers `incomplete` (exit 3) with the open item's identifier and never a pass. Candidate recorded beside
+  OI-6, not used: T09's close-out replay tolerance (decisions.md, T09 close-out, "Replay across platforms (review I1)": ln L 1e-6, the
+  statistic 4e-6, parameters 1e-3 σ, discrete values exact), fixed by that stage's review, not by Freeze B or K09: whether it becomes T09's
+  comparator tolerance is the user's word.
+- **OI-9 (recipe declarations).** The table above is T12's harness declaration, from the records; the recipes themselves still declare no
+  `reproducibility` (G03, `reconstruction_recipe.json`). Writing it into a recipe changes a Freeze B item (a return to Freeze B, v4 3.4), so
+  it is left open.
+
+**Matching rules (§14.1: quantities, matching rules, tolerances per quantity; permissible ordering apart from identity and association).**
+For the destriper product (`destriper-product/1`, read and refused by the recipe's own `product.read`): pixels are identities (key:
+pixel index); a baseline's key is the sorted tuple of its samples' observation values (the input values, copied exactly into the
+embedded scan model; `destriper-timestream/1` gives samples no other identity), and its association is the sorted tuple of its samples'
+(value, pixel) pairs, read from the embedded scan model's `design` and `observation`. A key held by two baselines of one product makes the
+matching rule ambiguous: rejected (exit 2). Values are compared exactly (each float as its exact binary value, `fractions.Fraction`, as
+T10's comparator does).
+
+**Expectations, byte (B1-B3).**
+- B1. Two products of the destriper solved twice on the same timestream (noisy fixture, seed 20260, stopping 1e-10, same `product_id`)
+  are byte-equal: `passed`.
+- B2. The same JSON written with another key order (a pure reordering) fails the byte comparator: `failed`, with the first differing
+  offset. A reordering passes only where the form allows it (numerical, statistical); byte form allows none.
+- B3. One changed byte fails; the result names both SHA-256 values. A hash is integrity evidence, never the scientific comparison
+  (§14.1): the numerical comparator does not read hashes.
+
+**Expectations, numerical (N1-N9; destriper on the fixture `t10-destripe/1`, noisy, seed 20260, stopping 1e-10).**
+- N2. Reordering, baselines: the timestream's baseline segments permuted (a fixed permutation from `default_rng(7)`), solved again: every
+  key matches, associations equal, `passed`. Reading of the probe: 15 iterations both; baseline difference 2.1e-15 and map 1.5e-15 of
+  `||a_r||_2`.
+- N3. Reordering, samples within each baseline (each segment's (pixel, value) pairs reversed), solved again: `passed`.
+- N4. Changed association, numbers moved: two samples of baseline 0 exchange pixels (values stay), solved again: `failed` with
+  `association` in the failed set (and the numbers, since they move: probe 5.4e-2 of `||a_r||_2`).
+- N5. Changed association, numbers unchanged: the reference product with one design row naming another pixel (map, baselines and reported
+  values untouched): `failed`, failed set exactly `{association}`. A topology change never passes because the numbers agree.
+- N6. A value change beyond the tolerance (baselines 0 and 1 moved by +δ and −δ, δ = 1e-6 `||a_r||_2`, map and reported values kept
+  consistent): `failed`, failed set exactly `{baselines}`; within it (δ = 1e-9 `||a_r||_2`): `passed`.
+- N7. A dropped baseline (one segment removed from the timestream, solved again): `failed` with `objects` in the failed set (an
+  unmatched reference key is a required object missing).
+- N8. A product with a stopping value in no record (1e-8), or two products with different stopping values: `rejected`. A frozen record
+  whose bytes differ from its SHA-256: rejected.
+- N9. Any open recipe (OI-1, OI-3 to OI-7): `incomplete`, with the open item, never `passed`.
+
+**Expectations, statistical (S2-S6; synthetic per-event counts, 12,000 events, `m_e` tracks and `y_e` fakes per event).**
+- S2. Reordering: the candidate is the reference with its events permuted: the statistic is equal to the reference-against-itself
+  value, and `passed`.
+- S3. A candidate with fakes added beyond `tau` (the statistic above 0.0025): `failed`. A changed association in T07's sense (a track
+  re-associated so it becomes a fake) shows only through the rate: a statistical comparator cannot see associations that leave the rate
+  unchanged, which is why §14.1 allows it only when one-to-one comparison is impossible (stated in the result).
+- S4. Data loss is not excused (§14.1): a candidate with a different event count from the reference's is `failed` (`events` in the failed
+  set), even when its rate passes.
+- S5. The statistic equals E6's F2 (`t07_evaluation_scoring.stability_test` at attempt 1) on the same counts to 1e-15 absolute
+  (agreement of the formula only; no evaluation bin is scored).
+- S6. Every other quantity of T07 CKF and every other recipe: `incomplete` (OI-2 to OI-7).
+
+**Expectations, quality before speed (Q1-Q8; T12-15, A15, A50).** The fixed gate is Freeze A's common gates (t04-values-v4.md §6):
+location and width by the pull test (§5.2 steps 1-4, tolerance 0.10, cap 0.0108) and the tail by the rate test `P(|pull| > 3)`, `L` = 1 %,
+at the attempt-1 level (95 %), computed by the E6 core's own functions, with B = 1,000 bootstrap rows from a T12 tag (`SeedSequence([1215])`,
+never the evaluation's 520). Samples: 12,000 events of one pull each. Baseline: `default_rng(20261115).normal(0, 1, 12000)`. Faster
+variant: `default_rng(20261116)`: unit normal, then a fraction drawn `< 0.02` replaced by `normal(0, 5)` (a fatter tail, the same core).
+Timings are synthetic numbers (baseline 10.0, variant 6.0, seconds per 1,000 events), labelled so; nothing is measured here.
+- Q1. Baseline: centre, width and tail pass (probe: centre 0.0336, width 0.0090, tail 0.0020 with U 0.0028).
+- Q2. Variant: centre and width pass, the tail fails at step 1 (probe: 225 replaced, tail 0.0121, lower bound 0.0105 > 0.01).
+- Q3. Report: the variant is `rejected under the fixed gates`, with no speed number anywhere in its entry; the baseline is `qualified`,
+  with its speed after its quality record; the selected candidate is the baseline, though the variant is faster (A50: a cost advantage
+  cannot compensate).
+- Q4. Declared as another working point, the variant is `listed as another working point`: its quality record (the tail fail) first, then
+  its speed, labelled "not qualified under the fixed gates; not a replacement"; it is never selected.
+- Q5. Order: no timing is read before that candidate's gate record is complete (a sealed timing refuses a release without a complete
+  gate record; a spy records the order); in every entry `quality` precedes `speed`.
+- Q6. Every candidate failing or inconclusive: nothing is selected ("no qualified candidate"), and no speed number is released except for
+  declared working points (A50).
+- Q7. An inconclusive gate (too few events: 2,000) is not qualified, and its speed is withheld.
+- Q8. The gates are the fixed ones: the gate constants are read from the E6 core (tolerance 0.10, cap 0.0108, `L` 1 %), and the harness
+  has no parameter that changes them.
+
+**Command line and exit codes (core/status.py).** `t12_comparators.py compare --recipe R --form byte|numerical|statistical --reference
+FILE --candidate FILE --out FILE [--quantity Q]`: `passed` 0, `failed` 1, `rejected` 2 (unknown recipe or form, a form declared not
+applicable, unreadable input, an output file that exists: never overwritten, a missing folder), `incomplete` 3 (an open tolerance, or the
+comparator could not run). `t12_comparators.py declarations` prints the table above as JSON, exit 0.
+
+**Mutation check (after green).** Planted in a copy of the harness, one at a time, each must turn at least one test red: the association
+check removed; keys matched by position instead of key; the tolerance multiplied by 100; the zero-sum check removed; the event-count check
+removed; F2's development-uncertainty term dropped; the tail gate dropped from the fixed gate; speed released before the gate; a failing
+candidate selected when faster; an open item answered `passed`.
+
+### Stage 4, fix round 1 (review `jobs/t12-stage4/REVIEW.md`, NOT READY 0/4/6/4; every finding adopted)
+
+Order of work, disclosed: the changed and new tests were written first and run red against the round-0 harness
+(`jobs/t12-stage4/red-r1/red-3-round0-harness.log`: 53 run, 9 failures, 9 errors; the tests that passed there characterise round-0
+behaviour, among them `test_constants_are_the_frozen_codings` (M1 is a refactor) and the 1e-13 record test); then the harness; this
+subsection records the changed expectations after green. The round-0 job 7636498 (PASS, 34 min 41 s) is kept as a reading only.
+
+**Changed declarations.**
+- OI-6: the user answered "Leave open" (2026-11-13) to the T09 close-out replay tolerance: T09 stays open.
+- OI-8 is a ruling, no longer an open item (the coordinator, fix round 1): T10's frozen replay tolerance holds for a product against a product
+  of the same recipe only on the record's pointing (t10-destripe/1, seed 20260): each is within `kappa eps` of the exact solution, so they
+  differ by at most `2 kappa eps` < `tau = safety kappa eps`. The 1e-13 record depends on the pointing only, so it applies to noisy products
+  stopped at 1e-13 too. Every destriper result and its command-line summary name the ruling (`"ruling": "OI-8"`).
+- OI-10 (new): F2 is one-sided as frozen. As a reproducibility rule, a lower candidate rate beyond `tau` (F2 with the roles of reference
+  and candidate exchanged, above `tau`) or a changed object (track) count has no frozen rule: the answer is `incomplete` with OI-10 and the
+  blocking reason, never `passed`. A different event count stays `failed` (S4).
+- OI-11 (new, M4): T08 has no recorded byte rerun of its products, so T08's byte form is open (`incomplete`). Each other recipe's byte
+  declaration names its record (T07 finder and vertexer: decisions.md 2026-11-08; refit: t07-closeout.md, job 7551619; T09 and T10 timing:
+  their close-outs; destriper: B1 here and t10-closeout.md).
+
+**Changed expectations.**
+- I1. Before the destriper tolerance is applied, T10's own record checks run on the reference product's pointing (read from its design):
+  `t10_comparator.fixture_numbers` gives kappa and G, which must be within 0.01 and 1e-4 of the record's; safety at least 10; `kappa eps`
+  at least 1e3 rounding units; `tau_baselines >= safety kappa eps`, `tau_map >= safety G kappa eps`; the record must have exactly T10's
+  keys and format. Otherwise `rejected` (exit 2). Seed 1's pointing (kappa 24.24 against 24.47) is rejected. A candidate on another pointing
+  than the reference shows as an association or object difference (N4, N5, N7 unchanged). The result carries `derivation` (kappa, G).
+- I2. As OI-10 above: a reference at rate 0.01 against a candidate with no fakes (F2 itself passes) answers `incomplete`, blocking
+  `lower_rate`; one added track answers `incomplete`, blocking `objects`, with both object counts as readings. S2, S5 and the command line
+  use a candidate with the reference's events and tracks per event (fakes drawn afresh), which `passed`.
+- I3, M5. The command-line summary carries `open_item`, `ruling`, `blocking` and `reason` when the result has them.
+- I4. An object without a result is NaN in the candidate's per-object array; the gate's location and width use the objects with a result,
+  and the tail counts every object, an object without a result as a failure (v4 5.1, as E6's `t07_evaluation_scoring._pull_records`). The
+  planted variant with its `|pull| > 3` objects turned into "no result" fails the tail. Candidates with different object counts are
+  rejected (the same scientific work, Section 14.2).
+- M1, N2. The tail constants and `tau` are E6's (`t07_evaluation_scoring.TAIL_LIMIT`, `TAIL_PULL`, `STABILITY_TOLERANCE`), the confidence
+  E2's `CONFIDENCE`; tests assert the equality.
+- M2. The statistical comparator and the gate refuse unless `t04_evaluation_core.py` is 265eb124… (freeze-b.md, evaluation manifest) and
+  `t07_fake_rate.py` 4b4aa1ad… (evaluation manifest); `t07_evaluation_scoring.py` is pinned at this base (32d0adc6…), which differs from
+  the evaluation manifest's 6102c2ef… (changed after attempt 1, commit 7a98aeff); only its constants are read.
+- M3. A timing is bound to one candidate when the candidate is made and released only against `gate_record(name, gate)` of that
+  candidate, which exists only when all three gate results carry v4's words; the value is not a public attribute.
+- M6. The mutation list grows by eleven: the derivation check removed; the record chosen without the stopping value; the tail limit
+  doubled; the statistical open item answered `passed`; the lower-rate block removed; the object-count block removed; objects without a
+  result not counted; the timing owner check removed; the frozen-module check removed; the ruling dropped from the summary; the open answer
+  given after parsing.
+- N1. The `1e-12` bound in the N2 test is a test bound on the readings (the probe read about 2e-15), not a tolerance.
+- N3. An open form answers `incomplete` (exit 3) before any input is parsed, so non-JSON input to an open recipe is exit 3, not 2.
+- N4. `Candidate` is frozen: the working-point declaration is fixed before any gate runs and recorded first in its entry.
+
+**Job.** `jobs/t12-stage4/t12-stage4-r1.sh` with `SOURCES-r1.sha256`, `--time 03:00:00`: a frozen test
+(`test_t04_evaluation_layout` TaskDeadline) fails inside any job with less than 1 h left; it is not edited, and the allowed failures
+stay the LCG ID only.
+
+### Stage 4, fix round 2 (re-review `jobs/t12-stage4/REREVIEW.md`: everything closed but M3; N-A and N-B accepted as they are)
+
+The three new tests were written first and run red against the round-1 harness (`jobs/t12-stage4/red-r2/red-4-round1-harness.log`:
+56 run, 2 failures, 3 errors); then the harness; this subsection after green. Job 7647973 (round 1's files) is a reading only.
+
+- M3, case 1 (forgery). A timing is released only against a record that `gate_record` made: a private class whose every instance
+  `gate_record` registers, checked by identity. A dict such as `{"candidate": "a", "complete": True}`, or a copy of a genuine record,
+  releases nothing (`rejected`).
+- M3, case 2 (failed candidate). `release` itself refuses unless the gate passed or the candidate declared a working point, so a direct
+  call cannot read a failed, undeclared candidate's timing; a declared working point still gets its speed after its gate.
+- M3, case 3 (names). A timing is bound to the candidate object, not its name: a record of another candidate with the same name releases
+  nothing. `quality_before_speed` rejects duplicate candidate names.
+- Mutation: four more mutants (the issued-record check removed; the owner matched by name; a failed gate released without a working point;
+  duplicate names accepted); the round-1 owner mutant follows the new code.
+
+**Job.** `jobs/t12-stage4/t12-stage4-r2.sh` with `SOURCES-r2.sha256`, `--time 03:00:00`; the r1 files are kept.
+
+**Part B, T12-14 (planned only; waits for stage 3).** The same scientific work on the same input domain and native output level, each
+recipe at its Freeze B hash: reading and probes, initialization, I/O, conditions, conversion, native compute and output/checks timed
+apart; with overlap, the total wall time and how each part was measured, never a sum of overlapping times (§14.2). Workload units per
+task (events for T07-T09, samples and baselines for the destriper); success and failure denominators, memory, latency quantiles,
+throughput. Cold and warm apart (K12, t04-values-v4.md §12: no targets; numbers are records, not gates). No speed number is reported
+for a recipe before its quality gate (T12-15); these CPU numbers are what T12-17 records beside A13. It needs stage 3's partition and
+accounts (T12-10 to T12-12) and its own job approval.
+
 ## Stage 6: A37 and §9.6 in T12 (fixed before the tests were written)
 
 **Scope.** T12-18 (the g×E degeneracy) and T12-19 (the weak-mode witness), A37 and §9.6 as R31 keeps them in T12. Both are
@@ -623,7 +836,6 @@ Job 7636529 failed only on `tests.adapters.test_t04_evaluation_layout.TaskDeadli
 - **n2.** The nominal sidecar's planes come from the nominal geometry text (`planes N` of `nominal_geometry_text()`), not a literal 8.
 - n1 (W6 restates part of W4) and n3 (`visible-chi2` run natively) are not taken: W6 keeps its own statement (the χ²-only judge), and the
   χ² side's power is shown on toys.
-
 ## A13: recorded blocked-by-resource (stage 5; no GPU job)
 
 The user answered Q1 on 2026-11-13: "Record blocked-by-resource (Recommended)". No T07-T09 recipe has a GPU subchain (the ACTS build,
