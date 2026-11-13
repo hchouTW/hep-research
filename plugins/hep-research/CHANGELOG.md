@@ -20,6 +20,14 @@ Detector reconstruction, task T15a. `judge_candidates` now ranks a conflict abov
 selection record with the hashes of its inputs, rules and readers. New sidecars `candidate_index.json` and `selection_policy.json`, and an optional `formal` block in `selection_record.json`. Rules only: a new sidecar not labelled artificial
 is refused, and nothing is claimed about selection on real recipes. A missing backend and insufficient evidence stay two reasons of a restricted delivery, and an old decision replays only on the inputs it was made from.
 
+Detector reconstruction, task T12 stage 2 (shared runner, behaviour change). `run_workflow.py` steps may declare `native_inputs` (native binaries, libraries,
+scripts and configurations): each is hashed afresh in every run before the skip decision and recorded as `extension.native_sha256` and in the receipt; a changed
+byte reruns the step. A native input no step can write is checked before the first step runs. An undeclared program (`argv[0]`, also through `PATH`) or a
+script run by a script interpreter (`sh`, `bash`, `root -q`, ...) is recorded as `extension.undeclared_native` and its step is never skipped; an executable
+given as an option value is not examined. `--incremental` now also reruns a step whose `seeds` changed. Steps with neither keep their records' keys and their
+skip. `geant4_run.py scan` declares each step's executable and build record as `native_inputs`, so a scan reruns when the binary changes.
+`ext_computational_run.json` does not yet list the two new keys (the extension is open; follow-up once the schema is no longer frozen).
+
 ## 0.58.0 (2026-11-07)
 
 Minor release. g4sim phase S3 (`adapters/geant4` 0.9.0; contracts 3.21.0, `CORE_VERSION` 1.8.0). Geometry: `grid`, `ring`, `explicit` (positions or a hashed CSV), `shell`, `clip`, `absent`, `trd`, `tube`, `polygon_prism`, arbitrary rotations

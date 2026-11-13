@@ -1,8 +1,8 @@
 # T12 stage plan: reprocessing and performance (finish-plan F2)
 
-State: stage 0 and stage 1 drafted on branch `t12/stage1` (from `a8388685`), in fix round 1 after a fresh review; not committed. This plan
-was written before stage 1's tests; the fix-round expectations below were added before the changed tests (red logs with file hashes in
-`jobs/t12-stage1/red/`). Paths are relative to
+State: stage 0 and stage 1 committed (`0e310d34`; job of record 7606257 PASS). Stage 2 drafted on branch `t12/stage2` (from `4c08da43`,
+after Freeze B and D4); not reviewed, not committed. The "Stage 2" section below was written before stage 2's tests (red logs with file
+hashes in `jobs/t12-stage2/red/`). Paths are relative to
 `plugins/hep-research/`. Sources: plan v9.2 §16.1 row T12, R14, R20, R30, R36, R37 (T12 item), §9.3-9.9, §10.2, §10.4, §14.1-14.2, §9.6
 with A37, G05 and G06; t05-task-sheets.md (T12 row: depends on T07-T10, A13 `blocked-by-resource`), contract-map.md (G05, Section 10.4
 row), calibration-alignment-interfaces.md (R36 rows), decisions.md (K07; U8 "Use the site GPU partition", 2026-11-12) and
@@ -20,10 +20,10 @@ until Freeze B fixes K09.
 | --- | --- | --- |
 | 0 | This plan | none |
 | 1 | `CAI-T12-1`, `CAI-T12-2`: the synthetic two-round loop (R37), below | none |
-| 2 | Conditions invalidation and identity on the T07-T09 recipes' products: A04, A40, A42, A14, G05, §9.8-9.9 | T07-T09 merged (E6); Freeze B for any quality reuse |
+| 2 | Conditions invalidation and identity: A04, A40, A42, A14, G05, §9.3, §9.8-9.9 (T12-05 to T12-09, T12-24 to T12-27) | Freeze B (given); drafted, see "Stage 2" |
 | 3 | Partitioning, recovery and boundaries: A11, A12, §10.2 items 3-7 | Stage 2; Freeze B for the T07-T09 recipes' quality |
 | 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (K09 gates); T10 for T10's recipe |
-| 5 | A13 GPU subchain against CPU (R30, U8) | Stage 4; a GPU-capable subchain (question Q1); the tiny confirmation job |
+| 5 | A13: recorded `blocked-by-resource` (R14; Q1 answered 2026-11-13); no GPU job. The CPU measurements of stage 4 (T12-14) are recorded beside it | Stage 4 |
 | 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | T10 for T10's part; question Q3 |
 | 7 | A10, A26-A36 runtime (R20: T11 design, T12 runtime) | T11 design (F1); a backend per family, else a recorded gap |
 
@@ -48,8 +48,8 @@ until Freeze B fixes K09.
 | T12-13 | §14.1 | Comparators for byte, numerical and statistical reproducibility, declared per recipe | A reordering passes, a changed association fails, each with its fixed tolerance | FB (tolerances with K09) | 4 | FB |
 | T12-14 | §14.2 | CPU engineering benchmark: the same scientific work, each component timed apart, overlap stated | Report reading, initialization, I/O, conditions, conversion, compute and checks separately, with success and failure denominators | Stage 3 | 4 | FB; T10 for T10's recipe |
 | T12-15 | A15, A50, §16.1 "quality before speed" | A faster variant with worse tails or coverage is rejected under fixed gates or listed as another working point | A planted faster variant with a fatter tail fails the gate; no speed number is reported before the quality gate | K09 frozen | 4 | FB |
-| T12-16 | A13, R30, U8 | GPU subchain against CPU: include transfer, initialization and queues; compare quality at a fixed reproducibility level | Section "A13 on the site GPU partitions" | Stages 4; Q1 | 5 | GPU, FB |
-| T12-17 | R14 | Without a usable GPU subchain, A13 stays `blocked-by-resource` with CPU measurements recorded; T12 stays blocked for A13 and P5 is incomplete | CPU timings from T12-14 are recorded beside the A13 row; T12's state and every P5 report say blocked for A13 | Stage 4 | 5 | FB |
+| T12-16 | A13, R30, U8 | GPU subchain against CPU: include transfer, initialization and queues; compare quality at a fixed reproducibility level | Not run: `blocked-by-resource` (R14). The user answered Q1 on 2026-11-13, "Record blocked-by-resource (Recommended)": no T07-T09 recipe has a GPU subchain, so there is no GPU job. Reopened only if a GPU subchain is built and the user asks | none | 5 | blocked-by-resource |
+| T12-17 | R14, Q1 | A13 is recorded `blocked-by-resource` (the user, 2026-11-13) with CPU measurements recorded; T12 stays blocked for A13 and P5 is incomplete | CPU timings from T12-14 (still in scope, stage 4) are recorded beside the A13 row; T12's state and every P5 report say blocked for A13, for want of a GPU subchain | Stage 4 (T12-14) | 5 | FB |
 | T12-18 | A37, §9.6 | g×E degeneracy: convergence and same-type holdouts are no proof of absolute scale; identifiable combinations and named constraints retained | A two-parameter synthetic fit of `y = gE` reports only `gE` (or a named external scale); a same-type holdout is not accepted as validation | Q3 | 6 | T10 (shared fixture) |
 | T12-19 | A37, §9.6, R31 (weak-mode witness) | The T07 weak-mode fixture reused in T12: χ²/ndf essentially unchanged while `q/p` is biased; the method card lists the mode and its named constraint | Reuse `CAI-T07-4`'s fixture 7004 against 7003 inside a T12 reprocessing; the card lists `sagitta-like deformation` with its constraint | T07 merged | 6 | T10 |
 | T12-20 | R20, A26-A36 | A26-A36 runtime: injection before filtering, scan settings, per-channel exposure, angle bases, CRES first segment, averaged spectra, IRF reuse, veto-only scintillation, null modes, frame definitions, injected data labels | One executed case per scenario on a backend that covers it; otherwise a recorded gap keeping P4 execution incomplete | T11 design (F1) | 7 | none (backend absent: gap) |
@@ -171,27 +171,140 @@ the deliverable rule is reached, which it implies, C4 a not-applicable convergen
 input (unknown variant or plant, an output file that exists: a record is never overwritten, a missing folder); `incomplete` exit 3, the
 harness could not run or the record could not be written. Exit codes come from `core.status.exit_code`.
 
-## A13 on the site GPU partitions (stage 5, planned only; nothing submitted)
+## Stage 2: conditions, invalidation and identity (fixed before the tests were written)
 
-U8: "Use the site GPU partition". R30: a tiny approved job confirms the hardware and what the job receives before any GPU pilot.
-- **Partitions.** `b6000-al9_devel` (RTX PRO 6000 Blackwell, sm_120, 1-2 GPUs per job, QoS `b6000_res` caps the partition at 2 GPUs) or
-  `v100-al9_short` (V100, driver CUDA <= 12.9). `--gres=gpu:N`, never `--qos`; each CPU on a GPU node is billed 2.
-- **Tiny confirmation job.** 1 GPU, 1 CPU, 2,000 MB, 10 minutes: `nvidia-smi`, `CUDA_VISIBLE_DEVICES`, the device the subchain's runtime
-  sees, and the driver's CUDA version. Bound: 0.17 GPU-hours, 0.33 billed core-hours.
-- **Pilot (after Q1 and the confirmation job).** The chosen subchain on a fixed block-1 sample, CPU and GPU from the same snapshot, timing
-  reading, initialization, transfer, queue and compute apart (§14.2), quality compared at the reproducibility level Q2 fixes. Proposed caps
-  for the coordinator to approve: 1 GPU-hour, 2 billed core-hours, at most 6 jobs.
-- **Stops.** A failed quality comparison blocks the GPU result before any speed number (T12-15). No GPU-capable subchain: A13 stays
-  `blocked-by-resource` (T12-17), now for want of a subchain, not of hardware.
+**Split, and why.** Stage 2 takes T12-05 to T12-09 and T12-24 to T12-27 only. T12-10 to T12-12 (partition and accounts) become stage 3 and
+T12-13 (comparators) stage 4. Reasons: stage 2 changes a shared runner (`skills/hep-computing/scripts/run_workflow.py`, G05), which every
+workflow uses and which deserves a review of its own; stage 3 needs multi-range recorded products and the E6 range layout; stage 4 needs
+each recipe's reproducibility level and tolerances read from Freeze B. One reviewed stage cannot hold all three. T10 is still in progress,
+so nothing here touches T10's recipe. A13 is recorded `blocked-by-resource` (Q1 answered), with no GPU job.
+
+**Inputs.** Synthetic DAGs, conditions-payload/1 sidecars built here, and frozen recorded files read only, by SHA-256: the T08
+configuration `adapters/calo-cluster/assets/t08-grid-1.configuration.json` and the T09 budget
+`adapters/photon-likelihood/assets/t09-multistart-1.budget.json` (Freeze B items; never edited: a changed configuration is a copy in a
+scratch folder). No recipe, frozen file or file of `jobs/evaluation/SOURCES.sha256` changes. No quality claim.
+
+**Files.** Production: `skills/hep-computing/scripts/run_workflow.py` (G05), with its documentation in its docstring. Tests:
+`tests/skills/hep_computing/test_workflow_native.py` (the runner) and `tests/contracts/test_t12_reprocessing.py` with its harness
+`tests/contracts/t12_reprocessing.py` (reprocessing scenarios, the scope check, the configuration classifier, the chunk binder).
+
+**The runner change (T12-07, T12-06).** All comparisons exact.
+- N1. A step may declare `"native_inputs": [PATH, ...]`: native binaries, libraries, configurations. Each PATH takes the placeholders
+  (`{plugin}`, `{workflow}`) or is absolute or relative to the work folder. Each is hashed when the step's record is formed, in every run,
+  before the skip decision (a fresh identity, never a stored one), and recorded as `extension.native_sha256` {PATH as written: SHA-256};
+  the receipt lists them as `native_inputs` [{path, sha256}]. A declared native input that is missing or not a regular file: `rejected`,
+  exit 2, nothing run.
+- N2. `--incremental` skips a step only if its `native_sha256` equals the previous record's. One changed byte in a declared native input
+  reruns the step ("a native input changed"); an unchanged one keeps the skip.
+- N3. An executable file named in argv (after placeholder filling; not the running interpreter, not a `.py` script, not a declared native
+  input) is undeclared: recorded as `extension.undeclared_native` [token as written], and the step is never skipped ("an undeclared native
+  file is in argv: its identity is not closed (G05)"). That is the broadened rerun of §9.4; a reuse is never granted.
+- N4. Old recipes are unchanged: a step without `native_inputs` and without an undeclared executable writes a run record and a receipt
+  with no new key, byte-identical to the runner at `4c08da43` (the shipped workflow's records compared), and keeps its skip behaviour.
+- N6 (T12-27, seed policy). The skip rule also compares the step's `seeds` (recorded in the run record but, at `4c08da43`, not compared:
+  a seed change that left argv unchanged kept the old record with the old seeds). A changed `seeds` reruns the step; unchanged seeds keep
+  the skip.
+- N5. Limits stated in the docstring: libraries loaded but not named are not observed (§9.8: within the binding's observable scope);
+  `native_inputs` is what the caller declares.
+
+**Reprocessing scenarios (harness; DAG `calibrate` -> `cluster` -> `response` -> `report`, plus `pedestal-monitor`; run by
+`run_workflow.py --incremental`).** `calibrate` reads the gain payload sidecar, `pedestal-monitor` the pedestal sidecar, `cluster` the
+T08 configuration (a byte copy), `report` a presentation file (title). Every step script is written by the harness; the native case uses a
+small executable written by the harness as a stand-in for a native binary.
+- R1 (T12-05, A04). The gain payload's content changes under the same tag (re-sealed: new `payload_id`, same tag). The rerun set is exactly
+  {calibrate, cluster, response, report}; `pedestal-monitor` is skipped with its outputs unchanged. `reuse_decision` refuses the old
+  `calibrate` product under the new payload and allows it under the old one.
+- R2 (T12-05, broadening). A step that declares unknown closure (an undeclared executable in argv, N3) reruns on every incremental run
+  even with nothing changed; `reuse_decision(..., unknown_dependencies=True)` refuses.
+- R3 (T12-06, A40). The stand-in native binary of `cluster` changes one byte; the Python wrapper and the workflow file are unchanged.
+  `cluster` reruns; downstream reruns exactly when `cluster`'s output changed (here the rebuilt stand-in writes another `tool` field, so
+  `response` and `report` rerun; a byte change that leaves the output equal reruns `cluster` only); nothing upstream does. A manifest of native hashes left from the last run (a declared input
+  file, unchanged) does not make the step skip: the binary itself is hashed afresh (§9.8: rehashing an old manifest is insufficient).
+- R4 (T12-25, A32). The T08 configuration copy changes one constant (`seed_threshold_mev` 10.0 -> 12.0). Its identity
+  (`configuration.from_bytes(...).sha256`, the recipe's own) changes; `cluster` writes to `products/<configuration sha256>/`, so the old and new
+  products are both kept; `response` and `report` rerun with the new pairing; `calibrate` and `pedestal-monitor` are skipped.
+- R5 (T12-26). Only the report title changes: only `report` reruns; every scientific output and run record is byte-identical. Recorded
+  finding, not a defect: the T08 configuration identity is the SHA-256 of the file's bytes, so its `source` text (non-scientific) is in
+  it, and a `source`-only edit reruns `cluster` (a conservative broadening, allowed by §9.4).
+- R6 (T12-27). `configuration_change(old, new)` classifies changed keys: T08 constants (thresholds, quantum, noise, width, sharing
+  iterations, grid) as `physics: response revalidation required`; T09 multistart budget keys (`starts`, `tie_tolerance`) as
+  `candidate or resource limit: response revalidation to be judged`; `format`, `recipe` as `identity`; `source` as `metadata`. A T08
+  configuration with a key removed (a value left to a default) is refused by the recipe's reader, so effective defaults are always written
+  out; a changed iteration limit or budget changes the identity. The T08 recipe is deterministic (no seed); the seed policy row is shown on
+  the runner's `seeds` field (N6).
+- R7 (T12-09, A14, U12). Control layer (as stage 1): an artifact with a pass under criterion A; a stricter contract adds criterion B.
+  The artifact is `unchecked` (no pass) until B's check runs; a `reuse` of it gives no result; its old fail under another criterion stays
+  in `historical_failures`. Runner: a skipped step writes no receipt (no new evidence), and an earlier receipt is never replaced.
+- R8 (T12-24, §9.3). `bind_chunk(keys, payloads)` binds each key to the one payload whose IOV holds it (`iov_holds`); a chunk crossing an
+  IOV boundary is subdivided (keys 40-59 over IOVs [0, 50) and [50, 100) give 40-49 and 50-59); a key with no payload or two is refused;
+  `check_chunk_binding` refuses a binding that applies the first key's payload to the whole chunk.
+- R9 (T12-08, A42). `scope_check(snapshot, live, outputs)` runs in the job's process: every `sys.path` entry, every loaded module's file,
+  the working folder and each output path must lie outside every live root (resolved, symlinks followed). A module imported from a live
+  root, an output under one, or a working folder inside one is refused (`rejected`, exit 2); a Git worktree path alone proves nothing (a
+  run whose working folder is a clean worktree but which imports from the main checkout is refused). The job of record runs it on itself
+  from the snapshot copy.
+
+**Exit codes.** `t12_reprocessing.py scope-check --snapshot DIR --live DIR [--live DIR ...] [--evidence-path PATH ...]`: `ok` 0, `rejected` 2
+with the offending paths, `incomplete` 3; from `core.status.exit_code`.
+
+### Stage 2, fix round 1 (review `jobs/t12-stage2/REVIEW.md`; written before the changed tests)
+
+**What changed after green-1 (M9).** Between green-1 and green-2 three renames only, for the naming check, and the reference inventory
+regenerated: the harness's `configuration_change(old, new)` parameter `new` became `changed`; the scope check's `--output` became
+`--evidence-path` (harness, its test and the plan's exit-code line). No expectation, rule or value changed.
+
+**Which scenarios test new behaviour (M4).** New behaviour: N1-N3, N6 and R2, R3 (the runner change), R8 and R9 (harness functions). R1,
+R4, R5 and R7 characterise behaviour that existed at `4c08da43` (input hashes, the output contract, the control layer); they pass on the base
+runner, and their red-2 failures came from the stub harness. R6 is a specification table (the harness's categories), not a demonstrated
+classifier: what it shows beyond the table is that the frozen T08 and T09 files have no uncategorised key, that the recipe's reader refuses
+a missing default, and that the identity changes with a limit.
+
+**Changed expectations.**
+- N3' (I1, I2: replaces N3). Only the program and an interpreter-run script are examined, so existing workflows keep their skip:
+  - the program is `argv[0]` after placeholder filling, a bare name resolved through `PATH` (`shutil.which`); if it is not the running
+    interpreter and not declared (an input or a native input), it is undeclared;
+  - if the program is an interpreter of scripts (`sh`, `bash`, `dash`, `zsh`, `ksh`, `root`, `root.exe`, `Rscript`, `perl`, `ruby`, `node`),
+    the first later token that names an existing regular file (for `root`, with a trailing `(...)` argument list removed) is its script; if it
+    is not a `.py` file and not declared, it is undeclared. The interpreter itself is not hashed (a system program; a limit);
+  - an executable named in any other argv token (an option value such as `--exe /path/prog`) is not examined: it is closed only when
+    declared. This is the limit that keeps the generated Geant4 scan (`geant4_run.py scan`, `--exe` as an option value) skipping as at
+    `4c08da43` when nothing changed;
+  - an undeclared program or script is recorded in `extension.undeclared_native` and its step is never skipped.
+  Workflows in this plugin whose program is not `{python}` (searched: `"argv": [` in the plugin): `ENV_ROOT/bin/python3` and
+  `ENV_ROOT/allpix/bin/allpix` (detector-simulation backends, not run through `--incremental`), `scancel` (a Slurm shim), and the test-only
+  `bin/legacy-tool`, `bin/cluster-tool`, `./native-tool`, `ENV_ROOT/bin/synthetic-sim`. None of them is an incremental workflow that skipped
+  before; if one is run with `--incremental`, its program must be declared or it reruns.
+- N7 (I1). `geant4_run.py scan` writes each step's `native_inputs` as `[<exe>, <build record>]`, in the same `~/` or absolute form as
+  its `--exe` and `--build-record` options. The runner expands a leading `~/` in a native input. A generated scan workflow skips when nothing
+  changed and reruns every step when one byte of the executable changes, with the executable outside home and under home.
+- N1' (I3). Every native input that is absolute, starts with `~`, or uses a placeholder is checked before the first step runs: a missing
+  one is `rejected` (exit 2) and no step has run. A work-relative native input (which an earlier step may write) is checked when its step
+  is reached; that refusal also writes nothing of that step. A relative native input with `..` is refused when the workflow is loaded, as
+  `inputs` are (M2); a native input that cannot be read is `rejected`, never a traceback (M2).
+- N4' (M1). Old records keep exactly the key sets of the runner at `4c08da43` (the record and receipt key sets are pinned in the test);
+  the diff adds keys only when declared, so values of existing keys are unchanged. "Byte-identical" is not claimed.
+- N5' (M3). The docstring and analysis-workflows.md recommend placeholders (`{plugin}`, `{workflow}`) or work-relative paths in
+  `native_inputs`, because an absolute path is written into the record as given.
+- R8' (M6). `check_chunk_binding(binding, payloads, keys)` reports keys whose payload's IOV does not hold them, keys of the chunk no part
+  covers, and keys two parts cover; `[{"keys": [40, 49], low}]` for the chunk 40-59 reports 50-59 uncovered. Each payload's own coordinate
+  is used.
+- R9' (M7, I5). The scope check also reports a namespace package whose search locations lie under a live root, and the running
+  interpreter (`sys.executable`, resolved) under a live root. In the job it imports the modules under test (`--import`) and takes the live
+  roots from `git worktree list --porcelain` of the checkout.
+
+## A13: recorded blocked-by-resource (stage 5; no GPU job)
+
+The user answered Q1 on 2026-11-13: "Record blocked-by-resource (Recommended)". No T07-T09 recipe has a GPU subchain (the ACTS build,
+calo-cluster and photon-likelihood are CPU code), so A13 stays `blocked-by-resource` under R14, with the CPU measurements recorded instead.
+There are no GPU jobs: neither the tiny confirmation job of R30 nor a pilot. U8 ("Use the site GPU partition") stands for any later GPU
+subchain, which would reopen A13 only on the user's word. The CPU engineering benchmark (T12-14) stays in scope, in stage 4, and its timings
+are the CPU measurements recorded beside A13.
 
 ## Questions and rulings
 
-- **Q1 (A13 subchain): for the user** (coordinator, fix round 1). No T07-T09 recipe has a GPU path at this baseline (the ACTS build,
-  calo-cluster and photon-likelihood are CPU code). Which subchain should A13 measure: a GPU build of one recipe's kernel (new work, which
-  task owns it), a learned model's inference (hep-ml), or is A13 recorded `blocked-by-resource` for want of a subchain even though the
-  hardware is approved? Owner: the user.
-- **Q2 (A13 reproducibility).** §14.1 lets the recipe declare byte, numerical or statistical reproducibility for the GPU-CPU comparison; it
-  needs K09-level tolerances. Fixed with Freeze B, or by T12 before the pilot? Owner: the coordinator.
+- **Q1 (A13 subchain): answered** by the user, 2026-11-13: "Record blocked-by-resource (Recommended)". A13 is `blocked-by-resource`
+  (R14), no GPU job; CPU measurements recorded (T12-14, T12-17).
+- **Q2 (A13 reproducibility): moot** while A13 is `blocked-by-resource` (Q1); it returns with a GPU subchain.
 - **Q3 (A37 in T12).** R31 says the weak-mode witness is the T07 fixture "reused in T10 and T12". Does T12's part need its own reprocessing
   run of fixtures 7003 and 7004 through the T12 loop machinery, or is citing `CAI-T07-4` with a T12 g×E fixture enough? Owner: the coordinator.
 - **Q4 (the previous-round link): closed** (coordinator, fix round 1, reversing the stage-0 reading). The schema has the fields:

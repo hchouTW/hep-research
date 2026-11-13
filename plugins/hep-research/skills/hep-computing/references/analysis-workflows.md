@@ -29,7 +29,13 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   step whose previous record matches on all of them and on its inputs and outputs (never when the release digest is
   unknown, as in a development checkout). A step may declare `parameter_digest` (a command printing the digest of the
   design parameters it reads, e.g. `evaluate_design.py run --digest-only`) that replaces the candidate files in the
-  skip key, so a design chain reruns only where a parameter it reads changed.
+  skip key, so a design chain reruns only where a parameter it reads changed. A step that runs native code declares it
+  in `native_inputs` (binaries, libraries, scripts, configurations; prefer `{plugin}`, `{workflow}` or work-relative
+  paths, since an absolute path is written into the record): each is hashed afresh in every run, before the skip
+  decision, and a changed byte reruns the step. An undeclared program (`argv[0]`, also found through `PATH`) or a script
+  run by `sh`, `bash`, `root -q` and similar interpreters makes the step's identity open, so it is never skipped; a
+  changed `seeds` also reruns. Not seen: an executable given as an option value (`--exe PATH`, unless declared), the
+  interpreter itself, and a library the step loads without naming it.
   Outputs are fresh and owned by the run: every input, output and `stdout` path must be relative to the work folder,
   without `..` and not through a symlink (anything else is refused before a step runs, and outputs are checked again
   after it, so a parent directory the step turned into a symlink fails the step); an output left from before
