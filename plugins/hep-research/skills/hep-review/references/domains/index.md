@@ -9,7 +9,8 @@ never filled in from memory.
 |---|---|---|
 | hep-statistics | [statistics card](statistics.md) | pilot domain (T03): one positive and one negative case |
 | hep-computing | [computing card](computing.md) | pilot domain (T03): one positive and one negative case |
-| hep-theory, hep-measurement, hep-detector, hep-ml, hep-citations, hep-authoring | none yet | planned (spec 13.1); review them with the owner skill's rules and record the gap |
+| hep-detector | [detector card](detector.md) | simulator calibration only: the calibration review obligation template, one positive and one negative case |
+| hep-theory, hep-measurement, hep-ml, hep-citations, hep-authoring | none yet | planned (spec 13.1); review them with the owner skill's rules and record the gap |
 
 Cross-cutting questions need one obligation per owner: "the Python correctly implements an inappropriate likelihood"
 is a computing obligation (supported) and a statistics obligation (violated); the first never overrides the second.

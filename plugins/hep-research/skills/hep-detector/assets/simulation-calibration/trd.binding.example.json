@@ -1,0 +1,311 @@
+{
+ "example": "simulation-calibration node binding: TRD",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row TRD",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "The dE/dx model is a discrete model M: the two enumerated models differ in the run card's PAI entry. The g4sim binding does not list /physics/pai or /physics/xtr among the discrete run-card fields, so a theta bound there would be accepted as a resimulation row (reported as a binding finding).",
+  "Section 12's TR yield factor on node 1 has no g4sim field; the example uses the radiator foil thickness, a geometry parameter (resimulation).",
+  "g4sim has no gas-avalanche stage kind; gas gain binds to the sensor stage gain (Inferred mapping)."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: electrons and pions of known momentum"
+    },
+    {
+     "id": "radiator_gas",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 dE/dx plus TR photons from the radiator (g4sim_run, XTR radiator)",
+     "samplable": true,
+     "mechanisms": [
+      "yield",
+      "physics-process",
+      "discrete-model"
+     ]
+    },
+    {
+     "id": "ionisation",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "2 ionisation electrons (response stage ionisation: W value, Fano)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "drift",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "3 drift and diffusion (drift_table stage, a hashed table)",
+     "mechanisms": [
+      "transport-diffusion"
+     ]
+    },
+    {
+     "id": "gas_gain",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b gas gain (bound to the sensor stage gain; Inferred mapping)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "adc",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 shaping and ADC",
+     "mechanisms": [
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "reco",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 clusters and likelihood"
+    },
+    {
+     "id": "cluster_charge",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: cluster-charge spectrum and its tail per species"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "radiator_gas"
+    },
+    {
+     "from": "radiator_gas",
+     "to": "ionisation"
+    },
+    {
+     "from": "ionisation",
+     "to": "drift"
+    },
+    {
+     "from": "drift",
+     "to": "gas_gain"
+    },
+    {
+     "from": "gas_gain",
+     "to": "adc"
+    },
+    {
+     "from": "adc",
+     "to": "reco"
+    },
+    {
+     "from": "reco",
+     "to": "cluster_charge"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "foil_thickness",
+    "role": "theta",
+    "nodes": [
+     "radiator_gas"
+    ],
+    "mechanism": "yield",
+    "physical_bounds": [
+     5.0,
+     50.0
+    ],
+    "sampling_bounds": [
+     10.0,
+     30.0
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/params/radiator_foil_um"
+     }
+    ]
+   },
+   {
+    "name": "gas_gain",
+    "role": "theta",
+    "nodes": [
+     "gas_gain"
+    ],
+    "mechanism": "fluctuation",
+    "physical_bounds": [
+     100.0,
+     100000.0
+    ],
+    "sampling_bounds": [
+     1000.0,
+     20000.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/2/parameters/gain/value"
+     }
+    ]
+   },
+   {
+    "name": "adc_noise",
+    "role": "theta",
+    "nodes": [
+     "adc"
+    ],
+    "mechanism": "noise-threshold",
+    "physical_bounds": [
+     0.0,
+     10.0
+    ],
+    "sampling_bounds": [
+     0.1,
+     3.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/3/parameters/noise_sigma/value"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_momentum",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "cluster_charge"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "pai",
+     "physics_list": "FTFP_BERT_EMZ"
+    },
+    {
+     "id": "standard-dedx",
+     "physics_list": "FTFP_BERT_EMZ"
+    }
+   ],
+   "absorbed": []
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "another XTR radiator class (regular versus irregular foil-gap model)",
+    "observable": "electron cluster-charge tail at fixed momentum",
+    "identity_difference": "run card /physics/xtr radiator_class"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "dE/dx without the PAI model in the gas",
+    "observable": "pion cluster-charge width (Landau tail)",
+    "identity_difference": "run card /physics/pai"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "radiator_gas": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "ionisation": {
+     "table1": "2",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "stage": "ionisation"
+    },
+    "drift": {
+     "table1": "3",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "gas_gain": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "distribution": "poisson"
+    },
+    "adc": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "reco": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}

@@ -1068,6 +1068,8 @@
    "path": "skills/hep-statistics/scripts/calib_chain.py",
    "depth": 3,
    "skills": [
+    "hep-detector",
+    "hep-review",
     "hep-statistics"
    ]
   },
@@ -1082,6 +1084,8 @@
    "path": "skills/hep-statistics/scripts/calib_contract.py",
    "depth": 3,
    "skills": [
+    "hep-detector",
+    "hep-review",
     "hep-statistics"
    ]
   },

@@ -1,0 +1,332 @@
+{
+ "example": "simulation-calibration node binding: DIRC",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row DIRC",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "quartz_rindex acts on two nodes (bar and tir); both bind to g4sim_run, so its only methods are resimulation and the surrogate model.",
+  "TTS has no field in response-pipeline/1 (the transit time is a digitization-job input), so it has no Table 2 row and is not bound here."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: tracks of known momentum, species and polar angle"
+    },
+    {
+     "id": "bar",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 traversal of the quartz bar, Cherenkov emission (g4sim_run)",
+     "samplable": true,
+     "mechanisms": [
+      "physics-process"
+     ]
+    },
+    {
+     "id": "tir",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "3 total internal reflection and propagation (g4sim_run, full optical tracking)",
+     "samplable": true,
+     "mechanisms": [
+      "transport-diffusion",
+      "time"
+     ]
+    },
+    {
+     "id": "pde",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4a MCP-PMT PDE as the sensor surface efficiency (applied in Geant4)",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "sensor",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b gain (response stage 3)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "tdc",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 TDC and threshold (response stage 4)",
+     "mechanisms": [
+      "time",
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "reco",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 pixels and time; likelihood of angle and time",
+     "mechanisms": [
+      "association"
+     ]
+    },
+    {
+     "id": "pattern",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: hit pattern in (pixel, time) per polar angle (two-dimensional shape)"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "bar"
+    },
+    {
+     "from": "bar",
+     "to": "tir"
+    },
+    {
+     "from": "tir",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "sensor"
+    },
+    {
+     "from": "sensor",
+     "to": "tdc"
+    },
+    {
+     "from": "tdc",
+     "to": "reco"
+    },
+    {
+     "from": "reco",
+     "to": "pattern"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "quartz_rindex",
+    "role": "theta",
+    "nodes": [
+     "bar",
+     "tir"
+    ],
+    "mechanism": "physics-process",
+    "physical_bounds": [
+     1.4,
+     1.6
+    ],
+    "sampling_bounds": [
+     1.45,
+     1.49
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/materials/FusedSilica/optical/rindex/value/0"
+     }
+    ]
+   },
+   {
+    "name": "bar_reflectivity",
+    "role": "theta",
+    "nodes": [
+     "tir"
+    ],
+    "mechanism": "transport-diffusion",
+    "physical_bounds": [
+     0.9,
+     1.0
+    ],
+    "sampling_bounds": [
+     0.99,
+     0.9999
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/optical_surfaces/bar_surface/reflectivity/value/0"
+     }
+    ]
+   },
+   {
+    "name": "sensor_efficiency",
+    "role": "theta",
+    "nodes": [
+     "pde"
+    ],
+    "mechanism": "yield",
+    "physical_bounds": [
+     0.0,
+     1.0
+    ],
+    "sampling_bounds": [
+     0.1,
+     0.4
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/optical_surfaces/mcp_window/efficiency/value/0"
+     }
+    ]
+   },
+   {
+    "name": "time_offset",
+    "role": "theta",
+    "nodes": [
+     "reco"
+    ],
+    "mechanism": "time",
+    "physical_bounds": [
+     -5.0,
+     5.0
+    ],
+    "sampling_bounds": [
+     -1.0,
+     1.0
+    ],
+    "bindings": [
+     {
+      "document": "reconstruction",
+      "pointer": "/time_offset_ns"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_track",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "pattern"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal",
+     "physics_list": "FTFP_BERT_EMZ"
+    }
+   ],
+   "absorbed": []
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "bar-surface roughness (unified model sigma_alpha) turned on versus a polished surface",
+    "observable": "photon yield versus polar angle (number of reflections)",
+    "identity_difference": "detector-spec optical surface finish and sigma_alpha_deg"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "absorption in the glue joints added",
+    "observable": "photon yield versus path length",
+    "identity_difference": "detector-spec material optical absorption table of the glue"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "bar": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "tir": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "pde": {
+     "table1": "4a",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "sensor": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "distribution": "poisson"
+    },
+    "tdc": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "reco": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}
