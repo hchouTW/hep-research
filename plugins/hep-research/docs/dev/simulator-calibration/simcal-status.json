@@ -43,13 +43,13 @@
    }
   },
   "phase-3": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-3",
    "branch": "simcal/phase-3",
    "task_card_sha256": "6671aa5af3b0a49beeca253fcd55fb576e959631009fe149f53778eadbedec62",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-3.md",
    "blocked_on": [],
-   "note": "started 2026-11-12 from origin/main ca70a606 (phases 0-2 merged as #385, #386, #396); the eight author items unblocked by approval A12, 2026-11-12; blocked 2026-11-12 by the failed row-2004 calibration, unblocked the same day by the user's decisions (A13) and the P6 fix; blocked 2026-11-13 by the failed folded calibration 6/12 (rows 2006, 2015), unblocked the same day by the user's decision A15 (second registration at 100x the fit MC)"
+   "note": "started 2026-11-12 from origin/main ca70a606 (phases 0-2 merged as #385, #386, #396); the eight author items unblocked by approval A12, 2026-11-12; blocked 2026-11-12 by the failed row-2004 calibration, unblocked the same day by the user's decisions (A13) and the P6 fix; blocked 2026-11-13 by the failed folded calibration 6/12 (rows 2006, 2015), unblocked the same day by the user's decision A15 (second registration at 100x the fit MC); gates recorded 2026-11-13 (gate part E at 586a143e) and merged to main incrementally (PRs #400, #401, #403, #404 -> a16ba662); set to merged on the user's word, 2026-11-13"
   },
   "phase-4": {
    "state": "not-started",
@@ -85,5 +85,5 @@
   },
   "note": "Phase 3 (checked 2026-11-12): S1, S3, S4, S5, S7, S8, S9 merged. Gate records read: S7 is partially complete, gate 3 (TR yield) a recorded gap; no phase-3 item uses a TR yield. The RICH replica fixture is the S7 reference case ams02-rich-replica (expressed at 210b1685, evaluated 2026-11-08, job 7523520, synthetic); the S7 record's 'not yet expressed' belongs to its first judged run's open items. check-spec on the case returns ok at f93841c3. S8 and S9 gates-recorded with all gates passing."
  },
- "updated": "2026-11-13T21:02:22Z"
+ "updated": "2026-11-13T22:25:42Z"
 }
