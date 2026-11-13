@@ -456,6 +456,13 @@
    "registered_at": "2026-11-13T11:09:16Z",
    "card_commit": "3583ca53",
    "reason": "execution log: gate part C and the section 5.4 decision recorded"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "4e6a3ac2d45c78af6cc0e69065ba537b7b4138577fa006d869c028b985323a19",
+   "registered_at": "2026-11-13T12:33:30Z",
+   "card_commit": "04c11c0f",
+   "reason": "gate part D (campaign p3-gates-d, A19) registered before any run"
   }
  ]
 }
