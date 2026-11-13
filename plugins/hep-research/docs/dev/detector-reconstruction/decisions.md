@@ -809,3 +809,24 @@ and T09 recipes by adapter manifest and file hashes, rechecked unchanged at d653
 the K09 reading rules), the user: "Freeze B as listed". FREEZE B GIVEN. Any change to a frozen item is a return to Freeze B (v4 3.4: a new
 recipe hash, a new Freeze-B run on block 5, the user's word). Evaluation attempt 1 on block 11 may now be submitted (resources approved,
 ceiling 200 CPU-hours). In the same answer: backup b22 approved ("Approve the backup (Recommended)").
+
+## Evaluation attempt 1 on block 11: a deviation, two rulings and the outcomes (2026-11-13)
+
+Submitted after Freeze B with jobs/evaluation/submit.sh (2fd84fe9; manifest d98f5e6f; 46 sbatch calls, 454 attempts lines).
+
+- **Deviation (E6, recorded beside Freeze B, not a v4 2.2 item).** The T08 checks task 7613402 (blocks 1 and 6 only) was read as crashed
+  (exit 3): `RESULT_LINES["t08_cai.py rereco"]` expected `RESULT RECORDED`, the tool prints `RECORD recorded without a numeric assertion
+  (R37)`. The user: "Fix and rerun T08 checks (Recommended)". Fixed on fix/t08-result-line (layout 96a32215, tasks fe4ef1a3), reviewed
+  (jobs/evaluation-t08rerun/REVIEW.md), rerun from snapshot evaluation-tree-7dd5982d (d98f5e6f with the two changed files).
+- **Ruling.** select_attempt counted a repeat on block 11 only after NO-DRAW or NEVER-RAN; 7613402 had drawn block-1 check events. The user:
+  "Count it: block 1/6 only (Recommended)": a check task drawing only from blocks 1 and 6 (T08 checks, T07 checks, T07 negative cases) may
+  be repeated after a harness crash and the repeat counted; no block-11 or block-12 event is ever redrawn; recipe tasks never.
+- **Outcomes (attempt 1, block 11; a failure stands, v4 3.4):**
+  - T07: workflow **fail**, R11 failed. 1,259 of 1,260 records pass, 46 of 47 gates. The fail: fixture 7002, stratum 9, `vertex pull z`,
+    tail rate (L 1 %), step 4: k 200 of 18,907 objects in 9,600 events, estimate 1.058 %, CP lower 0.938 %, U 1.189 % (summary 7613452).
+  - T08: **pass**, R11 done (narrowed claim), 8 of 8 gates; checks counted from rerun 7620410 (summary of record 7620411; 7613455 read
+    incomplete on the frozen code and is kept as evidence).
+  - T09: **pass**, R11 done (narrowed claim), 13 of 13 gates (summary 7613459); all 24 sample-10 single-photon refusals read
+    `"status": "rejected"` by hand (audit finding 2).
+- Carried to attempt 2 or later: audit findings 2 to 4 (e6-result-lines-audit.md), T07 check tasks writing no milestones (review I3), the
+  held bytecode line. Attempt 2 for T07 only after a recorded method change, a return to Freeze B (v4 3.4); the user's word.
