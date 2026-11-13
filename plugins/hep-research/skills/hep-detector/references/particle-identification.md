@@ -226,9 +226,16 @@ choice stated:
 - **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
   declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
   separation (see "Combining measurements" below).
-- **Assigning samples to the track.** Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists.
-  The samples arrive already assigned to one particle;
-  assigning layer signals to a track: no method text, no source read.
+- **Assigning samples to the track.** The samples above arrive already assigned to one particle.
+<!-- example: source citation -->
+  In the ALICE TRD (ALICE Collaboration, Nucl. Instrum. Methods A 881 (2018) 88, arXiv:1709.02743v2, secs. 8-8.2),
+  layer signals are assigned layer by layer: a seed track from the TPC is propagated to the
+  anode-wire radius of each chamber, the clusters near that intersection are combined into a
+  tracklet (a straight-line fit within the chamber), and the global track is updated with it
+  by the Kalman filter. Clusters are formed per time bin from adjacent pads, and an exponential ion
+  tail is subtracted from each pad's later samples; imperfect cancellation biases tracklet positions differently
+  for positive and negative tracks.
+<!-- /example -->
 
 ## Combining measurements
 

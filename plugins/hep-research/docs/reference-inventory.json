@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 49,
-   "bytes": 791672,
+   "bytes": 802709,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2125,7 +2125,7 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 24520,
+   "bytes": 24526,
    "lines": 301,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2281,8 +2281,8 @@
   {
    "path": "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 22029,
-   "lines": 266,
+   "bytes": 24574,
+   "lines": 298,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/event-reconstruction.md",
@@ -2336,8 +2336,8 @@
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
    "owner": "hep-detector",
-   "bytes": 13161,
-   "lines": 175,
+   "bytes": 16533,
+   "lines": 213,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2351,13 +2351,13 @@
     "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7cfaea3d 2026-11-06"
+   "last_commit": "2bcebda1 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 22402,
-   "lines": 274,
+   "bytes": 24370,
+   "lines": 293,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/event-reconstruction.md"
@@ -2368,8 +2368,8 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 21748,
-   "lines": 336,
+   "bytes": 23837,
+   "lines": 361,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-tracking.md",
@@ -2386,7 +2386,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "da7df3d1 2026-11-12"
+   "last_commit": "2bcebda1 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2516,8 +2516,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 23923,
-   "lines": 336,
+   "bytes": 24518,
+   "lines": 342,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2530,7 +2530,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "da7df3d1 2026-11-12"
+   "last_commit": "2bcebda1 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2552,8 +2552,8 @@
   {
    "path": "skills/hep-detector/references/particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 19056,
-   "lines": 290,
+   "bytes": 19518,
+   "lines": 297,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",

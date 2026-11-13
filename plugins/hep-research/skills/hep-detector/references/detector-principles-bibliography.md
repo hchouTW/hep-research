@@ -252,9 +252,9 @@ here, not a re-reading of the work, and no performance number is taken from them
   Methods A512 (2003) 539-545, DOI 10.1016/S0168-9002(03)02016-3. Momentum from multiple scattering in emulsion.
 - D. M. Chernyak et al., "Rejection of randomly coinciding events in ZnMoO4 scintillating bolometers", Eur. Phys.
   J. C 74 (2014) 2913, DOI 10.1140/epjc/s10052-014-2913-4. Pileup rejection in bolometers.
-- A. Broniatowski, B. Censier, A. Juillard and L. Bergé, "Cryogenic germanium detectors for dark matter search:
-  Surface events rejection by charge measurements", Nucl. Instrum. Methods A559 (2006) 378-380,
-  DOI 10.1016/j.nima.2005.12.015. Surface-event rejection with interleaved electrodes.
+- A. Broniatowski et al. (EDELWEISS), "A new high-background-rejection dark matter Ge cryogenic detector", Phys.
+  Lett. B 681 (2009) 305-309, DOI 10.1016/j.physletb.2009.10.036. Surface-event rejection with interleaved electrodes
+  (replaced 2026-11-13 after an INSPIRE lookup; read at `page` level).
 - D. Budjáš, M. Barnabé Heider, O. Chkvorets, N. Khanbekov and S. Schönert, "Pulse shape discrimination studies with a
   Broad-Energy Germanium detector for signal identification and background suppression in the GERDA double beta
   decay experiment", J. Instrum. 4 (2009) P10007, DOI 10.1088/1748-0221/4/10/P10007. Germanium current-pulse

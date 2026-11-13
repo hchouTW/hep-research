@@ -24,13 +24,17 @@ electron/nuclear recoil discrimination in the charge-to-light ratio; in argon th
 stronger discriminant is the scintillation pulse shape (singlet about 6 ns, triplet about
 1500 ns; in xenon 2.2 ns and 27 ns are too close for the same power). The scintillation is
 vacuum ultraviolet (about 128 nm in argon, 175 nm in xenon), so argon detectors use a
-wavelength shifter such as TPB (PDG RPP 2025, sec. 36, noble liquids).
+wavelength shifter such as TPB (PDG RPP 2025, sec. 36.4; the anticorrelation and the
+combined resolution: Aprile and Doke, Rev. Mod. Phys. 82 (2010) 2053, arXiv:0910.4956v1, sec. II.E).
 
 **Reconstruction.**
 - **Pulse finding** in the waveform (`S1`, `S2`, multiple scatters, single-electron
-  tails); pairing `S1`-`S2` in the presence of pileup. Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists.
-  Which `S1` goes with which `S2` when an event has several candidates: no method text, no
-  source read.
+  tails); pairing `S1`-`S2` in the presence of pileup. In XENON1T (Aprile et al., Phys. Rev.
+  D 100 (2019) 052014, arXiv:1906.04717v2, secs. III, VI.C-D) the largest `S2` and the `S1` with the most
+  sensors before it form the interaction; the pairing is tested by the `S2` width against
+  the diffusion expected at that drift time, and by the `S1` hit pattern and top-array
+  fraction against the position; a second `S1` within one maximum drift time that also fits,
+  or a second large `S2`, removes the event.
 - **3D position**: `xy` from the light pattern (dual phase) or charge pattern; `z` from
   the `S1`-`S2` drift time (`z = v_d Delta t`). In single-phase detectors the
   wire/pad readout and the charge-arrival time give 3D once the interaction time `t0`
@@ -54,11 +58,11 @@ Field non-uniformity displaces the drifting electrons, so the reconstructed `S2`
 is mapped back to the interaction position with a field-distortion map, which enters the
 fiducial volume.
 
-**Light-only (single-phase scintillation) detectors.** No method text, no source read for
-pulse finding, position from the light pattern, other parameter estimation, or energy from
-the light alone: the passage read (PDG RPP 2025, sec. 36.4 opening) covers TPCs, where
-position comes from `S2` and the drift time. Pulse-shape discrimination is in
+**Light-only (single-phase scintillation) detectors.** Event selection, pulse parameters and
+energy scale of one argon cell, and pulse-shape discrimination, are in
 [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
+Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. Position from the light
+pattern: no method text, no source read (PDG RPP 2025, sec. 36.4 opening, covers TPCs).
 
 ### Imaging reconstruction in single-phase LArTPCs
 
@@ -242,10 +246,10 @@ fiducialization, and energy scale** dominate the result.
   the thermal phonons, the early (athermal) part of the signal is shared among the sensors
   according to where the energy was deposited, and its arrival is delayed in the far
   sensors; the partition and delay give a position, while the later thermal part does not.
-- **Position from the charge electrodes.** In ionization-and-heat detectors, interleaved
-  electrodes on the surfaces separate events near a surface, whose charge is collected on
+- **Position from the charge electrodes.** In the EDELWEISS interleaved-electrode germanium
+  detector, electrodes on the surfaces separate events near a surface, whose charge is collected on
   the electrodes of that side only, from bulk events, whose electrons and holes reach the
-  fiducial electrodes of opposite sides (Broniatowski et al., Nucl. Instrum. Methods A 559 (2006) 378). The fiducial
+  fiducial electrodes of opposite sides (Broniatowski et al., Phys. Lett. B 681 (2009) 305, arXiv:0905.0753v1). The fiducial
   volume that this defines is measured as the fraction of events uniform in the bulk
   (cosmogenic or neutron-activation lines) that pass the cut, as a function of energy,
   since the charge resolution degrades the cut near threshold.
@@ -266,10 +270,12 @@ fiducialization, and energy scale** dominate the result.
   [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
   Segmented detectors add position from which segment collects the charge and from the
   transient signals induced on its neighbours.
-- **No method text, no source read**: particle identification from a single thermal
-  channel (the recoil-type ratio of the rare-event section needs a second channel); in
-  multisignal devices, the joint estimate across channels (channel covariance, a combined
-  energy, a restricted estimate when one signal is missing).
+- **Joint estimate across channels.** In EDELWEISS-III (Armengaud et al., J. Instrum. 12
+  (2017) P08010, arXiv:1706.01070v1, secs. 7, 7.1.3) the heat energy is the resolution-weighted mean of two
+  thermal sensors; the recoil energy is that heat less the Neganov-Luke heat, from each
+  electrode's bias and ionization energy; the ionization yield is total ionization over
+  recoil energy. Channel covariance, and a restricted estimate when one signal is missing:
+  no method text, no source read.
 
 **Check:** The pileup resolving time and its rejection efficiency versus pulse separation
 are measured with superposed pulses, and the position or fiducial cut states its
