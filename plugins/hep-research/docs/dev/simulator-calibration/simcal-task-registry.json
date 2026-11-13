@@ -470,6 +470,13 @@
    "registered_at": "2026-11-13T20:41:19Z",
    "card_commit": "337fffd9",
    "reason": "gate part E (campaign p3-gates-e, A20) registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-4.md",
+   "sha256": "b12d67748ac32bc24fa95f4bb46bd4ee223ccf47012cf2875798ed901934962d",
+   "registered_at": "2026-11-13T23:07:29Z",
+   "card_commit": "ad100511",
+   "reason": "phase-4 card refreshed at the phase start (A21; work packages; gate designs)"
   }
  ]
 }
