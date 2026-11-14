@@ -9041,11 +9041,14 @@ Passing checks show software consistency, not physical validity.
 
 ## 0.67.0 release check (2026-11-14, CI and the login-host conda environment)
 
-Release commit `2824169a` on `release/0.67.0`, based on main `af9e05ab` (simcal phase 4 merged, PR #407). Minor release: the simulator parameter calibration workflow, phases 0 to 4 (PRs #385, #386, #396, #400, #401, #403, #404, #406, #407; gate records `docs/dev/simulator-calibration/simcal-gates/phase-0.md` to `phase-4.md`), and the hep-detector method-text additions (PR #402 and the later Unreleased entries).
+Release commit `2824169a` on `release/0.67.0`, based on main `af9e05ab` (simcal phase 4 merged, PR #407); main `7958fa53` (PR #410, the phase-4 status) merged into the branch afterwards. Minor release: the simulator parameter calibration workflow, phases 0 to 4 (PRs #385, #386, #396, #400, #401, #403, #404, #406, #407; gate records `docs/dev/simulator-calibration/simcal-gates/phase-0.md` to `phase-4.md`), and the hep-detector method-text additions (PR #402 and the later Unreleased entries).
 
 What changed on the release branch:
 - version 0.67.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; `CORE_VERSION` 1.14.0 (`core/calibration/`); `adapters/geant4` 0.16.0 (`g4sim_calib_eval.py`, the calibration evaluator; its unit tests run in CI and in the checks below; its Geant4 production paths ran on Slurm in simcal phase 3 with `g4sim_run-build28`); contracts 3.27.0 unchanged (the calibration schemas carry their own `calibration-*/1` versions);
-- a CHANGELOG `0.67.0` section (the former `Unreleased` entries); simcal phase 4 status `merged`.
+- a CHANGELOG `0.67.0` section (the former `Unreleased` entries); simcal phase 4 status `merged`;
+- the README's upload statement: the plugin (about 5100 files, 100.5 MB uncompressed) is over the Upload-plugin route's documented file limit (5,000 files), so the README points to the marketplace (issue #409 tracks restoring the upload route; leaving `tests/`, `examples/`, `release-manifests/` or `docs/dev/` out of the zip breaks runtime reads or links). `check_packaging.py` passes with it.
+
+The checks below ran at `2824169a`; the later commits change only the README, this record, the simcal status records and the release manifest.
 
 No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
 
