@@ -110,13 +110,34 @@ def matrix_condition(S_mc: np.ndarray, S_data: np.ndarray) -> float:
     return float(np.linalg.eigvalsh(R.T @ S_mc @ R).max())
 
 
-def vmodel_columns(contract: dict, names: list[str]) -> np.ndarray:
+def vmodel_columns(contract: dict, names: list[str], version: dict | None = None) -> np.ndarray:
     """Columns u_k = sqrt(lambda_k) e_k of V_model (section 5.4), in link space, all components kept (section 5.4:
     "all components may always be kept"; the truncation conditions are phase 2's). Components: squared-exponential
     kernels {kind, observables, f, length, control: {observable: z}} and explicit matrices {kind: matrix,
-    observables, R}."""
+    observables, R}. The inferred form (phase 5, opt-in) needs its separate version (`vmodel_infer.infer`)."""
     md = contract.get("model_discrepancy") or {}
     comps = md.get("components") or []
+    if md.get("form") == "inferred" or version is not None:
+        if version is None:
+            raise DesignError("linear.incomplete", "the inferred form of V_model needs its separate version "
+                              "(calib_likelihood.py vmodel-infer)")
+        from core.calibration import vmodel_infer   # noqa: PLC0415 (opt-in, phase 5)
+        try:
+            comps = vmodel_infer.version_components(contract, version)
+        except vmodel_infer.VmodelInferError as exc:
+            raise DesignError(exc.code, str(exc)) from None
+    R = vmodel_matrix(comps, names)
+    n = len(names)
+    if not R.any():
+        return np.zeros((n, 0))
+    lam, E = np.linalg.eigh(0.5 * (R + R.T))
+    keep = lam > lam.max() * 1e-12
+    order = np.argsort(lam[keep])[::-1]
+    return (E[:, keep] * np.sqrt(lam[keep]))[:, order]
+
+
+def vmodel_matrix(comps: list[dict], names: list[str]) -> np.ndarray:
+    """The sum R of the V_model components over `names` (section 5.4)."""
     n = len(names)
     R = np.zeros((n, n))
     idx = {nm: i for i, nm in enumerate(names)}
@@ -135,12 +156,7 @@ def vmodel_columns(contract: dict, names: list[str]) -> np.ndarray:
             raise DesignError("linear.incomplete", f"V_model component kind {kind!r}: model ensembles and inferred "
                               "forms are phase 2")
         R[np.ix_(ii, ii)] += K
-    if not R.any():
-        return np.zeros((n, 0))
-    lam, E = np.linalg.eigh(0.5 * (R + R.T))
-    keep = lam > lam.max() * 1e-12
-    order = np.argsort(lam[keep])[::-1]
-    return (E[:, keep] * np.sqrt(lam[keep]))[:, order]
+    return R
 
 
 def systematic_columns(systematics: list[dict] | None, names: list[str], mu: np.ndarray, links: list[str]) -> np.ndarray:
@@ -173,7 +189,7 @@ def to_link_delta(mu: np.ndarray, links: list[str]) -> np.ndarray:
 
 
 def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None, systematics=None,
-           names: list[str] | None = None) -> dict:
+           names: list[str] | None = None, vmodel_version: dict | None = None) -> dict:
     """The design-stage linearization at theta_ref (default: the prior centre, section 6.7) with the evaluator's
     Asimov prediction: J by central differences of the plan's method (common random numbers), V_MC from the
     evaluator, V_data^unc = per-event covariance / exposure of each sample (the contract's `exposure`)."""
@@ -234,7 +250,7 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
     mu_l, J_l, Vd_l, Vm_l = _to_link(mu, J, V_data, V_mc, links)
     g = to_link_delta(mu, links)
     Ve_l = None if r0.get("V_emu") is None else np.asarray(r0["V_emu"], float) * np.outer(g, g)
-    U = vmodel_columns(contract, names)
+    U = vmodel_columns(contract, names, vmodel_version)
     S = systematic_columns(systematics, names, mu, links)
     Phi = np.stack([c * g for c in phi_cols], axis=1) if phi_cols else np.zeros((len(names), 0))
     Free = np.stack([c * g for c in phi_free], axis=1) if phi_free else np.zeros((len(names), 0))
