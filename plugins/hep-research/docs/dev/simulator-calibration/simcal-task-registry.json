@@ -519,6 +519,13 @@
    "registered_at": "2026-11-14T13:35:16Z",
    "card_commit": "c1ee7bb6",
    "reason": "S4 re-registered smaller (A28) before any task ran"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "d21ced70b7aae24a8fe226ceb4116b506343a34a24be8129ac840e30c4a70cbf",
+   "registered_at": "2026-11-14T16:28:11Z",
+   "card_commit": "a7306cd1d",
+   "reason": "S4 pilot (A30/A31) and S4 second registration (A29-A31), before they run"
   }
  ]
 }
