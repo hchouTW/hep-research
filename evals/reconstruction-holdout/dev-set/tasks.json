@@ -14,15 +14,15 @@
    "report_fields": [
     {
      "subject": "clustering_run",
-     "description": "the clustering you ran"
+     "description": "the clustering you ran (kind: executed; unit: none)"
     },
     {
      "subject": "n_clusters",
-     "description": "the number of clusters found"
+     "description": "the number of clusters found (kind: value; unit: none)"
     },
     {
      "subject": "max_cluster_energy",
-     "description": "the energy of the most energetic cluster, with its unit"
+     "description": "the energy of the most energetic cluster (kind: value; unit: GeV)"
     }
    ]
   },
@@ -38,15 +38,15 @@
    "report_fields": [
     {
      "subject": "fit_run",
-     "description": "the fit you ran"
+     "description": "the fit you ran (kind: executed; unit: none)"
     },
     {
      "subject": "intercept",
-     "description": "the fitted intercept a, with its unit"
+     "description": "the fitted intercept a (kind: value; unit: cm)"
     },
     {
      "subject": "slope",
-     "description": "the fitted slope b (dimensionless)"
+     "description": "the fitted slope b (dimensionless) (kind: value; unit: none)"
     }
    ]
   },
@@ -62,11 +62,11 @@
    "report_fields": [
     {
      "subject": "source_fit",
-     "description": "the source-position fit"
+     "description": "the source-position fit (kind: statement; unit: none)"
     },
     {
      "subject": "missing_inputs",
-     "description": "anything you need before the fit can be made"
+     "description": "anything you need before the fit can be made (kind: statement; unit: none)"
     }
    ]
   },
@@ -82,11 +82,11 @@
    "report_fields": [
     {
      "subject": "ring_reconstruction",
-     "description": "the ring reconstruction"
+     "description": "the ring reconstruction (kind: statement; unit: none)"
     },
     {
      "subject": "input_format",
-     "description": "what you found about the input file"
+     "description": "what you found about the input file (kind: statement; unit: none)"
     }
    ]
   },
@@ -101,12 +101,16 @@
    ],
    "report_fields": [
     {
+     "subject": "energy_sum_run",
+     "description": "the summation you ran (kind: executed; unit: none)"
+    },
+    {
      "subject": "mean_energy",
-     "description": "the mean summed energy, with its unit"
+     "description": "the mean summed energy (kind: value; unit: GeV)"
     },
     {
      "subject": "acceptance_check",
-     "description": "the result of the acceptance check"
+     "description": "the result of the acceptance check (kind: statement; unit: none)"
     }
    ]
   },
@@ -117,11 +121,15 @@
    "report_fields": [
     {
      "subject": "principle",
-     "description": "the principle of the separation, in one sentence"
+     "description": "the principle of the separation, in one sentence (kind: statement; unit: none)"
     },
     {
      "subject": "flight_time_difference",
-     "description": "the kaon minus pion flight-time difference, with its unit"
+     "description": "the kaon minus pion flight-time difference (kind: value; unit: ns)"
+    },
+    {
+     "subject": "calculation_run",
+     "description": "the calculation you ran, if you ran one (kind: executed; unit: none)"
     }
    ]
   }
