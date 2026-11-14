@@ -9,6 +9,9 @@ An experiment's adapter implements five functions:
     learned_closure(fold)                                         -> held-out closure of a learned ratio (G4-L)
     ask(requests) / tell(run_ids)                                 -> the asynchronous interface (below)
 
+V_learn (phase 5, a learned density ratio only, section 6.2): observable space, a matrix or v_learn's record; the toy
+evaluator returns a lazy handle (toy.LazyVLearn, computed on first use; `linear.v_learn_of` reads all three forms).
+
 ask/tell (resimulation and surrogate models, phase 3): the engine keeps the state file (calibration-ask-tell/1,
 core/calibration/emulator.py: new_state, ask, tell, drive), one entry per evaluation with its `run_id`, parameter
 point and seeds. `ask(requests)` submits [{run_id, theta, seeds, names}] and returns the run_ids accepted; `tell(

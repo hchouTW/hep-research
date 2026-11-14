@@ -140,6 +140,26 @@ class Rerun(unittest.TestCase):
                                            "p2_gate1", "p2_gate2", "p2_gate3", "p3_gate_e", "p4_gate"})
         self.assertTrue(all(not v["passed"] for v in r["items"].values()))
 
+    def test_p0_clean_status_from_the_guard_lines(self):
+        """A33 (review F11): p0_appendix_c reads the clean status from the jobs' guard lines (the p0 records carry no
+        dirty flag). Positive: a start line for every item at the commit. Negatives: a "worktree dirty" log, a missing
+        item, another commit; and merge_rerun marks the item dirty without logs."""
+        c = "ab" * 20
+        logs = self.d / "logs"
+        logs.mkdir()
+
+        def write(i, text):
+            (logs / f"task_1_{i}.log").write_text(text)
+        for i in range(3):
+            write(i, f"host n1 commit {c[:8]} task {i} start 2026-11-14T00:00:00+00:00\nend x\n")
+        self.assertTrue(G.p0_guard(logs, c, 3)["clean"])
+        self.assertFalse(G.p0_guard(logs, c, 4)["clean"])                         # item 3 has no log
+        self.assertFalse(G.p0_guard(logs, "cd" * 20, 3)["clean"])                 # another commit
+        write(3, "worktree dirty\n")
+        self.assertFalse(G.p0_guard(logs, c, 3)["clean"])                         # a guard failure
+        G.dispatch(self.d, "0" * 40, "/wt")
+        self.assertTrue(G.merge_rerun(self.d)["items"]["p0_appendix_c"]["dirty"])
+
     def test_numeric_differences_are_reported(self):
         d = G.numeric_diff({"a": 1.0, "b": [1, 2], "seconds": 3, "s": "x"}, {"a": 1.5, "b": [1, 2], "seconds": 9})
         self.assertEqual(d, [("/a", 1.0, 1.5)])
@@ -190,6 +210,33 @@ class Identity(unittest.TestCase):
             r2 = G.identity_item(path=p, cases=fast)
         self.assertFalse(r2["passed"])
         self.assertEqual(r2["differing"], ["closure_nc"])
+
+    def test_base_tree_cases(self):
+        """A33 (review F3): the p5base_* cases, captured by running their case file against a git archive of the
+        phase-5 base. Positive: a fast one reproduces its golden at this tree. Negatives: a changed golden byte, and a
+        case file whose SHA-256 differs from the capture's, are caught."""
+        doc = json.loads(G.GOLDEN.read_text())
+        names = sorted(k for k in doc["cases"] if k.startswith(G.TREE_PREFIX))
+        self.assertEqual(names, sorted(G.TREE_PREFIX + n for n in G._tree_case_names()))
+        self.assertEqual({doc["cases"][n]["captured_against"] for n in names},
+                         {doc["base_cases"]["captured_against"]})
+        self.assertTrue(doc["base_cases"]["captured_against"].startswith(G.PHASE_BASE))
+        if G.environment() != doc["environment"]:
+            self.skipTest("interpreter differs from the capture (the comparison is then incomplete, not judged)")
+        fast = [G.TREE_PREFIX + "evaluator_problem_standin"]
+        self.assertTrue(G.identity_item(cases=fast)["passed"])
+        for change in ("golden", "code"):
+            bad = json.loads(json.dumps(doc))
+            case = bad["cases"][fast[0]]
+            if change == "golden":
+                case["golden"]["output"] = case["golden"]["output"].replace("1", "2", 1)
+            else:
+                case["case_code_sha256"] = "0" * 64
+            with tempfile.TemporaryDirectory() as work_dir:
+                p = Path(work_dir) / "g.json"
+                p.write_text(json.dumps(bad))
+                r = G.identity_item(path=p, cases=fast)
+            self.assertEqual((r["passed"], r["differing"]), (False, fast), change)
 
     def test_environment_mismatch_is_incomplete(self):
         doc = json.loads(G.GOLDEN.read_text())

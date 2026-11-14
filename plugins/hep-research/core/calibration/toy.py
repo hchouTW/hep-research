@@ -450,6 +450,29 @@ def _difference_covariance(closures: list, at0: dict, k: int) -> np.ndarray:
     return V
 
 
+class LazyVLearn:
+    """The section 7.1 `V_learn` of one evaluation on the learned path (A33, review F8): `ChainEvaluator.v_learn` at the
+    evaluation's point and observables (observable space; on the nominal sample whatever the evaluation's seeds: a
+    reference quantity, section 2.1), computed on first use and cached on the evaluator. A fit's evaluations never
+    read it, so they pay nothing; the design stage reads it at theta_ref (`linear.v_learn_of`). Calling it gives
+    v_learn's record, np.asarray the matrix."""
+
+    def __init__(self, ev, theta: dict, names):
+        self.ev, self.theta, self.names = ev, dict(theta), None if names is None else list(names)
+
+    def __call__(self) -> dict:
+        key = (tuple(sorted((k, round(float(v), 14)) for k, v in self.theta.items()
+                            if isinstance(v, (int, float, np.floating, np.integer)))),
+               None if self.names is None else tuple(self.names))
+        cache = self.ev.__dict__.setdefault("_v_learn_cache", {})
+        if key not in cache:
+            cache[key] = self.ev.v_learn(self.theta, self.names)
+        return cache[key]
+
+    def __array__(self, dtype=None, copy=None):
+        return np.asarray(self()["V_learn"], dtype=dtype)
+
+
 # ------------------------------------------------------------------ evaluator
 class ChainEvaluator:
     """The section 7.1 interface on a Model and a plan: nominal events generated at the plan's generation point with its
@@ -673,8 +696,8 @@ class ChainEvaluator:
         run_events, regen = self._prepared(target, nom)
         out = self._observe(target, nom, run_events, regen, names)
         changed = [p for p in self.model.param_nodes if not _same(target.get(p), nom["params"].get(p))]
-        out.update({"V_emu": None, "V_learn": None, "theta": target,
-                    "methods": {p: self.default_method(p) for p in changed}})
+        out.update({"V_emu": None, "V_learn": None if self._learned_spec is None else LazyVLearn(self, target, names),
+                    "theta": target, "methods": {p: self.default_method(p) for p in changed}})
         return out
 
     def resample(self, node: str, theta: dict, phi: dict | None, psi: dict | None, model: str, inputs,

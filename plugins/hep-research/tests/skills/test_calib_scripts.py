@@ -398,6 +398,38 @@ class Phase1Scripts(unittest.TestCase):
         self.assertEqual(rc, 2)
         self.assertIn("learned.sbi_refused", out["error"])
 
+    def test_calib_reweight_g4l_points(self):
+        """A33 (review F13): g4l --points must contain the worst-ESS point of P0's scan (section 8.2 note 1): without it
+        rejected, g4l.worst_ess_missing (negative); P0's own points given explicitly pass (control). The section 5.4
+        spot checks (g4sim plans, which refuse learned ratios) are checked first: with a required spot check absent,
+        g4l.spot_checks_missing (negative), present it goes on to the worst-ESS check (control)."""
+        import copy
+        import importlib.util
+        from unittest import mock
+
+        from core.calibration import evaluator, kernel_check
+        fx = json.loads((FIXTURE_DIR / "toy_posthoc.json").read_text())
+        fx["plan"]["evaluator"]["spec"]["runs"][0]["n"] = 8000
+        c, p = copy.deepcopy(fx["contract"]), copy.deepcopy(fx["plan"])
+        ev = evaluator.make(p, c)
+        pts = kernel_check.default_points(ev, c, p)
+        hi = c["parameters"][0]["sampling_bounds"][1]
+        others = pts[1:] + [{"strength": 0.5 * (pts[1]["strength"] + pts[2]["strength"])}]
+        fxp = self.put("fx.json", fx)
+        rc, out = run("calib_reweight.py", "g4l", "--contract", fxp, "--points", self.put("o.json", others),
+                      timeout=300)
+        self.assertEqual((rc, out["status"], out["finding"]), (2, "rejected", "g4l.worst_ess_missing"))
+        rc, out = run("calib_reweight.py", "g4l", "--contract", fxp, "--points", self.put("w.json", pts), timeout=300)
+        self.assertEqual((rc, out["status"]), (0, "passed"))
+        spec = importlib.util.spec_from_file_location("calib_reweight_t", S / "calib_reweight.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        req = [{"parameter": "strength", "gate": "P0", "reason": "test", "points": [{"strength": float(hi)}]}]
+        with mock.patch.object(kernel_check, "required_spot_checks", lambda *_a: req):
+            self.assertEqual([f["code"] for f in mod.required_points_missing(ev, c, p, pts)],
+                             ["g4l.spot_checks_missing"])
+            self.assertEqual(mod.required_points_missing(ev, c, p, pts + [{"strength": float(hi)}]), [])
+
     def test_calib_emulator(self):
         """Phase 3: the ask/tell state file through the CLI, training, the surrogate domain, P6 on the toy detector
         and on arrays, and the G8 spot check's bookkeeping (not-decided)."""

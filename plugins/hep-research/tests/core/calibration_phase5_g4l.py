@@ -33,9 +33,12 @@ from scipy import stats
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
 
 from core.calibration import evaluator as E  # noqa: E402
 from core.calibration import io  # noqa: E402
+
+import calibration_phase5_taskenv as TE  # noqa: E402
 from core.calibration import kernel_check, linear, reweight, toy  # noqa: E402
 
 warnings.filterwarnings("ignore", message="The balance properties of Sobol")
@@ -135,6 +138,7 @@ def merge(out_dir: Path, out: Path, tasks=None, reps: int = REPS, max_fa: int = 
     rep = {"study": "phase-5 S1, G4-L false alarms (post-hoc fixture)", "complete": complete,
            "missing_tasks": missing, "commits": sorted(c for c in commits if c), "dirty": dirty, "result": res,
            "passed": bool(complete and res["passed"]), "provenance": provenance(), "flags": FLAGS,
+           "task_environment": TE.task_environment(recs.values()),
            "seconds": float(sum(r["seconds"] for r in recs.values() if r))}
     io.write_json(str(out), io.jsonable(rep))
     return rep

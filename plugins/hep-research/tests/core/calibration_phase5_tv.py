@@ -40,9 +40,12 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
 
 from core.calibration import fit as F  # noqa: E402
 from core.calibration import io, toy  # noqa: E402
+
+import calibration_phase5_taskenv as TE  # noqa: E402
 from core.calibration import validate as V  # noqa: E402
 from core.calibration.toy_problem import ToyProblem  # noqa: E402
 
@@ -282,7 +285,8 @@ def merge(out_dir: Path, out: Path, tasks=None, reps: int = REPS, n_ref: int = N
     rep = {"study": "phase-5 S4, T_v size on the learned path (post-hoc fixture)", "complete": complete,
            "missing_tasks": missing, "error_tasks": errors, "commits": sorted(c for c in commits if c),
            "dirty": dirty, "result": res, "passed": bool(complete and res["passed"]), "provenance": provenance(),
-           "flags": FLAGS, "seconds": float(sum(r["seconds"] for r in recs.values() if r))}
+           "flags": FLAGS, "task_environment": TE.task_environment(recs.values()),
+           "seconds": float(sum(r["seconds"] for r in recs.values() if r))}
     io.write_json(str(out), io.jsonable(rep))
     return rep
 

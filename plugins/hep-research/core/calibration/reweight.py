@@ -152,7 +152,9 @@ def g4l_structural(record: dict, contract: dict | None = None) -> list[dict]:
     the prior-ratio correction (section 6.2); the contract must state G4-L's alpha and multiple-comparison method
     (section 8.1, acceptance.gates["G4-L"]; alpha may be tightened below 0.01, never loosened)."""
     out = []
-    if not record.get("cross_fitted") or int(record.get("folds", 0)) < 2:
+    disjoint = record.get("train_apply_disjoint")          # A33 (review F4): from the index sets, not the declaration
+    sets_ok = isinstance(disjoint, list) and len(disjoint) == int(record.get("folds", 0)) and all(disjoint)
+    if not record.get("cross_fitted") or int(record.get("folds", 0)) < 2 or not sets_ok:
         out.append({"code": "g4l.no_cross_fitting", "message": f"the weights are applied to events their classifier "
                     f"was trained on (folds {record.get('folds')}, disjoint {record.get('train_apply_disjoint')}): "
                     "cross-fitting is required (section 6.2; remedy: plan)"})

@@ -14,7 +14,11 @@ Items:
    judged.
 4. `default_off_identity`: the outputs of the engine and of `calib_*.py` on a fixed set of phase-0..4 inputs, captured
    as golden JSON at the phase-5 base (`--capture-golden`, run once, before any WP merges), are byte-identical at the
-   gate commit except the fields listed in MASKED_KEYS.
+   gate commit except the fields listed in MASKED_KEYS. Since A33 (review F3) also the `p5base_*` cases of
+   `calibration_phase5_identity_cases.py` over the phase-5-modified default-off branches (holdout pieces and toys,
+   the ToyProblem validation and replica paths, EvaluatorProblem.reference, identify.p3, V_model components), whose
+   goldens are that file run against a `git archive` of the phase-5 base (`--capture-base-cases`); a case whose code
+   changed since its capture (SHA-256) differs.
 
 Usage (from a clean worktree at the gate commit):
   python -I tests/core/calibration_phase5_gates.py --run --out FILE                items 1, 2, 4 (login host, minutes)
@@ -22,6 +26,7 @@ Usage (from a clean worktree at the gate commit):
   python -I tests/core/calibration_phase5_gates.py --merge-rerun DIR --out FILE                  item 3: judge
   python -I tests/core/calibration_phase5_gates.py --units KEY --out FILE    an earlier unit-test item (Slurm task)
   python -I tests/core/calibration_phase5_gates.py --capture-golden          item 4: golden capture (phase-5 base only)
+  python -I tests/core/calibration_phase5_gates.py --capture-base-cases      item 4: the p5base_* goldens (A33, F3)
   python -I tests/core/calibration_phase5_gates.py --list
 Every result `synthetic` where it uses fixtures."""
 from __future__ import annotations
@@ -429,6 +434,28 @@ def judge_rerun(items: dict, commit: str | None) -> dict:
     return {"items": out, "passed": bool(out) and all(v["passed"] for v in out.values())}
 
 
+GUARD_LINE = re.compile(r"^host \S+ commit ([0-9a-f]{8}) task (\d+) start ", re.M)
+GUARD_FAIL = re.compile(r"^worktree (dirty|moved from \S+)$", re.M)
+
+
+def p0_guard(log_dir: Path, commit: str | None, n_items: int = P0_ITEMS) -> dict:
+    """Whether every Appendix C item ran from the clean worktree at the commit (A33, review F11): the p0 records carry
+    no dirty flag, so it is read from the Slurm logs. The sbatch guard prints its start line only after `git status
+    --porcelain` was empty and HEAD was the commit (exit 9 and "worktree dirty" / "worktree moved" otherwise). Clean
+    when every item 0..n-1 has a start line with the commit's prefix and no log has a guard failure."""
+    seen: dict = {}
+    failures = []
+    for f in sorted(log_dir.glob("*.log")) if log_dir.is_dir() else []:
+        text = f.read_text(errors="replace")
+        failures += [f"{f.name}: worktree {m.group(1)}" for m in GUARD_FAIL.finditer(text)]
+        for m in GUARD_LINE.finditer(text):
+            seen.setdefault(int(m.group(2)), set()).add(m.group(1))
+    missing = [i for i in range(n_items) if i not in seen]
+    wrong = sorted(i for i, c in seen.items() if commit and c != {commit[:8]})
+    return {"clean": not missing and not wrong and not failures, "items_with_guard_line": len(seen),
+            "missing": missing[:10], "n_missing": len(missing), "other_commit": wrong[:10], "failures": failures[:10]}
+
+
 def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
     """Judge each earlier item from the outputs in d (layout of `dispatch`), by its own registered rule."""
     import calibration_exhaustive as EX
@@ -439,10 +466,11 @@ def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
     items: dict = {}
     s = EX.summarize(d / "p0/out")
     prov = s.get("provenance") or {}
+    guard = p0_guard(d / "p0/logs", commit)          # A33 (review F11): the clean status from the jobs' guard lines
     items["p0_appendix_c"] = {"rule": "calibration_exhaustive --summarize status ok (phase 0 card test design item 1)",
                               "status": s["status"], "ok": s["status"] == "ok",
-                              "commits": [prov.get("commit")] if prov else [], "dirty": False,
-                              "reported": _reported("p0_appendix_c", s)}
+                              "commits": [prov.get("commit")] if prov else [], "dirty": not guard["clean"],
+                              "guard": guard, "reported": _reported("p0_appendix_c", s)}
     for key, (part, kinds) in UNIT_LISTS.items():
         rec = _load(d / "misc/out" / f"{key}.json")
         if rec is None:
@@ -769,6 +797,8 @@ def run_case(case: dict, python: str | None = None) -> dict:
     temporary folder as the working directory), or {output} of an engine case."""
     if case["kind"] == "engine":
         return {"output": _dump(engine_case(case["function"]))}
+    if case["kind"] == "engine-tree":
+        return run_tree_case(case["case"], ROOT, python)
     with tempfile.TemporaryDirectory(prefix="p5-identity-") as work_dir:
         for name, text in case["files"].items():          # the exact bytes written at the capture
             (Path(work_dir) / name).write_text(text if isinstance(text, str) else json.dumps(text))
@@ -800,6 +830,59 @@ def capture_golden(path: Path = GOLDEN) -> dict:
     return doc
 
 
+# the p5base_* cases (A33, review F3): engine code over the phase-5-modified default-off branches, run by their own
+# file against a plugin tree (the gate commit's, or a git archive of the base at the capture)
+TREE_CASES = ROOT / "tests" / "core" / "calibration_phase5_identity_cases.py"
+TREE_PREFIX = "p5base_"
+
+
+def run_tree_case(name: str, root: Path, python: str | None = None) -> dict:
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH",)}
+    res = subprocess.run([python or sys.executable, "-I", str(TREE_CASES), "--root", str(root), "--case", name],
+                         capture_output=True, text=True, timeout=1800, env=env)
+    return {"returncode": res.returncode, "output": res.stdout}
+
+
+def _tree_case_names() -> list:
+    sys.path.insert(0, str(TREE_CASES.parent))
+    import calibration_phase5_identity_cases as TC
+    return list(TC.CASES)
+
+
+def capture_base_cases(path: Path = GOLDEN, base: str = PHASE_BASE) -> dict:
+    """Add (or refresh) the p5base_* goldens: the case file of this tree run against a `git archive` of the phase-5
+    base, in the capture's environment (refused otherwise). The 50 phase-0..4 cases are kept byte for byte."""
+    doc = _load(path)
+    if doc is None:
+        raise SystemExit("no golden file: --capture-golden first (at the phase-5 base)")
+    if environment() != doc["environment"]:
+        raise SystemExit(f"the environment {environment()} differs from the capture's {doc['environment']}")
+    before = {k: json.dumps(v, sort_keys=True) for k, v in doc["cases"].items() if not k.startswith(TREE_PREFIX)}
+    full = _git("rev-parse", f"{base}^{{commit}}").strip()
+    code_sha = hashlib.sha256(TREE_CASES.read_bytes()).hexdigest()
+    with tempfile.TemporaryDirectory(prefix="p5-base-tree-") as d:
+        top = Path(_git("rev-parse", "--show-toplevel").strip())
+        arch = subprocess.run(["git", "archive", full, PLUGIN.rstrip("/")], cwd=top, capture_output=True,
+                              check=True, timeout=600).stdout
+        subprocess.run(["tar", "-x", "-C", d], input=arch, check=True, timeout=600)
+        tree = Path(d) / PLUGIN.rstrip("/")
+        for name in _tree_case_names():
+            g = run_tree_case(name, tree)
+            if g["returncode"] != 0:
+                raise SystemExit(f"case {name} fails on the base tree (returncode {g['returncode']})")
+            doc["cases"][TREE_PREFIX + name] = {"kind": "engine-tree", "case": name, "case_code_sha256": code_sha,
+                                                "captured_against": full, "golden": g}
+    after = {k: json.dumps(v, sort_keys=True) for k, v in doc["cases"].items() if not k.startswith(TREE_PREFIX)}
+    assert after == before, "a phase-0..4 case changed"
+    doc["base_cases"] = {"captured_against": full, "method": f"git archive {full} {PLUGIN.rstrip('/')}",
+                         "case_code_sha256": code_sha, "case_file": str(TREE_CASES.relative_to(ROOT)),
+                         "captured_from_commit": _git("rev-parse", "HEAD").strip(), "environment": environment(),
+                         "note": "A33 (review F3): the case code of this file run against the base tree; added "
+                                 "after the 50 phase-0..4 cases, which are unchanged"}
+    path.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
+    return doc
+
+
 def compare_case(golden: dict, now: dict) -> dict:
     diffs = []
     for k in ("returncode", "stdout", "output"):
@@ -816,7 +899,8 @@ def compare_case(golden: dict, now: dict) -> dict:
 
 def identity_item(path: Path = GOLDEN, cases: list | None = None) -> dict:
     rule = ("the outputs (exit code, stdout, written files) of every golden case are byte-identical to the capture at "
-            "the phase-5 base, after masking the fields in masked_fields")
+            "the phase-5 base, after masking the fields in masked_fields (a p5base_* case: its case file unchanged "
+            "since the capture, and its output byte-identical to that file run on a git archive of the base)")
     doc = _load(path)
     if doc is None:
         return {"item": "default_off_identity", "rule": rule, "status": "missing-golden", "passed": False}
@@ -830,6 +914,10 @@ def identity_item(path: Path = GOLDEN, cases: list | None = None) -> dict:
         if cases is not None and cid not in cases:
             continue
         try:
+            if case["kind"] == "engine-tree" and \
+                    hashlib.sha256(TREE_CASES.read_bytes()).hexdigest() != case["case_code_sha256"]:
+                rows[cid] = {"identical": False, "differs": ["case-code: the case file changed since the capture"]}
+                continue
             rows[cid] = compare_case(case["golden"], run_case(case))
         except Exception as exc:                          # noqa: BLE001 (a crash is a difference)
             rows[cid] = {"identical": False, "differs": [f"error: {exc}"]}
@@ -879,6 +967,7 @@ def main(argv=None) -> int:
     ap.add_argument("--merge-rerun", metavar="DIR")
     ap.add_argument("--units", choices=sorted(UNIT_LISTS))
     ap.add_argument("--capture-golden", action="store_true")
+    ap.add_argument("--capture-base-cases", action="store_true")
     ap.add_argument("--run-names", nargs="+", help=argparse.SUPPRESS)      # one module's tests (run_tests_by_module)
     ap.add_argument("--out")
     a = ap.parse_args(argv)
@@ -890,6 +979,10 @@ def main(argv=None) -> int:
     if a.capture_golden:
         doc = capture_golden()
         print(json.dumps({"cases": len(doc["cases"]), "captured_at_commit": doc["captured_at_commit"]}))
+        return 0
+    if a.capture_base_cases:
+        doc = capture_base_cases()
+        print(json.dumps({"cases": len(doc["cases"]), "base_cases": doc["base_cases"]["captured_against"]}))
         return 0
     if a.dispatch:
         if not (a.commit and a.worktree):
@@ -914,7 +1007,7 @@ def main(argv=None) -> int:
         io.write_json(a.out, io.jsonable(r))
         print(json.dumps({"gate_status": r["gate_status"], "passed": r["passed"]}))
         return 0 if r["gate_status"] == "passed" else 1
-    ap.error("one of --run, --list, --dispatch, --merge-rerun, --units, --capture-golden")
+    ap.error("one of --run, --list, --dispatch, --merge-rerun, --units, --capture-golden, --capture-base-cases")
     return 2
 
 

@@ -327,8 +327,10 @@ class LearnedCovariance(unittest.TestCase):
         np.testing.assert_array_equal(ref.V_G, ref.V_std + ref.V_MC)
 
     def test_evaluator_problem_reads_the_evaluators_v_learn(self):
-        """evaluator_problem (section 7.1 evaluators): a V_learn returned by `evaluate` enters V_G in link space; an
-        evaluator returning None (control: every phase-3 evaluator) leaves V_G = V_data + V_MC."""
+        """evaluator_problem (section 7.1 evaluators): with a declared learned ratio the V_learn `evaluate` returns
+        enters V_G in link space (positive); an evaluator returning V_learn while the plan declares no learned ratio,
+        and a declared ratio whose evaluator returns none, are refused (A33, review F8; negatives); no declaration and
+        no V_learn (control: every phase-3 evaluator) leaves V_G = V_data + V_MC."""
         import copy
         from core.calibration import evaluator as E
         from core.calibration import evaluator_problem as EP
@@ -338,20 +340,32 @@ class LearnedCovariance(unittest.TestCase):
         p["evaluator"]["spec"]["runs"][0]["n"] = 4000
         p["evaluator"]["learned"].update(LIGHT)
         ev = E.make(p, c)
+        undeclared = copy.deepcopy(p)
+        del undeclared["evaluator"]["learned"]
 
-        class WithVLearn:
+        class Wrap:                                      # no _learned_spec: the plan alone declares (or not)
+            def __init__(self, hide):
+                self.hide = hide
+
             def evaluate(self, theta, **kw):
-                return {**ev.evaluate(theta, **kw), "V_learn": ev.v_learn(theta, names=kw.get("names"))["V_learn"]}
+                r = ev.evaluate(theta, **kw)
+                return dict(r, V_learn=None) if self.hide else r
         tp = np.array([0.15])
-        base = EP.EvaluatorProblem(ev, c, p)
-        with_l = EP.EvaluatorProblem(WithVLearn(), c, p)
-        r0, r1 = base.reference(tp, None), with_l.reference(tp, None)
-        np.testing.assert_array_equal(r0.V_G, np.add(*base.V_parts(tp)))
+        pr = EP.EvaluatorProblem(ev, c, p)
+        r1 = pr.reference(tp, None)
+        out = ev.evaluate({"strength": 0.15}, names=pr.names)
+        g = linear.to_link_delta(np.asarray(out["pred"], float), pr.links)
+        Vl = ev.v_learn({"strength": 0.15}, names=pr.names)["V_learn"] * np.outer(g, g)
+        np.testing.assert_allclose(r1.V_G - np.add(*pr.V_parts(tp)), Vl, rtol=1e-10, atol=1e-18)
+        np.testing.assert_allclose(r1.V_learn, Vl, rtol=1e-10, atol=1e-18)
+        for wrap, plan, code in ((Wrap(False), undeclared, "evaluator_problem.v_learn_undeclared"),
+                                 (Wrap(True), p, "evaluator_problem.v_learn_missing")):
+            with self.assertRaises(EP.EvaluatorProblemError) as cm:
+                EP.EvaluatorProblem(wrap, c, plan).reference(tp, None)
+            self.assertEqual(cm.exception.code, code)
+        base = EP.EvaluatorProblem(Wrap(True), c, undeclared)                       # control
+        np.testing.assert_array_equal(base.reference(tp, None).V_G, np.add(*base.V_parts(tp)))
         self.assertIsNone(base.V_learn_link(tp))
-        pr = ev.evaluate({"strength": 0.15}, names=base.names)
-        g = linear.to_link_delta(np.asarray(pr["pred"], float), base.links)
-        Vl = ev.v_learn({"strength": 0.15}, names=base.names)["V_learn"] * np.outer(g, g)
-        np.testing.assert_allclose(r1.V_G - r0.V_G, Vl, rtol=1e-10, atol=1e-18)
 
     def test_v_learn_scale_against_the_truth(self):
         """The prediction error at the known truth over R independent nominal MC samples (each with its own trained

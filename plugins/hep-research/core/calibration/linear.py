@@ -66,9 +66,10 @@ def projected_inverse(V: np.ndarray, constraints: list[np.ndarray], V_std: np.nd
 
 def operator(J: np.ndarray, V_data: np.ndarray, V_MC: np.ndarray, nuisance: np.ndarray | None = None,
              free_extra: np.ndarray | None = None, constraints: list[np.ndarray] | None = None,
-             V_emu: np.ndarray | None = None) -> dict:
+             V_emu: np.ndarray | None = None, V_learn: np.ndarray | None = None) -> dict:
     """A, Sigma_beta, sigma_tot (theta block), Sigma_MC, Sigma_data for the linear Gaussian model with theta columns J,
-    N(0,1)-constrained nuisance columns and free extra columns (an unconstrained profile phi)."""
+    N(0,1)-constrained nuisance columns and free extra columns (an unconstrained profile phi). V = V_data + V_MC +
+    V_emu + V_learn (section 2.1 V_G; V_learn on the learned path only, phase 5)."""
     n, d = J.shape
     cols = [J]
     prior = [np.zeros(d)]
@@ -81,6 +82,8 @@ def operator(J: np.ndarray, V_data: np.ndarray, V_MC: np.ndarray, nuisance: np.n
     X = np.concatenate(cols, axis=1)
     P = np.diag(np.concatenate(prior))
     V = V_data + V_MC + (0.0 if V_emu is None else V_emu)
+    if V_learn is not None:
+        V = V + V_learn
     W = projected_inverse(V, constraints or [], V_data)
     F = X.T @ W @ X + P
     if not np.all(np.isfinite(F)) or np.linalg.cond(F) > 1e14:
@@ -188,11 +191,23 @@ def to_link_delta(mu: np.ndarray, links: list[str]) -> np.ndarray:
     return np.array([1.0 / m if l == "log" else 1.0 for m, l in zip(mu, links)])
 
 
+def v_learn_of(r: dict) -> np.ndarray | None:
+    """The V_learn of an evaluation (section 7.1; observable space): None, a matrix, v_learn's record {V_learn, ...},
+    or a lazy handle (toy.LazyVLearn: called for that record)."""
+    v = r.get("V_learn")
+    if v is None:
+        return None
+    v = v() if callable(v) else v
+    return np.asarray(v["V_learn"] if isinstance(v, dict) else v, float)
+
+
 def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None, systematics=None,
            names: list[str] | None = None, vmodel_version: dict | None = None) -> dict:
     """The design-stage linearization at theta_ref (default: the prior centre, section 6.7) with the evaluator's
     Asimov prediction: J by central differences of the plan's method (common random numbers), V_MC from the
-    evaluator, V_data^unc = per-event covariance / exposure of each sample (the contract's `exposure`)."""
+    evaluator, V_data^unc = per-event covariance / exposure of each sample (the contract's `exposure`); on the learned
+    path (phase 5) the evaluation's V_learn at theta_ref enters V, so sigma_tot^design is the Asimov Sigma_theta with
+    V_G = V_data + V_MC + V_emu + V_learn (sections 2.1, 8.1; A33)."""
     obs = calibration_observables(contract)
     if names is not None:
         obs = [o for o in obs if o["name"] in names]
@@ -250,6 +265,8 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
     mu_l, J_l, Vd_l, Vm_l = _to_link(mu, J, V_data, V_mc, links)
     g = to_link_delta(mu, links)
     Ve_l = None if r0.get("V_emu") is None else np.asarray(r0["V_emu"], float) * np.outer(g, g)
+    Vl = v_learn_of(r0)
+    Vl_l = None if Vl is None else Vl * np.outer(g, g)
     U = vmodel_columns(contract, names, vmodel_version)
     S = systematic_columns(systematics, names, mu, links)
     Phi = np.stack([c * g for c in phi_cols], axis=1) if phi_cols else np.zeros((len(names), 0))
@@ -262,10 +279,11 @@ def design(evaluator, contract: dict, plan: dict, theta_ref: dict | None = None,
                         for k, nm in enumerate(names)])
         if vec.any():
             constraints.append(vec)
-    op = operator(J_l, Vd_l, Vm_l, nuis, Free, constraints, Ve_l)
+    op = operator(J_l, Vd_l, Vm_l, nuis, Free, constraints, Ve_l, Vl_l)
     psi_effect = {p: (op["A_theta"] @ (c * g)) for p, c in psi_cols.items()}
     return {"names": names, "links": links, "theta": thetas, "theta_ref": theta_ref, "mu": mu, "J": J_l,
-            "V_data": Vd_l, "V_MC": Vm_l, "V_emu": Ve_l, "n_nu": U.shape[1], "n_eta": S.shape[1], "n_phi": Phi.shape[1] + Free.shape[1],
+            "V_data": Vd_l, "V_MC": Vm_l, "V_emu": Ve_l, **({} if Vl_l is None else {"V_learn": Vl_l}),
+            "n_nu": U.shape[1], "n_eta": S.shape[1], "n_phi": Phi.shape[1] + Free.shape[1],
             "psi_effect": psi_effect, "runs": runs, "evaluation": r0, **op,
             "lambda_max": matrix_condition(op["Sigma_MC"], op["Sigma_data"]),
             "flags": ["provisional-thresholds"], "sigma_tot_note": "sigma_tot^design without Sigma_boot / w (phase 2)"}
