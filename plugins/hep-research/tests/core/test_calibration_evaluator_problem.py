@@ -31,6 +31,54 @@ from core.calibration import likelihood as L  # noqa: E402
 N = 300
 
 
+class PoissonIntervalLightYield(unittest.TestCase):
+    """Section 11.4 Table 2: LY by analytic reweighting when only LY changes and only the Poisson interval is used
+    (A24), on a low-light synthetic ZDC setup (nominal LY 5 per MeV, prior 4.0-5.5: every bin below 10 photons).
+    Section 15.3.19: the photon-count density switched to the normal density -> P0 fails (against re-digitization at
+    theta, with the full runs at the light-yield extremes); the Poisson density passes (control)."""
+
+    N_EVENTS, LO, HI, NOMINAL = 3000, 4.0, 5.5, 5.0
+
+    def setup(self, density):
+        n = self.N_EVENTS
+        bs = {"nominal": Z.batch(41, 0, n, use="fit", set="s"), "reference": Z.batch(42, 0, n, use="reference")}
+        for v in (self.LO, self.HI):
+            bs[f"ly{v}"] = Z.batch(41, 0, n, light_yield=v, point={"light_yield": v}, use="fit", set="s")
+        c = Z.contract(thetas=("light_yield",), observables=("pe_std",), priors={"light_yield": (self.LO, self.HI)})
+        p = Z.plan(bs, observables=("pe_std",))
+        p["evaluator"]["reference"] = "reference"
+        p["evaluator"]["documents"]["pipeline"]["stages"][0]["parameters"]["light_yield_per_MeV"]["value"] = \
+            self.NOMINAL
+        p["evaluator"]["light_yield_density"] = density
+        p["methods"] = {"light_yield": "analytic-reweighting"}
+        ev = evaluator.make(p, c)
+        return c, p, ev, kernel_check.required_spot_checks(c, p)
+
+    def p0(self, density):
+        c, p, ev, req = self.setup(density)
+        return kernel_check.p0(ev, c, p, linear.design(ev, c, p), [{"light_yield": 5.0}, {"light_yield": 4.7}], 5,
+                               spot_checks=req[0]["points"], required=req)
+
+    def test_the_method_is_reweighting_and_the_reference_redigitizes(self):
+        c, p, ev, req = self.setup("poisson")
+        r = ev.evaluate({"light_yield": 4.7})
+        self.assertEqual(r["methods"], {"light_yield": "analytic-reweighting"})
+        self.assertIn("photon_generation", r["node_diag"])
+
+    def test_normal_density_fails_p0_poisson_passes(self):
+        good, bad = self.p0("poisson"), self.p0("normal")
+        self.assertEqual(good["status"], "passed", good["points"])
+        self.assertEqual(bad["status"], "failed")
+        self.assertIn("p0.kernel_inconsistent", {f["code"] for f in bad["findings"]})
+
+    def test_outside_the_poisson_interval_is_refused(self):
+        c, p, ev, req = self.setup("poisson")
+        p["evaluator"]["documents"]["pipeline"]["stages"][0]["parameters"]["light_yield_per_MeV"]["value"] = 200.0
+        ev = evaluator.make(p, c)
+        with self.assertRaises(E.DG.CheckError):
+            ev.evaluate({"light_yield": 190.0})
+
+
 class ResponseParametersP0(unittest.TestCase):
     """Section 15.2 synthetic ZDC item 1: response parameters by re-digitization against a full g4sim_run plus
     response (here the stand-in's products made at the new light yield): P0 passes."""

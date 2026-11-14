@@ -378,7 +378,18 @@ def check_export(record: dict, result: dict) -> list[dict]:
     beta = result.get("beta_hat")
     if not isinstance(beta, dict):
         beta = {}
-    for ptr, name in (entry.get("parameters") or {}).items():
+    params = entry.get("parameters") or {}
+    if not params or not isinstance(params, dict):           # review F3: the written values must be declared
+        out.append(_export_finding("export.parameters", "the calibration_result entry declares no written parameters"))
+    unknown = sorted(str(n) for n in params.values() if n not in beta)
+    if unknown:
+        out.append(_export_finding("export.parameters", f"parameters {unknown} are not in the result's beta_hat"))
+    label = SOURCE_PREFIX + str(entry["result_sha256"])
+    undeclared = sorted(k for k, v in sof.items() if v == label and k not in params)
+    if undeclared:
+        out.append(_export_finding("export.parameters", f"values labelled with the result's hash but not declared: "
+                                   f"{undeclared}"))
+    for ptr, name in params.items():
         if sof.get(ptr) != SOURCE_PREFIX + str(entry["result_sha256"]):
             out.append(_export_finding("export.hash_mismatch", f"source_of_facts[{ptr!r}] is not the result's hash"))
         try:

@@ -3,11 +3,11 @@ decomposition and the g4sim binding (section 15.3); specialization does not requ
 
 Three items, each from the registered card (`simcal-tasks/phase-4.md`, gate designs):
 - `contrib_negatives`: the section 15.3.18 contribution-decomposition tests (negatives caught, positive controls pass);
-- `g4sim_binding`: every case of section 15.3.19 and the A21 cases, each mapped to its test(s) (CASES); the case
-  "scintillation log_density switched to the normal density -> P0 fails" is recorded, not judged (A23: P0 does not
-  distinguish it on the toy detector; the g4sim path re-digitizes);
+- `g4sim_binding`: every case of section 15.3.19 and the A21 cases, each mapped to its test(s) (CASES), including
+  "scintillation log_density switched to the normal density -> P0 fails" on the Poisson-interval LY reweighting (A24);
 - `generic_layer`: the eight node-binding examples pass the existing contract checker, P4 and candidate methods, and
-  the commit that added the specialization documents touches no file under the generic layer (GENERIC_PATHS).
+  every commit since the phase base that touches the specialization documents touches no file under the generic layer
+  (GENERIC_PATHS).
 
 Usage (from a clean worktree at the registering commit): `python -I tests/core/calibration_phase4_gates.py --run --out
 FILE`; every result `synthetic` where it uses fixtures."""
@@ -31,7 +31,9 @@ from core.calibration import io  # noqa: E402
 LABEL = "synthetic"
 UNIT_RULE = ("every listed test passes (a negative test passing means its negative case is caught and its positive "
              "control passes); any skip, failure or error fails the item")
-SPECIALIZATION_COMMIT = "e661b3fd"            # WP-P: the commit that added simulation-calibration/ (card, A21)
+PHASE_BASE = "307a364d"                       # origin/main at the phase start (card)
+SPECIALIZATION_PATHS = ("plugins/hep-research/skills/hep-detector/references/simulation-calibration/",
+                        "plugins/hep-research/skills/hep-detector/assets/simulation-calibration/")
 GENERIC_PATHS = ("plugins/hep-research/core/", "plugins/hep-research/contracts/schemas/",
                  "plugins/hep-research/skills/hep-statistics/scripts/")
 M = "test_calibration_"
@@ -92,9 +94,11 @@ CASES = [
      [M + "deps.UpstreamInvalidation"]),
     ("discrete run-card fields (physics lists, PAI, XTR, optical, decay) bound as theta -> refused",
      [M + "g4sim_binding.Refusals.test_discrete_model_seeds_and_run_block"]),
+    ("scintillation log_density switched to the normal density -> P0 fails (A24: on the Poisson-interval LY "
+     "reweighting of section 11.4 Table 2, against re-digitization at theta)",
+     [M + "evaluator_problem.PoissonIntervalLightYield"]),
 ]
-RECORDED = [("scintillation log_density switched to the normal density -> P0 fails (Part B); A23: recorded, not judged",
-             [M + "kernel_check.NormalDensityRecord"])]
+RECORDED: list = []        # A24 judges the case A23 had recorded
 
 GENERIC = {"part": "specialization does not require modifying the generic layer (section 12, section 17)",
            "tests": {M + "specialization.Engine": "positive", M + "specialization.Scripts": "positive",
@@ -136,21 +140,32 @@ def binding_item() -> dict:
         outs = _run(ids)
         recorded.append({"case": label, "tests": {t: o["outcome"] for t, o in sorted(outs.items())}, "judged": False})
     return {"item": "g4sim_binding", "part": "negative tests of the g4sim binding (section 15.3.19) and the A21 cases",
-            "rule": "every case's tests pass (each negative caught, each control passing); the A23 case recorded",
+            "rule": "every case's tests pass (each negative caught, each control passing)",
             "cases": cases, "recorded_not_judged": recorded, "passed": ok}
 
 
+def _git(*args) -> list:
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True,
+                          timeout=120).stdout.split()
+
+
 def generic_item() -> dict:
+    """Every non-merge commit since the phase base that touches the specialization documents or examples touches no
+    file of the generic layer (review F2: all of them, not one named commit)."""
     j = judge_tests("generic_layer", GENERIC["part"], GENERIC["tests"], _run(list(GENERIC["tests"])))
     try:
-        files = subprocess.run(["git", "diff", "--name-only", f"{SPECIALIZATION_COMMIT}^", SPECIALIZATION_COMMIT],
-                               cwd=ROOT, capture_output=True, text=True, check=True, timeout=60).stdout.split()
+        commits = _git("log", "--no-merges", "--format=%H", f"{PHASE_BASE}..HEAD", "--", *SPECIALIZATION_PATHS)
+        rows = []
+        for c in commits:
+            files = _git("diff-tree", "--no-commit-id", "--name-only", "-r", c)
+            rows.append({"commit": c[:8], "files": len(files),
+                         "generic_layer_files": sorted(f for f in files if f.startswith(GENERIC_PATHS))})
     except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
         return dict(j, diff={"error": str(exc)}, passed=False)
-    touched = sorted(f for f in files if f.startswith(GENERIC_PATHS))
-    j["diff"] = {"commit": SPECIALIZATION_COMMIT, "files": len(files), "generic_layer_files": touched}
-    j["rule"] = UNIT_RULE + "; and the specialization commit touches no file under " + ", ".join(GENERIC_PATHS)
-    j["passed"] = bool(j["passed"] and files and not touched)
+    j["diff"] = {"base": PHASE_BASE, "commits": rows}
+    j["rule"] = (UNIT_RULE + "; and every non-merge commit since " + PHASE_BASE + " that touches the specialization "
+                 "documents touches no file under " + ", ".join(GENERIC_PATHS))
+    j["passed"] = bool(j["passed"] and rows and not any(r["generic_layer_files"] for r in rows))
     return j
 
 

@@ -187,6 +187,17 @@ class OtherClauses(unittest.TestCase):
         c["models"]["physics_list_confirmations"] = [{"physics_lists": ["PL_A", "PL_B"], "record": "note-1"}]
         self.assertNotIn("models.physics_list_unconfirmed", codes(c))
 
+    def test_physics_list_confirmation_for_an_alternative_hypothesis(self):
+        """Section 15.3.19 (review F6): a physics list used as an alternative hypothesis against an enumerated model's
+        list, without the confirmation record, is rejected; with it, accepted (control)."""
+        c = F.contract()
+        c["models"]["enumerated"] = [{"id": "a", "physics_list": "PL_A"}]
+        alts = (c.get("validation") or {}).get("alternatives") or [{"kind": "simulation-setting", "id": "alt"}]
+        c.setdefault("validation", {})["alternatives"] = [dict(alts[0], physics_list="PL_B")]
+        self.assertIn("models.physics_list_unconfirmed", codes(c))
+        c["models"]["physics_list_confirmations"] = [{"physics_lists": ["PL_A", "PL_B"], "record": "note-2"}]
+        self.assertNotIn("models.physics_list_unconfirmed", codes(c))
+
     def test_g4sim_source(self):
         c = F.contract()
         c["simulator"], c["source"] = "g4sim", {"density": "external"}

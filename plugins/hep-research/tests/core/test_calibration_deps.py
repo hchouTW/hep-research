@@ -175,6 +175,17 @@ class UpstreamInvalidation(unittest.TestCase):
         self.assertEqual(sorted(r["redo"]), sorted([H[0], H[1], H[4]]))
         self.assertEqual(deps.invalidate([self.down, grand], [])["redo"], {})   # control
 
+    def test_duplicate_changes_and_same_kappa_overlap(self):
+        """Review F12: two changes of the same old result are refused; a downstream marked for a redo is not also
+        listed under same_kappa (control: without the mark it is listed)."""
+        with self.assertRaises(deps.DependencyError):
+            deps.invalidate([self.down], [{"old": self.up, "new": result(H[3])},
+                                          {"old": self.up, "new": result(H[4], contract=4)}])
+        plain = deps.invalidate([self.down], [{"old": self.up, "new": result(H[3])}])
+        self.assertEqual([x["downstream"] for x in plain["same_kappa"]], [H[1]])
+        marked = deps.invalidate([self.down], [{"old": self.up, "new": result(H[3])}], marked=[H[1]])
+        self.assertEqual((list(marked["redo"]), marked["same_kappa"]), ([H[1]], []))
+
     def test_bad_input_is_refused(self):
         for bad in ({"old": self.up, "new": {"result_sha256": "x"}}, {"old": self.up}, "change"):
             with self.subTest(bad=bad), self.assertRaises(deps.DependencyError):
@@ -191,17 +202,31 @@ def ids(build="ab"):
 
 
 THETA_HAT, SPOT = {"k_B": 0.126, "LY": 200.0}, [{"k_B": 0.05, "LY": 200.0}, {"k_B": 0.3, "LY": 200.0}]
+# the result's design stage (A24): delta theta = A delta; sigma_tot^design 1.0 for both theta
+DESIGN = {"theta": ["k_B", "LY"], "sigma_tot": [1.0, 1.0], "a_theta": [[1.0, 0.0], [0.0, 2.0]]}
 BASIS = {"theta_hat": THETA_HAT, "spot_checks": SPOT, "observables": ["mean", "width"], "mc_events": 20000,
-         "new_build_first_run": "2026-11-20T09:00:00+00:00"}
+         "design": DESIGN, "new_build_first_run": "2026-11-20T09:00:00+00:00"}
 
 
-def t2(shift=0.0, se=0.01, registered="2026-11-19T12:00:00Z", **reg_over):
-    """A T2 equivalence record: sigma_tot^design 1.0 and 0.5, margin 0.1 of them; outcome differences `shift`."""
-    reg = {"result_sha256": H[5], "old_identities": ids(), "new_identities": ids("cd"),
+def result_doc(**basis_over):
+    """A result carrying its T2 basis (A24, review F1), hashed so that result_sha256 recomputes."""
+    tb = {k: v for k, v in dict(BASIS, **basis_over).items() if k != "new_build_first_run"}
+    body = {"model_identities": ids(), "t2_basis": tb}
+    return dict(body, result_sha256=canonical_sha256(body))
+
+
+RESULT_SHA = result_doc()["result_sha256"]
+
+
+def t2(shift=0.0, se=0.001, registered="2026-11-19T12:00:00Z", **reg_over):
+    """A T2 equivalence record (A24): margin 0.1 and power 0.025 of sigma_tot^design per theta; outcome differences
+    `shift` in every observable, MC errors `se`."""
+    reg = {"result_sha256": RESULT_SHA, "old_identities": ids(), "new_identities": ids("cd"),
            "points": [{"label": "theta-hat", "theta": THETA_HAT}, {"label": "kB-low", "theta": SPOT[0]},
                       {"label": "kB-high", "theta": SPOT[1]}],
-           "observables": [{"name": "mean", "sigma_tot_design": 1.0}, {"name": "width", "sigma_tot_design": 0.5}],
-           "mc_events": 20000, "margin_fraction": 0.1, "alpha": 0.05, "registered_at": registered}
+           "observables": [{"name": "mean"}, {"name": "width"}],
+           "mc_events": 20000, "margin_fraction": 0.1, "power_fraction": 0.025, "alpha": 0.05,
+           "registered_at": registered}
     reg.update(reg_over)
     out = {"registration_sha256": canonical_sha256(reg), "points": [
         {"label": p["label"], "mc_events": {"old": reg["mc_events"], "new": reg["mc_events"]},
@@ -213,12 +238,33 @@ def t2(shift=0.0, se=0.01, registered="2026-11-19T12:00:00Z", **reg_over):
 class IdentityChange(unittest.TestCase):
     """Section 10.3 change of simulation identity; A21 (section 19-g7) T2 carry-over (provisional margin)."""
 
-    def setUp(self):
-        self.result = {"result_sha256": H[5], "model_identities": ids()}
+    def decide(self, record=None, current=None, new_build_first_run=BASIS["new_build_first_run"], **basis):
+        """The result's own t2_basis (with `basis` overrides; a changed basis changes the result and its hash, so
+        records are re-pointed at it); the caller supplies only the new build's first run time."""
+        res = result_doc(**basis)
+        if record is not None and basis:
+            record = copy.deepcopy(record)
+            record["registration"]["result_sha256"] = res["result_sha256"]
+            record["outcome"]["registration_sha256"] = canonical_sha256(record["registration"])
+        return deps.identity_decision(res, ids("cd") if current is None else current, record,
+                                      {"new_build_first_run": new_build_first_run})
 
-    def decide(self, record=None, current=None, **basis):
-        return deps.identity_decision(self.result, ids("cd") if current is None else current, record,
-                                      dict(BASIS, **basis))
+    def test_the_basis_is_the_results_own(self):
+        """Review F1 (A24): a caller basis cannot replace the result's (here: no spot checks, inflated design); a
+        result whose hash does not recompute, or without a t2_basis, is redone."""
+        rec = t2()
+        rec["registration"]["points"] = rec["registration"]["points"][:1]   # theta-hat only
+        rec["outcome"]["points"] = rec["outcome"]["points"][:1]
+        rec["outcome"]["registration_sha256"] = canonical_sha256(rec["registration"])
+        res = result_doc()
+        d = deps.identity_decision(res, ids("cd"), rec, {"new_build_first_run": BASIS["new_build_first_run"],
+                                                         "spot_checks": [], "design": dict(DESIGN, sigma_tot=[100, 100])})
+        self.assertIn("t2.spot_checks", self.codes(d))                    # the caller's empty spot_checks ignored
+        forged = dict(res, t2_basis=dict(res["t2_basis"], spot_checks=[]))
+        self.assertEqual(self.codes(deps.identity_decision(forged, ids("cd"), rec, {})), ["t2.result_hash"])
+        bare = {"model_identities": ids()}
+        bare["result_sha256"] = canonical_sha256(bare)
+        self.assertEqual(self.codes(deps.identity_decision(bare, ids("cd"), t2(), {})), ["t2.no_basis"])
 
     def codes(self, d):
         return sorted({r["code"] for r in d.get("reasons", ())})
@@ -239,15 +285,35 @@ class IdentityChange(unittest.TestCase):
         self.assertEqual((d["status"], d["decision"]), ("ok", "carried-over"))
         self.assertEqual(d["flags"], ["identity-carried-over", "provisional-thresholds"])
         self.assertEqual(d["model_identities"], ids("cd"))
-        self.assertEqual(len(d["tests"]), 3 * 2)                         # every point and observable
+        self.assertEqual(len(d["tests"]), 3 * 2)                         # every point and theta_i
         self.assertTrue(all(t["equivalent"] for t in d["tests"]))
 
     def test_failing_record_redoes(self):
-        for shift, se in ((0.06, 0.001), (0.0, 0.05)):                  # a shift beyond the width margin; too noisy
-            with self.subTest(shift=shift, se=se):
-                d = self.decide(t2(shift=shift, se=se))
-                self.assertEqual((d["decision"], self.codes(d)), ("redo", ["t2.not_equivalent"]))
-        self.assertEqual(self.decide(t2(shift=0.04, se=0.001))["decision"], "carried-over")   # control: inside
+        d = self.decide(t2(shift=0.06))                                  # LY: delta theta = 0.12 > 0.1 sigma_tot
+        self.assertEqual((d["decision"], self.codes(d)), ("redo", ["t2.not_equivalent"]))
+        self.assertEqual(self.decide(t2(shift=0.04))["decision"], "carried-over")   # control: 0.08, inside
+
+    def test_power_condition(self):
+        """A24: se(delta theta_i) must be <= 0.025 sigma_tot,i (pre-registered); the result's own MC size alone gave
+        no power (a null shift could never be shown equivalent). Control: enough MC (smaller se) passes."""
+        d = self.decide(t2(se=0.01))                                     # se(LY) = 2 sqrt(2) 0.01 = 0.028 > 0.025
+        self.assertEqual(d["decision"], "redo")
+        self.assertIn("t2.power", self.codes(d))
+        self.assertEqual(self.decide(t2(se=0.008))["decision"], "carried-over")      # 0.0226 <= 0.025
+        bigger = self.decide(t2(mc_events=80000))                        # more MC than the result's own is allowed
+        self.assertEqual(bigger["decision"], "carried-over")
+
+    def test_judged_on_theta_not_per_observable(self):
+        """A24: an observable without leverage on theta (zero column of A) may shift without blocking the carry-over;
+        the same shift on an observable that moves theta fails."""
+        flat = dict(DESIGN, a_theta=[[1.0, 0.0], [0.0, 0.0]])
+        rec = t2()
+        for p in rec["outcome"]["points"]:
+            p["observables"]["width"]["new"] = 1.5                      # a large width shift
+        self.assertEqual(self.decide(rec, design=flat)["decision"], "carried-over")
+        self.assertEqual(self.decide(rec)["decision"], "redo")          # with leverage: LY moves 1.0 sigma
+        with self.assertRaises(deps.DependencyError):
+            self.decide(t2(), design=None)
 
     def test_record_registered_after_the_new_build_ran_redoes(self):
         for when in ("2026-11-20T09:00:00Z", "2026-11-21T00:00:00+01:00"):
@@ -262,15 +328,16 @@ class IdentityChange(unittest.TestCase):
         cases = {
             "t2.spot_checks": t2(points=pts[:2]),
             "t2.theta_hat": t2(points=[dict(pts[0], theta={"k_B": 0.13, "LY": 200.0})] + pts[1:]),
-            "t2.observables": t2(observables=[{"name": "mean", "sigma_tot_design": 1.0}]),
+            "t2.observables": t2(observables=[{"name": "mean"}]),
             "t2.mc_size": t2(mc_events=5000),
             "t2.loosened": t2(margin_fraction=0.2),
+            "t2.loosened (power)": t2(power_fraction=0.05),
             "t2.other_result": t2(result_sha256=H[6]),
             "t2.identities": t2(new_identities=ids("ef")),
         }
         for code, rec in cases.items():
             with self.subTest(code):
-                self.assertIn(code, self.codes(self.decide(rec)))
+                self.assertIn(code.split(" ")[0], self.codes(self.decide(rec)))
         edited = t2()
         edited["registration"]["alpha"] = 0.01                          # tightened after the outcome: unbound
         self.assertEqual(self.codes(self.decide(edited)), ["t2.outcome_unbound"])

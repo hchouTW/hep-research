@@ -20,9 +20,10 @@ rules (`packages`) phase 2; invalidation (section 10.3, approval A21) phase 4.
                                             (section 10.3); failed (exit 1) when any result needs a redo
   calib_deps.py identity --input FILE      {result, current, record?, basis?}: a changed masked identity item
                                             (section 5.1) needs a redo unless a T2 record registered before the new
-                                            build passes (TOST at 0.1 sigma_tot^design, alpha 0.05, provisional;
-                                            A21 19-g7): carried-over (exit 0, flag identity-carried-over), redo
-                                            (exit 1), unchanged (exit 0)
+                                            build passes (the shift propagated through the result's A_theta,
+                                            TOST per theta_i at 0.1 sigma_tot,i, power se <= 0.025 sigma_tot,i,
+                                            alpha 0.05, provisional; A21 19-g7 as amended by A24): carried-over
+                                            (exit 0, flag identity-carried-over), redo (exit 1), unchanged (exit 0)
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)

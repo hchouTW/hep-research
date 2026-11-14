@@ -92,8 +92,8 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["status"]), (0, "ok"))                            # control
         rc, out = run("calib_deps.py", "invalidate", "--input", self.put("ib.json", {"results": 1}))
         self.assertEqual((rc, out["status"]), (2, "rejected"))
-        res = {"result_sha256": TD.H[5], "model_identities": TD.ids()}
-        y = {"result": res, "current": TD.ids("cd"), "basis": TD.BASIS}
+        res = TD.result_doc()                                  # A24: the result carries its hash-bound t2_basis
+        y = {"result": res, "current": TD.ids("cd"), "basis": {"new_build_first_run": TD.BASIS["new_build_first_run"]}}
         rc, out = run("calib_deps.py", "identity", "--input", self.put("y.json", y))
         self.assertEqual((rc, out["decision"]), (1, "redo"))                        # no T2 record
         rc, out = run("calib_deps.py", "identity", "--input", self.put("y1.json", dict(y, record=TD.t2())))
@@ -844,14 +844,20 @@ class Phase4ExportScripts(unittest.TestCase):
                 bare = {k: v for k, v in json.loads(out_path.read_text()).items() if k != "source_of_facts"}
                 code, chk = run("calib_use.py", "export", "--record", self.write(f"{name}.bare.json", bare),
                                 "--result", res)
-                self.assertEqual((code, [f["code"] for f in chk["findings"]]), (2, ["export.source_of_facts"]))
+                self.assertEqual((code, [f["code"] for f in chk["findings"]]), (1, ["export.source_of_facts"]))
         proj = self.export_tests.result(real_data=False)
         pres = self.write("proj.json", proj)
         code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s.json", G4.snapshot()),
                         "--result", pres, "--contract", con, "--use", "production")
+        self.assertEqual(code, 2)                                        # review F8: a projection is not exported
+        self.assertIn("export.use", json.dumps(out))                     # for production
+        code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s.json", G4.snapshot()),
+                        "--result", pres, "--contract", con, "--use", "design-study")
         self.assertEqual(code, 0)
-        code, chk = run("calib_use.py", "export", "--record", self.write("pr.json", out["record"]), "--result", pres)
-        self.assertEqual((code, [f["code"] for f in chk["findings"]]), (2, ["export.use"]))
+        rec = out["record"]
+        rec["source_of_facts"]["calibration_result"]["use"] = "production"          # edited after the export
+        code, chk = run("calib_use.py", "export", "--record", self.write("pr.json", rec), "--result", pres)
+        self.assertEqual((code, [f["code"] for f in chk["findings"]]), (1, ["export.use"]))
         bad = dict(G4.snapshot(), iovs=[])                                   # minItems 1: the contracts schema
         code, chk = run("calib_use.py", "export", "--record", self.write("b.json", bad), "--result", res)
         self.assertIn("export.contracts_schema", [f["code"] for f in chk["findings"]])

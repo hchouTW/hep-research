@@ -9,7 +9,8 @@ Appendix C; owner of the grade rules, the "outcome already determined" lookup an
                                         an exported g4sim condition-snapshot/1 or alignment-overlay/1 against the
                                         calibration result it cites: the contracts schema, the result's hash in
                                         source_of_facts and the use matrix (section 10.4, 15.3.19, A21 19-g6);
-                                        accepted (exit 0) or rejected (exit 2) with findings
+                                        accepted (exit 0) or failed (exit 1) with findings; unreadable input
+                                        is rejected (exit 2)
 FILE holds {"inputs": {C.1 fields, own_flags: [...]}, "upstreams": [{"usages": [...], "effective_grade": ...,
 "flags": [...]}]}; field names are those of the reference decision table (Appendix C.1, last column).
 Output: one JSON object. judge: status ok (exit 0) with own_grade (null for a pending input), effective_grade, uses,
@@ -90,7 +91,7 @@ def export_check(record_path: str, result_path: str) -> dict:
     findings = [{"code": "export.contracts_schema", "message": f"{f.path}: {f.message}"}
                 for f in (validate(record, name[record["schema"]]).errors if record.get("schema") in name else [])]
     findings += use.check_export(record, result)
-    return {"status": "rejected" if findings else "accepted", "findings": findings}
+    return {"status": "failed" if findings else "accepted", "findings": findings}   # section 14: a negative is exit 1
 
 
 if __name__ == "__main__":

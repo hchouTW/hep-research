@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -295,7 +296,14 @@ class G4simEvaluator:
             self.bindings[self.pde["parameter"]] = {"document": "evaluator", "pointer": "/pde"}
             self.parameters.append(self.pde["parameter"])
             self.methods[self.pde["parameter"]] = "re-digitization"
+        self.light_yield_density = spec.get("light_yield_density", "poisson")       # section 15.3.19 (A24): "normal" only in its test
+        if self.light_yield_density not in ("poisson", "normal"):
+            raise DG.CheckError("evaluator.light_yield_density", "the photon-count density is poisson (or normal, a test)")
         for p, m in (plan.get("methods") or {}).items():
+            if p in self.methods and m == "analytic-reweighting" and self.methods[p] == "re-digitization" \
+                    and self._is_ly(p):        # section 11.4 Table 2: LY only, Poisson interval only (A24)
+                self.methods[p] = m
+                continue
             if p in self.methods and m != self.methods[p] and not (m == "surrogate-model"
                                                                    and self.methods[p] == "resimulation"):
                 raise DG.CheckError("evaluator.method", f"{p}: the plan's method {m} is not the one its binding allows "
@@ -336,6 +344,42 @@ class G4simEvaluator:
 
     def default_method(self, par: str) -> str:
         return self.methods[par]
+
+    def _is_ly(self, par: str) -> bool:
+        b = self.bindings.get(par) or {}
+        return b.get("document") == "pipeline" and str(b.get("pointer", "")).endswith("/light_yield_per_MeV/value")
+
+    def _ly_weights(self, par, value, tab, events, batch):
+        """Section 11.4 Table 2, LY by analytic reweighting when only LY changes and only the Poisson interval is used:
+        per (event, volume, bin) the photon count N_b of g4sim's own draw at the nominal LY (the scintillation stage's
+        sub-stream, response.bin_photons: Poisson below a mean of 10) weighted by p(N_b; mu_b LY'/LY0) / p(N_b; mu_b),
+        p the registered density (`light_yield_density`: Poisson; normal only for the section 15.3.19 negative test). A bin whose
+        mean at LY0 or LY' exceeds the Poisson interval is refused (re-digitization is then the method)."""
+        docs = self.documents
+        job = DG.job_from_documents(docs["pipeline"], docs["maps"][self.spec["map"]], self.readout,
+                                    sorted({r[2] for r in tab["split"]}) or [0], int(batch["logical_run_seed"]))
+        stage = job["stage"]
+        ly0, ly1 = float(stage["light_yield_per_MeV"]), float(value)
+        document = {"run_seed": job["run_seed"], "replica": job["replica"]}
+        key = rng.volume_key(job["run_seed"], stage["name"], job["replica"])
+        idx = {int(e): i for i, e in enumerate(events)}
+        logw = np.zeros(len(events))
+        for e, v, b, large, small, steps in tab["split"]:
+            factor = response.yield_factor(document, int(e), int(v), stage.get("yield_relative_width", 0.0))
+            m0 = ly0 * (large + small) * factor
+            m1 = ly1 * (large + small) * factor
+            if max(m0, m1) > response.POISSON_LIMIT:
+                raise DG.CheckError("evaluator.poisson_interval", f"{par}: event {e}, volume {v}, bin {b} has a mean "
+                                    f"of {max(m0, m1):.3g} photons > {response.POISSON_LIMIT} (Table 2: analytic "
+                                    "reweighting of LY only in the Poisson interval; re-digitize)")
+            n = response.bin_photons(rng.SubStream(key, int(e), int(v), int(b)), ly0, stage["resolution_scale"],
+                                     large, small, steps, factor)
+            if self.light_yield_density == "normal":
+                lp = stats.norm.logpdf(n, m1, math.sqrt(max(m1, 1e-300))) - stats.norm.logpdf(n, m0, math.sqrt(max(m0, 1e-300)))
+            else:
+                lp = stats.poisson.logpmf(n, m1) - stats.poisson.logpmf(n, m0)
+            logw[idx[int(e)]] += lp
+        return np.exp(logw)
 
     def _batch(self, seeds: dict | None, theta: dict):
         name = (seeds or {}).get("batch", self.nominal_batch)
@@ -409,7 +453,7 @@ class G4simEvaluator:
         events = np.arange(tab["first"], tab["first"] + tab["n"])
         changed = {p: v for p, v in values.items() if p in self.methods and not _same(v, self.nominal_theta[p])}
         flags = []
-        w, missing, diag = self._weights(values, changed, tab, events)
+        w, missing, diag = self._weights(values, changed, tab, events, batch)
         kb, kb0 = self._birks(values, batch)
         vis, bound = self._visible(tab, events, kb) if kb is not None else (None, None)
         need_digi = any(o["quantity"] in DIGITIZED for o in self.observable_specs)
@@ -436,11 +480,20 @@ class G4simEvaluator:
                                               "first_event": tab["first"], "events": tab["n"]}})
         return out
 
-    def _weights(self, values, changed, tab, events):
+    def _weights(self, values, changed, tab, events, batch=None):
         w = np.ones(len(events))
-        src = [p for p in changed if self.methods[p] == "analytic-reweighting"]
+        diag: dict = {}
+        for p in [p for p in changed if self.methods[p] == "analytic-reweighting" and self._is_ly(p)
+                  and not getattr(self, "_reference", False)]:   # the reference (P0) re-digitizes LY at theta
+            if any(self.methods[q] == "rerun" for q in changed):
+                raise DG.CheckError("evaluator.poisson_interval", "LY is reweighted only when LY alone changes in the "
+                                    "scintillation stage (Table 2); a k_B change re-digitizes")
+            w = w * self._ly_weights(p, values[p], tab, events, batch)
+            diag["photon_generation"] = {"n_eff": reweight.kish(w), "pareto_k": reweight.pareto_k(w),
+                                         "max_weight_fraction": float(w.max() / w.sum()) if w.sum() > 0 else None}
+        src = [p for p in changed if self.methods[p] == "analytic-reweighting" and not self._is_ly(p)]
         if not src:
-            return w, [], {}
+            return w, [], diag
         request = self.documents["request"]
         target = DG.apply_theta({"request": request}, self.plan, {p: values[p] for p in src})["request"]
         q = source_density.density(request["source"])
@@ -455,10 +508,10 @@ class G4simEvaluator:
                 missing.append(self.run)
                 w[i] = 0.0
                 continue
-            w[i] = source_density.energy_density(p, E) / qe
+            w[i] *= source_density.energy_density(p, E) / qe
         node = {"n_eff": reweight.kish(w), "pareto_k": reweight.pareto_k(w),
                 "max_weight_fraction": float(w.max() / w.sum()) if w.sum() > 0 else None}
-        return w, sorted(set(missing)), {"source": node}
+        return w, sorted(set(missing)), {**diag, "source": node}
 
     def _birks(self, values, batch=None):
         """(k_B at theta, k_B the batch's split was scored at): the nominal k_B, or the k_B of a run told at a k_B
@@ -480,8 +533,9 @@ class G4simEvaluator:
 
     def _digitize(self, values, tab, batch, kb, kb0):
         pde = (self.pde or {}).get("parameter")
-        docs = DG.apply_theta(self.documents, self.plan, {p: v for p, v in values.items()
-                                                          if self.methods.get(p) == "re-digitization" and p != pde})
+        redigi = ("re-digitization",) + (("analytic-reweighting",) if getattr(self, "_reference", False) else ())
+        docs = DG.apply_theta(self.documents, self.plan, {p: v for p, v in values.items() if p != pde and (
+            self.methods.get(p) == "re-digitization" or (self.methods.get(p) in redigi and self._is_ly(p)))})
         rows = tab["split"]
         if kb is not None and (not _same(kb, kb0) or getattr(self, "_bound_sign", 0)):
             scaled = []
@@ -547,6 +601,13 @@ class G4simEvaluator:
         theta; a response stage is the digitization of the batch `seeds['batch']` (new Geant4 events, its own keys)
         at theta, recomputed as a whole segment from the stored scorer quantities (no stage 2 -> 3 hand-off)."""
         values = {**self.nominal_theta, **(psi or {}), **(phi or {}), **(theta or {})}
+        self._reference = True                    # the direct sampling: LY re-digitized, never reweighted (P0's reference)
+        try:
+            return self._resample(node, values, seeds, theta)
+        finally:
+            self._reference = False
+
+    def _resample(self, node, values, seeds, theta):
         if node == "transport":                   # the run told at theta (every parameter off nominal, e.g. a light-yield
             name = self._told_batch({p: values[p] for p in self.methods  # spot check, section 5.4)
                                      if self.methods[p] in ("rerun", "resimulation")
@@ -564,7 +625,11 @@ class G4simEvaluator:
         """The observables from a node's output (for P0): the batch of the samples, with the given channel rows."""
         values = {**self.nominal_theta, **(psi or {}), **(phi or {}), **(theta or {})}
         batch = self.batches[samples["batch"]]
-        out = self._observe(values, samples["batch"], batch, names, given=samples.get("channel_rows"))
+        self._reference = True                    # P0's reference: LY re-digitized at theta, not reweighted
+        try:
+            out = self._observe(values, samples["batch"], batch, names, given=samples.get("channel_rows"))
+        finally:
+            self._reference = False
         out["independent_runs"] = [] if self._same_set(samples["batch"], self.nominal_batch) else [self.run]
         return out
 

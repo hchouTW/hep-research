@@ -319,6 +319,9 @@ def invalidate(downstreams: list, changes: list, marked=()) -> dict:
         if not isinstance(c, dict):
             raise DependencyError("invalidate.change", "a change is {old, new}", f"$.changes[{i}]")
         change = upstream_change(c.get("old"), c.get("new"))
+        if change["old"] in classified:                  # review F12: one successor per old result
+            raise DependencyError("invalidate.change", f"two changes of the same old result {change['old']}",
+                                  f"$.changes[{i}]")
         classified[change["old"]] = change
     ups = {}
     for i, r in enumerate(downstreams):
@@ -352,6 +355,7 @@ def invalidate(downstreams: list, changes: list, marked=()) -> dict:
             if hit and h not in redo:
                 redo[h] = [{"code": "upstream.needs_redo", "upstream": u} for u in hit]
                 grown = True
+    same = [x for x in same if x["downstream"] not in redo]   # review F12: a result marked for a redo is not listed
     return {"redo": dict(sorted(redo.items())), "same_kappa": same,
             "changes": [classified[k] for k in sorted(classified)]}
 
@@ -359,8 +363,9 @@ def invalidate(downstreams: list, changes: list, marked=()) -> dict:
 # ------------------------------------------------------------------ change of simulation identity (10.3, A21 19-g7)
 CARRIED_OVER = "identity-carried-over"
 PROVISIONAL = "provisional-thresholds"
-T2_MARGIN = 0.1            # x sigma_tot^design per observable: provisional threshold of A21 (section 19-g7)
-T2_ALPHA = 0.05            # TOST level per observable; all must pass (intersection-union test)
+T2_MARGIN = 0.1            # x sigma_tot,i^design per theta_i: provisional threshold of A21 as amended by A24
+T2_POWER = 0.025           # se(delta theta_i) <= T2_POWER sigma_tot,i^design: the pre-registered power condition (A24)
+T2_ALPHA = 0.05            # TOST level per theta_i and point; all must pass (intersection-union test)
 T2_SCHEMA = "calibration-identity-equivalence/1"
 THETA_HAT = "theta-hat"
 
@@ -429,7 +434,7 @@ def _record_shape(record) -> None:
         raise DependencyError("t2.shape", f"a T2 record is {{schema: {T2_SCHEMA}, registration, outcome}}", "$.record")
     reg = record["registration"]
     for k in ("result_sha256", "old_identities", "new_identities", "points", "observables", "mc_events",
-              "margin_fraction", "alpha", "registered_at"):
+              "margin_fraction", "power_fraction", "alpha", "registered_at"):
         if k not in reg:
             raise DependencyError("t2.shape", f"the registration lacks {k}", "$.record.registration")
     if not isinstance(reg["points"], list) or not all(isinstance(p, dict) and isinstance(p.get("label"), str)
@@ -438,21 +443,44 @@ def _record_shape(record) -> None:
                               "$.record.registration.points")
     if not isinstance(reg["observables"], list) or not all(
             isinstance(o, dict) and isinstance(o.get("name"), str) for o in reg["observables"]):
-        raise DependencyError("t2.shape", "registration observables are [{name, sigma_tot_design}]",
+        raise DependencyError("t2.shape", "registration observables are [{name}] (link space)",
                               "$.record.registration.observables")
     if not isinstance(record["outcome"].get("points"), list):
         raise DependencyError("t2.shape", "the outcome lists its points", "$.record.outcome.points")
 
 
+def _design(basis: dict) -> tuple[list, list, list]:
+    """(theta names, sigma_tot^design per theta_i, A_theta rows theta x columns basis observables) of the result's
+    design stage at theta_ref (A24: taken from the result, never from the T2 record)."""
+    d = basis.get("design")
+    if not isinstance(d, dict):
+        raise DependencyError("t2.design", "basis.design {theta, sigma_tot, a_theta} of the result is required",
+                              "$.basis.design")
+    names = list(d.get("theta") or [])
+    nobs = len(basis.get("observables") or ())
+    try:
+        sig = [float(x) for x in d.get("sigma_tot") or ()]
+        a = [[float(x) for x in row] for row in d.get("a_theta") or ()]
+    except (TypeError, ValueError):
+        sig, a = [], []
+    if not names or len(sig) != len(names) or len(a) != len(names) or any(len(r) != nobs for r in a) \
+            or not all(x > 0 and math.isfinite(x) for x in sig) or not all(math.isfinite(x) for r in a for x in r):
+        raise DependencyError("t2.design", "design: theta names, positive sigma_tot per theta and a finite a_theta "
+                              "of shape (theta x calibration observables)", "$.basis.design")
+    return names, sig, a
+
+
 def t2_check(record: dict, basis: dict) -> dict:
-    """The T2 equivalence record of approval A21 (section 19-g7) against the result it would carry over (each observable's
-    sigma_tot_design is sqrt of the diagonal of the design-stage total covariance in link space at theta_ref, A22). basis:
-    result_sha256, recorded (the result's identities {model: identity}), current (the current ones), theta_hat {name: value},
-    spot_checks [{name: value}] (the section 5.4 points of the result), observables [calibration observable names],
-    mc_events (the result's own MC size per evaluation), new_build_first_run (ISO time of the new build's first run,
-    from the execution record; None if unknown). Returns {passed, reasons, tests}: a record that is registered after
-    the new build ran, loosens the margin or alpha, does not cover theta-hat, every spot-check point and every
-    calibration observable at the result's MC size, or fails a TOST, does not pass."""
+    """The T2 equivalence record of approval A21 (section 19-g7) as amended by A24, against the result it would carry
+    over. The identity change is judged by its effect on theta-hat: at each registered point the old -> new shift of
+    the calibration observables (link space) is propagated through the result's design-stage A_theta,
+    delta theta = A delta, var = A (Sigma_old + Sigma_new) A^T (the observables' MC covariances, diagonal from se_old
+    and se_new when not given), and each delta theta_i must be shown inside +-margin sigma_tot,i^design by TOST at
+    alpha (all theta and points: an intersection-union test); the power condition se(delta theta_i) <= power sigma_tot,i
+    is checked first (else `t2.power`, a redo). basis: result_sha256, recorded, current, theta_hat, spot_checks,
+    observables (calibration observable names, the columns of a_theta), design {theta, sigma_tot, a_theta},
+    mc_events (the result's own MC size: the record's may be larger, never smaller), new_build_first_run (ISO time
+    or None). Returns {passed, reasons, tests}."""
     _record_shape(record)
     reg, outcome = record["registration"], record["outcome"]
     reasons = []
@@ -460,6 +488,7 @@ def t2_check(record: dict, basis: dict) -> dict:
     def no(code, message):
         reasons.append({"code": code, "message": message})
 
+    tnames, sig, amat = _design(basis)
     if reg["result_sha256"] != basis["result_sha256"]:
         no("t2.other_result", "the record is registered for another result")
     if _identities(reg["old_identities"], "$.record.registration.old_identities") != basis["recorded"] \
@@ -471,10 +500,11 @@ def t2_check(record: dict, basis: dict) -> dict:
     elif registered >= _time(basis["new_build_first_run"], "$.new_build_first_run"):
         no("t2.registered_late", "the record was registered after the new build ran (A21: registered before)")
     margin = _number(reg["margin_fraction"], "$.record.registration.margin_fraction", positive=True)
+    power = _number(reg["power_fraction"], "$.record.registration.power_fraction", positive=True)
     alpha = _number(reg["alpha"], "$.record.registration.alpha", positive=True)
-    if margin > T2_MARGIN or alpha > T2_ALPHA:
-        no("t2.loosened", f"margin {margin} sigma_tot^design and alpha {alpha} may be tightened from "
-                          f"{T2_MARGIN} and {T2_ALPHA}, never loosened")
+    if margin > T2_MARGIN or alpha > T2_ALPHA or power > T2_POWER:
+        no("t2.loosened", f"margin {margin}, power {power} (x sigma_tot^design) and alpha {alpha} may be tightened "
+                          f"from {T2_MARGIN}, {T2_POWER} and {T2_ALPHA}, never loosened")
     labels = [p["label"] for p in reg["points"]]
     if len(set(labels)) != len(labels):
         raise DependencyError("t2.shape", "point labels are unique", "$.record.registration.points")
@@ -482,17 +512,16 @@ def t2_check(record: dict, basis: dict) -> dict:
     hat = [p["theta"] for p in reg["points"] if p["label"] == THETA_HAT]
     if hat != [basis.get("theta_hat")]:
         no("t2.theta_hat", "the record has no theta-hat point equal to the result's theta-hat")
-    missing = [s for s in basis.get("spot_checks") or () if s not in thetas]
+    missing = [sp for sp in basis.get("spot_checks") or () if sp not in thetas]
     if missing:
         no("t2.spot_checks", f"the section 5.4 spot-check points {missing} are not in the record")
-    sig = {o["name"]: _number(o.get("sigma_tot_design"), "$.record.registration.observables", positive=True)
-           for o in reg["observables"]}
-    if set(sig) != set(basis.get("observables") or ()):
-        no("t2.observables", f"the record's observables {sorted(sig)} are not the calibration observables "
-                             f"{sorted(basis.get('observables') or ())}")
-    if reg["mc_events"] != basis.get("mc_events"):
-        no("t2.mc_size", f"registered at {reg['mc_events']} MC events, the result's own size is "
-                         f"{basis.get('mc_events')}")
+    onames = list(basis.get("observables") or ())
+    if sorted(o["name"] for o in reg["observables"]) != sorted(onames):
+        no("t2.observables", f"the record's observables {sorted(o['name'] for o in reg['observables'])} are not "
+                             f"the calibration observables {sorted(onames)}")
+    mc = reg["mc_events"]
+    if not isinstance(mc, int) or isinstance(mc, bool) or mc < int(basis.get("mc_events") or 0):
+        no("t2.mc_size", f"registered at {mc} MC events, below the result's own size {basis.get('mc_events')}")
     if outcome.get("registration_sha256") != canonical_sha256(reg):
         no("t2.outcome_unbound", "the outcome is not bound to this registration (registration_sha256)")
     got = {p.get("label"): p for p in outcome["points"] if isinstance(p, dict)}
@@ -502,25 +531,50 @@ def t2_check(record: dict, basis: dict) -> dict:
         if p is None:
             no("t2.outcome_missing", f"no outcome at point {label!r}")
             continue
-        if p.get("mc_events") != {"old": reg["mc_events"], "new": reg["mc_events"]}:
+        if p.get("mc_events") != {"old": mc, "new": mc}:
             no("t2.mc_size", f"point {label!r} was not evaluated at the registered MC size for both identities")
         obs = p.get("observables") or {}
-        for name in sorted(sig):
-            o = obs.get(name)
-            if not isinstance(o, dict):
-                no("t2.outcome_missing", f"no outcome for {name!r} at point {label!r}")
-                continue
-            w = f"$.record.outcome.points[{label}].{name}"
-            t = tost(_real(o.get("old"), w), _real(o.get("new"), w), _number(o.get("se_old"), w),
-                     _number(o.get("se_new"), w), margin * sig[name], alpha)
-            tests.append(dict(t, point=label, observable=name))
+        if any(not isinstance(obs.get(n), dict) for n in onames):
+            no("t2.outcome_missing", f"point {label!r} lacks observables "
+                                     f"{[n for n in onames if not isinstance(obs.get(n), dict)]}")
+            continue
+        w = f"$.record.outcome.points[{label}]"
+        n_o = len(onames)
+        delta = [_real(obs[n].get("new"), w) - _real(obs[n].get("old"), w) for n in onames]
+        cov = [[0.0] * n_o for _ in range(n_o)]
+        for side in ("old", "new"):
+            c = p.get(f"cov_{side}")
+            if c is not None:
+                try:
+                    c = [[float(x) for x in row] for row in c]
+                except (TypeError, ValueError):
+                    c = None
+                if c is None or len(c) != n_o or any(len(r) != n_o for r in c) or \
+                        not all(math.isfinite(x) for r in c for x in r):
+                    raise DependencyError("t2.shape", f"cov_{side} is the observables' MC covariance", w)
+                for a_ in range(n_o):
+                    for b_ in range(n_o):
+                        cov[a_][b_] += c[a_][b_]
+            else:
+                for a_, n in enumerate(onames):
+                    cov[a_][a_] += _number(obs[n].get(f"se_{side}"), w) ** 2
+        dth = [math.fsum(r[j] * delta[j] for j in range(n_o)) for r in amat]
+        se = [math.sqrt(max(math.fsum(r[a_] * cov[a_][b_] * r[b_] for a_ in range(n_o) for b_ in range(n_o)), 0.0))
+              for r in amat]
+        for k, name in enumerate(tnames):
+            if se[k] > power * sig[k]:
+                no("t2.power", f"{name} at {label!r}: se(delta theta) {se[k]:.4g} > {power} sigma_tot "
+                               f"{power * sig[k]:.4g} (the pre-registered power condition; A24)")
+            t = tost(0.0, float(dth[k]), float(se[k]), 0.0, margin * sig[k], alpha)
+            tests.append(dict(t, point=label, theta=name, sigma_tot_design=float(sig[k])))
             if not t["equivalent"]:
-                no("t2.not_equivalent", f"{name} at {label!r}: |difference| {abs(t['difference']):.4g} not shown "
+                no("t2.not_equivalent", f"{name} at {label!r}: |delta theta| {abs(t['difference']):.4g} not shown "
                                         f"< {t['margin']:.4g} (TOST p = {t['p']:.3g} >= {alpha})")
     return {"passed": not reasons, "reasons": reasons, "tests": tests}
 
 
 def identity_decision(result: dict, current: list, record: dict | None = None, basis: dict | None = None) -> dict:
+    """basis: only new_build_first_run is read from it (A24); the rest of the T2 basis is the result's `t2_basis`."""
     """Section 10.3 change of simulation identity with approval A21 (section 19-g7). result: a calibration-result
     with result_sha256 and model_identities [{model, identity}]; current: the current [{model, identity}] (from
     model_identity.identity). Unchanged identities (theta, phi values and provenance_id are masked, section 5.1):
@@ -538,7 +592,20 @@ def identity_decision(result: dict, current: list, record: dict | None = None, b
         return dict(out, status="failed", decision="redo",
                     reasons=[{"code": "t2.missing", "message": "the identity changed and no T2 equivalence record "
                                                                "was registered (A21: redo)"}])
-    t2 = t2_check(record, dict(basis or {}, result_sha256=h, recorded=old, current=now))
+    # review F1 (A24): the T2 basis is the result's own (theta-hat, spot checks, observables, MC size, design stage),
+    # bound by its recomputed hash; the caller supplies only the new build's first run time (the execution record)
+    if canonical_sha256({k: v for k, v in result.items() if k != "result_sha256"}) != h:
+        return dict(out, status="failed", decision="redo",
+                    reasons=[{"code": "t2.result_hash", "message": "the result's result_sha256 does not recompute: "
+                                                                   "its T2 basis is not bound to it"}])
+    rb = result.get("t2_basis")
+    if not isinstance(rb, dict):
+        return dict(out, status="failed", decision="redo",
+                    reasons=[{"code": "t2.no_basis", "message": "the result carries no t2_basis (theta_hat, "
+                                                                "spot_checks, observables, mc_events, design)"}])
+    eff = {k: rb.get(k) for k in ("theta_hat", "spot_checks", "observables", "mc_events", "design")}
+    eff["new_build_first_run"] = (basis or {}).get("new_build_first_run")
+    t2 = t2_check(record, dict(eff, result_sha256=h, recorded=old, current=now))
     if not t2["passed"]:
         return dict(out, status="failed", decision="redo", reasons=t2["reasons"], tests=t2["tests"])
     return dict(out, status="ok", decision="carried-over", flags=[CARRIED_OVER, PROVISIONAL],

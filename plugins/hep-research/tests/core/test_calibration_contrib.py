@@ -25,7 +25,7 @@ from core.calibration import evaluator as E  # noqa: E402
 
 
 def chain(n_effects: int, method: str = "resimulation", removal: float = 0.0, n: int = 4000, n_data: int = 200,
-          widths=None):
+          widths=None, seed=None):
     """(contract, plan, nominal widths) of the smearing chain with n_effects declared effects."""
     widths = list(widths or [0.5 + 0.1 * i for i in range(n_effects)])
     nodes = [{"id": "base", "kernel": "normal", "args": {"out": "base", "scale": "s_base"}}]
@@ -39,7 +39,8 @@ def chain(n_effects: int, method: str = "resimulation", removal: float = 0.0, n:
     last = f"x{n_effects - 1}"
     c, p = H.chain_case(nodes, [{"name": "res", "node": last, "var": last, "functional": "std", "link": "log",
                                  "class": "core-width"}], nominal, params, {"run": n_data},
-                        methods={k: method for k in params if k != "s_base"}, n=n)
+                        methods={k: method for k in params if k != "s_base"}, n=n,
+                        **({} if seed is None else {"seed": seed}))
     c["effects"] = [{"name": f"e{i}", "removal": {f"s{i}": removal}} for i in range(n_effects)]
     return c, p, widths
 
@@ -106,6 +107,20 @@ class Decomposition(unittest.TestCase):
         self.assertTrue(np.all(np.diag(cov) > 0))
         # the terms sum to the total on every replica too: the summed covariance is the variance of the total
         self.assertAlmostEqual(cov.sum(), r["total_sd"] ** 2, delta=1e-9 * max(1.0, cov.sum()))
+
+    def test_bootstrap_covariance_is_calibrated(self):
+        """Review F7: over 20 independent MC samples the spread of each term agrees with the mean bootstrap sd (ratio
+        within 0.6-1.5: the sd of a 20-sample sd is about 16%), and the terms recover s_i^2 within 4 standard errors."""
+        terms, sds = [], []
+        for seed in range(1, 21):
+            r = decompose(chain(3, seed=seed), bootstrap=200, bootstrap_seed=seed)
+            terms.append([r["terms"][f"e{i}"] for i in range(3)])
+            sds.append(np.sqrt(np.diag(np.array(r["covariance"]["matrix"]))))
+        terms, sds = np.array(terms), np.array(sds)
+        ratio = terms.std(axis=0, ddof=1) / sds.mean(axis=0)
+        self.assertTrue(np.all((ratio > 0.6) & (ratio < 1.5)), ratio)
+        se = terms.std(axis=0, ddof=1) / np.sqrt(len(terms))
+        np.testing.assert_array_less(np.abs(terms.mean(axis=0) - [0.25, 0.36, 0.49]), 4 * se + 1e-12)
 
     def test_negative_some_subset_below_the_ess_threshold(self):
         """Reweighting the widths down (removal 0.4) with N_req = 10 N_data = 3000 of N = 4000: the subsets with

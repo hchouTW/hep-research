@@ -167,27 +167,36 @@ class CheckExport(unittest.TestCase):
         self.assertIn("export.grade_mismatch", self.codes(dict(rec, source_of_facts=sof), prov))
 
     def test_use_matrix(self):
-        """Section 15.3.17 "projection used for a production correction is rejected", on the exported record; production
+        """Section 15.3.17 "projection used for a production correction is rejected": the export refuses a use the
+        result does not allow (review F8), and calib_use rejects a record whose stated use was edited to one; production
         simulation accepts only validated-in-scope (section 10.4); calibrated-unvalidated is accepted for systematic
-        variations; a use-blocking flag removes publication."""
+        variations; a use-blocking flag removes publication. Controls: the allowed uses are exported and accepted."""
+        def refused(tpl, res, use):
+            with self.assertRaises(P.PropagationError) as cm:
+                P.export_g4sim(tpl, res, contract(), use)
+            self.assertEqual(cm.exception.code, "export.use")
+
+        def edited(tpl, res, allowed, use):
+            rec = P.export_g4sim(tpl, res, contract(), allowed)
+            rec["source_of_facts"][P.SOURCE_KEY]["use"] = use
+            return self.codes(rec, res)
+
         proj = result(real_data=False)
         self.assertEqual(proj["grade"]["effective_grade"], "projection")
-        self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), proj, contract(), "production"), proj),
-                         ["export.use"])
+        refused(G4.snapshot(), proj, "production")
+        self.assertEqual(edited(G4.snapshot(), proj, "design-study", "production"), ["export.use"])
         self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), proj, contract(), "design-study"), proj), [])
         cu = result(v_pass=False)
-        self.assertEqual(self.codes(P.export_g4sim(G4.overlay(), cu, contract(), "production"), cu), ["export.use"])
+        refused(G4.overlay(), cu, "production")
+        self.assertEqual(edited(G4.overlay(), cu, "systematic-variation", "production"), ["export.use"])
         self.assertEqual(self.codes(P.export_g4sim(G4.overlay(), cu, contract(), "systematic-variation"), cu), [])
         failed = result(mandatory_gate_failed=True, own_flags={"outside-validated-range"})
-        self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), failed, contract(), "systematic-variation"),
-                                    failed), ["export.use"])
+        refused(G4.snapshot(), failed, "systematic-variation")
         self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), failed, contract(), "diagnostics"), failed), [])
         prov = result(own_flags={"preliminary"})
-        self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), prov, contract(), "publication"), prov),
-                         ["export.use"])
+        refused(G4.snapshot(), prov, "publication")
         self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), prov, contract(), "production"), prov), [])
-        self.assertEqual(self.codes(P.export_g4sim(G4.snapshot(), self.r, contract(), "make-believe")),
-                         ["export.use"])
+        refused(G4.snapshot(), self.r, "make-believe")
 
     def test_values_must_be_the_results(self):
         rec = copy.deepcopy(self.snap)
@@ -196,6 +205,18 @@ class CheckExport(unittest.TestCase):
         sof = copy.deepcopy(self.over["source_of_facts"])
         sof["/shifts/0/delta_mm/0"] = "survey"
         self.assertEqual(self.codes(dict(self.over, source_of_facts=sof)), ["export.hash_mismatch"])
+
+    def test_written_values_must_be_declared(self):
+        """Review F3: a tampered value cannot hide by emptying or misnaming the entry's parameter map, nor by being
+        labelled with the result's hash without being declared. Control: the untampered record is accepted."""
+        self.assertEqual(self.codes(self.snap), [])
+        key = P.SOURCE_KEY
+        for params in ({}, {"/iovs/0/rows/0/threshold": "not_a_parameter"}):
+            rec = copy.deepcopy(self.snap)
+            rec["iovs"][0]["rows"][0]["threshold"] = 3.0
+            rec["source_of_facts"][key]["parameters"] = params
+            with self.subTest(params=params):
+                self.assertIn("export.parameters", self.codes(rec))
 
     def test_not_an_exported_record(self):
         self.assertEqual(self.codes({"schema": "detector-spec/1"}), ["export.schema"])

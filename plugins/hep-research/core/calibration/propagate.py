@@ -116,7 +116,8 @@ def export_g4sim(template: dict, result: dict, contract: dict, use: str, values:
     source_of_facts carrying the result's hash, effective grade, uses, flags and `use` (the use the record is exported
     for). `values` maps a parameter name to its value; default the result's `beta_hat`. Refuses (PropagationError) a
     result without its hash or with no grade (incomplete cannot be cited), a binding outside Table 2 or a pointer that
-    does not resolve, a missing value, and a template with no theta bound to it. The use matrix is calib_use.py's."""
+    does not resolve, a missing value, a template with no theta bound to it, and a use the result's grade and flags do
+    not allow (section 10.2; calib_use.py export checks the written record again)."""
     kind = EXPORT_SCHEMAS.get(str(template.get("schema")))
     if kind is None:
         raise PropagationError("export.schema", f"exports are {sorted(EXPORT_SCHEMAS)}, not {template.get('schema')!r}")
@@ -128,6 +129,11 @@ def export_g4sim(template: dict, result: dict, contract: dict, use: str, values:
     if grade.get("effective_grade") not in ("failed", "projection", "calibrated-unvalidated", "validated-in-scope"):
         raise PropagationError("export.no_grade", "the result has no effective grade (incomplete results cannot be "
                                "cited, section 10.2 rule 0)")
+    from . import use as use_mod                           # review F8: never write a use the result does not allow
+    allowed = use_mod.allowed_uses(grade["effective_grade"], set(grade.get("flags") or ()))
+    if use not in allowed:
+        raise PropagationError("export.use", f"use {use!r} is not allowed for {grade['effective_grade']} with flags "
+                               f"{sorted(grade.get('flags') or ())}; allowed {sorted(allowed)} (section 10.2)")
     values = result.get("beta_hat") if values is None else values
     if not isinstance(values, dict):
         raise PropagationError("export.values", "values (or the result's beta_hat) map parameter names to values")

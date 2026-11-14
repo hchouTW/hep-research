@@ -28,11 +28,16 @@ class Judge(unittest.TestCase):
             with self.subTest(outs=sorted(outs)):
                 self.assertFalse(G.judge_tests("x", "p", self.KINDS, outs)["passed"])
 
-    def test_the_table_names_every_section_15_3_19_case_and_the_recorded_one(self):
-        self.assertGreaterEqual(len(G.CASES), 15)
+    def test_the_table_names_every_section_15_3_19_case(self):
+        """Review F9: the case table is complete and every mapped test name loads (a renamed test would otherwise
+        surface only as a gate failure)."""
+        self.assertEqual(len(G.CASES), 19)
         self.assertTrue(all(ids for _, ids in G.CASES))
-        self.assertEqual(len(G.RECORDED), 1)
-        self.assertIn("log_density", G.RECORDED[0][0])
+        loader = unittest.TestLoader()
+        names = [t for _, ids in G.CASES for t in ids] + list(G.CONTRIB["tests"]) + list(G.GENERIC["tests"])
+        for name in names:
+            with self.subTest(name=name):
+                self.assertGreater(loader.loadTestsFromName(name).countTestCases(), 0)
 
 
 if __name__ == "__main__":

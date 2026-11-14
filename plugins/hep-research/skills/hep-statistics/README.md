@@ -67,7 +67,7 @@ hep-statistics/
 | `SKILL.md` | entry point: invariants, Step 0 for a quick question and the task-to-tool table (default tool, fallback, or "no shipped tool"), workflow, context resolution |
 | `references/` | fourteen references: PDF, nPDF and FF fit statistics (chi2 forms, t0, tolerances, reweighting, profiling), the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, binned time series (documented; its time-bin covariance recipe demonstrated on synthetic data by `test_time_series_covariance.py`), ML-assisted inference, RooFit and RooStats methods, inference reasoning |
 | `assets/` | `combine.example.json`: SYNTHETIC input for `combine_measurements.py` (two experiments, shared luminosity) |
-| `scripts/` | forty-four helpers (listed below); the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
+| `scripts/` | forty-five helpers (listed below); the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
 
 Scripts:
 
