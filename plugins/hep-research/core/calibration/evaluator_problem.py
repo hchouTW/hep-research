@@ -5,7 +5,8 @@ section 15.2 through the g4sim evaluator, which registers itself from the Geant4
 - Prediction: the evaluator's prediction at theta (its methods, common random numbers: one batch of events at every
   theta), in the contract's link space, plus a toy's perturbation.
 - Errors at theta_ref: V_data^unc = per-event covariance / exposure of each sample (the construction of
-  `linear.design`), V_MC from the evaluator; V_G = V_data + V_MC. No bootstrap, nu or eta here.
+  `linear.design`), V_MC from the evaluator; V_G = V_data + V_MC (+ V_learn when the evaluator returns one, section
+  2.1; phase 5). No bootstrap, nu or eta here.
 - Pseudo-data: from a truth MC's events by the D6 rule of A12 (`closure.resample_truth`, at the data's sampling model),
   summarized with the evaluator's estimators; or, for analytic stand-ins without events, a Gaussian draw with V_data at
   the truth (labelled `gaussian-summary`).
@@ -84,10 +85,24 @@ class EvaluatorProblem:
         Vm = np.asarray(r["V_MC"], float) * np.outer(g, g)
         return Vd, Vm
 
+    def V_learn_link(self, tp) -> np.ndarray | None:
+        """The evaluator's V_learn at theta (section 7.1 `evaluate`; observable space) in link space, or None."""
+        r = self._evaluate(tp)
+        v = r.get("V_learn")
+        if v is None:
+            return None
+        v = v["V_learn"] if isinstance(v, dict) else v
+        g = linear.to_link_delta(np.asarray(r["pred"], float), self.links)
+        return np.asarray(v, float) * np.outer(g, g)
+
     def reference(self, tp, beta, frozen=None, **_kw) -> L.Reference:
         Vd, Vm = self.V_parts(tp)
         n = len(self.names)
-        return L.Reference(V_G=Vd + Vm, V_std=Vd, U=np.zeros((n, 0)), S=np.zeros((n, 0)), constraints=[]).finalize()
+        V_G = Vd + Vm
+        Vl = self.V_learn_link(tp)
+        if Vl is not None:                    # section 2.1: V_G = V_data + V_MC + V_emu + V_learn (phase 5)
+            V_G = V_G + Vl
+        return L.Reference(V_G=V_G, V_std=Vd, U=np.zeros((n, 0)), S=np.zeros((n, 0)), constraints=[]).finalize()
 
     def bounds(self):
         return list(self._bounds)
