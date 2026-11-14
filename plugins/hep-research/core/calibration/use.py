@@ -30,7 +30,8 @@ USE_MIN = {"diagnostics": "failed", "design-study": "projection", "systematic-va
            "production": "validated-in-scope", "publication": "validated-in-scope"}
 USE_BLOCKING_FLAGS = frozenset({"preliminary", "provisional-thresholds"})          # from all upstreams
 GRADE_CAPPING_FLAGS = frozenset({"outside-validated-range", "closure-not-tested"})  # from central upstreams
-INFORMATION_FLAGS = frozenset({"boundary-solution", "multimodal", "cv"})            # from central upstreams
+INFORMATION_FLAGS = frozenset({"boundary-solution", "multimodal", "cv",             # from central upstreams
+                               "identity-carried-over"})   # A22: a T2 carry-over (A21 19-g7); no effect on grade or use
 FLAGS = USE_BLOCKING_FLAGS | GRADE_CAPPING_FLAGS | INFORMATION_FLAGS
 
 VMODES = ("none", "holdout", "cross-validation")

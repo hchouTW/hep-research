@@ -445,7 +445,8 @@ def _record_shape(record) -> None:
 
 
 def t2_check(record: dict, basis: dict) -> dict:
-    """The T2 equivalence record of approval A21 (section 19-g7) against the result it would carry over. basis:
+    """The T2 equivalence record of approval A21 (section 19-g7) against the result it would carry over (each observable's
+    sigma_tot_design is sqrt of the diagonal of the design-stage total covariance in link space at theta_ref, A22). basis:
     result_sha256, recorded (the result's identities {model: identity}), current (the current ones), theta_hat {name: value},
     spot_checks [{name: value}] (the section 5.4 points of the result), observables [calibration observable names],
     mc_events (the result's own MC size per evaluation), new_build_first_run (ISO time of the new build's first run,

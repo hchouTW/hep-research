@@ -311,5 +311,15 @@ class IncompleteAggregation(unittest.TestCase):
             use.aggregate(self.gates(G99="passed"), "passed", "passed", "holdout")
 
 
+class IdentityCarriedOver(unittest.TestCase):
+    def test_the_flag_is_informational(self):
+        """A22: `identity-carried-over` (a T2 carry-over, A21 section 19-g7) is a known flag with no effect on grade or
+        use; control: a made-up flag is not known."""
+        self.assertIn("identity-carried-over", use.FLAGS)
+        self.assertIn("identity-carried-over", use.INFORMATION_FLAGS)
+        self.assertNotIn("identity-carried-over", use.USE_BLOCKING_FLAGS | use.GRADE_CAPPING_FLAGS)
+        self.assertNotIn("made-up-flag", use.FLAGS)
+
+
 if __name__ == "__main__":
     unittest.main()
