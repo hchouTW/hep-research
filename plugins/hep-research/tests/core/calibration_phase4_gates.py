@@ -154,7 +154,8 @@ def generic_item() -> dict:
     file of the generic layer (review F2: all of them, not one named commit)."""
     j = judge_tests("generic_layer", GENERIC["part"], GENERIC["tests"], _run(list(GENERIC["tests"])))
     try:
-        commits = _git("log", "--no-merges", "--format=%H", f"{PHASE_BASE}..HEAD", "--", *SPECIALIZATION_PATHS)
+        commits = _git("log", "--no-merges", "--format=%H", f"{PHASE_BASE}..HEAD", "--",
+                       *(":(top)" + p for p in SPECIALIZATION_PATHS))    # paths from the repository root
         rows = []
         for c in commits:
             files = _git("diff-tree", "--no-commit-id", "--name-only", "-r", c)
