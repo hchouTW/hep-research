@@ -505,6 +505,13 @@
    "registered_at": "2026-11-14T10:26:15Z",
    "card_commit": "0feb083d",
    "reason": "phase-5 card refreshed at the phase start (A25; work packages; gate designs)"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "1f954d136e7c23a18862bee0875cdc7e5a98e1991d868db55d66bfabf7fd3952",
+   "registered_at": "2026-11-14T13:17:05Z",
+   "card_commit": "9f289535",
+   "reason": "phase-5 gate run and studies S1-S4 registered before any run"
   }
  ]
 }
