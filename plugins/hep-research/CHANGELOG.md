@@ -5,6 +5,7 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Geant4 adapter: input refusals no longer depend on cmake.** `geant4_examples.py build` and `geant4_run.py build-sim` judge the build record, the installation and the example source before checking for cmake on PATH, so a refused input (exit 2, or a missing `geant4-config` / CMake configuration, exit 3) is reported the same on a host without cmake; before, such a host got "cmake not found on PATH" first. `test_geant4_register`: the example-source test passes on a host without cmake, and the `build-sim` refusal test runs there instead of skipping. Found by running CI's hostile-paths job on compute nodes without cmake.
 - **hep-ml: learned density ratios for reweighting stored MC** (documentation; simulator calibration phase 5, WP-T). New reference `skills/hep-ml/references/learned-density-ratio-reweighting.md`: the likelihood-ratio trick for one post-hoc correction node, cross-fitting, probability calibration and the prior-ratio correction, the effective sample size of the weights, and the boundary of approval A25 (a learned ratio only reweights stored MC; SBI is not a method of the calibration workflow). Linked from `ml-analysis.md`, `sbi-training.md` and `ml-analysis-weights.md`.
 
 Simulator parameter calibration workflow, phase 5 (extensions). Part of the same minor release.

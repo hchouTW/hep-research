@@ -752,8 +752,6 @@ def cmake_cache_compiler(bld: Path) -> dict:
 
 def cmd_build_sim(args) -> tuple[str, dict]:
     program = args.program
-    if not shutil.which("cmake"):
-        return "missing-dependency", {"error": "cmake not found on PATH"}
     g4opt, ident = [], None
     if program != "simreco":  # simreco links no Geant4 (B2.1)
         if not args.build_record:
@@ -774,6 +772,9 @@ def cmd_build_sim(args) -> tuple[str, dict]:
             # expat, Qt, ...): a conda or LCG prefix holds them next to Geant4; -U drops a G4SIM_GEANT4_CONFIG cached
             # by an earlier --configure-with geant4-config build in this folder, which would still take precedence
             g4opt = ["-UG4SIM_GEANT4_CONFIG", f"-DGeant4_DIR={g4dir}", f"-DCMAKE_PREFIX_PATH={install_prefix(build)}"]
+    # the build record and installation are judged before the host, so their refusals do not depend on cmake
+    if not shutil.which("cmake"):
+        return "missing-dependency", {"error": "cmake not found on PATH"}
     bld = expand(str(args.work)) / f"{program}-build"
     log = bld / "build.log"
     bld.mkdir(parents=True, exist_ok=True)

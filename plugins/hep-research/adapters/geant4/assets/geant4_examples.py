@@ -401,9 +401,10 @@ endforeach()
 
 def cmd_build(args) -> tuple[str, dict]:
     rec = _build(args)
+    # the inputs are judged before the host: a refused source (exit 2) is refused with or without cmake installed
+    src, src_info = example_source(rec, args.source)
     if not shutil.which("cmake"):
         return "missing-dependency", {"error": "cmake not found on PATH"}
-    src, src_info = example_source(rec, args.source)
     if args.configure_with == "geant4-config":
         cfg = geant4_config_path(rec)
         if not cfg.is_file():
