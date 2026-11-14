@@ -27,7 +27,10 @@ names the recorded cells file and payloads (SHA-256); it was made with the t08-g
 back whole as calo-cluster-product/1 of recipe reco.calo.cell-cluster/1 with energy kind clustered deposited energy, never incident
 energy; no cell is counted twice; its kept cells are exactly section 7.1's selection of the recorded cells, and kept, unclustered and
 dead cells and their sums account for the input (fixture_tools/t08_scenarios.py, scenario A38); the recipe run again on the recorded
-cells writes the recorded product byte for byte.
+cells writes the recorded product byte for byte. That last check holds where the BLAS and LAPACK kernels round as the recording's did:
+on x86-64 with NumPy's OpenBLAS (AVX-512 or AVX2 dispatch, checked in the CI fix round of PR #411); with other kernels (macOS arm64's
+Accelerate, OpenBLAS's pre-FMA Prescott kernel) the two-peak covariance differs in its last bits and the check fails: a stated limit,
+not a tolerance.
 
 Expected readings, stated before the first live run and checked by nobody: 2 events, 2 objects in each (two two-peak objects of one
 component, or two one-peak objects of two components), no component without objects, no dead cell, no saturated cell.
@@ -78,6 +81,18 @@ def placeholders(text: str, work: Path) -> str:
     return text
 
 
+def placeholders_in(value, work: Path):
+    """placeholders in every string of a decoded report. Not on its JSON text: json.dumps escapes a non-ASCII or backslashed folder
+    name (a folder named with Chinese characters becomes \\u escapes), which then no longer matches (hostile-paths, CI fix round of PR #411)."""
+    if isinstance(value, str):
+        return placeholders(value, work)
+    if isinstance(value, list):
+        return [placeholders_in(item, work) for item in value]
+    if isinstance(value, dict):
+        return {key: placeholders_in(item, work) for key, item in value.items()}
+    return value
+
+
 def recipe_run(arguments: list, work: Path) -> dict:
     command = [sys.executable, "-I", "-B", str(RECIPE_CLI), *arguments]
     finished = subprocess.run(command, capture_output=True, text=True, timeout=600)
@@ -87,7 +102,7 @@ def recipe_run(arguments: list, work: Path) -> dict:
         report = {"operation": arguments[0], "status": "failed", "exit_code": finished.returncode,
                   "reason": f"the recipe wrote no report: {finished.stderr[-500:]}"}
     kept = {key: value for key, value in report.items() if key not in DROPPED_FIELDS}
-    kept = json.loads(placeholders(json.dumps(kept, sort_keys=True), work))
+    kept = json.loads(json.dumps(placeholders_in(kept, work), sort_keys=True))
     kept["exit_code"] = finished.returncode
     kept["command"] = [placeholders(str(token), work) for token in command]
     return kept
