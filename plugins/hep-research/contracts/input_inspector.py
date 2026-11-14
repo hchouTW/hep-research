@@ -16,8 +16,9 @@ stated rather than hidden: a watch runs between Python calls, so one C call (a b
 numbers, one NumPy routine, one regular expression of a validator) runs to its end, and the overrun is caught as soon as it returns:
 that probe's facts are dropped and the record says stopped. A hard stop would need a separate process, which Section 5.6's lightweight read-only probe
 does not call for. Memory is the rise of the process's peak resident size (getrusage), which sees C libraries too but is one number
-for the process: an earlier, higher peak hides a rise below it, so the limit reads "the peak grows by at most this much". Where
-getrusage does not exist, a declared memory limit cannot be kept, so inspection stops at once with budget-memory.
+for the process: an earlier, higher peak hides a rise below it, so the limit reads "the peak grows by at most this much". On Windows,
+which has no getrusage, the same number is the peak working set (GetProcessMemoryInfo). Where neither can be read, a declared memory
+limit cannot be kept, so inspection stops at once with budget-memory.
 """
 from __future__ import annotations
 
@@ -32,7 +33,7 @@ import time
 
 try:
     import resource
-except ImportError:  # not on every platform (Windows); a declared memory limit then stops inspection (_peak_resident_bytes)
+except ImportError:  # not on Windows: there the peak working set stands in (_windows_peak_reader)
     HAS_GETRUSAGE = False
 else:
     HAS_GETRUSAGE = True
@@ -54,6 +55,9 @@ PROBES: dict[str, dict] = {JSON_PROBE: {"reader": "json", "reader_version": "1",
 PROBE_BY_SUFFIX = {".json": JSON_PROBE, ".csv": CSV_PROBE}
 # Engineering limits of the watch: looks at the clock and the memory every so many Python events, and reads a file in chunks.
 WATCH_INTERVAL = 64
+# A file is opened read-only and never blocks on a pipe swapped in after the stat (O_NONBLOCK, POSIX; Windows has no FIFO); on Windows
+# O_BINARY keeps the C runtime from translating line endings in the bytes read.
+OPEN_FLAGS = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
 READ_CHUNK_BYTES = 1024 * 1024
 # Section 5.6 item 5: read, time, memory, tool and probe-count limits. A tool is a registered reader, since no other tool exists here.
 BUDGET_COUNTS = ("probes", "bytes", "memory_bytes", "tools")
@@ -108,12 +112,47 @@ DIMENSION_KEYS = {"sampling": ("sampling.interval.value", "sampling.interval.uni
                   "retention": ("retention.raw", "retention.waveform", "retention.truth", "retention.candidates", "retention.conditions_snapshot")}
 
 
-def _peak_resident_bytes() -> int | None:
-    """Peak resident size of this process. getrusage gives kibibytes on Linux and bytes on macOS."""
-    if not HAS_GETRUSAGE:
+def _windows_peak_reader():
+    """On Windows, a function giving this process's peak working set in bytes (K32GetProcessMemoryInfo, kernel32 since Windows 7),
+    the counterpart of ru_maxrss; None where it cannot be set up. Prepared once, so the watch makes no ctypes setup per look."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+    except ImportError:
         return None
-    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    return peak if sys.platform == "darwin" else peak * 1024
+
+    class Counters(ctypes.Structure):  # PROCESS_MEMORY_COUNTERS
+        _fields_ = [("cb", wintypes.DWORD), ("PageFaultCount", wintypes.DWORD), ("PeakWorkingSetSize", ctypes.c_size_t),
+                    ("WorkingSetSize", ctypes.c_size_t), ("QuotaPeakPagedPoolUsage", ctypes.c_size_t), ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                    ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t), ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                    ("PagefileUsage", ctypes.c_size_t), ("PeakPagefileUsage", ctypes.c_size_t)]
+
+    try:
+        kernel32 = ctypes.WinDLL("kernel32")
+        get_info = kernel32.K32GetProcessMemoryInfo
+    except (AttributeError, OSError):
+        return None
+    kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+    get_info.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+    get_info.restype = wintypes.BOOL
+    process, counters = kernel32.GetCurrentProcess(), Counters()
+    counters.cb = ctypes.sizeof(Counters)
+
+    def peak() -> int | None:
+        return int(counters.PeakWorkingSetSize) if get_info(process, ctypes.byref(counters), counters.cb) else None
+    return peak
+
+
+WINDOWS_PEAK = _windows_peak_reader() if sys.platform == "win32" and not HAS_GETRUSAGE else None
+
+
+def _peak_resident_bytes() -> int | None:
+    """Peak resident size of this process. getrusage gives kibibytes on Linux and bytes on macOS; Windows, the peak working set in
+    bytes. None when neither can be read."""
+    if HAS_GETRUSAGE:
+        peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        return peak if sys.platform == "darwin" else peak * 1024
+    return WINDOWS_PEAK() if WINDOWS_PEAK is not None else None
 
 
 def _inside_import(frame) -> bool:
@@ -231,7 +270,7 @@ def _read_bounded(path, planned: int, spending: _Spending) -> bytes:
     """O_NONBLOCK and the second check: a pipe swapped in after the stat must not block the inspection. Every chunk is charged as it
     arrives, and a slow file is stopped between chunks; a single stalled read cannot be interrupted (module docstring)."""
     spending.pause()  # a stop between these two calls would leave the descriptor with no owner
-    stream = os.fdopen(os.open(path, os.O_RDONLY | os.O_NONBLOCK), "rb")
+    stream = os.fdopen(os.open(path, OPEN_FLAGS), "rb")
     chunks = []
     with stream:
         spending.resume()

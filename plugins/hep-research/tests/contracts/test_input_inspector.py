@@ -252,11 +252,15 @@ class ContainerIdentifiesOnlyTheReader(Scratch):
             self.assertEqual(code_list(read_sidecar(record)), [], repr(inputs))
 
     def test_a_missing_file_a_directory_and_a_pipe_are_unknown_and_nothing_blocks(self):
-        pipe = self.folder / "pipe.json"
-        os.mkfifo(pipe)
+        paths = [str(self.folder / "missing.json")]
         directory = self.folder / "folder.csv"
         directory.mkdir()
-        for path in (str(self.folder / "missing.json"), str(directory), str(pipe)):
+        paths.append(str(directory))
+        if hasattr(os, "mkfifo"):  # Windows has no FIFO: there the missing file and the directory are the cases
+            pipe = self.folder / "pipe.json"
+            os.mkfifo(pipe)
+            paths.append(str(pipe))
+        for path in paths:
             record = inspect_inputs([{"product": "product.a", "path": path}], BUDGET)
             self.assertEqual(only_signature(record)["facts"], [], path)
             self.assertEqual(record["probes"][0]["outcome"], "not-run", path)
@@ -405,11 +409,18 @@ class TextInData(Scratch):
         tree = ast.parse((ROOT / "contracts/input_inspector.py").read_text(encoding="utf-8"))
         imported = {alias.name for node in ast.walk(tree) if isinstance(node, ast.Import) for alias in node.names}
         imported |= {node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)}
-        self.assertEqual(imported, {"__future__", "contracts.reconstruction", "contracts.schema", "contracts.sidecar_reader", "contracts.validate", "csv", "io", "json", "math", "os", "resource", "stat", "sys", "time"})
+        # ctypes: only the Windows peak working set (GetProcessMemoryInfo), which reads a counter and runs nothing
+        self.assertEqual(imported, {"__future__", "contracts.reconstruction", "contracts.schema", "contracts.sidecar_reader", "contracts.validate", "csv", "ctypes", "io", "json", "math", "os", "resource", "stat", "sys", "time"})
         called = {node.func.attr if isinstance(node.func, ast.Attribute) else getattr(node.func, "id", "") for node in ast.walk(tree) if isinstance(node, ast.Call)}
         self.assertFalse(called & {"eval", "exec", "compile", "__import__", "system", "popen", "spawnv", "execv", "fork", "write", "remove", "unlink", "rename", "mkdir"})
         opened = [node for node in ast.walk(tree) if isinstance(node, ast.Attribute) and node.attr.startswith("O_")]
-        self.assertEqual({node.attr for node in opened}, {"O_RDONLY", "O_NONBLOCK"})
+        self.assertEqual({node.attr for node in opened}, {"O_RDONLY"})
+        flags = {node.args[1].value for node in ast.walk(tree) if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "getattr"
+                 and len(node.args) == 3 and isinstance(node.args[1], ast.Constant) and str(node.args[1].value).startswith("O_")}
+        self.assertEqual(flags, {"O_NONBLOCK", "O_BINARY"})
+        self.assertEqual(input_inspector.OPEN_FLAGS & os.O_WRONLY | input_inspector.OPEN_FLAGS & os.O_RDWR, 0)
+        if hasattr(os, "O_NONBLOCK"):
+            self.assertTrue(input_inspector.OPEN_FLAGS & os.O_NONBLOCK)
 
 
 VALID_ARTIFACTS = ROOT / "contracts/fixtures/artifacts/valid"
@@ -1320,7 +1331,17 @@ class BudgetBoundsTheWork(Scratch):
         self.assertEqual(code_list(read_sidecar(record)), [])
 
     def test_the_real_peak_is_read_in_bytes(self):
-        self.assertGreater(input_inspector._peak_resident_bytes(), 1024 * 1024)
+        self.assertGreater(input_inspector._peak_resident_bytes(), 1024 * 1024)  # getrusage, or the Windows peak working set
+
+    def test_the_peak_comes_from_getrusage_or_the_windows_counter(self):
+        self.assertEqual(input_inspector.HAS_GETRUSAGE, sys.platform != "win32")
+        self.assertEqual(input_inspector.WINDOWS_PEAK is not None, sys.platform == "win32")
+        with mock.patch.object(input_inspector, "HAS_GETRUSAGE", False), mock.patch.object(input_inspector, "WINDOWS_PEAK", lambda: 5 * 1024 * 1024):
+            self.assertEqual(input_inspector._peak_resident_bytes(), 5 * 1024 * 1024)
+        with mock.patch.object(input_inspector, "HAS_GETRUSAGE", False), mock.patch.object(input_inspector, "WINDOWS_PEAK", None):
+            self.assertIsNone(input_inspector._peak_resident_bytes())  # neither: a declared memory limit then stops (budget-memory)
+            record = self.inspected("a.json", product())
+        self.assertEqual((record["state"], record["stop_reason"]), ("stopped", "budget-memory"))
 
     def test_running_out_of_memory_is_a_stop_and_no_exception(self):
         with mock.patch("contracts.input_inspector.json.loads", side_effect=MemoryError):
@@ -1668,6 +1689,7 @@ class FindingsFixedOneByOne(Scratch):
     def signature(self, facts, **fields):
         return input_signature(facts, **fields)
 
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "no FIFO on this platform (Windows): nothing can be swapped in to block a read")
     def test_a_pipe_swapped_in_after_the_stat_does_not_block(self):
         pipe = self.folder / "pipe.json"
         os.mkfifo(pipe)
