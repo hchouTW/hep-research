@@ -19,6 +19,7 @@ import hashlib
 import io
 import json
 import math
+import platform
 import shutil
 import subprocess
 import sys
@@ -868,6 +869,9 @@ class TwoSourceHarness(unittest.TestCase):
         ("timed", "dead"): ("9108ff60cf01611037cba752f8615339ed0375b37e2a4843fb07188f0b6b4413", "177382c40fe41ff7ec0c51e51a6b1c842191de67740d75d6a42a58392e37aead"),
         ("timed", "saturation"): ("a9fcf64b4bd04a151fd3df644ce4d46322b3c4cf8989cee17a218ce06848f114", "14eef0581dd3f8980ba4ee91521f14cacf0c147c4596fc50f56a27797413ef19")}
 
+    @unittest.skipUnless(platform.system() == "Linux" and platform.libc_ver()[0] == "glibc",
+                         "the pins are the bytes of values from Python's math module (the C library's exp, cos, sqrt), pinned on Linux "
+                         "with glibc; macOS's libm rounds some of them otherwise (macOS CI run of PR #411)")
     def test_main_dead_and_saturation_outputs_are_unchanged(self):
         for (name, fixture), want in self.PINNED.items():
             gen = stage1.HandMadeGenerator() if name == "stage1" else stage3.TimedGenerator()

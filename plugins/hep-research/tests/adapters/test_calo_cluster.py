@@ -531,9 +531,22 @@ class Edge(unittest.TestCase):
         self.assertLess(cluster.energy, 2000.0 * 0.70)      # E Phi(0.5) = 0.6915 E is all the grid holds
 
 
+def mirrored_g_axis(i, c):
+    """g_axis with the cell's edges read from the side nearer the centre: a cell and its mirror image about c evaluate the same
+    expression, so their values are equal to the last bit on any C library. g_axis's own Phi((i + 1 - c)/W) - Phi((i - c)/W) equals
+    the mirror's only where 1 + erf rounds alike on both sides (glibc here; macOS's libm not, CI run of PR #411)."""
+    lower, upper = (i - c) / W, (i + 1 - c) / W
+    if lower + upper < 0:
+        lower, upper = -upper, -lower
+    return phi_cdf(upper) - phi_cdf(lower)
+
+
 class DeadCellInShower(unittest.TestCase):
+    """A shower centred on the dead cell (20, 20), imaged with mirrored_g_axis so that its four edge neighbours tie exactly, which the
+    two-peak case below needs."""
+
     def setUp(self):
-        self.grid = image([(2000.0, 20.5, 20.5)])
+        self.grid = [[2000.0 * mirrored_g_axis(ix, 20.5) * mirrored_g_axis(iy, 20.5) for iy in range(N)] for ix in range(N)]
         self.grid[20][20] = None
         self.result = run(self.grid)
 

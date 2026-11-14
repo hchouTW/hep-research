@@ -397,6 +397,18 @@ class ToleranceComparison(unittest.TestCase):
         self.assertEqual(self.differences("topology", shift_h2(0.5)), [])
         self.assertTrue(self.differences("topology", shift_h2(2.0)))
 
+    def test_a_rerun_topology_product_names_its_own_multistart_product(self):
+        # off the platform the rerun's /3 differs in its last bits, so the rerun's /4 names another /3 (CI fix round of PR #411)
+        kept = self.text["topology"]
+        named = json.loads(kept.splitlines()[0])["h1_product"]["sha256"]
+        rerun = self.planted("topology", lambda d: d[0]["h1_product"].update(sha256="1" * 64))
+        self.assertTrue(self.example.compare_products(kept, rerun))                       # without the two /3: the header exactly
+        self.assertEqual(self.example.compare_products(kept, rerun, (named, "1" * 64)), [])
+        self.assertTrue(self.example.compare_products(kept, rerun, (named, "2" * 64)))    # not the rerun's own /3
+        self.assertTrue(self.example.compare_products(kept, rerun, ("2" * 64, "1" * 64)))  # not the recorded /3
+        renamed = self.planted("topology", lambda d: d[0]["h1_product"].update(product_id="another"))
+        self.assertTrue(self.example.compare_products(kept, renamed, (named, named)))     # the rest of the header still exactly
+
     def test_a_discrete_difference_is_never_within_a_tolerance(self):
         self.assertTrue(self.differences("topology", lambda d: d[1]["topology"].update(choice="H1")))
         self.assertTrue(self.differences("multistart", lambda d: d[1]["fit"].update(status="failed")))
@@ -424,11 +436,12 @@ class LiveRun(unittest.TestCase):
                         self.assertEqual((folder / "output" / path.name).read_bytes(), path.read_bytes())
             else:                                                     # elsewhere the stated tolerances
                 for stem, *_ in run.SAMPLES:
+                    h1_sha256 = tuple(sha256(where / f"{stem}.multistart.product") for where in (RECORDED, folder / "recorded"))
                     for kind in ("multistart", "topology"):
                         with self.subTest(product=f"{stem}.{kind}"):
                             mine = (folder / "recorded" / f"{stem}.{kind}.product").read_text(encoding="utf-8")
                             kept = (RECORDED / f"{stem}.{kind}.product").read_text(encoding="utf-8")
-                            self.assertEqual(run.compare_products(kept, mine), [])
+                            self.assertEqual(run.compare_products(kept, mine, h1_sha256 if kind == "topology" else None), [])
 
 
 if __name__ == "__main__":

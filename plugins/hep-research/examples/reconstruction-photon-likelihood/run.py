@@ -48,8 +48,9 @@ the tolerances below, fixed before any run and never moved after a result (TOLER
   same decrement bound puts each converged point within sqrt(d) <= 1e-4 sigma of the maximum, so two fits differ by at most 2e-4 sigma;
   1e-3 is a factor of 5 above it. A fit without a covariance (uncertainty status not ok) has no sigma: its parameters are not compared,
   its status, ln L and the choices are.
-- everything discrete exactly: the header and end lines, the data (states, counts, hits), every status, failure kind and uncertainty
-  status, the chosen start, H2's reported start where the choice uses H2's point, the source of lnL_2, the choice, the probability
+- everything discrete exactly: the header and end lines (except that a /4 header names its own side's /3 by SHA-256: the recorded /3,
+  or the rerun's, whose last bits may differ), the data (states, counts, hits), every status, failure kind and uncertainty status,
+  the chosen start, H2's reported start where the choice uses H2's point, the source of lnL_2, the choice, the probability
   check's failures. The starts that were not chosen and the seeds are not compared off the platform: the reported fits are the result.
 The output (summary.json, report.md) does not depend on the mode; the run's JSON on stdout names it.
 
@@ -174,16 +175,25 @@ def _fit_differences(where: str, kept: dict, again: dict, h2: bool) -> list:
     return _parameter_differences(where, kept_sources, again_sources, covariance)
 
 
-def compare_products(kept_text: str, again_text: str) -> list:
+def compare_products(kept_text: str, again_text: str, h1_sha256: tuple | None = None) -> list:
     """Check 9 off the recording's platform: the differences between a recorded /3 or /4 and the recipe's rerun beyond TOLERANCES
-    (docstring); an empty list when the rerun reproduces the recorded product."""
+    (docstring); an empty list when the rerun reproduces the recorded product. h1_sha256, for a /4: the SHA-256 of the recorded /3
+    and of the rerun's own /3. Off the platform the rerun's /3 differs in its last bits, so the rerun's /4 names another /3: each
+    /4 header must name its own side's /3, and the rest of the header is equal (CI fix round, PR #411)."""
     kept, again = ([json.loads(line) for line in text.splitlines()] for text in (kept_text, again_text))
     if len(kept) != len(again):
         return [f"{len(kept)} lines recorded, {len(again)} rerun"]
     out = []
-    for name, i in (("header", 0), ("end line", -1)):
-        if kept[i] != again[i]:
-            out.append(f"the {name} differs")
+    headers = [kept[0], again[0]]
+    if h1_sha256 is not None:
+        named = [(header.get("h1_product") or {}).get("sha256") for header in headers]
+        if named != list(h1_sha256):
+            out.append("the header does not name its own multistart product")
+        headers = [{**header, "h1_product": {**(header.get("h1_product") or {}), "sha256": None}} for header in headers]
+    if headers[0] != headers[1]:
+        out.append("the header differs")
+    if kept[-1] != again[-1]:
+        out.append("the end line differs")
     for a, b in zip(kept[1:-1], again[1:-1]):
         where = f"event {a.get('event')}"
         for key in ("event", "states", "counts", "hits"):
@@ -237,6 +247,18 @@ def placeholders(text: str, work: Path) -> str:
     return text
 
 
+def placeholders_in(value, work: Path):
+    """placeholders in every string of a decoded report. Not on its JSON text: json.dumps escapes a non-ASCII or backslashed folder
+    name (a folder named with Chinese characters becomes \\u escapes), which then no longer matches (hostile-paths, CI fix round of PR #411)."""
+    if isinstance(value, str):
+        return placeholders(value, work)
+    if isinstance(value, list):
+        return [placeholders_in(item, work) for item in value]
+    if isinstance(value, dict):
+        return {key: placeholders_in(item, work) for key, item in value.items()}
+    return value
+
+
 def product_paths(folder: Path, stem: str) -> tuple:
     return folder / f"{stem}.multistart.product", folder / f"{stem}.topology.product"
 
@@ -262,7 +284,7 @@ def recipe_run(stem: str, arguments: list, work: Path) -> dict:
     except ValueError:
         report = {"operation": arguments[0], "status": "error", "reason": f"the recipe wrote no report: {finished.stderr[-500:]}"}
     kept = {key: value for key, value in report.items() if key not in DROPPED_FIELDS}
-    kept = json.loads(placeholders(json.dumps(kept, sort_keys=True), work))
+    kept = json.loads(json.dumps(placeholders_in(kept, work), sort_keys=True))
     kept["sample"] = stem
     kept["exit_code"] = finished.returncode
     kept["command"] = [placeholders(str(token), work) for token in [sys.executable, "-I", "-B", str(RECIPE_CLI), *arguments]]
@@ -314,12 +336,16 @@ def rerun_products(recorded: Path, same_platform: bool) -> bool:
             for operation in ("fit", "topology"):
                 if run_recipe(arguments[operation]).returncode != 0:
                     return False
-            for again, kept in zip(product_paths(folder, stem), product_paths(recorded, stem)):
+            (h1_again, h2_again), (h1_kept, h2_kept) = product_paths(folder, stem), product_paths(recorded, stem)
+            for again, kept in ((h1_again, h1_kept), (h2_again, h2_kept)):
                 if not again.is_file():
                     return False
                 if same_platform and again.read_bytes() != kept.read_bytes():
                     return False
-                if not same_platform and compare_products(kept.read_text(encoding="utf-8"), again.read_text(encoding="utf-8")):
+            if not same_platform:
+                h1_sha256 = (sha256_bytes(h1_kept.read_bytes()), sha256_bytes(h1_again.read_bytes()))
+                if compare_products(h1_kept.read_text(encoding="utf-8"), h1_again.read_text(encoding="utf-8")) or \
+                        compare_products(h2_kept.read_text(encoding="utf-8"), h2_again.read_text(encoding="utf-8"), h1_sha256):
                     return False
     return True
 

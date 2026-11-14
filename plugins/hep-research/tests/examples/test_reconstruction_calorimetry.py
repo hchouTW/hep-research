@@ -16,6 +16,7 @@ import io
 import json
 import math
 import os
+import platform
 import re
 import shutil
 import tempfile
@@ -31,6 +32,21 @@ EXPECTED_OUTPUT = Path(os.environ.get("HEP_T08_EXAMPLE_OUTPUT", EXAMPLE / "outpu
 HOST_PATH = re.compile(r"/ceph|/var/tmp|/tmp/|/dicos|/home/|hpa-wn")
 GENERATOR = os.environ.get("HEP_T08_GENERATOR", "")
 N = 40
+RERUN = "the recipe run again on the recorded cells writes the recorded product"
+
+
+def blas_of_numpy() -> str:
+    return numpy.show_config(mode="dicts")["Build Dependencies"]["blas"]["name"]
+
+
+# The rerun check is byte for byte (run.py). The recipe's two-peak covariance goes through BLAS and LAPACK (clustering.py: the matmul
+# jacobian.T @ ..., cho_factor), so its last bits are the kernels': equal on x86-64 with NumPy's OpenBLAS whatever the dispatch
+# (AVX-512 or AVX2; OpenBLAS SkylakeX, Haswell or Zen kernels: the CI fix round of PR #411), other with OpenBLAS's pre-FMA Prescott
+# kernel and on macOS arm64 (Accelerate, NEON), where that check fails and the committed output is not reproduced. A stated limit of the
+# example, not a tolerance: off these platforms only the other checks are required to pass.
+REPLAY_PLATFORM = platform.machine() in ("x86_64", "AMD64") and blas_of_numpy() == "scipy-openblas"
+OFF_PLATFORM = (f"the byte-for-byte rerun holds on x86-64 with NumPy's OpenBLAS; here {platform.machine()} with BLAS "
+                f"{blas_of_numpy()!r}, whose kernels round the two-peak covariance otherwise")
 
 
 def load():
@@ -78,6 +94,7 @@ class OfflineReplay(unittest.TestCase):
         cls.out = Path(cls.folder.name) / "output"
         cls.code = quiet(cls.example.main, ["--out", str(cls.out), "--recorded", str(RECORDED)])
 
+    @unittest.skipUnless(REPLAY_PLATFORM, OFF_PLATFORM)
     def test_the_replay_reproduces_the_committed_output(self):
         self.assertEqual(self.code, 0)
         self.assertEqual(sorted(path.name for path in self.out.iterdir()), sorted(path.name for path in EXPECTED_OUTPUT.iterdir()))
@@ -88,7 +105,9 @@ class OfflineReplay(unittest.TestCase):
     def test_every_check_passes_and_nothing_is_claimed(self):
         summary = json.loads((self.out / "summary.json").read_text(encoding="utf-8"))
         self.assertTrue(summary["checks"])
-        self.assertEqual([item["check"] for item in summary["checks"] if not item["passed"]], [])
+        self.assertIn(RERUN, [item["check"] for item in summary["checks"]])
+        failed = [item["check"] for item in summary["checks"] if not item["passed"]]
+        self.assertEqual(failed, [] if REPLAY_PLATFORM else [check for check in failed if check == RERUN], OFF_PLATFORM)
         self.assertEqual(summary["data"], "synthetic")
         self.assertTrue(summary["quality_claim"].startswith("none"))
         self.assertEqual((summary["generator"], summary["generator_sha256"]), ("t08-grid/1", self.example.FROZEN_GENERATOR_SHA256))

@@ -417,11 +417,24 @@ class EdgeOfTheDomain(unittest.TestCase):
         self.assertGreater(numpy.linalg.norm(res.vertex), self.EDGE - 1e-6)
 
     def test_charge_only_fit_against_the_yield_edge(self):
+        """Round 1 ends on the yield bound itself (sum mu = likelihood.YIELD_DOMAIN to the last bit, read on login). Whether round 2's
+        re-centred start, the same point in the new chart, is inside the domain is then the last bit of a sum of exp and pow terms. On login
+        (AVX-512) it is inside, with NumPy's AVX-512 kernels or OpenBLAS's SkylakeX kernel: not-converged, the decrement far above the
+        tolerance. With neither (NumPy's AVX2 and libm paths and OpenBLAS's Haswell or Zen kernel, as on GitHub's runners; reproduced with
+        NPY_DISABLE_CPU_FEATURES and OPENBLAS_CORETYPE in the CI fix round of PR #411) it is outside: non-finite after one round, no point kept. Either way the fit fails and is never read as
+        converged, which is what this case is for."""
         state, charge, e_vis = stage1.noise_free_event((1.2, -0.8, 0.6), unit((0.3, -0.5, 0.8)), 2e5)
         start = fit.Seed(numpy.array((1.2, -0.8, 0.6)), numpy.array(unit((0.3, -0.5, 0.8))), e_vis / 4)
         res = fit.fit_event(MODEL, stage1.event_from(state, charge), start=start)
-        self.assertEqual((res.status, res.failure), ("failed", "not-converged"))
-        self.assertGreater(res.newton_decrement, 1e3 * fit.DECREMENT_TOL)
+        self.assertEqual(res.status, "failed")
+        self.assertIn(res.failure, ("not-converged", "non-finite"))
+        if res.failure == "not-converged":
+            self.assertGreater(res.newton_decrement, 1e3 * fit.DECREMENT_TOL)
+            m = likelihood.Objective(MODEL, stage1.event_from(state, charge), res.direction)._m_gradient(
+                numpy.r_[res.vertex, 0.0, 0.0, res.e_vis])[0]
+            self.assertAlmostEqual(float((m - MODEL.dark).sum()) / likelihood.YIELD_DOMAIN, 1.0, delta=1e-9)   # on the yield bound
+        else:                              # round 2's start fell outside: one round run, no point recorded
+            self.assertEqual((res.rounds, res.vertex, res.newton_decrement), (1, None, None))
 
     def test_joint_fit_against_the_t0_edge(self):
         truth, direction = (1.2, -0.8, 0.6), unit((0.3, -0.5, 0.8))
