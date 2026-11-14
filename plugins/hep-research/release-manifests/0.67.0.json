@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 5010,
- "digest": "88f7ddd273561928fb364f32e6070d4adcf45050dbb019f72271c3caa5a152d3",
+ "digest": "2e5320caf7f22450caa0c19eabfd53da04a3aab5611a1939a5e922d24acc2327",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -45,14 +45,14 @@
   },
   {
    "path": "README.md",
-   "sha256": "6aeb6b04f11439278f2bda44fadb12c440c4eb070fb37fe230e6c659988a0606",
-   "size": 27118,
+   "sha256": "3fbf5b54d76f461a9ba2dad3e28c7b1bd2254eb2dffc5262e2591487cf67bb89",
+   "size": 27272,
    "mode": "100644"
   },
   {
    "path": "VALIDATION.md",
-   "sha256": "a1f3bb18ff7724ebc13dba112eeb0fefbd038eab833566d416063f772309527b",
-   "size": 1016948,
+   "sha256": "2bfb8d04b248df24bbf4cf8d230240fc7b93dd44e141b03d176117a041d95009",
+   "size": 1017568,
    "mode": "100644"
   },
   {
@@ -9165,7 +9165,7 @@
   },
   {
    "path": "docs/dev/simulator-calibration/simcal-status.json",
-   "sha256": "c783b3f646384c36bd9d762a42fe306cd6016ddc3468cea34c6acba8f12e8438",
+   "sha256": "61cc9e1fe638e44f4bbf75515def446bac4c17f4e510ed8d7ae17c36d3934458",
    "size": 4598,
    "mode": "100644"
   },
@@ -9207,8 +9207,8 @@
   },
   {
    "path": "docs/dev/simulator-calibration/simcal-tasks/phase-4.md",
-   "sha256": "2328468535d5833c608d068f74d86c06ce7505d9281b37770f6c12c958ed375b",
-   "size": 27455,
+   "sha256": "48fcfc9ea0b78675f5e247fb01d318f30ec6be83a30a62603077b93b44710375",
+   "size": 27602,
    "mode": "100644"
   },
   {
