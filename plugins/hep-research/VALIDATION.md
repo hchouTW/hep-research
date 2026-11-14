@@ -9039,6 +9039,27 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.67.0 release check (2026-11-14, CI and the login-host conda environment)
+
+Release commit `2824169a` on `release/0.67.0`, based on main `af9e05ab` (simcal phase 4 merged, PR #407). Minor release: the simulator parameter calibration workflow, phases 0 to 4 (PRs #385, #386, #396, #400, #401, #403, #404, #406, #407; gate records `docs/dev/simulator-calibration/simcal-gates/phase-0.md` to `phase-4.md`), and the hep-detector method-text additions (PR #402 and the later Unreleased entries).
+
+What changed on the release branch:
+- version 0.67.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; `CORE_VERSION` 1.14.0 (`core/calibration/`); `adapters/geant4` 0.16.0 (`g4sim_calib_eval.py`, the calibration evaluator; its unit tests run in CI and in the checks below; its Geant4 production paths ran on Slurm in simcal phase 3 with `g4sim_run-build28`); contracts 3.27.0 unchanged (the calibration schemas carry their own `calibration-*/1` versions);
+- a CHANGELOG `0.67.0` section (the former `Unreleased` entries); simcal phase 4 status `merged`.
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #407 at `156e4fa6` | success (29 pass, 3 skipped) |
+| CI `tests.yml` on PR #408 at `2824169a` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4` at `2824169a`, login host (conda env `ml`, Python 3.13.2, NumPy 2.2.2, uproot 5.5.2), `TMPDIR` on a private local folder under `/var/tmp` | 32 pass, 2 fail (the aggregating rows `unittest` and `ams_optional`, below); 7942 tests, 1 failure, 0 errors, 306 skipped, 1365 s |
+| `check_relocation.py --jobs 4`, same environment and `TMPDIR` | 31 pass, 2 fail (the same two rows), 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7942 tests, 1 failure, 323 skipped |
+
+The one failing test, `tests.skills.hep_computing.test_event_display_templates.PythonPipeline.test_export_bundle_check`, is environment-only: this environment's uproot reads the demo file's branches as `trk_x` where the mapping example names `trk.x`. It fails identically on the published 0.66.1 bundle (`git archive hep-research--v0.66.1`) in the same environment, and passes in CI. **E2, E5 and E6 were not run for this release**; the Geant4 evidence of the calibration workflow is in its phase-3 gate record (Slurm, NSTCCore), and no GPU path changed.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.66.1 release check (2026-11-12, CI and E6)
 
 Release commit `6e0ccaf1` on `release/0.66.1`, based on main `09403241` (PRs #391 and #392 merged). Patch release: the hep-detector reference `dis-kinematic-reconstruction.md`, `experiment:eic` 0.6.1 and two EIC routing cases (issues #388, #389). Contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged.
