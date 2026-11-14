@@ -717,6 +717,58 @@
   "pde_split": {
    "type": "object",
    "$comment": "section 6.7 PDE split (g4sim): {parameters, model: scale | table, applied_as, table: {energy_eV, value}, angle_dependent, ties, sensor_surfaces, map_mode}; core/calibration/pde_split.contract_findings"
+  },
+  "pooling": {
+   "type": "object",
+   "required": [
+    "segments"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "segments": {
+     "type": "array",
+     "minItems": 2,
+     "items": {
+      "type": "object",
+      "required": [
+       "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "conditions": {
+        "type": "object",
+        "$comment": "the segment's scope: a region in the condition space (section 3.7)"
+       }
+      }
+     }
+    },
+    "parameters": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "link": {
+        "enum": [
+         "identity",
+         "log",
+         "logit"
+        ]
+       },
+       "tau_bound": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       }
+      }
+     },
+     "$comment": "per pooled theta (index.conditioning partial-pooling): the link space of the pooling (default identity) and the upper end of the tau_pool search range in link units (default: the link-space width of the sampling range)"
+    }
+   },
+   "$comment": "section 3.7 partial pooling (phase 5, approval A25 (6)): theta_s ~ N(theta_bar, tau_pool^2) per pooled theta in link space, tau_pool by REML; core/calibration/pooling.contract_findings"
   }
  },
  "$comment": "calibration-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. calib_contract.py check applies the rules of section 5.2."

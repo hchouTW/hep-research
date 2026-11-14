@@ -508,6 +508,11 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
                                                      contract.get("parameters", []) for b in p.get("bindings") or []):
         from core.calibration import pde_split    # section 6.7 "Rejected" (NumPy/SciPy: only for a PDE split)
         out.extend(pde_split.contract_findings(contract))
+    if contract.get("pooling") is not None or any(
+            isinstance(p, dict) and isinstance(p.get("index"), dict) and p["index"].get("conditioning") == "partial-pooling"
+            for p in contract.get("parameters") or []):
+        from core.calibration import pooling      # section 3.7 partial pooling (phase 5, A25): opt-in declaration
+        out.extend(pooling.contract_findings(contract))
     if identities is not None:
         out.extend(identity_findings(contract, identities))
     samples = _samples(contract, out, releases)
