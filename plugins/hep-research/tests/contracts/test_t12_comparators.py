@@ -447,6 +447,40 @@ class QualityBeforeSpeed(unittest.TestCase):
             self.report([cmp.Candidate("dup", self.baseline_pulls, cmp.SealedTiming(1.0)),
                          cmp.Candidate("dup", self.variant_pulls, cmp.SealedTiming(2.0))])
 
+    def test_carried_a_gate_belongs_to_its_candidates_pulls(self):
+        """Carried minor (stage 4A M3 re-check): gate_record refuses a gate computed on another sample; the passed baseline gate does not
+        release the failing variant's timing."""
+        timing = cmp.SealedTiming(6.0)
+        variant = cmp.Candidate("variant", self.variant_pulls, timing)
+        with self.assertRaises(cmp.ComparatorInputError):
+            cmp.gate_record(variant, self.baseline_gate)
+        with self.assertRaises(cmp.ComparatorInputError):
+            cmp.gate_record(cmp.Candidate("short", self.baseline_pulls[:-1], cmp.SealedTiming(1.0)), self.baseline_gate)
+        same = cmp.Candidate("copy", self.baseline_pulls.copy(), cmp.SealedTiming(2.0))   # equal values, another array: the same sample
+        self.assertTrue(cmp.gate_record(same, self.baseline_gate).passed)
+
+    def test_carried_the_gate_word_is_read_from_the_three_results(self):
+        """Carried minor: a gate dict whose word was edited to pass still gives a failed record (the word follows centre, width, tail)."""
+        variant = cmp.Candidate("variant", self.variant_pulls, cmp.SealedTiming(6.0))
+        record = cmp.gate_record(variant, dict(self.variant_gate, word="pass", passed=True))
+        self.assertEqual((record.word, record.passed), ("fail", False))
+        with self.assertRaises(cmp.ComparatorInputError):
+            variant.timing.release(record)
+
+    def test_carried_a_gate_record_is_immutable(self):
+        """Carried minor: no field of a record gate_record made can be changed or deleted, so a failed record cannot be turned into a pass."""
+        timing = cmp.SealedTiming(6.0)
+        variant = cmp.Candidate("variant", self.variant_pulls, timing)
+        record = cmp.gate_record(variant, self.variant_gate)
+        for field_name, value in (("passed", True), ("word", "pass"), ("candidate", variant), ("complete", True)):
+            with self.assertRaises(AttributeError, msg=field_name):
+                setattr(record, field_name, value)
+            with self.assertRaises(AttributeError, msg=field_name):
+                delattr(record, field_name)
+        self.assertEqual((record.word, record.passed), ("fail", False))
+        with self.assertRaises(cmp.ComparatorInputError):
+            timing.release(record)
+
     def test_n4_the_working_point_is_declared_before_the_gate(self):
         candidate = cmp.Candidate("v", self.variant_pulls, cmp.SealedTiming(6.0))
         with self.assertRaises(dataclasses.FrozenInstanceError):

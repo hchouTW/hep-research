@@ -172,8 +172,17 @@ class Transcription(unittest.TestCase):
             right = solver._zero_sum(solver._sum_baselines(stream, solver._project_out_sky(stream, stream.value)))
             found = math.sqrt(float(((solver._zero_sum(right - solver.reduced_operator(stream, solution.baselines))) ** 2).sum()))
             found /= math.sqrt(float((right ** 2).sum()))
-            # 1e-6 relative, with an absolute floor of 1e-13 for a residual at the rounding floor (u kappa: about 1e-15 to 1e-14)
-            self.assertLessEqual(abs(found - solution.relative_residual), 1e-6 * found + 1e-13, name)
+            # Carried minor (stage 5 re-review): the old absolute floor of 1e-13 made this check nearly vacuous for the frozen pointings,
+            # whose stopping values (1e-10, 1e-13) end at the rounding floor (both residuals about 2e-16; u kappa about 1e-15 to 1e-14;
+            # there the two summation orders differ by about 20 % relative). Now: (a) the recomputed residual itself meets the stopping
+            # value, an independent check of convergence; (b) above 1e-12, where the stopping value leaves the residual well above the
+            # rounding floor (the 2,048-sample scan ends near 1.3e-11), a purely relative 1e-6 agreement; (c) at the rounding floor, an
+            # absolute 1e-14 (u kappa's upper end), not 1e-13. The iteration trajectory test covers the frozen pointings step by step.
+            self.assertLessEqual(found, stopping, name)
+            if found > 1e-12:
+                self.assertLessEqual(abs(found - solution.relative_residual), 1e-6 * found, name)
+            else:
+                self.assertLessEqual(abs(found - solution.relative_residual), 1e-14, name)
 
     def test_the_restart_branch_is_reached_alike(self):
         """Stopping 1e-17 on the frozen pointing lies below the rounding floor: the recurrence collapses and both paths restart (the

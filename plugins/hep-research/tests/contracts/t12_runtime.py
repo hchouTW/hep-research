@@ -90,8 +90,8 @@ SCENARIOS = {
             "run_time": "gap", "backend": None, "families": ["F35"],
             "reason": "no backend reads averaged or filtered spectra: F35 (HAYSTAC averaged spectra) has binding none"},
     "A32": {"scenario": "Cuts/cleaning/model/multiplicity change: downstream IRFs cannot be reused without checks",
-            "run_time": "executed", "backend": "adapters/calo-cluster/assets/calo_cluster.py", "families": ["F15", "F16 (T08)"],
-            "reason": None,
+            "run_time": "executed", "check_side": "harness", "backend": "adapters/calo-cluster/assets/calo_cluster.py",
+            "families": ["F15", "F16 (T08)"], "reason": None,
             "guard": "E32: the T08 accounting tool holding the frozen configuration refuses the variant's product; E32R: a response built by "
                      "skills/hep-detector/scripts/build_response.py from frozen-configuration products is refused against the variant's "
                      "product by the harness's pairing check (build_response.py records no structured identity); stage 2's R4 (T12-25) "
@@ -484,13 +484,14 @@ CONFIGURATION_IN_PROVENANCE = re.compile(r"configuration sha256 ([0-9a-f]{64})")
 
 def response_pairing(artifact_path: Path, product_path: Path) -> dict:
     """The harness's pairing check: a response is used with a product only when the configuration identity its provenance names is the
-    product's own; a response that names none is unbound and refused."""
+    product's own; a response that names none, or more than one (carried minor, stage 7 re-review), is unbound and refused."""
     artifact = json.loads(Path(artifact_path).read_text(encoding="utf-8"))
     found = CONFIGURATION_IN_PROVENANCE.findall(str(artifact.get("extension", {}).get("provenance", "")))
     product_configuration = product_header(product_path)["configuration"]["sha256"]
     if len(found) != 1:
-        return {"accepted": False, "reason": "unbound: the response names no configuration identity", "response_configuration": None,
-                "product_configuration": product_configuration}
+        reason = ("unbound: the response names no configuration identity" if not found else
+                  f"unbound: the response names {len(found)} configuration identities, not exactly one")
+        return {"accepted": False, "reason": reason, "response_configuration": None, "product_configuration": product_configuration}
     accepted = found[0] == product_configuration
     reason = "" if accepted else (f"the response was built from products of configuration {found[0]}; this product was made with "
                                   f"configuration {product_configuration}: refused")

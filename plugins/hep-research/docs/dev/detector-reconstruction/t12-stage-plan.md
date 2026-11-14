@@ -467,6 +467,12 @@ paragraph; `jobs/t12-stage3/plan-at-green-14100006.md`). Change 1, after green-3
 the edits marked "fix round 1" in this section (m4, n2, m2, I1, I2, m1, P7, m3, n3, m6, concern 4, concern 2, this record), made after
 red-3 and before green; the hash at the fix round's green run is in `jobs/t12-stage3/green/green-*-fix-round-1.log`.
 
+### Stage 3, carried minors (re-review `jobs/t12-stage3/REREVIEW.md`; branch `t12/carried-minors`, red first in `jobs/t12-minors/red/`)
+
+- `exposure()` sorts the gap spans on (first, end) only, so two equal spans with scope None and a string are refused as an overlap, never a
+  TypeError (`CarriedMinors`, red: TypeError).
+- A gap's first and count are integers, never bools, and first >= 0 (first True, first -1, count True refused; red: not raised).
+
 ## Stage 4: comparators and quality before speed (fixed before the tests were written)
 
 **Split.** Part A takes T12-13 (§14.1) and T12-15 (A15, A50, §16.1 "quality before speed"), on branch `t12/stage4` from `28763f50`
@@ -680,6 +686,14 @@ throughput. Cold and warm apart (K12, t04-values-v4.md §12: no targets; numbers
 for a recipe before its quality gate (T12-15); these CPU numbers are what T12-17 records beside A13. It needs stage 3's partition and
 accounts (T12-10 to T12-12) and its own job approval.
 
+### Stage 4, carried minors (M3 re-check addendum of `jobs/t12-stage4/REREVIEW.md`; branch `t12/carried-minors`)
+
+- `fixed_gate` records the SHA-256 of the sample it gated (`pulls_sha256`); `gate_record` recomputes the digest of the candidate's pulls
+  and refuses a gate computed on another sample, and derives the record's word from the three results, never from the gate's `word` or
+  `passed` (red: the baseline gate gave the variant a passed record).
+- `_GateRecord` is immutable (no field set or deleted after `__init__`); a copy is an unregistered look-alike and releases nothing.
+  SealedTiming's private attributes stay writable (the usual Python limit, not taken).
+
 ## Stage 5: A13 on the GPU, and T12-14 (fixed before the tests were written)
 
 **Authority and scope.** The user, 2026-11-13: "A13: GPU part: allow use GPU". A13 is reopened; Q1's answer ("Record
@@ -863,6 +877,13 @@ eigen-solver or a smaller size); the exact rational reference of the T10 replay 
 `jobs/a13-gpu/a13-pilot-r1.sh` (00:30:00) and `a13-measure-r1.sh` with `jobs/a13-gpu/SOURCES-r1.sha256`. The round-0 scripts and
 manifests are kept.
 
+### Stage 5, carried minors (re-review `jobs/t12-stage5/REREVIEW.md`; branch `t12/carried-minors`)
+
+- The noiseless (and noisy) frozen residual check was nearly vacuous under the 1e-13 floor (both residuals end near 2e-16). The test now
+  asks that the recomputed residual meets the stopping value, a purely relative 1e-6 agreement above 1e-12 (the scan case), and an
+  absolute 1e-14 at the rounding floor; red: two harness mutants (reported residual + 5e-14, stopping loosened 1000x) pass the old
+  check and fail the new (`jobs/t12-minors/red/red-4-a13.log`). Test only; the harness is unchanged.
+
 ## Stage 6: A37 and §9.6 in T12 (fixed before the tests were written)
 
 **Scope.** T12-18 (the g×E degeneracy) and T12-19 (the weak-mode witness), A37 and §9.6 as R31 keeps them in T12. Both are
@@ -1019,6 +1040,11 @@ Job 7636529 failed only on `tests.adapters.test_t04_evaluation_layout.TaskDeadli
 - **n2.** The nominal sidecar's planes come from the nominal geometry text (`planes N` of `nominal_geometry_text()`), not a literal 8.
 - n1 (W6 restates part of W4) and n3 (`visible-chi2` run natively) are not taken: W6 keeps its own statement (the χ²-only judge), and the
   χ² side's power is shown on toys.
+### Stage 6, carried minors (re-review `jobs/t12-stage6/REREVIEW.md`)
+
+- Job script only, no change in the tree: the ldd guard's `||` tests the loop's last pipeline, not `ldd` (the later "not found" grep
+  catches a failure). The next stage-6 job checks `ldd`'s own status (`PIPESTATUS`, or `ldd` run alone before the loop's grep).
+
 ## Stage 7: A26-A36 at run time and A10 (fixed before the tests were written)
 
 **Scope.** T12-20 (R20: A26-A36 were designed in T11; T12 owes the run time: one executed case per scenario on a backend that covers it,
@@ -1152,6 +1178,13 @@ hour); that test is not edited, and the redrafted job (`t12-stage7-r1.sh`) asks 
 - **N2.** The A32 refusal must name the variant's and the frozen configuration identities in the accounting tool's words ("made with
   configuration V, not the one given (F)"); the zero-sum statement must equal the destriper's text exactly.
 - **N3.** E34's item count (11) is listed by name in the test.
+
+### Stage 7, carried minors (re-review `jobs/t12-stage7/REREVIEW.md`; branch `t12/carried-minors`)
+
+- The A32 record carries `check_side: "harness"` beside `run_time: "executed"` (only A32 has the field). No stage-7 job is redrafted, so
+  no job's expected record changes; a later stage-7 job must add the field to its expected A32 entry.
+- `response_pairing`: a provenance with more than one configuration string binds to none (refused as unbound, reason "names N
+  configuration identities, not exactly one"), even when the strings are the product's own; tested on a hand-made artifact (red: reason).
 
 ## A13: reopened by the user (stage 5)
 

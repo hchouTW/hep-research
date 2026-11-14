@@ -489,27 +489,58 @@ def fixed_gate(pulls) -> dict:
     words = [record.result for record in (centre, width, tail)]
     word = "fail" if "fail" in words else ("inconclusive" if "inconclusive" in words else "pass")
     return {"centre": centre, "width": width, "tail": tail, "word": word, "passed": word == "pass", "objects": int(values.size),
-            "without_result": int(missing.sum())}
+            "without_result": int(missing.sum()), "pulls_sha256": pulls_digest(pulls)}
+
+
+def pulls_digest(pulls) -> str:
+    """The SHA-256 of the sample a gate is computed on (float64 values in order, with their count), so gate_record can tell whose gate it
+    is (carried minor of the stage 4A M3 re-check)."""
+    values = numpy.ascontiguousarray(numpy.asarray(pulls, dtype=float).ravel())
+    return hashlib.sha256(f"{values.size}:".encode() + values.tobytes()).hexdigest()
+
+
+def _word(results) -> str:
+    return "fail" if "fail" in results else ("inconclusive" if "inconclusive" in results else "pass")
 
 
 class _GateRecord:
     """A gate record (fix round 2, M3): made only by gate_record, which registers it in _ISSUED; release accepts a record only if this very
-    object (identity, not equality) was issued, so a dict, a copy or a look-alike releases nothing."""
+    object (identity, not equality) was issued, so a dict, a copy or a look-alike releases nothing. Immutable (carried minor): no field
+    can be set or deleted after __init__."""
     __slots__ = ("candidate", "complete", "word", "passed", "__weakref__")
 
     def __init__(self, candidate, word: str, passed: bool):
-        self.candidate, self.complete, self.word, self.passed = candidate, True, word, passed
+        for name, value in (("candidate", candidate), ("complete", True), ("word", word), ("passed", passed)):
+            object.__setattr__(self, name, value)
+
+    def __setattr__(self, name, value):
+        raise AttributeError(f"a gate record is immutable: {name} cannot be set")
+
+    def __delattr__(self, name):
+        raise AttributeError(f"a gate record is immutable: {name} cannot be deleted")
+
+    def __copy__(self):   # a copy is a look-alike: made here, never registered in _ISSUED, so it releases nothing
+        return _GateRecord(self.candidate, self.word, self.passed)
+
+    def __deepcopy__(self, memo):
+        return self.__copy__()
 
 
 _ISSUED: dict = {}   # id(record) -> record: the records gate_record made (kept alive, so an id is never reused while registered)
 
 
 def gate_record(candidate, gate: dict) -> _GateRecord:
-    """The record a timing is released against (M3): the candidate object itself and a gate whose three results exist with v4's words."""
+    """The record a timing is released against (M3): the candidate object itself and a gate whose three results exist with v4's words.
+    Carried minors (stage 4A M3 re-check): the gate must be the candidate's own (its pulls_sha256 equals the digest of candidate.pulls,
+    recomputed here), and the record's word is derived from the three results, never read from the gate's word or passed."""
     records = [gate.get(key) for key in ("centre", "width", "tail")]
     if any(record is None or record.result not in core.RESULT_WORDS for record in records):
         raise ComparatorInputError(f"the gate of {getattr(candidate, 'name', candidate)!r} is incomplete: no speed number before the quality gate")
-    record = _GateRecord(candidate, gate["word"], gate["passed"])
+    if gate.get("pulls_sha256") != pulls_digest(candidate.pulls):
+        raise ComparatorInputError(f"the gate given for {getattr(candidate, 'name', candidate)!r} was not computed on its pulls: a gate releases "
+                                   "only its own candidate's timing")
+    word = _word([record.result for record in records])
+    record = _GateRecord(candidate, word, word == "pass")
     _ISSUED[id(record)] = record
     return record
 
