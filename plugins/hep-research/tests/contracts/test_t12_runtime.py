@@ -99,6 +99,12 @@ class ScenarioTable(unittest.TestCase):
         self.assertIn("build_response.py", entry["guard"])
         self.assertNotIn("A32 IRF reuse", rt.p4_gaps())
 
+    def test_carried_a32_records_its_check_side(self):
+        """Carried minor (stage 7 re-review): the A32 record says the pairing check is the harness's (check_side), run_time stays executed."""
+        entry = rt.SCENARIOS["A32"]
+        self.assertEqual((entry["run_time"], entry.get("check_side")), ("executed", "harness"))
+        self.assertEqual([s for s, e in rt.SCENARIOS.items() if "check_side" in e], ["A32"])
+
     def test_a33_names_simreco_as_adjacent_not_a_cover(self):
         """Fix round 1, I2: F11 is bound to simreco (TOF times, beta), adjacent, not a cover."""
         reason = rt.SCENARIOS["A33"]["reason"]
@@ -268,6 +274,26 @@ class E32RResponseReuse(Scratch):
             self.assertIn(item, case["items"])
         self.assertTrue(all(case["items"].values()), case["items"])
         self.assertIn("variant_matrix_differs", case["readings"])
+
+
+class E32RPairingStrings(Scratch):
+    def test_carried_a_response_naming_two_configurations_is_refused_as_unbound(self):
+        """Carried minor (stage 7 re-review): a provenance with more than one configuration string binds to none, even when one or both
+        are the product's own identity; one string stays bound. Hand-made artifact and product header (no tool run)."""
+        own, other = FROZEN_CONFIGURATION_SHA256, "ab" * 32
+        product = self.folder / "header.product"
+        product.write_text(json.dumps({"configuration": {"sha256": own}}) + "\n", encoding="utf-8")
+        artifact = self.folder / "response.json"
+        for names in ((own, other), (other, own), (own, own)):
+            provenance = " and ".join(f"configuration sha256 {name}" for name in names)
+            artifact.write_text(json.dumps({"extension": {"provenance": provenance}}), encoding="utf-8")
+            found = rt.response_pairing(artifact, product)
+            self.assertFalse(found["accepted"], names)
+            self.assertIsNone(found["response_configuration"], names)
+            self.assertIn("unbound", found["reason"], names)
+            self.assertIn("2 configuration identities, not exactly one", found["reason"], names)
+        artifact.write_text(json.dumps({"extension": {"provenance": f"configuration sha256 {own}"}}), encoding="utf-8")
+        self.assertTrue(rt.response_pairing(artifact, product)["accepted"])
 
 
 # ================================================================ E34: null modes on the destriper

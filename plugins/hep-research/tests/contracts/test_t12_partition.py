@@ -591,5 +591,29 @@ class FixRound1(unittest.TestCase):
             self.assertEqual(verdicts[0], ("complete", []) if name == "intact" else ("missing", [1]), name)
 
 
+
+class CarriedMinors(unittest.TestCase):
+    """Carried from the stage 3 re-review (jobs/t12-stage3/REREVIEW.md): the gap checks of exposure()."""
+
+    GOOD = {"success": [0], "excluded": {1: "boundary"}, "failure": [], "unconfirmed": []}
+
+    def test_equal_spans_with_and_without_a_scope_are_an_overlap_not_a_crash(self):
+        """Minor (1): two gaps with the same span, one scope None and one a string, overlap; the sort never compares the scopes."""
+        for scopes in ((None, "x"), ("x", None)):
+            with self.assertRaises(tp.PartitionError, msg=scopes):
+                tp.exposure(self.GOOD, 2, gaps=[{"scope": scopes[0], "first": 10, "count": 5, "reason": "never recorded"},
+                                                {"scope": scopes[1], "first": 10, "count": 5, "reason": "never recorded"}])
+        seen = tp.exposure(self.GOOD, 2, gaps=[{"scope": None, "first": 10, "count": 5, "reason": "never recorded"},
+                                               {"scope": "x", "first": 15, "count": 5, "reason": "never recorded"}])
+        self.assertEqual(len(seen["original_gaps"]), 2)
+
+    def test_a_gap_span_is_a_non_negative_integer_never_a_bool(self):
+        """Minor (2): first True, first -1 and count True are refused; first 0 is accepted."""
+        for first, count in ((True, 5), (-1, 5), (0, True), (False, 5)):
+            with self.assertRaises(tp.PartitionError, msg=(first, count)):
+                tp.exposure(self.GOOD, 2, gaps=[{"scope": "x", "first": first, "count": count, "reason": "never recorded"}])
+        self.assertEqual(tp.exposure(self.GOOD, 2, gaps=[{"scope": "x", "first": 0, "count": 1, "reason": "never recorded"}])["source_events"], 2)
+
+
 if __name__ == "__main__":
     unittest.main()

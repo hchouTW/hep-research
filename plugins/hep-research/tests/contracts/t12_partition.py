@@ -424,17 +424,23 @@ DENOMINATOR_USE = {
 def exposure(accounts: dict, total: int, gaps=()) -> dict:
     """Counts per category and the exposure success / total: excluded, failed and unconfirmed events lower it; original gaps (never
     recorded) are listed apart with their observable scope and are not source events. Fix round 1, m1: the accounts must pass
-    check_accounts, and each gap needs a reason and a span (first, count) in the stream's own numbering that overlaps no other gap."""
+    check_accounts, and each gap needs a reason and a span (first, count) in the stream's own numbering that overlaps no other gap.
+    Carried minors (stage 3 re-review): first and count are integers, never bools, first >= 0; the spans are sorted on (first, end) only,
+    so equal spans with a scope None and a string are an overlap, not a TypeError."""
     defects = check_accounts(accounts, total)
     if defects:
         raise PartitionError(f"the accounts are inconsistent: {defects[:3]}")
+
+    def whole(value) -> bool:
+        return isinstance(value, int) and not isinstance(value, bool)
+
     spans = []
     for gap in gaps:
-        if not isinstance(gap, dict) or not str(gap.get("reason", "")).strip() or not isinstance(gap.get("first"), int) \
-                or not isinstance(gap.get("count"), int) or gap["count"] < 1:
-            raise PartitionError(f"a gap needs a reason and a span (first, count >= 1): {gap}")
+        if not isinstance(gap, dict) or not str(gap.get("reason", "")).strip() or not whole(gap.get("first")) or gap["first"] < 0 \
+                or not whole(gap.get("count")) or gap["count"] < 1:
+            raise PartitionError(f"a gap needs a reason and a span (first >= 0, count >= 1, both integers): {gap}")
         spans.append((gap["first"], gap["first"] + gap["count"], gap.get("scope")))
-    spans.sort()
+    spans.sort(key=lambda span: span[:2])
     for (a0, a1, sa), (b0, b1, sb) in zip(spans, spans[1:]):
         if b0 < a1:
             raise PartitionError(f"gaps {sa} and {sb} overlap")
