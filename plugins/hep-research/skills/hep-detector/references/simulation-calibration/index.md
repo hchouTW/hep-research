@@ -70,7 +70,6 @@ parameters it could not bind and why.
   stage (HCAL); no single-photoelectron injection before response stage 3 (ECAL).
 - Misalignment through `alignment-overlay/1` has no recorded run yet (D83 (7)); the RICH mirror is bound as a
   detector-spec parameter instead.
-- `chain.binding_row` classes every run-card physics field other than the reference list, EM option and
-  constructor, extra constructors and fast simulation as the continuous "geometry" row, including `/physics/pai`,
-  `/physics/xtr` and the optical process switches, which are discrete. The examples therefore enter the PAI choice
-  as a discrete model and bind no θ there.
+- The run-card physics fields `/physics/pai`, `/physics/xtr`, `/physics/optical` and `/physics/decay` are discrete
+  model choices: the g4sim binding refuses a θ bound there (phase 4, after this page's first version found them in
+  the continuous "geometry" row). The examples enter the PAI choice as a discrete model and bind no θ there.

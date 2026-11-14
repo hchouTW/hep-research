@@ -6,7 +6,7 @@
  "part_b": "section 11.4 (g4sim binding), section 12 row TRD",
  "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
  "notes": [
-  "The dE/dx model is a discrete model M: the two enumerated models differ in the run card's PAI entry. The g4sim binding does not list /physics/pai or /physics/xtr among the discrete run-card fields, so a theta bound there would be accepted as a resimulation row (reported as a binding finding).",
+  "The dE/dx model is a discrete model M: the two enumerated models differ in the run card's PAI entry. /physics/pai and /physics/xtr are discrete run-card fields: the g4sim binding refuses a theta bound there.",
   "Section 12's TR yield factor on node 1 has no g4sim field; the example uses the radiator foil thickness, a geometry parameter (resimulation).",
   "g4sim has no gas-avalanche stage kind; gas gain binds to the sensor stage gain (Inferred mapping)."
  ],

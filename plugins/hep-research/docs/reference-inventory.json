@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 58,
-   "bytes": 844740,
+   "bytes": 844704,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2178,7 +2178,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "d3ee1c15 2026-11-01"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/detector-systems-overview.md",
@@ -2772,7 +2772,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/ecal.md",
@@ -2786,7 +2786,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/hcal.md",
@@ -2814,13 +2814,13 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/index.md",
    "owner": "hep-detector",
-   "bytes": 5801,
-   "lines": 77,
+   "bytes": 5765,
+   "lines": 76,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/fixtures/projects/local_profile/local-profiles/exp-local/profile.json",
@@ -2939,7 +2939,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
@@ -2952,7 +2952,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/rich.md",
@@ -2965,7 +2965,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/tof.md",
@@ -2978,7 +2978,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/tracker.md",
@@ -2991,7 +2991,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/trd.md",
@@ -3004,7 +3004,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
@@ -4240,7 +4240,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "untracked"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-review/references/domains/index.md",
@@ -4365,7 +4365,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "e661b3fd 2026-11-13"
   },
   {
    "path": "skills/hep-review/references/domains/statistics.md",
@@ -4583,7 +4583,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "e46812b3 2026-11-12"
+   "last_commit": "3a349fce 2026-11-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
