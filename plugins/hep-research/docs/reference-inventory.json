@@ -29,8 +29,8 @@
    "uncited": 0
   },
   "hep-ml": {
-   "references": 42,
-   "bytes": 195454,
+   "references": 43,
+   "bytes": 207679,
    "uncited": 0
   },
   "hep-review": {
@@ -2939,7 +2939,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "9cf8a372 2026-11-14"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
@@ -3765,6 +3765,20 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
+   "path": "skills/hep-ml/references/learned-density-ratio-reweighting.md",
+   "owner": "hep-ml",
+   "bytes": 11558,
+   "lines": 150,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-ml/references/ml-analysis-weights.md",
+    "skills/hep-ml/references/ml-analysis.md",
+    "skills/hep-ml/references/sbi-training.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-ml/references/mixed-precision.md",
    "owner": "hep-ml",
    "bytes": 3981,
@@ -3829,13 +3843,14 @@
   {
    "path": "skills/hep-ml/references/ml-analysis-weights.md",
    "owner": "hep-ml",
-   "bytes": 6368,
-   "lines": 83,
+   "bytes": 6551,
+   "lines": 85,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-ml/assets/calibration.py",
     "skills/hep-ml/assets/hep_losses.py",
     "skills/hep-ml/assets/set_classifier.py",
+    "skills/hep-ml/references/learned-density-ratio-reweighting.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/hep-ml/references/uncertainty-and-calibration.md",
@@ -3849,8 +3864,8 @@
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
    "owner": "hep-ml",
-   "bytes": 7454,
-   "lines": 88,
+   "bytes": 7698,
+   "lines": 89,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -3866,6 +3881,7 @@
     "skills/hep-ml/references/evaluation-metrics.md",
     "skills/hep-ml/references/evaluation-strategy.md",
     "skills/hep-ml/references/export-and-deployment.md",
+    "skills/hep-ml/references/learned-density-ratio-reweighting.md",
     "skills/hep-ml/references/mixed-precision.md",
     "skills/hep-ml/references/ml-analysis-decorrelation-and-systematics.md",
     "skills/hep-ml/references/ml-analysis-training-and-data.md",
@@ -4035,12 +4051,13 @@
   {
    "path": "skills/hep-ml/references/sbi-training.md",
    "owner": "hep-ml",
-   "bytes": 4893,
-   "lines": 61,
+   "bytes": 5133,
+   "lines": 63,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-ml/SKILL.md",
     "skills/hep-ml/references/deep-learning-guide.md",
+    "skills/hep-ml/references/learned-density-ratio-reweighting.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/scientific-machine-learning.md"
    ],
@@ -4198,6 +4215,7 @@
     "skills/hep-ml/references/deep-learning-guide.md",
     "skills/hep-ml/references/evaluation-strategy.md",
     "skills/hep-ml/references/interpretability-and-explainability.md",
+    "skills/hep-ml/references/learned-density-ratio-reweighting.md",
     "skills/hep-ml/references/ml-analysis-weights.md",
     "skills/hep-ml/references/ml-analysis.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",

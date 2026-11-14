@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 41 | 404 | 0 |
 | hep-detector | 58 | 845 | 0 |
 | hep-measurement | 12 | 125 | 0 |
-| hep-ml | 42 | 195 | 0 |
+| hep-ml | 43 | 208 | 0 |
 | hep-review | 10 | 34 | 0 |
 | hep-statistics | 14 | 210 | 0 |
 | hep-theory | 31 | 244 | 0 |
@@ -243,7 +243,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `simulation-calibration/dirc.md` | hep-detector | 4.0 | no | 2 | - | e661b3fd 2026-11-13 |
 | `simulation-calibration/ecal.md` | hep-detector | 5.7 | no | 3 | - | e661b3fd 2026-11-13 |
 | `simulation-calibration/hcal.md` | hep-detector | 4.5 | no | 17 | - | e661b3fd 2026-11-13 |
-| `simulation-calibration/index.md` | hep-detector | 5.8 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-measurement, hep-ml, hep-review, hep-statistics, hep-theory | e661b3fd 2026-11-13 |
+| `simulation-calibration/index.md` | hep-detector | 5.8 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-measurement, hep-ml, hep-review, hep-statistics, hep-theory | 9cf8a372 2026-11-14 |
 | `simulation-calibration/muon-detector.md` | hep-detector | 4.6 | no | 2 | - | e661b3fd 2026-11-13 |
 | `simulation-calibration/rich.md` | hep-detector | 4.2 | no | 2 | - | e661b3fd 2026-11-13 |
 | `simulation-calibration/tof.md` | hep-detector | 4.3 | no | 2 | - | e661b3fd 2026-11-13 |
@@ -285,12 +285,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `generative-models.md` | hep-ml | 4.8 | yes | 5 | - | 9257d7b5 2026-10-15 |
 | `geometric-and-equivariant-learning.md` | hep-ml | 2.5 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `interpretability-and-explainability.md` | hep-ml | 2.5 | no | 3 | - | 9257d7b5 2026-10-15 |
+| `learned-density-ratio-reweighting.md` | hep-ml | 11.6 | no | 3 | - | untracked |
 | `mixed-precision.md` | hep-ml | 4.0 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `ml-analysis-decorrelation-and-systematics.md` | hep-ml | 7.0 | no | 4 | - | 485e96cb 2026-10-17 |
 | `ml-analysis-training-and-data.md` | hep-ml | 9.0 | no | 5 | - | 485e96cb 2026-10-17 |
 | `ml-analysis-validation-and-deployment.md` | hep-ml | 3.1 | no | 3 | - | 485e96cb 2026-10-17 |
-| `ml-analysis-weights.md` | hep-ml | 6.4 | no | 9 | - | 33bd6464 2026-10-22 |
-| `ml-analysis.md` | hep-ml | 7.5 | yes | 26 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
+| `ml-analysis-weights.md` | hep-ml | 6.6 | no | 10 | - | 33bd6464 2026-10-22 |
+| `ml-analysis.md` | hep-ml | 7.7 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `monitoring-and-lifecycle.md` | hep-ml | 2.1 | no | 3 | - | 9257d7b5 2026-10-15 |
 | `multivariate-analysis-bdt-nn.md` | hep-ml | 16.2 | yes | 12 | hep-detector | 33bd6464 2026-10-22 |
 | `optimization-and-training-dynamics.md` | hep-ml | 3.8 | no | 1 | - | 9257d7b5 2026-10-15 |
@@ -299,7 +300,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `performance-memory.md` | hep-ml | 3.4 | no | 6 | - | 9257d7b5 2026-10-15 |
 | `reproducibility.md` | hep-ml | 6.3 | no | 8 | hep-computing | 16214af1 2026-10-26 |
 | `robustness-and-distribution-shift.md` | hep-ml | 4.4 | yes | 11 | - | 1a844ba0 2026-10-17 |
-| `sbi-training.md` | hep-ml | 4.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
+| `sbi-training.md` | hep-ml | 5.1 | yes | 5 | - | 9257d7b5 2026-10-15 |
 | `scientific-machine-learning.md` | hep-ml | 3.5 | yes | 7 | hep-statistics | fc8606a1 2026-10-29 |
 | `sequence-models.md` | hep-ml | 2.2 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `serving-architecture.md` | hep-ml | 1.9 | no | 2 | - | 485e96cb 2026-10-17 |
@@ -309,7 +310,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `training-loop.md` | hep-ml | 1.1 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `transfer-learning.md` | hep-ml | 1.6 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `transformer-architectures.md` | hep-ml | 5.5 | no | 4 | - | 9257d7b5 2026-10-15 |
-| `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
+| `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 11 | hep-statistics | 485e96cb 2026-10-17 |
 | `domains/computing.md` | hep-review | 1.8 | no | 3 | - | dbebc92c 2026-10-29 |
 | `domains/detector.md` | hep-review | 4.8 | no | 5 | hep-detector | e661b3fd 2026-11-13 |
 | `domains/index.md` | hep-review | 1.9 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | e661b3fd 2026-11-13 |

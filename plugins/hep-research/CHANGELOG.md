@@ -5,6 +5,8 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-ml: learned density ratios for reweighting stored MC** (documentation; simulator calibration phase 5, WP-T). New reference `skills/hep-ml/references/learned-density-ratio-reweighting.md`: the likelihood-ratio trick for one post-hoc correction node, cross-fitting, probability calibration and the prior-ratio correction, the effective sample size of the weights, and the boundary of approval A25 (a learned ratio only reweights stored MC; SBI is not a method of the calibration workflow). Linked from `ml-analysis.md`, `sbi-training.md` and `ml-analysis-weights.md`.
+
 ## 0.67.0 (2026-11-14)
 
 Minor release; contracts 3.27.0 unchanged (the calibration schemas carry their own schema versions, `calibration-*/1`), `CORE_VERSION` 1.14.0 (`core/calibration/`), `adapters/geant4` 0.16.0 (the calibration evaluator `g4sim_calib_eval.py`). Ships the simulator parameter calibration workflow, phases 0 to 4 (PRs #385, #386, #396, #400, #401, #403, #404, #406, #407), and the hep-detector method-text additions (PR #402 and those below). Every calibration result is `synthetic` and, where a §8.7 value is not calibrated, `provisional-thresholds`.

@@ -28,7 +28,9 @@ Balancing classes to equal Σw is normal and keeps the per-class shapes. The cla
 the balanced prior. When the output is used as a probability, undo the prior shift with the odds:
 `f_phys = r·f / (r·f + 1 − f)`, where r = (π_s/π_b)_physical / (π_s/π_b)_training. A selection cut needs no
 correction; a probability that enters a likelihood or a combination does, and it still needs calibration
-([uncertainty-and-calibration.md](uncertainty-and-calibration.md)).
+([uncertainty-and-calibration.md](uncertainty-and-calibration.md)). For a classifier ratio that reweights stored
+MC (cross-fitting, calibration, effective sample size), see
+[learned-density-ratio-reweighting.md](learned-density-ratio-reweighting.md).
 
 For training, weights are usually normalized so that their mean is about one, keeping the loss scale and learning
 rate independent of the luminosity. Steeply falling spectra (pT, rigidity, energy) put most of the weight at

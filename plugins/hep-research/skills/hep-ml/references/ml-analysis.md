@@ -31,6 +31,7 @@ The index of tasks this skill owns that have no row of their own in `SKILL.md`:
 | Anomaly detection and weak supervision (CWoLa, CATHODE, autoencoders), training on data | [training and data](ml-analysis-training-and-data.md), "Weak supervision and anomaly detection" and "Training on data and blinding" |
 | "Is this improvement real?": ablations, seed variance, model comparison | [ablation-and-design-review.md](ablation-and-design-review.md); `scripts/compare_model_runs.py` |
 | Interpretability of a physics model | [interpretability-and-explainability.md](interpretability-and-explainability.md) |
+| Learned density ratio reweighting stored MC (simulator calibration): cross-fitting, probability calibration, prior ratio, effective sample size; boundary to SBI | [learned-density-ratio-reweighting.md](learned-density-ratio-reweighting.md) |
 | Reweighting and ML unfolding (OmniFold, DCTR) | [training and data](ml-analysis-training-and-data.md), "ML unfolding (training side)"; the `reweighting` task of the ml-artifact |
 | ML tracking and graph networks on hits | [particle-and-jet-architectures.md](particle-and-jet-architectures.md) |
 
