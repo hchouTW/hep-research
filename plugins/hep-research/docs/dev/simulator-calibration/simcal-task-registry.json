@@ -526,6 +526,13 @@
    "registered_at": "2026-11-14T16:28:11Z",
    "card_commit": "a7306cd1d",
    "reason": "S4 pilot (A30/A31) and S4 second registration (A29-A31), before they run"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "f73fe69fa41dd33ff1fc9ef2d6aa11266d440f2b8f7fa266e0ed3fb4365cc41e",
+   "registered_at": "2026-11-14T19:36:07Z",
+   "card_commit": "3ecb86b4b",
+   "reason": "gate run 3 (A33): G4L list +4 negatives, identity 55 cases, before it runs"
   }
  ]
 }

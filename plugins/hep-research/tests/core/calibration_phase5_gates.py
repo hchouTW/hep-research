@@ -79,6 +79,11 @@ G4L: dict = {               # section 15.3.1 G4-L, section 15.3.16 and the A25 (
     L + "SBIBoundary": "negative",
     L + "Fixture.test_15_3_16_learned_plan_makes_p0_and_g4l_apply": "positive",
     L + "DefaultOff": "positive",
+    # A33 (review F4, F5, F8, F13; WP-V), added before gate run 3
+    L + "G4L.test_15_3_1_no_cross_fitting_is_caught_by_the_record_not_the_closure": "negative",
+    L + "PriorRatio": "negative",
+    L + "DesignWithVLearn": "negative",
+    SCRIPTS + "Phase1Scripts.test_calib_reweight_g4l_points": "negative",
 }
 POOLING: dict = {           # section 15.3.18 partial pooling in A25 (6)'s reading (WP-Q)
     Q + "TauReturnsToZero.test_tau_returns_to_zero": "positive",
