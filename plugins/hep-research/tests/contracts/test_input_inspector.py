@@ -456,12 +456,14 @@ class EnvelopeArtifacts(Scratch):
             for dimension in ("representation", "quantity", "detector", "conditions", "sampling"):
                 self.assertIn(dimension, signature["unknown"], name)
 
+    @unittest.skipUnless((ROOT / "examples/ams-flux-ratio/output/artifacts").is_dir(), "no examples/ams-flux-ratio/output in this copy (the AMS-optional check builds its copy without example outputs)")
     def test_artifacts_the_plugin_wrote_in_an_example_are_read(self):
         folder = ROOT / "examples/ams-flux-ratio/output/artifacts"
         for name, kind in (("response_helium_synthetic-period-1.json", "response"), ("ratio_result.json", "statistical-result")):
             record = inspect_inputs([{"product": "product.a", "path": str(folder / name)}], BUDGET)
             self.assertEqual((fact_values(only_signature(record), "artifact_type"), record["state"]), ([kind], "complete"), name)
 
+    @unittest.skipUnless((ROOT / "examples/ams-flux-ratio/output/artifacts").is_dir(), "no examples/ams-flux-ratio/output in this copy (the AMS-optional check builds its copy without example outputs)")
     def test_a_term_of_a_profile_stays_unknown_without_that_profile(self):
         """The validator knows a profile's vocabulary only from a project, which the inspector is not given. It fails closed and says why."""
         record = inspect_inputs([{"product": "product.a", "path": str(ROOT / "examples/ams-flux-ratio/output/artifacts/measurement_spec.json")}], BUDGET)
