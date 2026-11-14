@@ -879,5 +879,57 @@ class Phase4ExportScripts(unittest.TestCase):
         self.assertEqual((code, out["forced_joint_fits"]), (0, []))
 
 
+class Phase5PoolScripts(unittest.TestCase):
+    """Phase 5, WP-Q: calib_fit.py pool (partial pooling, section 3.7, A25 (6)) on a two-segment toy-detector
+    contract; the declaration errors are rejected (exit 2), the declared contract runs to a decision (control)."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, record):
+        p = self.d / name
+        p.write_text(json.dumps(record))
+        return p
+
+    def test_pool(self):
+        import numpy as np
+        from core.calibration import toy, toy_problem as TP
+        cal = ["beam1_e_mean", "beam2_e_mean", "beam4_e_mean", "light_e_mean", "light_e_width", "spe_e_mean"]
+        theta = {"pde": {"bounds": (0.01, 0.99), "prior": (0.2, 0.3)}, "gain": {"bounds": (1, 100), "prior": (8, 12)}}
+        p = TP.ToyProblem(lambda n: toy.build_toy(n, "subgraph"), cal, theta, 100, 500)
+        rng = np.random.default_rng(3)
+        vals = {s: dict(zip(cal, np.exp(p.simulate(np.array([pde, 10.0]), rng, nominal=False).y_gauss).tolist()))
+                for s, pde in (("A", 0.23), ("B", 0.27))}
+        contract = {"observables": [{"name": n, "role": "calibration", "block": "gaussian", "link": "log"} for n in cal],
+                    "exposure": {"all": 100},
+                    "parameters": [{"name": "pde", "role": "theta", "sampling_bounds": [0.2, 0.3],
+                                    "physical_bounds": [0.01, 0.99],
+                                    "index": {"mechanism": "yield", "channel_set": "all",
+                                              "conditioning": "partial-pooling"}},
+                                   {"name": "gain", "role": "theta", "sampling_bounds": [8, 12],
+                                    "physical_bounds": [1, 100]}]}
+        plan = self.write("p.json", {"evaluator": {"kind": "toy-detector-subgraph", "events": 500},
+                                     "design": {"bootstrap_B": 50}})
+        v = self.write("v.json", {"segments": vals})
+        code, out = run("calib_fit.py", "pool", "--contract", self.write("c0.json", contract), "--plan", plan,
+                        "--values", v, "--sigma-noise", 0)
+        self.assertEqual((code, out.get("code")), (2, "pooling.no_segments"))
+        contract["pooling"] = {"segments": [{"name": "A"}, {"name": "B"}], "parameters": {"pde": {"link": "logit"}}}
+        c = self.write("c.json", contract)
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan,
+                        "--values", self.write("v1.json", {"segments": {"A": vals["A"]}}), "--sigma-noise", 0)
+        self.assertEqual((code, out.get("code")), (2, "pooling.values"))
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
+                        timeout=600)
+        self.assertIn(code, (0, 1), out)
+        self.assertEqual(out["status"], "passed" if code == 0 else "failed")
+        self.assertIn("pde", out["pooling"]["tau_pool"])
+        self.assertIn("partial-pooling", out["flags"])
+
+
 if __name__ == "__main__":
     unittest.main()
