@@ -297,7 +297,7 @@ jobs:
           mkdir -p ../../check-runs
           python tools/run_required_backends.py --require torch==2.14.1,torchvision==0.29.1 \
             --allow-skip-reason "only meaningful when PyTorch is not installed" \
-            --modules tests.skills.hep_ml.test_assets_smoke,tests.skills.hep_ml.test_audit_domain_method,tests.skills.hep_ml.test_audit_metric_layer,tests.skills.hep_ml.test_audit_small_corrections,tests.skills.hep_ml.test_audit_train_keys,tests.skills.hep_ml.test_hep_losses,tests.skills.hep_ml.test_hep_ml_skill,tests.skills.hep_ml.test_set_classifier,tests.skills.hep_ml.test_training_pipeline \
+            --modules tests.contracts.test_t12_a13_gpu,tests.skills.hep_ml.test_assets_smoke,tests.skills.hep_ml.test_audit_domain_method,tests.skills.hep_ml.test_audit_metric_layer,tests.skills.hep_ml.test_audit_small_corrections,tests.skills.hep_ml.test_audit_train_keys,tests.skills.hep_ml.test_hep_losses,tests.skills.hep_ml.test_hep_ml_skill,tests.skills.hep_ml.test_set_classifier,tests.skills.hep_ml.test_training_pipeline \
             --out ../../check-runs/torch-backend.json
       - name: Keep the report
         if: always()
