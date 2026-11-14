@@ -4,8 +4,8 @@
 #              the impact map in contracts/rules/registry.json; anything it cannot bound (a file outside the plugin, CI
 #              tooling, a path no impact group covers) is the full run. Pushes to main, weekly and manual runs are full
 #   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.13 (the supported floor) with the
-#              pinned set (plugins/hep-research/requirements-ci.lock); required. The Python version runs as five
-#              parallel jobs: the test modules in three shards balanced by tools/module_timings.json, the profile
+#              pinned set (plugins/hep-research/requirements-ci.lock); required. The Python version runs as six
+#              parallel jobs: the test modules in four shards balanced by tools/module_timings.json, the profile
 #              suites with the static checks, and the AMS-optionality check (run_all_checks.py --part / --shard);
 #              every module is in one shard. Each job writes failures and timings to the job summary. On a pull request
 #              each job runs what the plan selects (the AMS-optionality job: the selected modules of its suites); a job
@@ -30,7 +30,7 @@
 #   release-manifests  published release bundles unchanged (C10); required
 #   hostile-paths  TMPDIR and the working directory reached through symlinks, in a folder whose name has a space and
 #              Chinese characters; a test tree with an NFD-named file, .DS_Store and an AppleDouble file through
-#              tools/check_packaging.py. Six parallel legs under the hostile TMPDIR: units 1/3-3/3, each running its
+#              tools/check_packaging.py. Seven parallel legs under the hostile TMPDIR: units 1/4-4/4, each running its
 #              shard of tools/check_relocation.py; relocated static and relocated AMS optional (check_relocation.py
 #              --part static / --part ams-optional, together the former checks leg's --part checks); and the
 #              packaging scan, which on pull requests also runs tests/contracts, tests/core (partition, blinding, R5)
@@ -109,9 +109,10 @@ jobs:
       matrix:
         python: ["3.13"]
         part:
-          - {name: "units 1/3", key: units-1, args: "--part units --shard 1/3", sel: "--part units --shard 1/3"}
-          - {name: "units 2/3", key: units-2, args: "--part units --shard 2/3", sel: "--part units --shard 2/3"}
-          - {name: "units 3/3", key: units-3, args: "--part units --shard 3/3", sel: "--part units --shard 3/3"}
+          - {name: "units 1/4", key: units-1, args: "--part units --shard 1/4", sel: "--part units --shard 1/4"}
+          - {name: "units 2/4", key: units-2, args: "--part units --shard 2/4", sel: "--part units --shard 2/4"}
+          - {name: "units 3/4", key: units-3, args: "--part units --shard 3/4", sel: "--part units --shard 3/4"}
+          - {name: "units 4/4", key: units-4, args: "--part units --shard 4/4", sel: "--part units --shard 4/4"}
           - {name: "static and profiles", key: static, args: "--part static", sel: "--part static"}
           - {name: "AMS optional", key: ams-optional, args: "--part ams-optional", sel: "--part ams-optional"}
     steps:
@@ -192,7 +193,7 @@ jobs:
             python tools/ci_plan.py plan --full "$EVENT run" --out ../../gate-plan/plan.json > /dev/null
           fi
       - name: Reconcile the check-run records
-        run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 3 --parts static,ams-optional --plan ../../gate-plan/plan.json --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
+        run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 4 --parts static,ams-optional --plan ../../gate-plan/plan.json --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
       - name: The platform jobs passed (old-python, hostile-paths)
         env:
           OLD_PYTHON: ${{ needs.old-python.result }}
@@ -467,8 +468,8 @@ jobs:
 
   hostile-paths:
     # Paths with a space, Chinese characters and symlinks (TMPDIR and the working directory), plus a tree with an
-    # NFD-named file, .DS_Store and an AppleDouble file for the packaging scan. Six legs, like the checks matrix: the
-    # relocated run (tools/check_relocation.py) is split into units 1/3-3/3, --part static and --part ams-optional
+    # NFD-named file, .DS_Store and an AppleDouble file for the packaging scan. Seven legs, like the checks matrix: the
+    # relocated run (tools/check_relocation.py) is split into units 1/4-4/4, --part static and --part ams-optional
     # (static plus ams-optional is --part checks, so the legs together run what the single checks leg ran); the
     # packaging leg runs the packaging scan and the pull-request subset (in parallel, through a plan of those modules)
     # and no relocated part. checks-complete needs every leg. On main,
@@ -482,9 +483,10 @@ jobs:
       fail-fast: false
       matrix:
         leg:
-          - {name: "units 1/3", key: units-1, shard: "1/3", part: units}
-          - {name: "units 2/3", key: units-2, shard: "2/3", part: units}
-          - {name: "units 3/3", key: units-3, shard: "3/3", part: units}
+          - {name: "units 1/4", key: units-1, shard: "1/4", part: units}
+          - {name: "units 2/4", key: units-2, shard: "2/4", part: units}
+          - {name: "units 3/4", key: units-3, shard: "3/4", part: units}
+          - {name: "units 4/4", key: units-4, shard: "4/4", part: units}
           - {name: "packaging and PR subset", key: packaging, shard: "", part: ""}
           - {name: "relocated static", key: static, shard: "", part: static}
           - {name: "relocated AMS optional", key: ams-optional, shard: "", part: ams-optional}
@@ -614,7 +616,7 @@ jobs:
           path: platform-runs/
 
   hostile-paths-complete:
-    # main, weekly and manual runs: the three hostile units shards together cover every module once
+    # main, weekly and manual runs: the four hostile units shards together cover every module once
     if: always() && github.event_name != 'pull_request'
     needs: hostile-paths
     runs-on: ubuntu-24.04
@@ -633,7 +635,7 @@ jobs:
           path: platform-runs
           merge-multiple: true
       - name: Reconcile the records
-        run: python tools/reconcile_check_runs.py ../../platform-runs --python 3.13 --shards 3 --parts "" --summary "$GITHUB_STEP_SUMMARY"
+        run: python tools/reconcile_check_runs.py ../../platform-runs --python 3.13 --shards 4 --parts "" --summary "$GITHUB_STEP_SUMMARY"
 
   old-python:
     # A real CPython 3.9 (end of life; no macOS arm64 or Windows build in actions/python-versions) as `python3`:
