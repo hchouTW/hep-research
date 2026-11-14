@@ -15,6 +15,22 @@ sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 import calibration_phase5_gates as G  # noqa: E402
 
+REPO = ROOT.parents[1]
+# The static item reads the repository: the plugin folder at <repo>/plugins/hep-research next to a .git, with the
+# phase-5 base reachable. A relocated copy (tools/check_ams_optional.py) or a shallow CI checkout skips those tests;
+# the gate itself runs them at the gate commit.
+IN_REPO = (REPO / ".git").exists() and ROOT == (REPO / "plugins" / "hep-research").resolve()
+
+
+def _base_reachable() -> bool:
+    if not IN_REPO:
+        return False
+    try:
+        return G.subprocess.run(["git", "cat-file", "-e", G.PHASE_BASE + "^{commit}"], cwd=ROOT,
+                                capture_output=True, timeout=60).returncode == 0
+    except (OSError, G.subprocess.SubprocessError):
+        return False
+
 
 class Negatives(unittest.TestCase):
     KINDS = {"m.C.test_neg": "negative", "m.C.test_pos": "positive"}
@@ -73,12 +89,14 @@ class Static(unittest.TestCase):
         reg = {"registrations": [self.ENTRY, {"card": "simcal-tasks/phase-5.md"}]}
         self.assertEqual(G.prior_registry_entries(reg), [self.ENTRY])
 
+    @unittest.skipUnless(IN_REPO, "repository checkout only (a relocated copy has no repository root)")
     def test_protected_paths_are_repository_relative(self):
         self.assertEqual(len(G.PROTECTED), 15)
         self.assertTrue(all(p.startswith("plugins/hep-research/") for p in G.PROTECTED))
         for p in G.PROTECTED:
             self.assertTrue((ROOT.parents[1] / p).is_file(), p)
 
+    @unittest.skipUnless(_base_reachable(), "needs a repository checkout with the phase-5 base commit")
     def test_static_item_at_this_commit(self):
         """This branch (base plus the phase-5 work) leaves every protected file and registry entry unchanged."""
         r = G.static_item()
