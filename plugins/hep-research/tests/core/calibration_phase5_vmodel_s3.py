@@ -37,8 +37,11 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
 
 from core.calibration import io  # noqa: E402
+
+import calibration_phase5_taskenv as TE  # noqa: E402
 from core.calibration import vmodel_infer as VI  # noqa: E402
 
 FLAGS = ["synthetic", "provisional-thresholds"]
@@ -201,6 +204,7 @@ def merge(out_dir: Path, out: Path) -> dict:
     rep_ = {"array": "phase-5 S3 inferred-V_model recovery", "complete": complete, "missing_tasks": missing,
             "commits": sorted(c for c in commits if c), "dirty": dirty, "results": results,
             "passed": {k: v["passed"] for k, v in results.items()}, "provenance": provenance(), "flags": FLAGS,
+            "task_environment": TE.task_environment(recs.values()),
             "seconds": float(sum(r["seconds"] for r in recs.values() if r))}
     io.write_json(str(out), io.jsonable(rep_))
     return rep_

@@ -14,7 +14,9 @@ incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 
 G4-L (phase 5, section 8.2): for a plan with a learned density ratio (one post-hoc correction node, section 6.2),
 the held-out closure of every fold at >= 3 theta' (default P0's points), propagated to theta with A, in the form of P0;
 the structural record (cross-fitting, probability calibration, prior-ratio correction) and the contract's alpha
-declaration first. not-applicable without a learned ratio; passed (0), failed (1), rejected (2), incomplete (3).
+declaration first. --points must contain the worst-ESS point of P0's scan (g4l.worst_ess_missing) and the section 5.4
+spot checks (g4l.spot_checks_missing, g4sim plans), as section 8.2 note 1 requires; rejected (exit 2) otherwise
+(A33). not-applicable without a learned ratio; passed (0), failed (1), rejected (2), incomplete (3).
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -106,6 +108,23 @@ def main(argv=None) -> int:
     return io.run(lambda: io.jsonable(go()))
 
 
+def required_points_missing(ev, contract, plan, points) -> list:
+    """Section 8.2 note 1 for user-given G4-L points (A33, review F13): the section 5.4 spot checks of the plan (P0's,
+    before any evaluation) and the worst-ESS point of P0's scan (kernel_check.default_points) must be among them."""
+    from core.calibration import emulator, kernel_check
+    out = []
+    spots = kernel_check.missing_spot_checks(points, kernel_check.required_spot_checks(contract, plan), "P0")
+    if spots:
+        out.append({"code": "g4l.spot_checks_missing", "message": f"the section 5.4 spot checks {spots} are not among "
+                    "--points (section 8.2 note 1; they cannot be omitted)"})
+        return out
+    worst = kernel_check.default_points(ev, contract, plan)[0]
+    if not any(emulator._same_point(p, worst, list(worst)) for p in points):
+        out.append({"code": "g4l.worst_ess_missing", "message": f"the worst-ESS point {worst} of P0's scan is not among "
+                    "--points (section 8.2 note 1: >= 3 theta' including the worst-ESS point within the prior)"})
+    return out
+
+
 def _g4l(ev, contract, plan, args):
     from core.calibration import design as design_mod
     from core.calibration import kernel_check, learned, linear
@@ -121,6 +140,9 @@ def _g4l(ev, contract, plan, args):
             pts = io.load(args.points)
             if not isinstance(pts, list) or not all(isinstance(p, dict) for p in pts):
                 raise io.InputError("--points: a JSON list of theta' objects")
+            missing = required_points_missing(ev, contract, plan, pts)
+            if missing:
+                return {"gate": "G4-L", "status": "rejected", "finding": missing[0]["code"], "findings": missing}
         else:
             pts = kernel_check.default_points(ev, contract, plan)
         alpha = None if args.alpha is None else min(args.alpha, reweight.g4l_alpha(contract))

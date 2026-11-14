@@ -5,8 +5,9 @@ section 15.2 through the g4sim evaluator, which registers itself from the Geant4
 - Prediction: the evaluator's prediction at theta (its methods, common random numbers: one batch of events at every
   theta), in the contract's link space, plus a toy's perturbation.
 - Errors at theta_ref: V_data^unc = per-event covariance / exposure of each sample (the construction of
-  `linear.design`), V_MC from the evaluator; V_G = V_data + V_MC (+ V_learn when the evaluator returns one, section
-  2.1; phase 5). No bootstrap, nu or eta here.
+  `linear.design`), V_MC from the evaluator; V_G = V_data + V_MC (+ V_learn on the learned path, section 2.1; phase
+  5: only when the plan or the evaluator declares a learned ratio, `evaluator.learned`; a V_learn without that
+  declaration, or a declared ratio whose evaluator returns none, is refused, A33). No bootstrap, nu or eta here.
 - Pseudo-data: from a truth MC's events by the D6 rule of A12 (`closure.resample_truth`, at the data's sampling model),
   summarized with the evaluator's estimators; or, for analytic stand-ins without events, a Gaussian draw with V_data at
   the truth (labelled `gaussian-summary`).
@@ -20,6 +21,14 @@ import numpy as np
 from . import closure
 from . import likelihood as L
 from . import linear, toy
+
+
+class EvaluatorProblemError(ValueError):
+    """A V_learn the plan does not declare, or a declared learned ratio without one (A33, review F8): refused."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(f"{code}: {message}")
+        self.code = code
 
 
 class EvaluatorProblem:
@@ -85,15 +94,30 @@ class EvaluatorProblem:
         Vm = np.asarray(r["V_MC"], float) * np.outer(g, g)
         return Vd, Vm
 
+    @property
+    def learned_declared(self) -> bool:
+        """Whether a learned density ratio is declared (section 6.2): the plan's `evaluator.learned`, or the
+        evaluator's own learned specification."""
+        return ((self.plan.get("evaluator") or {}).get("learned") is not None
+                or getattr(self.evaluator, "_learned_spec", None) is not None)
+
     def V_learn_link(self, tp) -> np.ndarray | None:
-        """The evaluator's V_learn at theta (section 7.1 `evaluate`; observable space) in link space, or None."""
+        """The evaluator's V_learn at theta (section 7.1 `evaluate`; observable space) in link space, or None without
+        a declared learned ratio. Refused (EvaluatorProblemError): a V_learn without the declaration
+        (`evaluator_problem.v_learn_undeclared`), a declaration without a V_learn (`evaluator_problem.v_learn_missing`)."""
         r = self._evaluate(tp)
-        v = r.get("V_learn")
-        if v is None:
+        declared = self.learned_declared
+        if r.get("V_learn") is None:
+            if declared:
+                raise EvaluatorProblemError("evaluator_problem.v_learn_missing", "the plan declares a learned density "
+                                            "ratio but the evaluator returns no V_learn (section 7.1)")
             return None
-        v = v["V_learn"] if isinstance(v, dict) else v
+        if not declared:
+            raise EvaluatorProblemError("evaluator_problem.v_learn_undeclared", "the evaluator returns V_learn but the "
+                                        "plan declares no learned density ratio (section 6.2: evaluator.learned)")
+        v = linear.v_learn_of(r)
         g = linear.to_link_delta(np.asarray(r["pred"], float), self.links)
-        return np.asarray(v, float) * np.outer(g, g)
+        return v * np.outer(g, g)
 
     def reference(self, tp, beta, frozen=None, **_kw) -> L.Reference:
         Vd, Vm = self.V_parts(tp)

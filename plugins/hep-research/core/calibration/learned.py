@@ -17,7 +17,10 @@ conditional ratio, so it composes with weights on upstream nodes).
 - Log-ratio clip (A31): each fold model keeps the range of its log ratio (after Platt scaling and the prior-ratio
   correction) over its own fitting rows of both classes at their training points, and clips evaluated log ratios
   to it: a polynomial excursion outside the training rows never becomes an extreme weight.
-- Prior-ratio correction: log r = logit' - log(n_1 / n_0), the class sizes of the set the logit is calibrated on.
+- Prior-ratio correction: log r = logit' - log(n_1 / n_0), the class sizes of the set the logit is calibrated on. With
+  the default design both classes have one row per event and training point, so n_1 = n_0 and the correction is 0
+  (review F5); `class1_fraction` < 1 (Platt only) keeps that fraction of the class-1 calibration rows at each training
+  point, the case where the correction matters (A33: tested with unequal classes).
 - V_learn = the variation between repeated trainings (independent training MC and a new initialization seed) + the
   square of the closure bias on held-out samples (section 6.2): `v_learn`, its two parts kept apart
   (V_learn^bias is sampled by the toys of section 6.6). Readings of the open details (L2): full matrices, the
@@ -42,7 +45,8 @@ TARGET = "node-density-ratio"
 USE = "reweight-stored-mc"
 CALIBRATIONS = ("platt", "none")
 DEFAULTS = {"folds": 5, "repeats": 5, "training_points": 8, "degree": 4, "l2": 1e-4, "calibration": "platt",
-            "calibration_fraction": 0.2, "label_smoothing": 0.0, "prior_ratio": True, "max_iterations": 500}
+            "calibration_fraction": 0.2, "label_smoothing": 0.0, "prior_ratio": True, "max_iterations": 500,
+            "class1_fraction": 1.0}
 
 
 class LearnedError(ValueError):
@@ -121,6 +125,11 @@ def check_spec(spec: dict, param_nodes: dict | None = None, node_io: tuple | Non
     s = settings(spec)
     if s["calibration"] not in CALIBRATIONS:
         bad("learned.spec", f"calibration {s['calibration']!r} (Platt scaling, or none, which G4-L refuses)")
+    f1 = s["class1_fraction"]
+    if isinstance(f1, bool) or not isinstance(f1, (int, float)) or not 0 < f1 <= 1:
+        bad("learned.spec", f"class1_fraction {f1!r}: 0 < fraction <= 1 (the class-1 calibration rows kept)")
+    elif f1 < 1 and s["calibration"] != "platt":
+        bad("learned.spec", "class1_fraction < 1 subsamples the calibration rows: it needs calibration platt")
     if not (isinstance(s["folds"], int) and s["folds"] >= 1 and isinstance(s["repeats"], int) and s["repeats"] >= 2):
         bad("learned.spec", "folds >= 1 and repeats >= 2 (V_learn needs repeated trainings)")
     if contract is not None and isinstance(node, str):
@@ -344,7 +353,14 @@ def train(stored: np.ndarray, sampler, spec: dict, theta0: dict, support: dict, 
         if n_cal:
             C0 = tr.base(stored[cal_idx], fm) @ beta
             s0 = np.concatenate([C0 @ tau for tau in taus])
-            s1 = np.concatenate([(tr.base(sampler(pt, cal_idx, [*key, 3, k, t]), fm) @ beta) @ taus[t]
+            f1 = float(s["class1_fraction"])
+            if f1 < 1.0:          # unequal classes (A33): a subset of the class-1 calibration rows at each point
+                rs = np.random.default_rng(np.random.SeedSequence([*key, 4, k]))
+                m1 = max(1, int(round(f1 * len(cal_idx))))
+                c1 = [np.sort(rs.choice(cal_idx, m1, replace=False)) for _ in pts]
+            else:
+                c1 = [cal_idx] * len(pts)
+            s1 = np.concatenate([(tr.base(sampler(pt, c1[t], [*key, 3, k, t]), fm) @ beta) @ taus[t]
                                  for t, pt in enumerate(pts)])
             fm.a, fm.b = _platt(s0, s1)
             n0, n1 = len(s0), len(s1)

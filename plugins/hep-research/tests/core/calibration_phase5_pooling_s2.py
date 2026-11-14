@@ -30,8 +30,11 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
 
 from core.calibration import io  # noqa: E402
+
+import calibration_phase5_taskenv as TE  # noqa: E402
 from core.calibration import pooling as PL  # noqa: E402
 from core.calibration import toys_linear as TL  # noqa: E402
 
@@ -134,7 +137,7 @@ def merge(out_dir: Path, out: Path, tasks: list | None = None) -> dict:
     rep = {"study": "S2 partial-pooling frequency report (phase 5, reported, not judged)",
            "status": "reported" if complete else "incomplete", "complete": complete, "missing_tasks": missing,
            "commits": sorted(c for c in commits if c), "dirty": dirty, "report": report(rows),
-           "provenance": provenance(), "flags": FLAGS,
+           "provenance": provenance(), "flags": FLAGS, "task_environment": TE.task_environment(recs.values()),
            "seconds": float(sum(r["seconds"] for r in recs.values() if r))}
     io.write_json(str(out), io.jsonable(rep))
     return rep

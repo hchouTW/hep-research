@@ -7,6 +7,7 @@ test_calibration_design.Applicability.test_full_resimulation_only, rerun, not du
 from __future__ import annotations
 
 import copy
+import math
 import sys
 import unittest
 import warnings
@@ -245,6 +246,121 @@ class G4L(unittest.TestCase):
         self.assertIn("g4l.too_few_points", {f["code"] for f in r["findings"]})
 
 
+    def test_15_3_1_no_cross_fitting_is_caught_by_the_record_not_the_closure(self):
+        """A33 (review F4): G4-L's statistical part is the held-out closure of section 7.1 (learned_closure: the
+        difference on the held-out sample), whose events no classifier saw whatever F, so it cannot see a ratio
+        applied to its own training events: with F = 1 every closure point passes the bound (shown, the statistical
+        part is blind) and only the record check rejects. The record check reads the index sets: a record that
+        declares cross_fitted but whose train/apply sets overlap, or that lacks them, is refused (negative); the real
+        cross-fitted record passes (control)."""
+        c, p = fixture(folds=1)
+        r = g4l(c, p, self.pts)[3]
+        self.assertEqual([f["code"] for f in r["findings"]], ["g4l.no_cross_fitting"])
+        self.assertTrue(all(not row["failing"] for row in r["points"]), r["points"])     # blind statistically
+        rec = self.ev.learned_record()
+        self.assertEqual(reweight.g4l_structural(rec), [])                                 # control
+        for bad in ({**rec, "train_apply_disjoint": [True] * 4 + [False]},               # declared, sets overlap
+                    {k: v for k, v in rec.items() if k != "train_apply_disjoint"},        # no index sets
+                    {**rec, "train_apply_disjoint": [True] * 3}):                          # not one per fold
+            self.assertEqual([f["code"] for f in reweight.g4l_structural(bad)], ["g4l.no_cross_fitting"])
+
+
+class PriorRatio(unittest.TestCase):
+    """Section 6.2 prior-ratio correction with unequal class sizes (A33, review F5: with the default design n_1 = n_0
+    and the correction is 0). class1_fraction 0.25 keeps a quarter of the class-1 calibration rows: log r =
+    logit' - log(n_1/n_0) must match the true kernel log ratio in level (mean difference) and the weights must keep
+    E_0[r] = 1. Positive: the correct correction (and the balanced default). Negatives: a sign error injected into the
+    training (log(n_0/n_1)) and no correction both shift log r by a constant, and both are caught."""
+
+    TOL = 0.05
+
+    def level(self, patch=False, **over):
+        from unittest import mock
+        c, p = fixture(**over)
+        ev = E.make(p, c)
+        if patch:
+            class SignError:
+                @staticmethod
+                def log(v):
+                    return -math.log(v)
+            with mock.patch.object(learned, "math", SignError):
+                tr = ev.learned_ratio()
+        else:
+            tr = ev.learned_ratio()
+        e = ev.nominal["runs"]["run"]["events"]
+        x, y = e["x"]["x"], e["correction"]["y"]
+        kern = ev.model.runs["run"].kernels["correction"]
+        out = []
+        for c1 in (0.0, 0.2):
+            lr = tr.log_weights(np.stack([x, y], 1), {"strength": c1})
+            out.append((abs(float(np.mean(lr - kern.true_log_ratio(x, y, c1, 0.1)))),
+                        abs(float(np.mean(np.exp(lr))) - 1.0)))
+        return tr, out
+
+    def ok(self, out):
+        return all(a < self.TOL and b < self.TOL for a, b in out)
+
+    def test_unequal_classes(self):
+        tr, out = self.level(class1_fraction=0.25)
+        self.assertTrue(all(abs(f.log_prior - math.log(0.25)) < 0.01 for f in tr.folds))   # the classes differ
+        self.assertTrue(self.ok(out), out)                                                   # positive
+        self.assertTrue(self.ok(self.level()[1]))                                            # balanced control
+        _, sign = self.level(patch=True, class1_fraction=0.25)
+        self.assertFalse(self.ok(sign), sign)                                                # sign error: caught
+        _, none = self.level(class1_fraction=0.25, prior_ratio=False)
+        self.assertFalse(self.ok(none), none)                                                # no correction: caught
+
+    def test_fraction_is_checked(self):
+        for v, code in ((0.0, "learned.spec"), (1.5, "learned.spec")):
+            self.assertIn(code, {f["code"] for f in learned.check_spec({**fixture()[1]["evaluator"]["learned"],
+                                                                         "class1_fraction": v})})
+        self.assertTrue(learned.check_spec({**fixture()[1]["evaluator"]["learned"], "class1_fraction": 0.5,
+                                            "calibration": "none"}))                         # needs Platt
+        self.assertEqual(learned.check_spec({**fixture()[1]["evaluator"]["learned"], "class1_fraction": 0.5}), [])
+
+
+class DesignWithVLearn(unittest.TestCase):
+    """Sections 7.1, 2.1, 8.1 (A33, review F8): on the learned path `evaluate` returns V_learn (lazily: v_learn at the
+    evaluation's point), and linear.design puts it in V at theta_ref, so sigma_tot^design is the Asimov Sigma_theta
+    with V_G = V_data + V_MC + V_learn (positive). Negative: the design with V_learn hidden (the construction before
+    A33) has a smaller sigma_tot^design; a plan without a learned ratio gets V_learn None (control)."""
+
+    LIGHT = {"folds": 2, "repeats": 3, "training_points": 4, "degree": 2}
+    REF = {"strength": 0.15}         # the prior centre 0.1 is the generation point, where V_learn = 0 by construction
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c, cls.p = fixture(n=4000, **cls.LIGHT)
+        cls.ev = E.make(cls.p, cls.c)
+
+    def test_evaluate_carries_v_learn(self):
+        r = self.ev.evaluate({"strength": 0.15})
+        self.assertIsNotNone(r["V_learn"])
+        np.testing.assert_array_equal(linear.v_learn_of(r), self.ev.v_learn({"strength": 0.15})["V_learn"])
+        self.assertIsNone(E.make(H.gaussian_chain(n=2000)[1]).evaluate({"mu": 0.3})["V_learn"])     # control
+
+    def test_sigma_tot_design_includes_v_learn(self):
+        d = linear.design(self.ev, self.c, self.p, theta_ref=self.REF)
+        g = linear.to_link_delta(d["mu"], d["links"])
+        v = self.ev.v_learn(d["theta_ref"], d["names"])["V_learn"]
+        np.testing.assert_allclose(d["V_learn"], v * np.outer(g, g), rtol=1e-12)
+        op = linear.operator(d["J"], d["V_data"], d["V_MC"], V_learn=d["V_learn"])
+        np.testing.assert_allclose(d["sigma_tot"], op["sigma_tot"], rtol=1e-10)
+        ev = self.ev
+
+        class Hidden:                                  # the construction before A33: V_learn not returned
+            def __getattr__(self, k):
+                return getattr(ev, k)
+
+            def evaluate(self, theta, **kw):
+                return dict(ev.evaluate(theta, **kw), V_learn=None)
+        d0 = linear.design(Hidden(), self.c, self.p, theta_ref=self.REF)
+        self.assertNotIn("V_learn", d0)
+        self.assertTrue(np.all(d0["sigma_tot"] < d["sigma_tot"]), (d0["sigma_tot"], d["sigma_tot"]))
+        dc = linear.design(self.ev, self.c, self.p)          # at the prior centre (= theta_0): V_learn = 0
+        self.assertLess(float(np.abs(dc["V_learn"]).max()), 1e-25)
+
+
 class P0OnTheLearnedPath(unittest.TestCase):
     def test_p0_passes_with_the_correct_ratio_and_fails_uncalibrated(self):
         """P0 applies to the learned density ratio (section 8.1): the cross-fitted, calibrated ratio passes against
@@ -331,6 +447,34 @@ class S1Driver(unittest.TestCase):
         self.assertEqual((rep["label"], rep["result"]["repetitions"]), ("smoke", 2))
         self.assertEqual(rep["result"]["not_judged"], [])
         self.assertIn("provisional-thresholds", rep["flags"])
+
+
+class TaskEnvironment(unittest.TestCase):
+    """A33 (review F10): a merged study file records the tasks' Python, NumPy and file hashes (task_environment),
+    besides the merging process's provenance; agreeing tasks give one set (positive), a task with another NumPy
+    is reported as disagreeing (negative). Reported only: no study rule changes."""
+
+    def merged(self, numpys):
+        import json
+        import tempfile
+
+        import calibration_phase5_g4l as X
+        tasks = [{"r0": i, "reps": 1} for i in range(len(numpys))]
+        with tempfile.TemporaryDirectory() as d:
+            for i, v in enumerate(numpys):
+                prov = {"commit": "c" * 40, "dirty": False, "python": "3.13.18", "numpy": v, "sha256": {"f": "a"}}
+                (Path(d) / f"task_{i:04d}.json").write_text(json.dumps(
+                    {"task": i, "rows": [{"r": i, "status": "passed"}], "seconds": 1.0, "provenance": prov}))
+            return X.merge(Path(d), Path(d) / "merged.json", tasks, reps=len(numpys))
+
+    def test_task_environment(self):
+        rep = self.merged(["2.4.6", "2.4.6"])
+        te = rep["task_environment"]
+        self.assertEqual((te["python"], te["numpy"], te["agree"], te["sha256"], te["n_tasks"]),
+                         (["3.13.18"], ["2.4.6"], True, {"f": "a"}, 2))
+        self.assertEqual(rep["provenance"]["numpy"], np.__version__)            # the merger's, kept apart
+        te = self.merged(["2.4.6", "2.2.2"])["task_environment"]
+        self.assertEqual((te["numpy"], te["agree"], te["sha256"]), (["2.2.2", "2.4.6"], False, None))
 
 
 class DefaultOff(unittest.TestCase):
