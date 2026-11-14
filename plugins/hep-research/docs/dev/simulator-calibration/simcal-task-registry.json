@@ -484,6 +484,13 @@
    "registered_at": "2026-11-14T00:37:47Z",
    "card_commit": "b49d098c",
    "reason": "phase-4 gate run registered before the run (A22, A23)"
+  },
+  {
+   "card": "simcal-tasks/phase-4.md",
+   "sha256": "c6cec3d96bbf84e457f8329dcaf83b8f6b98043aabdf585f5d059288b47e29f3",
+   "registered_at": "2026-11-14T01:54:50Z",
+   "card_commit": "627cef31",
+   "reason": "phase-4 gate run, second registration (A24, review fixes)"
   }
  ]
 }
