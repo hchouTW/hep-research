@@ -61,7 +61,7 @@ LINKS = {"y_mean": "identity", "y_width": "log", "y_hi": "logit", "y_sq": "log"}
 # failed in 5 of 6 pilot toys (V_learn's theta dependence, recomputed per theta as Part B line 1493 reads), at 40,000
 # 0 of 4
 CONFIG = {"exposure": 8000, "mc_events": 40_000, "degree": 4}
-REPS, N_REF = 10_000, 2000
+REPS, N_REF = 2000, 1000                 # A28: shrunk from 10^4 and 2000 before any task ran (the cluster was full)
 BLOCK_REF, BLOCK_REP = 50, 50          # pilot: ~30 s per reference toy (both constructions) and per repetition
 TASKS = [{"kind": "reference", "i0": i, "n": min(BLOCK_REF, N_REF - i)} for i in range(0, N_REF, BLOCK_REF)] + \
     [{"kind": "actual", "i0": i, "n": min(BLOCK_REP, REPS - i)} for i in range(0, REPS, BLOCK_REP)]
