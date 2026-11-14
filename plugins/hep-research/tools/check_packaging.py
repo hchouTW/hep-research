@@ -21,8 +21,8 @@ content rules below apply to every text file (a known text suffix, or no NUL byt
 - the README's stated package size ("about N files, X MB uncompressed") within 10% of the file count and byte total
   of the upload zip it describes, `git archive --format=zip HEAD:plugins/hep-research`: the scanned files minus every
   path that git archive leaves out because it or one of its folders is marked export-ignore in a .gitattributes inside
-  the plugin (git archive of a subtree reads only the attributes in that tree; tests/ and docs/dev/ are left out,
-  maintainer decision 2026-11-14); and that zip inside the documented upload limits, 5,000 entries (files plus the
+  the plugin (git archive of a subtree reads only the attributes in that tree; tests/ is left out except the files
+  shipped code reads at run time, maintainer decision 2026-11-14; docs/dev/ is kept); and that zip inside the documented upload limits, 5,000 entries (files plus the
   folder entries git archive writes, the stricter reading of "5,000 files") and 200 MB (10^6 bytes per MB) uncompressed
 - every runtime reference from a shipped file into tests/ or docs/dev/ resolves inside that zip: the tests a profile
   capability cites, plugin-root path constants and "tests/..." path strings in Python files, and relative Markdown links

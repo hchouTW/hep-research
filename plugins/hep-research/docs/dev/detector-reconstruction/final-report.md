@@ -164,8 +164,8 @@ are `met`, `met with readings`, `open` or `gap` (`t07-closeout.md`). These are k
 - **Cannot be claimed.** **Holdout independence is not established**: the holdout is to be written in the user's session off this account
   and host, and no `holdout_id` or SHA-256 is recorded (`t13-harness-spec.md`, sections 1 and 6). The system under test and the budget for
   3 × (number of tasks) sessions are the user's and not given (`decisions.md`, "T13 design"). No model session on the holdout has run. The
-  development-set shakedown (not the holdout) started: probe job 7652238 was submitted on 2026-11-14 and was pending when this report
-  was last updated; no result is recorded (`<private>/jobs/t13-shakedown/`). So the P6 gate is not passed. Stated limits: custody on one
+  development-set shakedown (not the holdout) started: probe job 7652238 ran on 2026-11-14; its unresolved `cmd:` citations led to the
+  round-12 harness fix, and the six-session plan 2 run followed (`<private>/jobs/t13-shakedown/`, harness REPORT). So the P6 gate is not passed. Stated limits: custody on one
   Unix user; shell network flagged, not blocked (`t13-harness-spec.md`, section 8).
 - **Continue.** The user's holdout and its hashes, the SUT and budget; the paid shakedown first, with the SUT model and plugin commit
   confirmed with the user (`decisions.md`, "T13 design").
@@ -235,8 +235,8 @@ Each stays open; none is turned into a pass by this report.
 14. **Calibration and alignment handoff:** the gaps and the "Open, not gaps" items of `calibration-alignment-interfaces.md`.
 15. **T11:** ten unread citation uses; plugin defects in `t11-citation-findings.md` not applied; method-text group 4 not merged.
 16. **G3 itself:** step 2 (the final checkpoint job on the integrated tip and a whole-branch review by a fresh reviewer) and step 4 (PR on
-    the user's word, final backup) are not done. The branch is based on 0.58.0; `github/main` is at 0.66.1 as last fetched, so a rebase
-    precedes any PR.
+    the user's word, final backup) are not done. Update 2026-11-14: `github/main` (0.66.1, `7958fa53`) was merged into `g3/final` instead of a
+    rebase; checkpoint 7652645 passed on the merged tip and the whole-branch review returned READY FOR PR.
 17. **Process:** 13 recorded deviations, none known to have affected a recorded result (`deviations.md`). The LCG test's site CVMFS cause is
     not known (`baseline.md`); it did not fail in jobs 7650906 and 7651192.
 
