@@ -113,3 +113,11 @@ stratum 9, `vertex pull z`, tail rate 1.058 % (U 1.189 %) against L 1 %. Diagnos
 close 3-track vertex pairs; every occupancy-1 bin sits near 0.9 % on blocks 1 and 2. Three pre-registered candidates (C1-C3) all failed their
 criteria; by the user's decision no attempt 2 is made (decisions.md, "T07: failed at attempt 1"). A remedy needs a different vertex seeding
 or splitting method: new design work.
+
+## Final (2026-11-14)
+
+After the evaluation, three further principled candidates were tested on development block 1 on the user's word: the seeders S1 and S2
+(jobs 7632710, 7636593; both worse than the frozen seeder; S2 not counted, K8) and the post-fit split test (job 7649462; K1 and K2 not met,
+merged vertices almost unchanged). The user accepted the outcome on 2026-11-14: **T07 failed at attempt 1, final**; no return to Freeze B,
+no attempt 2 (decisions.md, "T07: final at failed at attempt 1").
+

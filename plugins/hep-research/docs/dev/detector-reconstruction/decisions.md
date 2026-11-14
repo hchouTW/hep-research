@@ -927,3 +927,184 @@ element_sim events, J15, digitization off); no post-selection quality claim with
 it, for the user's information: the fake reading; the pull and charge-flip population (fit_ok and selected with at least 4 true planes); the
 attempt-2 level the scorer would take on block 22 (K09's rule, the user's call if ever needed). The pilot's development readings (7627279)
 had shown the same tail and fake pattern.
+
+## Backup b23 and the order of work after Gate D (the user, 2026-11-13)
+
+- 10:34Z, the user: "approve backup b23, auto continue". b23 started when the Gate D checkpoint 7628236 ended (no live writer during the
+  read).
+- 10:51Z, the user: "do T07 (the seed-finder study) after all works". Order then: Gate D checkpoint, backup b23, close-out records, the T07
+  seed-finder study (development only, block 1, a new pre-registration; T07 stays failed at attempt 1 unless the user later chooses a
+  Freeze B return). The ledger cites the user's "how about T07" with this word when S1 was submitted (12:35Z).
+- 12:00Z, the user: "keep waiting, auto continue" (b23 was reading evaluation-b11, 180 GB, at about 14 MB/s). 12:11Z, the user: "Backup is
+  slow": the single-stream archive was stopped (18 of about 240 GB in 66 min) and redone in the same folder in parallel: evaluation-b11 as 8
+  size-balanced parts plus one archive of its directories, the rest as 8 balanced parts plus one archive of directories and links, pigz,
+  1 MB records. Bundle at 93d95a16 kept. The T07 S1 job was submitted during the rest archive, which read file lists fixed before the
+  submission, so S1's new evidence folder could not enter it.
+- Result (20:30Z): b23 complete and verified, `<workdir>/backup/20261113T105814Z`: 19 archives and the bundle, the 20 entries of
+  `SHA256SUMS` (its own SHA-256 6c2bc806...; the ledger says "20 archives + bundle"; the folder holds 19 .tar.gz files) check, every archive
+  read back, 381,724 files and 40,060 directories and links archived, equal to the lists, 0 tar warnings, 92 GB; bundle 73e5b0c9... at
+  93d95a16; ledger archive f925dd24... In-progress lane folders were excluded (jobs/t12-stage3, 4, 6, 7, jobs/t13-harness), as in b14. A
+  first verify step failed only because coloured `ls` output garbled names; it was rerun with globs.
+
+## T07 seed-finder study, development on block 1 (2026-11-13)
+
+Done on the user's word above, development only; T07's outcome is not changed by it. Prepared in t07-vz-diagnosis.md ("Seed-finder study"):
+ACTS 48.2.0 seeders listed from the headers; a truth emulation on 7623497's occupancy-1 events found two density maxima in every merged
+event (356/356, 323/323) with the global maximum on a cluster: the merge forms at track admission around a correct seed (median separation
+5.4 u_v against the tracksMaxSignificance cut of 5), not at seeding, so the seed-finder premise was not supported at truth level. Still run
+as pre-registered (`jobs/t07-vz-diag/t07-seed-prereg.md` 3012f373..., K1-K8 unchanged from ac3cd0b3; S1 AdaptiveGrid 6 um; S2 adds
+estimateSeedWidth only if S1 is not null):
+- S1 (job 7632710, t07-seed-s1.sh a585707f, SOURCES-s1 976af123): predicted null; **not null**: merged vertices 419/429/391 against
+  356/367/323 (+17-21 %, beyond +-15 %); z tail +0.04-0.06 % absolute (within 0.15 %); vertex finding -2.7 points (mostly "seeded, not
+  good"); K1-K6 not met, K7 and K8 met. The prediction was refuted, so S2 ran.
+- S2 (job 7636593, t07-seed-s2.sh ed15d177..., SOURCES-s2 f284283f, predictions t07-seed-s2-predictions.md 7578ce82): exit 1 at K8
+  ("no failed vertexing event" false: 219, 203, 187 failed events in the occupancy-1 bins, 1 in s10; defects 0): estimateSeedWidth makes
+  AMVF fail events. Otherwise K1 0/2, K2 0/3, K4 2/5 (finding 0.9515, 0.9527, 0.9553, below S1's), merged 409/426/387.
+- **Coordinator's reading of S2** (20:30Z): the pre-registration repairs and reruns a K8 failure that is a run defect; this one is the
+  variant's own behaviour, and any repair would be another setting, which section 2 forbids. S2 is not counted and not repairable within the
+  pre-registration; the study ends (at most two variants). Conclusion: the seeder is not the lever; both finer-seed variants are worse than
+  the frozen seeder. T07 stays failed at attempt 1.
+
+## T13: the holdout session, custody and section 7's readings (the user, 2026-11-13)
+
+- 12:23Z, the user: "fix T13 (your holdout session)". Read as: the holdout writer stays off this account by design (harness spec section 1,
+  U9); the agent-side items start now: the harness code (spec 3.1-3.10) tested on a fake CLI and frozen by hash, and the agent-written
+  development set (K11). Lane t13h-tree, branch t13/harness. No paid model calls until the user's word on the shakedown.
+- 12:24Z, the user: custody "Agree, one account (Recommended)": the custody procedure of harness spec section 1 (no implementer sessions
+  during the run window), with its stated limit (one Unix user: the system under test could search the host). Spec section 4's row "User
+  agrees to the custody procedure" becomes done in the harness lane.
+- 12:24Z, the user: spec section 7's five readings "Adopt all five (Recommended)": (1) under R22 and U9, in R14's no-model-access case T13
+  records the frozen scorer, the brief and the holdout hashes; (2) the holdout's confirmation is narrowed to the three required workflows and
+  a 12-family sample, the other families staying an open obligation; (3) the holdout carries the brief's counterexample classes, not the
+  A-list, and no A-scenario is claimed confirmed by it; (4) a critical fail (including a successful-looking result with the wrong physics
+  meaning) blocks a required workflow; (5) section 14.2's timed intervals, warm method-card states and a paired baseline are outside T13.
+- Still the user's (as of this word): the holdout itself (written in a session off this account; holdout_id and two SHA-256 sent), the
+  system under test, the runner, the budget, the execution resources, and the shakedown's paid calls. The runner and the execution
+  resources were answered on 2026-11-14 (below).
+
+## Parallel lanes (the user, 2026-11-13 and 2026-11-14)
+
+The user's parallel-processing remark, twice. 2026-11-13 12:30Z: lanes for T12 stage 3 (t12s3-tree) and stage 4 part A (t12s4-tree), then
+(12:31Z) stage 6 (t12s6-tree) and stage 7 (t12s7-tree), all from 28763f50. 2026-11-14 01:32Z: lanes records/after-t12 (rec-tree: these
+records, t12-closeout.md, STATE) and t12/carried-minors (t12m-tree: the stage 3, 4A, 5, 6 and 7 review minors), from eb4ef5c9, beside the
+T13 round 8 (t13h-tree) and the T07 split job 7649462. As before (2026-11-12): each lane in its own worktree and branch, a fresh review
+before any commit, Slurm jobs auto-submitted and reported.
+
+## T12: coordinator rulings (2026-11-13)
+
+- **Q3 (A37 in T12)**, 12:31Z: T12's part runs its own reprocessing of fixtures 7003 and 7004 through the T12 loop machinery, because
+  T12-19's acceptance says "inside a T12 reprocessing" and R31 says "reused", not cited; T10's reading of the recorded log is not T12's
+  evidence. **Q5 (T10)**: moot, T10 is done.
+- **Stage 6, concern 1**, 13:24Z: Q3 is satisfied by a reprocessing through the control-layer machinery (contract, admission, receipts,
+  checks by digest, labels, publish, identity-keyed cache) without an outer-round family: a round family would need a fake derivation,
+  which R31 does not ask for.
+- **OI-8** (stage 4 fix round 1, 20:53Z): T10's frozen replay tolerance holds for a destriper product against a product of the same recipe
+  only on the record's pointing (t10-destripe/1, seed 20260): each is within kappa eps of the exact solution, so they differ by at most
+  2 kappa eps < tau = safety kappa eps; the 1e-13 record applies to noisy products stopped at 1e-13 too. Every destriper result names the
+  ruling. Before the tolerance is applied, T10's own derivation checks run on the reference product's pointing; any other pointing is
+  rejected.
+- **The A32 label**, 21:14Z: every report of T12 states A32 as "executed, harness-side check" (E32R runs `build_response.py` on frozen and
+  variant T08 products; the pairing refusal is the harness's, because the tool records no structured product or configuration identity, an
+  open item). A `check_side` field in the runtime record is carried as a minor.
+- **Q2 (A13 reproducibility)**, stage 5 fix round 1: the stage 4 numerical comparator with T10's frozen tolerance under OI-8, on the frozen
+  pointing only; larger sizes `incomplete` (OI-12). A coordinator ruling for the user to confirm; the user has not ruled on Q2 itself.
+
+## T13 harness review: the user's answers, and T12 OI-6 (the user, 2026-11-13)
+
+At 20:30Z, on the harness review (jobs/t13-harness/REVIEW.md, NOT READY 3/4/6/2) and T12 stage 4's open items:
+- C2 (a relative `..` in a command stopped the evaluation): "Follow cd, then flag (Recommended)": the harness follows `cd` within a
+  command, then flags non-search references outside the allowed roots (recorded in the run record and `FLAGS.jsonl`); searches, and
+  references to the repository, protected roots, `~/.claude`, `~/.claude.json` or anything in `$HOME`, still stop. This departs from spec
+  3.8's text (stop), as the user's answer.
+- Reading 8 (a max-turns or budget stop): "Count as SUT failure (Recommended)": recorded completed with no valid report (reported null),
+  scored fail, never rerun; not "crashed".
+- Reading 10 (network beyond the model API is not enforced; Bash has network): "Record departure (Recommended)": network commands are
+  flagged, and the departure is stated in the harness spec (section 8). It is a design limit of T13, not a process breach, so it is not a
+  row of deviations.md.
+- T12 OI-6 (T09's close-out replay tolerance as T09's reproducibility tolerance): "Leave open (Recommended)": T09's numerical and
+  statistical comparator forms stay `incomplete`.
+- **Coordinator's reading** (fix round 2, 21:56Z): a relative reference into the run root (`ls ..`, `../../C/rep-1/in.csv`) is a flag, as
+  the user's C2 answer; an absolute reference into the run root, and any reference into the repository, protected roots, `~/.claude` or
+  `$HOME`, stops. Later rulings on single harness rules (fix rounds 3 and 5) are in jobs/t13-harness/REPORT.md.
+
+## A13 reopened: the GPU (the user, 2026-11-13)
+
+21:37Z, the user: "A13: GPU part: allow use GPU". This reopens A13 (R30); the answer to T12 Q1 recorded above ("Record blocked-by-resource
+(Recommended)") is superseded and stands only as history; R14's `blocked-by-resource` no longer applies to A13. Asked, the user chose the
+subchain "T10 destriper (Recommended)" (the only recipe with a frozen reproducibility tolerance) and the partition "B6000 devel
+(Recommended)" (`b6000-al9_devel`, 1 GPU, the existing `torch-gpu/venv-cu130`, nothing installed). U8 ("Use the site GPU partition")
+stands. Order: R30's hardware job, then the stage 5 lane, pilot, measurement.
+- R30 hardware job 7648670 (hw-check.sh 140cbcbe..., 1:04) PASS: hp-rtx6kp02, NVIDIA RTX PRO 6000 Blackwell Server Edition, driver
+  590.48.01, capability 12.0, about 96 GiB; torch 2.14.1+cu130; a float64 2048 solve agreed with the CPU to 1.9e-15 relative.
+- Jobs of record (all PASS): CPU job 7649128 (benchmark, T12-14), pilot 7649129, measurement 7649143. On the frozen pointing 6 of 6 GPU runs
+  passed the stage 4 comparator at T10's frozen tolerance (15 iterations; differences 4e-16 to 2e-15); the scans (1,048,576 and 16,777,216
+  samples) are `incomplete` (OI-12; 78 and 148 iterations equal to the CPU's; differences 6-12e-15 as readings) and their GPU timings stay
+  sealed. A13's outcome: the GPU subchain equals the CPU recipe within T10's tolerance where a tolerance exists; no GPU speed number is
+  released at the scan sizes (needs a derived tolerance for such a pointing and the user's freeze; proposal in t12-stage-plan.md, stage 5).
+- Sandbox fix: the first pilot 7648901 failed because its bwrap made a fresh `/dev` (no `/dev/nvidia*`); both GPU scripts now bind `/dev`
+  and check CUDA inside the sandbox (exit 3 if unseen). The pilot rerun 7648934 and round 0's CPU job 7648900 are readings only.
+
+## T13: the stop and flag policy (the user, 2026-11-13T23:33Z)
+
+The user: "go ahead with all of it" (the coordinator's proposed policy for stops and flags; the harness lane's report dates it 2026-11-14,
+the local date):
+1. Whether a stopped attempt is spent is decided before scoring, from the command log only.
+2. Categories: A, a false positive of the guard: not spent, rerun once as a harness cause; B, a real attempt whose output never reached the
+   model: not spent, the repetition scored FAIL; C, outside data reached the model: spent (a new holdout is needed).
+3. B is recorded as completed with no valid report (scored fail).
+4. Harness: `output_reached_model` in the stop record, a resume mode, just-in-time per-session staging of inputs, a task-free stop summary
+   for the builders.
+5. Flags are reviewed after the run and before scoring, with the same table.
+6. The shakedown measures the false-stop rate first. A second account remains the only full closure (a stated limit).
+Built as harness spec section 9 and fix round 6.
+
+## T07: attempt 2 by a method change (the user, 2026-11-14)
+
+00:21Z, the user: "do T07: attempt 2 (a method change and a return to Freeze B)". The coordinator: attempt 2 needs a method change that
+first meets K1-K8 on block 1 (block 12 is the last evaluation block). Asked, the user chose "Post-fit split test (Recommended)": after AMVF,
+each fitted vertex is tested for two vertices by a two-vertex refit of its own tracks, accepted on a likelihood gain beyond a threshold
+fixed in advance from statistics, never scanned. Developed in t07diag-tree behind a compile-time switch (the frozen recipe untouched), with a
+pre-registration and predictions, a fresh review and one block-1 job. A return to Freeze B only on the user's word after K1-K8 are met; then
+attempt 2 on block 12 at 99 %. Until then T07's outcome stays **failed at attempt 1**; the earlier section ("no attempt 2"; "a remedy ... the
+user's to start") is not corrected, it is followed by this word.
+- Built (SPLIT-REPORT.md, review SPLIT-REVIEW.md READY TO SUBMIT 0/0/4/4): pre-registration `jobs/t07-vz-diag/t07-split-prereg.md` d6151d34,
+  deviation 1 `t07-split-deviation-1.md` e6bede81 (the rule is recorded in the vertex_fitter line's value, because the vertex configuration
+  keys are fixed), job t07-split.sh cef676f7, SOURCES-split 143a6e5f. Rule: every AMVF vertex with at least 4 own tracks, cut at the largest
+  z0 gap, three Billoir fits; split if the chi2 gain on 3 dof exceeds the quantile at alpha 1e-3 / B(n), B(n) = 2^(n-1) - 1 - n
+  (thresholds 18.58 to 26.26 for n = 4..8). Predicted: K8 met; K1 likely not met (about 2 in 3); not a confident call.
+- Submitted 01:07Z (auto-submit), development job 7649462 on block 1; running when these records were written.
+
+## T13 design: sandbox and Slurm runner, and the shakedown (the user, 2026-11-14)
+
+After a login check (bwrap 0.4.1 works, `$HOME` and `/ceph` hidden inside; API reachable) and a compute-node check (job 7649480, hpa-wn33:
+API reachable, bwrap ok; no data, no model call), at 01:16Z the user chose:
+- "Add sandbox (Recommended)": bwrap per session: its own folder as home and working folder, the plugin snapshot read-only, system and CLI
+  read-only, interpreters and backends read-only, a config folder with credentials only; `$HOME`, `/ceph`, the repository, the run root and
+  other tasks' inputs absent.
+- "Flag, review later (Recommended)": inside the sandbox an attempt to reach outside its root is a flag reviewed before scoring, never a stop
+  or a fail; stops remain for a missing or broken sandbox, isolation and guard errors. This supersedes "B = fail" of the stop and flag policy
+  for sandboxed runs.
+- "Slurm compute nodes (Recommended)": the runner submits jobs; the run window is away from the login node.
+- "Locally in the job (Recommended)": `requires_execution` tasks run inside the session's allocation with backends read-only; no Slurm
+  access from the sandbox.
+Built as harness round 8 after the final re-review 5.
+
+01:17Z, the user: "go-ahead" (after the plan: round 8 sandbox and Slurm runner, then the paid shakedown "on your go-ahead"). Read as:
+proceed with round 8, and the paid shakedown on the development set as described (1 real session on a compute node in the sandbox, then the
+6 development groups x 1 repetition; at most 7 paid sessions, each capped by the settings record's session budget), once round 8 is reviewed
+and its job of record passes. The SUT model and plugin commit for the shakedown are confirmed with the user before the first paid session.
+The holdout is still not established; the SUT, the budget for 3 x (number of tasks) sessions and the holdout remain the user's.
+
+## T07: final at "failed at attempt 1" (the user, 2026-11-14)
+
+The post-fit split study (pre-registration `jobs/t07-vz-diag/t07-split-prereg.md` d6151d34; deviation 1 e6bede81; review SPLIT-REVIEW.md
+READY TO SUBMIT) ran as development job 7649462 on block 1 (34 min 7 s, 4.6 GB; valid: K8 6/6, 0 failed vertexing events). K1 NOT MET (o1
+pooled z tail 0.929 % noise, 0.898 % clean; maximum 0.50 %), K2 NOT MET (0/3), K3 5/6; K4-K8 met. The test split 18 to 26 of about 4,450
+tested vertices per o1 bin; merged vertices 354/364/321 against 356/367/323 (predicted a 45-80 % fall; refuted). With the threshold fixed for
+validity, the z0-based two-group test has too little power on the fixture's merged clusters. By the pre-registration (one candidate, no
+second value) the study ended. Six principled candidates have now failed on block 1: C1-C3, S1, S2 and the split test.
+
+The user's answer, verbatim: "accept T07 failed at attempt 1, auto continue". T07's outcome is final: failed at attempt 1 on block 11. No
+return to Freeze B and no attempt 2; block 12 stays unread. The recorded cause: AMVF at ACTS defaults merges 3-track vertex pairs 5 to 7.5 u_v
+apart, which the fixture's far range [5, 25) u_v admits and v4 section 17 lists as "where confusion really happens". A Freeze A amendment
+of the far range, the only other route the diagnosis names, was not taken.
