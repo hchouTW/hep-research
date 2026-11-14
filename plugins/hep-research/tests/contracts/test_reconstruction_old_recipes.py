@@ -91,7 +91,13 @@ class OldItemsKeepTheirResult(unittest.TestCase):
     def test_results_match_the_record(self):
         results = current_results()
         self.assertTrue(RECORDED.is_file(), "no record yet; current results:\n" + json.dumps(results, indent=1, sort_keys=True))
-        self.assertEqual(results, load(RECORDED))
+        recorded = load(RECORDED)
+        if not any(ROOT.glob("examples/*/output")):
+            # tools/check_ams_optional.py runs tests/contracts on a copy without the examples' output/ folders: there the
+            # example responses are absent, and everything else must still match (CI fix round of PR #411)
+            recorded["responses"] = {k: v for k, v in recorded["responses"].items() if not k.startswith("examples/")}
+            self.assertGreater(len(recorded["responses"]), 0)
+        self.assertEqual(results, recorded)
 
 
 if __name__ == "__main__":

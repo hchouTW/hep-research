@@ -1,5 +1,5 @@
 {
- "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The seven reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2, test_control_layer, test_control_layer_model, test_control_layer_c2, test_control_layer_review330) were added from a local run (Linux, 2026-10-29) until the next CI refresh. The four cross-platform modules (test_interpreter_guard, test_hostcaps, test_partition_guard_variables, test_skill_scripts) carry the median until the next CI refresh. The four detector-simulation modules (test_detsim_identity, test_detsim_schemas, test_detsim_plan, test_detsim_missing_dependency) were added from a local run (macOS arm64, 2026-11-01) until the next CI refresh. test_outputs_keep_their_version was added from a local run (Linux, 2026-11-04) until the next CI refresh. test_g4sim_run and test_g4proto_conservation were added from a local run (Linux, 2026-11-06) until the next CI refresh. The seven simulator-calibration phase-0 modules (test_calibration_use, test_calibration_contract, test_calibration_data, test_calibration_chain, test_calibration_deps, test_calibration_schemas, test_calib_scripts) were added from a local run (Linux, 2026-11-10) until the next CI refresh, and so were the six phase-1 modules (test_calibration_toy, test_calibration_reweight, test_calibration_linear, test_calibration_design, test_calibration_kernel_check, test_calibration_preflight).",
+ "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The seven reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2, test_control_layer, test_control_layer_model, test_control_layer_c2, test_control_layer_review330) were added from a local run (Linux, 2026-10-29) until the next CI refresh. The four cross-platform modules (test_interpreter_guard, test_hostcaps, test_partition_guard_variables, test_skill_scripts) carry the median until the next CI refresh. The four detector-simulation modules (test_detsim_identity, test_detsim_schemas, test_detsim_plan, test_detsim_missing_dependency) were added from a local run (macOS arm64, 2026-11-01) until the next CI refresh. test_outputs_keep_their_version was added from a local run (Linux, 2026-11-04) until the next CI refresh. test_g4sim_run and test_g4proto_conservation were added from a local run (Linux, 2026-11-06) until the next CI refresh. The seven simulator-calibration phase-0 modules (test_calibration_use, test_calibration_contract, test_calibration_data, test_calibration_chain, test_calibration_deps, test_calibration_schemas, test_calib_scripts) were added from a local run (Linux, 2026-11-10) until the next CI refresh, and so were the six phase-1 modules (test_calibration_toy, test_calibration_reweight, test_calibration_linear, test_calibration_design, test_calibration_kernel_check, test_calibration_preflight). The eight tests.contracts.test_t12_* modules (CI fix round of PR #411) come from one local run (login node, --jobs 4): check_ams_optional.py starts a module without a timing last.",
  "source": "median of the passing runs of each module in GitHub Actions runs 39573953922 (PR #191 head ad0fc1f8) and the main run on a5663baa, ubuntu-latest, --jobs 4, Python 3.13 units shards (2 samples per module); refreshed 2026-10-21",
  "seconds": {
   "tests.adapters.test_adapter_declarations": 0.1,
@@ -625,6 +625,14 @@
   "tests.tools.test_ci_plan": 5.5,
   "tests.tools.test_optional_selection": 0.3,
   "tests.tools.test_run_all_checks_git": 0.3,
-  "tests.tools.test_scifix_schemas": 0.2
+  "tests.tools.test_scifix_schemas": 0.2,
+  "tests.contracts.test_t12_a13_gpu": 0.2,
+  "tests.contracts.test_t12_benchmark": 34.2,
+  "tests.contracts.test_t12_comparators": 7.7,
+  "tests.contracts.test_t12_degeneracy": 7.2,
+  "tests.contracts.test_t12_outer_loop": 2.7,
+  "tests.contracts.test_t12_partition": 7.7,
+  "tests.contracts.test_t12_reprocessing": 7.9,
+  "tests.contracts.test_t12_runtime": 348.2
  }
 }
