@@ -5,6 +5,12 @@ Appendix C; owner of the grade rules, the "outcome already determined" lookup an
   calib_use.py judge  --inputs FILE     grade one result: the Appendix C.1 inputs and its upstreams
   calib_use.py lookup --inputs FILE --undecided mandatory-gate,p7,v
                                         before opening: is the outcome already determined (section 10.2 rule 0)?
+  calib_use.py export --record FILE --result FILE
+                                        an exported g4sim condition-snapshot/1 or alignment-overlay/1 against the
+                                        calibration result it cites: the contracts schema, the result's hash in
+                                        source_of_facts and the use matrix (section 10.4, 15.3.19, A21 19-g6);
+                                        accepted (exit 0) or failed (exit 1) with findings; unreadable input
+                                        is rejected (exit 2)
 FILE holds {"inputs": {C.1 fields, own_flags: [...]}, "upstreams": [{"usages": [...], "effective_grade": ...,
 "flags": [...]}]}; field names are those of the reference decision table (Appendix C.1, last column).
 Output: one JSON object. judge: status ok (exit 0) with own_grade (null for a pending input), effective_grade, uses,
@@ -58,7 +64,12 @@ def main(argv=None) -> int:
     lk = sub.add_parser("lookup", help="outcome already determined?")
     lk.add_argument("--inputs", required=True)
     lk.add_argument("--undecided", required=True, help="comma list of mandatory-gate, p7, v")
+    ex = sub.add_parser("export", help="check an exported g4sim snapshot or overlay")
+    ex.add_argument("--record", required=True)
+    ex.add_argument("--result", required=True)
     args = ap.parse_args(argv)
+    if args.cmd == "export":
+        return io.run(lambda: export_check(args.record, args.result))
 
     def go():
         c, ups = _inputs(args.inputs)
@@ -71,6 +82,16 @@ def main(argv=None) -> int:
         except ValueError as exc:
             raise io.InputError(str(exc)) from None
     return io.run(go)
+
+
+def export_check(record_path: str, result_path: str) -> dict:
+    from contracts.schema import validate
+    record, result = io.load_object(record_path), io.load_object(result_path)
+    name = {"condition-snapshot/1": "condition_snapshot.json", "alignment-overlay/1": "alignment_overlay.json"}
+    findings = [{"code": "export.contracts_schema", "message": f"{f.path}: {f.message}"}
+                for f in (validate(record, name[record["schema"]]).errors if record.get("schema") in name else [])]
+    findings += use.check_export(record, result)
+    return {"status": "failed" if findings else "accepted", "findings": findings}   # section 14: a negative is exit 1
 
 
 if __name__ == "__main__":

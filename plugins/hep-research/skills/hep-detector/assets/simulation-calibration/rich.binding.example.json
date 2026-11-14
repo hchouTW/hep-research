@@ -1,0 +1,285 @@
+{
+ "example": "simulation-calibration node binding: RICH",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row RICH",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "Mirror alignment is bound as a detector-spec geometry parameter (a new geometry_id per design point): an alignment-overlay theta is refused while no recorded run applies an overlay (D83 (7)).",
+  "On the full optical tracking path the PDE is part of node 1 (resimulation); neither injection reference can be declared without the photons.csv thinning of section 11.4."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: tracks of known momentum and species"
+    },
+    {
+     "id": "radiator",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 Cherenkov emission (n, dispersion), optical propagation and mirrors, and the PDE at the sensor surface: full optical tracking in g4sim_run (section 11.4)",
+     "samplable": true,
+     "mechanisms": [
+      "physics-process",
+      "geometry-material",
+      "transport-diffusion",
+      "yield"
+     ]
+    },
+    {
+     "id": "sensor",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b photodetector gain (response stage 3)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 threshold, time",
+     "mechanisms": [
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "reco",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 light spots, ring and Cherenkov angle",
+     "mechanisms": [
+      "association"
+     ]
+    },
+    {
+     "id": "ring",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: Cherenkov angle and photon count per beta"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "radiator"
+    },
+    {
+     "from": "radiator",
+     "to": "sensor"
+    },
+    {
+     "from": "sensor",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "reco"
+    },
+    {
+     "from": "reco",
+     "to": "ring"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "aerogel_rindex",
+    "role": "theta",
+    "nodes": [
+     "radiator"
+    ],
+    "mechanism": "physics-process",
+    "physical_bounds": [
+     1.0,
+     1.2
+    ],
+    "sampling_bounds": [
+     1.01,
+     1.08
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/materials/Aerogel/optical/rindex/value/0"
+     }
+    ]
+   },
+   {
+    "name": "mirror_tilt",
+    "role": "theta",
+    "nodes": [
+     "radiator"
+    ],
+    "mechanism": "geometry-material",
+    "physical_bounds": [
+     -10.0,
+     10.0
+    ],
+    "sampling_bounds": [
+     -3.0,
+     3.0
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/params/mirror_tilt_mrad"
+     }
+    ]
+   },
+   {
+    "name": "sensor_efficiency",
+    "role": "theta",
+    "nodes": [
+     "radiator"
+    ],
+    "mechanism": "yield",
+    "physical_bounds": [
+     0.0,
+     1.0
+    ],
+    "sampling_bounds": [
+     0.1,
+     0.5
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/optical_surfaces/photocathode/efficiency/value/0"
+     }
+    ]
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "sensor"
+    ],
+    "mechanism": "fluctuation",
+    "physical_bounds": [
+     0.1,
+     10.0
+    ],
+    "sampling_bounds": [
+     0.5,
+     2.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/0/parameters/gain/value"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_beta",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "ring"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal",
+     "physics_list": "FTFP_BERT_EMZ"
+    }
+   ],
+   "absorbed": []
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "Rayleigh scattering in the radiator turned off versus on (run card optical process)",
+    "observable": "photon count per ring and the background of hits off the ring",
+    "identity_difference": "run card /physics/optical/rayleigh"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "a measured rindex dispersion table replacing a constant index",
+    "observable": "Cherenkov-angle width versus beta",
+    "identity_difference": "detector-spec rindex spectrum (a different material table, a different model)"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "radiator": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "sensor": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "distribution": "poisson"
+    },
+    "electronics": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "reco": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}

@@ -51,6 +51,18 @@ class ToyDetector(unittest.TestCase):
         self.assertEqual(run_toy(self.plan)["status"], "passed")          # registered as it is sampled
 
 
+class NormalDensityRecord(unittest.TestCase):
+    def test_15_3_19_normal_density_is_not_distinguished_inside_the_prior(self):
+        """A property of P0 on the toy detector (A23, A24): with the photon kernel registered as normal instead of
+        Poisson, P0 passes inside the narrow prior box (light yield 97-103, large photon counts). Section 15.3.19's case
+        is judged where the density matters, on the Poisson-interval LY reweighting of the g4sim path
+        (test_calibration_evaluator_problem.PoissonIntervalLightYield)."""
+        plan = copy.deepcopy(H.toy_design()["plan"])
+        plan["evaluator"]["events"] = 20_000
+        plan["kernels"]["photon_generation"]["registration"] = {"density": "normal"}
+        self.assertEqual(run_toy(plan)["status"], "passed")
+
+
 class MissingSupport(unittest.TestCase):
     def check(self, proposal=None):
         c, p = H.uniform_chain(proposal)

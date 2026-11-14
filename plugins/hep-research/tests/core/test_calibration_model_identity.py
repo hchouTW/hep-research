@@ -20,6 +20,7 @@ import calibration_g4sim_fixtures as G  # noqa: E402
 from contracts import geometry  # noqa: E402
 from contracts.schema import validate  # noqa: E402
 from core.calibration import contract as cc  # noqa: E402
+from core.calibration import deps  # noqa: E402
 from core.calibration import model_identity as mi  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
 from core.geometry import identity as gid  # noqa: E402
@@ -272,6 +273,47 @@ class ContractClause1Item2(unittest.TestCase):
         rebuilt = ident(build_environment=dict(G.BUILD, build_hash="cd" * 32))
         self.assertEqual(mi.changed_items(ident(), rebuilt), ["build_environment"])
         self.assertEqual(mi.changed_items(ident(), ident(simulation_request=G.request_text("900"))), [])
+
+
+class IdentityChangeRedo(unittest.TestCase):
+    """Section 10.3 and 15.3.19 (phase 4): after build_hash changes the result is marked as needing a redo, and so
+    after any change of the five masked items; theta, phi values and provenance_id alone do not (A21: without a T2
+    record the result is redone; the T2 carry-over itself: test_calibration_deps)."""
+
+    def setUp(self):
+        self.result = {"result_sha256": "ef" * 32, "model_identities": [{"model": "nominal", "identity": ident()}]}
+
+    def decide(self, **over):
+        return deps.identity_decision(self.result, [{"model": "nominal", "identity": ident(**over)}])
+
+    def test_build_hash_change_marks_a_redo(self):
+        d = self.decide(build_environment=dict(G.BUILD, build_hash="cd" * 32))
+        self.assertEqual((d["status"], d["decision"], d["changed"]), ("failed", "redo",
+                                                                     {"nominal": ["build_environment"]}))
+        self.assertEqual(self.decide()["decision"], "unchanged")                  # positive control
+
+    def test_each_identity_change_marks_a_redo(self):
+        for name, over, item in (
+                ("Geant4 version", {"build_environment": dict(G.BUILD, geant4_version="11.3.0")}, "build_environment"),
+                ("data set version", {"build_environment": dict(G.BUILD, datasets={"G4EMLOW": "8.6",
+                                                                                   "G4ENSDFSTATE": "2.3"})},
+                 "build_environment"),
+                ("material", {"detector_spec": G.detector_text().replace(b'"density_g_cm3": "1.85"',
+                                                                         b'"density_g_cm3": "1.9"')}, "detector_spec"),
+                ("response stage", {"response_pipeline": _with(G.pipeline(), 0, "resolution_scale", 0.7)},
+                 "response_pipeline"),
+                ("efficiency map", {"efficiency_map": G.efficiency_map(seed=8)}, "response_pipeline")):
+            with self.subTest(name):
+                d = self.decide(**over)
+                self.assertEqual((d["decision"], d["changed"]), ("redo", {"nominal": [item]}))
+
+    def test_theta_values_and_provenance_do_not(self):
+        for name, over in (("design point / written-back theta", {"simulation_request": G.request_text("900")}),
+                           ("provenance_id", {"detector_spec": G.detector_text(
+                               source_of_facts={"/materials": "other source"}),
+                               "condition_snapshot": G.snapshot(description="conditions v2")})):
+            with self.subTest(name):
+                self.assertEqual(self.decide(**over)["decision"], "unchanged")
 
 
 class DigiJob(unittest.TestCase):

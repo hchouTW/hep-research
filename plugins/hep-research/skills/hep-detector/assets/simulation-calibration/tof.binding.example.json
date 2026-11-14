@@ -1,0 +1,377 @@
+{
+ "example": "simulation-calibration node binding: TOF",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row TOF",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "The scintillation emission time (decay_ns, rise_ns) is a detector-spec scintillation field other than Birks, LY and r: no Table 2 row, so it is not a theta here.",
+  "TTS and the effective light speed enter through the digitization job's timing and the map's transit times, which no Table 2 row binds; the attenuation length is bound through the optical row (resimulation with a new mapping run).",
+  "The internal constraint from the tracker uses an upstream result referenced by hash in a real contract."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: particles of known momentum and species"
+    },
+    {
+     "id": "scintillator",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 scintillator deposition (g4sim_run)",
+     "samplable": true
+    },
+    {
+     "id": "quanta",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "2 scintillation photons including emission time (response stage 1)",
+     "mechanisms": [
+      "yield",
+      "time"
+     ]
+    },
+    {
+     "id": "light",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "3 light propagation, attenuation, path dispersion (efficiency map with transit)",
+     "mechanisms": [
+      "transport-diffusion",
+      "time"
+     ]
+    },
+    {
+     "id": "pde",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4a photoelectric conversion and TTS",
+     "mechanisms": [
+      "yield",
+      "time"
+     ]
+    },
+    {
+     "id": "sensor",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b gain",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "tdc",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 TDC and slewing",
+     "mechanisms": [
+      "time",
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "tracker_path",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "control variable from another subsystem: track length and momentum from the tracker"
+    },
+    {
+     "id": "reco",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 time points and beta, with T0 and slewing corrections",
+     "mechanisms": [
+      "time"
+     ]
+    },
+    {
+     "id": "beta",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: beta and time residual per species and hit position"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "scintillator"
+    },
+    {
+     "from": "scintillator",
+     "to": "quanta"
+    },
+    {
+     "from": "quanta",
+     "to": "light"
+    },
+    {
+     "from": "light",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "sensor"
+    },
+    {
+     "from": "sensor",
+     "to": "tdc"
+    },
+    {
+     "from": "tdc",
+     "to": "reco"
+    },
+    {
+     "from": "source",
+     "to": "tracker_path"
+    },
+    {
+     "from": "tracker_path",
+     "to": "reco"
+    },
+    {
+     "from": "reco",
+     "to": "beta"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "light_yield",
+    "role": "theta",
+    "nodes": [
+     "quanta"
+    ],
+    "mechanism": "yield",
+    "physical_bounds": [
+     1.0,
+     2000.0
+    ],
+    "sampling_bounds": [
+     50.0,
+     500.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/0/parameters/light_yield_per_MeV/value"
+     }
+    ]
+   },
+   {
+    "name": "attenuation_length",
+    "role": "theta",
+    "nodes": [
+     "light"
+    ],
+    "mechanism": "transport-diffusion",
+    "physical_bounds": [
+     100.0,
+     10000.0
+    ],
+    "sampling_bounds": [
+     500.0,
+     5000.0
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/materials/PlasticScint/optical/absorption_length_mm/value/0"
+     }
+    ]
+   },
+   {
+    "name": "t0",
+    "role": "theta",
+    "nodes": [
+     "reco"
+    ],
+    "mechanism": "time",
+    "physical_bounds": [
+     -5.0,
+     5.0
+    ],
+    "sampling_bounds": [
+     -1.0,
+     1.0
+    ],
+    "bindings": [
+     {
+      "document": "reconstruction",
+      "pointer": "/counters/0/t0_ns"
+     }
+    ]
+   },
+   {
+    "name": "slewing",
+    "role": "theta",
+    "nodes": [
+     "reco"
+    ],
+    "mechanism": "time",
+    "physical_bounds": [
+     0.0,
+     10.0
+    ],
+    "sampling_bounds": [
+     0.0,
+     3.0
+    ],
+    "bindings": [
+     {
+      "document": "reconstruction",
+      "pointer": "/slewing/coefficient"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_momentum",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "beta"
+   },
+   {
+    "id": "tracker_length",
+    "type": "internal-constraint",
+    "edge": {
+     "from": "tracker_path",
+     "to": "reco"
+    },
+    "observation": "beta"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal",
+     "physics_list": "FTFP_BERT_EMZ"
+    }
+   ],
+   "absorbed": []
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "full optical tracking replacing the efficiency map and its mapped transit times",
+    "observable": "time residual versus hit position along the counter",
+    "identity_difference": "run card optical processes on; no efficiency_map stage"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "a second scintillation component with its own decay time",
+    "observable": "leading-edge time versus pulse height (slewing shape)",
+    "identity_difference": "detector-spec scintillation components (a different material table)"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "scintillator": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "quanta": {
+     "table1": "2",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "stage": "scintillation"
+    },
+    "light": {
+     "table1": "3",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "pde": {
+     "table1": "4a",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "sensor": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "distribution": "poisson"
+    },
+    "tdc": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "reco": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}

@@ -280,7 +280,10 @@ REWEIGHTABLE = ("poisson", "binomial", "multinomial")
 NO_HANDOFF_BEFORE = ("2", "3", "4a", "4b")  # the hand-offs are 3->4 and 4->5 only (section 19): no stored input
 RECORDED_OVERLAY_RUN = False                # D83 (7): geant4_run.py run-spec takes no overlay (section 19, C25)
 DISCRETE_RUN_FIELDS = ("/physics/reference_list", "/physics/em_option", "/physics/em_constructor",
-                       "/physics/extra_constructors", "/physics/fast_sim")
+                       "/physics/extra_constructors", "/physics/fast_sim",
+                       # model choices too (XTR radiator class, PAI model requests, optical and decay switches;
+                       # phase-4 WP-P finding): a discrete model M, never a continuous theta
+                       "/physics/pai", "/physics/xtr", "/physics/optical", "/physics/decay")
 _PIPE_VALUE = re.compile(r"^/stages/(\d+)/parameters/([^/]+)/value$")
 _SNAPSHOT = re.compile(r"^/iovs/\d+/rows/\d+/([^/]+)$")
 _OVERLAY = re.compile(r"^/shifts/\d+/(delta_mm|rotation/zyx_deg)/[0-2]$")

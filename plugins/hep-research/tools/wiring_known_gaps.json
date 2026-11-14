@@ -16,7 +16,8 @@
    "references/detector-simulation.md",
    "references/detector-design-principles.md",
    "references/front-end-electronics-and-signal-processing.md",
-   "references/event-reconstruction.md"
+   "references/event-reconstruction.md",
+   "references/simulation-calibration/index.md"
   ],
   "hep-ml": [
    "references/deep-learning-guide.md"

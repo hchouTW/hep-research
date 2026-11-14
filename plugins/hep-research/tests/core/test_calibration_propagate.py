@@ -126,6 +126,52 @@ class Segmented(unittest.TestCase):
         self.assertNotEqual(v1["version_id"], P.version({**payload, "values": {"theta": [0.2]}})["version_id"])
 
 
+class SingleEta(unittest.TestCase):
+    """Section 15.3.17 "Propagation (central)", single eta: the upstream exports (eta-hat, Sigma_eta); the segmented
+    calibration equals the joint fit; with the prior N(0, 1) substituted it fails (counterexample)."""
+
+    def setUp(self):
+        s = two_segments(seed=5)
+        s["s2"] = 0.1 * s["s2"]                     # segment 2 barely measures eta: the upstream posterior matters
+        n1, n2 = s["n1"], s["n2"]
+        rng = np.random.default_rng(11)
+        y1 = s["J1"] @ np.array([0.4, -0.2]) + s["s1"] * 0.3 + rng.normal(size=n1) * np.sqrt(V)
+        y2 = s["J2"] @ np.array([0.7]) + s["K2"] @ np.array([0.4, -0.2]) + s["s2"] * 0.3 \
+            + rng.normal(size=n2) * np.sqrt(V)
+        X = np.zeros((n1 + n2, 4))
+        X[:n1, :2], X[:n1, 3] = s["J1"], s["s1"]
+        X[n1:, :2], X[n1:, 2:3], X[n1:, 3] = s["K2"], s["J2"], s["s2"]
+        bj, Cj = gls(X, np.r_[y1, y2], np.diag([0, 0, 0, 1.0]), np.zeros(4))
+        self.bj, self.Cj = bj[:3], Cj[:3, :3]
+        b1, C1 = gls(np.c_[s["J1"], s["s1"]], y1, np.diag([0, 0, 1.0]), np.zeros(3))
+        self.pkg = P.export(b1[:2], b1[2:], C1, [0, 1], [2], zeta_keys=["eta:release"])
+        self.s, self.y2 = s, y2
+
+    def segment2(self, zmean, Sz):
+        s, pkg = self.s, self.pkg
+        Gx, Gz = pkg["G_xi"], pkg["G_zeta"]
+        Xs = np.c_[s["J2"], s["K2"] @ Gx, s["K2"] @ Gz + s["s2"][:, None]]
+        Pm = np.zeros((4, 4))
+        Pm[1:3, 1:3] = np.eye(2)
+        Pm[3, 3] = 1.0 / Sz[0, 0]
+        pm = np.r_[0.0, 0.0, 0.0, zmean]
+        est, C = gls(Xs, self.y2 - s["K2"] @ (pkg["theta_hat"] - Gz @ pkg["zeta_hat"]), Pm, pm)
+        T = np.zeros((3, 4))
+        T[:2, 1:3], T[:2, 3:4], T[2, 0] = Gx, Gz, 1.0
+        th1 = pkg["theta_hat"] + Gx @ est[1:3] + Gz @ (est[3:4] - pkg["zeta_hat"])
+        return np.r_[th1, est[0]], T @ C @ T.T
+
+    def test_exported_eta_posterior_equals_the_joint_fit(self):
+        seg, Cs = self.segment2(self.pkg["zeta_hat"], self.pkg["Sigma_zeta"])
+        np.testing.assert_allclose(seg, self.bj, atol=1e-10)
+        np.testing.assert_allclose(Cs, self.Cj, rtol=1e-8, atol=1e-12)
+        self.assertTrue(agree(seg, Cs, self.bj, self.Cj))
+
+    def test_prior_in_place_of_the_eta_posterior_fails(self):
+        seg, Cs = self.segment2(np.zeros(1), np.eye(1))
+        self.assertFalse(agree(seg, Cs, self.bj, self.Cj))
+
+
 H = {k: hashlib.sha256(k.encode()).hexdigest() for k in "ABCDEFGH"}
 
 
@@ -202,6 +248,39 @@ class Conflicts(unittest.TestCase):
         r = deps.check_packages([{"id": "p1", "upstream": H["A"], "joint_factor": ["p1", "p2"]},
                                  {"id": "p2", "upstream": H["B"]}], u)
         self.assertEqual(r, [])
+
+    def test_forced_joint_fits_reported(self):
+        """A21 19-g8: xi has no versions; each joint fit the conflict rules force is reported (one entry per group of
+        packages fitted together, with every reason), and none when the packages are independent (control)."""
+        A, B, C, D, E = (H[k] for k in "ABCDE")
+        u = {H[k]: v for k, v in ups({"B": ["A"], "C": ["A"]}).items()}
+        pk = [{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C},
+              {"id": "p3", "upstream": D, "zeta": {"eta": "v1"}}, {"id": "p4", "upstream": E, "zeta": {"eta": "v2"}}]
+        f = deps.check_packages(pk, u)
+        jf = deps.forced_joint_fits(pk, f)
+        self.assertEqual([g["packages"] for g in jf], [["p1", "p2"], ["p3", "p4"]])
+        self.assertEqual([r["code"] for r in jf[0]["reasons"]], ["deps.source_overlap"])
+        self.assertTrue(jf[0]["xi_involved"])
+        self.assertEqual(jf[1]["reasons"][0]["code"], "deps.version_conflict")
+        self.assertFalse(jf[1]["xi_involved"])
+        # a chain p1-p2 (overlap) and p2-p3 (common source) is one joint fit
+        pk2 = [{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C}, {"id": "p3", "upstream": D}]
+        f2 = deps.check_packages(pk2, u, common_sources={"p2": {"raw:run-7"}, "p3": {"raw:run-7"}})
+        jf2 = deps.forced_joint_fits(pk2, f2)
+        self.assertEqual(len(jf2), 1)
+        self.assertEqual(jf2[0]["packages"], ["p1", "p2", "p3"])
+        # control: independent packages force nothing; a refusal of one package is not a joint fit
+        u0 = {H[k]: v for k, v in ups({"B": ["D"], "C": ["E"]}).items()}
+        ind = [{"id": "p1", "upstream": B}, {"id": "p2", "upstream": C}]
+        self.assertEqual(deps.forced_joint_fits(ind, deps.check_packages(ind, u0)), [])
+        tn = [{"id": "p1", "upstream": D, "exports": ["theta", "nu"]}]
+        self.assertEqual(deps.forced_joint_fits(tn, deps.check_packages(tn, {})), [])
+
+    def test_no_versions_for_xi(self):
+        """A21 19-g8: a package citing a version of xi is refused; without it (control) the package is accepted."""
+        r = deps.check_packages([{"id": "p1", "upstream": H["D"], "xi_version": H["E"]}], {})
+        self.assertEqual([f["code"] for f in r], ["deps.xi_version"])
+        self.assertEqual(deps.check_packages([{"id": "p1", "upstream": H["D"]}], {}), [])
 
     def test_numbers_instead_of_hashes_rejected(self):
         self.assertFalse(deps.is_hash_reference("0.123"))

@@ -80,6 +80,29 @@ class Scripts(unittest.TestCase):
         self.assertEqual((rc, out["version_id"]), (0, v["version_id"]))
         self.assertEqual(json.loads((self.d / "final.json").read_text())["result_sha256"], out["result_sha256"])
 
+    def test_calib_deps_invalidation(self):
+        """Phase 4: section 10.3 upstream invalidation and the A21 (section 19-g7) identity decision through the CLI;
+        the engine cases are in tests/core/test_calibration_deps.py."""
+        import test_calibration_deps as TD
+        up, down = TD.result(TD.H[0]), TD.result(TD.H[1], upstream=[(TD.H[0], ["xi"])])
+        x = {"results": [down], "changes": [{"old": up, "new": TD.result(TD.H[3], contract=4)}]}
+        rc, out = run("calib_deps.py", "invalidate", "--input", self.put("i.json", x))
+        self.assertEqual((rc, out["status"], list(out["redo"])), (1, "failed", [TD.H[1]]))
+        rc, out = run("calib_deps.py", "invalidate", "--input", self.put("i0.json", dict(x, changes=[])))
+        self.assertEqual((rc, out["status"]), (0, "ok"))                            # control
+        rc, out = run("calib_deps.py", "invalidate", "--input", self.put("ib.json", {"results": 1}))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        res = TD.result_doc()                                  # A24: the result carries its hash-bound t2_basis
+        y = {"result": res, "current": TD.ids("cd"), "basis": {"new_build_first_run": TD.BASIS["new_build_first_run"]}}
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y.json", y))
+        self.assertEqual((rc, out["decision"]), (1, "redo"))                        # no T2 record
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y1.json", dict(y, record=TD.t2())))
+        self.assertEqual((rc, out["decision"], out["flags"][0]), (0, "carried-over", "identity-carried-over"))
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y2.json", dict(y, record=TD.t2(shift=0.5))))
+        self.assertEqual((rc, out["decision"]), (1, "redo"))
+        rc, out = run("calib_deps.py", "identity", "--input", self.put("y3.json", dict(y, record={"schema": 1})))
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+
     def test_calib_chain(self):
         for name in ("ecal", "rich", "tracker"):
             rc, out = run("calib_chain.py", "candidates", "--contract", FIXTURE_DIR / f"{name}.json")
@@ -322,6 +345,25 @@ class Phase1Scripts(unittest.TestCase):
                                                                            (0.0, 0.5, 1.0)]}))
         rc, out = run("calib_kernel_check.py", "p0", "--contract", c, "--plan", p, "--points", pts, "--seed", 11)
         self.assertEqual((rc, out["status"]), (0, "passed"))
+
+    def test_calib_contrib(self):
+        """Phase 4 (section 10.5, 15.3.18): a decomposition (exit 0), no decomposition when a subset is below the ESS
+        threshold of G4 (exit 1), the object required (exit 2)."""
+        import test_calibration_contrib as TC
+        th = self.put("th.json", {})
+        c, p = self.chain(TC.chain(2)[:2])
+        args = ("decompose", "--contract", c, "--plan", p, "--theta", th, "--observable", "res", "--bootstrap", 50)
+        rc, out = run("calib_contrib.py", *args, "--object", "variance")
+        self.assertEqual((rc, out["status"], out["object"], out["method"]), (0, "ok", "variance", "exhaustive"))
+        self.assertAlmostEqual(out["sum_of_terms"], out["total"], places=10)
+        rc, out = run("calib_contrib.py", *args)
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
+        self.assertIn("contrib.object", out["error"])
+        c, p = self.chain(TC.chain(2, method="analytic-reweighting", removal=0.4, n_data=320)[:2])
+        rc, out = run("calib_contrib.py", "decompose", "--contract", c, "--plan", p, "--theta", th, "--observable",
+                      "res", "--object", "resolution", "--bootstrap", 50)
+        self.assertEqual((rc, out["status"], out["finding"]), (1, "failed", "contrib.ess"))
+        self.assertNotIn("terms", out)
 
     def test_calib_reweight(self):
         c, p = self.chain(H.gaussian_chain())
@@ -766,6 +808,75 @@ class Phase3MapScripts(unittest.TestCase):
         self.assertEqual((code, out["point"], out["exported"]), (0, 1, False))
         code, out = run("calib_likelihood.py", "map-term", "--input", self.write("mt3.json", {**mt, "mode": "fixed"}))
         self.assertEqual((code, out["code"]), (2, "map_term.fixed"))
+
+
+
+class Phase4ExportScripts(unittest.TestCase):
+    """Phase 4, WP-N: calib_propagate.py g4sim writes the exported condition snapshot or alignment overlay;
+    calib_use.py export checks it (section 10.4, 15.3.19, A21 19-g6); calib_deps.py packages lists each forced joint
+    fit (A21 19-g8)."""
+
+    def setUp(self):
+        import test_calibration_export as export_tests
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+        self.export_tests = export_tests
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, record):
+        p = self.d / name
+        p.write_text(json.dumps(record, default=sorted))
+        return p
+
+    def test_export_and_check(self):
+        r, c = self.export_tests.result(), self.export_tests.contract()
+        res, con = self.write("r.json", r), self.write("c.json", c)
+        for name, tpl in (("snap", G4.snapshot()), ("over", G4.overlay())):
+            with self.subTest(name):
+                out_path = self.d / f"{name}.out.json"
+                code, out = run("calib_propagate.py", "g4sim", "--template", self.write(f"{name}.json", tpl),
+                                "--result", res, "--contract", con, "--use", "production", "--out", out_path)
+                self.assertEqual((code, out["status"]), (0, "written"))
+                code, chk = run("calib_use.py", "export", "--record", out_path, "--result", res)
+                self.assertEqual((code, chk["status"], chk["findings"]), (0, "accepted", []))
+                bare = {k: v for k, v in json.loads(out_path.read_text()).items() if k != "source_of_facts"}
+                code, chk = run("calib_use.py", "export", "--record", self.write(f"{name}.bare.json", bare),
+                                "--result", res)
+                self.assertEqual((code, [f["code"] for f in chk["findings"]]), (1, ["export.source_of_facts"]))
+        proj = self.export_tests.result(real_data=False)
+        pres = self.write("proj.json", proj)
+        code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s.json", G4.snapshot()),
+                        "--result", pres, "--contract", con, "--use", "production")
+        self.assertEqual(code, 2)                                        # review F8: a projection is not exported
+        self.assertIn("export.use", json.dumps(out))                     # for production
+        code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s.json", G4.snapshot()),
+                        "--result", pres, "--contract", con, "--use", "design-study")
+        self.assertEqual(code, 0)
+        rec = out["record"]
+        rec["source_of_facts"]["calibration_result"]["use"] = "production"          # edited after the export
+        code, chk = run("calib_use.py", "export", "--record", self.write("pr.json", rec), "--result", pres)
+        self.assertEqual((code, [f["code"] for f in chk["findings"]]), (1, ["export.use"]))
+        bad = dict(G4.snapshot(), iovs=[])                                   # minItems 1: the contracts schema
+        code, chk = run("calib_use.py", "export", "--record", self.write("b.json", bad), "--result", res)
+        self.assertIn("export.contracts_schema", [f["code"] for f in chk["findings"]])
+        nohash = {k: v for k, v in r.items() if k != "result_sha256"}
+        code, out = run("calib_propagate.py", "g4sim", "--template", self.write("s2.json", G4.snapshot()),
+                        "--result", self.write("nh.json", nohash), "--contract", con, "--use", "production")
+        self.assertEqual((code, out["code"]), (2, "export.no_hash"))
+
+    def test_forced_joint_fits_listed(self):
+        x = self.write("x.json", {"packages": [{"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
+                                               {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v2"}}],
+                                  "upstreams": {}})
+        code, out = run("calib_deps.py", "packages", "--input", x)
+        self.assertEqual((code, [g["packages"] for g in out["forced_joint_fits"]]), (1, [["p1", "p2"]]))
+        y = self.write("y.json", {"packages": [{"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
+                                               {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v1"}}],
+                                  "upstreams": {}})
+        code, out = run("calib_deps.py", "packages", "--input", y)
+        self.assertEqual((code, out["forced_joint_fits"]), (0, []))
 
 
 if __name__ == "__main__":

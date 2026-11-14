@@ -6,6 +6,8 @@ effective() is table C.3: the pending step, the cap by central upstreams and by 
 allowed_uses() is the use matrix; variation_upstream_admissible() the eligibility of a variation upstream.
 outcome_determined() is the "outcome already determined" lookup of section 10.2 rule 0 (D63), evaluated with C.2 then
 C.3 for every combination of the possible outcomes of the inputs not yet decided.
+check_export() is the offline check of an exported g4sim condition-snapshot/1 or alignment-overlay/1 (section 10.4
+"Feeding back to g4sim", 15.3.19, A21 19-g6): the calibration result's hash in source_of_facts and the use matrix.
 
 These must agree input by input with the reference implementation calib_use_decision_table.py (the version attached
 to v7.37.4, SHA-256 c5279adf...); tests/core/test_calibration_use.py checks that over Appendix C's test scope and runs
@@ -17,7 +19,8 @@ from __future__ import annotations
 import itertools
 from typing import Any
 
-from core.calibration.deps import derive_role
+from core.calibration.deps import derive_role, is_hash_reference
+from core.canonical import canonical_sha256
 
 GRADES = ("failed", "projection", "calibrated-unvalidated", "validated-in-scope")
 RANK = {g: i for i, g in enumerate(GRADES)}
@@ -27,7 +30,8 @@ USE_MIN = {"diagnostics": "failed", "design-study": "projection", "systematic-va
            "production": "validated-in-scope", "publication": "validated-in-scope"}
 USE_BLOCKING_FLAGS = frozenset({"preliminary", "provisional-thresholds"})          # from all upstreams
 GRADE_CAPPING_FLAGS = frozenset({"outside-validated-range", "closure-not-tested"})  # from central upstreams
-INFORMATION_FLAGS = frozenset({"boundary-solution", "multimodal", "cv"})            # from central upstreams
+INFORMATION_FLAGS = frozenset({"boundary-solution", "multimodal", "cv",             # from central upstreams
+                               "identity-carried-over"})   # A22: a T2 carry-over (A21 19-g7); no effect on grade or use
 FLAGS = USE_BLOCKING_FLAGS | GRADE_CAPPING_FLAGS | INFORMATION_FLAGS
 
 VMODES = ("none", "holdout", "cross-validation")
@@ -302,4 +306,98 @@ def outcome_determined(c: dict, upstreams: list[dict], undecided) -> dict:
             raise AssertionError("the not-opened result differs from the common outcome")
         out["effective_grade"], out["uses"] = eff, sorted(res[1])
         out["inputs_when_not_opened"] = {"v_pass": False, "incomplete": False}
+    return out
+
+
+# ------------------------------------------------------------------ exported g4sim records (section 10.4, A21 19-g6)
+EXPORT_SCHEMAS = ("condition-snapshot/1", "alignment-overlay/1")
+SOURCE_KEY = "calibration_result"          # written by propagate.export_g4sim
+SOURCE_PREFIX = "calibration-result:"
+
+
+def _get(document, pointer: str):
+    node = document
+    for s in pointer[1:].split("/"):
+        s = s.replace("~1", "/").replace("~0", "~")
+        node = node[int(s)] if isinstance(node, list) else node[s]
+    return node
+
+
+def _export_finding(code: str, message: str) -> dict:
+    return {"code": code, "message": message}
+
+
+def check_export(record: dict, result: dict) -> list[dict]:
+    """Findings of an exported g4sim record against the calibration result it cites; empty means accepted.
+    - export.schema: not a condition-snapshot/1 or alignment-overlay/1;
+    - export.source_of_facts: no source_of_facts, or no `calibration_result` entry with the result's hash (g4sim S9
+      leaves it optional; this workflow requires it, section 10.4, 15.3.19);
+    - export.result_hash: the cited result's result_sha256 is absent or does not recompute from the result;
+    - export.hash_mismatch: the hash in source_of_facts (or a pointer's entry) is not the cited result's;
+    - export.grade_mismatch: the stated effective grade, uses or flags are not the result's;
+    - export.incomplete: the result has no grade (cannot be cited, section 10.2 rule 0);
+    - export.use: the stated use is not allowed by the use matrix of section 10.2 for the result's effective grade and
+      flags (production simulation needs validated-in-scope; publication none of the use-blocking flags);
+    - export.value_mismatch: a written value differs from the result's beta_hat for that parameter."""
+    if record.get("schema") not in EXPORT_SCHEMAS:
+        return [_export_finding("export.schema", f"exported records are {list(EXPORT_SCHEMAS)}, not "
+                                f"{record.get('schema')!r}")]
+    out: list[dict] = []
+    sha = result.get("result_sha256")
+    if not is_hash_reference(sha) or canonical_sha256({k: v for k, v in result.items()
+                                                        if k != "result_sha256"}) != sha:
+        out.append(_export_finding("export.result_hash", "the cited result's result_sha256 is absent or does not "
+                                   "recompute from the result"))
+    sof = record.get("source_of_facts")
+    if not isinstance(sof, dict):
+        sof = {}
+    entry = sof.get(SOURCE_KEY)
+    if not isinstance(entry, dict) or not is_hash_reference(entry.get("result_sha256")):
+        out.append(_export_finding("export.source_of_facts", "an exported condition-snapshot/1 or "
+                                   "alignment-overlay/1 carries the calibration result's hash in source_of_facts "
+                                   "(section 10.4, 15.3.19)"))
+        return out
+    if entry["result_sha256"] != sha:
+        out.append(_export_finding("export.hash_mismatch", "source_of_facts cites another result"))
+    grade = result.get("grade") or {}
+    eff = grade.get("effective_grade")
+    if eff not in RANK:
+        out.append(_export_finding("export.incomplete", "the result has no grade: an incomplete result cannot be "
+                                   "cited (section 10.2 rule 0)"))
+        return out
+    flags = set(grade.get("flags") or [])
+    stated = (entry.get("effective_grade"), sorted(entry.get("uses") or []), sorted(entry.get("flags") or []))
+    if stated != (eff, sorted(grade.get("uses") or []), sorted(flags)):
+        out.append(_export_finding("export.grade_mismatch", f"source_of_facts states {stated}, the result has "
+                                   f"{(eff, sorted(grade.get('uses') or []), sorted(flags))}"))
+    use_ = entry.get("use")
+    allowed = allowed_uses(eff, flags)
+    if use_ not in USES or use_ not in allowed:
+        out.append(_export_finding("export.use", f"use {use_!r} is not allowed for {eff} with flags {sorted(flags)}; "
+                                   f"allowed {sorted(allowed)} (use matrix, section 10.2)"))
+    beta = result.get("beta_hat")
+    if not isinstance(beta, dict):
+        beta = {}
+    params = entry.get("parameters") or {}
+    if not params or not isinstance(params, dict):           # review F3: the written values must be declared
+        out.append(_export_finding("export.parameters", "the calibration_result entry declares no written parameters"))
+    unknown = sorted(str(n) for n in params.values() if n not in beta)
+    if unknown:
+        out.append(_export_finding("export.parameters", f"parameters {unknown} are not in the result's beta_hat"))
+    label = SOURCE_PREFIX + str(entry["result_sha256"])
+    undeclared = sorted(k for k, v in sof.items() if v == label and k not in params)
+    if undeclared:
+        out.append(_export_finding("export.parameters", f"values labelled with the result's hash but not declared: "
+                                   f"{undeclared}"))
+    for ptr, name in params.items():
+        if sof.get(ptr) != SOURCE_PREFIX + str(entry["result_sha256"]):
+            out.append(_export_finding("export.hash_mismatch", f"source_of_facts[{ptr!r}] is not the result's hash"))
+        try:
+            v = float(_get(record, ptr))
+        except (KeyError, IndexError, ValueError, TypeError, AttributeError):
+            out.append(_export_finding("export.value_mismatch", f"{ptr} does not resolve to a value"))
+            continue
+        if name in beta and abs(v - float(beta[name])) > 1e-12 * max(1.0, abs(float(beta[name]))):
+            out.append(_export_finding("export.value_mismatch", f"{ptr} holds {v}, the result's {name} is "
+                                       f"{beta[name]}"))
     return out

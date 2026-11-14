@@ -1,7 +1,10 @@
 """core/calibration/deps (simulator calibration phase 0): hash references, cycle checks, roles derived from usage, and
-acyclic version ids (Part B sections 5.2 clause 5, 10.2, 10.3, 10.4; sections 15.3.2, 15.3.17, 15.3a)."""
+acyclic version ids (Part B sections 5.2 clause 5, 10.2, 10.3, 10.4; sections 15.3.2, 15.3.17, 15.3a); phase 4:
+upstream invalidation and the change of simulation identity (section 10.3) with the T2 carry-over of approval A21
+(section 19-g7). Each negative test has a positive control."""
 from __future__ import annotations
 
+import copy
 import hashlib
 import sys
 import unittest
@@ -11,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from core.calibration import deps  # noqa: E402
+from core.canonical import canonical_sha256  # noqa: E402
 
 H = [hashlib.sha256(f"result-{i}".encode()).hexdigest() for i in range(8)]
 
@@ -108,6 +112,256 @@ class Versions(unittest.TestCase):
             deps.update_digest(self.payload(parents=["1.0"]))
         with self.assertRaises(deps.DependencyError):
             deps.update_digest({"values": {}})
+
+
+# ------------------------------------------------------------------ phase 4: section 10.3 and A21 (section 19-g7)
+def result(h, contract=0, grade="validated-in-scope", uses=("diagnostics", "design-study"), own="same",
+           waiting=False, upstream=()):
+    r = {"result_sha256": h, "contract_sha256": H[contract], "plan_sha256": H[7], "engine_version": "0.66.1",
+         "grade": {"own_grade": grade if own == "same" else own, "effective_grade": grade, "uses": list(uses),
+                   "flags": []},
+         "upstream": [{"result_sha256": u, "usages": list(us)} for u, us in upstream]}
+    if waiting:
+        r["waiting_records"] = [{"unit": "u1", "kappa": H[6], "seq": 3}]
+    return r
+
+
+class UpstreamInvalidation(unittest.TestCase):
+    """Section 10.3: a revised or downgraded upstream marks the downstream for a redo; a re-judgment of the same kappa
+    after the records are resolved is not an upstream revision."""
+
+    def setUp(self):
+        self.up = result(H[0], waiting=True, own=None)                   # pending inputs: no own grade
+        self.down = result(H[1], upstream=[(H[0], ["xi"])])
+        self.other = result(H[2], upstream=[(H[5], ["xi"])])             # cites something else: never marked
+
+    def run_(self, successor, *rest):
+        return deps.invalidate([self.down, self.other, *rest], [{"old": self.up, "new": successor}])
+
+    def test_revision_marks_the_downstream(self):
+        r = self.run_(result(H[3], contract=4))                          # a new kappa: a revision
+        self.assertEqual(list(r["redo"]), [H[1]])
+        self.assertEqual(r["redo"][H[1]][0]["code"], "upstream.revision")
+        self.assertEqual(r["same_kappa"], [])
+        self.assertEqual(self.run_(self.up)["redo"], {})                 # control: the same result, no change
+
+    def test_downgrade_marks_the_downstream(self):
+        for successor in (result(H[3], contract=4, grade="calibrated-unvalidated"),
+                          result(H[3], contract=4, uses=("diagnostics",))):     # a lost use is a downgrade too
+            self.assertEqual(self.run_(successor)["redo"][H[1]][0]["code"], "upstream.downgrade")
+        up = result(H[3], contract=4, grade="projection")                 # a variation upstream is marked as well
+        r = deps.invalidate([result(H[1], upstream=[(H[0], ["envelope"])])], [{"old": self.up, "new": up}])
+        self.assertEqual(r["redo"][H[1]][0]["role"], "variation")
+
+    def test_same_kappa_rejudgment_is_not_a_revision(self):
+        later = result(H[3])                                              # same kappa, own grade now recorded
+        r = self.run_(later)
+        self.assertEqual(r["redo"], {})
+        self.assertEqual(r["same_kappa"], [{"downstream": H[1], "kappa": deps.kappa(self.up), "earlier": H[0],
+                                            "later": H[3]}])
+        # negative controls: the same kappa without pending inputs, or a re-judgment that changes the grade
+        not_pending = result(H[0])
+        r = deps.invalidate([self.down], [{"old": not_pending, "new": later}])
+        self.assertEqual(r["redo"][H[1]][0]["code"], "upstream.revision")
+        r = self.run_(result(H[3], grade="calibrated-unvalidated"))
+        self.assertEqual(r["redo"][H[1]][0]["code"], "upstream.downgrade")
+
+    def test_redo_propagates_down_the_graph(self):
+        grand = result(H[4], upstream=[(H[1], ["phi-center"])])
+        r = self.run_(result(H[3], contract=4), grand)
+        self.assertEqual(sorted(r["redo"]), sorted([H[1], H[4]]))
+        self.assertEqual(r["redo"][H[4]], [{"code": "upstream.needs_redo", "upstream": H[1]}])
+        r = deps.invalidate([self.down, grand], [], marked=[H[0]])     # e.g. an identity change of the upstream
+        self.assertEqual(sorted(r["redo"]), sorted([H[0], H[1], H[4]]))
+        self.assertEqual(deps.invalidate([self.down, grand], [])["redo"], {})   # control
+
+    def test_duplicate_changes_and_same_kappa_overlap(self):
+        """Review F12: two changes of the same old result are refused; a downstream marked for a redo is not also
+        listed under same_kappa (control: without the mark it is listed)."""
+        with self.assertRaises(deps.DependencyError):
+            deps.invalidate([self.down], [{"old": self.up, "new": result(H[3])},
+                                          {"old": self.up, "new": result(H[4], contract=4)}])
+        plain = deps.invalidate([self.down], [{"old": self.up, "new": result(H[3])}])
+        self.assertEqual([x["downstream"] for x in plain["same_kappa"]], [H[1]])
+        marked = deps.invalidate([self.down], [{"old": self.up, "new": result(H[3])}], marked=[H[1]])
+        self.assertEqual((list(marked["redo"]), marked["same_kappa"]), ([H[1]], []))
+
+    def test_bad_input_is_refused(self):
+        for bad in ({"old": self.up, "new": {"result_sha256": "x"}}, {"old": self.up}, "change"):
+            with self.subTest(bad=bad), self.assertRaises(deps.DependencyError):
+                deps.invalidate([self.down], [bad])
+        with self.assertRaises(deps.DependencyError):
+            deps.invalidate([dict(self.down, upstream=[{"result_sha256": 0.98, "usages": ["xi"]}])], [])
+
+
+def ids(build="ab"):
+    """Five synthetic identity items of one model (the real masked hashes: test_calibration_model_identity)."""
+    return [{"model": "nominal", "identity": {
+        "detector_spec": [H[0], None], "simulation_request": H[1], "run_physics": H[2], "response_pipeline": H[3],
+        "build_environment": {"build_hash": build * 32, "geant4_version": "11.2.1", "datasets": {"G4EMLOW": "8.5"}}}}]
+
+
+THETA_HAT, SPOT = {"k_B": 0.126, "LY": 200.0}, [{"k_B": 0.05, "LY": 200.0}, {"k_B": 0.3, "LY": 200.0}]
+# the result's design stage (A24): delta theta = A delta; sigma_tot^design 1.0 for both theta
+DESIGN = {"theta": ["k_B", "LY"], "sigma_tot": [1.0, 1.0], "a_theta": [[1.0, 0.0], [0.0, 2.0]]}
+BASIS = {"theta_hat": THETA_HAT, "spot_checks": SPOT, "observables": ["mean", "width"], "mc_events": 20000,
+         "design": DESIGN, "new_build_first_run": "2026-11-20T09:00:00+00:00"}
+
+
+def result_doc(**basis_over):
+    """A result carrying its T2 basis (A24, review F1), hashed so that result_sha256 recomputes."""
+    tb = {k: v for k, v in dict(BASIS, **basis_over).items() if k != "new_build_first_run"}
+    body = {"model_identities": ids(), "t2_basis": tb}
+    return dict(body, result_sha256=canonical_sha256(body))
+
+
+RESULT_SHA = result_doc()["result_sha256"]
+
+
+def t2(shift=0.0, se=0.001, registered="2026-11-19T12:00:00Z", **reg_over):
+    """A T2 equivalence record (A24): margin 0.1 and power 0.025 of sigma_tot^design per theta; outcome differences
+    `shift` in every observable, MC errors `se`."""
+    reg = {"result_sha256": RESULT_SHA, "old_identities": ids(), "new_identities": ids("cd"),
+           "points": [{"label": "theta-hat", "theta": THETA_HAT}, {"label": "kB-low", "theta": SPOT[0]},
+                      {"label": "kB-high", "theta": SPOT[1]}],
+           "observables": [{"name": "mean"}, {"name": "width"}],
+           "mc_events": 20000, "margin_fraction": 0.1, "power_fraction": 0.025, "alpha": 0.05,
+           "registered_at": registered}
+    reg.update(reg_over)
+    out = {"registration_sha256": canonical_sha256(reg), "points": [
+        {"label": p["label"], "mc_events": {"old": reg["mc_events"], "new": reg["mc_events"]},
+         "observables": {o["name"]: {"old": 1.0, "new": 1.0 + shift, "se_old": se, "se_new": se}
+                         for o in reg["observables"]}} for p in reg["points"]]}
+    return {"schema": deps.T2_SCHEMA, "registration": reg, "outcome": out}
+
+
+class IdentityChange(unittest.TestCase):
+    """Section 10.3 change of simulation identity; A21 (section 19-g7) T2 carry-over (provisional margin)."""
+
+    def decide(self, record=None, current=None, new_build_first_run=BASIS["new_build_first_run"], **basis):
+        """The result's own t2_basis (with `basis` overrides; a changed basis changes the result and its hash, so
+        records are re-pointed at it); the caller supplies only the new build's first run time."""
+        res = result_doc(**basis)
+        if record is not None and basis:
+            record = copy.deepcopy(record)
+            record["registration"]["result_sha256"] = res["result_sha256"]
+            record["outcome"]["registration_sha256"] = canonical_sha256(record["registration"])
+        return deps.identity_decision(res, ids("cd") if current is None else current, record,
+                                      {"new_build_first_run": new_build_first_run})
+
+    def test_the_basis_is_the_results_own(self):
+        """Review F1 (A24): a caller basis cannot replace the result's (here: no spot checks, inflated design); a
+        result whose hash does not recompute, or without a t2_basis, is redone."""
+        rec = t2()
+        rec["registration"]["points"] = rec["registration"]["points"][:1]   # theta-hat only
+        rec["outcome"]["points"] = rec["outcome"]["points"][:1]
+        rec["outcome"]["registration_sha256"] = canonical_sha256(rec["registration"])
+        res = result_doc()
+        d = deps.identity_decision(res, ids("cd"), rec, {"new_build_first_run": BASIS["new_build_first_run"],
+                                                         "spot_checks": [], "design": dict(DESIGN, sigma_tot=[100, 100])})
+        self.assertIn("t2.spot_checks", self.codes(d))                    # the caller's empty spot_checks ignored
+        forged = dict(res, t2_basis=dict(res["t2_basis"], spot_checks=[]))
+        self.assertEqual(self.codes(deps.identity_decision(forged, ids("cd"), rec, {})), ["t2.result_hash"])
+        bare = {"model_identities": ids()}
+        bare["result_sha256"] = canonical_sha256(bare)
+        self.assertEqual(self.codes(deps.identity_decision(bare, ids("cd"), t2(), {})), ["t2.no_basis"])
+
+    def codes(self, d):
+        return sorted({r["code"] for r in d.get("reasons", ())})
+
+    def test_unchanged_identity_is_kept(self):
+        d = self.decide(current=ids())
+        self.assertEqual((d["decision"], d["changed"]), ("unchanged", {}))
+
+    def test_changed_identity_without_record_is_redone(self):
+        d = self.decide()
+        self.assertEqual((d["status"], d["decision"], self.codes(d)), ("failed", "redo", ["t2.missing"]))
+        self.assertEqual(d["changed"], {"nominal": ["build_environment"]})
+        gone = self.decide(current=[])                                     # a model removed: every item changed
+        self.assertEqual(gone["changed"], {"nominal": list(deps.model_identity.ITEMS)})
+
+    def test_passing_record_keeps_the_result_flagged(self):
+        d = self.decide(t2(shift=0.01))
+        self.assertEqual((d["status"], d["decision"]), ("ok", "carried-over"))
+        self.assertEqual(d["flags"], ["identity-carried-over", "provisional-thresholds"])
+        self.assertEqual(d["model_identities"], ids("cd"))
+        self.assertEqual(len(d["tests"]), 3 * 2)                         # every point and theta_i
+        self.assertTrue(all(t["equivalent"] for t in d["tests"]))
+
+    def test_failing_record_redoes(self):
+        d = self.decide(t2(shift=0.06))                                  # LY: delta theta = 0.12 > 0.1 sigma_tot
+        self.assertEqual((d["decision"], self.codes(d)), ("redo", ["t2.not_equivalent"]))
+        self.assertEqual(self.decide(t2(shift=0.04))["decision"], "carried-over")   # control: 0.08, inside
+
+    def test_power_condition(self):
+        """A24: se(delta theta_i) must be <= 0.025 sigma_tot,i (pre-registered); the result's own MC size alone gave
+        no power (a null shift could never be shown equivalent). Control: enough MC (smaller se) passes."""
+        d = self.decide(t2(se=0.01))                                     # se(LY) = 2 sqrt(2) 0.01 = 0.028 > 0.025
+        self.assertEqual(d["decision"], "redo")
+        self.assertIn("t2.power", self.codes(d))
+        self.assertEqual(self.decide(t2(se=0.008))["decision"], "carried-over")      # 0.0226 <= 0.025
+        bigger = self.decide(t2(mc_events=80000))                        # more MC than the result's own is allowed
+        self.assertEqual(bigger["decision"], "carried-over")
+
+    def test_judged_on_theta_not_per_observable(self):
+        """A24: an observable without leverage on theta (zero column of A) may shift without blocking the carry-over;
+        the same shift on an observable that moves theta fails."""
+        flat = dict(DESIGN, a_theta=[[1.0, 0.0], [0.0, 0.0]])
+        rec = t2()
+        for p in rec["outcome"]["points"]:
+            p["observables"]["width"]["new"] = 1.5                      # a large width shift
+        self.assertEqual(self.decide(rec, design=flat)["decision"], "carried-over")
+        self.assertEqual(self.decide(rec)["decision"], "redo")          # with leverage: LY moves 1.0 sigma
+        with self.assertRaises(deps.DependencyError):
+            self.decide(t2(), design=None)
+
+    def test_record_registered_after_the_new_build_ran_redoes(self):
+        for when in ("2026-11-20T09:00:00Z", "2026-11-21T00:00:00+01:00"):
+            d = self.decide(t2(registered=when))
+            self.assertEqual((d["decision"], self.codes(d)), ("redo", ["t2.registered_late"]))
+        d = self.decide(t2(), new_build_first_run=None)
+        self.assertEqual((d["decision"], self.codes(d)), ("redo", ["t2.order_unknown"]))
+        self.assertEqual(self.decide(t2(registered="2026-11-20T08:59:59Z"))["decision"], "carried-over")  # control
+
+    def test_incomplete_or_loosened_record_redoes(self):
+        pts = t2()["registration"]["points"]
+        cases = {
+            "t2.spot_checks": t2(points=pts[:2]),
+            "t2.theta_hat": t2(points=[dict(pts[0], theta={"k_B": 0.13, "LY": 200.0})] + pts[1:]),
+            "t2.observables": t2(observables=[{"name": "mean"}]),
+            "t2.mc_size": t2(mc_events=5000),
+            "t2.loosened": t2(margin_fraction=0.2),
+            "t2.loosened (power)": t2(power_fraction=0.05),
+            "t2.other_result": t2(result_sha256=H[6]),
+            "t2.identities": t2(new_identities=ids("ef")),
+        }
+        for code, rec in cases.items():
+            with self.subTest(code):
+                self.assertIn(code.split(" ")[0], self.codes(self.decide(rec)))
+        edited = t2()
+        edited["registration"]["alpha"] = 0.01                          # tightened after the outcome: unbound
+        self.assertEqual(self.codes(self.decide(edited)), ["t2.outcome_unbound"])
+        smaller = t2()
+        smaller["outcome"]["points"][1]["mc_events"]["new"] = 1000
+        self.assertEqual(self.codes(self.decide(smaller)), ["t2.mc_size"])
+        dropped = t2()
+        del dropped["outcome"]["points"][2]["observables"]["width"]
+        self.assertEqual(self.codes(self.decide(dropped)), ["t2.outcome_missing"])
+        self.assertEqual(self.decide(t2(se=0.001, margin_fraction=0.05, alpha=0.01))["decision"], "carried-over")  # tightened
+
+    def test_tost(self):
+        self.assertTrue(deps.tost(1.0, 1.0, 0.01, 0.01, 0.1)["equivalent"])
+        self.assertFalse(deps.tost(1.0, 1.09, 0.01, 0.01, 0.1)["equivalent"])   # 0.09 + 1.645 * 0.0141 > 0.1
+        self.assertTrue(deps.tost(1.0, 1.07, 0.01, 0.01, 0.1)["equivalent"])
+        self.assertFalse(deps.tost(1.0, 1.0, 0.1, 0.1, 0.1)["equivalent"])     # no power: not shown equivalent
+        self.assertTrue(deps.tost(1.0, 1.05, 0.0, 0.0, 0.1)["equivalent"])
+
+    def test_malformed_record_is_refused(self):
+        bad = copy.deepcopy(t2())
+        del bad["registration"]["registered_at"]
+        for rec in ({"schema": "other"}, bad, t2(registered="2026-11-19 12:00")):
+            with self.subTest(rec=str(rec)[:40]), self.assertRaises(deps.DependencyError):
+                self.decide(rec)
 
 
 if __name__ == "__main__":

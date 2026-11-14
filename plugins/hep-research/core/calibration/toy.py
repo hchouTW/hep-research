@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 from scipy import special, stats
 
-from core.calibration import reweight
+from core.calibration import evaluator, reweight
 
 STATUS = ["synthetic"]
 
@@ -100,7 +100,7 @@ class Uniform(Kernel):
 class Poisson(Kernel):
     """n ~ Poisson(rate x parent) sampled, optionally with excess variance (Fano factor > 1: a negative binomial with
     the same mean, the "implementation includes ENF" of section 15.3.1). The density used for reweighting is the
-    registered one (plan kernels[node].registration.density: poisson | negative-binomial)."""
+    registered one (plan kernels[node].registration.density: poisson | negative-binomial | normal)."""
 
     def __init__(self, out="n", rate="rate", parent=None, fano=1.0, registered="poisson"):
         self.out, self.rate, self.parent, self.fano, self.registered = out, rate, parent, fano, registered
@@ -123,6 +123,8 @@ class Poisson(Kernel):
         if self.registered == "negative-binomial" and self.fano > 1.0:
             prob = 1.0 / self.fano
             return stats.nbinom.logpmf(out[self.out], mu * prob / (1.0 - prob), prob)
+        if self.registered == "normal":                       # section 15.3.19 (A23): the normal density for Poisson
+            return stats.norm.logpdf(out[self.out], mu, np.sqrt(np.maximum(mu, 1e-300)))
         return stats.poisson.logpmf(out[self.out], mu)
 
 
@@ -607,12 +609,15 @@ class ChainEvaluator:
                  effects_off=(), seeds: dict | None = None, names=None) -> dict:
         """Prediction at theta with the plan's methods, outside to inside (section 6.5): resimulation from the most
         upstream resimulated node (common random numbers with the nominal events of seeds['nominal']), rerun of
-        deterministic kernels, reweighting of the remaining density nodes."""
+        deterministic kernels, reweighting of the remaining density nodes. effects_off ({effect: {parameter: value
+        after removal}}, section 10.5) sets those parameters last, evaluated with the same methods."""
         if model != "nominal":
             raise ValueError("alternative models of the toy detector are phase 2")
-        if effects_off:
-            raise ValueError("effects_off (the contribution decomposition of section 10.5) is phase 4")
-        target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {})}
+        removal = evaluator.removal_values(effects_off)           # section 10.5: the declared values after removal
+        unknown = sorted(set(removal) - set(self.model.nominal) - set(self.model.param_nodes))
+        if unknown:
+            raise ValueError(f"effects_off removes parameters {unknown} that this evaluator does not have")
+        target = {**self.model.nominal, **(phi or {}), **(psi or {}), **(theta or {}), **removal}
         sur = self.surrogate
         if sur is not None and any(self.default_method(p) == "surrogate-model" for p in sur.parameters):
             return self._evaluate_surrogate(target, seeds, names)

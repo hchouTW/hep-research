@@ -58,7 +58,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Calibration, alignment, conditions; stability, eras, an added layer | [calibration](references/calibration-and-alignment.md); `stability_monitor.py` |
 | Calibration residual (scale, curvature offset, resolution) | `propagate_scale_distortion.py` |
 | Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
-| Simulation (Geant4) | [simulation](references/detector-simulation.md) |
+| Simulation (Geant4); simulator calibration per detector type | [simulation](references/detector-simulation.md), [calibration specializations](references/simulation-calibration/index.md) |
 | Charge-sign confusion; nuclei in material (survival, feed-down) | [charge confusion](references/charge-confusion.md), [nuclear interactions](references/nuclear-interactions-in-detector-material.md); `charge_confusion_rate.py`, `survival_feeddown.py` |
 | Space-based and balloon instruments | [space-based](references/space-based-direct-detection.md) |
 | Air showers, X_max | [air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |

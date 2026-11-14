@@ -43,19 +43,21 @@ hep-detector/
 ├── SKILL.md                  entry point loaded by the host
 ├── README.md                 this folder guide
 ├── references/               topic references, entry: detector-principles-summary.md
+│   └── simulation-calibration/  simulator-calibration specializations of eight detector types
 ├── scripts/                  command-line helpers
 │   └── design_search_lib/    Sobol, NSGA-II, hypervolume behind evaluate_design.py search
 ├── assets/                   example inputs, Geant4 schema and rule table
-│   └── design-search/        realization rules per role, NIST materials, Sobol direction numbers
+│   ├── design-search/        realization rules per role, NIST materials, Sobol direction numbers
+│   └── simulation-calibration/  node-binding examples of the eight detector types
 └── examples/                 behavioural examples for Geant4 studies
 ```
 
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, workflow, context resolution, resources, handoffs; its front matter carries the routing description and it stays under 8 KiB |
-| `references/` | forty-nine references: a principles summary that indexes the rest, the detector system design workflow, one file per subsystem or topic, astroparticle instruments, case studies, comparison tables, glossary, bibliography |
+| `references/` | forty-nine references: a principles summary that indexes the rest, the detector system design workflow, one file per subsystem or topic, astroparticle instruments, case studies, comparison tables, glossary, bibliography; `simulation-calibration/`: an index and eight detector-type specializations of the simulator calibration workflow (Part B section 11.1) |
 | `scripts/` | twenty-five helpers and the package `design_search_lib/` (Sobol, NSGA-II, hypervolume) behind `evaluate_design.py search`: design evaluations from tool contracts, automated candidate generation and the derived design report, design-level budget sums, straight-line acceptance and PID rejection, the sourced detector atlas (validate, render, query, audit), a tracker resolution for a stated layout (exact fit and Gluckstern, scattering, MDR, impact parameter, requirement scan), a response artifact from matched events, era responses mixed or stacked, calorimeter resolution, Cherenkov angle, front-end electronics (noise, thresholds, timing, quantization, pileup, SiPM, dead time), multiple scattering, PID separation power, pileup reweighting, tag-and-probe efficiency, the Gaisser-Hillas longitudinal profile, a seeded toy spectrometer (synthetic events and periods), propagation of a calibration residual into yields and ratios, many-sample PID, stability over time, survival and fragmentation feed-down in material, charge-sign confusion rates, species-migration responses, a Geant4 study checker, independent-reference benchmarks for Geant4 runs and the naming extractor for calibrations and conditions tags |
-| `assets/` | a simulated thin-silicon charge spectrum for `hit-efficiency --signal-model table` (Geant4 PAI, from journey J14's run `mpv-pai`, unvalidated); synthetic example inputs: a calorimeter response, a detector stack, pileup profiles, a fictional toy-spectrometer configuration, multisample PID events and a response curve, a stability series; the Geant4 study-spec schema with a synthetic example and the sourced Geant4 physics-rule table; `design-search/`: the realization rules per role, the Geant4 NIST materials table and the Sobol direction numbers of `evaluate_design.py search` |
+| `assets/` | a simulated thin-silicon charge spectrum for `hit-efficiency --signal-model table` (Geant4 PAI, from journey J14's run `mpv-pai`, unvalidated); synthetic example inputs: a calorimeter response, a detector stack, pileup profiles, a fictional toy-spectrometer configuration, multisample PID events and a response curve, a stability series; the Geant4 study-spec schema with a synthetic example and the sourced Geant4 physics-rule table; `design-search/`: the realization rules per role, the Geant4 NIST materials table and the Sobol direction numbers of `evaluate_design.py search`; `simulation-calibration/`: eight synthetic node-binding examples (contract fragment and plan, Part B section 11.4) |
 | `examples/` | two illustrative behavioural examples for Geant4 studies: eliciting a study spec, and auditing a result claimed as validated |
 
 References: start with `references/detector-principles-summary.md`, then the topic file the task needs:

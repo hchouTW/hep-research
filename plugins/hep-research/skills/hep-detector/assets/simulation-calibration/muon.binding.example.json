@@ -1,0 +1,410 @@
+{
+ "example": "simulation-calibration node binding: mu detector",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row mu detector",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "Cluster size (sharing/3) and the r-t relation live in hashed tables (charge_sharing, drift_table): no stage parameter value, no Table 2 row.",
+  "The HV-dependent gain is phi on the snapshot's gain_factor (D87); a common gas gain binds to the sensor stage of response-pipeline/1. Dead time is a cross-event effect (section 19-6), not modelled."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: muons of known momentum"
+    },
+    {
+     "id": "absorber",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 traversal of the absorber (multiple scattering) and gas ionisation (g4sim_run)",
+     "samplable": true,
+     "mechanisms": [
+      "physics-process",
+      "geometry-material"
+     ]
+    },
+    {
+     "id": "gas",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "2 primary electron clusters (ionisation stage)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "drift",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "3 drift and diffusion (drift_table stage, a hashed table)",
+     "mechanisms": [
+      "transport-diffusion"
+     ]
+    },
+    {
+     "id": "avalanche",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b avalanche gain (bound to the sensor stage gain; Inferred mapping)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "discriminator",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 threshold, time, dead time",
+     "mechanisms": [
+      "noise-threshold",
+      "time"
+     ]
+    },
+    {
+     "id": "readout",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "5 clusters of strips or wires",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "segment",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 hits and segments, with t0 and the r-t relation",
+     "mechanisms": [
+      "time",
+      "association"
+     ]
+    },
+    {
+     "id": "muon_segment",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: muon-system segment position and efficiency"
+    },
+    {
+     "id": "inner_track",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: inner-tracker track extrapolated to the muon station"
+    },
+    {
+     "id": "matching",
+     "kernel": "deterministic",
+     "kind": "comparison",
+     "description": "comparison: segment minus extrapolated track (matching across branches)"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "absorber"
+    },
+    {
+     "from": "absorber",
+     "to": "gas"
+    },
+    {
+     "from": "gas",
+     "to": "drift"
+    },
+    {
+     "from": "drift",
+     "to": "avalanche"
+    },
+    {
+     "from": "avalanche",
+     "to": "discriminator"
+    },
+    {
+     "from": "discriminator",
+     "to": "readout"
+    },
+    {
+     "from": "readout",
+     "to": "segment"
+    },
+    {
+     "from": "segment",
+     "to": "muon_segment"
+    },
+    {
+     "from": "source",
+     "to": "inner_track"
+    },
+    {
+     "from": "muon_segment",
+     "to": "matching"
+    },
+    {
+     "from": "inner_track",
+     "to": "matching"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "absorber_mm",
+    "role": "phi",
+    "nodes": [
+     "absorber"
+    ],
+    "mechanism": "geometry-material",
+    "physical_bounds": [
+     100.0,
+     3000.0
+    ],
+    "sampling_bounds": [
+     500.0,
+     2000.0
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/params/absorber_mm"
+     }
+    ],
+    "source": "engineering drawing of the experiment instance"
+   },
+   {
+    "name": "gas_gain",
+    "role": "theta",
+    "nodes": [
+     "avalanche"
+    ],
+    "mechanism": "fluctuation",
+    "physical_bounds": [
+     1000.0,
+     1000000.0
+    ],
+    "sampling_bounds": [
+     10000.0,
+     200000.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/2/parameters/gain/value"
+     }
+    ]
+   },
+   {
+    "name": "hv_gain_factor",
+    "role": "phi",
+    "nodes": [
+     "avalanche"
+    ],
+    "mechanism": "fluctuation",
+    "physical_bounds": [
+     0.5,
+     2.0
+    ],
+    "sampling_bounds": [
+     0.8,
+     1.2
+    ],
+    "bindings": [
+     {
+      "document": "condition-snapshot",
+      "pointer": "/iovs/0/rows/0/gain_factor"
+     }
+    ],
+    "source": "HV readings of the conditions database (section 12: HV listed as phi)"
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "discriminator"
+    ],
+    "mechanism": "noise-threshold",
+    "physical_bounds": [
+     0.0,
+     50.0
+    ],
+    "sampling_bounds": [
+     1.0,
+     20.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/3/parameters/threshold/value"
+     }
+    ]
+   },
+   {
+    "name": "t0",
+    "role": "theta",
+    "nodes": [
+     "segment"
+    ],
+    "mechanism": "time",
+    "physical_bounds": [
+     -20.0,
+     20.0
+    ],
+    "sampling_bounds": [
+     -5.0,
+     5.0
+    ],
+    "bindings": [
+     {
+      "document": "reconstruction",
+      "pointer": "/stations/0/t0_ns"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_momentum",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "muon_segment"
+   },
+   {
+    "id": "track_match",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "matching"
+    },
+    "observation": "matching"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal",
+     "physics_list": "FTFP_BERT"
+    }
+   ],
+   "absorbed": []
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "a drift table from another gas-mixture computation (Garfield++ run)",
+    "observable": "drift-time spectrum edges and the r-t residual versus distance",
+    "identity_difference": "response-pipeline drift_table hash and its detsim run"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "multiple-scattering model of another EM option",
+    "observable": "matching residual width versus momentum",
+    "identity_difference": "run card /physics/em_option"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "absorber": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "gas": {
+     "table1": "2",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "stage": "ionisation"
+    },
+    "drift": {
+     "table1": "3",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "avalanche": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "discriminator": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "readout": {
+     "table1": "5r",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "segment": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}

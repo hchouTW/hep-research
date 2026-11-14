@@ -218,6 +218,20 @@ class NamedCases(unittest.TestCase):
         prelim = dict(usages={"variation-set"}, effective_grade="validated-in-scope", flags={"preliminary"})
         self.assertNotIn("publication", use.judge(base(), [prelim])["uses"])
 
+    def test_grade_limiting_flags_union_of_central_upstreams(self):
+        """Section 15.3.17: grade-limiting flags propagate from central upstreams as a union (both reach the result
+        and cap it); the same flags on variation upstreams stay in variation_flags and do not cap (control)."""
+        a = dict(usages={"phi-center"}, effective_grade="validated-in-scope", flags={"outside-validated-range"})
+        b = dict(usages={"xi"}, effective_grade="validated-in-scope", flags={"closure-not-tested", "multimodal"})
+        j = use.judge(base(), [a, b])
+        self.assertEqual(j["effective_grade"], "calibrated-unvalidated")
+        self.assertTrue({"outside-validated-range", "closure-not-tested", "multimodal"} <= set(j["flags"]))
+        va, vb = dict(a, usages={"envelope"}), dict(b, usages={"variation-set"})
+        j = use.judge(base(), [va, vb])
+        self.assertEqual(j["effective_grade"], "validated-in-scope")
+        self.assertEqual(j["flags"], [])
+        self.assertEqual(j["variation_flags"], ["closure-not-tested", "multimodal", "outside-validated-range"])
+
     def test_lookup_refuses_inconsistent_undecided_inputs(self):
         """F1 of the phase-0 review: the undecided list matches the incomplete input; mode none has only gates."""
         with self.assertRaises(ValueError):
@@ -295,6 +309,25 @@ class IncompleteAggregation(unittest.TestCase):
             use.aggregate(self.gates(), "passed", "passed", "none")
         with self.assertRaises(ValueError):
             use.aggregate(self.gates(G99="passed"), "passed", "passed", "holdout")
+
+
+class SimulatedReleases(unittest.TestCase):
+    def test_15_3_19_g4sim_output_as_a_data_release(self):
+        """Section 15.3.19: g4sim output as the calibration data release -> projection (rule 2); only the validation
+        release is g4sim output -> calibrated-unvalidated (rule 3e). Control: real releases -> validated-in-scope."""
+        self.assertEqual(use.assign(base()), "validated-in-scope")
+        self.assertEqual(use.assign(base(real_data=False)), "projection")
+        self.assertEqual(use.assign(base(validation_data_simulated=True)), "calibrated-unvalidated")
+
+
+class IdentityCarriedOver(unittest.TestCase):
+    def test_the_flag_is_informational(self):
+        """A22: `identity-carried-over` (a T2 carry-over, A21 section 19-g7) is a known flag with no effect on grade or
+        use; control: a made-up flag is not known."""
+        self.assertIn("identity-carried-over", use.FLAGS)
+        self.assertIn("identity-carried-over", use.INFORMATION_FLAGS)
+        self.assertNotIn("identity-carried-over", use.USE_BLOCKING_FLAGS | use.GRADE_CAPPING_FLAGS)
+        self.assertNotIn("made-up-flag", use.FLAGS)
 
 
 if __name__ == "__main__":
