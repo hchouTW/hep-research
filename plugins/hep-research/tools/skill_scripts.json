@@ -614,6 +614,13 @@
    ]
   },
   {
+   "path": "skills/hep-detector/scripts/g4kit.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
    "path": "skills/hep-detector/scripts/geant4_benchmarks.py",
    "depth": 3,
    "skills": [
@@ -1058,6 +1065,136 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_chain.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector",
+    "hep-review",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_closure.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_contract.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector",
+    "hep-review",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_contrib.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_data.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_deps.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_design.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_emulator.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_identify.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_interval.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_kernel_check.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_likelihood.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_propagate.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_reweight.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_shift.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_use.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_validate.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/combine_asymmetric.py",
    "depth": 3,
    "skills": [
@@ -1261,6 +1398,7 @@
    "path": "skills/hep-theory/scripts/dis_kinematics.py",
    "depth": 3,
    "skills": [
+    "hep-detector",
     "hep-theory"
    ]
   },
@@ -1634,7 +1772,7 @@
   {
    "skill": "hep-detector",
    "name": "check_citations.py",
-   "source": "skills/hep-detector/references/geant4-study-protocol.md:448",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:458",
    "matches": []
   },
   {
@@ -1652,7 +1790,7 @@
   {
    "skill": "hep-detector",
    "name": "local_partition.py",
-   "source": "skills/hep-detector/references/geant4-study-protocol.md:382",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:392",
    "matches": []
   },
   {
@@ -1778,7 +1916,7 @@
   {
    "skill": "hep-statistics",
    "name": "stability_monitor.py",
-   "source": "skills/hep-statistics/references/core-stats-guide.md:81",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:52",
    "matches": []
   },
   {
@@ -1802,7 +1940,7 @@
   {
    "skill": "hep-statistics",
    "name": "test_core_stats_guide.py",
-   "source": "skills/hep-statistics/references/core-stats-guide.md:43",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:25",
    "matches": []
   },
   {
@@ -1909,7 +2047,7 @@
   }
  ],
  "counts": {
-  "scripts": 198,
+  "scripts": 217,
   "unresolved": 70,
   "named_without_main": 28
  }

@@ -10,7 +10,7 @@
     "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
    },
    "configuration_gap": null,
-   "detection_limit_relative": 0.03940428593124131,
+   "detection_limit_relative": 0.039404285931241304,
    "estimator": "batch means of block means",
    "geant4": 13.605636582872334,
    "geant4_dof": 15,
@@ -44,7 +44,7 @@
      {
       "at_claimed_detection_limit": true,
       "csv": null,
-      "detection_limit_relative": 0.03940428593124131,
+      "detection_limit_relative": 0.039404285931241304,
       "injected": "silicon density x 0.960 on the Geant4 side (reference keeps 2.329 g/cm3)",
       "injected_relative": -0.04,
       "relative_difference": -0.04156097251946652,
@@ -57,7 +57,7 @@
       "verdict_on_control": "fail"
      }
     ],
-    "detection_limit_relative": 0.03940428593124131,
+    "detection_limit_relative": 0.039404285931241304,
     "detection_limit_sign": "+-",
     "status": "caught"
    },
@@ -70,7 +70,7 @@
    "relative_difference": -0.0018499429437009848,
    "relative_se": 0.0013481301767398677,
    "scope": {
-    "detection_limit_relative": 0.03940428593124131,
+    "detection_limit_relative": 0.039404285931241304,
     "detection_limit_sign": "+-",
     "energy_MeV": 100.0,
     "material": "Si_study",

@@ -10,8 +10,8 @@ operating) and `valid_for` (the configuration). Read it with
 | Experiment | Claims | Source |
 |---|---|---|
 | ATLAS | 11 | detector paper, JINST 3 (2008) S08003 |
-| CMS | 9 | detector paper, JINST 3 (2008) S08004 |
-| LHCb | 10 | LHCb Upgrade I, arXiv:2305.10515 (original and upgraded configurations) |
+| CMS | 35 | detector paper, JINST 3 (2008) S08004; ECAL TDR, CERN-LHCC-97-033 (ECAL crystals, g4sim S6); CSC cosmic-ray paper, JINST 5 (2010) T03018; muon TDR, CERN-LHCC-97-032; Phase-1 pixel paper, JINST 16 (2021) P02027 (g4sim S7) |
+| LHCb | 20 | LHCb Upgrade I, arXiv:2305.10515 (original and upgraded configurations; RICH and SciFi, g4sim S7); RICH performance paper, EPJC 73 (2013) 2431 (Run 1) |
 | IceCube | 10 | instrumentation paper, arXiv:1612.05093 |
 | Super-Kamiokande | 10 | calibration paper, arXiv:1307.0162 (phases SK-I to SK-IV) |
 | Fermi-LAT | 10 | instrument paper, arXiv:0902.1089 (pre-flight estimates) |
@@ -23,7 +23,7 @@ operating) and `valid_for` (the configuration). Read it with
 | Pierre Auger Observatory | 10 | observatory paper, arXiv:1502.01323 (as completed in 2008) |
 
 Further experiments are added by demand, with the same rules (open question 11 of the upgrade work order).
-AMS-02: use its experiment profile (`experiment:ams-02`); this atlas holds no AMS-02 claim.
+AMS-02: use its experiment profile (`experiment:ams-02`); this atlas holds no AMS-02 claim. ePIC and the EIC (Electron-Ion Collider): use the experiment profile `experiment:eic`; this atlas holds no ePIC or EIC claim.
 
 ## Rules
 

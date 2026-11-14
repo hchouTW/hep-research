@@ -1,0 +1,152 @@
+{
+ "schema": "g4kit/1",
+ "name": "tof",
+ "version": "1.1.0",
+ "geometry_kind": "tof",
+ "role": "timing",
+ "purpose": "Planes of parallel scintillator bars, read at their ends.",
+ "inputs": {
+  "planes": {
+   "kind": "integer"
+  },
+  "bars": {
+   "kind": "integer"
+  },
+  "bar_length_mm": {
+   "kind": "length"
+  },
+  "bar_width_mm": {
+   "kind": "length"
+  },
+  "bar_thickness_mm": {
+   "kind": "length"
+  },
+  "plane_gap_mm": {
+   "kind": "length"
+  },
+  "bar_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  },
+  "materials": {
+   "kind": "materials",
+   "optional": true
+  }
+ },
+ "geometric_defaults": {
+  "bar_gap_mm": "0.5"
+ },
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "pitch_mm": "bar_width_mm + bar_gap_mm",
+   "plane_width_mm": "bars * pitch_mm",
+   "plane_step_mm": "bar_thickness_mm + plane_gap_mm",
+   "first_plane_mm": "0 - (planes - 1) * plane_step_mm / 2",
+   "world_mm": "4 * (bar_length_mm + plane_width_mm + planes * plane_step_mm) + 200"
+  },
+  "materials": {
+   "$input": "materials"
+  },
+  "templates": {
+   "bar": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "bar_length_mm",
+       "bar_width_mm",
+       "bar_thickness_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "bar_material"
+    },
+    "tags": [
+     "active"
+    ]
+   },
+   "plane": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "bar_length_mm",
+       "plane_width_mm",
+       "bar_thickness_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "tags": [
+     "plane"
+    ],
+    "children": [
+     {
+      "template": "bar",
+      "placement": {
+       "grid": {
+        "n": [
+         1,
+         {
+          "$input": "bars"
+         }
+        ],
+        "pitch_mm": [
+         "bar_length_mm",
+         "pitch_mm"
+        ],
+        "centre_mm": [
+         "0",
+         "0",
+         "0"
+        ],
+        "index": [
+         "bar_row",
+         "bar"
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "plane",
+     "placement": {
+      "linear": {
+       "count": {
+        "$input": "planes"
+       },
+       "pitch_mm": [
+        "0",
+        "0",
+        "plane_step_mm"
+       ],
+       "start_mm": [
+        "0",
+        "0",
+        "first_plane_mm"
+       ],
+       "index": "plane"
+      }
+     }
+    }
+   ]
+  },
+  "frames": {}
+ }
+}

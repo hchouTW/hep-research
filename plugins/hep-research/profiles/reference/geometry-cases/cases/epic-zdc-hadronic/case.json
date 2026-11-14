@@ -1,0 +1,95 @@
+{
+ "case_id": "epic-zdc-hadronic",
+ "card_case": "ePIC ZDC hadronic section",
+ "level": "L2",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "ePIC",
+ "subsystem": "far-forward ZDC, hadronic section (SiPM-on-tile), as in the ePIC simulation geometry 26.11.0, status development",
+ "corresponding_kit": "calorimeter",
+ "cited_claims": [
+  "eic:C10",
+  "eic:C11",
+  "eic:C12",
+  "eic:C13",
+  "eic:C15"
+ ],
+ "quantities": [
+  {
+   "name": "steel_x0",
+   "definition": "x/X0 of the steel along the section's axis (64 absorber plates and the back plate)",
+   "reference": 73.73,
+   "tolerance_relative": 0.01,
+   "derivation": "65 x 2 cm (eic:C11) x 7.85 g/cm3 (eic:C15) / 13.84 g/cm2 (PDG, iron)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties, iron (2025 web edition)",
+     "url": "https://pdg.lbl.gov/2025/AtomicNuclearProperties/HTML/iron_Fe.html",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "radiation length 13.84 g/cm2 (1.757 cm at 7.874 g/cm3)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: the plate thickness and density are design values written as input to the ePIC simulation, not outputs of it, and the radiation length is PDG's tabulation for iron; Steel235's 0.2% carbon is neglected in the reference. The reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula, so agreement validates the geometry and the material definition (composition and density), not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "60 layers instead of 64",
+    "parameter": "/params/layers",
+    "value": "60",
+    "expected_shift_relative": -0.062
+   },
+   "detection_limit_relative": 0.01
+  },
+  {
+   "name": "cells",
+   "definition": "readout cells of the scintillator layers in the expanded IR",
+   "reference": 8096,
+   "tolerance_relative": 0,
+   "derivation": "12 x 11 cells in even layers and 11 x 11 in odd layers of 48.8 mm (eic:C13), 64 layers (eic:C11); the 2026 Preins talk states 8096 channels (tier 3)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count, not a simulation output; the case is built from the same geometry release, so it checks how the segmentation is expressed, not physics"
+   },
+   "negative_control": {
+    "change": "even layers with 11 x 11 cells",
+    "expected_shift_relative": -0.0435
+   },
+   "detection_limit_relative": 0
+  }
+ ],
+ "approximations": [
+  "the staggered grid (CartesianGridXYStaggered) is expressed as even and odd layers of their own cell counts; the per-layer offsets of the cells are not modelled",
+  "the EM section is left out, its design not settled (eic:C14 and the maintainer's decision)",
+  "the section is at the origin along z: its placement 35.8 m from the IP on the -25 mrad axis (eic:C12) is recorded, not modelled",
+  "ESR foil as polystyrene and FR4 as silica at 1.86 g/cm3, as the release models them or close to it"
+ ],
+ "status": "validated-in-scope (comparison with cited values, not confirmation)",
+ "result": {
+  "quantities": [
+   {
+    "name": "steel_x0",
+    "measured": 73.64383754903704,
+    "reference": 73.73,
+    "residual_relative": -0.0011686213340967866,
+    "tolerance_relative": 0.01,
+    "within": true,
+    "control": 69.11190908448091,
+    "control_caught": true
+   },
+   {
+    "name": "cells",
+    "measured": 8096,
+    "reference": 8096,
+    "residual_relative": 0.0,
+    "tolerance_relative": 0,
+    "within": true,
+    "control": 7744,
+    "control_caught": true
+   }
+  ],
+  "copies_the_card": true,
+  "independent": true
+ }
+}

@@ -1,91 +1,201 @@
 {
- "$comment": "Design geometry mapping table (detector system design spec ART-33..ART-35, contracts 3.11.0): the candidate parameters a Geant4 study geometry reads (each field an expression of the tool contract design block, tool_contract.json $defs/expr), and the figures of merit a study record can deliver with their denominators. Read by evaluate_design.py geometry (which writes the geometry file and the digest of the parameters read) and by contracts/design.py (which recomputes that digest, ART-35). Kept in contracts/rules/ (OQ-08, the spec's alternative location): it describes no command-line tool, and every file in contracts/tool_contracts/ is checked against a tool's --help.",
- "type": "object",
- "required": [
-  "mapping_version",
-  "geometry",
-  "fields",
-  "figures_of_merit"
- ],
- "additionalProperties": false,
- "properties": {
-  "$comment": {
-   "type": "string"
-  },
-  "mapping_version": {
-   "type": "string",
-   "enum": [
-    "1.0.0",
-    "1.1.0"
-   ]
-  },
-  "geometry": {
-   "type": "string",
-   "minLength": 1
-  },
-  "fields": {
-   "type": "array",
-   "minItems": 1,
-   "items": {
-    "type": "object",
-    "required": [
-     "field",
-     "from"
-    ],
-    "additionalProperties": false,
-    "properties": {
-     "field": {
-      "type": "string",
-      "minLength": 1
-     },
-     "from": {
-      "$ref": "tool_contract.json#/$defs/expr"
-     },
-     "optional": {
-      "$comment": "mapping 1.1.0: a field read only when the candidate has the parameter (a plain parameter expression)",
-      "type": "boolean"
+ "$comment": "Design geometry mapping table (detector system design spec ART-33..ART-35, contracts 3.11.0): the candidate parameters a Geant4 study geometry reads (each field an expression of the tool contract design block, tool_contract.json $defs/expr), and the figures of merit a study record can deliver with their denominators. Read by evaluate_design.py geometry (which writes the geometry file and the digest of the parameters read) and by contracts/design.py (which recomputes that digest, ART-35). Kept in contracts/rules/ (OQ-08, the spec's alternative location): it describes no command-line tool, and every file in contracts/tool_contracts/ is checked against a tool's --help. g4sim S5 (Section 14.3): a oneOf of two forms, exclusive in mapping_version: 1.0.0 and 1.1.0 allow no kit; 1.2.0, the form of rules/design_geometry/<kind>.json, requires it.",
+ "oneOf": [
+  {
+   "type": "object",
+   "required": [
+    "mapping_version",
+    "geometry",
+    "fields",
+    "figures_of_merit"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "geometry": {
+     "type": "string",
+     "minLength": 1
+    },
+    "fields": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object",
+      "required": [
+       "field",
+       "from"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "field": {
+        "type": "string",
+        "minLength": 1
+       },
+       "from": {
+        "$ref": "tool_contract.json#/$defs/expr"
+       },
+       "optional": {
+        "$comment": "mapping 1.1.0: a field read only when the candidate has the parameter (a plain parameter expression)",
+        "type": "boolean"
+       }
+      }
      }
+    },
+    "figures_of_merit": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "better",
+       "unit",
+       "denominator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "better": {
+        "type": "string",
+        "enum": [
+         "smaller",
+         "larger"
+        ]
+       },
+       "unit": {
+        "type": "string",
+        "minLength": 1
+       },
+       "denominator": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "string",
+         "enum": [
+          "number",
+          "string"
+         ]
+        }
+       },
+       "tail_sensitive": {
+        "$comment": "FID-03: resolution, confusion rate and rejection stay optimistic unless the study simulated every tail source",
+        "type": "boolean"
+       }
+      }
+     }
+    },
+    "mapping_version": {
+     "type": "string",
+     "enum": [
+      "1.0.0",
+      "1.1.0"
+     ]
     }
    }
   },
-  "figures_of_merit": {
+  {
    "type": "object",
-   "additionalProperties": {
-    "type": "object",
-    "required": [
-     "better",
-     "unit",
-     "denominator"
-    ],
-    "additionalProperties": false,
-    "properties": {
-     "better": {
-      "type": "string",
-      "enum": [
-       "smaller",
-       "larger"
-      ]
-     },
-     "unit": {
-      "type": "string",
-      "minLength": 1
-     },
-     "denominator": {
+   "required": [
+    "mapping_version",
+    "geometry",
+    "kit",
+    "fields",
+    "figures_of_merit"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "geometry": {
+     "type": "string",
+     "minLength": 1
+    },
+    "fields": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
       "type": "object",
-      "additionalProperties": {
-       "type": "string",
-       "enum": [
-        "number",
-        "string"
-       ]
+      "required": [
+       "field",
+       "from"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "field": {
+        "type": "string",
+        "minLength": 1
+       },
+       "from": {
+        "$ref": "tool_contract.json#/$defs/expr"
+       },
+       "optional": {
+        "$comment": "mapping 1.1.0: a field read only when the candidate has the parameter (a plain parameter expression)",
+        "type": "boolean"
+       }
       }
-     },
-     "tail_sensitive": {
-      "$comment": "FID-03: resolution, confusion rate and rejection stay optimistic unless the study simulated every tail source",
-      "type": "boolean"
+     }
+    },
+    "figures_of_merit": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "better",
+       "unit",
+       "denominator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "better": {
+        "type": "string",
+        "enum": [
+         "smaller",
+         "larger"
+        ]
+       },
+       "unit": {
+        "type": "string",
+        "minLength": 1
+       },
+       "denominator": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "string",
+         "enum": [
+          "number",
+          "string"
+         ]
+        }
+       },
+       "tail_sensitive": {
+        "$comment": "FID-03: resolution, confusion rate and rejection stay optimistic unless the study simulated every tail source",
+        "type": "boolean"
+       }
+      }
+     }
+    },
+    "mapping_version": {
+     "const": "1.2.0"
+    },
+    "kit": {
+     "$comment": "the kit that produces this geometry",
+     "type": "object",
+     "required": [
+      "name",
+      "version"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "version": {
+       "type": "string",
+       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      }
      }
     }
    }
   }
- }
+ ]
 }

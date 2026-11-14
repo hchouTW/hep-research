@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 VALIDATE = ROOT / "contracts" / "validate.py"
 ARTIFACTS = ROOT / "examples" / "ams-flux-ratio" / "output" / "artifacts"
 AMS_PROFILE = ROOT / "profiles" / "experiments" / "ams-02" / "profile.json"
+_AMS_PROFILE = Path(__file__).resolve().parents[2] / "profiles/experiments/ams-02/profile.json"
+AMS_VERSION = json.loads(_AMS_PROFILE.read_text(encoding="utf-8"))["version"] if _AMS_PROFILE.is_file() else None  # absent in the AMS-optional copy
 
 
 def run(*args):
@@ -27,7 +29,7 @@ class ProfileVocabHint(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.config = Path(self.tmp.name) / "hep-research.project.json"
         self.config.write_text(json.dumps({"schema_version": "1.1.0", "plugin_version": ">=0.1.0",
-                                           "experiments": [{"profile": "experiment:ams-02", "version": "2.0.0"}]}))
+                                           "experiments": [{"profile": "experiment:ams-02", "version": AMS_VERSION}]}))
 
     def tearDown(self):
         self.tmp.cleanup()

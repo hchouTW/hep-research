@@ -1,11 +1,11 @@
 {
- "contract_version": "3.20.0",
+ "contract_version": "3.23.0",
  "artifact_id": "j15-v1-CALC-MASS-N6",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
-  "plugin": "0.57.0",
-  "contracts": "3.20.0",
+  "plugin": "0.60.0",
+  "contracts": "3.23.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-N6.json",
-   "sha256": "a235ef32d3f1cc73864c25ca105af94611eb02dde63d564ba47f94da71aca385",
+   "sha256": "66f480302b5acb5c0fc575ea3a7eb67424ae91a1b80031fd812d43db2ff882c9",
    "artifact_type": "design-candidate",
    "artifact_id": "j15-v1-cand-N6",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-MASS-N6.computational-run.json",
-   "sha256": "329dc74e0bfa611fd0b712750caed4a01101bedd3d9bbc2fb8521b2316845a69",
+   "sha256": "7143ff9fbc872289569659e1f7fefafdde569d400773b40186984f0a8673903c",
    "artifact_type": "computational-run",
    "artifact_id": "j15-v1-CALC-MASS-N6-run",
    "status": [

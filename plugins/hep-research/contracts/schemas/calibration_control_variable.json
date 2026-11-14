@@ -1,0 +1,28 @@
+{
+ "type": "object",
+ "required": [
+  "name",
+  "level"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "name": {
+   "type": "string",
+   "minLength": 1
+  },
+  "level": {
+   "const": "reconstructed"
+  },
+  "unit": {
+   "type": "string",
+   "minLength": 1
+  },
+  "edges": {
+   "type": "array",
+   "items": {
+    "type": "number"
+   }
+  }
+ },
+ "$comment": "calibration-control-variable/1 (section 3.3): binning is in the reconstructed control variable; data and simulation use the same reconstruction."
+}

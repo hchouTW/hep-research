@@ -1,0 +1,110 @@
+{
+ "type": "object",
+ "required": [
+  "schema",
+  "seq",
+  "events",
+  "failure_records",
+  "drafts"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "calibration-ledger/1"
+  },
+  "seq": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "events": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "unit",
+     "release_sha256",
+     "channel",
+     "kappa",
+     "kind",
+     "seq"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "unit": {
+      "type": "string",
+      "minLength": 1
+     },
+     "release_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "channel": {
+      "type": "object"
+     },
+     "kappa": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "kind": {
+      "enum": [
+       "fit",
+       "validation"
+      ]
+     },
+     "seq": {
+      "type": "integer",
+      "minimum": 1
+     }
+    }
+   }
+  },
+  "failure_records": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "unit",
+     "kappa",
+     "seq",
+     "status"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "unit": {
+      "type": "string",
+      "minLength": 1
+     },
+     "kappa": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "seq": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "status": {
+      "enum": [
+       "pending",
+       "final",
+       "withdrawn"
+      ]
+     }
+    }
+   }
+  },
+  "drafts": {
+   "type": "object"
+  },
+  "decisions": {
+   "type": "array"
+  }
+ },
+ "$comment": "calibration-ledger/1 (section 9.5): the single writer's record of reads, failure records and contract drafts on raw units (calib_data.py); records change state and are never deleted."
+}

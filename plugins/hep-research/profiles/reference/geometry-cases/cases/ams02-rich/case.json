@@ -1,0 +1,138 @@
+{
+ "phase": "S7",
+ "case_id": "ams02-rich",
+ "card_case": "AMS-02 RICH",
+ "level": "L3",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "AMS-02",
+ "subsystem": "Ring Imaging Cherenkov detector: the radiator plane of 92 aerogel and 16 NaF tiles",
+ "corresponding_kit": "cherenkov",
+ "cited_claims": [
+  "ams02:C70",
+  "ams02:C205",
+  "ams02:C206",
+  "ams02:C208",
+  "ams02:C209"
+ ],
+ "quantities": [
+  {
+   "name": "aerogel_tiles",
+   "definition": "number of aerogel tiles (tag aerogel_tile) in the expanded IR",
+   "reference": 92,
+   "tolerance_relative": 0,
+   "derivation": "92 tiles of 113 x 113 x 25 mm3 (ams02:C70, S01 Section 1.6)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count from the tier-1 review, not a simulation output; the tile layout is a construction chosen to give it (ams02:C206), so the count checks how the layout is expressed, not the AMS arrangement"
+   },
+   "negative_control": {
+    "change": "the website's 115 mm tile (instead of S01's 113 mm) as size and pitch",
+    "pointer": "/params/aerogel_side_mm",
+    "value": "115",
+    "expected_shift_relative": -0.043
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "aerogel_tile"
+   }
+  },
+  {
+   "name": "naf_tiles",
+   "definition": "number of NaF tiles (tag naf_tile) in the expanded IR",
+   "reference": 16,
+   "tolerance_relative": 0,
+   "derivation": "16 tiles of 85 x 85 x 5 mm3 (ams02:C70)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count from the tier-1 review, not a simulation output; checks how the 4 x 4 array is expressed"
+   },
+   "negative_control": {
+    "change": "one row of the NaF array missing (3 x 4)",
+    "pointer": "/templates/naf_plane/children/0/placement/grid/n",
+    "value": [
+     3,
+     4
+    ],
+    "expected_shift_relative": -0.25
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "naf_tile"
+   }
+  },
+  {
+   "name": "aerogel_cherenkov_angle",
+   "definition": "mean polar angle, in rad, of the Cherenkov photons a 10 GeV (kinetic) mu- emits in an aerogel tile, detected inside the tile's own medium (per-event means averaged over events)",
+   "reference": 0.30967,
+   "tolerance_relative": 0.005,
+   "derivation": "arccos(1/(n beta)) with n = 1.050 (ams02:C205) and beta = 0.99994534 for a muon of 10000 MeV kinetic energy (core/constants muon mass 105.6583755 MeV): 0.309674 rad (17.743 degrees)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "analytic: the Cherenkov relation with the published index, not a Geant4 output; it validates the radiator's material (index) and the tile geometry as Geant4 builds them and Geant4's Cherenkov emission angle, not the AMS ring reconstruction"
+   },
+   "negative_control": {
+    "change": "aerogel of index 1.03 instead of 1.050",
+    "pointer": "/materials/aerogel/optical/rindex/value",
+    "value": [
+     "1.03",
+     "1.03"
+    ],
+    "expected_shift_relative": -0.219
+   },
+   "detection_limit_relative": 0.005,
+   "measure": {
+    "kind": "cherenkov_angle",
+    "request": "request-aerogel.json",
+    "run": "run.json"
+   },
+   "tolerance_basis": "fixed before any measurement: 0.5% (1.5 mrad), three times gate 2's 0.5 mrad margin; the muon's multiple scattering in 25 mm of aerogel (about 0.2 mrad) enters the mean polar angle only at second order, and 20 events of about 80 photons each give a standard error far below it"
+  },
+  {
+   "name": "naf_cherenkov_angle",
+   "definition": "mean polar angle, in rad, of the Cherenkov photons a 10 GeV (kinetic) mu- emits in a NaF tile, detected inside the tile's own medium",
+   "reference": 0.72324,
+   "tolerance_relative": 0.005,
+   "derivation": "arccos(1/(n beta)) with n = 1.334 (ams02:C205) and beta = 0.99994534 (10000 MeV kinetic muon): 0.723239 rad (41.439 degrees); S01's two-decimal 1.33 would give 0.7202 rad (-0.4%)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "analytic: the Cherenkov relation with the published index, not a Geant4 output; as for the aerogel"
+   },
+   "negative_control": {
+    "change": "the muon at 300 MeV kinetic energy (beta = 0.9655) while the reference keeps beta of 10 GeV",
+    "file": "request-naf.json",
+    "pointer": "/source/energy/mono/energy_MeV",
+    "value": "300",
+    "expected_shift_relative": -0.057
+   },
+   "detection_limit_relative": 0.005,
+   "measure": {
+    "kind": "cherenkov_angle",
+    "request": "request-naf.json",
+    "run": "run.json"
+   },
+   "tolerance_basis": "fixed before any measurement: 0.5% (3.6 mrad); about 60 photons per event in 4 mm of NaF and second-order scattering keep the statistical and physical spread well inside it"
+  }
+ ],
+ "approximations": [
+  "the tile layout is constructed (ams02:C206: not published): the aerogel tiles on a 113 mm square lattice, 11 x 11 without its central 3 x 3, keeping the centres within 650 mm of the axis, which leaves exactly 92; the NaF tiles in a 4 x 4 array at 85 mm",
+  "the edge tiles keep their full square shape; the real ones are cut to the conical mirror (radius about 60 cm, research only)",
+  "the NaF array sits in its own 5 mm layer directly below the aerogel layer, so that its 340 mm square does not overlap the 339 mm hole of the aerogel lattice; in AMS-02 both are in one radiator plane",
+  "a constant refractive index over 2.5-3.5 eV (no dispersion, no tile-to-tile spread); no absorption or Rayleigh scattering",
+  "aerogel as silica of PDG's generic aerogel density 0.200 g/cm3 (ams02:C208; the AMS tiles' density is not in the sources read, and the 3% water is left out); NaF stoichiometric at 2.558 g/cm3 (ams02:C209, tier 6); neither density enters the angle",
+  "each tile holds a 1 mm silicon sensor at its +z face, inside the tile's medium, with a dielectric-metal skin of efficiency 1 and reflectivity 0: it stands for gate 2's measurement and is not the AMS photo-detection plane (680 PMTs 470 mm below, ams02:C70), mirror or expansion volume, none of which is modelled",
+  "the muon travels along +z, because the measure reads the angle to +z; the direction does not change an emission angle"
+ ],
+ "cherenkov_handling": {
+  "option": "full_optical_tracking",
+  "reason": "the quantities are Cherenkov angles, for which efficiency maps do not apply (g4sim plan, Section 10.4); the radiators have no scintillation, so no efficiency map is used",
+  "run": "run.json (G4OpticalPhysics, separated accounting)"
+ },
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

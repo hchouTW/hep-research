@@ -1,0 +1,194 @@
+{
+ "$comment": "g4sim S5 (Section 14.3): the design geometry of the calorimeter kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "calorimeter",
+ "kit": {
+  "name": "calorimeter",
+  "version": "1.2.0"
+ },
+ "fields": [
+  {
+   "field": "layers",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "layers",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "towers_x",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "towers_x",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "towers_y",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "towers_y",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "absorber_mm",
+   "from": {
+    "quotient": [
+     {
+      "product": [
+       {
+        "parameter": {
+         "role": "calorimetry-em",
+         "name": "depth_x0",
+         "unit": "1"
+        }
+       },
+       {
+        "parameter": {
+         "role": "calorimetry-em",
+         "name": "absorber_x0_mm",
+         "unit": "mm"
+        }
+       }
+      ]
+     },
+     {
+      "parameter": {
+       "role": "calorimetry-em",
+       "name": "layers",
+       "unit": "1"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "field": "active_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "active_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "support_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "support_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "support_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "support_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "tower_side_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "tower_side_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "absorber_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "absorber_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "active_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "active_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "wrap_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "wrap_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "guide_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "guide_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "materials",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "shower-containment": {
+   "better": "larger",
+   "unit": "1",
+   "denominator": {
+    "energy_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": false
+  },
+  "calorimeter-energy-resolution": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "energy_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
+  }
+ }
+}

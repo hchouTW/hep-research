@@ -1,0 +1,141 @@
+{
+ "$comment": "g4sim S7 (Section 12): the design geometry of the barrel_tracker kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "barrel-tracker",
+ "kit": {
+  "name": "barrel_tracker",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "modules",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "modules",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "layer_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "layer_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "module_length_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "module_length_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "module_width_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "module_width_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "sensor_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "sensor_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "tilt_deg",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "tilt_deg",
+     "unit": "deg"
+    }
+   }
+  },
+  {
+   "field": "stagger_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "stagger_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "sensor_material",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "sensor_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "pai_particles",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "pai_particles",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "materials",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "momentum-resolution-core": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "rigidity_GV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
+  },
+  "material-budget": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "eta": "number"
+   },
+   "tail_sensitive": false
+  }
+ }
+}

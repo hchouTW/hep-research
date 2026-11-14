@@ -26,7 +26,7 @@ DATASETS = ("G4NEUTRONHPDATA", "G4LEDATA", "G4LEVELGAMMADATA", "G4RADIOACTIVEDAT
 TIME_LIMIT_S = 900
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[4]
-CASES = {"FTFP_BERT_EMZ": ("element_sim", "FTFP_BERT_EMZ"), "QGSP_BIC_EMZ": ("element_sim", "QGSP_BIC_EMZ"),
+CASES = {"FTFP_BERT": ("element_sim", "FTFP_BERT"), "FTFP_BERT_EMZ": ("element_sim", "FTFP_BERT_EMZ"), "QGSP_BIC_EMZ": ("element_sim", "QGSP_BIC_EMZ"),
          "FTFP_BERT_EMY": ("element_sim", "FTFP_BERT_EMY"), "FTFP_BERT__SS": ("element_sim", "FTFP_BERT__SS"),
          "G4EmStandardPhysics_option4": ("layered_sim", "G4EmStandardPhysics_option4"),
          "G4EmStandardPhysics_option3": ("layered_sim", "G4EmStandardPhysics_option3"), "G4EmStandardPhysics": ("layered_sim", "G4EmStandardPhysics")}

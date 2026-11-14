@@ -47,9 +47,9 @@ CLAIMS = [
      "tests.core.test_stats_p0_regressions.T02T03ToyTails.test_zero_exceedances_give_a_bound_not_a_zero"),
     (GUIDE, "it refuses `dagostini`",
      "tests.skills.hep_statistics.test_core_stats_guide.RoutedCommandsRun.test_regularized_scan_refuses_dagostini"),
-    (GUIDE, "marked ones refuse to run without NumPy (and SciPy) with exit 2 and a JSON message",
+    (GUIDE, "Marked scripts exit 2 with a JSON message without NumPy (and SciPy)",
      "tests.skills.hep_statistics.test_core_stats_guide.DependencyMarkers.test_markers_match_imports"),
-    (GUIDE, "every script prints `--help` without them",
+    (GUIDE, "all print `--help` without them",
      "tests.skills.hep_statistics.test_cli_input_fuzz.CliInputFuzz.test_help_without_numpy"),
     # hep-statistics capability-matrix rows
     (MATRIX, "the output carries `status` and `method_kind: asymptotic`",
@@ -71,11 +71,11 @@ CLAIMS = [
     (MATRIX, "`--help` without NumPy/SciPy for every script",
      "tests.skills.hep_statistics.test_cli_input_fuzz.CliInputFuzz.test_help_without_numpy"),
     # hep-detector capability-matrix rows (its entry reference, the principles summary, states no script output)
-    (MATRIX, "twenty-three scripts with status labels and JSON errors",
+    (MATRIX, "twenty-five scripts with status labels and JSON errors",
      "tests.skills.hep_detector.test_hep_detector_audit.StatusLabelTests.test_every_script_echoes_status"),
-    (MATRIX, "twenty-three scripts with status labels and JSON errors",
+    (MATRIX, "twenty-five scripts with status labels and JSON errors",
      "tests.skills.hep_detector.test_hep_detector_audit.UniformErrorTests.test_invalid_input_is_exit_2_with_a_json_error"),
-    (MATRIX, "twenty-three scripts with status labels and JSON errors", f"{T}.DetectorScriptCount.test_script_count"),
+    (MATRIX, "twenty-five scripts with status labels and JSON errors", f"{T}.DetectorScriptCount.test_script_count"),
 ]
 
 
@@ -144,7 +144,7 @@ class GeneralMethodLabel(unittest.TestCase):
 
 class DetectorScriptCount(unittest.TestCase):
     def test_script_count(self):
-        self.assertEqual(len(list((ROOT / "skills" / "hep-detector" / "scripts").glob("*.py"))), 24)
+        self.assertEqual(len(list((ROOT / "skills" / "hep-detector" / "scripts").glob("*.py"))), 25)
 
 
 if __name__ == "__main__":

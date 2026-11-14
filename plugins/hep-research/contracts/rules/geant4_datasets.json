@@ -1,8 +1,14 @@
 {
- "$comment": "Physics list to required Geant4 datasets (g4sim plan, Section 8.10), content maintained by hep-detector. From adapters/geant4/tests/g4proto/datasets/probe_datasets.py on E5, Geant4 11.4.3, 10 protons per case: a dataset is required when pointing it at an empty folder stops the run or silently changes its events. G4LEVELGAMMADATA is the silent case. FTFP_BERT__SS took the same three failures as the other lists, its other cases timed out, and its G4LEVELGAMMADATA entry follows the FTFP_BERT family. A dataset absent here was not needed by that short run, which is weaker than not needed.",
+ "$comment": "Physics list to required Geant4 datasets (g4sim plan, Section 8.10), content maintained by hep-detector. From adapters/geant4/tests/g4proto/datasets/probe_datasets.py on E5, Geant4 11.4.3, 10 protons per case: a dataset is required when pointing it at an empty folder stops the run or silently changes its events. G4LEVELGAMMADATA is the silent case. FTFP_BERT__SS took the same three failures as the other lists, its other cases timed out, and its G4LEVELGAMMADATA entry follows the FTFP_BERT family. A dataset absent here was not needed by that short run, which is weaker than not needed. FTFP_BERT (EM option 0, added 2026-11-09): probed on E2 (macOS arm64, Geant4 11.4.3) with g4sim_run of adapters/geant4 0.15.0, not element_sim, by the same method (each dataset pointed at an empty folder, serial, per-event seeding): 10 protons at 3 GeV/c and 10 positrons at 796.6 MeV into a 6x6 PbWO4 array. Both runs need the four datasets below, with G4LEVELGAMMADATA the silent case. The same probe on FTFP_BERT_EMZ with the proton run found G4LEVELGAMMADATA not needed, where the E5 entry has it: a short run can miss a silent dataset, so these entries are lower bounds.",
  "schema": "geant4-datasets/1",
  "geant4": "11.4.3",
  "physics_lists": {
+  "FTFP_BERT": [
+   "G4ENSDFSTATEDATA",
+   "G4LEDATA",
+   "G4LEVELGAMMADATA",
+   "G4PARTICLEXSDATA"
+  ],
   "FTFP_BERT_EMZ": [
    "G4ENSDFSTATEDATA",
    "G4LEDATA",

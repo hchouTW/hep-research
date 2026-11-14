@@ -9,6 +9,7 @@ import json
 import math
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -241,6 +242,40 @@ class CommandLine(unittest.TestCase):
             proc = self.run_cli(args)
             self.assertNotEqual(proc.returncode, 0, msg=str(args))
             self.assertNotIn('Traceback', proc.stderr, msg=str(args))
+
+
+
+class ResponseHandoff(unittest.TestCase):
+    """FE4 through the stage hand-off file: the same draws as core's normative stage 4 (g4sim plan, Section 10.1)."""
+
+    def run_stage(self, document, folder):
+        source, target = Path(folder) / 'in.json', Path(folder) / 'out.json'
+        source.write_text(json.dumps(document), encoding='utf-8')
+        done = subprocess.run([sys.executable, str(SCRIPT), 'handoff', '--handoff-in', str(source), '--handoff-out', str(target), '--stage', 'adc', '--next-stage', 'readout', '--readout', 'ecal', '--run-seed', '7',
+                               '--noise-sigma', '2', '--threshold', '5', '--lsb', '0.5', '--bits', '12'], capture_output=True, text=True, timeout=60, check=False)
+        return done, target
+
+    def test_it_equals_the_normative_stage(self):
+        from core.simulation import response, rng
+        rows = [{'event': event, 'cell': cell, 'charge': charge} for event, cell, charge in ((0, 3, 50.0), (1, 3, 1.0), (2, 9, 2000.0))]
+        with tempfile.TemporaryDirectory() as folder:
+            done, target = self.run_stage(response.handoff('sensor', 'adc', rows), folder)
+            self.assertEqual(done.returncode, 0, done.stderr)
+            written = response.read_handoff(json.loads(target.read_text(encoding='utf-8')), 'readout')
+        key = rng.channel_key(7, 'ecal', 'adc', 0)
+        wanted = []
+        for row in rows:
+            code = response.electronics_response(rng.SubStream(key, row['event'], row['cell']), row['charge'], 2.0, 5.0, 0.5, 12)
+            if code is not None:
+                wanted.append({'event': row['event'], 'cell': row['cell'], 'adc': code})
+        self.assertEqual(written, wanted)
+        self.assertEqual(len(wanted), 2)
+
+    def test_a_file_for_another_stage_is_refused(self):
+        from core.simulation import response
+        with tempfile.TemporaryDirectory() as folder:
+            done, _ = self.run_stage(response.handoff('sensor', 'other', []), folder)
+        self.assertNotEqual(done.returncode, 0)
 
 
 if __name__ == '__main__':

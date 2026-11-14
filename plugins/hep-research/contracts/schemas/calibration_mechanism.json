@@ -1,0 +1,25 @@
+{
+ "$comment": "calibration-mechanism/1 (Part B section 3.2): a mechanism class of the vocabulary; an extension is namespaced x-<name> and needs review. Correctness decisions never depend on the class.",
+ "anyOf": [
+  {
+   "enum": [
+    "input-distribution",
+    "geometry-material",
+    "physics-process",
+    "yield",
+    "fluctuation",
+    "nonlinearity",
+    "transport-diffusion",
+    "time",
+    "noise-threshold",
+    "sharing-crosstalk",
+    "discrete-model",
+    "association"
+   ]
+  },
+  {
+   "type": "string",
+   "pattern": "^x-[a-z0-9-]+$"
+  }
+ ]
+}

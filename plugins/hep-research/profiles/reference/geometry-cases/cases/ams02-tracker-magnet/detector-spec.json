@@ -1,0 +1,183 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "outer_radius_mm": "649",
+  "bl2_half_interval_mm": "714",
+  "silicon_mm": "0.3",
+  "layer_radius_mm": "500",
+  "lever_arm_mm": "3000",
+  "l1_z_mm": "1600",
+  "l2_z_mm": "600",
+  "plane_z_mm": "300",
+  "plane_side_mm": "15"
+ },
+ "templates": {
+  "sensor_L1": {
+   "solid": {
+    "tube": {
+     "rmin_mm": "0",
+     "rmax_mm": "layer_radius_mm",
+     "length_mm": "silicon_mm"
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "silicon_layer",
+    "L1"
+   ]
+  },
+  "sensor_outer": {
+   "solid": {
+    "tube": {
+     "rmin_mm": "0",
+     "rmax_mm": "layer_radius_mm",
+     "length_mm": "silicon_mm"
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "silicon_layer"
+   ]
+  },
+  "sensor": {
+   "solid": {
+    "tube": {
+     "rmin_mm": "0",
+     "rmax_mm": "layer_radius_mm",
+     "length_mm": "silicon_mm"
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "silicon_layer"
+   ]
+  },
+  "bore": {
+   "solid": {
+    "tube": {
+     "rmin_mm": "0",
+     "rmax_mm": "outer_radius_mm",
+     "length_mm": "2 * bl2_half_interval_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "field": "magnet",
+   "children": [
+    {
+     "template": "sensor",
+     "placement": {
+      "explicit": {
+       "positions_mm": [
+        [
+         "0",
+         "0",
+         "l2_z_mm"
+        ],
+        [
+         "0",
+         "0",
+         "plane_z_mm + plane_side_mm"
+        ],
+        [
+         "0",
+         "0",
+         "plane_z_mm - plane_side_mm"
+        ],
+        [
+         "0",
+         "0",
+         "plane_side_mm"
+        ],
+        [
+         "0",
+         "0",
+         "0 - plane_side_mm"
+        ],
+        [
+         "0",
+         "0",
+         "plane_side_mm - plane_z_mm"
+        ],
+        [
+         "0",
+         "0",
+         "0 - plane_z_mm - plane_side_mm"
+        ]
+       ],
+       "index": "inner"
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "4000",
+   "4000",
+   "4000"
+  ],
+  "children": [
+   {
+    "template": "bore",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   },
+   {
+    "template": "sensor_L1",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "l1_z_mm"
+      ]
+     }
+    }
+   },
+   {
+    "template": "sensor_outer",
+    "placement": {
+     "explicit": {
+      "positions_mm": [
+       [
+        "0",
+        "0",
+        "l1_z_mm - lever_arm_mm"
+       ]
+      ],
+      "index": "outer"
+     }
+    }
+   }
+  ]
+ },
+ "fields": {
+  "magnet": {
+   "map": {
+    "path": "magnet-field-map.txt",
+    "sha256": "bab68647d404d4a76c91951af9bf3680f9e6719cfdbdafbb4daf424c77228804"
+   }
+  }
+ },
+ "source_of_facts": {
+  "/params/outer_radius_mm": "claim:ams02:C199",
+  "/params/bl2_half_interval_mm": "claim:ams02:C201",
+  "/params/silicon_mm": "claim:ams02:C202",
+  "/params/layer_radius_mm": "claim:ams02:C203",
+  "/params/lever_arm_mm": "claim:ams02:C94",
+  "/params/l1_z_mm": "claim:ams02:C204",
+  "/params/l2_z_mm": "claim:ams02:C204",
+  "/params/plane_z_mm": "claim:ams02:C204",
+  "/params/plane_side_mm": "claim:ams02:C204",
+  "/fields/magnet/map": "claim:ams02:C93"
+ }
+}

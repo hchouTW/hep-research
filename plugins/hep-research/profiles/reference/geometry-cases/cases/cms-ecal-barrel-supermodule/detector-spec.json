@@ -1,0 +1,202 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "crystal_length_mm": "230",
+  "front_side_mm": "22",
+  "rear_side_mm": "26",
+  "crystal_gap_mm": "0.35",
+  "web_mm": "4",
+  "pitch_mm": "rear_side_mm + crystal_gap_mm"
+ },
+ "materials": {
+  "PbWO4": {
+   "composition": {
+    "Pb": "0.45534",
+    "W": "0.40401",
+    "O": "0.14065"
+   },
+   "density_g_cm3": "8.28"
+  },
+  "Al": {
+   "base": "G4_Al"
+  }
+ },
+ "templates": {
+  "crystal": {
+   "solid": {
+    "trd": {
+     "x1_mm": "front_side_mm",
+     "x2_mm": "rear_side_mm",
+     "y1_mm": "front_side_mm",
+     "y2_mm": "rear_side_mm",
+     "length_mm": "crystal_length_mm"
+    }
+   },
+   "material": "PbWO4",
+   "tags": [
+    "crystal"
+   ]
+  },
+  "module500": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "25 * pitch_mm",
+      "20 * pitch_mm",
+      "crystal_length_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "module"
+   ],
+   "children": [
+    {
+     "template": "crystal",
+     "placement": {
+      "grid": {
+       "n": [
+        25,
+        20
+       ],
+       "pitch_mm": [
+        "pitch_mm",
+        "pitch_mm"
+       ],
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ],
+       "index": [
+        "ieta",
+        "iphi"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "module400": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "20 * pitch_mm",
+      "20 * pitch_mm",
+      "crystal_length_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "module"
+   ],
+   "children": [
+    {
+     "template": "crystal",
+     "placement": {
+      "grid": {
+       "n": [
+        20,
+        20
+       ],
+       "pitch_mm": [
+        "pitch_mm",
+        "pitch_mm"
+       ],
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ],
+       "index": [
+        "ieta",
+        "iphi"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "web": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "web_mm",
+      "20 * pitch_mm",
+      "crystal_length_mm"
+     ]
+    }
+   },
+   "material": "Al",
+   "tags": [
+    "web"
+   ]
+  },
+  "supermodule": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "85 * pitch_mm + 3 * web_mm",
+      "20 * pitch_mm",
+      "crystal_length_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "supermodule"
+   ],
+   "children": [
+    {
+     "placement": {
+      "stack": {
+       "axis": "x",
+       "from": "-x",
+       "sequence": [
+        "module500",
+        "web",
+        "module400",
+        "web",
+        "module400",
+        "web",
+        "module400"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "3000",
+   "3000",
+   "3000"
+  ],
+  "children": [
+   {
+    "template": "supermodule",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/crystal_length_mm": "claim:detector-atlas:C125",
+  "/params/front_side_mm": "claim:detector-atlas:C125",
+  "/params/rear_side_mm": "claim:detector-atlas:C125",
+  "/params/crystal_gap_mm": "claim:detector-atlas:C127",
+  "/params/web_mm": "claim:detector-atlas:C128",
+  "/materials/PbWO4/density_g_cm3": "claim:detector-atlas:C130"
+ }
+}

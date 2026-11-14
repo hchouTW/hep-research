@@ -2,7 +2,8 @@
  "note": "Extension-point registry of hep-review (spec v9 section 3.3). An entry here does not mean the capability is supported beyond its stated status.",
  "domain_packs": [
   {"owner": "hep-statistics", "card": "references/domains/statistics.md", "status": "pilot-domain", "question_types": ["uncertainty model", "degrees of freedom", "propagation with correlations", "combination"], "cases": {"positive": "BLUE with the stated correlation", "negative": "fully correlated systematic with a zero off-diagonal"}},
-  {"owner": "hep-computing", "card": "references/domains/computing.md", "status": "pilot-domain", "question_types": ["recomputation within tolerance", "implementation matches method"], "cases": {"positive": "weighted mean recomputes within 0.1%", "negative": "stated value rounded outside the tolerance"}}
+  {"owner": "hep-computing", "card": "references/domains/computing.md", "status": "pilot-domain", "question_types": ["recomputation within tolerance", "implementation matches method"], "cases": {"positive": "weighted mean recomputes within 0.1%", "negative": "stated value rounded outside the tolerance"}},
+  {"owner": "hep-detector", "card": "references/domains/detector.md", "status": "calibration-template", "question_types": ["stage graph and injection splits", "parameter binding to simulator fields", "reference placement and conversion", "model discrepancy declared from physics", "alternative hypotheses as simulation settings"], "cases": {"positive": "ECAL node-binding example accepted, P4 passed, candidates derived", "negative": "correlation length raised after a G6 failure"}}
  ],
  "method_cards": [
   {"id": "assumption-check", "evidence": "a finding or support per stated assumption", "acceptance_case": "statistics card, missing input"},

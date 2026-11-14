@@ -2,7 +2,7 @@
 
 Claude Code and Codex plugin for experimental and theoretical high-energy and astroparticle physics research.
 
-Version 0.58.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data is synthetic and labeled synthetic in file names and metadata.
+Version 0.66.1, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data is synthetic and labeled synthetic in file names and metadata.
 Validation status: [docs/capability-matrix.md](docs/capability-matrix.md). Test evidence: [VALIDATION.md](VALIDATION.md).
 
 ## Core capabilities
@@ -260,7 +260,7 @@ Taken from Anthropic's documentation, read on 2026-10-04 ([Plugins](https://clau
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Or **Add > Upload plugin** with a `.zip` holding exactly one `.claude-plugin/plugin.json`, built from a clean
    checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 4950 files, 88.8 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 5400 files, 107.0 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 - The plugin is saved to the account: available in Chat, Cowork, and Claude Code sessions signed in to the same account
   (synced plugin; run `/reload-plugins`). Pick a skill with `/` and `hep-research:`, or describe the task.

@@ -112,14 +112,16 @@ def main(argv=None) -> int:
             return 2
     tmp = Path(tempfile.mkdtemp(prefix="hep research no ams "))  # a path with spaces on purpose
     dst = tmp / "hep-research"
-    ams_dir = None
     reg = json.loads((ROOT / "profiles" / "registry.json").read_text(encoding="utf-8"))
+    # the AMS-02 profile goes, and with it every profile that depends on it (reference:geometry-cases cites its claims)
+    gone = {AMS}
     for p in reg["profiles"]:
-        if p["id"] == AMS:
-            ams_dir = (ROOT / "profiles" / p["path"]).resolve()
+        if p["id"] != AMS and AMS in json.loads((ROOT / "profiles" / p["path"] / "profile.json").read_text(encoding="utf-8")).get("depends_on", []):
+            gone.add(p["id"])
+    dirs = {(ROOT / "profiles" / p["path"]).resolve() for p in reg["profiles"] if p["id"] in gone}
     shutil.copytree(ROOT, dst, ignore=lambda d, names: [n for n in names if n in ("__pycache__", "output")
-                                                           or (ams_dir and (Path(d) / n).resolve() == ams_dir)])
-    reg["profiles"] = [p for p in reg["profiles"] if p["id"] != AMS]
+                                                           or (Path(d) / n).resolve() in dirs])
+    reg["profiles"] = [p for p in reg["profiles"] if p["id"] not in gone]
     (dst / "profiles" / "registry.json").write_text(json.dumps(reg, indent=1) + "\n", encoding="utf-8")
     py = sys.executable
     out = tmp / "outputs"

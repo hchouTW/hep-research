@@ -1,0 +1,110 @@
+{
+ "schema": "detector-spec/1",
+ "params": {},
+ "materials": {
+  "mylar": {
+   "base": "G4_MYLAR",
+   "density_g_cm3": "1.39"
+  },
+  "air": {
+   "base": "G4_AIR",
+   "density_g_cm3": "0.00120479"
+  },
+  "radiator_mix": {
+   "density_g_cm3": "9.809747906976744186046511627906977e-2",
+   "components": [
+    {
+     "material": "mylar",
+     "mass_fraction": "9.885752937348791837715479780482233e-1"
+    },
+    {
+     "material": "air",
+     "mass_fraction": "1.142470626512081622845202195177668e-2"
+    }
+   ]
+  }
+ },
+ "templates": {
+  "radiator": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "100",
+      "100",
+      "21.5"
+     ]
+    }
+   },
+   "material": "radiator_mix",
+   "tags": [
+    "radiator"
+   ]
+  },
+  "xenon": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "100",
+      "100",
+      "10"
+     ]
+    }
+   },
+   "material": "G4_Xe",
+   "tags": [
+    "absorber"
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "1000",
+   "1000",
+   "1000"
+  ],
+  "children": [
+   {
+    "template": "radiator",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   },
+   {
+    "template": "xenon",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "30"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "physics_requirements": [
+  {
+   "need": "transition_radiation",
+   "select": {
+    "tags": [
+     "radiator"
+    ]
+   },
+   "structure": "regular",
+   "foil_material": "mylar",
+   "gas_material": "air",
+   "foil_thickness_um": "15",
+   "gap_um": "200",
+   "foils": 100,
+   "axis": "z"
+  }
+ ]
+}

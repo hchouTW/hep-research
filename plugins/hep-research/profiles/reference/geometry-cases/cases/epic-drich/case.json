@@ -1,0 +1,82 @@
+{
+ "phase": "S7",
+ "case_id": "epic-drich",
+ "card_case": "ePIC dRICH aerogel",
+ "level": "L3",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "ePIC",
+ "subsystem": "forward PID, dual-radiator RICH: the six sector sensor-box extrusions and the aerogel radiator with a test sensor inside it, as in the ePIC simulation geometry 26.11.0, status development",
+ "corresponding_kit": "cherenkov",
+ "cited_claims": [
+  "eic:C32",
+  "eic:C33",
+  "eic:C34",
+  "eic:C35"
+ ],
+ "quantities": [
+  {
+   "name": "sectors",
+   "definition": "sector sensor-box extrusions (volumes tagged sector) in the expanded IR",
+   "reference": 6,
+   "tolerance_relative": 0,
+   "derivation": "DRICH_num_sectors = 6, one sensor-box extrusion per sector (eic:C32); the PDR draft states 6 sectors (eic:C34, Tier 2)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count, not a simulation output; the PDR draft states 6 sectors independently of the geometry file"
+   },
+   "negative_control": {
+    "change": "five sectors in the ring instead of six",
+    "pointer": "/world/children/1/placement/ring/n",
+    "value": 5,
+    "expected_shift_relative": -0.1667
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "sector"
+   }
+  },
+  {
+   "name": "aerogel_cherenkov_angle",
+   "definition": "mean polar angle (rad) of the Cherenkov photons a 3000 MeV (kinetic) mu- emits in the aerogel, detected by a sensor inside the aerogel itself, mean per event then over events (gate 2's method)",
+   "reference": 0.22307,
+   "tolerance_relative": 0.005,
+   "derivation": "arccos(1/(n beta)) with n = 1.026 at 400 nm (PDR draft, eic:C34, Tier 2; the 2026 dRICH paper calls it the current default, eic:C35) and beta = 0.999421 for a 3000 MeV mu- (muon mass 105.6583755 MeV, core/constants): 0.223068 rad",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "the reference is the Cherenkov relation evaluated with the index the PDR draft states for the selected aerogel, not a Geant4 output; the case's index is the geometry's tabulated value at 400 nm (eic:C33), which equals it. Agreement checks the case's optical material and the photon accounting (option (a), full optical tracking), not the aerogel's dispersion, which the case does not model."
+   },
+   "negative_control": {
+    "change": "the earlier aerogel sample's index, 1.019 (eic:C35), instead of 1.026",
+    "pointer": "/materials/Aerogel_DRICH/optical/rindex/value",
+    "value": [
+     "1.019",
+     "1.019"
+    ],
+    "expected_shift_relative": -0.1463
+   },
+   "detection_limit_relative": 0.0022,
+   "measure": {
+    "kind": "cherenkov_angle",
+    "request": "request.json",
+    "run": "run.json"
+   }
+  }
+ ],
+ "approximations": [
+  "the aerogel is a flat disk 4.0 cm thick out to the radiator's outer radius 90.0 - 1.0 - 0.2 = 88.8 cm (eic:C32) with no bore: the bore radius depends on region constants not read; in the geometry it is a cone whose inner radius grows along z",
+  "the aerogel index is constant, 1.026 over 2.5-3.5 eV: the geometry's dispersion table (eic:C33) and the PDR's dn/dlambda are not modelled, and the aerogel has no absorption or Rayleigh tables; its composition is SiO2 at 0.110 g/cm3, not the geometry's Air/SiliconDioxide fractions (eic:C33), which matter only for scattering and energy loss",
+  "the photon sensor (silicon, 100 x 100 x 1 mm, efficiency 1, no reflection) lies inside the aerogel at its back face, so a detected photon keeps its emission direction: it is a measuring device of the case, not a part of the dRICH; the filter, the C2F6 gas, the mirrors and the SiPM sensor spheres are not modelled (the gas index has no independent reference, so no gas quantity is made)",
+  "each sector's sensor-box extrusion (a tube segment 50.0 cm long in z, radii 108-185 cm, 42 degrees wide, centred at (k + 0.5) x 60 degrees, eic:C32) is an air trd with flat faces at apothems 108 and 185 cm and side faces along the 21-degree rays (tan 21 deg = 0.383864, written as a parameter), placed by a ring at the aerogel's z: the overlap check cannot yet judge coaxial phi segments, and these volumes carry the sector count only; the vessel, its walls and the true z positions are not modelled",
+  "the muon starts in vacuum 300 mm before the aerogel at x = 500 mm, inside sector 0's azimuth; the vessel length is disputed (geometry 120 cm, PDR 1.27 m) and not used"
+ ],
+ "cherenkov_handling": {
+  "option": "full_optical_tracking",
+  "scintillation": "none: aerogel is not a scintillator, so no efficiency map is needed",
+  "photons": "every Cherenkov photon is tracked by G4OpticalPhysics inside the optical scope (the aerogel and the test sensor); the accounting is separated"
+ },
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

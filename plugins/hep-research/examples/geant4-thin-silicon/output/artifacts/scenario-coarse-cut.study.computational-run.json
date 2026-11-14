@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.20.0",
+ "contract_version": "3.23.0",
  "extension": {
   "commands": [
    "check_geant4_study.py label --write"
@@ -19,7 +19,7 @@
    },
    {
     "path": "output/benchmarks-mpv.json",
-    "sha256": "9c364977cd931a98b1b119f02eed1dd1fcdfdd82c82e3365531fc06510a20b80"
+    "sha256": "b1065e61130ae2a0c86f624e1b06d52454a2bc5ae5a7ed90b861252c3319318f"
    },
    {
     "path": "output/scenarios/coarse-cut.convergence.json",
@@ -96,7 +96,7 @@
        {
         "at_claimed_detection_limit": true,
         "csv": null,
-        "detection_limit_relative": 0.06793162748330063,
+        "detection_limit_relative": 0.06793162748330062,
         "injected": "silicon density x 0.931 on the Geant4 side (reference keeps 2.329 g/cm3)",
         "injected_relative": -0.069,
         "relative_difference": -0.05542934573762228,
@@ -433,11 +433,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "53630d62f5f67009"
+    "version": "2739b1bccf1387be"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "d10569e7cb964fdb"
+    "version": "7e391dc5e2029750"
    }
   ]
  },
@@ -582,8 +582,8 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.20.0",
-  "plugin": "0.57.0",
+  "contracts": "3.23.0",
+  "plugin": "0.60.0",
   "profiles": {}
  }
 }

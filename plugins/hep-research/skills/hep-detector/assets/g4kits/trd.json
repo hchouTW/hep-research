@@ -1,0 +1,282 @@
+{
+ "schema": "g4kit/1",
+ "name": "trd",
+ "version": "1.0.0",
+ "geometry_kind": "trd",
+ "role": "particle-id",
+ "purpose": "Layers of a foil radiator and a plane of straws along x; the radiator is an XTR envelope, the straws' gas has PAI.",
+ "inputs": {
+  "layers": {
+   "kind": "integer"
+  },
+  "radiator_thickness_mm": {
+   "kind": "length"
+  },
+  "module_width_mm": {
+   "kind": "length"
+  },
+  "straws": {
+   "kind": "integer"
+  },
+  "straw_radius_mm": {
+   "kind": "length"
+  },
+  "straw_wall_mm": {
+   "kind": "length"
+  },
+  "straw_length_mm": {
+   "kind": "length"
+  },
+  "radiator_material": {
+   "kind": "material"
+  },
+  "foil_material": {
+   "kind": "material"
+  },
+  "gas_material": {
+   "kind": "material"
+  },
+  "drift_gas_material": {
+   "kind": "material"
+  },
+  "wall_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  },
+  "radiator_structure": {
+   "kind": "word"
+  },
+  "foils": {
+   "kind": "integer"
+  },
+  "foil_thickness_um": {
+   "kind": "physical"
+  },
+  "gap_um": {
+   "kind": "physical"
+  },
+  "pai_particles": {
+   "kind": "names"
+  },
+  "materials": {
+   "kind": "materials",
+   "optional": true
+  }
+ },
+ "geometric_defaults": {
+  "straw_gap_mm": "0.1"
+ },
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "straw_pitch_mm": "2 * straw_radius_mm + straw_gap_mm",
+   "gas_radius_mm": "straw_radius_mm - straw_wall_mm",
+   "plane_width_mm": "straws * straw_pitch_mm",
+   "first_straw_mm": "0 - (straws - 1) * straw_pitch_mm / 2",
+   "layer_mm": "radiator_thickness_mm + straw_pitch_mm",
+   "module_x_mm": "layers * layer_mm",
+   "world_mm": "4 * (module_x_mm + module_width_mm + straw_length_mm) + 200"
+  },
+  "materials": {
+   "$input": "materials"
+  },
+  "templates": {
+   "radiator": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "radiator_thickness_mm",
+       "module_width_mm",
+       "straw_length_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "radiator_material"
+    },
+    "tags": [
+     "radiator"
+    ]
+   },
+   "straw_gas": {
+    "solid": {
+     "tube": {
+      "rmin_mm": "0",
+      "rmax_mm": "gas_radius_mm",
+      "length_mm": "straw_length_mm"
+     }
+    },
+    "material": {
+     "$input": "drift_gas_material"
+    },
+    "region": "drift",
+    "tags": [
+     "drift"
+    ]
+   },
+   "straw": {
+    "solid": {
+     "tube": {
+      "rmin_mm": "0",
+      "rmax_mm": "straw_radius_mm",
+      "length_mm": "straw_length_mm"
+     }
+    },
+    "material": {
+     "$input": "wall_material"
+    },
+    "tags": [
+     "straw"
+    ],
+    "children": [
+     {
+      "template": "straw_gas",
+      "placement": {
+       "single": {
+        "centre_mm": [
+         "0",
+         "0",
+         "0"
+        ]
+       }
+      }
+     }
+    ]
+   },
+   "straw_plane": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "straw_pitch_mm",
+       "module_width_mm",
+       "straw_length_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "children": [
+     {
+      "template": "straw",
+      "placement": {
+       "linear": {
+        "count": {
+         "$input": "straws"
+        },
+        "pitch_mm": [
+         "0",
+         "straw_pitch_mm",
+         "0"
+        ],
+        "start_mm": [
+         "0",
+         "first_straw_mm",
+         "0"
+        ],
+        "index": "straw"
+       }
+      }
+     }
+    ]
+   },
+   "module": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "module_x_mm",
+       "module_width_mm",
+       "straw_length_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "children": [
+     {
+      "placement": {
+       "stack": {
+        "axis": "x",
+        "from": "-x",
+        "repeat": {
+         "$input": "layers"
+        },
+        "sequence": [
+         "radiator",
+         {
+          "template": "straw_plane",
+          "index": "layer"
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "physics_requirements": [
+   {
+    "need": "transition_radiation",
+    "select": {
+     "tags": [
+      "radiator"
+     ]
+    },
+    "structure": {
+     "$input": "radiator_structure"
+    },
+    "foil_material": {
+     "$input": "foil_material"
+    },
+    "gas_material": {
+     "$input": "gas_material"
+    },
+    "foil_thickness_um": {
+     "$input": "foil_thickness_um"
+    },
+    "gap_um": {
+     "$input": "gap_um"
+    },
+    "foils": {
+     "$input": "foils"
+    },
+    "axis": "x"
+   },
+   {
+    "need": "thin_layer_ionisation",
+    "region": "drift",
+    "particles": {
+     "$input": "pai_particles"
+    }
+   }
+  ],
+  "frames": {}
+ }
+}

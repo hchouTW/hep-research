@@ -1,0 +1,330 @@
+{
+ "type": "object",
+ "required": [
+  "schema",
+  "contract_sha256",
+  "data_sha256",
+  "plan_sha256",
+  "contract_versions",
+  "engine_version",
+  "grade",
+  "gates",
+  "validation",
+  "k",
+  "k0",
+  "unused_observables",
+  "upstream",
+  "status"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "calibration-result/1"
+  },
+  "contract_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "data_sha256": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^[0-9a-f]{64}$"
+   },
+   "minItems": 1
+  },
+  "plan_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "contract_versions": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^[0-9a-f]{64}$"
+   },
+   "minItems": 1
+  },
+  "engine_version": {
+   "type": "string",
+   "minLength": 1
+  },
+  "kappa": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "beta_hat": {
+   "type": "object"
+  },
+  "exports": {
+   "type": "object"
+  },
+  "profiles": {
+   "type": "array"
+  },
+  "gates": {
+   "type": "object"
+  },
+  "validation": {
+   "type": "object"
+  },
+  "power": {
+   "type": "object"
+  },
+  "grade": {
+   "type": "object",
+   "required": [
+    "effective_grade",
+    "uses",
+    "flags"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "own_grade": {
+     "anyOf": [
+      {
+       "enum": [
+        "failed",
+        "projection",
+        "calibrated-unvalidated",
+        "validated-in-scope"
+       ]
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "effective_grade": {
+     "enum": [
+      "failed",
+      "projection",
+      "calibrated-unvalidated",
+      "validated-in-scope",
+      "incomplete"
+     ]
+    },
+    "uses": {
+     "type": "array",
+     "items": {
+      "enum": [
+       "diagnostics",
+       "design-study",
+       "systematic-variation",
+       "production",
+       "publication"
+      ]
+     }
+    },
+    "flags": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "variation_flags": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "resolutions": {
+     "type": "array"
+    }
+   }
+  },
+  "waiting_records": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "unit",
+     "kappa",
+     "seq"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "unit": {
+      "type": "string",
+      "minLength": 1
+     },
+     "kappa": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "seq": {
+      "type": "integer"
+     },
+     "status": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "k": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "k0": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "unused_observables": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "observable",
+     "reason",
+     "clause"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "observable": {
+      "type": "string",
+      "minLength": 1
+     },
+     "reason": {
+      "type": "string",
+      "minLength": 1
+     },
+     "clause": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "validation_release_lineage": {
+   "type": "string",
+   "minLength": 1
+  },
+  "envelope": {
+   "type": "object"
+  },
+  "shift_mode": {
+   "type": "object"
+  },
+  "upstream": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "result_sha256",
+     "usages"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "result_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "usages": {
+      "type": "array",
+      "items": {
+       "enum": [
+        "phi-center",
+        "nuisance-posterior",
+        "xi",
+        "fixed-value",
+        "variation-set",
+        "envelope"
+       ]
+      },
+      "minItems": 1
+     },
+     "role": {
+      "enum": [
+       "central",
+       "variation"
+      ]
+     }
+    }
+   }
+  },
+  "nuisance_versions": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^[0-9a-f]{64}$"
+   }
+  },
+  "scope": {
+   "type": "object"
+  },
+  "data_declarations": {
+   "type": "array"
+  },
+  "concurrent_failure_records": {
+   "type": "array"
+  },
+  "model_identities": {
+   "type": "array"
+  },
+  "dependency_inputs": {
+   "type": "object"
+  },
+  "version_id": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "result_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "status": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "minLength": 1
+   }
+  }
+ },
+ "$comment": "calibration-result/1 (section 10.1; D11, approval A6: k, k0 and the unused observables with their reasons are fields of the result). The own grade is null with a pending input; result_sha256 is computed after version_id (section 10.4). A result with a pending input has own_grade null, both resolutions and the records it waits for.",
+ "anyOf": [
+  {
+   "properties": {
+    "grade": {
+     "properties": {
+      "own_grade": {
+       "enum": [
+        "failed",
+        "projection",
+        "calibrated-unvalidated",
+        "validated-in-scope"
+       ]
+      }
+     },
+     "required": [
+      "own_grade"
+     ]
+    }
+   }
+  },
+  {
+   "required": [
+    "waiting_records"
+   ],
+   "properties": {
+    "grade": {
+     "required": [
+      "own_grade",
+      "resolutions"
+     ],
+     "properties": {
+      "own_grade": {
+       "type": "null"
+      },
+      "resolutions": {
+       "type": "array",
+       "minItems": 2
+      }
+     }
+    }
+   }
+  }
+ ]
+}

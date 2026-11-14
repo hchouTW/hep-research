@@ -1,0 +1,219 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "rich1_length_mm": "110 * 10",
+  "rich2_length_mm": "167 * 10"
+ },
+ "materials": {
+  "C4F10": {
+   "composition": {
+    "C": "0.20184",
+    "F": "0.79816"
+   },
+   "density_g_cm3": "0.010620",
+   "state": "gas",
+   "temperature_K": "273.15",
+   "pressure_Pa": "101325",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "3.024005",
+      "3.179082"
+     ],
+     "value": [
+      "1.0014",
+      "1.0014"
+     ]
+    },
+    "facts": "the index at 400 nm (C154, C155), constant over 390-410 nm; no absorption, no scintillation"
+   },
+   "facts": "stoichiometric mass fractions; ideal-gas density at the STP of C156 (0 C, 101.325 kPa)"
+  },
+  "CF4": {
+   "composition": {
+    "C": "0.13648",
+    "F": "0.86352"
+   },
+   "density_g_cm3": "0.003926",
+   "state": "gas",
+   "temperature_K": "273.15",
+   "pressure_Pa": "101325",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "3.024005",
+      "3.179082"
+     ],
+     "value": [
+      "1.0005",
+      "1.0005"
+     ]
+    },
+    "facts": "the index at 400 nm (C154, C155), constant over 390-410 nm; no absorption, no scintillation"
+   },
+   "facts": "stoichiometric mass fractions; ideal-gas density at the STP of C156 (0 C, 101.325 kPa)"
+  }
+ },
+ "templates": {
+  "sensor": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "300",
+      "300",
+      "1"
+     ]
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "optical",
+    "sensor"
+   ]
+  },
+  "rich1_radiator": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "400",
+      "400",
+      "rich1_length_mm"
+     ]
+    }
+   },
+   "material": "C4F10",
+   "tags": [
+    "optical",
+    "radiator"
+   ],
+   "children": [
+    {
+     "template": "sensor",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "rich1_length_mm / 2 - 1.5"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "rich2_radiator": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "400",
+      "400",
+      "rich2_length_mm"
+     ]
+    }
+   },
+   "material": "CF4",
+   "tags": [
+    "optical",
+    "radiator"
+   ],
+   "children": [
+    {
+     "template": "sensor",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "rich2_length_mm / 2 - 1.5"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "4000",
+   "4000",
+   "4000"
+  ],
+  "children": [
+   {
+    "template": "rich1_radiator",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "-500",
+       "0",
+       "0"
+      ]
+     }
+    }
+   },
+   {
+    "template": "rich2_radiator",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "500",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "physics_requirements": [
+  {
+   "need": "optical_scope",
+   "select": {
+    "tags": [
+     "optical"
+    ]
+   }
+  }
+ ],
+ "optical_surfaces": {
+  "sensor_surface": {
+   "skin": "sensor",
+   "model": "unified",
+   "finish": "polished",
+   "type": "dielectric_metal",
+   "reflectivity": {
+    "energy_eV": [
+     "3.024005",
+     "3.179082"
+    ],
+    "value": [
+     "0",
+     "0"
+    ]
+   },
+   "efficiency": {
+    "energy_eV": [
+     "3.024005",
+     "3.179082"
+    ],
+    "value": [
+     "1",
+     "1"
+    ]
+   }
+  }
+ },
+ "source_of_facts": {
+  "/materials/C4F10/optical/rindex/value": "claim:detector-atlas:C154",
+  "/materials/CF4/optical/rindex/value": "claim:detector-atlas:C155",
+  "/materials/C4F10/optical/rindex/energy_eV": "claim:detector-atlas:C154",
+  "/materials/CF4/optical/rindex/energy_eV": "claim:detector-atlas:C155",
+  "/params/rich1_length_mm": "claim:detector-atlas:C154",
+  "/params/rich2_length_mm": "claim:detector-atlas:C155",
+  "/materials/C4F10/temperature_K": "claim:detector-atlas:C156",
+  "/materials/C4F10/pressure_Pa": "claim:detector-atlas:C156",
+  "/materials/CF4/temperature_K": "claim:detector-atlas:C156",
+  "/materials/CF4/pressure_Pa": "claim:detector-atlas:C156"
+ }
+}

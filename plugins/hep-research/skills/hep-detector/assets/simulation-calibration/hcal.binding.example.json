@@ -1,0 +1,405 @@
+{
+ "example": "simulation-calibration node binding: HCAL",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row HCAL",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "Cross-section scaling and model-internal parameters have no field in the g4sim run card; the hadronic model enters as a discrete model M (two enumerated lists here) and the production cut as the physics-process theta.",
+  "SiPM saturation (nonlinearity/4b) is not implemented as a g4sim response stage (section 11.4 Table 1)."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: beam (analytic source density)"
+    },
+    {
+     "id": "shower",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 hadronic shower and sampling (g4sim_run)",
+     "samplable": true,
+     "mechanisms": [
+      "physics-process",
+      "geometry-material",
+      "discrete-model"
+     ]
+    },
+    {
+     "id": "quanta",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "2 scintillation photons, Birks (response stage 1)",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "wls",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "3 WLS collection and attenuation (efficiency map)",
+     "mechanisms": [
+      "transport-diffusion"
+     ]
+    },
+    {
+     "id": "pde",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4a SiPM PDE (sensor surface efficiency, folded into the map)"
+    },
+    {
+     "id": "sensor",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b SiPM gain (saturation not implemented in g4sim)",
+     "mechanisms": [
+      "fluctuation",
+      "nonlinearity"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 noise and time window"
+    },
+    {
+     "id": "reco",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 tower and weighted energy"
+    },
+    {
+     "id": "tower_energy",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: reconstructed energy per beam energy and species"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "shower"
+    },
+    {
+     "from": "shower",
+     "to": "quanta"
+    },
+    {
+     "from": "quanta",
+     "to": "wls"
+    },
+    {
+     "from": "wls",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "sensor"
+    },
+    {
+     "from": "sensor",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "reco"
+    },
+    {
+     "from": "reco",
+     "to": "tower_energy"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "beam_energy",
+    "role": "phi",
+    "nodes": [
+     "source"
+    ],
+    "mechanism": "input-distribution",
+    "physical_bounds": [
+     1000.0,
+     400000.0
+    ],
+    "sampling_bounds": [
+     2000.0,
+     300000.0
+    ],
+    "bindings": [
+     {
+      "document": "simulation-request",
+      "pointer": "/source/energy/mono/energy_MeV"
+     }
+    ],
+    "source": "beam-line momentum measurement of the experiment instance"
+   },
+   {
+    "name": "absorber_mm",
+    "role": "phi",
+    "nodes": [
+     "shower"
+    ],
+    "mechanism": "geometry-material",
+    "physical_bounds": [
+     1.0,
+     100.0
+    ],
+    "sampling_bounds": [
+     10.0,
+     60.0
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/params/absorber_mm"
+     }
+    ],
+    "source": "engineering drawing of the experiment instance (sets the sampling fraction)"
+   },
+   {
+    "name": "production_cut",
+    "role": "theta",
+    "nodes": [
+     "shower"
+    ],
+    "mechanism": "physics-process",
+    "physical_bounds": [
+     0.01,
+     10.0
+    ],
+    "sampling_bounds": [
+     0.05,
+     2.0
+    ],
+    "bindings": [
+     {
+      "document": "run-card",
+      "pointer": "/physics/cuts_mm/default"
+     }
+    ]
+   },
+   {
+    "name": "birks",
+    "role": "theta",
+    "nodes": [
+     "shower"
+    ],
+    "mechanism": "nonlinearity",
+    "physical_bounds": [
+     0.0,
+     0.5
+    ],
+    "sampling_bounds": [
+     0.0,
+     0.3
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/materials/Polystyrene/ionisation/birks_mm_per_MeV"
+     }
+    ]
+   },
+   {
+    "name": "light_yield",
+    "role": "theta",
+    "nodes": [
+     "quanta"
+    ],
+    "mechanism": "yield",
+    "physical_bounds": [
+     1.0,
+     1000.0
+    ],
+    "sampling_bounds": [
+     20.0,
+     300.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/0/parameters/light_yield_per_MeV/value"
+     }
+    ]
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "sensor"
+    ],
+    "mechanism": "fluctuation",
+    "physical_bounds": [
+     0.1,
+     10.0
+    ],
+    "sampling_bounds": [
+     0.5,
+     2.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/2/parameters/gain/value"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_beam",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "tower_energy"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "ftfp",
+     "physics_list": "FTFP_BERT"
+    },
+    {
+     "id": "qgsp",
+     "physics_list": "QGSP_BIC"
+    }
+   ],
+   "absorbed": [],
+   "physics_list_confirmations": [
+    {
+     "physics_lists": [
+      "FTFP_BERT",
+      "QGSP_BIC"
+     ],
+     "record": "placeholder: the experiment instance attaches the record that the two lists use different hadronic models in its particle and energy range (section 5.2 clause 1 item 3)"
+    }
+   ]
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "SiPM saturation turned on (listed in g4sim section 10.1, not implemented: the alternative needs the instance's own digitization)",
+    "observable": "tower_energy linearity at the highest beam energies",
+    "identity_difference": "a response stage g4sim does not provide (Part B section 11.4 Table 1 row 4b)"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "a third hadronic model neither enumerated nor absorbed",
+    "observable": "e/pi response ratio versus energy and longitudinal shower profile",
+    "identity_difference": "run card /physics/reference_list (with its confirmation record)"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "shower": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "quanta": {
+     "table1": "2",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "stage": "scintillation"
+    },
+    "wls": {
+     "table1": "3",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "pde": {
+     "table1": "4a",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "sensor": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "distribution": "poisson"
+    },
+    "electronics": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "reco": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}

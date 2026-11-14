@@ -1,0 +1,178 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "sectors": "6",
+  "aerogel_mm": "40.0",
+  "rmax0_mm": "900.0",
+  "wall_mm": "10.0",
+  "rmax2_mm": "1800.0",
+  "sensorbox_length_mm": "500.0",
+  "sensorbox_rmin_mm": "1080.0",
+  "sensorbox_tan_half_dphi": "0.383864"
+ },
+ "materials": {
+  "Aerogel_DRICH": {
+   "base": "G4_SILICON_DIOXIDE",
+   "density_g_cm3": "0.110",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "2.5",
+      "3.5"
+     ],
+     "value": [
+      "1.026",
+      "1.026"
+     ]
+    }
+   }
+  }
+ },
+ "templates": {
+  "sensor": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "100",
+      "100",
+      "1"
+     ]
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "optical",
+    "sensor"
+   ]
+  },
+  "aerogel": {
+   "solid": {
+    "tube": {
+     "rmin_mm": "0",
+     "rmax_mm": "rmax0_mm - wall_mm - 2",
+     "length_mm": "aerogel_mm"
+    }
+   },
+   "material": "Aerogel_DRICH",
+   "tags": [
+    "optical",
+    "radiator"
+   ],
+   "children": [
+    {
+     "template": "sensor",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "500",
+        "0",
+        "aerogel_mm / 2 - 0.5"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "sensorbox": {
+   "solid": {
+    "trd": {
+     "x1_mm": "sensorbox_length_mm",
+     "x2_mm": "sensorbox_length_mm",
+     "y1_mm": "2 * sensorbox_rmin_mm * sensorbox_tan_half_dphi",
+     "y2_mm": "2 * (rmax2_mm + 50) * sensorbox_tan_half_dphi",
+     "length_mm": "rmax2_mm + 50 - sensorbox_rmin_mm"
+    }
+   },
+   "material": "G4_AIR",
+   "tags": [
+    "sector"
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "4000",
+   "4000",
+   "1200"
+  ],
+  "children": [
+   {
+    "template": "aerogel",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   },
+   {
+    "template": "sensorbox",
+    "placement": {
+     "ring": {
+      "n": 6,
+      "radius_mm": "(sensorbox_rmin_mm + rmax2_mm + 50) / 2",
+      "phi0_deg": "360 / sectors / 2",
+      "orientation": "radial",
+      "index": "sector"
+     }
+    }
+   }
+  ]
+ },
+ "physics_requirements": [
+  {
+   "need": "optical_scope",
+   "select": {
+    "tags": [
+     "optical"
+    ]
+   }
+  }
+ ],
+ "optical_surfaces": {
+  "sensor_surface": {
+   "skin": "sensor",
+   "model": "unified",
+   "finish": "polished",
+   "type": "dielectric_metal",
+   "reflectivity": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "0",
+     "0"
+    ]
+   },
+   "efficiency": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "1",
+     "1"
+    ]
+   }
+  }
+ },
+ "source_of_facts": {
+  "/params/sectors": "claim:eic:C32",
+  "/params/aerogel_mm": "claim:eic:C32",
+  "/params/rmax0_mm": "claim:eic:C32",
+  "/params/wall_mm": "claim:eic:C32",
+  "/params/rmax2_mm": "claim:eic:C32",
+  "/params/sensorbox_length_mm": "claim:eic:C32",
+  "/params/sensorbox_rmin_mm": "claim:eic:C32",
+  "/materials/Aerogel_DRICH/density_g_cm3": "claim:eic:C33",
+  "/materials/Aerogel_DRICH/optical/rindex/value/0": "claim:eic:C33",
+  "/materials/Aerogel_DRICH/optical/rindex/value/1": "claim:eic:C33",
+  "/params/sensorbox_tan_half_dphi": "claim:eic:C32",
+  "/world/children/1/placement/ring/n": "claim:eic:C32"
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "case_id": "cms-ecal-barrel-crystal",
+ "card_case": "CMS ECAL barrel crystal",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "CMS",
+ "subsystem": "ECAL barrel, one PbWO4 crystal",
+ "corresponding_kit": null,
+ "cited_claims": [
+  "detector-atlas:C124",
+  "detector-atlas:C125",
+  "detector-atlas:C130"
+ ],
+ "quantities": [
+  {
+   "name": "depth_x0",
+   "definition": "x/X0 along the crystal axis, front-face centre to rear-face centre",
+   "reference": 25.77,
+   "tolerance_relative": 0.01,
+   "derivation": "230 mm (detector-atlas:C125) x 8.28 g/cm3 (detector-atlas:C130) / 7.39 g/cm2 (PDG); CMS states 25.8 X0 (detector-atlas:C125)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties, lead tungstate (2025 web edition)",
+     "url": "https://pdg.lbl.gov/2025/AtomicNuclearProperties/HTML/lead_tungstate.html",
+     "read_level": "page",
+     "verified": "2026-11-07",
+     "value": "radiation length 7.39 g/cm2 (0.8903 cm at 8.300 g/cm3)",
+     "method": "Tsai's formula with Bragg addition over mass fractions (RPP 2024 section 34.4.2)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: the crystal length is CMS's design value and the radiation length PDG's tabulation; CMS's own 25.8 X0 is 230 mm / 8.9 mm from PDG 2004, not a simulation output. The reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula, so agreement validates the geometry and the material definition (composition and density), not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "the crystal 220 mm long",
+    "parameter": "/params/crystal_length_mm",
+    "value": "220",
+    "expected_shift_relative": -0.043
+   },
+   "detection_limit_relative": 0.01
+  }
+ ],
+ "approximations": [
+  "one barrel crystal as a symmetric trd, 22 x 22 to 26 x 26 mm2 nominal; the true crystals are 17 shape pairs varying with eta",
+  "PbWO4 by stoichiometric mass fractions with CMS's density 8.28 g/cm3 (PDG gives 8.300, 0.24% more)",
+  "the crystal in vacuum at the origin: its placement in the barrel (radius 1.29 m, 3 degree tilt) is not modelled, and does not enter the quantity"
+ ],
+ "status": "validated-in-scope (comparison with cited values, not confirmation)",
+ "result": {
+  "quantities": [
+   {
+    "name": "depth_x0",
+    "measured": 25.77131265583826,
+    "reference": 25.77,
+    "residual_relative": 5.0937362757519367e-05,
+    "tolerance_relative": 0.01,
+    "within": true,
+    "control": 24.650820801236595,
+    "control_caught": true
+   }
+  ],
+  "copies_the_card": true,
+  "independent": true
+ }
+}

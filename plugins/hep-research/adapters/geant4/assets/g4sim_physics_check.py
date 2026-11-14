@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""check-spec rules of S3 (g4sim plan, Sections 6.2.9, 8.4, 8.6, 9.1): PAI semantics, the G4UserLimits restriction, time cuts and scorer combinations.
+"""check-spec rules of S3 (g4sim plan, Sections 6.2.9, 8.4, 8.6, 9.1): PAI semantics, the G4UserLimits restriction, time cuts and scorer combinations;
+from S8 the run card's placement_impl and fast_sim block (Sections 6.2.9, 16).
 
 A particle's ionization process name comes from the effective config after initialization (`ionisation`), never from an assumption here.
 Every function returns findings, each {code, path, message}; an empty list passes.
@@ -8,8 +9,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import re
 import sys
 from decimal import Decimal
+from pathlib import Path
 
 PAI_MODELS = ("PAI", "PAIphoton")
 ALL_PARTICLES = "all"
@@ -18,13 +22,15 @@ WORLD_REGION_NAMES = ("", "world", "World")
 MAPPED_PROCESS = {"e-": "eIoni", "e+": "eIoni", "mu+": "muIoni", "mu-": "muIoni", "GenericIon": "ionIoni"}
 ALLOWED_USER_LIMITS = {"max_step_mm"}
 
-ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class")
+ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class", "edep_visible_ly_split")
 BOUNDARY = ("n_crossings", "crossing_kinematics", "energy_out_by_face")
 FIRST = ("time_first", "first_entry_kinematics")
-LATER_QUANTITIES = {"edep_visible_ly_split": "S4", "photon_detected": "S7"}
+PHOTON = ("photon_detected",)  # S7: a count per detecting volume, with optical physics on
+LATER_QUANTITIES: dict = {}  # empty since photon_detected opened in S7
 SEGMENTATIONS = ("none", "along_axis", "cartesian_xy", "cartesian_xyz", "polar")
-ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST}}
-BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class")
+ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST + PHOTON}}
+BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class", "edep_visible_ly_split")
+SPLIT_QUANTITY = "edep_visible_ly_split"
 
 
 def _finding(code: str, path: str, message: str) -> dict:
@@ -123,6 +129,8 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
     names: set = set()
     for at, scorer in enumerate(scorers):
         where, quantity = f"scorers/{at}", scorer.get("quantity")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+", str(scorer.get("name"))) or scorer.get("name") == "event":
+            findings.append(_finding("scorer-name", where, f"name {scorer.get('name')!r}: a name is a word, and `event` heads a file's columns"))
         if scorer.get("name") in names:
             findings.append(_finding("scorer-name", where, f"{scorer.get('name')} appears twice"))
         names.add(scorer.get("name"))
@@ -144,32 +152,232 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
             findings.append(_finding("scorer-combination", where, f"split {split!r} is not apportion or midpoint"))
         if split != "apportion" and ({"apportion_short_step_fraction", "chord_min_rigidity_GV"} & set(scorer)):
             findings.append(_finding("scorer-combination", where, "the short-step fraction and rigidity threshold belong to `apportion`"))
-        if scorer.get("level", "column") != "column":
-            findings.append(_finding("scorer-phase", where, f"level {scorer['level']} arrives in S4"))
+        level = scorer.get("level", "column")
+        if level == "event_file":
+            if quantity != "edep" or scorer.get("hit_kind") not in ("tracker", "calorimeter"):
+                findings.append(_finding("scorer-combination", where, "an event_file scorer is `edep` with hit_kind tracker or calorimeter"))
+        elif level == "moments":
+            if quantity not in ADDITIVE:
+                findings.append(_finding("scorer-combination", where, "`moments` is for linear quantities"))
+        elif level != "column":
+            findings.append(_finding("scorer-quantity", where, f"unknown level {level!r}"))
         if quantity in BIRKS_QUANTITIES and materials is not None:
             for name in (selected_materials or {}).get(scorer.get("name"), ()):
                 if "birks_mm_per_MeV" not in materials.get(name, {}).get("ionisation", {}):
                     findings.append(_finding("birks-undeclared", where, f"{name} declares no Birks constant, and Geant4 may set one silently (GB13)"))
+                if quantity == SPLIT_QUANTITY and "scintillation" not in materials.get(name, {}):
+                    findings.append(_finding("scintillation-undeclared", where, f"{name} declares no scintillation yield or RESOLUTIONSCALE (Section 10.3)"))
     return findings
 
 
 def source_findings(source: dict) -> list:
-    """Section 6.3: the density type is declared, and `external` arrives in S4."""
+    """Section 6.3: the density type is declared; an external source names a text event file, or HepMC3 if the installation record has it."""
     density = source.get("density")
     if density == "analytic":
         return []
-    return [_finding("source-density", "source/density", "an external source arrives in S4" if density == "external" else f"density {density!r} is not declared")]
+    if density != "external":
+        return [_finding("source-density", "source/density", f"density {density!r} is not declared")]
+    if source.get("format") == "hepmc3":
+        return [_finding("source-hepmc3", "source/format", "HepMC3 is not in the installation record of this host: use a text event file, or install it and record it")]
+    if source.get("format") != "text":
+        return [_finding("source-format", "source/format", f"format {source.get('format')!r} is not text or hepmc3")]
+    return []
 
 
-def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None) -> list:
-    """All of the above that the inputs at hand can judge. Without `ionisation` the PAI semantics wait for the effective config."""
-    findings = limit_findings(card)
+def plane_findings(request: dict) -> list:
+    """Section 6.3: a reference plane states its frame."""
+    return [_finding("plane-frame", f"reference_planes/{at}", f"plane {plane.get('name')!r} states no frame") for at, plane in enumerate(request.get("reference_planes", [])) if not plane.get("frame")]
+
+
+def truth_findings(request: dict) -> list:
+    """Section 9.3: the keeping rules are known ones, and a time bin has a width."""
+    truth = request.get("truth", {})
+    findings = []
+    width = float(truth.get("time_bin_ns", 1))
+    if not math.isfinite(width) or width <= 0:
+        findings.append(_finding("truth-rule", "truth/time_bin_ns", "a time bin has a positive, finite width"))
+    for at, rule in enumerate(truth.get("keep", [])):
+        known = rule in ("primary", "decay_products", "all") or (isinstance(rule, dict) and "energy_above_MeV" in rule and set(rule) <= {"energy_above_MeV", "region"} and 0 <= float(rule["energy_above_MeV"]) < math.inf)
+        if not known:
+            findings.append(_finding("truth-rule", f"truth/keep/{at}", f"unknown keeping rule {rule!r}"))
+    return findings
+
+
+def hit_findings(scorers: list, regions: set, truth: dict) -> list:
+    """On resolved scorers: a step is written once, a named readout can encode its cells, and a rule's region exists."""
+    findings = []
+    claimed: dict = {}
+    for scorer in scorers:
+        if "hit_kind" not in scorer:
+            continue
+        if "problem" in scorer.get("cell_id", {}):
+            findings.append(_finding("hit-readout", f"scorers/{scorer['name']}", scorer["cell_id"]["problem"]))
+        for template in scorer["templates"]:
+            if template in claimed:
+                findings.append(_finding("hit-overlap", f"scorers/{scorer['name']}", f"template {template} is also written by {claimed[template]}: each step would be written twice"))
+            claimed[template] = scorer["name"]
+    for at, rule in enumerate(truth.get("keep", [])):
+        if isinstance(rule, dict) and "region" in rule and rule["region"] not in regions:
+            findings.append(_finding("truth-rule", f"truth/keep/{at}", f"region {rule['region']!r} is not a named region of this specification"))
+    return findings
+
+
+def calibration_findings(request: dict) -> list:
+    """Section 3, principle 7: a calibration workflow needs an analytic density, so an external source is refused there."""
+    if request.get("source", {}).get("density") == "external":
+        return [_finding("calibration-source", "source/density", "the calibration workflow refuses an external source: it has no analytic density")]
+    return []
+
+
+def event_range_findings(card: dict) -> list:
+    """Section 10.2: first_event + number of events fits in the counter's word 0."""
+    run = card.get("run", {})
+    if run.get("first_event", 0) + run.get("events", 0) > 2 ** 32:
+        return [_finding("event-range", "run", "first_event + events exceeds 2^32")]
+    return []
+
+
+BUILT_CONSTRUCTORS = {"G4OpticalPhysics", "g4sim_xtr"}
+RADIATOR_CONSTRUCTOR = "g4sim_xtr"
+RADIATOR_TABLE = Path(__file__).resolve().parent / "xtr_radiators.json"
+
+
+def radiator_findings(card: dict, requirements, table: dict | None = None) -> list:
+    """XTR rules 4 and 5 (Section 6.2.9, S7): the g4sim_xtr constructor attaches one radiator per transition_radiation requirement, named by
+    its envelope; the run card's class must be in the adapter's table with the requirement's structure. G4StrawTubeXTRadiator has no foil
+    count and no structure, so it is refused (addendum 11.1)."""
+    table = table if table is not None else json.loads(RADIATOR_TABLE.read_text(encoding="utf-8"))["classes"]
+    physics = card.get("physics", {})
+    radiators = {item.get("envelope"): item for item in physics.get("xtr", [])}
+    wanted = {requirement["templates"][0]: requirement for requirement in requirements if requirement.get("need") == "transition_radiation" and requirement.get("templates")}
+    findings = []
+    if (wanted or radiators) and RADIATOR_CONSTRUCTOR not in physics.get("extra_constructors", ()):
+        findings.append({"code": "xtr-constructor", "path": "physics.extra_constructors", "message": f"XTR is attached by {RADIATOR_CONSTRUCTOR} in extra_constructors (rule 4)"})
+    for envelope in sorted(set(wanted) - set(radiators)):
+        findings.append({"code": "xtr-class-missing", "path": "physics.xtr", "message": f"the radiator of envelope {envelope} has no class in the run card"})
+    for envelope in sorted(set(radiators) - set(wanted)):
+        findings.append({"code": "xtr-requirement-missing", "path": "physics.xtr", "message": f"{envelope} is no transition_radiation envelope of the specification"})
+    for envelope in sorted(set(wanted) & set(radiators)):
+        name = radiators[envelope].get("radiator_class")
+        entry = table.get(name)
+        if entry is None:
+            findings.append({"code": "xtr-class-unknown", "path": "physics.xtr", "message": f"{name} is not in xtr_radiators.json"})
+        elif entry["structure"] is None:
+            findings.append({"code": "xtr-class-structureless", "path": "physics.xtr", "message": f"{name} has no foil count and no structure, so g4sim cannot check it (addendum 11.1)"})
+        elif entry["structure"] != wanted[envelope]["structure"]:
+            findings.append({"code": "xtr-incompatible", "path": "physics.xtr", "message": f"{name} builds the structure {entry['structure']}, the specification's radiator is {wanted[envelope]['structure']} (rule 5)"})
+    return findings
+
+
+def optical_findings(card: dict, requirements, scorers=()) -> list:
+    """A new-mode run (S7): G4OpticalPhysics is the one extra constructor g4sim_run builds, and it runs only with a specification that declares
+    optical_scope, the templates KillProcess keeps photons in (GB16). Any other name would be ignored by the program, so it is refused here."""
+    extra = card.get("physics", {}).get("extra_constructors", ())
+    findings = [{"code": "extra-constructor-unknown", "path": "physics.extra_constructors", "message": f"g4sim_run builds only {sorted(BUILT_CONSTRUCTORS)}, not {name}"}
+                for name in extra if name not in BUILT_CONSTRUCTORS]
+    if "G4OpticalPhysics" in extra and not any(requirement.get("need") == "optical_scope" for requirement in requirements):
+        findings.append({"code": "optical-no-scope", "path": "physics.extra_constructors", "message": "optical physics needs an optical_scope requirement in the specification"})
+    if "opticalphoton" in card.get("kill_policy", {}).get("kill_secondaries", ()):  # Section 8.4: a stacking kill would book photons as killed energy
+        findings.append({"code": "optical-stacking-kill", "path": "kill_policy.kill_secondaries", "message": "optical photons are their own class; switch processes off in physics.optical instead of killing them"})
+    if "G4OpticalPhysics" not in extra:
+        findings += [{"code": "photon-detected-without-optics", "path": f"scorers/{at}", "message": "photon_detected counts optical photons, which need G4OpticalPhysics"}
+                     for at, scorer in enumerate(scorers) if scorer.get("quantity") in PHOTON]
+    return findings
+
+
+def validation_findings(card: dict, materials: dict, material: str, effective: dict, resolution_scale: float) -> list:
+    """check-spec of a validation run with full optical tracking (Section 10.4, S7): optical physics on; the material's RESOLUTIONSCALE equals
+    the digitization's r; and, read back from Geant4, G4Scintillation holds G4EmSaturation and ScintillationByParticleType is off. The
+    material declares its Birks constant, without which the saturation would use one Geant4 may set silently (GB13)."""
+    findings = []
+    if "G4OpticalPhysics" not in card.get("physics", {}).get("extra_constructors", ()):
+        findings.append({"code": "validation-not-optical", "path": "physics.extra_constructors", "message": "a validation run tracks the light: it needs G4OpticalPhysics"})
+    declared = materials.get(material, {})
+    scale = declared.get("scintillation", {}).get("resolution_scale")
+    if scale is None or float(scale) != float(resolution_scale):
+        findings.append({"code": "validation-resolution-scale", "path": f"materials.{material}", "message": f"RESOLUTIONSCALE {scale} in the full optical run, r = {resolution_scale} in the digitization"})
+    if "birks_mm_per_MeV" not in declared.get("ionisation", {}):
+        findings.append({"code": "birks-undeclared", "path": f"materials.{material}", "message": f"{material} declares no Birks constant (GB13)"})
+    optical = effective.get("optical", {})
+    if optical.get("scintillation_saturation") is not True:
+        findings.append({"code": "validation-saturation", "path": "effective-em.optical", "message": "G4Scintillation holds no G4EmSaturation"})
+    if optical.get("scintillation_by_particle_type") is not False:
+        findings.append({"code": "validation-by-particle-type", "path": "effective-em.optical", "message": "ScintillationByParticleType is not off"})
+    if optical.get("cerenkov_active") is not False:  # a map is for scintillation light only (Section 10.4): Cherenkov light would enter N_full alone
+        findings.append({"code": "validation-cerenkov", "path": "physics.optical.cerenkov", "message": "a validation run of a scintillation map runs with Cerenkov off"})
+    return findings
+
+
+PLACEMENT_IMPLEMENTATIONS = ("assembly",)
+REMOVED_IMPLEMENTATIONS = ("replica", "parameterised")  # addendum 11.1: they change histories (GB20)
+FAST_SIM_NEED = "fast_sim_envelope"
+FAST_SIM_MODELS = Path(__file__).resolve().parent / "fast_sim_models.json"
+
+
+def placement_findings(card: dict, physical: dict | None) -> list:
+    """placement_impl (S8, Section 16): each entry names a (mother, template) pair the IR places, built as an assembly; only for a template
+    with no daughters of its own, because the imprint removes that template's level from the copy chain (GB20, addendum 11.1)."""
+    entries = card.get("placement_impl", [])
+    if not entries:
+        return []
+    findings = []
+    placements = (physical or {}).get("placements", [])
+    pairs = {(item["mother"], item["template"]) for item in placements}
+    mothers = {item["mother"] for item in placements}
+    seen = set()
+    for at, entry in enumerate(entries):
+        path, kind, pair = f"placement_impl[{at}]", entry.get("kind"), (entry.get("mother"), entry.get("template"))
+        if kind in REMOVED_IMPLEMENTATIONS:
+            findings.append({"code": "placement-impl-removed", "path": path, "message": f"{kind} is not offered: it changes histories and copy numbers (GB20, addendum 11.1); only assembly is"})
+        elif kind not in PLACEMENT_IMPLEMENTATIONS:
+            findings.append({"code": "placement-impl-unknown", "path": path, "message": f"{kind!r} is not a placement implementation; only assembly is"})
+        if pair in seen:
+            findings.append({"code": "placement-impl-twice", "path": path, "message": f"{pair[1]} in {pair[0]} is named twice"})
+        seen.add(pair)
+        if physical is None:
+            continue
+        if pair not in pairs:
+            findings.append({"code": "placement-impl-pair", "path": path, "message": f"the IR places no {pair[1]} in {pair[0]}"})
+        elif pair[1] in mothers:
+            findings.append({"code": "placement-impl-daughters", "path": path, "message": f"{pair[1]} has daughters of its own: an imprint would remove its level from the copy chain (GB20)"})
+    return findings
+
+
+def fast_sim_findings(card: dict, requirements) -> list:
+    """The fast-simulation hook (S8): a fast_sim_envelope requirement and the run card's fast_sim block go together; the model is one of
+    fast_sim_models.json, and the particles are named, never all (GB19, addendum 11.1)."""
+    block = card.get("physics", {}).get("fast_sim")
+    envelopes = [item for item in requirements if item.get("need") == FAST_SIM_NEED]
+    if not block and not envelopes:
+        return []
+    if not envelopes:
+        return [{"code": "fast-sim-envelope-missing", "path": "physics.fast_sim", "message": "the run card attaches a fast-simulation model, but the specification has no fast_sim_envelope"}]
+    if not block:
+        return [{"code": "fast-sim-model-missing", "path": "physics.fast_sim", "message": "the specification declares a fast_sim_envelope, but the run card names no model"}]
+    findings = []
+    models = json.loads(FAST_SIM_MODELS.read_text(encoding="utf-8"))["models"]
+    if block.get("model") not in models:
+        findings.append({"code": "fast-sim-model-unknown", "path": "physics.fast_sim.model", "message": f"{block.get('model')!r} is not in fast_sim_models.json"})
+    particles = block.get("particles", [])
+    if not particles or ALL_PARTICLES in particles:
+        findings.append({"code": "fast-sim-particles", "path": "physics.fast_sim.particles", "message": "name the particles: attaching the process to all of them changes histories (GB19)"})
+    if len(set(particles)) != len(particles):
+        findings.append({"code": "fast-sim-particles", "path": "physics.fast_sim.particles", "message": "a particle is named twice"})
+    return findings
+
+
+def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None,
+                  physical: dict | None = None) -> list:
+    """All of the above that the inputs at hand can judge. Without `ionisation` the PAI semantics wait for the effective config; without the
+    IR's `physical` part, placement_impl is judged by its kinds only."""
+    findings = limit_findings(card) + placement_findings(card, physical)
     requests = card.get("physics", {}).get("pai", [])
     if requests and ionisation is not None:
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
-        findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {}))
+        findings += optical_findings(card, requirements, scorers) + radiator_findings(card, requirements) + fast_sim_findings(card, requirements)
+        findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 
 

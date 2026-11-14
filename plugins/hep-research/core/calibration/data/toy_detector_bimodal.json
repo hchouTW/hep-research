@@ -1,0 +1,309 @@
+{
+ "schema": "calibration-fixture/1",
+ "fixture": "toy_detector_bimodal",
+ "description": "Bimodal variant of the toy detector (section 15.1): the overlapping modules are read out as a sum S = a f + b (1 - f) + eps, f ~ Beta(alpha, beta); graph structure only.",
+ "status": "synthetic",
+ "contract": {
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "input",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ]
+    },
+    {
+     "id": "deposition",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "photon_generation",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "2",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "pde",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4a",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "gain",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4b",
+     "mechanisms": [
+      "yield",
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "5",
+     "mechanisms": [
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "module_a",
+     "kind": "stage",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "module_b",
+     "kind": "stage",
+     "kernel": "deterministic",
+     "stage": "6",
+     "mechanisms": [
+      "sharing-crosstalk"
+     ]
+    },
+    {
+     "id": "module_sum",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7"
+    }
+   ],
+   "edges": [
+    {
+     "from": "input",
+     "to": "deposition"
+    },
+    {
+     "from": "deposition",
+     "to": "photon_generation"
+    },
+    {
+     "from": "photon_generation",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "gain"
+    },
+    {
+     "from": "gain",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "module_a"
+    },
+    {
+     "from": "electronics",
+     "to": "module_b"
+    },
+    {
+     "from": "module_a",
+     "to": "module_sum"
+    },
+    {
+     "from": "module_b",
+     "to": "module_sum"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "light_yield",
+    "role": "theta",
+    "nodes": [
+     "photon_generation"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "pde",
+    "role": "theta",
+    "nodes": [
+     "pde"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "enf",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "fluctuation"
+   },
+   {
+    "name": "noise_width",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold"
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold"
+   },
+   {
+    "name": "material_thickness",
+    "role": "phi",
+    "nodes": [
+     "deposition"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "relative_gain_b",
+    "role": "theta",
+    "nodes": [
+     "module_b"
+    ],
+    "mechanism": "sharing-crosstalk"
+   }
+  ],
+  "references": [
+   {
+    "id": "known_input",
+    "type": "known-input",
+    "edge": {
+     "into": "input"
+    },
+    "observation": "module_sum",
+    "enabled": true
+   },
+   {
+    "id": "light_source",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "photon_generation",
+     "to": "pde"
+    },
+    "observation": "module_sum",
+    "conversion": {
+     "relation": "known photon count",
+     "parameters": []
+    }
+   },
+   {
+    "id": "single_photoelectron",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "pde",
+     "to": "gain"
+    },
+    "observation": "module_sum",
+    "conversion": {
+     "relation": "single photoelectron charge",
+     "parameters": []
+    }
+   }
+  ]
+ },
+ "plan": {
+  "kernels": {
+   "input": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "deposition": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "photon_generation": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "pde": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "gain": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "electronics": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "module_sum": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  }
+ }
+}

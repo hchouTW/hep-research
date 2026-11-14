@@ -1,0 +1,91 @@
+{
+ "$comment": "condition-snapshot/1: A condition snapshot (g4sim S9, Section 17): conditions that do not change the geometry (dead channels, gains, thresholds, temperatures) for one readout system, as versioned tables indexed by intervals of validity; a cell is a dictionary of the readout's field values. Read by core/simulation/conditions.py; it enters the response layer only.",
+ "type": "object",
+ "required": [
+  "schema",
+  "readout",
+  "version",
+  "iovs"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "condition-snapshot/1"
+  },
+  "readout": {
+   "type": "string"
+  },
+  "version": {
+   "type": "string"
+  },
+  "description": {
+   "type": "string"
+  },
+  "source_of_facts": {
+   "type": "object"
+  },
+  "time_unit": {
+   "const": "ns",
+   "description": "event times and IOV bounds in ns of the run's clock"
+  },
+  "defaults": {
+   "type": "object",
+   "description": "values a cell takes when no row names it: gain_factor, threshold, dead, temperature_K"
+  },
+  "iovs": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "start_ns",
+     "end_ns",
+     "rows"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "start_ns": {
+      "type": "integer"
+     },
+     "end_ns": {
+      "type": "integer",
+      "description": "exclusive: the interval is [start_ns, end_ns)"
+     },
+     "rows": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "cell"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "cell": {
+         "type": "object",
+         "additionalProperties": {
+          "type": "integer"
+         },
+         "description": "the readout's fields and their values"
+        },
+        "gain_factor": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "threshold": {
+         "type": "number"
+        },
+        "dead": {
+         "type": "boolean"
+        },
+        "temperature_K": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

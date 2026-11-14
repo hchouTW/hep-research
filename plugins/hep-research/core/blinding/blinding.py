@@ -58,6 +58,9 @@ from typing import Any
 from core.protected.guard import guard
 
 NUMBER = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][-+]?\d+)?")
+# A hexadecimal word of 16 or more characters with at least one letter (a SHA-256 digest, a git commit id) is not a
+# printed number: its digit runs are not tokens (hexadecimal is in OUT_OF_SCOPE_RENDERINGS).
+HEX_WORD = re.compile(r"(?<![0-9A-Za-z_])(?=[0-9A-Fa-f]*[A-Fa-f])[0-9A-Fa-f]{16,}(?![0-9A-Za-z_])")
 TEXT_SUFFIXES = {".json", ".txt", ".log", ".csv", ".tsv", ".md", ".svg", ".yaml", ".yml", ".tex", ".html",
                  ".out", ".err", ".sh", ".sbatch", ".sub"}  # the last five: batch job logs and job descriptions
 
@@ -308,8 +311,11 @@ def scan_text(text: str, sealed, rtol: float = 1e-9) -> list[dict]:
     hits = []
     text = text.translate(MINUS_SIGNS)  # one character for one: offsets and line numbers are unchanged
     weak = {t: _significant_digits(t) < WEAK_DIGITS for t in sealed}
+    hex_words = [(mt.start(), mt.end()) for mt in HEX_WORD.finditer(text)]
     tokens = [(mt.start(), mt.end(), mt.group(0)) for mt in NUMBER.finditer(text)]
     tokens += [(mt.start(), mt.end(), mt.group(0).replace(",", "")) for mt in GROUPED.finditer(text)]
+    if hex_words:
+        tokens = [tk for tk in tokens if not any(a <= tk[0] and tk[1] <= b for a, b in hex_words)]
     for start, end, tok in tokens:
         x = float(tok)
         alone = None

@@ -99,7 +99,7 @@ class G4simPath(_Tmp):
         checked = geometry.check_spec(self.copies["detector_spec"].read_bytes())
         request = json.loads(self.copies["simulation_request"].read_text(encoding="utf-8"))
         return {"detector_spec": entry("detector_spec"), "simulation_request": entry("simulation_request"), "run_card": entry("run_card"),
-                "geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
+                "geometry_id": checked["geometry_id"], "request_id": identity.request_id(identity.identified_request(request, checked["ir"]), checked["geometry_id"])}
 
     def test_the_rule_table_reads_the_run_card_and_the_ir(self):
         loaded = C.load_g4sim(self.block(), self.d)
@@ -474,6 +474,41 @@ class RealizationEntryTests(unittest.TestCase):
         esp.write_text("{}", encoding="utf-8")
         rp = "~/no-such-machine-folder/p.realization.json"
         self.assertIsNone(self.C.realization_entry({"path": rp, "sha256": self.sha}, esp, inner))
+
+
+
+class G4simStudy(unittest.TestCase):
+    STUDY = {"physics": {"g4sim": {"run_card": {"sha256": "a" * 64}}, "g4sim_loaded": {"run_card": {"physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}}}, "request": {"source": {"particle": "proton", "energy": {"mono": {"energy_MeV": 433.0}}}}}}}
+
+    def test_a_run_is_compared_with_its_request_and_run_card(self):
+        program, view = C.sim_spec(self.STUDY)
+        self.assertEqual(view["source"], {"particle": "proton", "energy_MeV": 433.0})
+        self.assertEqual(view["physics"]["default_cut_mm"], 0.7)
+        self.assertEqual(C.spec_hash(program, view), "a" * 64)
+
+    def test_the_record_carries_the_identity_of_its_one_nominal_run(self):
+        with tempfile.TemporaryDirectory() as folder:
+            paths = []
+            for name, role in (("a", "nominal"), ("b", "calibration")):
+                paths.append(Path(folder) / f"{name}.json")
+                paths[-1].write_text(json.dumps({"extension": {"geometry": {"geometry_id": name}, "simulation": {"evidence_role": role}}}), encoding="utf-8")
+            self.assertEqual(C.nominal_identity(paths), {"geometry": {"geometry_id": "a"}})
+            self.assertEqual(C.nominal_identity(paths[1:]), {})
+            self.assertEqual(C.nominal_identity(paths + paths[:1]), {})
+
+
+class ModelConfirmation(unittest.TestCase):
+    EMZ = {"models": {"world": {"eIoni/e-": ["PenIoni"], "hIoni/proton": ["Bragg"], "hIoni/B+": ["Bragg"]}}, "msc_range_factor": 0.08, "msc_muhad_range_factor": 0.2, "step_functions": ["Step function for e+- (0.2, 0.01 mm)", "Step function for muons/hadrons (0.1, 0.05 mm)"]}
+
+    def test_a_pair_differs_only_for_the_particles_it_differs_for(self):
+        hadronic = json.loads(json.dumps(self.EMZ))
+        del hadronic["models"]["world"]["hIoni/B+"]
+        self.assertEqual(C.family_view(self.EMZ, "electron"), C.family_view(hadronic, "electron"))
+        self.assertNotEqual(C.family_view(self.EMZ, "hadron"), C.family_view(hadronic, "hadron"))
+
+    def test_an_em_option_changes_the_electron_view(self):
+        for change in ({"msc_range_factor": 0.04}, {"step_functions": ["Step function for e+- (0.2, 0.1 mm)"]}):
+            self.assertNotEqual(C.family_view(self.EMZ, "electron"), C.family_view({**self.EMZ, **change}, "electron"))
 
 
 if __name__ == "__main__":

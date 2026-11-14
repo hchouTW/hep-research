@@ -6164,6 +6164,112 @@
     "reason": "changes only the status of a Geant4 program run whose spec names a non-ASCII string as a \\u escape (it stopped with a JSON parse error), where no result was produced",
     "decided": "2026-11-01, VALIDATION CROSS-PLATFORM-FOLLOWUPS"
    }
+  },
+  {
+   "id": "BLINDING-HEX-WORDS",
+   "title": "Blinding scanner skips digits inside long hex words, so a hash is not a printed number",
+   "changelog": {
+    "kind": "release",
+    "release": "0.66.0"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively",
+    "tests/core/test_blinding.py::HexWordTests::test_release_digest_is_not_a_printed_number"
+   ],
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C4",
+   "discrimination": "D3",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "scan_text tokenized digit runs inside SHA-256 digests; the 0.66.0 release digest (...9082c936a853) in every example artifact matched the AMS example's sealed 936.24 and failed its sentinel audit in CI; a digit run inside a hexadecimal word of 16 or more characters with a letter is no longer a token (hexadecimal was already out of scope); both evidence tests fail by assertion on parent b3974460 and pass on the fix; 4 local mutants killed, including the revert; a mutant treating '_' as a word boundary survives (VALIDATION SCIFIX-HEX-WORDS 2026-11-11)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively",
+     "basis": "exhaustive",
+     "detail": "sealed n + 0.25 for n = 100..999 at every position of 64-, 16- and 15-character hex words, lower and upper case (205,200 scans); expected from the domain's definition, the 15-character boundary still a hit",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "b3974460d806f57cbcffb2aca3f25a9ba9ccdf70",
+    "fix": "1f97a1c6d2a27e9e1875352603a9da9b8ee5b01e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "SCIFIX-HEX-WORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/core/test_blinding.py::HexWordTests::test_release_digest_is_not_a_printed_number",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "SCIFIX-HEX-WORDS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "core/blinding/blinding.py::scan_text",
+     "mutation": "revert",
+     "killed_by": [
+      "tests/core/test_blinding.py::HexWordTests"
+     ],
+     "detail": "the revert (digits in hex words are tokens)"
+    },
+    {
+     "function": "core/blinding/blinding.py::scan_text",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::HexWordTests"
+     ],
+     "detail": "a hex-word length floor of 8"
+    },
+    {
+     "function": "core/blinding/blinding.py::scan_text",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::HexWordTests"
+     ],
+     "detail": "a hex-word length floor of 17"
+    },
+    {
+     "function": "core/blinding/blinding.py::scan_text",
+     "mutation": "other",
+     "killed_by": [
+      "tests/core/test_blinding.py::HexWordTests"
+     ],
+     "detail": "no letter required in a hex word"
+    }
+   ],
+   "advisory_waiver": {
+    "reason": "removes false alarms only: a digit run inside a 16+ character hexadecimal word, a rendering OUT_OF_SCOPE_RENDERINGS already excluded, no longer fails a scan; no released number changes and no sealed value printed as a decimal is missed",
+    "decided": "2026-11-11, VALIDATION SCIFIX-HEX-WORDS"
+   }
   }
  ],
  "documentation_fixes": [

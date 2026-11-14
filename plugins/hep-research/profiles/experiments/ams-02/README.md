@@ -12,7 +12,7 @@ This README is for people. The skills route through [index.md](index.md); the ru
 
 - **Public-domain reasoning** about subsystems, observables, species, methods and time-dependent analyses
   (`modules/subsystems/`, `species/`, `methods/`, `periods/`, `sources/`).
-- **A public evidence ledger**: 60 sources and 184 claims (`evidence/`, ids `ams02:S01`, `ams02:C01`). An AMS number
+- **A public evidence ledger**: 68 sources and 198 claims (`evidence/`, ids `ams02:S01`, `ams02:C01`). An AMS number
   is quoted only from a claim whose species, range, period and selection cover the statement. `evidence/index.md` is
   generated.
 - **Dataset records** of published measurements (`datasets/`), metadata only.

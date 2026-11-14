@@ -1,0 +1,111 @@
+{
+ "schema": "g4kit/1",
+ "name": "barrel_tracker",
+ "version": "1.0.0",
+ "geometry_kind": "barrel-tracker",
+ "role": "tracking",
+ "purpose": "One barrel layer of flat silicon modules on a ring around the beam, tilted and staggered, with PAI in the sensors.",
+ "inputs": {
+  "modules": {
+   "kind": "integer"
+  },
+  "layer_radius_mm": {
+   "kind": "length"
+  },
+  "module_length_mm": {
+   "kind": "length"
+  },
+  "module_width_mm": {
+   "kind": "length"
+  },
+  "sensor_thickness_mm": {
+   "kind": "length"
+  },
+  "tilt_deg": {
+   "kind": "angle"
+  },
+  "stagger_mm": {
+   "kind": "length"
+  },
+  "sensor_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  },
+  "pai_particles": {
+   "kind": "names"
+  },
+  "materials": {
+   "kind": "materials",
+   "optional": true
+  }
+ },
+ "geometric_defaults": {},
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "world_mm": "4 * (layer_radius_mm + stagger_mm + module_length_mm + module_width_mm) + 200"
+  },
+  "materials": {
+   "$input": "materials"
+  },
+  "templates": {
+   "module": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "module_length_mm",
+       "module_width_mm",
+       "sensor_thickness_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "sensor_material"
+    },
+    "region": "sensors",
+    "tags": [
+     "sensor"
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "ring": {
+       "n": {
+        "$input": "modules"
+       },
+       "radius_mm": "layer_radius_mm",
+       "orientation": "radial",
+       "tilt_deg": "tilt_deg",
+       "stagger_mm": "stagger_mm",
+       "index": "module"
+      }
+     }
+    }
+   ]
+  },
+  "physics_requirements": [
+   {
+    "need": "thin_layer_ionisation",
+    "region": "sensors",
+    "particles": {
+     "$input": "pai_particles"
+    }
+   }
+  ],
+  "frames": {}
+ }
+}

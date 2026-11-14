@@ -18,6 +18,9 @@ neither, their charge-sign, empty-event and interpolation semantics, and the two
 `detector-simulation` adapter are in [sensor and gas transport tools](sensor-and-gas-transport-tools.md); building
 and running them is in the hep-computing operations guide it links.
 
+Calibrating simulator parameters against control samples (stage graph, field binding, references, candidate
+methods) per detector type: [simulator-calibration specializations](simulation-calibration/index.md).
+
 ## What full simulation does
 
 A full simulation (Geant4 being the standard toolkit) transports each particle through

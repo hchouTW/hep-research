@@ -1,0 +1,112 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "bar_height_mm": "17.25",
+  "bar_width_mm": "35.0",
+  "bar_gap_mm": "0.15",
+  "bar_length_mm": "1140.0",
+  "glue_mm": "0.025",
+  "bar_centre_mm": "765.875",
+  "bars_y": "10",
+  "bars_z": "4"
+ },
+ "materials": {
+  "QuartzOptical": {
+   "base": "G4_SILICON_DIOXIDE",
+   "density_g_cm3": "2.2"
+  }
+ },
+ "templates": {
+  "bar": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "bar_length_mm",
+      "bar_width_mm",
+      "bar_height_mm"
+     ]
+    }
+   },
+   "material": "QuartzOptical",
+   "tags": [
+    "bar"
+   ]
+  },
+  "barbox": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "bars_z * (bar_length_mm + glue_mm)",
+      "bars_y * bar_width_mm + (bars_y - 1) * bar_gap_mm",
+      "bar_height_mm"
+     ]
+    }
+   },
+   "material": "G4_AIR",
+   "tags": [
+    "barbox"
+   ],
+   "children": [
+    {
+     "template": "bar",
+     "placement": {
+      "grid": {
+       "n": [
+        4,
+        10
+       ],
+       "pitch_mm": [
+        "bar_length_mm + glue_mm",
+        "bar_width_mm + bar_gap_mm"
+       ],
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ],
+       "index": [
+        "piece",
+        "bar"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "2000",
+   "2000",
+   "5000"
+  ],
+  "children": [
+   {
+    "template": "barbox",
+    "placement": {
+     "ring": {
+      "n": 12,
+      "radius_mm": "bar_centre_mm",
+      "orientation": "radial",
+      "index": "box"
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/bar_height_mm": "claim:eic:C28",
+  "/params/bar_width_mm": "claim:eic:C28",
+  "/params/bar_gap_mm": "claim:eic:C28",
+  "/params/bar_length_mm": "claim:eic:C28",
+  "/params/glue_mm": "claim:eic:C28",
+  "/params/bar_centre_mm": "claim:eic:C28",
+  "/params/bars_y": "claim:eic:C27",
+  "/params/bars_z": "claim:eic:C27",
+  "/templates/barbox/children/0/placement/grid/n/0": "claim:eic:C27",
+  "/templates/barbox/children/0/placement/grid/n/1": "claim:eic:C27",
+  "/world/children/0/placement/ring/n": "claim:eic:C27",
+  "/materials/QuartzOptical/density_g_cm3": "claim:eic:C29"
+ }
+}

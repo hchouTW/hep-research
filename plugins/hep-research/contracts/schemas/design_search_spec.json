@@ -1,95 +1,515 @@
 {
  "$comment": "Owner: hep-detector (contracts CV-C1; geant4 program C1.1, section C.4.4). design-search-spec/1: the search spec of evaluate_design.py search, hashed before the first evaluation and recorded in the search_summary. Only keywords contracts/schema.py implements: the limit of 4 objectives, the upper bounds of ranges and slot counts, and the cross-field rules (a requirement exists in the design-spec, a figure of merit is in the adequacy table, a parameter ref exists in the base candidate or the role rules, a role is in subsystem_roles and the role rules, ranges lie inside the role rules) are checked in Python (evaluate_design.py check_search_spec).",
  "type": "object",
- "required": ["search_spec_version", "design_spec", "base_candidate", "objectives", "free_parameters", "rules_version",
-              "materials_version", "budget", "optimizer", "finalists"],
+ "required": [
+  "search_spec_version",
+  "design_spec",
+  "base_candidate",
+  "objectives",
+  "free_parameters",
+  "rules_version",
+  "materials_version",
+  "budget",
+  "optimizer",
+  "finalists"
+ ],
  "additionalProperties": false,
  "properties": {
-  "search_spec_version": {"const": 1},
-  "description": {"type": "string"},
-  "design_spec": {"type": "object", "required": ["path", "sha256"], "additionalProperties": false, "properties": {
-   "path": {"type": "string", "minLength": 1},
-   "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
-  "base_candidate": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}:[A-Za-z0-9][A-Za-z0-9._-]*$"},
-  "objectives": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/target"}},
-  "constraints": {"type": "array", "items": {"$ref": "#/$defs/target"}},
-  "free_parameters": {"type": "array", "items": {"$ref": "#/$defs/free_parameter"}},
-  "slots": {"$comment": "roles whose subsystems the search may add or remove: [min, max] or {range, ids}; at most one subsystem per role (main's granularity), checked in Python",
-   "type": "object", "additionalProperties": {"anyOf": [
-    {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 0}},
-    {"type": "object", "required": ["range"], "additionalProperties": false, "properties": {
-     "range": {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 0}},
-     "ids": {"type": "array", "items": {"type": "string", "pattern": "^DES-[A-Za-z0-9][A-Za-z0-9._-]*$"}}}}]}},
-  "envelope": {"type": "object", "required": ["length_m"], "additionalProperties": false, "properties": {
-   "length_m": {"type": "number", "exclusiveMinimum": 0}}},
-  "regenerate_budgets": {"$comment": "base subsystems whose budget rows the role-rule model replaces (default: none; a subsystem the search adds always gets model rows)",
-   "type": "array", "items": {"type": "string", "pattern": "^DES-"}},
-  "rules_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-  "materials_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
-  "budget": {"type": "object", "required": ["evaluations"], "additionalProperties": false, "properties": {
-   "evaluations": {"type": "integer", "minimum": 1},
-   "geant4": {"$comment": "C2: the most Geant4 search runs S2 may make (one element_sim and one simreco run per design evaluation); 0 keeps the search at F1; > 0 needs the geant4 block", "type": "integer", "minimum": 0}}},
-  "geant4": {"$comment": "Geant4 program C2.2: S2 refines the top_k designs of distinct topologies from S1 on Geant4 search values (short element_sim and simreco runs, a declared event count, K blocks), every generation in one seed_group (paired comparison) unless gate G-C2a switches to independent seeds",
-   "type": "object", "additionalProperties": false,
-   "required": ["realization", "reco", "events", "targets", "top_k", "generations", "offspring"], "properties": {
-   "realization": {"description": "element_sim.realization/1 profile, a path in the artifacts_dir", "type": "string", "minLength": 1},
-   "reco": {"description": "the simreco.spec/1 fields other than output (point resolution, radiation lengths, tof, fit); tail sources stay off, so a Geant4 search value is optimistic", "type": "object"},
-   "events": {"description": "events per Geant4 search run, a multiple of blocks", "type": "integer", "minimum": 32},
-   "blocks": {"description": "K, default 16", "type": "integer", "minimum": 2},
-   "targets": {"description": "objective label -> the simreco observable that gives its Geant4 search value and the beam particle (the rigidity comes from the objective's denominator; at least one target)", "type": "object",
-    "additionalProperties": {"type": "object", "additionalProperties": false, "required": ["observable", "particle"], "properties": {
-     "observable": {"type": "object"}, "particle": {"enum": ["proton", "e-", "e+", "mu-", "mu+"]}}}},
-   "top_k": {"type": "integer", "minimum": 1},
-   "generations": {"type": "integer", "minimum": 1},
-   "offspring": {"description": "mutated designs per parent and generation (continuous genes only)", "type": "integer", "minimum": 1},
-   "paired_threshold": {"description": "gate G-C2a: below this Var(independent) / Var(paired) the later generations use independent seeds (default 2)", "type": "number", "exclusiveMinimum": 0},
-   "threads": {"type": "integer", "minimum": 1}}},
-  "optimizer": {"type": "object", "required": ["name", "population", "generations", "seed"], "additionalProperties": false,
+  "search_spec_version": {
+   "const": 1
+  },
+  "description": {
+   "type": "string"
+  },
+  "design_spec": {
+   "type": "object",
+   "required": [
+    "path",
+    "sha256"
+   ],
+   "additionalProperties": false,
    "properties": {
-    "name": {"enum": ["nsga2"]},
-    "population": {"type": "integer", "minimum": 4},
-    "generations": {"type": "integer", "minimum": 0},
-    "eta_c": {"type": "number", "minimum": 0},
-    "eta_m": {"type": "number", "minimum": 0},
-    "p_crossover": {"type": "number", "minimum": 0},
-    "p_mutation": {"$comment": "per gene; default 1 / number of genes", "type": "number", "minimum": 0},
-    "seed": {"type": "integer", "minimum": 0}}},
-  "stopping": {"type": "object", "additionalProperties": false, "properties": {
-   "hypervolume_window": {"type": "integer", "minimum": 1},
-   "min_improvement": {"$comment": "relative hypervolume improvement over the window", "type": "number", "minimum": 0},
-   "reference_point": {"$comment": "'auto': each objective's threshold moved towards worse by a factor 1.1; an objective without a threshold declares reference_point itself",
-    "const": "auto"}}},
-  "finalists": {"type": "object", "required": ["max"], "additionalProperties": false, "properties": {
-   "max": {"type": "integer", "minimum": 1},
-   "distinct_topologies": {"type": "boolean"}}},
-  "proposals": {"$comment": "seed designs written by the designer (proposer llm); they take the same decoding, validity and evaluation as random designs",
-   "type": "array", "items": {"type": "object", "required": ["id", "reason"], "additionalProperties": false, "properties": {
-    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
-    "reason": {"type": "string", "minLength": 1},
-    "enabled": {"type": "object", "additionalProperties": {"type": "boolean"}},
-    "parent": {"type": "object", "additionalProperties": {"type": "string"}},
-    "parameters": {"type": "object"}}}},
-  "consistency_samples": {"$comment": "points recomputed with evaluate_design.py run besides the finalists (default 20)",
-   "type": "integer", "minimum": 0},
-  "inline_points_max": {"$comment": "above this many distinct designs the points go to a JSON Lines file (default 2000)",
-   "type": "integer", "minimum": 1}
+    "path": {
+     "type": "string",
+     "minLength": 1
+    },
+    "sha256": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    }
+   }
+  },
+  "base_candidate": {
+   "type": "string",
+   "pattern": "^[a-z0-9][a-z0-9._-]{0,63}:[A-Za-z0-9][A-Za-z0-9._-]*$"
+  },
+  "objectives": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "$ref": "#/$defs/target"
+   }
+  },
+  "constraints": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/target"
+   }
+  },
+  "free_parameters": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/free_parameter"
+   }
+  },
+  "slots": {
+   "$comment": "roles whose subsystems the search may add or remove: [min, max] or {range, ids}; at most one subsystem per role (main's granularity), checked in Python",
+   "type": "object",
+   "additionalProperties": {
+    "anyOf": [
+     {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+       "type": "integer",
+       "minimum": 0
+      }
+     },
+     {
+      "type": "object",
+      "required": [
+       "range"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "range": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+         "type": "integer",
+         "minimum": 0
+        }
+       },
+       "ids": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^DES-[A-Za-z0-9][A-Za-z0-9._-]*$"
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  "envelope": {
+   "type": "object",
+   "required": [
+    "length_m"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "length_m": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   }
+  },
+  "regenerate_budgets": {
+   "$comment": "base subsystems whose budget rows the role-rule model replaces (default: none; a subsystem the search adds always gets model rows)",
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^DES-"
+   }
+  },
+  "rules_version": {
+   "type": "string",
+   "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  },
+  "materials_version": {
+   "type": "string",
+   "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  },
+  "budget": {
+   "type": "object",
+   "required": [
+    "evaluations"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "evaluations": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "geant4": {
+     "$comment": "C2: the most Geant4 search runs S2 may make (one element_sim and one simreco run per design evaluation); 0 keeps the search at F1; > 0 needs the geant4 block",
+     "type": "integer",
+     "minimum": 0
+    }
+   }
+  },
+  "geant4": {
+   "$comment": "Geant4 program C2.2: S2 refines the top_k designs of distinct topologies from S1 on Geant4 search values (short element_sim and simreco runs, a declared event count, K blocks), every generation in one seed_group (paired comparison) unless gate G-C2a switches to independent seeds",
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "events",
+    "targets",
+    "top_k",
+    "generations",
+    "offspring"
+   ],
+   "properties": {
+    "realization": {
+     "description": "element_sim.realization/1 profile, a path in the artifacts_dir",
+     "type": "string",
+     "minLength": 1
+    },
+    "reco": {
+     "description": "the simreco.spec/1 fields other than output (point resolution, radiation lengths, tof, fit); tail sources stay off, so a Geant4 search value is optimistic",
+     "type": "object"
+    },
+    "events": {
+     "description": "events per Geant4 search run, a multiple of blocks",
+     "type": "integer",
+     "minimum": 32
+    },
+    "blocks": {
+     "description": "K, default 16",
+     "type": "integer",
+     "minimum": 2
+    },
+    "targets": {
+     "description": "objective label -> the simreco observable that gives its Geant4 search value and the beam particle (the rigidity comes from the objective's denominator; at least one target)",
+     "type": "object",
+     "additionalProperties": {
+      "oneOf": [
+       {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+         "observable",
+         "particle"
+        ],
+        "properties": {
+         "observable": {
+          "type": "object"
+         },
+         "particle": {
+          "enum": [
+           "proton",
+           "e-",
+           "e+",
+           "mu-",
+           "mu+"
+          ]
+         }
+        }
+       },
+       {
+        "$comment": "g4sim S5: the value of a kit search, from a scorer's per-event totals",
+        "type": "object",
+        "required": [
+         "particle",
+         "energy_MeV",
+         "scorer",
+         "measure"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "particle": {
+          "type": "string",
+          "minLength": 1
+         },
+         "energy_MeV": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "scorer": {
+          "type": "string",
+          "minLength": 1
+         },
+         "measure": {
+          "enum": [
+           "relative_width",
+           "mean_fraction"
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    "top_k": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "generations": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "offspring": {
+     "description": "mutated designs per parent and generation (continuous genes only)",
+     "type": "integer",
+     "minimum": 1
+    },
+    "paired_threshold": {
+     "description": "gate G-C2a: below this Var(independent) / Var(paired) the later generations use independent seeds (default 2)",
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "threads": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "kit": {
+     "$comment": "g4sim S5: a new geometry kind: g4kit.py writes each design's detector-spec, geant4_run.py run-spec runs it with this request and run card, paths in the artifacts_dir",
+     "type": "object",
+     "required": [
+      "request",
+      "run"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "request": {
+       "type": "string",
+       "minLength": 1
+      },
+      "run": {
+       "type": "string",
+       "minLength": 1
+      }
+     }
+    }
+   },
+   "oneOf": [
+    {
+     "required": [
+      "realization",
+      "reco"
+     ]
+    },
+    {
+     "required": [
+      "kit"
+     ]
+    }
+   ]
+  },
+  "optimizer": {
+   "type": "object",
+   "required": [
+    "name",
+    "population",
+    "generations",
+    "seed"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "enum": [
+      "nsga2"
+     ]
+    },
+    "population": {
+     "type": "integer",
+     "minimum": 4
+    },
+    "generations": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "eta_c": {
+     "type": "number",
+     "minimum": 0
+    },
+    "eta_m": {
+     "type": "number",
+     "minimum": 0
+    },
+    "p_crossover": {
+     "type": "number",
+     "minimum": 0
+    },
+    "p_mutation": {
+     "$comment": "per gene; default 1 / number of genes",
+     "type": "number",
+     "minimum": 0
+    },
+    "seed": {
+     "type": "integer",
+     "minimum": 0
+    }
+   }
+  },
+  "stopping": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "hypervolume_window": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "min_improvement": {
+     "$comment": "relative hypervolume improvement over the window",
+     "type": "number",
+     "minimum": 0
+    },
+    "reference_point": {
+     "$comment": "'auto': each objective's threshold moved towards worse by a factor 1.1; an objective without a threshold declares reference_point itself",
+     "const": "auto"
+    }
+   }
+  },
+  "finalists": {
+   "type": "object",
+   "required": [
+    "max"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "max": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "distinct_topologies": {
+     "type": "boolean"
+    }
+   }
+  },
+  "proposals": {
+   "$comment": "seed designs written by the designer (proposer llm); they take the same decoding, validity and evaluation as random designs",
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "reason"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+     },
+     "reason": {
+      "type": "string",
+      "minLength": 1
+     },
+     "enabled": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "boolean"
+      }
+     },
+     "parent": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "parameters": {
+      "type": "object"
+     }
+    }
+   }
+  },
+  "consistency_samples": {
+   "$comment": "points recomputed with evaluate_design.py run besides the finalists (default 20)",
+   "type": "integer",
+   "minimum": 0
+  },
+  "inline_points_max": {
+   "$comment": "above this many distinct designs the points go to a JSON Lines file (default 2000)",
+   "type": "integer",
+   "minimum": 1
+  }
  },
  "$defs": {
-  "target": {"type": "object", "additionalProperties": false, "properties": {
-   "requirement": {"$comment": "a requirement or constraint id of the design-spec (with or without the design_id namespace)", "type": "string", "minLength": 1},
-   "figure_of_merit": {"type": "string", "minLength": 1},
-   "denominator": {"type": "object"},
-   "tool": {"$comment": "TOOL:OPERATION when several F1 operations compute the figure of merit", "type": "string"},
-   "upstream_tool": {"type": "string"},
-   "reference_point": {"type": "number"},
-   "comparator": {"enum": ["<=", ">="]},
-   "target": {"type": "number"}}},
-  "free_parameter": {"type": "object", "required": ["ref"], "additionalProperties": false, "properties": {
-   "ref": {"type": "string", "pattern": "^DES-[A-Za-z0-9][A-Za-z0-9._-]*\\.parameters\\.[A-Za-z0-9_]+$"},
-   "kind": {"enum": ["continuous", "integer", "categorical", "positions"]},
-   "range": {"type": "array", "minItems": 2, "items": {"type": "number"}},
-   "choices": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-   "n": {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 1}},
-   "min_spacing_m": {"type": "number", "minimum": 0}}}
+  "target": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "requirement": {
+     "$comment": "a requirement or constraint id of the design-spec (with or without the design_id namespace)",
+     "type": "string",
+     "minLength": 1
+    },
+    "figure_of_merit": {
+     "type": "string",
+     "minLength": 1
+    },
+    "denominator": {
+     "type": "object"
+    },
+    "tool": {
+     "$comment": "TOOL:OPERATION when several F1 operations compute the figure of merit",
+     "type": "string"
+    },
+    "upstream_tool": {
+     "type": "string"
+    },
+    "reference_point": {
+     "type": "number"
+    },
+    "comparator": {
+     "enum": [
+      "<=",
+      ">="
+     ]
+    },
+    "target": {
+     "type": "number"
+    }
+   }
+  },
+  "free_parameter": {
+   "type": "object",
+   "required": [
+    "ref"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "ref": {
+     "type": "string",
+     "pattern": "^DES-[A-Za-z0-9][A-Za-z0-9._-]*\\.parameters\\.[A-Za-z0-9_]+$"
+    },
+    "kind": {
+     "enum": [
+      "continuous",
+      "integer",
+      "categorical",
+      "positions"
+     ]
+    },
+    "range": {
+     "type": "array",
+     "minItems": 2,
+     "items": {
+      "type": "number"
+     }
+    },
+    "choices": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string"
+     }
+    },
+    "n": {
+     "type": "array",
+     "minItems": 2,
+     "items": {
+      "type": "integer",
+      "minimum": 1
+     }
+    },
+    "min_spacing_m": {
+     "type": "number",
+     "minimum": 0
+    }
+   }
+  }
  }
 }

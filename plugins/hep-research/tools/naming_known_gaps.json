@@ -9,6 +9,31 @@
    ],
    "reason": "field name fixed by the reconstruction v12.1 reference model: its scenarios build and replace StepSpec with na_allowed= (not-applicable allowed), and the control-layer implementation must accept them unchanged to be tested against the model (Delivery 5.1)",
    "recorded_by": "reconstruction v12 C1, pending maintainer approval"
+  },
+  {
+   "rule_id": "naming.common.vocabulary",
+   "entity_ids": [
+    "N1:docs/dev/simulator-calibration/tools/build_approvals.py#<module>/bl",
+    "N1:docs/dev/simulator-calibration/tools/build_approvals.py#<module>/ds",
+    "N1:docs/dev/simulator-calibration/tools/build_approvals.py#<module>/kd",
+    "N1:docs/dev/simulator-calibration/tools/build_approvals.py#<module>/pr",
+    "N1:docs/dev/simulator-calibration/tools/build_approvals.py#<module>/wh",
+    "N1:docs/dev/simulator-calibration/tools/build_decision_index.py#<module>/bl",
+    "N1:docs/dev/simulator-calibration/tools/build_decision_index.py#<module>/pr",
+    "N1:docs/dev/simulator-calibration/tools/build_decision_index.py#<module>/st"
+   ],
+   "reason": "names in the simulator-calibration task package's own tools, which simcal-task.md Part A (Section E9, step 2) requires to be copied unchanged; their SHA-256 values are recorded in simcal-tasks/phase-0.md and renaming them would break that record",
+   "recorded_by": "simulator calibration phase 0, pending maintainer approval"
+  },
+  {
+   "rule_id": "naming.n1.pep8-shape",
+   "entity_ids": [
+    "N1:docs/dev/simulator-calibration/tools/build_decision_index.py#<module>/sA",
+    "N1:docs/dev/simulator-calibration/tools/build_decision_index.py#<module>/sD",
+    "N1:docs/dev/simulator-calibration/tools/build_decision_index.py#<module>/sE"
+   ],
+   "reason": "names in the simulator-calibration task package's own tools, which simcal-task.md Part A (Section E9, step 2) requires to be copied unchanged; their SHA-256 values are recorded in simcal-tasks/phase-0.md and renaming them would break that record",
+   "recorded_by": "simulator calibration phase 0, pending maintainer approval"
   }
  ],
  "gaps": {

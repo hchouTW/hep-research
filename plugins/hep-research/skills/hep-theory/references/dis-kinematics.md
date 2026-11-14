@@ -55,7 +55,8 @@ but their reconstruction is an estimator question for hep-detector.
 
 ## What is not derived here
 
-Reconstruction estimators (electron, hadron and double-angle methods) and their resolutions: hep-detector.
+Reconstruction estimators (electron, hadron and double-angle methods) and their resolutions: hep-detector
+([DIS kinematic reconstruction](../../hep-detector/references/dis-kinematic-reconstruction.md)).
 Structure functions F_i, g_i and the cross-section formulae of PDG 18.1.1 onward: [DIS structure
 functions](dis-structure-functions.md) (Th14) and `structure_functions_lo.py`; the hadron-structure topics around
 them start at [hadron structure](hadron-structure-essentials.md). On a nucleus, x defined with the nucleon mass

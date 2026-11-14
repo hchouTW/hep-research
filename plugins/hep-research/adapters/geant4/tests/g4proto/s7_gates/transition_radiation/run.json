@@ -1,0 +1,27 @@
+{
+ "schema": "g4sim-run/1",
+ "physics": {
+  "reference_list": "FTFP_BERT_EMZ",
+  "cuts_mm": {
+   "default": "0.7"
+  },
+  "extra_constructors": [
+   "g4sim_xtr"
+  ],
+  "xtr": [
+   {
+    "envelope": "radiator",
+    "radiator_class": "G4XTRTransparentRegRadModel"
+   }
+  ]
+ },
+ "accounting": "separated",
+ "run": {
+  "events": 100,
+  "first_event": 0,
+  "logical_run_seed": 20261108,
+  "mode": "mt",
+  "seeding": "per-event",
+  "threads": 4
+ }
+}

@@ -1,0 +1,189 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "radiator_mm": "20",
+  "tube_mm": "6",
+  "length_mm": "2000",
+  "layer_mm": "radiator_mm + tube_mm"
+ },
+ "materials": {
+  "fleece": {
+   "base": "G4_POLYETHYLENE",
+   "density_g_cm3": "0.06"
+  }
+ },
+ "templates": {
+  "radiator": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length_mm",
+      "length_mm",
+      "radiator_mm"
+     ]
+    }
+   },
+   "material": "fleece",
+   "tags": [
+    "radiator"
+   ]
+  },
+  "radiator_top": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length_mm",
+      "length_mm",
+      "radiator_mm"
+     ]
+    }
+   },
+   "material": "fleece",
+   "tags": [
+    "radiator",
+    "radiator_top"
+   ]
+  },
+  "straws": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length_mm",
+      "length_mm",
+      "tube_mm"
+     ]
+    }
+   },
+   "material": "G4_Xe",
+   "tags": [
+    "straw_layer"
+   ]
+  },
+  "layer": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length_mm",
+      "length_mm",
+      "layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "placement": {
+      "stack": {
+       "axis": "z",
+       "from": "+z",
+       "sequence": [
+        "radiator",
+        "straws"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "layer_top": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length_mm",
+      "length_mm",
+      "layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "placement": {
+      "stack": {
+       "axis": "z",
+       "from": "+z",
+       "sequence": [
+        "radiator_top",
+        "straws"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "trd": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length_mm",
+      "length_mm",
+      "20 * layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "layer_top",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "19 * layer_mm / 2"
+       ]
+      }
+     }
+    },
+    {
+     "template": "layer",
+     "placement": {
+      "linear": {
+       "count": 19,
+       "pitch_mm": [
+        "0",
+        "0",
+        "0 - layer_mm"
+       ],
+       "start_mm": [
+        "0",
+        "0",
+        "17 * layer_mm / 2"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "3000",
+   "3000",
+   "3000"
+  ],
+  "children": [
+   {
+    "template": "trd",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/radiator_mm": "claim:ams02:C67",
+  "/params/tube_mm": "claim:ams02:C67",
+  "/params/length_mm": "claim:ams02:C67",
+  "/materials/fleece/density_g_cm3": "claim:ams02:C67",
+  "/materials/fleece/base": "claim:ams02:C212"
+ }
+}

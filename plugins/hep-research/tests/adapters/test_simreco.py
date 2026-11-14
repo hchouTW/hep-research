@@ -200,6 +200,16 @@ class Simreco(unittest.TestCase):
             sel += len(ok)
         return widths, flips / sel, summ
 
+    def test_a_digitized_hit_reports_the_error_it_has(self):
+        """With strips the only error, chi2/ndof of the fits is 1: the reported hit error is the cluster's true RMS. The
+        width used before 0.61.0 gave 1.19 on J15's strips."""
+        d = self.toy(300.0)
+        strips = {"on": True, "pitch_y_um": 47, "pitch_z_um": 116, "sharing_um": 8, "threshold": 0.2, "efficiency": 1.0}
+        rows, _ = self.run_reco(d, reco({"point_resolution_um": {"bending": 1.0, "non_bending": 1.0}, "tail_sources": {"noise-digitization": strips}}))
+        ratios = [r["chi2"] / r["ndof"] for r in rows if r["selected"] == 1 and r["ndof"] > 0]
+        self.assertGreater(len(ratios), 3000)
+        self.assertAlmostEqual(statistics.fmean(ratios), 1.0, delta=0.04)
+
     def test_digitization_and_pattern_recognition_widen_and_raise_confusion(self):
         d = self.toy(500.0, secondaries=True)
         base_w, base_f, _ = self.width_and_flips(d, reco())

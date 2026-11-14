@@ -7,6 +7,9 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -14,10 +17,14 @@
 #include "G4IonTable.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
+#include "G4OpticalPhoton.hh"
+#include "G4PrimaryParticle.hh"
+#include "G4PrimaryVertex.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4ThreeVector.hh"
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "ExternalEvents.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
 #include "Randomize.hh"
@@ -30,17 +37,38 @@ inline G4ThreeVector Vector(const Value& rows) {
   return {Decimal(v[0]), Decimal(v[1]), Decimal(v[2])};
 }
 
+// A PDG code Geant4 knows, or a nuclear code of an ion: the event file itself is checked by ExternalEvents.hh, but only Geant4 has the particle table.
+inline G4ParticleDefinition* ExternalDefinition(int pdg) {
+  G4ParticleDefinition* found = G4ParticleTable::GetParticleTable()->FindParticle(pdg);
+  if (!found && pdg >= 1000000000) found = G4IonTable::GetIonTable()->GetIon(pdg);
+  if (!found) G4Exception("NewSource", "g4sim-external", FatalException, ("the event file names unknown PDG code " + std::to_string(pdg)).c_str());
+  return found;
+}
+
 class NewSource : public G4VUserPrimaryGeneratorAction {
  public:
   NewSource(const Value& source, long long seed, long long firstEvent, std::FILE* primaries)
       : fSource(source), fSeed(seed), fFirst(firstEvent), fPrimaries(primaries), fGun(1) {
     const char* control = std::getenv("G4SIM_SOURCE_CONTROL");
     fScale = control && std::string(control) == "wide_energy" ? 1.1 : 1.;
+    if (source.has("external_path")) fExternal = ReadExternalEvents(source.obj.at("external_path").str);
   }
 
   void GeneratePrimaries(G4Event* event) override {
     const long long global = fFirst + event->GetEventID();
     ReseedEvent(fSeed, global);
+    if (fSource.has("external_path")) {
+      const auto found = fExternal.find(global);
+      if (found == fExternal.end()) G4Exception("NewSource", "g4sim-external", FatalException, ("the event file has no event " + std::to_string(global)).c_str());
+      for (const ExternalParticle& row : found->second) {
+        auto* vertex = new G4PrimaryVertex(G4ThreeVector(row.position[0], row.position[1], row.position[2]) * mm, 0.);
+        auto* particle = new G4PrimaryParticle(ExternalDefinition(row.pdg));
+        particle->SetMomentum(row.momentum[0] * MeV, row.momentum[1] * MeV, row.momentum[2] * MeV);
+        vertex->SetPrimary(particle);
+        event->AddPrimaryVertex(vertex);
+      }
+      return;
+    }
     if (!fParticle) fParticle = Particle();
     const double energy = Energy(global) * fScale;
     const G4ThreeVector position = Position();
@@ -49,6 +77,11 @@ class NewSource : public G4VUserPrimaryGeneratorAction {
     fGun.SetParticleEnergy(energy * MeV);
     fGun.SetParticlePosition(position * mm);
     fGun.SetParticleMomentumDirection(direction);
+    if (fParticle == G4OpticalPhoton::OpticalPhotonDefinition()) {  // S7: a random linear polarization across the direction, drawn last
+      const G4ThreeVector across = direction.orthogonal().unit(), other = direction.cross(across);
+      const double angle = CLHEP::twopi * G4UniformRand();
+      fGun.SetParticlePolarization(std::cos(angle) * across + std::sin(angle) * other);
+    }
     fGun.GeneratePrimaryVertex(event);
     if (fPrimaries) std::fprintf(fPrimaries, "%lld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g\n", global, energy, position.x(), position.y(), position.z(), direction.x(), direction.y(), direction.z());
   }
@@ -140,6 +173,7 @@ class NewSource : public G4VUserPrimaryGeneratorAction {
   std::FILE* fPrimaries;
   G4ParticleGun fGun;
   G4ParticleDefinition* fParticle = nullptr;
+  std::map<long long, std::vector<ExternalParticle>> fExternal;
   double fScale = 1.;
 };
 

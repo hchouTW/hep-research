@@ -1,0 +1,79 @@
+{
+ "phase": "S7",
+ "case_id": "epic-tof",
+ "card_case": "ePIC barrel TOF staves",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "ePIC",
+ "subsystem": "barrel time-of-flight (AC-LGAD strip staves): the 144 tilted staves as silicon sensor strips, as in the ePIC simulation geometry 26.11.0, status development",
+ "corresponding_kit": "barrel_tracker",
+ "cited_claims": [
+  "eic:C26",
+  "eic:C36",
+  "eic:C37"
+ ],
+ "quantities": [
+  {
+   "name": "staves",
+   "definition": "barrel TOF staves (volumes tagged stave) in the expanded IR",
+   "reference": 144,
+   "tolerance_relative": 0,
+   "derivation": "BarrelTOF_Module_nphi = 144 (eic:C36); the PDR draft states 144 tilted staves (eic:C37, Tier 2)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count, not a simulation output; the PDR draft states 144 staves independently of the geometry file; it does not depend on the disputed radius and z range"
+   },
+   "negative_control": {
+    "change": "143 staves in the ring",
+    "pointer": "/world/children/0/placement/ring/n",
+    "value": 143,
+    "expected_shift_relative": -0.0069
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "stave"
+   }
+  },
+  {
+   "name": "sensor_x0",
+   "definition": "x/X0 of one stave's silicon sensor for a geantino crossing it along its normal (stave 0)",
+   "reference": 0.003735,
+   "tolerance_relative": 0.01,
+   "derivation": "0.35 mm (BarrelTOF_Sensor_thickness, eic:C36) / 93.70 mm (PDG silicon at 2.329 g/cm3, eic:C26)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties (2025 web edition), eic:S15 via claim eic:C26",
+     "url": "https://pdg.lbl.gov/2025/AtomicNuclearProperties/",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "silicon: density 2.329 g/cm3, radiation length 21.82 g/cm2 (9.370 cm)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: the thickness and density are design values written as input to the ePIC simulation (release 26.11.0), not outputs of it, and the radiation length is PDG's tabulation; the reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula, so agreement validates the geometry and the material definition, not Geant4's radiation-length physics. The sensor is G4_Si (2.33 g/cm3, 0.04 % above PDG's 2.329); the geometry's 'Silicon' material was not traced."
+   },
+   "negative_control": {
+    "change": "0.30 mm sensors (the forward TOF's thickness) instead of 0.35 mm",
+    "pointer": "/params/sensor_mm",
+    "value": "0.30",
+    "expected_shift_relative": -0.1429
+   },
+   "detection_limit_relative": 0.01,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   }
+  }
+ ],
+ "approximations": [
+  "each stave is one continuous silicon strip 30.0 mm wide, 0.35 mm thick and 2600 mm long (z from -1125 to +1475 mm, eic:C36): the 2 cm sensors, their overlaps and dead spaces, the two half staves, Kapton, carbon foam, cooling and services are not modelled, so the stave is not the 3 % X0 stave of the PDR requirement",
+  "the strip centre sits at the layout radius 646 mm, tilted by 18 degrees about the beam axis by the case's ring convention; the geometry's sensor offset inside the 60 mm module and the sign of its phi_tilt are not reproduced",
+  "the radius and z range are disputed (geometry 64.6 cm and -112.5 to +147.5 cm, eic:C36; PDR draft around 65 cm and 63 cm, and -117.5 to +171.5 cm, eic:C37): the case uses the geometry (Tier 2, development) for construction only; no quantity depends on them",
+  "the 0.35 mm silicon is the geometry's sensor volume, not the active thickness (likely 50 um per the PDR); the forward TOF is not part of this case"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

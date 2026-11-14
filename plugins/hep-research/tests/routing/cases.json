@@ -1578,7 +1578,7 @@
    "profiles": [
     "experiment:eic"
    ],
-   "note": "facility module of the eic profile; design targets only, no number is shipped"
+   "note": "facility module of the eic profile; design targets and requirements from cited claims; no performance number"
   },
   {
    "id": "epic-detector-1",
@@ -4543,7 +4543,11 @@
     "small-x",
     "model alternatives"
    ],
-   "set": "Th19"
+   "set": "Th19",
+   "profiles": [
+    "experiment:eic"
+   ],
+   "note": "e-Au beam settings (configurations, per-nucleon energies) come from the facility module of the eic profile; no detector module is read"
   },
   {
    "id": "th19-dipole-1",

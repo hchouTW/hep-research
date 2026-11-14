@@ -26,9 +26,18 @@ def index_files(keyword):
 
 
 class ScenarioTests(unittest.TestCase):
-    def test_five_scenarios_with_distinct_ids(self):
+    def test_ids_are_distinct_and_the_original_five_remain(self):
         ids = [s["id"] for s in SCENARIOS]
-        self.assertEqual(sorted(ids), sorted(["generic-dis", "eic-facility", "epic-detector", "ambiguous-detector", "unrelated-experiment"]))
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertLessEqual({"generic-dis", "eic-facility", "epic-detector", "ambiguous-detector", "unrelated-experiment"}, set(ids))
+
+    def test_each_keyword_matches_exactly_one_request_cell(self):
+        requests = [[c.strip() for c in line.strip().strip("|").split("|")][0] for line in INDEX.splitlines()
+                    if len([c for c in line.strip().strip("|").split("|")]) == 2]
+        for s in SCENARIOS:
+            if "experiment:eic" in s.get("explicit_profiles", []) and s.get("index_row_keyword"):
+                hits = [r for r in requests if s["index_row_keyword"].lower() in r.lower()]
+                self.assertEqual(len(hits), 1, (s["id"], hits))
 
     def test_decisions(self):
         for s in SCENARIOS:

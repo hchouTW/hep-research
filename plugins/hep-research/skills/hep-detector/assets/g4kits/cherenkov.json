@@ -1,0 +1,251 @@
+{
+ "schema": "g4kit/1",
+ "name": "cherenkov",
+ "version": "1.0.0",
+ "geometry_kind": "cherenkov",
+ "role": "particle-id",
+ "purpose": "A gas radiator vessel with a spherical mirror cap downstream and a photodetector under a conical light guide upstream, all inside optical_scope.",
+ "inputs": {
+  "vessel_x_mm": {
+   "kind": "length"
+  },
+  "vessel_y_mm": {
+   "kind": "length"
+  },
+  "vessel_z_mm": {
+   "kind": "length"
+  },
+  "mirror_radius_mm": {
+   "kind": "length"
+  },
+  "mirror_thickness_mm": {
+   "kind": "length"
+  },
+  "mirror_theta_span_deg": {
+   "kind": "angle"
+  },
+  "mirror_centre_z_mm": {
+   "kind": "length"
+  },
+  "detector_side_mm": {
+   "kind": "length"
+  },
+  "detector_thickness_mm": {
+   "kind": "length"
+  },
+  "detector_z_mm": {
+   "kind": "length"
+  },
+  "guide_entrance_radius_mm": {
+   "kind": "length"
+  },
+  "guide_exit_radius_mm": {
+   "kind": "length"
+  },
+  "guide_length_mm": {
+   "kind": "length"
+  },
+  "gas_material": {
+   "kind": "material"
+  },
+  "mirror_material": {
+   "kind": "material"
+  },
+  "guide_material": {
+   "kind": "material"
+  },
+  "detector_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  },
+  "mirror_reflectivity": {
+   "kind": "spectrum"
+  },
+  "detector_efficiency": {
+   "kind": "spectrum"
+  },
+  "materials": {
+   "kind": "materials"
+  }
+ },
+ "geometric_defaults": {},
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "mirror_outer_mm": "mirror_radius_mm + mirror_thickness_mm",
+   "guide_z_mm": "detector_z_mm + detector_thickness_mm / 2 + guide_length_mm / 2",
+   "world_mm": "4 * (vessel_x_mm + vessel_y_mm + vessel_z_mm) + 200"
+  },
+  "materials": {
+   "$input": "materials"
+  },
+  "templates": {
+   "mirror": {
+    "solid": {
+     "sphere_section": {
+      "rmin_mm": "mirror_radius_mm",
+      "rmax_mm": "mirror_outer_mm",
+      "theta_start_deg": "0",
+      "theta_span_deg": "mirror_theta_span_deg"
+     }
+    },
+    "material": {
+     "$input": "mirror_material"
+    },
+    "tags": [
+     "optical",
+     "mirror"
+    ]
+   },
+   "guide": {
+    "solid": {
+     "cone": {
+      "rmin1_mm": "0",
+      "rmax1_mm": "guide_exit_radius_mm",
+      "rmin2_mm": "0",
+      "rmax2_mm": "guide_entrance_radius_mm",
+      "length_mm": "guide_length_mm"
+     }
+    },
+    "material": {
+     "$input": "guide_material"
+    },
+    "tags": [
+     "optical",
+     "guide"
+    ]
+   },
+   "detector": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "detector_side_mm",
+       "detector_side_mm",
+       "detector_thickness_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "detector_material"
+    },
+    "tags": [
+     "optical",
+     "sensor"
+    ]
+   },
+   "vessel": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "vessel_x_mm",
+       "vessel_y_mm",
+       "vessel_z_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "gas_material"
+    },
+    "tags": [
+     "optical",
+     "radiator"
+    ],
+    "children": [
+     {
+      "template": "mirror",
+      "placement": {
+       "single": {
+        "centre_mm": [
+         "0",
+         "0",
+         "mirror_centre_z_mm"
+        ]
+       }
+      }
+     },
+     {
+      "template": "detector",
+      "placement": {
+       "single": {
+        "centre_mm": [
+         "0",
+         "0",
+         "detector_z_mm"
+        ]
+       }
+      }
+     },
+     {
+      "template": "guide",
+      "placement": {
+       "single": {
+        "centre_mm": [
+         "0",
+         "0",
+         "guide_z_mm"
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "vessel",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "physics_requirements": [
+   {
+    "need": "optical_scope",
+    "select": {
+     "tags": [
+      "optical"
+     ]
+    }
+   }
+  ],
+  "optical_surfaces": {
+   "mirror_surface": {
+    "skin": "mirror",
+    "model": "unified",
+    "finish": "polished",
+    "type": "dielectric_metal",
+    "reflectivity": {
+     "$input": "mirror_reflectivity"
+    }
+   },
+   "photocathode": {
+    "skin": "detector",
+    "model": "unified",
+    "finish": "polished",
+    "type": "dielectric_metal",
+    "efficiency": {
+     "$input": "detector_efficiency"
+    }
+   }
+  },
+  "frames": {}
+ }
+}

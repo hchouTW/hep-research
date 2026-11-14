@@ -3,7 +3,10 @@
  "energy_variable": "beam energies E_e x E_h per named collision configuration (GeV; per nucleon for ions) with sqrt(s) derived and stated alongside; never a single implicit energy",
  "frame": "laboratory frame with asymmetric beams: the lab and center-of-mass frames differ, and every boost or crossing-angle correction is stated per configuration from its source",
  "eic:beam_energy_configuration": "a named pair (E_e, E_h) with species and polarization, taken from the cited source and release; this profile does not fix a default configuration",
- "eic:hadron_beam_direction": "the sign of the z axis relative to the hadron beam is not fixed by this profile: take it from the ePIC geometry release the analysis uses and record it; unknown until then",
- "eic:polarization_sign": "helicity and transverse-polarization sign conventions follow the cited analysis or facility document; this profile does not fix them; unknown until stated",
- "eic:ion_energy_normalization": "ion beam energies are per nucleon unless a claim says whole-ion; every conversion states A and Z"
+ "rapidity_frame": "laboratory frame; the +z direction (along the hadron or the electron beam) is unknown: this profile does not fix it, and the analysis or the ePIC geometry it uses states it",
+ "polarization_convention": "helicity and transverse-polarization sign conventions are unknown: this profile does not fix them; take them from the cited analysis (see the hep-theory pages polarized-dis.md and sidis-and-tmd.md)",
+ "eic:ion_energy_normalization": "ion beam energies are per nucleon unless a claim says whole-ion; every conversion states A and Z. This concerns the beam energy, not the cross-section target_normalization",
+ "target_normalization": "per nucleon or per nucleus, stated by the analysis; this profile does not fix it",
+ "azimuth_convention": "named by the analysis (for example Trento); this profile does not fix it",
+ "eic:crossing_angle_treatment": "the analysis states whether it boosts to the head-on frame and where the crossing angle comes from; this profile does not fix it"
 }

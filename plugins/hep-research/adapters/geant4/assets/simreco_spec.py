@@ -43,11 +43,14 @@ def tails_on(spec: dict) -> list[str]:
     return [n for n in TAIL_SOURCES if (t.get(n) or {}).get("on")]
 
 
-def strip_sigma(pitch: float, sharing: float) -> float:
-    """The strip digitization's position resolution (simreco StripSigma): sigma^2 = (p - w)^3 / (12 p), the cluster at
-    the strip centre outside the sharing band w, exact inside it (linear sharing)."""
-    q = max(pitch - min(sharing, pitch), 0.0)
-    return (q ** 3 / (12.0 * pitch)) ** 0.5
+def strip_sigma(pitch: float, sharing: float, threshold: float = 0.2) -> float:
+    """The strip digitization's position resolution, simreco's StripClusterSigma: the RMS error of the cluster for a
+    crossing uniform over the strip, with linear sharing over w and a strip below the threshold fraction dropped.
+    Where both strips stay above threshold the error falls linearly from (p - w)(1/2 - t) to 0; elsewhere the cluster
+    sits at the centre of a span L = p - w (1 - 2 t). (Before 0.61.0, sqrt((p - w)^3 / 12 p): too small.)"""
+    w, t = min(sharing, pitch), min(max(threshold, 0.0), 0.5)
+    span, largest = pitch - w * (1 - 2 * t), (pitch - w) * (0.5 - t)
+    return (span ** 3 / (12.0 * pitch) + w * (1 - 2 * t) / pitch * largest * largest / 3.0) ** 0.5
 
 
 def _inert_tails(spec: dict, element_spec: dict | None) -> list[str]:
@@ -76,7 +79,7 @@ def _inert_tails(spec: dict, element_spec: dict | None) -> list[str]:
         pr = spec.get("point_resolution_um") or {}
         w = n.get("sharing_um", 10.0)
         for axis, key in (("bending", "pitch_y_um"), ("non_bending", "pitch_z_um")):
-            res = strip_sigma(n[key], w)
+            res = strip_sigma(n[key], w, n.get("threshold", 0.2))
             if isinstance(pr.get(axis), (int, float)) and res < pr[axis] * (1 - 1e-9):
                 out.append(f"tail source noise-digitization: {key} {n[key]} with sharing {w} um gives a {axis} "
                            f"resolution {res:.3g} um, finer than the declared {pr[axis]} um: a tail stage must not "

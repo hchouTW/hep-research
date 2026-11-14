@@ -1,0 +1,755 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "thickness_mm": "10",
+  "width_mm": "120",
+  "trapezoid_width_mm": "260",
+  "overlap_mm": "5",
+  "stagger_mm": "15",
+  "half_distance_mm": "1200",
+  "pitch_mm": "width_mm - overlap_mm",
+  "layer_mm": "thickness_mm + stagger_mm",
+  "length0_mm": "130.5",
+  "length1_mm": "132.2",
+  "length2_mm": "132.2",
+  "length3_mm": "134.0"
+ },
+ "materials": {
+  "EJ200": {
+   "composition": {
+    "H": "0.0847",
+    "C": "0.9153"
+   },
+   "density_g_cm3": "1.023"
+  }
+ },
+ "templates": {
+  "edge0": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length0_mm",
+      "trapezoid_width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer0",
+    "upper"
+   ]
+  },
+  "layer0": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length0_mm",
+      "1600",
+      "layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "even0",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0 - stagger_mm / 2"
+       ]
+      }
+     }
+    },
+    {
+     "template": "odd0",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "stagger_mm / 2"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "edge1": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length1_mm",
+      "trapezoid_width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer1",
+    "upper"
+   ]
+  },
+  "layer1": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length1_mm",
+      "1600",
+      "layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "even1",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0 - stagger_mm / 2"
+       ]
+      }
+     }
+    },
+    {
+     "template": "odd1",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "stagger_mm / 2"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "edge2": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length2_mm",
+      "trapezoid_width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer2",
+    "lower"
+   ]
+  },
+  "layer2": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length2_mm",
+      "1600",
+      "layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "even2",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0 - stagger_mm / 2"
+       ]
+      }
+     }
+    },
+    {
+     "template": "odd2",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "stagger_mm / 2"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "edge3": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length3_mm",
+      "trapezoid_width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer3",
+    "lower"
+   ]
+  },
+  "layer3": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length3_mm",
+      "1600",
+      "layer_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "even3",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0 - stagger_mm / 2"
+       ]
+      }
+     }
+    },
+    {
+     "template": "odd3",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "stagger_mm / 2"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "counter0": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length0_mm",
+      "width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer0",
+    "upper"
+   ]
+  },
+  "even0": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length0_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter0",
+     "placement": {
+      "linear": {
+       "count": 3,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "0 - (6 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge0",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "(6 - 1) * pitch_mm / 2 + (width_mm + trapezoid_width_mm) / 2 - overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "odd0": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length0_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter0",
+     "placement": {
+      "linear": {
+       "count": 3,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "pitch_mm - (6 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge0",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0 - (6 - 1) * pitch_mm / 2 - (width_mm + trapezoid_width_mm) / 2 + overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "counter1": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length1_mm",
+      "width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer1",
+    "upper"
+   ]
+  },
+  "even1": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length1_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter1",
+     "placement": {
+      "linear": {
+       "count": 3,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "0 - (6 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge1",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "(6 - 1) * pitch_mm / 2 + (width_mm + trapezoid_width_mm) / 2 - overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "odd1": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length1_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter1",
+     "placement": {
+      "linear": {
+       "count": 3,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "pitch_mm - (6 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge1",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0 - (6 - 1) * pitch_mm / 2 - (width_mm + trapezoid_width_mm) / 2 + overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "counter2": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length2_mm",
+      "width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer2",
+    "lower"
+   ]
+  },
+  "even2": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length2_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter2",
+     "placement": {
+      "linear": {
+       "count": 4,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "0 - (8 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge2",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "(8 - 1) * pitch_mm / 2 + (width_mm + trapezoid_width_mm) / 2 - overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "odd2": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length2_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter2",
+     "placement": {
+      "linear": {
+       "count": 4,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "pitch_mm - (8 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge2",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0 - (8 - 1) * pitch_mm / 2 - (width_mm + trapezoid_width_mm) / 2 + overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "counter3": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length3_mm",
+      "width_mm",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "EJ200",
+   "tags": [
+    "counter",
+    "layer3",
+    "lower"
+   ]
+  },
+  "even3": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length3_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter3",
+     "placement": {
+      "linear": {
+       "count": 3,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "0 - (6 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge3",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "(6 - 1) * pitch_mm / 2 + (width_mm + trapezoid_width_mm) / 2 - overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "odd3": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "length3_mm",
+      "1600",
+      "thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "counter3",
+     "placement": {
+      "linear": {
+       "count": 3,
+       "pitch_mm": [
+        "0",
+        "2 * pitch_mm",
+        "0"
+       ],
+       "start_mm": [
+        "0",
+        "pitch_mm - (6 - 1) * pitch_mm / 2",
+        "0"
+       ],
+       "index": "counter"
+      }
+     }
+    },
+    {
+     "template": "edge3",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0 - (6 - 1) * pitch_mm / 2 - (width_mm + trapezoid_width_mm) / 2 + overlap_mm",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "6000",
+   "6000",
+   "6000"
+  ],
+  "children": [
+   {
+    "template": "layer0",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "half_distance_mm / 2 + layer_mm / 2"
+      ]
+     }
+    }
+   },
+   {
+    "template": "layer1",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "half_distance_mm / 2 - layer_mm / 2"
+      ],
+      "rotation": {
+       "axis": "z",
+       "angle_deg": "90"
+      }
+     }
+    }
+   },
+   {
+    "template": "layer2",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0 - half_distance_mm / 2 + layer_mm / 2"
+      ]
+     }
+    }
+   },
+   {
+    "template": "layer3",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0 - half_distance_mm / 2 - layer_mm / 2"
+      ],
+      "rotation": {
+       "axis": "z",
+       "angle_deg": "90"
+      }
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/thickness_mm": "claim:ams02:C188",
+  "/params/width_mm": "claim:ams02:C190",
+  "/params/trapezoid_width_mm": "claim:ams02:C190",
+  "/params/overlap_mm": "claim:ams02:C191",
+  "/params/stagger_mm": "claim:ams02:C191",
+  "/params/half_distance_mm": "claim:ams02:C194",
+  "/materials/EJ200/density_g_cm3": "claim:ams02:C193",
+  "/params/length0_mm": "claim:ams02:C189",
+  "/params/length1_mm": "claim:ams02:C189",
+  "/params/length2_mm": "claim:ams02:C189",
+  "/params/length3_mm": "claim:ams02:C189"
+ }
+}

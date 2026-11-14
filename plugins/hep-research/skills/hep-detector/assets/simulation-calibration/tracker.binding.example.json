@@ -1,0 +1,406 @@
+{
+ "example": "simulation-calibration node binding: Tracker",
+ "status": [
+  "synthetic"
+ ],
+ "part_b": "section 11.4 (g4sim binding), section 12 row Tracker",
+ "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "notes": [
+  "The simulation-side Lorentz angle, diffusion and charge sharing live in the hashed table of the charge_sharing stage, which has no stage parameter value: no Table 2 row, a different table is a different model. The theta here is the Lorentz shift assumed by reconstruction (rerun).",
+  "Residual smearing (noise/5) is used only when the microscopic mechanism is not modeled (section 12)."
+ ],
+ "contract_fragment": {
+  "simulator": "g4sim",
+  "source": {
+   "density": "analytic"
+  },
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "source",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "0 input: tracks of known momentum"
+    },
+    {
+     "id": "material",
+     "kernel": "black-box",
+     "kind": "stage",
+     "description": "1 ionisation and multiple scattering in material (g4sim_run)",
+     "samplable": true,
+     "mechanisms": [
+      "geometry-material",
+      "physics-process"
+     ]
+    },
+    {
+     "id": "pairs",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "2 electron-hole pairs (ionisation stage: W value, Fano)",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "sharing",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "3 drift, Lorentz angle, diffusion, charge sharing (charge_sharing stage, a hashed table)",
+     "mechanisms": [
+      "sharing-crosstalk",
+      "transport-diffusion"
+     ]
+    },
+    {
+     "id": "preamp",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "4b preamplifier",
+     "mechanisms": [
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kernel": "density",
+     "kind": "stage",
+     "description": "5 noise, threshold, shaping",
+     "mechanisms": [
+      "noise-threshold"
+     ]
+    },
+    {
+     "id": "hits",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "5 readout: zero suppression and clustering"
+    },
+    {
+     "id": "reco",
+     "kernel": "deterministic",
+     "kind": "stage",
+     "description": "6-7 hits and tracks with the alignment and Lorentz correction assumed by reconstruction",
+     "mechanisms": [
+      "geometry-material",
+      "association"
+     ]
+    },
+    {
+     "id": "residual_a",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: hit residual in module A"
+    },
+    {
+     "id": "residual_b",
+     "kernel": "deterministic",
+     "kind": "observation",
+     "description": "observation: hit residual in the overlapping module B"
+    },
+    {
+     "id": "overlap",
+     "kernel": "deterministic",
+     "kind": "comparison",
+     "description": "comparison: difference of the two residuals in the overlap region"
+    }
+   ],
+   "edges": [
+    {
+     "from": "source",
+     "to": "material"
+    },
+    {
+     "from": "material",
+     "to": "pairs"
+    },
+    {
+     "from": "pairs",
+     "to": "sharing"
+    },
+    {
+     "from": "sharing",
+     "to": "preamp"
+    },
+    {
+     "from": "preamp",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "hits"
+    },
+    {
+     "from": "hits",
+     "to": "reco"
+    },
+    {
+     "from": "reco",
+     "to": "residual_a"
+    },
+    {
+     "from": "reco",
+     "to": "residual_b"
+    },
+    {
+     "from": "residual_a",
+     "to": "overlap"
+    },
+    {
+     "from": "residual_b",
+     "to": "overlap"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "sensor_thickness",
+    "role": "phi",
+    "nodes": [
+     "material"
+    ],
+    "mechanism": "geometry-material",
+    "physical_bounds": [
+     100.0,
+     600.0
+    ],
+    "sampling_bounds": [
+     250.0,
+     350.0
+    ],
+    "bindings": [
+     {
+      "document": "detector-spec",
+      "pointer": "/params/sensor_um"
+     }
+    ],
+    "source": "metrology of the experiment instance"
+   },
+   {
+    "name": "noise_sigma",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold",
+    "physical_bounds": [
+     0.0,
+     10.0
+    ],
+    "sampling_bounds": [
+     0.1,
+     3.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/3/parameters/noise_sigma/value"
+     }
+    ]
+   },
+   {
+    "name": "threshold",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold",
+    "physical_bounds": [
+     0.0,
+     20.0
+    ],
+    "sampling_bounds": [
+     1.0,
+     8.0
+    ],
+    "bindings": [
+     {
+      "document": "response-pipeline",
+      "pointer": "/stages/3/parameters/threshold/value"
+     }
+    ]
+   },
+   {
+    "name": "lorentz_shift",
+    "role": "theta",
+    "nodes": [
+     "reco"
+    ],
+    "mechanism": "transport-diffusion",
+    "physical_bounds": [
+     -50.0,
+     50.0
+    ],
+    "sampling_bounds": [
+     -20.0,
+     20.0
+    ],
+    "bindings": [
+     {
+      "document": "reconstruction",
+      "pointer": "/lorentz_shift_um"
+     }
+    ]
+   },
+   {
+    "name": "module_b_offset",
+    "role": "theta",
+    "nodes": [
+     "reco"
+    ],
+    "mechanism": "geometry-material",
+    "physical_bounds": [
+     -100.0,
+     100.0
+    ],
+    "sampling_bounds": [
+     -30.0,
+     30.0
+    ],
+    "bindings": [
+     {
+      "document": "reconstruction",
+      "pointer": "/modules/1/offset_um"
+     }
+    ]
+   }
+  ],
+  "references": [
+   {
+    "id": "known_momentum",
+    "type": "known-input",
+    "edge": {
+     "into": "source"
+    },
+    "observation": "residual_a"
+   },
+   {
+    "id": "overlap_pairs",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "overlap"
+    },
+    "observation": "overlap"
+   }
+  ],
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal",
+     "physics_list": "FTFP_BERT_EMZ"
+    }
+   ],
+   "absorbed": []
+  },
+  "validation_alternatives": [
+   {
+    "kind": "simulation-setting",
+    "description": "PAI model in the sensor instead of the standard ionisation model",
+    "observable": "cluster-charge spectrum and the cluster-size distribution at normal incidence",
+    "identity_difference": "run card /physics/pai"
+   },
+   {
+    "kind": "simulation-setting",
+    "description": "a charge-sharing table with diffusion versus without",
+    "observable": "cluster size versus incidence angle",
+    "identity_difference": "response-pipeline charge_sharing table hash"
+   }
+  ]
+ },
+ "plan": {
+  "schema": "calibration-plan/1",
+  "kernels": {},
+  "node_binding": {
+   "nodes": {
+    "source": {
+     "table1": "0",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "support_declared": true
+    },
+    "material": {
+     "table1": "1",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "pairs": {
+     "table1": "2",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ],
+     "stage": "ionisation"
+    },
+    "sharing": {
+     "table1": "3",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "preamp": {
+     "table1": "4b",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "electronics": {
+     "table1": "5e",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "hits": {
+     "table1": "5r",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    },
+    "reco": {
+     "table1": "6-7",
+     "recording": "column",
+     "stored": [
+      "edep_by_dedx_class",
+      "edep_visible_ly_split",
+      "hits",
+      "simreco_columns"
+     ]
+    }
+   },
+   "pde_split": false
+  },
+  "design_points": [
+   {
+    "theta": {}
+   }
+  ]
+ }
+}

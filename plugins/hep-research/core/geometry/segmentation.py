@@ -21,7 +21,7 @@ def bin_count(block, half_mm: list) -> int:
         width, sectors = float(body["width_r_mm"]), int(body["phi_bins"])
         if width <= 0 or sectors < 1:
             raise GeometryError("segmentation-size", f"polar {body!r}")
-        count = math.ceil(max(sizes[:2]) / 2 / width) * sectors
+        count = math.ceil(math.hypot(sizes[0], sizes[1]) / 2 / width) * sectors  # to the farthest corner, as Grid in NewScorers.hh
     else:
         widths = [float(body["width_mm"])] if kind == "along_axis" else [float(value) for value in body["width_mm"]]
         extents = [sizes["xyz".index(body["axis"])]] if kind == "along_axis" else sizes[:len(widths)]

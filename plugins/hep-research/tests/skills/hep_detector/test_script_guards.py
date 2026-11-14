@@ -485,6 +485,7 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('design_estimates.py', 'straight-line-acceptance', '--z-m', '0', '1e308', '--radius-m', '1e-308', '1e308',
              '--lateral-offset-m', '0', '0'),
             ('design_estimates.py', 'budget-sum', '--estimates', 'nan', '--uncertainties', '1'),
+            ('g4kit.py', 'derive', '--geometry', self.write('not_a_geometry.json', '{}'), '--out-detector', self.tmp / 'd.json', '--out-derivation', self.tmp / 'r.json'),
             ('evaluate_design.py', 'report', '--artifacts', self.write('not_a_dir.json', '{}')),
             ('evaluate_design.py', 'run', '--artifacts', self.tmp, '--candidate', 'x:y', '--figure-of-merit', 'nope'),
             ('geant4_benchmarks.py', 'reference', '--study-spec', ASSETS / 'geant4-study-spec.example.json',

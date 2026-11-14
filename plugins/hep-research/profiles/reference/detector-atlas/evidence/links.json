@@ -1,2 +1,4 @@
 {"note": "Experiments with their own profile: the atlas holds no claim for them and points to the profile instead.",
- "links": [{"experiment": "AMS-02", "aliases": ["AMS", "AMS02", "Alpha Magnetic Spectrometer"], "profile": "experiment:ams-02"}]}
+ "links": [{"experiment": "AMS-02", "aliases": ["AMS", "AMS02", "Alpha Magnetic Spectrometer"], "profile": "experiment:ams-02"},
+  {"experiment": "ePIC", "aliases": [], "profile": "experiment:eic"},
+  {"experiment": "EIC", "aliases": ["Electron-Ion Collider"], "profile": "experiment:eic"}]}

@@ -1,0 +1,61 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "stave_radius_mm": "646",
+  "tilt_deg": "18",
+  "sensor_mm": "0.35",
+  "sensor_width_mm": "30.0",
+  "zneg_mm": "1125",
+  "zpos_mm": "1475"
+ },
+ "materials": {},
+ "templates": {
+  "stave": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "zneg_mm + zpos_mm",
+      "sensor_width_mm",
+      "sensor_mm"
+     ]
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "stave"
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "2000",
+   "2000",
+   "4000"
+  ],
+  "children": [
+   {
+    "template": "stave",
+    "placement": {
+     "ring": {
+      "n": 144,
+      "radius_mm": "stave_radius_mm",
+      "tilt_deg": "tilt_deg",
+      "z_mm": "(zpos_mm - zneg_mm) / 2",
+      "orientation": "radial",
+      "index": "stave"
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/stave_radius_mm": "claim:eic:C36",
+  "/params/tilt_deg": "claim:eic:C36",
+  "/params/sensor_mm": "claim:eic:C36",
+  "/params/sensor_width_mm": "claim:eic:C36",
+  "/params/zneg_mm": "claim:eic:C36",
+  "/params/zpos_mm": "claim:eic:C36",
+  "/world/children/0/placement/ring/n": "claim:eic:C36"
+ }
+}

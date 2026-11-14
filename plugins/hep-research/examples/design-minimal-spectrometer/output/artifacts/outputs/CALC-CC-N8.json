@@ -23,7 +23,7 @@
    ],
    "sigma_inv_r": 0.0007892920232481602,
    "lower_bound_at_low_edge": 0.0056397819503904755,
-   "lower_bound_at_high_edge": 0.10258511850652408
+   "lower_bound_at_high_edge": 0.1025851185065241
   }
  ],
  "estimate": null,

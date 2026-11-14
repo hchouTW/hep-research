@@ -1,0 +1,385 @@
+{
+ "schema": "calibration-fixture/1",
+ "fixture": "ecal",
+ "description": "Electromagnetic calorimeter (section 3.1, derivation basis (1)) with a pair of overlapping modules (comparison node: energy ratio).",
+ "status": "synthetic",
+ "contract": {
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "beam",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "input-distribution"
+     ]
+    },
+    {
+     "id": "shower_deposition",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "physics-process",
+      "geometry-material"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "photon_generation",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "2",
+     "mechanisms": [
+      "yield",
+      "nonlinearity"
+     ]
+    },
+    {
+     "id": "light_collection",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "3",
+     "mechanisms": [
+      "transport-diffusion"
+     ]
+    },
+    {
+     "id": "pde",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4a",
+     "mechanisms": [
+      "yield"
+     ]
+    },
+    {
+     "id": "gain",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "4b",
+     "mechanisms": [
+      "yield",
+      "fluctuation"
+     ]
+    },
+    {
+     "id": "electronics",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "5",
+     "mechanisms": [
+      "noise-threshold",
+      "nonlinearity"
+     ]
+    },
+    {
+     "id": "crystal_a",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6"
+    },
+    {
+     "id": "crystal_b",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "6"
+    },
+    {
+     "id": "crystal_ratio",
+     "kind": "comparison",
+     "kernel": "deterministic",
+     "stage": "7"
+    },
+    {
+     "id": "shower_energy",
+     "kind": "observation",
+     "kernel": "deterministic",
+     "stage": "7",
+     "mechanisms": [
+      "association"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "from": "beam",
+     "to": "shower_deposition"
+    },
+    {
+     "from": "shower_deposition",
+     "to": "photon_generation"
+    },
+    {
+     "from": "photon_generation",
+     "to": "light_collection"
+    },
+    {
+     "from": "light_collection",
+     "to": "pde"
+    },
+    {
+     "from": "pde",
+     "to": "gain"
+    },
+    {
+     "from": "gain",
+     "to": "electronics"
+    },
+    {
+     "from": "electronics",
+     "to": "crystal_a"
+    },
+    {
+     "from": "electronics",
+     "to": "crystal_b"
+    },
+    {
+     "from": "crystal_a",
+     "to": "crystal_ratio"
+    },
+    {
+     "from": "crystal_b",
+     "to": "crystal_ratio"
+    },
+    {
+     "from": "crystal_a",
+     "to": "shower_energy"
+    },
+    {
+     "from": "crystal_b",
+     "to": "shower_energy"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "birks_kb",
+    "role": "theta",
+    "nodes": [
+     "photon_generation"
+    ],
+    "mechanism": "nonlinearity"
+   },
+   {
+    "name": "light_yield",
+    "role": "theta",
+    "nodes": [
+     "photon_generation"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "attenuation_length",
+    "role": "theta",
+    "nodes": [
+     "light_collection"
+    ],
+    "mechanism": "transport-diffusion"
+   },
+   {
+    "name": "pde",
+    "role": "theta",
+    "nodes": [
+     "pde"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain",
+    "role": "theta",
+    "nodes": [
+     "gain"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "noise_width",
+    "role": "theta",
+    "nodes": [
+     "electronics"
+    ],
+    "mechanism": "noise-threshold"
+   },
+   {
+    "name": "gain_a",
+    "role": "theta",
+    "nodes": [
+     "crystal_a"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "gain_b",
+    "role": "theta",
+    "nodes": [
+     "crystal_b"
+    ],
+    "mechanism": "yield"
+   },
+   {
+    "name": "alignment_a",
+    "role": "theta",
+    "nodes": [
+     "crystal_a"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "alignment_b",
+    "role": "theta",
+    "nodes": [
+     "crystal_b"
+    ],
+    "mechanism": "geometry-material"
+   },
+   {
+    "name": "dead_material",
+    "role": "phi",
+    "nodes": [
+     "shower_deposition"
+    ],
+    "mechanism": "geometry-material"
+   }
+  ],
+  "references": [
+   {
+    "id": "beam_energy",
+    "type": "known-input",
+    "edge": {
+     "into": "beam"
+    },
+    "observation": "shower_energy"
+   },
+   {
+    "id": "led",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "light_collection",
+     "to": "pde"
+    },
+    "observation": "crystal_a",
+    "conversion": {
+     "relation": "S/S0 = (R/R0)^alpha",
+     "parameters": [
+      "led_alpha"
+     ]
+    }
+   },
+   {
+    "id": "single_photoelectron",
+    "type": "mid-chain-injection",
+    "edge": {
+     "from": "pde",
+     "to": "gain"
+    },
+    "observation": "crystal_a",
+    "conversion": {
+     "relation": "single photoelectron charge",
+     "parameters": []
+    }
+   },
+   {
+    "id": "crystal_overlap",
+    "type": "redundant-measurement",
+    "edge": {
+     "out_of": "crystal_ratio"
+    },
+    "observation": "crystal_ratio"
+   }
+  ]
+ },
+ "plan": {
+  "kernels": {
+   "beam": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "shower_deposition": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "photon_generation": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "light_collection": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "pde": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "gain": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "electronics": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "crystal_a": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "crystal_b": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "crystal_ratio": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "shower_energy": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  }
+ }
+}

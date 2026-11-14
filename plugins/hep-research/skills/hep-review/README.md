@@ -47,6 +47,7 @@ hep-review/
 │   ├── domains/
 │   │   ├── index.md
 │   │   ├── computing.md
+│   │   ├── detector.md
 │   │   └── statistics.md
 │   ├── evaluation-and-claims.md
 │   ├── evidence-and-adjudication.md
@@ -69,7 +70,7 @@ hep-review/
 | Path | Holds |
 |---|---|
 | `SKILL.md` | the entry point Claude reads first |
-| `references/` | six reference pages loaded on demand (workflow and tiers, evidence and adjudication, host and trust boundaries, storage and continuity, evaluation and claims, support matrix) and `domains/` (an index and the statistics and computing domain cards) |
+| `references/` | six reference pages loaded on demand (workflow and tiers, evidence and adjudication, host and trust boundaries, storage and continuity, evaluation and claims, support matrix) and `domains/` (an index and the statistics, computing and detector (simulator calibration) domain cards) |
 | `assets/` | `registry.json` (domain packs, method cards, readers, host adapter), `host_profile.json` (measured host capabilities) and `claims.json` (capability claims, written through the claim lifecycle) |
 | `scripts/` | `review.py` (the CLI) and `hep_review_support/` (controlled reading, store, continuity, export, coordinator, submissions, evaluation) |
 

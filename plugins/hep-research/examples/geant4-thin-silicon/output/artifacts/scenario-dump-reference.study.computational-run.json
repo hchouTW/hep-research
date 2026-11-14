@@ -5,7 +5,7 @@
   "experiments": [],
   "theory": []
  },
- "contract_version": "3.20.0",
+ "contract_version": "3.23.0",
  "extension": {
   "commands": [
    "check_geant4_study.py label --write"
@@ -19,7 +19,7 @@
    },
    {
     "path": "output/benchmarks-sp.json",
-    "sha256": "7e1f5f4559cbce9e2761d081518de8f3592fdcd4d5fbd3ffe851a97d2d4a9a43"
+    "sha256": "644a0443ac2b6156a68507e668f143b3768068ad0f8528d2381f58d56a027aab"
    },
    {
     "path": "output/convergence-sp.json",
@@ -48,7 +48,7 @@
       "sha256": "609c932bbe38a006919b1202c8218a847939939618e65f3f7006834a1345bcc6"
      },
      "configuration_gap": null,
-     "detection_limit_relative": 0.03940428593124131,
+     "detection_limit_relative": 0.039404285931241304,
      "estimator": "batch means of block means",
      "geant4": 13.605636582872334,
      "geant4_dof": 15,
@@ -82,7 +82,7 @@
        {
         "at_claimed_detection_limit": true,
         "csv": null,
-        "detection_limit_relative": 0.03940428593124131,
+        "detection_limit_relative": 0.039404285931241304,
         "injected": "silicon density x 0.960 on the Geant4 side (reference keeps 2.329 g/cm3)",
         "injected_relative": -0.04,
         "relative_difference": -0.04156097251946652,
@@ -95,7 +95,7 @@
         "verdict_on_control": "fail"
        }
       ],
-      "detection_limit_relative": 0.03940428593124131,
+      "detection_limit_relative": 0.039404285931241304,
       "detection_limit_sign": "+-",
       "status": "caught"
      },
@@ -108,7 +108,7 @@
      "relative_difference": -0.0018499429437009848,
      "relative_se": 0.0013481301767398677,
      "scope": {
-      "detection_limit_relative": 0.03940428593124131,
+      "detection_limit_relative": 0.039404285931241304,
       "detection_limit_sign": "+-",
       "energy_MeV": 100.0,
       "material": "Si_study",
@@ -221,7 +221,7 @@
     {
      "benchmark": "stopping-power",
      "scope": {
-      "detection_limit_relative": 0.03940428593124131,
+      "detection_limit_relative": 0.039404285931241304,
       "detection_limit_sign": "+-",
       "energy_MeV": 100.0,
       "material": "Si_study",
@@ -314,11 +314,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "53630d62f5f67009"
+    "version": "2739b1bccf1387be"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "d10569e7cb964fdb"
+    "version": "7e391dc5e2029750"
    }
   ]
  },
@@ -443,8 +443,8 @@
  ],
  "unresolved_inputs": [],
  "versions": {
-  "contracts": "3.20.0",
-  "plugin": "0.57.0",
+  "contracts": "3.23.0",
+  "plugin": "0.60.0",
   "profiles": {}
  }
 }

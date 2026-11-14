@@ -1,0 +1,100 @@
+{
+ "case_id": "ams02-tof",
+ "card_case": "AMS-02 TOF",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "AMS-02",
+ "subsystem": "Time-of-Flight, four layers in two halves",
+ "corresponding_kit": "tof",
+ "cited_claims": [
+  "ams02:C186",
+  "ams02:C187",
+  "ams02:C188",
+  "ams02:C189",
+  "ams02:C190",
+  "ams02:C191",
+  "ams02:C192",
+  "ams02:C193",
+  "ams02:C194",
+  "ams02:C196"
+ ],
+ "quantities": [
+  {
+   "name": "half_x0",
+   "definition": "x/X0 of the scintillator at normal incidence through one counter of each layer of a half, outside overlaps",
+   "reference": 0.0466,
+   "tolerance_relative": 0.03,
+   "derivation": "2 x 1 cm (ams02:C188) x 1.023 g/cm3 (ams02:C193) / 43.90 g/cm2 (PDG, polyvinyltoluene); NIM A 623 Table 3 states 4.7% (ams02:C196)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties, polyvinyltoluene (2024 web edition; 2025 identical)",
+     "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/polyvinyltoluene.html",
+     "read_level": "page",
+     "verified": "2026-11-07",
+     "value": "radiation length 43.90 g/cm2 (42.54 cm at 1.032 g/cm3)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: thickness and density from the TOF hardware papers and the manufacturer, radiation length PDG's tabulation; NIM A 623 does not say how Table 3 was computed. The reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula, so agreement validates the geometry and the material definition (composition and density), not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "counters 0.9 cm thick",
+    "parameter": "/params/thickness_mm",
+    "value": "9",
+    "expected_shift_relative": -0.1
+   },
+   "detection_limit_relative": 0.03
+  },
+  {
+   "name": "counters",
+   "definition": "number of counters in the expanded IR",
+   "reference": 34,
+   "tolerance_relative": 0,
+   "derivation": "8, 8, 10, 8 (ams02:C187, NIM A 623 p. 972)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count from the hardware paper, not a simulation output"
+   },
+   "negative_control": {
+    "change": "one counter fewer in layer 3",
+    "expected_shift_relative": -0.029
+   },
+   "detection_limit_relative": 0
+  }
+ ],
+ "approximations": [
+  "the trapezoidal outer counters, whose outline no source dimensions, are rectangles of the largest width, 26 cm",
+  "every counter of a layer has the length of the layer's longest rectangular counter (NIM A 623 Table 2)",
+  "the upper and lower halves are 120 cm apart ('about 120 cm'), the two layers of a half adjacent",
+  "counters alternate by the 1.5 cm stagger in z; covers, supports and honeycomb (ams02:C196, C197) are not modelled"
+ ],
+ "status": "validated-in-scope (comparison with cited values, not confirmation)",
+ "result": {
+  "quantities": [
+   {
+    "name": "half_x0",
+    "measured": 0.046609110433133205,
+    "reference": 0.0466,
+    "residual_relative": 0.0001955028569355921,
+    "tolerance_relative": 0.03,
+    "within": true,
+    "control": 0.04194819938981988,
+    "control_caught": true
+   },
+   {
+    "name": "counters",
+    "measured": 34,
+    "reference": 34,
+    "residual_relative": 0.0,
+    "tolerance_relative": 0,
+    "within": true,
+    "control": 33,
+    "control_caught": true
+   }
+  ],
+  "copies_the_card": true,
+  "independent": true
+ }
+}

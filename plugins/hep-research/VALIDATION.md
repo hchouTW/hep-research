@@ -24,6 +24,7 @@ earlier run's totals included them ("since removed") the totals are quoted as th
 | E3 | Linux (EL9) shared cluster node (AlmaLinux 9, Linux 5.14.0 x86_64), plugin tree on a network file system, Python 3.11.13 in a venv on local disk; system ROOT 6.40.04 (C++17, g++ 11.5.0; PyROOT through the system Python 3.9), cmake 3.31.8, Graphviz 2.44.0, HTCondor 25.0.14; Claude Code 2.1.287, Codex CLI 0.160.0 |
 | E4 | Linux cloud container (Claude Code cloud, Linux x86_64), Python 3.13.16 in `.venv-hep` with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0, pyhf 0.7.6; no ROOT, PyTorch, Combine or Codex; Claude Code 2.1.292 |
 | E-crprop | The E2 host (macOS 26.5 arm64; Python 3.13.2 in the E2 venv with numpy 2.5.3, scipy 1.18.1) plus the external cosmic-ray propagation codes of the cr-propagation campaign: DRAGON2 (cosmicrays/DRAGON2-Beta_version commit cd588707, configure.ac DRAGON 3.1.0; serial build of 2026-10-15, binary sha256 d26dbb85…, data directory = the checkout's `data/`), built with Homebrew GCC 15.2.0_1 (g++-15, gfortran-15), GSL 2.8, CFITSIO 4.6.4, Autoconf 2.72, libtool 2.6.2; on the host also ROOT 6.38.04, cmake 4.3.2, Apple clang 21.0.0 (not used by DRAGON2). From 2026-10-28 (host now macOS 27.2, Darwin 27.2.0): USINE V3.5 (gitlab.com/dmaurin/USINE tag V3.5, tag object 7197ddc1, commit fb53006d; GPL-2.0; decision A1.1), built with cmake 4.3.2 and Apple clang 21.0.0 (`-O0`, C++17) against Homebrew ROOT 6.38.04 (GSL 2.8 through ROOT MathMore; CFITSIO not used), binary sha256 1d444720…, data directory = the checkout's `inputs/` (run with `USINE` set to the checkout). GALPROP v57 absent (no source, D5, A1.2). No batch client: local `local_partition.py` only (D6). Located through `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`, `HEP_USINE_BIN`, `HEP_USINE_DATA`; records in `tests/adapters/fixtures/cr_propagation/env/` |
+| E6 | Linux (EL9) shared cluster node (AlmaLinux 9.5, Linux 5.14.0 x86_64), plugin tree in a git worktree on a CephFS network file system, Python 3.13.18 (conda environment; standard library only for the eic profile checks); Claude Code 2.1.322 and Codex CLI present |
 
 Aggregate command: `python3 tools/run_all_checks.py --out <dir>` from the plugin root (`--help` runs nothing). Seeds
 and tolerances of every example are in its `results.json`.
@@ -773,6 +774,60 @@ Relocation passes (`codex-plugin-load` skips in the copy). Detection note: Codex
 as invoked when its `SKILL.md` is read; 54 runs read one SKILL.md and 7 read two (`j02`, `an-direct-2` checked by
 hand). GitHub source: `codex plugin marketplace add hchouTW/hep-research` in a throwaway `CODEX_HOME` found the
 marketplace file and `codex plugin add` installed 0.2.0 with the seven skills; removal clean; no login or model call.
+
+## EIC-EXPANSION-M3 (2026-11-11, E6, version 0.65.1): experiment:eic 0.6.0
+
+Final release gate G3 of the EIC profile expansion (milestone M3, configuration checker), with the full aggregate and relocation checks (FULL_CHECK_AT final).
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 97 tests; `ledger.py --strict` exit 0 (38 sources, 93 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Configuration checker | two positive fixtures exit 0 and pass `contracts/validate.py`; nine negative cases each exit 1 with only their own code; deprecated keys reported as info; with `--profiles-from`, core keys such as `rapidity_frame` not reported; non-JSON and non-spec input exit 2 | `tests/test_eic_conventions.py` (14 tests) |
+| Registry, layering, budgets, capabilities | pass; registry 3007 B ≤ 3072, eic index 3369 B ≤ 4096; no `profile.unbacked_capability` | `contracts/registry.py`, `tools/check_layering.py` |
+| `detector_atlas.py audit --strict`; atlas and geometry-cases suites; frozen set | ok on every `facility/` and `detector/` module; suites pass; frozen records identical to the start commit | gate log |
+| Plugin scans | pass: `test_eic_profile_routing` (16 scenarios, 5 atlas queries), `test_evidence_query`, `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract`; `check_naming.py` no new finding | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | release gate |
+| `run_all_checks.py` (full, `--jobs 4`) | 34 pass, 0 fail, 0 skip; unit tests 7220 run, 0 failures, 0 errors, 385 skipped | check-run record of 2026-11-11T10:34:47Z |
+| `check_relocation.py` (`--jobs 4`) | 33 pass, 0 fail, 1 skip (`codex-plugin-load`: host CLI check, unverified, not passed) | relocation record of 2026-11-11T11:05:58Z |
+
+Environment notes: both full runs used TMPDIR on a private local folder under `/var/tmp`. On this host, TMPDIR under `/tmp` fails the name-extraction tests (an empty `/tmp/.git` folder makes temporary folders look like a repository), and TMPDIR on the shared CephFS work area fails two revocation tests (ancestor folders are writable by other accounts through ACLs, which the revocation check correctly reports); neither involves code changed here. Software checks only; not physical validity.
+
+Follow-up (2026-11-11, open question Q12): `number_rules.py` keeps a number from 1900 to 2099 when a count word follows it (`2000 channels`); the profile suite then passed with 98 tests (new `test_years_and_counts_in_the_year_range`), every module still passed the per-number test unchanged (all 24 such numbers in the modules are dates), and `run_all_checks.py --part static` passed (32 pass, 0 fail, 0 skip). Q10 (`scope.number_kind` not shown by `render_index.py`) was accepted as is.
+
+## EIC-EXPANSION-M2 (2026-11-11, E6, version 0.65.1): experiment:eic 0.5.0
+
+Release gate G2 of the EIC profile expansion (milestone M2, ePIC detector values), with `reference:detector-atlas` 0.3.1.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 83 tests; `ledger.py --strict` exit 0 (38 sources, 93 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Per-number sourcing, performance words, scope separation | every number in the six new detector modules and the rewritten overview is in a cited numeric claim with a `scope.number_kind`; no number near a performance word | `test_scope_and_placement.py` |
+| `detector_atlas.py audit --strict` | ok on every `facility/` and `detector/` module | gate log |
+| Registry, layering, budgets | pass; registry 3007 B ≤ 3072, eic index 3172 B ≤ 4096 | `contracts/registry.py`, `tools/check_layering.py` |
+| Atlas link | unbound queries for ePIC, EIC and "Electron-Ion Collider" return `see_profile: experiment:eic`; bound to `experiment:eic`, ePIC returns 20 and EIC 16 profile rows | `tests/examples/test_eic_profile_routing.py`; atlas suite pass |
+| Geometry cases; frozen set | pass; eic:S04, S05, S10, C08, C09, C10-C37 identical to the start commit | run helper `check-frozen` |
+| Example and plugin scans | pass: example (15 scenarios, 5 atlas queries), `test_evidence_query`, `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract` | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | check-run record of 2026-11-11T07:31:18Z |
+| Independent verification | 22 numeric claims (C58-C76, C82-C84) and the new non-numeric claims ending in 0 or 5 supported by three verifiers that wrote no content, after fixes (counts the PDR draft states inconsistently removed from C66, C72, C74; wording of C76, C80, C82, C84); none flagged as performance | run log of the expansion |
+
+ePIC values are design values (construction parameters) from a draft design report and subsystem papers, and proposals of the Early Science Report; none is a measured or performance value. Software checks only.
+
+## EIC-EXPANSION-M1 (2026-11-11, E6, version 0.65.1): experiment:eic 0.4.0
+
+Release gate G1 of the EIC profile expansion (milestone M1, facility values) on the `eic-profile-expansion` branch, before the gate commit.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Profile suite; ledger; index | pass: 83 tests; `ledger.py --strict` exit 0 (20 sources, 57 claims); `render_index.py` check exit 0 | `profiles/experiments/eic/tests/` |
+| Per-number sourcing; derived values | every number in the three facility modules is in a cited numeric claim with a `scope.number_kind`; 8 derived center-of-mass energies recomputed by `dis_kinematics.py` and equal to the CDR values to the digits written | `test_scope_and_placement.py` |
+| `detector_atlas.py audit --strict` | ok on every `facility/` and `detector/` module | gate log |
+| Registry, layering, budgets | pass; registry 3007 B ≤ 3072, eic index 2462 B ≤ 4096 | `contracts/registry.py`, `tools/check_layering.py` |
+| Atlas and geometry-cases profile tests; frozen set | pass; eic:S04, S05, S10, C08, C09, C10-C37 identical to the start commit | profile suites; run helper `check-frozen` |
+| Example and plugin scans | pass: `tests.examples.test_eic_profile_routing`, `tests.core.test_evidence_query` (`TODAY` 2026-11-11), `test_subprocess_timeouts`, `test_constant_literals`, `test_cli_contract` | |
+| `run_all_checks.py --part static` | 32 pass, 0 fail, 0 skip | check-run record of 2026-11-11T07:04:43Z |
+| Independent verification | 18 numeric claims (C03, C38-C48, C53-C57) supported by two verifiers that wrote no content; none flagged as performance; derived lines reproduced twice | run log of the expansion |
+
+Facility values are design targets (CDR 2021, Yellow Report) and project requirements as read on 2026-11-11; none is an achieved value. Software checks only.
 
 ## EIC-PROFILE (2026-10-04, E2, version 0.2.0): experiment:eic 0.1.0, with EIC-FOLLOWUPS and EIC-TODO
 
@@ -8924,6 +8979,41 @@ the hook of `s3_steps` and Par01, the radiator code of `s3_optics` and TestEm10,
 
 **Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", in answer to the request for G5 at that commit, whose suggested wording stated that the files are written from the Geant4 API with no example code copied or adapted, and that `PaiConstructor.hh`, `BirksTerms.hh` and `s3_em/main.cc` are adapted in part from Geant4 library code. This record does not state which files the maintainer read.
 
+## G4SIM-S4-G5 (2026-11-07, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S4 (gate 11), at `064c6cca`: `adapters/geant4/assets/g4sim/Philox.hh`, and the hit output, `g4sim_run/NewHits.hh` and `g4sim/HitColumns.hh`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` at `39d680cb`, on all 13 C++ files changed since 0.58.0, against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines;
+the positive control found 863 and 880. Four independent reads by agents that did not write the code found defects, all fixed or recorded in `g4sim-gates/S4.md`; the first looked for adaptation and found none, by a token scan of the examples, not of Geant4 library
+sources. `Philox.hh`'s fsum follows CPython's `math.fsum`, by design, and says so; the Python Software Foundation License ships as `adapters/geant4/assets/PYTHON-LICENSE.txt`.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", in answer to the request for G5 of those files, which also pointed to "What the table does not cover" in `g4sim-gates/S4.md`.
+
+## G4SIM-S5-G5 (2026-11-07, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S5, at `87f3eb57`: the encoded cellID, in `g4sim_run/NewScorers.hh`, `g4sim_run/NewHits.hh`, `g4sim/HitColumns.hh` and `simroot/simroot.cc`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py`, on those four files, against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880. An independent read of the first version, by an agent that did not write the code, compared its added lines by tokens against the examples and found no adaptation; it found defects around the code, fixed and listed in `g4sim-gates/S5.md`.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", given while a second read was still running. That read was cancelled; a third, complete read then compared `CopyPart`, `AxisValues` and `CellId` by eye with the nearest examples and found no copied structure, which supports the confirmation and cannot prove authorship.
+
+## G4SIM-S8-G5 (2026-11-09, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S8 (gate 5), at `e98cd989`: `adapters/geant4/assets/g4sim_run/FastSim.hh`, the assembly builder in `g4sim_run/NewBuild.hh`, the S8 changes of `g4sim_run/NewRun.cc` and `g4sim/Accounting.hh`, and `adapters/geant4/assets/g4sim_digi/Samplers.hh` and `g4sim_digi.cc`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` on those six files against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880 (`g4sim-references/s8/g5/scan-*.json`). Two independent reads by agents that did not write the code: the first judged the files written from the API, named the closest resemblances (the absorb model's `KillPrimaryTrack` with `ProposeTotalEnergyDeposited` and the model creation in `ConstructSDandField`, as in Par01 and Par03; the assembly from the project's own S3 prototype), confirmed `LogGamma` character for character against CPython 3.13.2's `Modules/mathmodule.c`, and found defects fixed at `70af0c20`; the second read those fixes, found error-path defects fixed at `e98cd989`, and no adaptation. `LogGamma` is adapted from CPython under the Python Software Foundation License (`adapters/geant4/assets/PYTHON-LICENSE.txt`); the PTRS and BTPE constants come through `rng.py` from NumPy's `distributions.c` (BSD).
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-09, in the Claude Code session): "agree G5 wording", in answer to the wording: "G5 for S8: I reviewed the S8 C++ at commit e98cd989: g4sim_run/FastSim.hh, the assembly builder in g4sim_run/NewBuild.hh, the S8 changes in g4sim_run/NewRun.cc and g4sim/Accounting.hh, and g4sim_digi/Samplers.hh and g4sim_digi.cc. They are written from the Geant4 API, with no example code copied or adapted. The fast-simulation hook follows the Par01/Par03 API pattern. LogGamma is adapted from CPython 3.13.2 under the PSF License, and the PTRS/BTPE constants come from NumPy (BSD) through rng.py."
+
+## G4SIM-S7-G5 (2026-11-08, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S7 (gate 6), at `4ee3288a` (build 26): `adapters/geant4/assets/g4sim/Accounting.hh`, `FieldMap.hh`, `KillProcess.hh`, `Optics.hh`, `ProbeV2.hh` and `adapters/geant4/assets/g4sim_run/NewBuild.hh`, `NewRun.cc`, `NewScorers.hh`, `NewSource.hh`, `XtrConstructor.hh`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` at `c675e0a5`, on those ten files, against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880 (`g4sim-references/s7/g5/scan-b26-*.json`).
+Three independent reads by agents that did not write the code (the S7 C++ at `5d2ae24c`; the C++ since `6f2f4895` at `8b9e4130`; the fix commit `62e69568`) found defects, all fixed (`6d8f9b9b`, `62e69568`, `4ee3288a`) and recorded in `g4sim-gates/S7.md`. The second judged each file written from the API, with no example or library source adapted, and named the nearest resemblances: OpBoundary's cached lookup (LXe, OpNovice2), the random polarization (OpNovice), the XTR if-chain (TestEm10), the tabulated field (purging magnet), all with different code. The third found no adaptation in the fixes. The examples' sources were not installed on this host for those reads; they compared from the API headers and the scan.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-08, in the Claude Code session): "G5 is OK.", in answer to the request for G5 at that commit, whose suggested wording named the ten files and stated that they are written from the Geant4 API, with no example code copied or adapted. This record does not state which files the maintainer read.
+
 ## 0.57.0 release check (2026-11-06, E2 and CI)
 
 Release branch `release/0.57.0`, based on main `dfbbb787` (PR #354 merged), with main merged in at `575e309b` for PR #353 (citation corrections in 10 hep-detector reference documents).
@@ -8946,6 +9036,244 @@ S2 worktree, whose path contains the reviewer label `S2`, pass here.
 
 Open: gate 4 of S2 ran at `ebd4d056`, and the later fixes were checked by spot runs; gate 6 covers a sample of 3 runs; GB9 no longer tests against independent masses; the hadronic conservation
 limits catch large defects only. The custodian's re-evaluation of qualification follows this release and is not recorded here.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.66.1 release check (2026-11-12, CI and E6)
+
+Release commit `6e0ccaf1` on `release/0.66.1`, based on main `09403241` (PRs #391 and #392 merged). Patch release: the hep-detector reference `dis-kinematic-reconstruction.md`, `experiment:eic` 0.6.1 and two EIC routing cases (issues #388, #389). Contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.1 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- a CHANGELOG `0.66.1` section (the former `Unreleased` entries).
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #391 at `ddd98d3c` and PR #392 at `28ad9ffa` | success (27 pass, 3 skipped; 29 pass, 3 skipped) |
+| CI `tests.yml` on PR #393 at `6e0ccaf1` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `6e0ccaf1`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7223 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `6e0ccaf1`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7223 tests, 0 failures, 402 skipped |
+
+Environment note as in the 0.66.0 release check. **E2 and E5 were not run for this release**; it changes no Geant4, g4sim or GPU path.
+
+Passing checks show software consistency, not physical validity.
+
+## SCIFIX-HEX-WORDS (2026-11-11, E6 and CI; branch `release/0.66.0`)
+
+sci-fix BLINDING-HEX-WORDS (S2: a wrong verdict, a false alarm that fails the scan). Found by CI on PR #390:
+`tests.examples.test_ams_flux_ratio.PathATests.test_blinding_audit_with_synthetic_sentinel` failed after the 0.66.0
+release manifest was added, locally as well (3 of 3 runs). Every example artifact records `versions.plugin_release`
+with the release digest `fe310bac...9082c936a853`; `scan_text` tokenized the `936` inside it, which matched the
+example's sealed synthetic count 936.24 at 3 significant digits. The fix: a digit run inside a hexadecimal word of 16
+or more characters with at least one letter (a SHA-256 digest, a git commit id) is not a token. Hexadecimal was
+already in `OUT_OF_SCOPE_RENDERINGS`. Shorter hex words, all-digit runs, words with another letter and values joined by
+`_` are scanned as before. `CORE_VERSION` 1.13.0 -> 1.13.1.
+
+**Correctness (C4, exhaustive):** `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively`
+writes every sealed n = 100 to 999 (sealed n + 0.25) at every position of a 64-, a 16- and a 15-character hex word, lower
+and upper case (205,200 scans): no hit at 64 and 16 characters, a hit at 15 (the boundary). The expected values come
+from the domain's definition, not from the scanner. `test_release_digest_is_not_a_printed_number` is the CI case.
+Negative control `test_numbers_beside_hex_words_still_hit`: a number before or after a digest, `c936a`, an all-digit
+16-character run, a word with `g` to `j`, `count_936.24` are hits on the parent and on the fix.
+
+**Discrimination (D3):**
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/core/test_blinding.py::HexWordTests::test_digits_inside_hex_words_exhaustively` | exhaustive | fail (assertion): n=100 at position 0 of a 64-character word is a hit | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_release_digest_is_not_a_printed_number` | behavioral | fail (assertion): token `936` on line 5 | pass | no | E6 |
+| `tests/core/test_blinding.py::HexWordTests::test_numbers_beside_hex_words_still_hit` | behavioral (negative control) | pass | pass | no | E6 |
+
+Parent: `b3974460` (release branch) with this commit's test file copied in. Local mutants of the filter in
+`scan_text`, killed by `HexWordTests`: the revert, a length floor of 8, a length floor of 17, no letter required. One
+mutant survives: treating `_` as a word boundary (a value joined to a hex word by `_` is then skipped as part of no
+word, and the tests contain no such case). Blinding suites (`test_blinding`, `test_blinding_regressions`,
+`test_blinding_residual`, `test_blinding_u11`, `test_r5_blinding`) and `test_ams_flux_ratio`: 122 tests pass on the fix.
+
+**Advisory waiver:** the fix only removes false alarms on a rendering already out of scope; no released number
+changes and no sealed value printed as a decimal is missed. Decided 2026-11-11 with the maintainer's choice of
+this fix in the session.
+
+## 0.66.0 release check (2026-11-11, CI and E6)
+
+Release branch `release/0.66.0`, based on main `401f322f` (PR #387 merged); checks at `054dcc22`. Minor release: the `experiment:eic` expansion, `experiment:eic` 0.3.0 -> 0.6.0 (evidence in EIC-EXPANSION-M1 to M3 above, and the Q12 follow-up in M3) and `reference:detector-atlas` 0.3.1; the sci-fix BLINDING-HEX-WORDS (SCIFIX-HEX-WORDS above), `CORE_VERSION` 1.13.0 -> 1.13.1. Contracts 3.27.0 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.66.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py` (`5af131ad`);
+- a CHANGELOG `0.66.0` section (the former `Unreleased` entries and the sci-fix);
+- the sci-fix `1f97a1c6` and its evidence `f43507bd`. CI on `b3974460`, the first commit with a 0.66.0 release manifest, failed `test_blinding_audit_with_synthetic_sentinel` (units 1/3 and hostile-paths units 1/3): the release digest in the example artifacts matched a sealed synthetic count. That manifest was dropped (`054dcc22`) and is regenerated last.
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #387 at `f3722217` | success (27 pass, 3 skipped) |
+| CI `tests.yml` on PR #390 at `b3974460` | failure: the two unit shards 1/3 (one test, the case above); the other jobs pass |
+| CI `tests.yml` on PR #390 at `054dcc22` | success (27 pass, 3 skipped) |
+| `run_all_checks.py --jobs 4`, E6 (py313 conda env, Python 3.13) at `054dcc22`, `TMPDIR` on a private local folder under `/var/tmp` | 34 pass, 0 fail, 0 skip; 7223 tests, 0 failures, 0 errors, 385 skipped |
+| `check_relocation.py --jobs 4`, E6 at `054dcc22`, same `TMPDIR` | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed); 7223 tests, 0 failures, 402 skipped |
+
+Environment note: on E6, `TMPDIR` under `/tmp` or on the shared CephFS work area fails tests unrelated to this release (see the EIC-EXPANSION-M3 environment notes).
+
+**E2 and E5 were not run for this release.** The release changes no Geant4, g4sim or GPU path, so no real-hardware check applies.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.65.1 release check (2026-11-09, CI and E2)
+
+Release commit `b51f502f` on `release/0.65.1`, based on main `d85dde30` (PR #382 merged). Patch release: the `FTFP_BERT` entry of `contracts/rules/geant4_datasets.json`, its case in `probe_datasets.py` and its assertion in `tests/adapters/test_g4proto_reacquire.py`. Contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.65.1 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- a CHANGELOG `0.65.1` section.
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+How the entry was measured: E2 (macOS arm64, Geant4 11.4.3), with `g4sim_run` built from adapters/geant4 0.15.0, not `element_sim`. Each dataset was pointed at an empty folder, with serial runs and per-event seeding: 10 protons at 3 GeV/c and 10 positrons at 796.6 MeV into a 6x6 PbWO4 array. Both runs need G4ENSDFSTATEDATA, G4LEDATA, G4LEVELGAMMADATA (the silent case) and G4PARTICLEXSDATA. A control probe of `FTFP_BERT_EMZ` with the proton run did not find G4LEVELGAMMADATA, which its E5 entry has. The probe was not rerun on E5.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #382 at `3dcaf6f3` | success (27 pass, 3 skipped) |
+| `run_all_checks.py`, E2 at `3dcaf6f3` (miniconda Python 3.13.2) | 34 pass, 0 fail; 7217 tests, 0 failures, 231 skipped |
+| `run_all_checks.py --no-cli --jobs 4`, E2 (`~/.venvs/hep-research-e2`, Python 3.13.2) at `b51f502f` | 32 pass, 0 fail, 2 skipped (CLI host checks); 7217 tests, 0 failures, 180 skipped |
+| `check_relocation.py`, E2 at `b51f502f`, `TMPDIR` on local disk | 32 pass, 1 fail, 1 skipped (`codex-plugin-load`); 7217 tests, 1 failure, 197 skipped; two runs, the same failure. `claude-plugin-validate` passes |
+| A 20-event g4sim run with `FTFP_BERT` (e+ 197 MeV, PbWO4 array) | completes; conservation residual about 1e-13 MeV |
+
+The one relocation failure, `tests.skills.hep_ml.test_assets_smoke` `test_ddp_skeleton_two_gloo_processes` (two gloo processes on loopback), is the known one of 0.53.0 and 0.54.0. It passes 3 of 3 times alone on E2, it passes in the full `run_all_checks.py`, and no file it reads changed in this release.
+
+**E5 was not run for this release.**
+
+Passing checks show software consistency, not physical validity.
+
+## 0.65.0 release check (2026-11-09, CI and E5)
+
+Release branch `release/0.65.0`, based on main `3e3a1909` (PR #379 merged). Minor release: g4sim phase S9, the last phase of the g4sim plan. Contracts 3.27.0, `CORE_VERSION` 1.13.0, `adapters/geant4` 0.15.0.
+
+What changed on the release branch: the CHANGELOG `0.65.0` section and the g4sim status (S9 `merged`). No regeneration: S9 changed no example or committed output. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S9.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #379 at `f8ec3fae` | success (27 pass, 3 skipped) |
+| `run_all_checks.py`, E5 Slurm node at `48949b4e`, `--jobs 8` | 33 pass, 1 fail: one environmental test, which needs `cmake`, absent on the node |
+| `mypy` | Clean (every S9 commit's gate) |
+| S9 gates | 1: five distinct geometry_ids for the nominal and four overlaid IRs of the CMS Phase-1 BPIX case; 2: the diff tool exact for every overlay; 3: 2 of 2 negatives |
+
+**E2 was not run for this release.** S9 has no Geant4 run and no new C++, so no G5 was due.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.64.0 release check (2026-11-09, CI and E5)
+
+Release branch `release/0.64.0`, based on main `148e084c` (PR #376 merged). Minor release: g4sim phase S8. Contracts 3.26.0, `CORE_VERSION` 1.12.0, `adapters/geant4` 0.14.0.
+
+What changed on the release branch: the CHANGELOG `0.64.0` section and the g4sim status (S8 `merged`). No regeneration: S8 changed no example or committed output. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S8.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #376 at `eb2dd160` | success (27 pass, 3 skipped) |
+| `run_all_checks.py`, E5 Slurm node at `883a3f3d`, `--jobs 8` | 33 pass, 1 fail: the three environmental failures (two pass from a path without `S8`, one needs `cmake`, absent on the node) and `test_unbinned_fit` over 600 s on a loaded node, which passed alone in 31 s (job 7532919) |
+| `mypy` | Clean (every S8 commit's gate) |
+| S8 gates | 1 to 5 pass: check-spec at 10⁶ touchables in 94 s; `g4sim_digi` bit-identical with Python at every level of Section 10.2; the idle hook equivalent on all six observables over 150,802 paired events, the absorb closure exact; 4 of 4 negatives; G5 |
+| S7 reference cases on the S8 build | every quantity and control identical to build 26 |
+
+**E2 was not run for this release.** G5 was confirmed by the maintainer for the S8 C++ at `e98cd989` (G4SIM-S8-G5). `g4sim_digi` meets the throughput budget on the registered workload but not with a time per detected photon; no gate judges it.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.63.0 release check (2026-11-08, CI and E5)
+
+Release branch `release/0.63.0`, based on main `f2145691` (PR #373 merged). Minor release: g4sim phase S7. Contracts 3.25.0, `CORE_VERSION` 1.11.0, `adapters/geant4` 0.13.0; profiles `reference:geometry-cases` 0.2.0, `reference:detector-atlas` 0.3.0, `experiment:eic` 0.3.0, `experiment:ams-02` 2.2.0.
+
+What changed on the release branch: the CHANGELOG `0.63.0` section and the g4sim status (S7 `merged`). No regeneration here: S7 regenerated the eic routing example for the eic profile's new version. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S7.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #373 at `d8f5a64b` | success (27 pass, 3 skipped); a first run at `41d67be7` failed lint on 10 mypy errors in S7's new Python, fixed at `d8f5a64b` with no change in behaviour |
+| `run_all_checks.py`, E5 Slurm node at `a7849893`, `--jobs 8` | 33 pass, 1 fail; 3 failing tests, all environmental: two pass from a path without `S7`, one needs `cmake`, absent on the node |
+| `mypy` | Clean, 144 source files |
+| S7 gates | 1, 2, 4, 5 (20 of 20) and 6 (G5) pass; 3 is a recorded gap (no qualifying TR yield data), so S7 is partially complete; gates 1, 2, 4 and every case reproduce identically on the final build 26 |
+| Reference cases | 13 validated-in-scope (comparison with cited values, not confirmation), every negative control caught; the RICH replica labelled synthetic, +0.56% within 3% |
+
+**E2 was not run for this release.** G5 was confirmed by the maintainer for the S7 C++ at `4ee3288a` (G4SIM-S7-G5). The `ams02-tracker-magnet` field-integral reference derives from the official AMS-02 field map, collaboration-internal and not committed; the maintainer cleared the derived value for publication. Gates 1 and 4 failed at their first registration and were redesigned on the maintainer's word; every failed run stays in the gate record.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.62.0 release check (2026-11-08, CI and E5)
+
+Release branch `release/0.62.0`, based on main `c3a47c02` (PR #370 merged). Minor release: g4sim phase S6. Contracts 3.24.0, `CORE_VERSION` 1.10.0, `adapters/geant4` 0.12.0; profiles `reference:geometry-cases` 0.1.0, `reference:detector-atlas` 0.2.0, `experiment:ams-02` 2.1.0, `experiment:eic` 0.2.0.
+
+What changed on the release branch: the CHANGELOG `0.62.0` section and the g4sim status (S6 `merged`). No regeneration here: S6 regenerated the eic routing example for the eic profile's new version. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S6.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #370 | success |
+| `run_all_checks.py`, E5 Slurm node at `69a75f66`, `--jobs 8` | 33 pass, 1 fail; 3 failing tests, all environmental: two pass from a path without `S6`, one needs `cmake`, absent on the node |
+| `mypy` | Clean, 140 source files |
+| Reference cases | CMS ECAL crystal 25.771 X0 against 25.77; AMS-02 TOF half 0.04661 X0 against 0.0466 and 34 counters; ePIC ZDC steel 73.64 X0 against 73.73 and 8,096 cells; every negative control caught |
+
+**E2 was not run for this release.** No C++ changed in S6, so no G5 was due. The cases compare with cited values: validation, not confirmation, and none is an experiment's geometry. The AMS-02 TOF values rest on two NIM A papers the maintainer supplied, read in full; the PDFs are not committed. The ePIC ZDC case follows a development simulation geometry.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.61.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.61.0`, based on main `0e586eeb` (PR #367 merged). Minor release: simreco's strip digitization error. `adapters/geant4` 0.11.1; contracts 3.23.0 and `CORE_VERSION` 1.10.0 unchanged.
+
+What changed on the release branch: the CHANGELOG `0.61.0` section. No regeneration: by the maintainer's decision J15 and J16 keep the old width in their 24 reconstructions with tail sources on, as their recorded simreco hash shows (CHANGELOG, both READMEs, `g4sim-approvals.md`).
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `aba8b905` | success: 27 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `aba8b905`, `--jobs 8` | 32 pass, 1 fail; 7,064 tests, 1 failing: `test_examples_need_an_explicit_source_of_the_installed_version`, which needs `cmake`, absent on the node |
+| The fix | chi2/ndof 1.001 of fits with only strip errors, 1.197 with the old simreco on the same events; the width agrees with a direct Monte Carlo of the cluster position to 0.5% |
+
+**E2 was not run for this release.** The first CI run and an E5 run failed on a stale reference inventory after the study protocol's edit, which also failed `test_a_hanging_module_fails_with_a_reason` (it runs the inventory test as its passing module); fixed in `aba8b905`.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.60.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.60.0`, based on main `b7657d81` (PR #364 merged). Minor release: g4sim phase S5, `partially-complete` with the gaps the maintainer accepted. Contracts 3.23.0, `CORE_VERSION` 1.10.0, `adapters/geant4` 0.11.0; the version constants were bumped in S5.
+
+What changed on the release branch:
+- the CHANGELOG `0.60.0` section and the g4sim status (S5 `merged`);
+- no regeneration here: S5 regenerated `geant4-thin-silicon` and `design-minimal-spectrometer` on E5, on the maintainer's word, because the hashes of `check_geant4_study.py` and `geant4_benchmarks.py` recorded in them changed. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S5.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `1c90e910` (runs 42415824285, 42415824358) | success: 29 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `222a50e2`, `--jobs 8` | 32 pass, 1 fail; 7,061 tests, 6,674 passed, 384 skipped, 3 failing. All three are environment failures: two pass from a path without `S5`, one needs `cmake`, absent on the node |
+| `mypy` | Clean, 140 source files |
+
+**E2 was not run for this release**: there is no `run_all_checks.py` result on macOS arm64 for 0.60.0, and the committed examples S5 regenerated were written on E5, whose last bits differ from E2's (at most 2.7e-16 relative in the 28 numbers that changed).
+
+Three independent reads of S5's cellID change found real defects, all fixed; the third found the C++ sound and holes in the Python of the forgery check, fixed without changing the C++, so the maintainer's G5 stands. The last fixes have had no read of their own.
+
+Open: the gaps the maintainer accepted (TOF time resolution, calorimeter transverse shape, hit efficiency, beam-test sampling fraction, tracker residuals against data, longitudinal shape as a weak band); the readout limits in the gate record; `design.py` sees an edit of a study record, not one that also rewrites the study's results file and its hashes; simreco's `StripSigma`, corrected after S5.
+
+Passing checks show software consistency, not physical validity.
+
+## 0.59.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.59.0`, based on main `81bd7595` (PR #361 merged). Minor release: g4sim phase S4. Contracts 3.22.0, `CORE_VERSION` 1.9.0, `adapters/geant4` 0.10.0; the version constants were bumped in S4.
+
+What changed on the release branch:
+- the CHANGELOG `0.59.0` section and the g4sim status (S4 `merged`);
+- no regeneration: no committed result changed, and `check_geant4_study.py`, whose hash is recorded in committed outputs, is unchanged. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S4.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `93a56932` (run 42357608475) | success: 25 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `39d680cb`, `--jobs 8` | 31 pass, 2 fail; 7,012 tests, 6,624 passed, 384 skipped, 4 failing. All four are environment failures here: two pass from a path without `S4`, and two pass off the Slurm nodes; `ams_optional` fails only on the `lcg` one. The commits after it change records only |
+| `mypy` | Clean, 140 source files |
+
+**E2 was not run for this release**: there is no `run_all_checks.py` result on macOS arm64 for 0.59.0. E2 was used in S4 only for cross-platform sampling, on 200,000 draws per sampler.
+
+Four independent reads of S4's C++ found real defects, and gate 8 passed real faults three times before its final form. What it still does not see is listed in the gate record, under "What the table does not cover".
+
+Open: the Python response misses its throughput limit on low-energy workloads, and `photon_times` is not in that measurement; `g4sim_digi` is undecided, an S8 conditional. simreco's `StripSigma` is too small, to be corrected after S4 and before any S5 closure with `noise-digitization` on. Encoded cellIDs in hit files are deferred to S5. HepMC3 reading is not implemented. No real Garfield++ table was read. No full regression was run: the maintainer accepted the gate 9 spot check. GB13, GB20 and GB21 remain untested on arm64.
 
 Passing checks show software consistency, not physical validity.
 

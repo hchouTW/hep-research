@@ -1,0 +1,151 @@
+{
+ "contract_version": "3.27.0",
+ "artifact_id": "eic-measurement-spec-positive",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC test fixture for the EIC configuration checker: inclusive electron-proton cross section at the 18x275 configuration; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "3.27.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-measurement",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "estimand": "SYNTHETIC: placeholder differential cross section in cos_theta at particle level",
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "synthetic e p -> e X",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "synthetic fiducial region",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "ref": "synthetic-normalization.json"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "pb",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "frame": "laboratory frame; the center-of-mass frame differs because the beams are unequal",
+    "eic:beam_energy_configuration": "18x275 e+p",
+    "rapidity_frame": "laboratory frame with +z along the hadron beam, as stated by the analysis",
+    "polarization_convention": "helicity convention of the analysis, stated in its note",
+    "azimuth_convention": "Trento convention",
+    "eic:crossing_angle_treatment": "boosted to the head-on frame using the 25 mrad crossing angle of eic:C41"
+   }
+  },
+  "species_or_process": "synthetic",
+  "period": {
+   "start": "synthetic-period-1",
+   "end": "synthetic-period-1"
+  },
+  "selections": [
+   {
+    "name": "two-muons",
+    "definition": "placeholder",
+    "conditional_denominator": "all events"
+   }
+  ],
+  "backgrounds": [
+   {
+    "name": "placeholder-bkg",
+    "estimator": "sideband",
+    "control_region": "synthetic sideband",
+    "closure": "synthetic validation region"
+   }
+  ],
+  "corrections": [
+   {
+    "effect_id": "trigger-eff",
+    "category": "trigger_efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "selection-eff",
+    "category": "selection_efficiency",
+    "applied_in": "estimator"
+   }
+  ],
+  "systematics": [
+   {
+    "name": "energy-scale",
+    "source": "calibration",
+    "effect": "migration",
+    "applied_via": "migration"
+   }
+  ],
+  "blinding": {
+   "blinded": true,
+   "mask": {
+    "intervals": [
+     {
+      "variable": "cos_theta",
+      "low": 0.5,
+      "high": 1.0
+     }
+    ]
+   }
+  },
+  "experiment_fields": {
+   "eic:beams": {
+    "electron": {
+     "energy_GeV": {
+      "value": 18,
+      "source": "eic:C44"
+     },
+     "polarization": {
+      "value": 0.7,
+      "source": "eic:C43"
+     }
+    },
+    "hadron": {
+     "species": "p",
+     "A": 1,
+     "Z": 1,
+     "energy_per_nucleon_GeV": {
+      "value": 275,
+      "source": "eic:C44"
+     },
+     "polarization": {
+      "value": 0.7,
+      "source": "eic:C43"
+     }
+    },
+    "crossing_angle_mrad": {
+     "value": 25,
+     "source": "eic:C41"
+    }
+   }
+  }
+ }
+}

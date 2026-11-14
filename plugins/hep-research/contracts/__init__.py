@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.21.0"
+CONTRACTS_VERSION = "3.27.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,24 @@ CONTRACTS_VERSION = "3.21.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.27.0 (minor; g4sim S9) adds alignment_overlay.json (alignment-overlay/1: shifts and small rotations of IR placements, applied by
+# core/geometry/alignment.py after expansion) and condition_snapshot.json (condition-snapshot/1: IOV-indexed conditions of a readout's cells, for
+# the response layer, core/simulation/conditions.py), and the optional `alignment` field of geometry_ir.json's physical part (the IR's minor change:
+# geometry-ir/1 unchanged; an IR without an overlay keeps its geometry_id). Additive: every 3.26 artifact keeps its outcome.
+# 3.26.0 (minor; g4sim S8) makes the fast_sim_envelope requirement of detector_spec.json operational: core/geometry/fast_sim.py checks it (no
+# daughter inside an envelope, a region of its own, no model in the specification) and the IR carries it in physics_requirements (the IR's minor
+# change: geometry-ir/1 and its field set unchanged). The run card's placement_impl and physics.fast_sim belong to adapters/geant4. Additive:
+# every 3.25 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
+# 3.25.0 (minor; g4sim S7) opens detector_spec.json to the cone, sphere_section, polycone and polyhedra shapes, field maps (g4sim-field-map/1 files read by hash), optical properties and surfaces, and the
+# optical_scope and transition_radiation requirements; geometry_ir.json carries them (the IR's minor change: new optional fields, geometry-ir/1 unchanged); efficiency_map.json gains the photon_detected readout;
+# rules/design_geometry/ adds the barrel-tracker, endcap-disks, trd, cherenkov and shell-veto kits. Additive: every 3.24 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
+# 3.24.0 (minor; g4sim S6): the reference profile template lets a profile hold reference cases instead of an evidence ledger
+# (cases/, coverage.json; evidence optional), as Section 13.1 lays out reference:geometry-cases. Additive: every 3.23 profile and
+# artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
+# 3.23.0 (minor; g4sim S5) adds geometry_derivation.json (geometry-derivation/1), rules/design_geometry/ (calorimeter, planes-tracker, tof), the oneOf of design_geometry.json by mapping_version, geometry_kind, geometry_id and geometry_derivation_ref of
+# design candidates, the kit form of design_search_spec.json, and scorers and readouts of simulation_hits.json; design.py adds design.qualification_mismatch. The upgrade rules of validate.py are unchanged: a study record of the g4sim path passes them as written. Additive for every honest record: a 3.22 record whose conditions contradict its validated-in-scope label moves from row 8 to an error, and no recorded study does. The hit file gains columns, so simroot refuses a file of the earlier layout. Committed outputs keep the contracts version that wrote them.
+# 3.22.0 (minor; g4sim S4) adds simulation_hits.json (simulation-hits/1), response_pipeline.json (response-pipeline/1, with the stage hand-off response-handoff/1 in $defs) and efficiency_map.json (efficiency-map/1), and the optional
+# scintillation block of detector_spec.json materials. The block reaches the run through the request, so the IR's field set does not change. Additive: every 3.21 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # 3.21.0 (minor; g4sim S3) adds source_density.json (source-density/1), read by core/simulation/source_density.py, and opens the shapes, placements, modifiers and
 # segmentation of S3 in the IR; the IR's field set does not change. Additive: every 3.20 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # Next minor, number assigned at merge (detector reconstruction T06) adds eight schemas read by contracts/reconstruction.py and contracts/conditions.py, through contracts/sidecar_reader.py:
