@@ -2874,8 +2874,7 @@ class TestRound13(TempCase):
                  "cat > notes.md <<'EOF'\nratio 3/4, the 1/100 fraction\nEOF",
                  "python3 -c \"print(open('in.csv').read().split('/'))\"", "python3 -c \"print('%d/%d' % (a, b), '/2')\"",
                  "cd /tmp && ls 2>&1", "cd /tmp && ls >&2 2>&-",
-                 "cat > notes.md <<'EOF'\nscale /3 and (a)/b\nEOF",
-                 "python3 -c \"print('total /len per event', 'a /b')\""]  # a message string is not a path literal
+                 "cat > notes.md <<'EOF'\nscale /3 and (a)/b\nEOF"]
         for cmd in clean:
             stops, flags = g.command_check(cmd)
             self.assertEqual(stops, [], cmd)
@@ -2898,6 +2897,69 @@ class TestRound13(TempCase):
         self.assertTrue(stops)
         stops, _ = g.command_check("python3 -c 'x = open( ~/../../../plan.json )'")
         self.assertTrue(stops, "an unquoted ~/ path in code is judged")
+
+
+class TestRound14(TempCase):
+    """Fix round 14 (review of a7b66cae): false negatives of the round-13 narrowing. Every string literal in code is
+    scanned for path words; relative ./ and ../ literals in code are judged; -c/-e is code only before the script."""
+
+    def setUp(self):
+        super().setUp()
+        self.rh = load_harness()
+
+    sandbox_guard = TestRound13.sandbox_guard
+
+    def test_round14_inputs(self):
+        g, rep = self.sandbox_guard()
+        cases = [
+            ("python3 -c 'import os; os.system(\"cat /etc/passwd\")'", "/etc/passwd"),
+            ("python3 tool.py -c ../../plan.json", "relative reference into the run root"),
+            ("python3 -c \"print(open('../../plan.json').read())\"", "relative reference into the run root"),
+            ("node -e 'fs.readFileSync(`/etc/passwd`)'", "/etc/passwd"),
+            ("perl -e 'open(F, \"</etc/passwd\")'", "/etc/passwd"),
+            ("python3 -c \"print('copy to /etc/x')\"", "/etc/x"),
+            ("python3 -c \"open('sub/../../../plan.json')\"", "relative reference into the run root"),
+            ("python3 -c \"open('./../../plan.json')\"", "relative reference into the run root"),
+            ("python3 -W ignore -c \"open('/etc/hosts')\"", "/etc/hosts"),
+            ("cat > notes.md <<'EOF'\nsee `/etc/hosts` and </etc/passwd>\nEOF", "/etc/hosts"),
+            ("cat > notes.md <<'EOF'\nsee `/etc/hosts` and </etc/passwd>\nEOF", "/etc/passwd"),
+            ("echo hi >&/etc/out.log", "/etc/out.log"),
+            ("python3 -c \"os.path.expanduser('~nobody/.ssh/id')\"", "~nobody/.ssh/id"),
+            ("cd /tmp && python3 -c \"open('./secret.txt')\"", "./secret.txt"),
+            ("python3 -c \"open('../x')\"", "relative reference into the run root: ../x"),
+        ]
+        for cmd, needle in cases:
+            stops, flags = g.command_check(cmd)
+            self.assertTrue(any(needle in f for f in stops + flags), (cmd, stops, flags))
+
+    def test_round14_code_after_the_script_is_not_code(self):
+        g, rep = self.sandbox_guard()
+        # a script's own -c is its argument: judged as a word; python -m mod -c is the module's argument too
+        for cmd in ("python3 tool.py -c ../../plan.json", "python3 -m tool -c ../../plan.json",
+                    "python3 -- tool.py -c ../../plan.json"):
+            stops, flags = g.command_check(cmd)
+            self.assertTrue(any(f.startswith("relative reference into the run root: ../../plan.json -> ")
+                                and f.endswith("/runroot/runs/plan.json") for f in flags), (cmd, flags))
+        # perl -mModule is an option: its -e is still code
+        stops, flags = g.command_check("perl -mPOSIX -e 'open(F, \"/etc/passwd\")'")
+        self.assertIn("reference outside the allowed roots: /etc/passwd -> /etc/passwd", flags)
+        # outside the allowed roots every word of a command is judged; code would not judge a bare word
+        for cmd in ("cd /tmp && python3 tool.py -c config.ini", "cd /tmp && python3 -m tool -c config.ini",
+                    "cd /tmp && python3 -- tool.py -c config.ini", "cd /tmp && python3 -mtool -c config.ini",
+                    "cd /tmp && python3 -- -c config.ini"):
+            stops, flags = g.command_check(cmd)
+            self.assertIn("reference outside the allowed roots: config.ini -> /tmp/config.ini", flags, cmd)
+
+    def test_round14_honest_relative_code_literals_inside_the_session_are_clean(self):
+        g, rep = self.sandbox_guard()
+        for cmd in ("python3 -c \"open('./in.csv')\"", "python3 -c \"open('out/../in.csv')\"",
+                    "python3 -c \"print(a/len(b), x[1..2])\""):
+            self.assertEqual(g.command_check(cmd), ([], []), cmd)
+        # a dotted word without ./ or ../ is not a relative path, even outside the allowed roots
+        self.assertEqual(g.command_check("cd /tmp && python3 -c \"print('.5f', ', '.join(a))\""),
+                         ([], ["reference outside the allowed roots: /tmp -> /tmp"]))
+        # documents: relative paths are text, not judged (a stated limit)
+        self.assertEqual(g.command_check("cat > notes.md <<'EOF'\nsee ../../plan.json\nEOF"), ([], []))
 
 
 def spec_of(task_doc, subject):

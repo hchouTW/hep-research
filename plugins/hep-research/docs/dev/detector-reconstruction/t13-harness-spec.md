@@ -92,11 +92,17 @@ $H/...`), a symbolic link made at run time, a path built at run time (command su
 only makes the directory unknown). Such a read is neither stopped nor flagged. Text that is not a path argument (an `echo`
 string, a comment, a document written by a here-document) stops only when it names the repository, a protected
 root, `~/.claude` or `~/.claude.json`; other paths inside the home directory in such text are flagged. In interpreter
-code (`python -c`, other `-c`/`-e` code, interpreter here-documents) and in documents, only plausible path literals
-are references (round 13, after the shakedown flagged `/100`, `/len`, `/255` and whole code blocks): a quoted string
-literal whose text is an absolute or `~/` path, or an unquoted absolute or `~/` path that starts a word; either must
-hold a letter. A `-c` payload is never judged as one path word, and a redirection such as `2>/dev/null` names only its
-target (`2>&1` none). The raw pass over the whole command still stops on any literal naming protected material. A foreground
+code (`-c`/`-e` given to the interpreter itself, before any script operand, and interpreter here-documents) and in
+documents, the references are path words (rounds 13-14, after the shakedown flagged `/100`, `/len`, `/255` and whole
+code blocks): a word that starts where a word can start (after a blank, a quote or backtick, `<` or `>`, or one of
+`( , = [ { : ; | &`), anywhere in the code, string contents included, and is an absolute path holding a letter, a
+`~/` or `~user/` path, or, in code only, a relative path starting with `./` or `../` or climbing with `/..`. A `-c`
+payload is never judged as one path word, a script's own `-c` argument (`python3 tool.py -c x`) is an ordinary word,
+and a redirection such as `2>/dev/null` names only its target (`2>&1` none). The raw pass over the whole command still
+stops on any literal naming protected material. Not judged as references (noise traded for these limits, the user's
+rule being that a missed reference matters more than a flag): a path right after a letter, digit, `)` or `]` (read as
+division), an absolute path without a letter (`/255`), a bare `/`, a relative path without `./`, `../` or `/..`
+(`data/x.csv`), relative paths in documents, and paths built at run time. A foreground
 command whose whole output is exactly the CLI's "moved to the background (ID: ...)" text, and which exits 0, is
 recorded as a background job without a completion record (exit code -1): this can turn an honest claim into an
 unevidenced one, never forge a success. The staging folder of the tasks file and the inputs lies outside the run

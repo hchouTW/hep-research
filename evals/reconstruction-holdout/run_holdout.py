@@ -156,9 +156,14 @@ directory of a file you wrote>" or "read:<path of a file you read>". Report only
 
 
 # round 13: in interpreter code and documents, only plausible path literals are references (flag noise of the shakedown)
-CODE_STRING_RE = re.compile(r"""(['"])((?:\\.|(?!\1)[^\\\n])*)\1""")
-CODE_PATH_RE = re.compile(r"(?:/|~/|~[A-Za-z_][\w.-]*(?:/|$))[\w.~+@%:,=/*?\[\]{}-]*")
-CODE_WORD_RE = re.compile(r"(?:^|(?<=[\s(,=\[{:]))((?:/|~/)[\w.~+@%:,=/*?\[\]{}-]*)")
+# round 14: path words are found anywhere in the code, string contents included, where a word can start (after a blank,
+# a quote or backtick, an open mode < >, or ( , = [ { : ; | &); after a letter, digit, ) or ] a / is arithmetic
+CODE_BOUND = r"(?:^|(?<=[\s(,=\[{:'\"`<>;|&]))"
+CODE_PATH_CHARS = r"[\w.~+@%:,=/*?\[\]{}-]"
+CODE_WORD_RE = re.compile(CODE_BOUND + r"((?:/|~/|~[A-Za-z_][\w.-]*/)" + CODE_PATH_CHARS + r"*)")
+CODE_REL_RE = re.compile(CODE_BOUND + r"((?:\.\.?/|[\w.-]+/\.\.(?=/|$|[^\w.~+@%:,=/*?\[\]{}-]))"
+                         + CODE_PATH_CHARS + r"*)")
+INTERP_ARG_OPTS = {"-W", "-X", "-r", "--require"}  # interpreter options whose value is the next word
 REDIRECT_RE = re.compile(r"^(?:\d*|&)(?:>>?|<|>&|<&|&>>?|>\|)(.*)$", re.S)
 
 # round 13: every report field states the claim kind and the unit to report it in, at the end of its description
@@ -1187,32 +1192,32 @@ class Guard:
                 elif self._in_home(p) and p not in self.home_sp:
                     flags.append(f"literal path inside the home directory: {p}")
 
-    def _code_path_literals(self, code: str) -> list:
-        """Round 13: the plausible path literals of interpreter code or a document (the shakedown flagged arithmetic
-        such as /100, /len and /255 and whole code blocks): a quoted string literal whose text is an absolute or ~/
-        path (after an optional open mode such as < or >), and an unquoted absolute or ~/ path that starts a word
-        (after a blank, ( , = [ { or :). Either must hold a letter, so a bare / or /255 is never a path. $HOME forms
-        are expanded first. Anything naming protected material is still caught by the raw pass of the whole command."""
+    def _code_path_literals(self, code: str, relative: bool = True) -> list:
+        """[(literal, form)]: the path words of interpreter code or a document (rounds 13-14). A path word starts
+        where a word can start (CODE_BOUND: after a blank, a quote or backtick, < or >, or ( , = [ { : ; | &), so
+        string contents are scanned too, while a / after a letter, digit, ) or ] is arithmetic (/len, /100, /255).
+        Absolute and ~/ words ("abs") must hold a letter unless they start with ~ (a bare / or /255 is never one);
+        relative words ("rel", code only) start with ./ or ../ or climb with /.. . $HOME forms are expanded first.
+        The raw pass of the whole command still stops on any literal naming protected material."""
         t = HOME_ANY_RE.sub(lambda m: self.expand_home, code)
         out = []
-        for m in CODE_STRING_RE.finditer(t):
-            s = m.group(2).lstrip("<>+|& ")
-            if CODE_PATH_RE.fullmatch(s) and re.search(r"[A-Za-z]", s):
-                out.append(s)
-        bare = CODE_STRING_RE.sub(" ", t)
-        for m in CODE_WORD_RE.finditer(bare):
-            if re.search(r"[A-Za-z]", m.group(1)):
-                out.append(m.group(1))
+        for m in CODE_WORD_RE.finditer(t):
+            w = m.group(1)
+            if w.startswith("~") or re.search(r"[A-Za-z]", w):
+                out.append((w, "abs"))
+        if relative:
+            for m in CODE_REL_RE.finditer(t):
+                out.append((m.group(1), "rel"))
         return out
 
     def _text_literals(self, text: str, cwd, stops: list, flags: list) -> None:
-        for lit in self._code_path_literals(text):
+        for lit, _form in self._code_path_literals(text, relative=False):
             self._judge_text(lit, cwd, stops, flags)
 
     def _code_literals(self, code: str, cwd, stops: list, flags: list) -> None:
-        """Interpreter code (-c, here-documents): its plausible absolute literal paths are references (round 13)."""
-        for lit in self._code_path_literals(code):
-            self._judge(lit, cwd, "abs", False, stops, flags)
+        """Interpreter code (-c/-e, here-documents): its path words are references (rounds 13-14)."""
+        for lit, form in self._code_path_literals(code):
+            self._judge(lit, cwd, form, False, stops, flags)
 
     # ---------------------------------------------------------------- commands
     def command_check(self, command, cwd=None, depth: int = 0) -> tuple[list, list]:
@@ -1294,12 +1299,17 @@ class Guard:
                         code_args.add(i + 1)
                         break
             interp = name in INTERPRETERS or name.startswith("python")
-            if interp:
-                for i, t in enumerate(toks[1:-1], 1):
+            if interp:  # round 14: -c/-e is code only among the interpreter's own options, before any script
+                i = 1
+                while i < len(toks) - 1:
+                    t = toks[i]
+                    if not t.startswith("-") or t in ("-", "--") or (name.startswith("python") and t.startswith("-m")):
+                        break  # a script, stdin, the end of options, or python -m MOD / -mMOD: the rest are arguments
                     if re.fullmatch(r"-[a-zA-Z]*[ce]", t):
                         self._code_literals(toks[i + 1], cwd, stops, flags)
                         code_args.add(i + 1)
                         break
+                    i += 2 if t in INTERP_ARG_OPTS else 1
             for i, t in enumerate(toks[:-1]):
                 if t == "<<<":
                     self._nested(toks[i + 1], cwd, depth, stops, flags)
