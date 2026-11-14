@@ -263,7 +263,7 @@ Taken from Anthropic's documentation, read on 2026-10-04 ([Plugins](https://clau
    `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The zip leaves out most of the test suite
    (`tests/` is `export-ignore` in the plugin's `.gitattributes`, except the few files shipped code reads at run time,
    such as the tests profile capabilities cite and the emulator's default artifact), so it (about 4,100 files,
-   90.3 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). `tools/check_packaging.py` measures
+   91.4 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). `tools/check_packaging.py` measures
    this archive, checks both limits, and fails when a reference from a shipped file into `tests/` or `docs/dev/` does
    not resolve inside it (this restores the upload route, issue #409). An uploaded plugin does not update from GitHub.
 

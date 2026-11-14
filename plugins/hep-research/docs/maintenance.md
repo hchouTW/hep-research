@@ -352,7 +352,7 @@ state the current contract. So a version bump needs no reference machine, and th
   listed there with `-export-ignore` and its folders); the check also fails above the documented upload limits (5,000
   files, counted with their folders, or 200 MB) and when a shipped reference into `tests/` or `docs/dev/` does not
   resolve in the zip. When shipped code starts reading a new file under `tests/`, add it to that list. Measured on 2026-11-14 the zip held
-  4,882 entries (4,119 files) and 90.3 MB, so about 118 entries of room were left; every release manifest, example or
+  4,883 entries (4,120 files) and 91.4 MB (after merging 0.67.0), so about 117 entries of room were left; every release manifest, example or
   `docs/dev/` addition uses some of it. The next lever is to make `docs/dev/` (about 569 files) `export-ignore` as well,
   after rewriting the shipped links into it; that is the maintainer's decision. Generate `release-manifests/X.Y.Z.json` last, after the
   VALIDATION release check and any README change, and verify it on a `git archive` export.
