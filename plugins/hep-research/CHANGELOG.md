@@ -27,6 +27,12 @@ Detector reconstruction, task T14. `contracts/input_inspector.py` forms per-prod
 declares (probes, bytes, seconds, memory, tools), and records every probe, its cost and what stayed unread in the new sidecar `input_inspection.json`. What it cannot read stays
 unknown with a stop reason, and a conflict is never a clean end. ROOT files stay unknown until `uproot` is approved, and a file name establishes nothing. `input-signature/1` now tells a number from a boolean when it looks for a hidden conflict.
 
+Detector reconstruction, CI fix round of PR #411 (T14 on Windows). `contracts/input_inspector.py` reads the peak working set
+(GetProcessMemoryInfo) where `resource.getrusage` does not exist, so a declared memory budget is kept on Windows instead of
+stopping every inspection with `budget-memory` (still the stop where neither counter can be read); files are opened with
+`O_NONBLOCK` and `O_BINARY` only where the platform defines them. The T13 harness refuses a non-canonical bind before it
+looks for `bwrap`.
+
 Detector reconstruction, task T15a. `judge_candidates` now ranks a conflict above an unsatisfied item at every level of a condition, reads a fact only inside its own product, and treats two values of a constraint in scopes of one product as a conflict. `binding-evidence/1` refuses two rows for one check. `contracts/candidate_selection.py` judges a finite candidate index on one input signature, necessary conditions first, then quality evidence, then a fixed objective, and writes a replayable
 selection record with the hashes of its inputs, rules and readers. New sidecars `candidate_index.json` and `selection_policy.json`, and an optional `formal` block in `selection_record.json`. Rules only: a new sidecar not labelled artificial
 is refused, and nothing is claimed about selection on real recipes. A missing backend and insufficient evidence stay two reasons of a restricted delivery, and an old decision replays only on the inputs it was made from.

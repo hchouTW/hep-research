@@ -135,11 +135,11 @@ def _windows_peak_reader():
     kernel32.GetCurrentProcess.restype = wintypes.HANDLE
     get_info.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
     get_info.restype = wintypes.BOOL
-    process, counters = kernel32.GetCurrentProcess(), Counters()
+    this_process, counters = kernel32.GetCurrentProcess(), Counters()
     counters.cb = ctypes.sizeof(Counters)
 
     def peak() -> int | None:
-        return int(counters.PeakWorkingSetSize) if get_info(process, ctypes.byref(counters), counters.cb) else None
+        return int(counters.PeakWorkingSetSize) if get_info(this_process, ctypes.byref(counters), counters.cb) else None
     return peak
 
 

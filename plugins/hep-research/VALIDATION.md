@@ -9781,6 +9781,43 @@ Whole-suite checkpoints of the branch, each from a checked snapshot with the liv
 Job 7650906 is entered in `STATE.md` (`checkpoint-ce250473-1`) from its log, at G3. Finish-plan G3 step 2 (the final
 checkpoint job on the integrated tip and a whole-branch review by a fresh reviewer) has not run.
 
+### RECO-CHECKPOINTS, CI fix round of PR #411 — 2026-11-14 (login node, Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1; no job)
+
+GitHub CI on `fdcfbaca` failed where the Slurm checkpoints passed. Root causes and fixes, each pinned by a test:
+
+- lint: mypy 2.4.0 found 18 errors in the 3.28.0 contracts (unannotated empty containers, Optional values indexed
+  without narrowing, `resource` rebound to None). Annotated and narrowed; no behaviour change.
+- static: the T13 harness probed `/usr/bin/bwrap` before judging the settings binds, so on a runner without bwrap a
+  non-canonical bind was refused as "bwrap not found". The binds are judged first
+  (`test_settings_are_judged_before_the_bwrap_probe`); FROZEN-HARNESS.sha256 re-frozen, the scorer's FROZEN.sha256
+  unchanged. The `digest-mismatch: error` line in that log is an input of actions/download-artifact, not a failure.
+- units 2/3 and macOS: GitHub's x86 runners take NumPy's non-AVX-512 exp/log/pow kernels and other OpenBLAS kernels
+  than the login node and the recording host; reproduced with `NPY_DISABLE_CPU_FEATURES` (AVX-512 off) and
+  `OPENBLAS_CORETYPE=Haswell`. The photon example's off-platform check 9 compared each /4 header exactly, but a /4
+  names its /3 by SHA-256: each side's /4 must now name its own /3. The yield-edge fit ends on YIELD_DOMAIN to the
+  last bit, so it fails as not-converged or non-finite by one bit; the test accepts and checks either. macOS only,
+  reasoned and not run on a Mac: the two-source harness hash pins come from libm bytes (skipped off Linux/glibc), the
+  dead-cell hole image is now built exactly mirror-symmetric, and the calorimetry byte-for-byte rerun is stated as
+  bound to x86-64 with NumPy's OpenBLAS (fails locally with OpenBLAS's Prescott kernel). Recordings unchanged.
+- hostile paths: both examples replaced folder names in `json.dumps` text, which escapes non-ASCII names (now in the
+  decoded strings); the T04 fake `sacct` scripts used unquoted paths; the T12 R9 test matched a path inside JSON text.
+- Windows: the input inspector had no peak-memory reading (no `resource`), so every budgeted inspection stopped with
+  budget-memory; it now reads the peak working set (K32GetProcessMemoryInfo), opens files with O_NONBLOCK and O_BINARY
+  only where defined, and the FIFO cases skip there. `t12_runtime` ran a guarded script with `-I`, which drops
+  PYTHONUTF8 (now `child_flags()`). The T12 benchmark (os.wait4) and the workflow tests (process groups) are POSIX-only
+  by design: they skip with the reason, and the incomplete benchmark is pinned. Reasoned, not run on Windows.
+- AMS optional: timed out at 1200 s on CI, which reports nothing per module. Locally the whole check (no plan,
+  `--jobs 4`) took 895 s and found one real failure: `test_reconstruction_old_recipes` compared the example responses,
+  which the check's copy (no `output/` folders) lacks; without them it now compares everything else. The new T12
+  modules had no recorded timing, and `check_ams_optional.py` starts such a module last (`test_t12_runtime` alone
+  350-420 s locally); their local timings are now recorded. Why CI passed 1200 s is not established.
+
+Local evidence: mypy and ruff clean; holdout tests 164 OK; the hostile-path pull-request subset (151 modules) passes
+except two `test_revocation` cases that fail whenever TMPDIR is on this cluster's shared file system, unchanged from
+main, and two hep-statistics/hep-computing extractor modules that fail in the AMS copy only because this login node's
+/tmp holds a `.git` folder (they pass with another TMPDIR). Open: `test_photon_likelihood_records` (5) and `test_calo_records` (2) fail on their job-of-record pins of the
+changed test modules and photon `run.py` until a job of record renews them.
+
 ## RECO-SIX-CRITERIA — 2026-11-14 (records only; no job)
 
 The six-criterion evidence table of plan v9.2 §3.2 and P6, written from the records of this branch at `316a097b`. Correctness and
