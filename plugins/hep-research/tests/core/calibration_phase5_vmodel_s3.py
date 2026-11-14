@@ -10,10 +10,13 @@ concatenates them and applies the registered rule (failures are reported, never 
 
 A draw: link-space residual r = J theta + delta + e with delta ~ N(0, R(f, ell)) (squared-exponential kernel per
 component, C = 0 between components), e ~ N(0, sigma^2 I), J = [1, z] integrated with a flat prior (theta), the prior
-f ~ Half-Normal(f_scale), ell log-uniform on length_bounds. Pull = (log x-hat - log x_true) / sd_log_x (Laplace).
+prior the Jeffreys measure x Half-Normal(f_scale) weight within length_bounds (vmodel_infer V3). Pull of x in log x:
+(m - t) / (m - q16) if m > t, else (m - t) / (q84 - m), with m the marginal posterior median (the estimate) and q16,
+q84 its 15.87 % and 84.13 % quantiles (the error toward the truth; WP-S2, A26 (2): the interval, not the rule,
+replaced the Laplace sd, which misdescribed the skewed posterior in log ell).
 Rule (proposed in the card, Inferred, from section 8.7 note 4's form, line 2068): per hyperparameter, |mean pull| <= 0.1
-and sd within [0.9, 1.1]. A draw whose pull is undefined (estimate at a bound, or the Laplace Hessian not positive
-definite) is counted; any such draw makes the configuration `incomplete` (not passed) until the rule says how it counts.
+and sd within [0.9, 1.1]. A draw whose pull is undefined (the posterior mode at a bound, or a zero-width quantile
+interval) is counted; any such draw makes the configuration `incomplete` (not passed) until the rule says how it counts.
 
 Seeds: draw r of configuration j uses default_rng([SEED0 + r, j]). Records are labelled `synthetic` and
 `provisional-thresholds`.
@@ -114,12 +117,18 @@ def draw(name: str, r: int, cfg: dict | None = None):
     return contract, names, J @ theta + delta, V, J
 
 
+def pull(q: list, truth: float) -> float | None:
+    """(m - t) / (error toward t) from the log quantiles q = [2.5 %, 15.87 %, 50 %, 84.13 %, 97.5 %]."""
+    m, t = q[2], math.log(truth)
+    err = m - q[1] if m > t else q[3] - m
+    return (m - t) / err if err > 0 else None
+
+
 def pulls(rec: dict, cfg: dict) -> dict:
     out = {}
     for k, (e, c) in enumerate(zip(rec["estimates"], cfg["components"])):
-        for par, sd in (("f", "sd_log_f"), ("length", "sd_log_length")):
-            ok = e[sd] is not None and not e["at_bound"]
-            out[f"{par}{k}"] = (math.log(e[par]) - math.log(c[par])) / e[sd] if ok else None
+        for par in ("f", "length"):
+            out[f"{par}{k}"] = None if e["at_bound"] else pull(e["log_quantiles"][par], c[par])
     return out
 
 
@@ -128,8 +137,8 @@ def rep(name: str, r: int, cfg: dict | None = None) -> dict:
     contract, names, res, V, J = draw(name, r, cfg)
     t0 = time.time()
     rec = VI.infer(contract, names, res, V, flat=J)
-    return {"r": r, "pulls": pulls(rec, cfg), "estimates": [{k: e[k] for k in ("f", "length", "sd_log_f",
-                                                                             "sd_log_length", "at_bound")}
+    return {"r": r, "pulls": pulls(rec, cfg), "estimates": [{k: e[k] for k in ("f", "length", "log_quantiles", "mode",
+                                                                             "sd_log_f", "sd_log_length", "at_bound")}
                                                           for e in rec["estimates"]],
             "converged": rec["converged"], "seconds": time.time() - t0}
 

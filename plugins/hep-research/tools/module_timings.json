@@ -534,6 +534,6 @@
   "tests.core.test_calibration_map": 12.0,
   "tests.core.test_calibration_map_patterns": 1.0,
   "tests.core.test_calibration_phase3_cals": 24.0,
-  "tests.core.test_calibration_vmodel_infer": 10.0
+  "tests.core.test_calibration_vmodel_infer": 135.0
  }
 }

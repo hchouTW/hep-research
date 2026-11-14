@@ -13,10 +13,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import numpy as np
-from scipy import optimize
+from scipy import optimize, special, stats
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -192,8 +193,9 @@ class SeparateVersion(unittest.TestCase):
 
 class Recovery(unittest.TestCase):
     def test_d_marginal_estimates_cover_the_truth(self):
-        """(d) On synthetic draws with known f, ell, |log x-hat - log x| <= 2 sd_log_x in >= 80% of 24 draws for each;
-        negative control: against a misstated truth (x 3) the same check fails."""
+        """(d) On synthetic draws with known f, ell, the central 95 % marginal posterior interval in log x covers
+        log x in >= 80% of 24 draws for each; negative control: against a misstated truth (x 3) the same check
+        fails."""
         hits = {"f": 0, "length": 0}
         wrong = {"f": 0, "length": 0}
         n = 24
@@ -201,13 +203,137 @@ class Recovery(unittest.TestCase):
             c, names, res, V, J = case(100 + r)
             e = VI.infer(c, names, res, V, flat=J)["estimates"][0]
             self.assertFalse(e["at_bound"])
-            for par, sd in (("f", "sd_log_f"), ("length", "sd_log_length")):
-                truth = CFG["components"][0][par]
-                hits[par] += abs(math.log(e[par] / truth)) <= 2 * e[sd]
-                wrong[par] += abs(math.log(e[par] / (3 * truth))) <= 2 * e[sd]
+            for par in ("f", "length"):
+                q, truth = e["log_quantiles"][par], CFG["components"][0][par]
+                self.assertAlmostEqual(math.exp(q[2]), e[par])                # the estimate is the median
+                hits[par] += q[0] <= math.log(truth) <= q[4]
+                wrong[par] += q[0] <= math.log(3 * truth) <= q[4]
         for par in hits:
             self.assertGreaterEqual(hits[par], 0.8 * n, par)
             self.assertLess(wrong[par], 0.8 * n, par)
+
+
+GAMMA_SHAPE = 0.3        # x0 = log G, G ~ Gamma(0.3): strongly skewed in log
+
+
+def _skewed(x):
+    """-ln density of x0 = log G, G ~ Gamma(k = GAMMA_SHAPE) (skewed, mode log k, Laplace sd k^-1/2), and
+    x1 | x0 ~ N(x0, 0.3^2)."""
+    return -GAMMA_SHAPE * x[0] + math.exp(x[0]) + 0.5 * ((x[1] - x[0]) / 0.3) ** 2
+
+
+def _skewed_cdf(t):
+    return float(special.gammainc(GAMMA_SHAPE, math.exp(t)))
+
+
+def _skewed_quantiles():
+    return [math.log(float(stats.gamma.ppf(p, GAMMA_SHAPE))) for p in VI.QUANTILES]
+
+
+class Intervals(unittest.TestCase):
+    """A26 (2) (WP-S2): the reported interval is the marginal posterior quantile interval, not the Laplace sd at the
+    mode; the prior is the Jeffreys measure x Half-Normal(f) weight."""
+
+    def test_quantiles_exact_on_a_skewed_posterior_where_laplace_undercovers(self):
+        """Negative: on a skewed posterior with a known marginal (log of a Gamma(0.3) variable), the Laplace
+        interval mode +- sd holds 0.53 of the posterior (not 0.683) and its centre is 0.77 sd off the median.
+        Control: the marginal quantiles reproduce the exact quantiles, and their 1-sd interval holds 0.683."""
+        bounds = [(-40.0, 10.0), (-45.0, 15.0)]
+        x = optimize.minimize(_skewed, np.array([0.5, 0.5]), method="L-BFGS-B", bounds=bounds).x
+        sd = math.sqrt(np.linalg.inv(VI._hessian(_skewed, x))[0, 0])
+        self.assertAlmostEqual(sd, GAMMA_SHAPE ** -0.5, delta=0.01)
+        exact = _skewed_quantiles()
+        lap = _skewed_cdf(x[0] + sd) - _skewed_cdf(x[0] - sd)
+        self.assertLess(lap, 0.6827 - 0.1)                                  # negative: Laplace undercovers
+        self.assertGreater(abs(x[0] - exact[2]) / sd, 0.5)                  # and is off-centre
+        m = VI.marginal_quantiles(_skewed, x, 0, bounds, sd)
+        np.testing.assert_allclose(m["quantiles"], exact, atol=0.05)       # control
+        self.assertTrue(m["laplace_marginal"])
+        self.assertFalse(m["truncated"])
+        q = m["quantiles"]
+        self.assertAlmostEqual(_skewed_cdf(q[3]) - _skewed_cdf(q[1]), 0.6827, delta=0.01)
+        self.assertAlmostEqual(m["cdf"](exact[2]), 0.5, delta=0.01)
+
+    def test_window_widens_from_a_too_narrow_start(self):
+        """A too small starting sd (0.03 of the true width) still gives the exact quantiles: the window widens
+        while an edge carries density; negative: with the widening disabled (one window) the quantiles are
+        wrong and the result says `truncated`."""
+        bounds = [(-40.0, 10.0), (-45.0, 15.0)]
+        x0 = np.array([math.log(GAMMA_SHAPE), math.log(GAMMA_SHAPE)])
+        m = VI.marginal_quantiles(_skewed, x0, 0, bounds, 0.05)
+        exact = _skewed_quantiles()
+        np.testing.assert_allclose(m["quantiles"], exact, atol=0.05)
+        self.assertFalse(m["truncated"])
+        self.assertLess(m["window"][0], exact[0])
+        with mock.patch.object(VI, "_WIDEN", 1):
+            short = VI.marginal_quantiles(_skewed, x0, 0, bounds, 0.05)
+        self.assertTrue(short["truncated"])
+        self.assertGreater(np.abs(np.array(short["quantiles"]) - exact).max(), 1.0)
+
+    def test_fisher_information_matches_the_dense_formula(self):
+        """The block-wise expected Fisher information equals 0.5 tr(P S_i P S_j) formed densely, and the cached
+        kernels equal `kernel_block`; negative: a kernel with ell off by 1 % gives a different information."""
+        cfg = X.CONFIGS["two"]
+        c, names, res, V, J = X.draw("two", 3, cfg)
+        inferred, fixed = VI._components(c, names)
+        post = VI.Objective(res, V, inferred, linear.vmodel_matrix(fixed, names), J)
+        x = np.log([0.05, 0.08, 0.02, 0.15])
+
+        def dense(ell_scale=1.0):
+            S = post.covariance(x)
+            Si = np.linalg.inv(S)
+            P = Si - Si @ J @ np.linalg.solve(J.T @ Si @ J, J.T @ Si)
+            D = []
+            for k, comp in enumerate(inferred):
+                f, ell = math.exp(x[2 * k]), math.exp(x[2 * k + 1]) * ell_scale
+                K = VI.kernel_block(comp["z"], f, ell)
+                for M in (2 * K, K * (comp["z"][:, None] - comp["z"][None, :]) ** 2 / ell ** 2):
+                    Z = np.zeros_like(S)
+                    Z[np.ix_(comp["rows"], comp["rows"])] = M
+                    D.append(P @ Z)
+            return np.array([[0.5 * np.trace(a @ b) for b in D] for a in D])
+        info = post.fisher(x)
+        np.testing.assert_allclose(info, dense(), rtol=1e-10, atol=1e-10)
+        self.assertGreater(np.abs(info - dense(1.01)).max(), 1e-3)         # negative
+        R = post.covariance(x) - post.base
+        for k, comp in enumerate(inferred):
+            np.testing.assert_allclose(R[np.ix_(comp["rows"], comp["rows"])],
+                                       VI.kernel_block(comp["z"], math.exp(x[2 * k]), math.exp(x[2 * k + 1])),
+                                       atol=1e-15)
+
+    def test_weak_component_laplace_undercovers_quantile_interval_covers(self):
+        """The S3 failure, reproduced on its weakly determined component alone (n 25, f 0.02 with sigma 0.01,
+        ell 0.15, bounds [0.02, 2]; 32 fixed draws). Negative (caught): WP-S's prior with the Laplace sd at the mode
+        gives ell pulls biased (mean 0.41) and too wide (sd 1.27): its 95 % interval covers ell in 27 of 32.
+        Control: the revised prior with the marginal quantile interval (the S3 driver's `pull`) covers in 32 of 32,
+        mean -0.26 (within 2 SE = 0.35 of 0). Recorded: here the revised interval is conservative (sd 0.69)."""
+        cfg = {"sigma": 0.01, "components": [{"n": 25, "f": 0.02, "length": 0.15, "f_scale": 0.05,
+                                              "length_bounds": [0.02, 2.0]}]}
+        old, revised = [], []
+        for r in range(32):
+            c, names, res, V, J = X.draw("weak", 40 + r, cfg)
+            inferred, fixed = VI._components(c, names)
+            wps = VI.Objective(res, V, inferred, linear.vmodel_matrix(fixed, names), J, jeffreys=False)
+            b = wps.bounds()
+            best = min((optimize.minimize(wps, x0, method="L-BFGS-B", bounds=b) for x0 in VI._starts(inferred, b)),
+                       key=lambda o: o.fun)
+            sd = math.sqrt(np.linalg.inv(VI._hessian(wps, best.x))[1, 1])
+            old.append((best.x[1] - math.log(0.15)) / sd)
+            e = VI.infer(c, names, res, V, flat=J)["estimates"][0]
+            revised.append(X.pull(e["log_quantiles"]["length"], 0.15))
+        old_a, new_a = np.array(old), np.array(revised)
+        self.assertGreater(float(old_a.mean()), 0.3)                        # negative: biased
+        self.assertGreater(float(old_a.std(ddof=1)), 1.15)                  # and too wide
+        self.assertLessEqual(int((np.abs(old_a) <= 1.96).sum()), 28)       # 95 % interval undercovers
+        self.assertGreaterEqual(int((np.abs(new_a) <= 1.96).sum()), 30)    # control: covers
+        self.assertLess(abs(float(new_a.mean())), 2 / math.sqrt(32))
+
+    def test_s3_pull_uses_the_error_toward_the_truth(self):
+        q = [-2.0, -1.5, -1.0, -0.2, 0.5]                                  # median -1, errors 0.5 down, 0.8 up
+        self.assertAlmostEqual(X.pull(q, math.exp(-1.5)), 1.0)              # median above truth: lower error
+        self.assertAlmostEqual(X.pull(q, math.exp(-0.2)), -1.0)             # below truth: upper error
+        self.assertAlmostEqual(X.pull(q, math.exp(-0.6)), -0.5)
+        self.assertIsNone(X.pull([0.0, 0.0, 0.0, 0.0, 0.0], 2.0))
 
 
 class Script(unittest.TestCase):
