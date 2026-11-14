@@ -51,6 +51,18 @@ class ToyDetector(unittest.TestCase):
         self.assertEqual(run_toy(self.plan)["status"], "passed")          # registered as it is sampled
 
 
+class NormalDensityRecord(unittest.TestCase):
+    def test_15_3_19_normal_density_is_not_distinguished_inside_the_prior(self):
+        """Section 15.3.19 says "scintillation log_density switched to the normal density -> P0 fails". Recorded, not
+        asserted as a detection (A23, a finding for the author): on the toy detector, with the photon kernel registered
+        as normal instead of Poisson, P0 passes inside the prior box (light yield 97-103) like the correct registration;
+        on the g4sim path response parameters are re-digitized and no log_density is used."""
+        plan = copy.deepcopy(H.toy_design()["plan"])
+        plan["evaluator"]["events"] = 20_000
+        plan["kernels"]["photon_generation"]["registration"] = {"density": "normal"}
+        self.assertEqual(run_toy(plan)["status"], "passed")
+
+
 class MissingSupport(unittest.TestCase):
     def check(self, proposal=None):
         c, p = H.uniform_chain(proposal)

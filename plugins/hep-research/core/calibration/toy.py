@@ -100,7 +100,7 @@ class Uniform(Kernel):
 class Poisson(Kernel):
     """n ~ Poisson(rate x parent) sampled, optionally with excess variance (Fano factor > 1: a negative binomial with
     the same mean, the "implementation includes ENF" of section 15.3.1). The density used for reweighting is the
-    registered one (plan kernels[node].registration.density: poisson | negative-binomial)."""
+    registered one (plan kernels[node].registration.density: poisson | negative-binomial | normal)."""
 
     def __init__(self, out="n", rate="rate", parent=None, fano=1.0, registered="poisson"):
         self.out, self.rate, self.parent, self.fano, self.registered = out, rate, parent, fano, registered
@@ -123,6 +123,8 @@ class Poisson(Kernel):
         if self.registered == "negative-binomial" and self.fano > 1.0:
             prob = 1.0 / self.fano
             return stats.nbinom.logpmf(out[self.out], mu * prob / (1.0 - prob), prob)
+        if self.registered == "normal":                       # section 15.3.19 (A23): the normal density for Poisson
+            return stats.norm.logpdf(out[self.out], mu, np.sqrt(np.maximum(mu, 1e-300)))
         return stats.poisson.logpmf(out[self.out], mu)
 
 

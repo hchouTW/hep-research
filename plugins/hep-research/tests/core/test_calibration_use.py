@@ -311,6 +311,15 @@ class IncompleteAggregation(unittest.TestCase):
             use.aggregate(self.gates(G99="passed"), "passed", "passed", "holdout")
 
 
+class SimulatedReleases(unittest.TestCase):
+    def test_15_3_19_g4sim_output_as_a_data_release(self):
+        """Section 15.3.19: g4sim output as the calibration data release -> projection (rule 2); only the validation
+        release is g4sim output -> calibrated-unvalidated (rule 3e). Control: real releases -> validated-in-scope."""
+        self.assertEqual(use.assign(base()), "validated-in-scope")
+        self.assertEqual(use.assign(base(real_data=False)), "projection")
+        self.assertEqual(use.assign(base(validation_data_simulated=True)), "calibrated-unvalidated")
+
+
 class IdentityCarriedOver(unittest.TestCase):
     def test_the_flag_is_informational(self):
         """A22: `identity-carried-over` (a T2 carry-over, A21 section 19-g7) is a known flag with no effect on grade or
