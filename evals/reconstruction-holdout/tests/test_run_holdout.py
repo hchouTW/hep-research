@@ -2305,6 +2305,20 @@ class TestRound9(TempCase):
                 self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
                 self.assertIn("canonical", p.stdout + p.stderr)
 
+    def test_settings_are_judged_before_the_bwrap_probe(self):
+        # CI round of PR #411: a host without /usr/bin/bwrap refused a bad bind as "bwrap not found"; the settings
+        # record is now judged first, and a good record on such a host still names the missing bwrap
+        alias = self.tmp / "alias-nobwrap"
+        alias.symlink_to(HERE)
+        missing = str(self.tmp / "no-such-bwrap")
+        for binds, expected in (([str(HERE), str(alias)], "canonical"), ([str(HERE)], "bwrap not found")):
+            with self.subTest(expected), tempfile.TemporaryDirectory(prefix="t13h-9-", dir=TMP_BASE) as d:
+                settings = self.sandbox_settings(bwrap=missing, ro_binds=binds)
+                env = Env(Path(d), [task("A"), task("B")], {}, settings=settings)
+                p = self.dry(env)
+                self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+                self.assertIn(expected, p.stdout + p.stderr)
+
     def test_roots_holding_a_git_clone_or_a_protected_root_are_refused(self):
         for case in ("git", "protected"):
             with self.subTest(case), tempfile.TemporaryDirectory(prefix="t13h-9-", dir=TMP_BASE) as d:

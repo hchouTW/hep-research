@@ -2648,8 +2648,7 @@ def cmd_run(args) -> int:
     need(sandbox or args.no_sandbox, "the settings record has no sandbox (sandbox.enabled false): such a run needs "
                                      "--no-sandbox, for tests only; a holdout run needs sandbox.enabled true")
     if sandbox:
-        bw = settings["sandbox"]["bwrap"]
-        need(os.path.isfile(bw) and os.access(bw, os.X_OK), f"sandbox: bwrap not found or not executable at {bw}")
+        # the settings record is judged before the host: a bad bind is refused also where bwrap is absent
         protected = [x for r in settings.get("protected_roots", []) for x in spellings(r)]
         for p in [*settings["sandbox"]["ro_binds"], *settings.get("allowed_read_roots", [])]:
             real = os.path.realpath(p)
@@ -2657,6 +2656,8 @@ def cmd_run(args) -> int:
                                                 f"write the resolved path (re-review 6)")
             need(not os.path.lexists(os.path.join(real, ".git")), f"settings: the bind {p} holds a .git clone")
             need(not any(inside(q, [real]) for q in protected), f"settings: the bind {p} holds a protected root")
+        bw = settings["sandbox"]["bwrap"]
+        need(os.path.isfile(bw) and os.access(bw, os.X_OK), f"sandbox: bwrap not found or not executable at {bw}")
     need(args.max_sessions is None or args.max_sessions >= 1, "--max-sessions must be at least 1")
     resume = args.resume is not None
     need(resume or args.run_root is not None, "give --run-root (a new evaluation) or --resume RUN_ROOT")
