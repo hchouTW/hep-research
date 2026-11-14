@@ -19,7 +19,9 @@ conditional ratio, so it composes with weights on upstream nodes).
   square of the closure bias on held-out samples (section 6.2): `v_learn`, its two parts kept apart
   (V_learn^bias is sampled by the toys of section 6.6). Readings of the open details (L2): full matrices, the
   training part the sample covariance over R repeats, the bias part b b^T with b the fold-averaged held-out closure
-  difference at the evaluation point.
+  difference at the evaluation point minus the same difference at theta_0, where the ratio is 1 (a control variate
+  that removes most of the closure comparison's own MC noise, A29; toy.ChainEvaluator.v_learn), and V_bias = b b^T
+  minus the covariance of b's remaining MC noise, negative eigenvalues set to 0 (A29).
 
 Everything is `synthetic` when it runs on the toy chain; results carry `provisional-thresholds` (no section 8.7 row
 calibrates G4-L, ambiguity L8)."""
@@ -346,14 +348,22 @@ def train(stored: np.ndarray, sampler, spec: dict, theta0: dict, support: dict, 
 
 
 # ------------------------------------------------------------------ V_learn (section 6.2)
-def v_learn(preds: list, bias) -> dict:
+def v_learn(preds: list, bias, bias_noise=None) -> dict:
     """V_learn = the variation between repeated trainings + the square of the closure bias on held-out samples.
-    preds: the predictions of R >= 2 repeated trainings at one point (observable space); bias: the fold-averaged
-    held-out closure difference there. Full matrices (reading L2): V_train the sample covariance, V_bias = b b^T."""
+    preds: the predictions of R >= 2 repeated trainings at one point (observable space); bias: the held-out closure
+    difference there. Full matrices (reading L2): V_train the sample covariance; V_bias = b b^T, or, with bias_noise
+    (the covariance of b's own MC noise, A29), b b^T - bias_noise with negative eigenvalues set to 0 (E[b b^T] =
+    bias bias^T + bias_noise: the subtraction removes the noise, the clipping keeps V_bias positive semi-definite)."""
     P = np.atleast_2d(np.asarray(preds, float))
     if P.shape[0] < 2:
         raise LearnedError("learned.spec", "V_learn needs >= 2 repeated trainings")
     Vt = np.atleast_2d(np.cov(P, rowvar=False, ddof=1))
     b = np.asarray(bias, float).reshape(-1)
     Vb = np.outer(b, b)
-    return {"V_learn": Vt + Vb, "V_learn_train": Vt, "V_learn_bias": Vb, "bias": b, "repeats": int(P.shape[0])}
+    out: dict = {"repeats": int(P.shape[0])}
+    if bias_noise is not None:
+        N = np.asarray(bias_noise, float).reshape(b.size, b.size)
+        lam, U = np.linalg.eigh(0.5 * ((Vb - N) + (Vb - N).T))
+        Vb = (U * np.clip(lam, 0.0, None)) @ U.T
+        out["V_learn_bias_noise"] = N
+    return {"V_learn": Vt + Vb, "V_learn_train": Vt, "V_learn_bias": Vb, "bias": b, **out}

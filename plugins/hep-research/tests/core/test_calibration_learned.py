@@ -107,16 +107,49 @@ class Classifier(unittest.TestCase):
         self.assertEqual((r["status"], r["finding"]), ("rejected", "learned.outside_support"))
 
     def test_v_learn_parts(self):
+        """V_learn = V_train + V_bias; b = the fold-averaged closure difference at theta minus the same at theta_0
+        (A29: was the difference at theta alone, so V_bias = b b^T exactly); V_bias = b b^T - the covariance of b's
+        MC noise, clipped to positive semi-definite."""
         v = self.ev.v_learn({"strength": 0.2})
         self.assertEqual(v["repeats"], 5)
         np.testing.assert_allclose(v["V_learn"], v["V_learn_train"] + v["V_learn_bias"])
-        np.testing.assert_allclose(v["V_learn_bias"], np.outer(v["bias"], v["bias"]))
+        lam, U = np.linalg.eigh(np.outer(v["bias"], v["bias"]) - v["V_learn_bias_noise"])
+        np.testing.assert_allclose(v["V_learn_bias"], (U * np.clip(lam, 0, None)) @ U.T, atol=1e-18)
+        self.assertGreaterEqual(np.linalg.eigvalsh(v["V_learn_bias"]).min(), -1e-15)
         self.assertGreaterEqual(np.linalg.eigvalsh(v["V_learn_train"]).min(), -1e-15)
         cl = [self.ev.learned_closure(k, {"strength": 0.2}) for k in range(5)]
-        np.testing.assert_allclose(v["bias"], np.mean([c["learned"]["pred"] for c in cl], 0) - cl[0]["direct"]["pred"])
+        raw = np.mean([c["learned"]["pred"] for c in cl], 0) - cl[0]["direct"]["pred"]
+        np.testing.assert_allclose(v["bias_raw"], raw)
+        c0 = self.ev.learned_closure(0, {"strength": 0.1})
+        np.testing.assert_allclose(v["bias"], raw - (c0["learned"]["pred"] - c0["direct"]["pred"]))
         self.assertTrue(np.all(np.diag(v["V_learn_train"]) > 0))      # repeated trainings differ (new training MC)
         with self.assertRaises(learned.LearnedError):
             learned.v_learn([v["bias"]], v["bias"])
+
+    def test_v_learn_bias_vanishes_at_the_generation_point(self):
+        """At theta_0 the ratio is 1 by construction, so V_learn^bias is 0 there (positive, A29); the uncorrected
+        closure difference (the construction before A29) is the closure comparison's own MC noise, not 0 (negative)."""
+        v = self.ev.v_learn({"strength": 0.1})
+        self.assertLess(float(np.abs(v["bias"]).max()), 1e-14)
+        self.assertLess(float(np.abs(v["V_learn_bias"]).max()), 1e-25)
+        self.assertGreater(float(np.abs(v["bias_raw"]).max()), 1e-4)
+
+    def test_v_learn_bias_noise_subtraction(self):
+        """learned.v_learn with bias_noise: over draws b ~ N(delta, N) with delta delta^T ~ N, the mean V_bias keeps
+        less than 0.7 tr N above delta delta^T (positive; the clipping keeps about 0.6 here), while b b^T (the
+        construction before A29) adds all of N (negative)."""
+        rng = np.random.default_rng(5)
+        delta, N = np.array([0.02, -0.01]), np.array([[4e-4, 1e-4], [1e-4, 2e-4]])
+        P = rng.normal(size=(3, 2))
+        Lc = np.linalg.cholesky(N)
+        corrected, uncorrected = [], []
+        for _ in range(4000):
+            b = delta + Lc @ rng.standard_normal(2)
+            corrected.append(learned.v_learn(P, b, N)["V_learn_bias"])
+            uncorrected.append(learned.v_learn(P, b)["V_learn_bias"])
+        t0 = float(delta @ delta)
+        self.assertLess(abs(np.trace(np.mean(corrected, 0)) - t0), 0.7 * np.trace(N))
+        self.assertGreater(np.trace(np.mean(uncorrected, 0)) - t0, 0.9 * np.trace(N))
 
     def test_learned_closure_is_held_out(self):
         cl = self.ev.learned_closure(2, {"strength": 0.15})

@@ -51,7 +51,7 @@ FLAGS = ["synthetic", "provisional-thresholds"]
 FILES = ["core/calibration/" + f for f in ("learned.py", "toy.py", "toy_problem.py", "validate.py", "fit.py",
                                             "likelihood.py", "data/toy_posthoc.json")] + \
     ["tests/core/calibration_phase5_tv.py", "docs/dev/simulator-calibration/simcal-tasks/phase-5.md"]
-SEED0 = 20261540
+SEED0 = 20261590                         # second registration (A29); the first (A27/A28) used 20261540
 ALPHA_TV = 0.05
 TRUTH = 0.15
 CALIBRATION = ["y_mean", "y_width"]
@@ -246,7 +246,8 @@ def pvalue(T_obs: float, ref) -> float:
 def judge(ref_rows: list, rows: list, reps: int = REPS, n_ref: int = N_REF, alpha: float = ALPHA_TV) -> dict:
     """The registered rule (section 8.7 note 4, line 2063): the rejection rate of the learned-path toy-calibrated T_v
     is within alpha +- 25%, over `reps` repetitions against `n_ref` reference toys. A non-converged actual fit is
-    reported and enters the rate as not rejected; the result is incomplete if any repetition or toy is missing.
+    reported and left out of the rate (the rate is over the converged repetitions); the result is incomplete if any
+    repetition or toy is missing.
     Reported, not judged: the `no-learned-toys` reference, V_learn left out of C_r, and the chi2_k p."""
     ref = {k: [r[k] for r in ref_rows] for k in ("learned", "no-learned-toys")}
     ok = [r for r in rows if r.get("status") == "ok"]

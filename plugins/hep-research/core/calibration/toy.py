@@ -434,6 +434,22 @@ def observe(model: Model, run_events: dict, run_weights: dict, names=None) -> di
             "per_event_var": per_event_var, "influence": infl, "runs": [o.run for o in obs], "samples": samples}
 
 
+def _difference_covariance(closures: list, at0: dict, k: int) -> np.ndarray:
+    """The MC-noise covariance of the learned-ratio bias estimate (ChainEvaluator.v_learn): b = mean over folds of the
+    learned closure at theta - direct at theta - (learned - direct at theta_0), all on the same closure events; from
+    the per-event influence values of the four evaluations (observe), summed over runs."""
+    V = np.zeros((k, k))
+    for run, cols in closures[0]["direct"]["influence"].items():
+        js = sorted(cols)
+
+        def m(ev):
+            return np.stack([ev["influence"][run][j][0] for j in js], axis=1)
+        D = np.mean([m(c["learned"]) for c in closures], axis=0) - m(closures[0]["direct"]) \
+            - (m(at0["learned"]) - m(at0["direct"]))
+        V[np.ix_(js, js)] += D.T @ D
+    return V
+
+
 # ------------------------------------------------------------------ evaluator
 class ChainEvaluator:
     """The section 7.1 interface on a Model and a plan: nominal events generated at the plan's generation point with its
@@ -893,8 +909,19 @@ class ChainEvaluator:
 
     def v_learn(self, theta: dict, names=None) -> dict:
         """V_learn at theta (section 6.2; observable space, like V_emu): the covariance of the nominal prediction over
-        the plan's repeated trainings plus b b^T, b the fold-averaged held-out closure difference
-        (learned.v_learn). WP-R2 adds it to V_G and to the validation residual covariance."""
+        the plan's repeated trainings plus b b^T (learned.v_learn). WP-R2 adds it to V_G and to the validation residual
+        covariance.
+
+        b (reading L2, A29): the fold-averaged held-out closure difference at theta minus the same difference at the
+        generation point theta_0, where the ratio is 1 by construction (the learned side is the closure sample's stored
+        outputs, the direct side the same events resampled at theta_0 with the uniforms used at theta). Both terms
+        have the closure's MC noise, the theta_0 term has expectation 0 exactly, so the difference keeps the
+        expectation and removes the noise (a control variate; common random numbers on both sides). Without it b b^T
+        carries the closure comparison's own MC noise (about twice V_MC of the closure sample for event-noise
+        dominated observables): V_learn^bias > 0 at theta_0 and V_learn conservative (S4 of phase 5 failed so).
+        `bias_raw` keeps the uncorrected difference, `bias_theta0` the subtracted one (diagnostics). The MC noise
+        left in b (the closure events' influence values of the four terms, the classifiers held fixed: they never saw
+        the closure sample) is subtracted from b b^T, negative eigenvalues set to 0 (learned.v_learn)."""
         from core.calibration import learned
         if self._learned_spec is None:
             raise NotImplementedError("the plan has no learned density ratio (section 6.2)")
@@ -911,8 +938,12 @@ class ChainEvaluator:
             preds.append(observe(self.model, run_events, w, names)["pred"])
         lt = {p: target[p] for p in self._learned_spec["parameters"]}
         cl = [self.learned_closure(k, lt, names) for k in range(len(self.learned_ratio().folds))]
-        bias = np.mean([c["learned"]["pred"] for c in cl], axis=0) - cl[0]["direct"]["pred"]
-        return {**learned.v_learn(preds, bias), "names": cl[0]["names"], "theta": dict(theta)}
+        raw = np.mean([c["learned"]["pred"] for c in cl], axis=0) - cl[0]["direct"]["pred"]
+        c0 = self.learned_closure(0, {p: float(nom["params"][p]) for p in lt}, names)    # the ratio is 1 there
+        at0 = np.asarray(c0["learned"]["pred"], float) - np.asarray(c0["direct"]["pred"], float)
+        noise = _difference_covariance(cl, c0, len(raw))
+        return {**learned.v_learn(preds, raw - at0, noise), "names": cl[0]["names"], "theta": dict(theta),
+                "bias_raw": raw, "bias_theta0": at0}
 
     # ---- surrogate model (section 6.4) and ask/tell (section 7.1)
     def attach_surrogate(self, surrogate) -> None:
