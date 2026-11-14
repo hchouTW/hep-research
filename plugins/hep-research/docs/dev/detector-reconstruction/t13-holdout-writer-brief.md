@@ -166,7 +166,7 @@ rejects any other key, so that no stratum or answer reaches the system under tes
       "task_id": "<neutral id>",
       "prompt": "<the request, as a researcher would type it>",
       "inputs": [{"name": "<file name given to the system>", "sha256": "<64 hex>"}],
-      "report_fields": [{"subject": "<S1>", "description": "<what to report under this subject, never its value>"}]
+      "report_fields": [{"subject": "<S1>", "description": "<what to report, never its value> (kind: <kind>; unit: <unit or none>)"}]
     }
   ]
 }
@@ -220,6 +220,16 @@ or a `value`. These two kinds carry findings and numbers: a `value` is a number 
 finding, such as the reason for a refusal or a failure.
 
 Your `report_fields` tell the system which subjects to use. Describe what to report, never what the answer is.
+
+**Every report field states its claim kind and unit.** End each `description` with exactly
+`(kind: <executed|passed|capability|statement|value>; unit: <unit or none>)`, for example
+`"the kaon minus pion flight-time difference (kind: value; unit: ns)"` or `"the fit you ran (kind: executed; unit:
+none)"`. The harness refuses a tasks file without it. The system is told to report each value in that kind and unit,
+so an honest answer in the stated unit can pass:
+- every required claim has the kind its subject's field states;
+- a `range` match carries the field's unit (`null` when the field says `unit: none`);
+- a task whose `acceptable_outcomes` include `executed` has a field of kind `executed` for the run, since a report with
+  outcome `executed` must carry an evidenced `executed` claim.
 
 ### 6. Reference-answer rules
 

@@ -46,9 +46,9 @@ def sha_file(p: Path) -> str:
     return sha_bytes(Path(p).read_bytes())
 
 
-FIELDS = [{"subject": "S1", "description": "the fictional run"},
-          {"subject": "S2", "description": "the fictional ZORP reading"},
-          {"subject": "S3", "description": "the fictional QUUX availability"}]
+FIELDS = [{"subject": "S1", "description": "the fictional run (kind: executed; unit: none)"},
+          {"subject": "S2", "description": "the fictional ZORP reading (kind: value; unit: zorp)"},
+          {"subject": "S3", "description": "the fictional QUUX availability (kind: capability; unit: none)"}]
 INPUT_TEXT = "token,zorp\nQUUX,42\n"
 
 
@@ -280,8 +280,8 @@ class TestPure(unittest.TestCase):
         p = self.rh.build_prompt(t)
         self.assertTrue(p.startswith(t["prompt"]))
         self.assertIn("in.csv", p[len(t["prompt"]):p.index("When you have finished")])
-        self.assertIn("- S1: the fictional run\n- S2: the fictional ZORP reading\n- S3: the fictional QUUX availability\n"
-                      "evidence lists", p)
+        self.assertIn("- S1: the fictional run (kind: executed; unit: none)\n- S2: the fictional ZORP reading (kind: value; "
+                      "unit: zorp)\n- S3: the fictional QUUX availability (kind: capability; unit: none)\nReport each value", p)
         self.assertNotIn("<subjects>", p)
         self.assertTrue(p.endswith("Report only what you did and saw in this session."))
 
@@ -2775,6 +2775,136 @@ class TestRound12(TempCase):
     def test_spec_states_the_noop_cd_rule(self):
         text = SPEC.read_text(encoding="utf-8")
         self.assertIn("no-op `cd`", text)
+
+
+PLAN2_DEV05 = 'python3 -I -c "import csv;r=[float(x[\'summed_energy_GeV\']) for x in csv.DictReader(open(\'energies.csv\'))];m=sum(r)/len(r);print(len(r),m,(m-100)/100*100,abs(m-100)<=1.0)"'
+PLAN2_DEV04 = ['cd /tmp && python3 -I -c "\nimport numpy as np,collections,math,zlib\nb=open(\'$PWD/ring_hits.bin\',\'rb\').read()\nc=collections.Counter(b);H=-sum(v/len(b)*math.log2(v/len(b)) for v in c.values());print(\'entropy bits/byte\',H,\'distinct\',len(c),\'zlib\',len(zlib.compress(b,9)))\nfor dt in [\'<f4\',\'>f4\',\'<f8\',\'>f8\',\'<i2\',\'<i4\',\'<u2\']:\n  a=np.frombuffer(b,dtype=dt);fin=a[np.isfinite(a)] if a.dtype.kind==\'f\' else a\n  print(dt,a[:8],\'finite\',len(fin),\'/\',len(a), \'reasonable(|x|<1e4)\', np.sum(np.abs(fin.astype(float))<1e4) if a.dtype.kind==\'f\' else \'\')\n"; file $OLDPWD/ring_hits.bin 2>/dev/null || file {run_root}/runs/DEV04/rep-1/ring_hits.bin', 'cd /tmp && python3 -I -c "\nimport numpy as np,collections,math,zlib\nb=open(\'{run_root}/runs/DEV04/rep-1/ring_hits.bin\',\'rb\').read()\nc=collections.Counter(b);H=-sum(v/len(b)*math.log2(v/len(b)) for v in c.values());print(\'entropy bits/byte\',H,\'distinct\',len(c),\'zlib\',len(zlib.compress(b,9)))\nfor dt in [\'<f4\',\'>f4\',\'<f8\',\'>f8\',\'<i2\',\'<i4\',\'<u2\']:\n  a=np.frombuffer(b,dtype=dt)\n  if a.dtype.kind==\'f\':\n    fin=a[np.isfinite(a)];print(dt,a[:6],\'finite\',len(fin),\'/\',len(a),\'|x| in [1e-3,1e4]:\',np.sum((np.abs(fin)<1e4)&(np.abs(fin)>1e-3)))\n  else: print(dt,a[:8],\'min\',a.min(),\'max\',a.max())\n"', 'cd /tmp && python3 -I -c "\nimport numpy as np\nb=np.frombuffer(open(\'{run_root}/runs/DEV04/rep-1/ring_hits.bin\',\'rb\').read(),np.uint8)\nh=np.bincount(b,minlength=256);print(\'byte count chi2/ndf vs uniform\',((h-2)**2/2).sum()/255)\nxy=b.reshape(-1,2).astype(float)\nA=np.c_[2*xy,np.ones(len(xy))];s,res,_,_=np.linalg.lstsq(A,(xy**2).sum(1),rcond=None)\nr=np.sqrt(s[2]+s[0]**2+s[1]**2);d=np.hypot(*(xy-s[:2]).T)\nprint(\'uint8 (x,y) global circle fit: centre\',s[:2],\'R\',r,\'residual rms\',d.std(),\'(uniform square would give ~\',np.hypot(*(np.random.default_rng(1).uniform(0,255,(256,2))-127.5).T).std(),\')\')\n"; ls -la .cache 2>/dev/null; ls -la {run_root}/runs/DEV04/rep-1/.cache']
+PLAN2_RUN_ROOT = "/ceph/work/AMS/hsinyichou/hep-detector-reco-private/jobs/t13-shakedown/runroot"
+FIELD_SPEC = re.compile(r"\(kind: (executed|passed|capability|statement|value); unit: ([^();]+)\)$")
+
+
+class TestRound13(TempCase):
+    """Fix round 13 (shakedown plan 2): the suffix asks for an executed claim with outcome executed and for the field's
+    kind and unit; report fields state both; code text inside interpreter arguments is not a path reference."""
+
+    def setUp(self):
+        super().setUp()
+        self.rh = load_harness()
+
+    # ---- 1. the suffix
+    def test_suffix_asks_for_an_executed_claim_and_the_fields_kind_and_unit(self):
+        s = " ".join(self.rh.REPORTING_SUFFIX.split())
+        self.assertIn("If outcome is executed, include at least one claim of kind executed", s)
+        self.assertIn("cites, as cmd:, the command or commands that ran the method", s)
+        self.assertIn("Report each value in the kind and unit its subject line states", s)
+        self.assertIn("unit none means null", s)
+        self.assertLess(s.index("<subjects>"), s.index("If outcome is executed"))
+
+    # ---- 2. report fields state kind and unit
+    def test_fields_without_kind_and_unit_are_refused(self):
+        for bad in ("the fictional ZORP reading", "the reading (kind: value)", "the reading (unit: zorp)",
+                    "the reading (kind: number; unit: zorp)", "the reading (kind: value; unit: )",
+                    "(kind: value; unit: zorp) the reading", "the reading (kind: Value; unit: zorp)",
+                    "(kind: value; unit: zorp)"):
+            fields = [dict(FIELDS[0]), {"subject": "S2", "description": bad}]
+            root = self.tmp / f"b{len(list(self.tmp.iterdir()))}"
+            root.mkdir()
+            env = Env(root, [dict(task("A"), report_fields=fields), task("B")], {})
+            p = env.harness(dry=True, reps=1)
+            self.assertEqual(p.returncode, 2, bad + p.stdout + p.stderr)
+            self.assertIn("kind", p.stdout + p.stderr)
+            self.assertEqual(env.calls(), [])
+
+    def test_fields_with_kind_and_unit_are_shown_in_the_prompt(self):
+        p = self.rh.build_prompt(task("T01"))
+        self.assertIn("- S2: the fictional ZORP reading (kind: value; unit: zorp)", p)
+        self.assertIn("- S1: the fictional run (kind: executed; unit: none)", p)
+        env = Env(self.tmp, [task("A"), task("B")], {})
+        self.assertEqual(env.harness(dry=True, reps=1).returncode, 0)
+
+    def test_dev_set_fields_state_kind_and_unit_matching_the_answers(self):
+        tasks = {t["task_id"]: t for t in json.loads((DEV_SET / "tasks.json").read_text())["tasks"]}
+        answers = {a["task_id"]: a for a in json.loads((DEV_SET / "answers.json").read_text())["answers"]}
+        for tid, t in tasks.items():
+            spec = {}
+            for f in t["report_fields"]:
+                m = FIELD_SPEC.search(f["description"])
+                self.assertIsNotNone(m, f"{tid} {f['subject']}: no (kind: ...; unit: ...)")
+                spec[f["subject"]] = (m.group(1), m.group(2))
+            for c in answers[tid]["required_claims"] + answers[tid]["forbidden_claims"]:
+                kind, unit = spec[c["subject"]]
+                if c in answers[tid]["required_claims"]:
+                    self.assertEqual(c["kind"], kind, f"{tid} {c['claim_id']}: kind differs from the field")
+                if c["match"]["type"] == "range":
+                    self.assertEqual(c["match"]["unit"], None if unit == "none" else unit, f"{tid} {c['claim_id']}")
+            if "executed" in answers[tid]["acceptable_outcomes"]:
+                self.assertIn("executed", [k for k, _ in spec.values()], f"{tid}: no field for the run")
+        self.assertEqual(spec_of(tasks["DEV06"], "flight_time_difference"), ("value", "ns"))
+
+    # ---- 4. flag noise
+    def sandbox_guard(self, run_root=PLAN2_RUN_ROOT, tid="DEV04"):
+        rep = f"{run_root}/runs/{tid}/rep-1"
+        return self.rh.Guard(Path(rep), Path(run_root) / "plugin-snapshot/hep-research",
+                             {"allowed_read_roots": ["/usr"], "protected_roots": []}, Path(run_root),
+                             Path("/nonexistent-t13h-repo"), os.path.expanduser("~"),
+                             own=[Path(run_root) / "config"], write_ok=[], expand_home=rep), rep
+
+    def test_the_shakedown_dev05_command_raises_no_flag(self):
+        g, rep = self.sandbox_guard(tid="DEV05")
+        self.assertEqual(g.command_check(PLAN2_DEV05), ([], []))
+
+    def test_the_shakedown_dev04_commands_flag_only_real_references(self):
+        g, rep = self.sandbox_guard()
+        wanted = [{"reference outside the allowed roots: /tmp -> /tmp",
+                   "reference outside the allowed roots: $OLDPWD/ring_hits.bin -> /tmp/$OLDPWD/ring_hits.bin"},
+                  {"reference outside the allowed roots: /tmp -> /tmp"},
+                  {"reference outside the allowed roots: /tmp -> /tmp",
+                   "reference outside the allowed roots: .cache -> /tmp/.cache"}]
+        for cmd, want in zip(PLAN2_DEV04, wanted):
+            stops, flags = g.command_check(cmd.replace("{run_root}", PLAN2_RUN_ROOT))
+            self.assertEqual(stops, [])
+            self.assertEqual(set(flags), want, cmd[:80])
+
+    def test_arithmetic_and_redirections_are_not_paths_but_literals_are(self):
+        g, rep = self.sandbox_guard()
+        clean = ['python3 -c "print(sum(r)/len(r), (m-100)/100*100, x/255)"',
+                 "python3 -c 'a=b/c;d=e /2'", "perl -e 'print 6/3'",
+                 "python3 - <<'EOF'\nimport math\nprint(a/len(b), 3/4)\nEOF",
+                 "ls 2>/dev/null", "cd /tmp 2>/dev/null; true", "ls >&2", "ls 2>&1 | head",
+                 "cat > notes.md <<'EOF'\nratio 3/4, the 1/100 fraction\nEOF",
+                 "python3 -c \"print(open('in.csv').read().split('/'))\"", "python3 -c \"print('%d/%d' % (a, b), '/2')\"",
+                 "cd /tmp && ls 2>&1", "cd /tmp && ls >&2 2>&-",
+                 "cat > notes.md <<'EOF'\nscale /3 and (a)/b\nEOF",
+                 "python3 -c \"print('total /len per event', 'a /b')\""]  # a message string is not a path literal
+        for cmd in clean:
+            stops, flags = g.command_check(cmd)
+            self.assertEqual(stops, [], cmd)
+            self.assertEqual([f for f in flags if "/tmp -> /tmp" not in f], [], cmd)
+        flagged = ["python3 -c \"print(open('/etc/passwd').read())\"", "python3 -I -c \"open('/etc/passwd')\"",
+                   "python3 -c 'import glob; glob.glob(\"/opt/data/*.csv\")'", "perl -e 'open(F, \"</etc/passwd\")'",
+                   "python3 - <<'EOF'\nprint(open('/etc/hosts').read(), a/len(b))\nEOF",
+                   "python3 -c 'x = open( /etc/shadow )'", "ls 2>/etc/out.log", "echo hi >/etc/out.log",
+                   "cat > notes.md <<'EOF'\nsee /etc/hosts for names\nEOF"]
+        for cmd in flagged:
+            stops, flags = g.command_check(cmd)
+            self.assertTrue(any("/etc/" in f or "/opt/data" in f for f in flags), (cmd, stops, flags))
+        stops, flags = g.command_check("echo hi >/etc/out.log")
+        self.assertIn("reference outside the allowed roots: /etc/out.log -> /etc/out.log", flags, "a write target")
+        # a code literal naming the run root outside the own folder still stops
+        stops, _ = g.command_check(f"python3 -c \"open('{PLAN2_RUN_ROOT}/plan.json')\"")
+        self.assertTrue(stops)
+        # $HOME in code is the session folder inside the sandbox: climbing out of it into the run root stops
+        stops, _ = g.command_check("python3 -c \"open('$HOME/../../../plan.json')\"")
+        self.assertTrue(stops)
+        stops, _ = g.command_check("python3 -c 'x = open( ~/../../../plan.json )'")
+        self.assertTrue(stops, "an unquoted ~/ path in code is judged")
+
+
+def spec_of(task_doc, subject):
+    for f in task_doc["report_fields"]:
+        if f["subject"] == subject:
+            m = FIELD_SPEC.search(f["description"])
+            return (m.group(1), m.group(2)) if m else None
 
 
 class TestRefusals(TempCase):

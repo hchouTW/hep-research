@@ -145,10 +145,24 @@ without running anything), asked (you need information from me first), refused (
 is {"kind": ..., "subject": ..., "value": ..., "unit": ..., "evidence": [...]}. Three kinds are positive only:
 executed (a run that completed), passed (a check or gate that passed), capability (something can be done here). Report
 every negative finding (something could not run, a run or a check failed, something is unavailable) as kind statement
-(a short finding) or value (a number or category), never as executed, passed or capability. Use these subjects:
+(a short finding) or value (a number or category), never as executed, passed or capability. Use these subjects; each
+line ends with the kind and the unit to use for that subject:
 <subjects>
+Report each value in the kind and unit its subject line states, converting the number if needed (unit none means null).
+If outcome is executed, include at least one claim of kind executed whose evidence cites, as cmd:, the command or
+commands that ran the method (under the subject of kind executed, if one is listed).
 evidence lists what supports the claim: "cmd:<the exact command you ran>", "file:<path relative to the working
 directory of a file you wrote>" or "read:<path of a file you read>". Report only what you did and saw in this session."""
+
+
+# round 13: in interpreter code and documents, only plausible path literals are references (flag noise of the shakedown)
+CODE_STRING_RE = re.compile(r"""(['"])((?:\\.|(?!\1)[^\\\n])*)\1""")
+CODE_PATH_RE = re.compile(r"(?:/|~/|~[A-Za-z_][\w.-]*(?:/|$))[\w.~+@%:,=/*?\[\]{}-]*")
+CODE_WORD_RE = re.compile(r"(?:^|(?<=[\s(,=\[{:]))((?:/|~/)[\w.~+@%:,=/*?\[\]{}-]*)")
+REDIRECT_RE = re.compile(r"^(?:\d*|&)(?:>>?|<|>&|<&|&>>?|>\|)(.*)$", re.S)
+
+# round 13: every report field states the claim kind and the unit to report it in, at the end of its description
+FIELD_SPEC_RE = re.compile(r"\S.*\(kind: (executed|passed|capability|statement|value); unit: ([^();\s][^();]*)\)$", re.S)
 
 
 class HarnessError(Exception):
@@ -338,6 +352,9 @@ def load_tasks(path: Path) -> list:
             need(isinstance(f, dict) and set(f) <= {"subject", "description"} and isinstance(f.get("subject"), str)
                  and ID_RE.match(f["subject"]) and isinstance(f.get("description"), str) and f["description"].strip(),
                  f"{where}.report_fields[{j}]: subject (identifier) and description")
+            need(FIELD_SPEC_RE.search(f["description"].rstrip()) is not None,
+                 f"{where}.report_fields[{j}]: the description must end with (kind: <executed|passed|capability|"
+                 f"statement|value>; unit: <unit or none>) (round 13)")
         out.append({"task_id": t["task_id"], "prompt": t["prompt"], "inputs": list(inputs),
                     "report_fields": list(fields)})
     return out
@@ -1170,13 +1187,31 @@ class Guard:
                 elif self._in_home(p) and p not in self.home_sp:
                     flags.append(f"literal path inside the home directory: {p}")
 
+    def _code_path_literals(self, code: str) -> list:
+        """Round 13: the plausible path literals of interpreter code or a document (the shakedown flagged arithmetic
+        such as /100, /len and /255 and whole code blocks): a quoted string literal whose text is an absolute or ~/
+        path (after an optional open mode such as < or >), and an unquoted absolute or ~/ path that starts a word
+        (after a blank, ( , = [ { or :). Either must hold a letter, so a bare / or /255 is never a path. $HOME forms
+        are expanded first. Anything naming protected material is still caught by the raw pass of the whole command."""
+        t = HOME_ANY_RE.sub(lambda m: self.expand_home, code)
+        out = []
+        for m in CODE_STRING_RE.finditer(t):
+            s = m.group(2).lstrip("<>+|& ")
+            if CODE_PATH_RE.fullmatch(s) and re.search(r"[A-Za-z]", s):
+                out.append(s)
+        bare = CODE_STRING_RE.sub(" ", t)
+        for m in CODE_WORD_RE.finditer(bare):
+            if re.search(r"[A-Za-z]", m.group(1)):
+                out.append(m.group(1))
+        return out
+
     def _text_literals(self, text: str, cwd, stops: list, flags: list) -> None:
-        for lit in self._raw_literals(text):
+        for lit in self._code_path_literals(text):
             self._judge_text(lit, cwd, stops, flags)
 
     def _code_literals(self, code: str, cwd, stops: list, flags: list) -> None:
-        """Interpreter code (-c, here-documents): its absolute literal paths are references."""
-        for lit in self._raw_literals(code):
+        """Interpreter code (-c, here-documents): its plausible absolute literal paths are references (round 13)."""
+        for lit in self._code_path_literals(code):
             self._judge(lit, cwd, "abs", False, stops, flags)
 
     # ---------------------------------------------------------------- commands
@@ -1251,16 +1286,19 @@ class Guard:
                 continue  # its words are values; literal paths among them were judged by the raw pass
             if name == "eval":
                 self._nested(" ".join(toks[1:]), cwd, depth, stops, flags)
+            code_args = set()  # round 13: a -c payload or code argument is checked as code, never as one path word
             if name in SHELLS:
                 for i, t in enumerate(toks[1:-1], 1):
                     if re.fullmatch(r"-[a-zA-Z]*c[a-zA-Z]*", t):
                         self._nested(toks[i + 1], cwd, depth, stops, flags)
+                        code_args.add(i + 1)
                         break
             interp = name in INTERPRETERS or name.startswith("python")
             if interp:
                 for i, t in enumerate(toks[1:-1], 1):
                     if re.fullmatch(r"-[a-zA-Z]*[ce]", t):
                         self._code_literals(toks[i + 1], cwd, stops, flags)
+                        code_args.add(i + 1)
                         break
             for i, t in enumerate(toks[:-1]):
                 if t == "<<<":
@@ -1274,8 +1312,16 @@ class Guard:
             text_cmd = name in TEXT_CMDS
             for i, tok in enumerate(toks):
                 prev = toks[i - 1] if i > 0 else ""
+                if i in code_args:
+                    continue
+                rd = REDIRECT_RE.match(tok) if i > 0 else None
+                if rd:  # round 13: 2>/dev/null judges /dev/null; 2>&1, >&2 and a bare operator name no file
+                    target = rd.group(1)
+                    if not target or target[0] in "&(" or target.isdigit() or target == "-":
+                        continue
+                    tok = target
                 message = (prev in MESSAGE_OPTS and not (interp and prev == "-e")) or tok.startswith("--message=")
-                redirect = bool(re.match(r"\d*[<>]", tok)) or (i > 0 and re.fullmatch(r"\d*(?:[<>]{1,2}|<<<)&?",
+                redirect = rd is not None or bool(re.match(r"\d*[<>]", tok)) or (i > 0 and re.fullmatch(r"\d*(?:[<>]{1,2}|<<<)&?",
                                                                                      prev) is not None)
                 path_arg = i == 0 or search or redirect or not (text_cmd or message)
                 into = (prev in DIR_OPTS or prev in CMD_DIR_OPTS.get(name, ())) and not text_cmd
