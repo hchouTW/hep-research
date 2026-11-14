@@ -2,7 +2,7 @@
 
 Claude Code and Codex plugin for experimental and theoretical high-energy and astroparticle physics research.
 
-Version 0.66.1, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data is synthetic and labeled synthetic in file names and metadata.
+Version 0.67.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data is synthetic and labeled synthetic in file names and metadata.
 Validation status: [docs/capability-matrix.md](docs/capability-matrix.md). Test evidence: [VALIDATION.md](VALIDATION.md).
 
 ## Core capabilities
@@ -265,7 +265,7 @@ Taken from Anthropic's documentation, read on 2026-10-04 ([Plugins](https://clau
    such as the tests profile capabilities cite and the emulator's default artifact), so it (about 4,100 files,
    90.3 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). `tools/check_packaging.py` measures
    this archive, checks both limits, and fails when a reference from a shipped file into `tests/` or `docs/dev/` does
-   not resolve inside it. An uploaded plugin does not update from GitHub.
+   not resolve inside it (this restores the upload route, issue #409). An uploaded plugin does not update from GitHub.
 
 - The plugin is saved to the account: available in Chat, Cowork, and Claude Code sessions signed in to the same account
   (synced plugin; run `/reload-plugins`). Pick a skill with `/` and `hep-research:`, or describe the task.

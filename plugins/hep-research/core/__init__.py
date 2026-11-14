@@ -1,2 +1,2 @@
 """Shared core library of the hep-research plugin. Stewards per module: core/OWNERS.json."""
-CORE_VERSION = "1.13.1"
+CORE_VERSION = "1.14.0"
