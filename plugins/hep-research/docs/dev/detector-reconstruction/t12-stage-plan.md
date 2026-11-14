@@ -22,8 +22,8 @@ until Freeze B fixes K09.
 | 1 | `CAI-T12-1`, `CAI-T12-2`: the synthetic two-round loop (R37), below | none |
 | 2 | Conditions invalidation and identity: A04, A40, A42, A14, G05, §9.3, §9.8-9.9 (T12-05 to T12-09, T12-24 to T12-27) | Freeze B (given); drafted, see "Stage 2" |
 | 3 | Partitioning, recovery and boundaries: A11, A12, §10.2 items 3-7 (T12-10 to T12-12) | Stage 2 (done); Freeze B for the T07-T09 recipes' quality; drafted on `t12/stage3` (from `28763f50`), see "Stage 3" |
-| 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (given), T10 (done); part A (T12-13, T12-15) done: job of record 7648553 PASS after a fresh review and two fix rounds, merged into feature, see "Stage 4"; part B (T12-14) planned, stage 3 done |
-| 5 | A13: recorded `blocked-by-resource` (R14; Q1 answered 2026-11-13); no GPU job. The CPU measurements of stage 4 (T12-14) are recorded beside it | Stage 4 |
+| 4 | Comparators and CPU benchmarks: §14.1, §14.2, A15, quality before speed | Freeze B (given), T10 (done); part A (T12-13, T12-15) done: job of record 7648553 PASS after a fresh review and two fix rounds, merged into feature, see "Stage 4"; part B (T12-14) taken by stage 5 on branch `t12/stage5-a13` (from `d1f6fc30`), see "Stage 5" |
+| 5 | A13 reopened by the user (2026-11-13, "A13: GPU part: allow use GPU"; Q1 superseded): the T10 destriper's baseline solve on the GPU (`b6000-al9_devel`) against the CPU recipe; T12-14 (stage 4 part B) and T12-22 with it; drafted on `t12/stage5-a13`, see "Stage 5" | Stage 4 part A (done); the user's word (given) |
 | 6 | A37 and §9.6 in T12: the g×E degeneracy and the weak-mode witness | none (Q3 answered, Q5 moot: T10 done); drafted on branch `t12/stage6`, see "Stage 6" |
 | 7 | A10, A26-A36 runtime (R20: T11 design, T12 runtime) | T11 design (F1); a backend per family, else a recorded gap |
 
@@ -46,15 +46,15 @@ until Freeze B fixes K09.
 | T12-11 | A12, §10.2 item 7, §10.5 | Native async, OOM or timeout: complete or fail explicitly; never an old artifact | A killed range leaves no output that passes; a resubmission does not reuse a partial file; no retry without a configured count | Stage 2 | 3 | none |
 | T12-12 | §10.2 item 3 | Processing accounts: success, exclusion, failure, unconfirmed per stable scope | Every source event is in exactly one category; an empty collection is not a failure | Stage 2 | 3 | none |
 | T12-13 | §14.1 | Comparators for byte, numerical and statistical reproducibility, declared per recipe | A reordering passes, a changed association fails, each with its fixed tolerance | FB (tolerances with K09) | 4 | FB |
-| T12-14 | §14.2 | CPU engineering benchmark: the same scientific work, each component timed apart, overlap stated | Report reading, initialization, I/O, conditions, conversion, compute and checks separately, with success and failure denominators | Stage 3 | 4 | FB; T10 for T10's recipe |
+| T12-14 | §14.2 | CPU engineering benchmark: the same scientific work, each component timed apart, overlap stated | Report reading, initialization, I/O, conditions, conversion, compute and checks separately, with success and failure denominators ("Stage 5" C1-C8: destriper, T08, T09; T07 not measured, failed gate) | Stage 3 | 4 (taken by stage 5) | none (FB given, T10 done) |
 | T12-15 | A15, A50, §16.1 "quality before speed" | A faster variant with worse tails or coverage is rejected under fixed gates or listed as another working point | A planted faster variant with a fatter tail fails the gate; no speed number is reported before the quality gate | K09 frozen | 4 | FB |
-| T12-16 | A13, R30, U8 | GPU subchain against CPU: include transfer, initialization and queues; compare quality at a fixed reproducibility level | Not run: `blocked-by-resource` (R14). The user answered Q1 on 2026-11-13, "Record blocked-by-resource (Recommended)": no T07-T09 recipe has a GPU subchain, so there is no GPU job. Reopened only if a GPU subchain is built and the user asks | none | 5 | blocked-by-resource |
-| T12-17 | R14, Q1 | A13 is recorded `blocked-by-resource` (the user, 2026-11-13) with CPU measurements recorded; T12 stays blocked for A13 and P5 is incomplete | CPU timings from T12-14 (still in scope, stage 4) are recorded beside the A13 row; T12's state and every P5 report say blocked for A13, for want of a GPU subchain | Stage 4 (T12-14) | 5 | FB |
+| T12-16 | A13, R30, U8 | GPU subchain against CPU: include transfer, initialization and queues; compare quality at a fixed reproducibility level | Reopened by the user (2026-11-13). The destriper's baseline solve in PyTorch float64 on `cuda` against the CPU recipe: on the frozen pointing the stage 4 numerical comparator with T10's frozen tolerance (OI-8) passes; on larger scans the answer is `incomplete` (OI-12), never a pass; queue, initialization, transfers, compute and checks timed apart; speed only after the gate ("Stage 5" G1-G8) | R30 hardware job 7648670 (PASS) | 5 | GPU |
+| T12-17 | R14, Q1 (superseded) | The CPU measurements recorded beside A13 | T12-14's destriper timings on the same sizes, released on the recipe's quality record, recorded beside each A13 row; R14's `blocked-by-resource` no longer applies (a GPU is chosen, R30 done) | Stage 5 (T12-14) | 5 | none |
 | T12-18 | A37, §9.6 | g×E degeneracy: convergence and same-type holdouts are no proof of absolute scale; identifiable combinations and named constraints retained | A two-parameter synthetic fit of `y = gE` reports only `gE` (or a named external scale); a same-type holdout is not accepted as validation | Q3 | 6 | T10 (shared fixture) |
 | T12-19 | A37, §9.6, R31 (weak-mode witness) | The T07 weak-mode fixture reused in T12: χ²/ndf essentially unchanged while `q/p` is biased; the method card lists the mode and its named constraint | Reuse `CAI-T07-4`'s fixture 7004 against 7003 inside a T12 reprocessing; the card lists `sagitta-like deformation` with its constraint | T07 merged | 6 | T10 |
 | T12-20 | R20, A26-A36 | A26-A36 runtime: injection before filtering, scan settings, per-channel exposure, angle bases, CRES first segment, averaged spectra, IRF reuse, veto-only scintillation, null modes, frame definitions, injected data labels | One executed case per scenario on a backend that covers it; otherwise a recorded gap keeping P4 execution incomplete | T11 design (F1) | 7 | none (backend absent: gap) |
 | T12-21 | §16.1 T12 row, A10 | Waveform omitted: higher-level parameters usable; trace-requiring recomputation judged infeasible | A product with `raw` retention removed refuses a trace rerun (`can_recompute` false) inside a T12 reprocessing | T08 merged | 7 | none |
-| T12-22 | §10.4, contract-map Section 10.4 row | Execution fields beyond concurrency, layout, residence and ownership: transfer edges, precision, batch and memory limits, streaming queues | Written only where a backend supports them; a CPU-only CLI gets no GPU field | Stage 5 findings | 5 | GPU |
+| T12-22 | §10.4, contract-map Section 10.4 row | Execution fields beyond concurrency, layout, residence and ownership: transfer edges, precision, batch and memory limits, streaming queues | Written for the GPU subchain only ("Stage 5", T12-22), with measured transfers and device memory; streaming queues not applicable (offline); the CPU recipe's CLI gets no GPU field | Stage 5 | 5 | GPU |
 | T12-24 | §9.9 row 2, §9.3 | An IOV crossing a chunk: subdivide, resolve per observation or use a time-varying model | On a T07-T09 product split across a payload change: each part binds its own payload (the per-key frames of T06, `check_frame_conditions`, carried into reprocessing); the first event's payload on the whole chunk is refused | T07-T09 merged | 2 | none |
 | T12-25 | §9.9 rows 3-4, A32 | Clustering, cleaning, cut, model, noise, template or transform changes invalidate by effective dependency and keep different-version results | A changed T08 configuration digest reruns the calo products and their response pairing; old and new products both kept | T07-T09 merged | 2 | FB for response revalidation |
 | T12-26 | §9.9 row 6 | Report title or non-scientific metadata only: scientific results unchanged; integrity manifests and presentation updated apart | A metadata-only change keeps every scientific product's identity; only the presentation product and its manifest change | none | 2 | none |
@@ -672,13 +672,196 @@ The three new tests were written first and run red against the round-1 harness (
 
 **Job.** `jobs/t12-stage4/t12-stage4-r2.sh` with `SOURCES-r2.sha256`, `--time 03:00:00`; the r1 files are kept.
 
-**Part B, T12-14 (planned only; waits for stage 3).** The same scientific work on the same input domain and native output level, each
+**Part B, T12-14 (planned here; taken by stage 5, see "Stage 5" C1-C8).** The same scientific work on the same input domain and native output level, each
 recipe at its Freeze B hash: reading and probes, initialization, I/O, conditions, conversion, native compute and output/checks timed
 apart; with overlap, the total wall time and how each part was measured, never a sum of overlapping times (§14.2). Workload units per
 task (events for T07-T09, samples and baselines for the destriper); success and failure denominators, memory, latency quantiles,
 throughput. Cold and warm apart (K12, t04-values-v4.md §12: no targets; numbers are records, not gates). No speed number is reported
 for a recipe before its quality gate (T12-15); these CPU numbers are what T12-17 records beside A13. It needs stage 3's partition and
 accounts (T12-10 to T12-12) and its own job approval.
+
+## Stage 5: A13 on the GPU, and T12-14 (fixed before the tests were written)
+
+**Authority and scope.** The user, 2026-11-13: "A13: GPU part: allow use GPU". A13 is reopened; Q1's answer ("Record
+blocked-by-resource") is superseded by it. The subchain is the T10 destriper's baseline solve (`reco.scan.destriper/1`), the only recipe
+with a frozen reproducibility tolerance; the partition is `b6000-al9_devel` (`--gres=gpu:1`, never `--qos`), PyTorch from the existing
+venv `torch-gpu/venv-cu130` (torch 2.14.1+cu130, Python 3.12, `PYTHONNOUSERSITE=1`; nothing installed). R30's tiny hardware job is done:
+`jobs/a13-gpu/hw-check.sh`, job 7648670 PASS (NVIDIA RTX PRO 6000 Blackwell Server Edition, driver 590.48.01, capability 12.0, 188 SMs;
+a 2048 x 2048 float64 solve on the GPU agreed with the CPU to 1.9e-15 relative; float64 GPU 0.0144 s against float32 0.0050 s warm, first
+call 1.30 s: readings). This stage also takes part B of stage 4 (T12-14, the CPU engineering benchmark), whose destriper timings are A13's
+CPU side and what T12-17 records beside A13, and T12-22 (execution fields). On branch `t12/stage5-a13` from `d1f6fc30`. Before this
+section one feasibility probe ran on login (a PyTorch transcription of the solver on the CPU, float64, beside the recipe; a 1,048,576-sample
+synthetic scan timed with NumPy and PyTorch); its numbers are the readings quoted below, and no test existed then.
+
+**Files.** `tests/contracts/t12_a13_gpu.py` (the GPU subchain, the A13 comparison, the sealed timings, the execution fields, a command
+line) and `tests/contracts/test_t12_a13_gpu.py` (skipped as a whole without PyTorch, and listed in the required torch-backend CI job,
+`.github/workflows/tests.yml`, where no PyTorch skip is allowed; the CUDA cases skipped without a CUDA device);
+`tests/contracts/t12_benchmark.py` (T12-14: component timers, recipe identity, the release rule) and
+`tests/contracts/test_t12_benchmark.py`; `tools/optional_modules.json` lists the new torch module under `torch-cpu` (the required units
+skip it). No recipe, frozen file, adapter asset or `jobs/evaluation/SOURCES.sha256` entry changes: the GPU subchain is a harness-side
+transcription that reads the recipe's own timestream reader and writes the product with the recipe's own writer. No quality claim: every
+input is synthetic or a block-1 development input.
+
+**The GPU subchain (G1-G8).** The same algorithm as `destripe_recipe/solver.py`, line by line in PyTorch: conjugate gradient on the reduced
+system `D a = F^T Z y` from `a = 0`, every residual and direction projected onto the zero-sum subspace (mean removed), the stopping test on
+the recomputed residual `||Pi (F^T Z y - D a)|| / ||Pi F^T Z y|| <= eps`, the restart when the recurrence collapses, the budget 10 per
+baseline (`BUDGET_PER_BASELINE`) and the recipe's `NotConverged`; the map by binning. `M^-1 P^T v` is `index_add_` divided by the hit
+count, `F^T v` a reshape and row sum. The input is read by `destripe_recipe.timestream.read` (so a scan the recipe refuses is refused
+here), the product built by `destripe_recipe.product.build` with a `destripe_recipe.solver.Solution`, and read back by `product.read` and
+`contracts.reconstruction.read_sidecar`. Precision float64 (the frozen tolerance is a float64 derivation); float32 is a reading only.
+- G1. On the frozen pointing (t10-destripe/1, noisy, seed 20260, stopping 1e-10), on `cpu` in tests: the product is read by the recipe's
+  reader, the contract accepts its embedded product, and the stage 4 numerical comparator (`t12_comparators.compare_numerical`, the record
+  `217a38bc…`, the OI-8 ruling) answers `passed` against the recipe's product. Probe: 15 iterations both; baselines 2.4e-16 and map
+  1.7e-16 of `||a_r||_2`; zero sum 3.5e-17 of `sum |a|` (fix round 1: the iteration counts are equal exactly; tests bound the readings by
+  1e-12: test bounds on readings, not tolerances).
+- G2. The noiseless variant at stopping 1e-13 against the recipe's product at 1e-13 (record `12738ebc…`): `passed` (probe: 15 iterations
+  both, 7.2e-16 and 2.8e-16).
+- G3. The stopping rule is the recipe's: the product's `relative_residual` is at most its `stopping` (else `product.read` refuses it); a
+  budget of 3 raises the recipe's `NotConverged` with 3 iterations and writes nothing, on both paths alike.
+- G4. A scan the recipe refuses (the disconnected variant; an unobserved pixel) is refused by the same reader before any device work.
+- G5. `device="cuda"` without a CUDA device is `DeviceUnavailable`: `incomplete` (exit 3), never a silent run on the CPU.
+- G6. float32: the solve runs as a reading; at the recipe's stopping it ends in `NotConverged` or a residual above it, and a product is
+  never built from a non-float64 solution (`rejected`). No float32 result is ever passed to the comparator.
+- G7. Both products of a comparison must name the same input (`input.sha256`); otherwise `rejected`.
+- G8. On CUDA (job only): G1 and G2 hold on the device (`passed`). Prediction: the iteration counts equal the recipe's (15, 15), the
+  differences 1e-16 to 1e-14 of `||a_r||_2`, far below `tau` (2.5e-8 and 2.5e-11). GPU-to-GPU byte equality across repetitions is a
+  reading (`index_add_` uses atomic adds on CUDA, so the order of the additions is not fixed), never a gate.
+
+**The A13 comparison (T12-16; plan A13, R30, U8; Section 14.2).** Per size, the GPU subchain against the CPU recipe on the same timestream:
+- Sizes. `frozen-noisy` (t10-destripe/1, seed 20260, 256 samples, 32 baselines, 16 pixels, stopping 1e-10) and `frozen-noiseless` (the
+  same pointing, stopping 1e-13); larger synthetic scans by the harness's generator (the fixture's model at scale: baseline b sweeps a
+  contiguous arc of L/2 or L pixels from a seeded start; map integers 1..19 with a sign; baselines in pairs (v, -v); white noise sigma 1;
+  streams seed, seed + 1, seed + 2): `scan-1m` (4,096 pixels, 8,192 baselines of 128, 1,048,576 samples, seed 20261) and `scan-16m`
+  (16,384 pixels, 65,536 baselines of 256, 16,777,216 samples, seed 20262), both at stopping 1e-10. Probe on login, `scan-1m`: NumPy
+  recipe 2.32 s, 78 iterations; PyTorch on one CPU thread 2.04 s, 78 iterations, 2.0e-15 of `||a_r||_2`; JSON 27 MB.
+- Quality at the specified reproducibility level. Frozen sizes: the stage 4 numerical comparator with T10's frozen tolerance under the OI-8
+  ruling (same pointing only): `passed`, `failed` or `rejected` as it answers. Larger sizes: T10's record does not hold off its pointing
+  (OI-8; the comparator's derivation check rejects the pointing), and no tolerance is frozen for them, so the answer is `incomplete` with
+  **OI-12** (new) and the differences as readings, never a pass. **OI-13** (new): `destriper-product/1` embeds a dense design matrix
+  (samples x (pixels + baselines)), so no product of a larger scan can be written (scan-1m: 1,048,576 x 12,288 entries); the larger sizes
+  are compared in memory, the CPU side by the recipe's solver in the same process.
+- Times, each apart, per repetition (a repetition is one process): queue wait (from `sacct`: Submit to Start, once per job); process
+  start to the end of `import torch` (the shell's launch time passed in); CUDA initialization (context and first kernel, synchronized);
+  reading (file read and `timestream.read`); host to device (pixel and value tensors, synchronized); compute, first solve and then warm
+  solves (synchronized); device to host (map and baselines); checks (product build, `product.read`, `read_sidecar`, the comparator). Per
+  iteration the stopping test and the CG scalars cross to the host (4 scalars, counted), which is the algorithm's own synchronization.
+  Denominators: attempted, succeeded (converged, product read, contract accepted, comparator passed; for larger sizes: converged and
+  compared, answer incomplete) and failed by category (not-converged, refused, comparator failed, rejected, crashed, device unavailable).
+- Quality before speed (stage 4, M3; A15, A50). Every timing is sealed to its run when the run starts; it is released only against a
+  quality record that the harness itself made from that run's products (by identity, never a dict or a copy), and only if that record says
+  `passed`. Frozen sizes release after their comparator passes; larger sizes stay withheld (OI-12), written to a sealed file that no report
+  reads. The CPU recipe's own timings (T12-14) are released on the recipe's quality record (below); the GPU's never on the CPU's record.
+- Release-time CPU side. In `a13-measure.sh` the CPU side runs in the same job on the node's allocated CPUs (8 CPUs requested, the
+  recipe single-threaded by `OMP_NUM_THREADS=1`, stated): the recipe's own command line under the project's Python 3.13 environment for
+  the frozen sizes (the reference products), and the recipe's solver in the venv process for the larger sizes.
+
+**T12-14, the CPU benchmark (C1-C8; Section 14.2; stage 4 part B).** Same scientific work, input domain and native output level, each
+recipe at its Freeze B bytes; numbers are records, not gates (K12: no targets).
+- C1. Destriper, in process: I/O (file read), reading (JSON parse and `timestream.read`, with its connectivity probe), initialization
+  (a separate fresh-process probe: interpreter start and the recipe's imports), conditions (not applicable: the recipe consumes no
+  conditions, `conditions_ref` "none"), compute (`solver.solve`), output (`product.build`, `dumps`, write), checks (`product.read`,
+  `read_sidecar`). The whole command line `destriper.py solve` timed separately as the total wall. The in-process components are
+  sequential in one thread (no overlap), and the total is measured, never their sum. Workload: samples, baselines, iterations.
+- C2. The in-process product is byte-equal to the command line's product of the same input and `product_id` (the same work); else the
+  benchmark is `failed` for that recipe.
+- C3. T08 (`reco.calo.cell-cluster/1`), in process, the command line's `reconstruct` path step by step: configuration (its own component,
+  beside the import probe), readout (reading and I/O), pedestal and gain payloads (conditions), the cell chain per event (conversion),
+  clustering per event (compute), event documents and the writer (output); `check-product` as checks (command line). C2's byte equality
+  against the command line's product. Per-event compute latency quantiles (50, 90, 99 %) and events per second.
+- C4. T09 (`reco.light.channel-likelihood/1`): the command lines `fit --likelihood charge-time --starts multistart`, `topology` and
+  `check-product`, as the evaluation runs them; initialization by the import probe. Reading, conversion, compute and output happen inside
+  one call per event and are not separated: separating them means instrumenting a frozen file (recorded, not measured).
+- C5. Recipe identity: every file of the recipe is pinned by SHA-256 at `d1f6fc30` (Freeze B's bytes; `calo_cluster.py` and
+  `photon_likelihood.py` with exactly the recorded post-D4 bytecode line, decisions.md "The held bytecode line"); a different byte is
+  `rejected` and nothing is timed.
+- C6. Release (quality before speed): the destriper on the record's quality (T10 replay PASS, job 7596623, at its frozen hash) and, on
+  the frozen pointing, this run's product passing the numerical comparator against the command line's; T08 and T09 on their evaluation
+  attempt-1 pass at Freeze B bytes (summaries 7620411 and 7613459) with C5. T07 failed at attempt 1 (STATE.md): no speed number may be
+  released for it (A50), so it is not measured.
+- C7. Inputs. Destriper: the four A13 sizes. T08: main, block 1, stratum 4, 600 events, by the frozen generator `gen_t08_grid.py`
+  (`d901362c…`) through `t08_fixture_files.py`, as E6a ran it. T09: main, block 1, stratum 9, 40 events, by `gen_t09_sphere.py`
+  (`2657f56b…`). Tests use the tracked block-1 examples (`examples/reconstruction-calorimetry/recorded/events.*`, 2 events;
+  `examples/reconstruction-photon-likelihood/recorded/main.readout`). Repetitions: 3 per recipe and size (the first process is "first",
+  the rest "warm"; the file-system cache is not controlled, stated).
+- C8. Reported per recipe: each component's seconds per repetition with the median, success and failure denominators, peak memory per
+  process (`wait4`), throughput, and the not-measured list with reasons: T07 (failed gate; native build), `reco.timing.time-chain/1` (not
+  named by part B; no A13 role), the destriper's conditions (none consumed), T09's inner components (C4), queue wait on the CPU partition
+  (the job's own, from `sacct`, not per recipe).
+
+**T12-22, execution fields (plan Section 10.4).** Written for the GPU subchain only, as a record in the run output: layout (contiguous
+1-D tensors: pixel int64, value float64, structure of arrays), residence (host for reading and product, device for the solve), ownership
+(PyTorch's caching allocator, released at process end), asynchronous completion (one CUDA stream, synchronized at each stopping test and
+at every timing boundary), transfer edges (host to device once per solve, 16 bytes per sample; device to host once, 8 bytes per pixel and
+baseline; 4 scalars per iteration), zero-copy not claimed (copies measured), precision (float64; float32 a reading), batch (one timestream
+per solve, no batching), memory limits (the measured device peak, `max_memory_allocated`, against the device's 97,887 MiB; host peak RSS),
+streaming queues (not applicable: an offline solve, no queue or in-flight limit). The CPU recipe's command line gets no GPU field: asked
+for the CPU backend, the function returns none.
+
+**Mutation check (after green).** Planted one at a time in a copy of the harness, each must turn at least one test red: the stopping test
+loosened tenfold; the budget ignored; a silent CPU fallback for `cuda`; a float32 product built; the zero-sum projection of the right side
+removed; the map binned without subtracting the baselines; the input-identity check removed; a larger size answered `passed`; a timing
+released without the gate's record; released on a failed gate; GPU fields written for the CPU backend; the recipe identity check removed
+(benchmark); the byte equality of C2 dropped; T07's timing released. (As run: see the disclosed changes below.)
+
+**Changes after the tests were written (disclosed; red logs `jobs/t12-stage5/red/`).** (1) The mutation list: "the zero-sum projection of
+the right side removed" is an equivalent mutant (`F^T Z y` sums to zero exactly, since `Z` removes each pixel's mean and the pixel means
+cover every sample), so it is replaced by "binning sums instead of averaging"; added: "a frozen size compared in memory", "the owner check
+removed", "a comparator failure ignored by the recipe gate"; 17 in all (`jobs/t12-stage5/mutate.py`). (2) The command line takes `--size
+custom` for any pointing but the record's (always OI-12), so the tests need no larger file; the named sizes check their shape (and the
+frozen ones their bytes). (3) The float32 reading's budget is capped at twice the float64 iteration count plus 10 (a reading's budget,
+stated): at 1e-10 float32 never converges, and the recipe's budget (10 per baseline) would spend 655,360 iterations on scan-16m. (4) The
+test module is listed in the required torch-backend CI job (`tests/tools/test_pyproject.py` requires every module with a PyTorch skip
+there).
+
+**Jobs (drafted; the coordinator submits).** `jobs/t12-stage5/t12-stage5.sh` (CPU, `edr2-al9_short_serial`, `--time 03:00:00`): units,
+neighbours, the CPU benchmark, the full suite and static; LCG the only allowed failure. `jobs/a13-gpu/a13-pilot.sh` (B6000, 1 GPU, the
+frozen sizes only, 2 repetitions; fix round 1: limit 30 min, wall 10 to 15 min with the setup). `jobs/a13-gpu/a13-measure.sh` (B6000, 1
+GPU): every size, sized from the pilot, re-pinned by the coordinator after it. Each follows the snapshot rule
+(`jobs/t12-stage4/t12-stage4-r2.sh`).
+
+### Stage 5, fix round 1 (review `jobs/t12-stage5/REVIEW.md`, NOT READY 1/2/6/3; every finding adopted)
+
+Order of work, disclosed: the changed and new tests were written first and run red against the round-0 harnesses
+(`jobs/t12-stage5/red-r1/red-1-round0-harness.log`: a13 36 run, 3 failures, 2 errors; benchmark 19 run, 3 failures); the trajectory test and
+the exact iteration counts passed there (they characterise round-0 behaviour, which the review found faithful by reading). One new bound
+was set before any run and changed after the first green attempt: the injected-offset drift bound, 1e-12, read 5.2e-11 at c = 37.5 on the
+unmutated harness (rounding of c against a late, small vector), so it is 1e-8 (a removed projection leaves 1e-1 to 1). The rounds-0 jobs
+7648900 and 7648934 ran on the round-0 files and are readings for this round.
+
+- **C1** (the coordinator's fix, kept): the GPU jobs' sandbox binds the real `/dev` (`--dev-bind /dev /dev`) and checks inside it that
+  PyTorch sees the device before any step (else exit 3).
+- **I1** (the tests did not pin the transcription). Exact iteration equality with the recipe (G1, G2). New tests: the trajectory, for
+  every budget k = 1 .. n-1 on the frozen noisy and noiseless pointings and a 2,048-sample scan, both paths raise the recipe's
+  `NotConverged` after k iterations with recomputed residuals within 1e-6 relative; the reported residual equals the one recomputed with
+  the recipe's NumPy operators from the returned baselines (1e-6 relative, absolute floor 1e-13 at the rounding floor); the restart branch
+  (stopping 1e-17 on the frozen pointing, budget 150: both paths restart, the same number of times, the recipe's counted from its
+  `_zero_sum` calls, and end `NotConverged` at 150); fault injection (`probe["offset"]` puts c times the null vector into the start of a,
+  the start of the direction and every application of D: the solution is unchanged within 1e-12 and every kept vector's mean stays below
+  1e-8 of its largest entry). The reviewer's survivors are in the mutation list: stopping on the recurrence residual, the zero-sum
+  projection removed from a, from the direction, from the image, and a stricter stopping value. In exact arithmetic the three projections
+  are redundant (D maps into 1-perp and the Krylov space stays there); the fault injection is what makes them observable.
+- **I2** (GPU limits ignored the setup; job 7648901 spent 7.6 min before its first step): the pilot's limit is 00:30:00, its wall
+  prediction 10 to 15 min; the measurement's sizing rule adds the measured setup (snapshot and checks, from the pilot's receipt times).
+- **M1**: a zero right side gives 0 iterations and residual 0.0, as the recipe (it gave 1.0); test added.
+- **M2**: on another pointing the GPU run's `checks` exclude the CPU recipe's solve (timed apart in `cpu_side`); test added.
+- **M3**: `process_to_import` ends after every import of the harness module (the plugin's and the recipe's included), not after `torch`.
+- **M4**: the overlap statement is per recipe: the destriper's `total_wall` is the command line's own run and overlaps every in-process
+  part; T08's `checks` is a command line's wall (its own interpreter start and reading); each T09 part is a whole command line's wall.
+- **M5**: Q2 is a coordinator ruling for the user to confirm (below), not the user's word.
+- **M6**: the jobs' queue-wait line no longer depends on `tee`'s status: the computed line is kept in a variable and its own exit decides.
+- Nits: the destriper's pinned bytes cite the T10 replay of record (job 7596623; `destriper.py` 2a8a0a04, `solver.py` 85ca7de7), not the
+  evaluation manifest, which does not hold the destriper; the jobs' `steps.tsv` seconds are whole-step walls (process starts included),
+  never component timings.
+
+**Proposal, not adopted (OI-12's way out; the user's call).** An intermediate pointing of about 4,096 to 65,536 samples with a T10-style
+derived tolerance would let A13 release a GPU speed number at a size where the GPU could matter. It would need: a fixed generator and seed
+for that pointing; kappa and G recomputed for it (`t10_comparator.fixture_numbers` builds dense matrices: at 65,536 samples an iterative
+eigen-solver or a smaller size); the exact rational reference of the T10 replay or a stated substitute at that size; a record in the
+`t10-replay-tolerance/1` format with tau = safety x kappa x eps; a review; and the user's freeze, as for T10's record. Not built here.
+
+**Jobs (fix round 1; drafted).** `jobs/t12-stage5/t12-stage5-r1.sh` with `SOURCES-r1.sha256` and `mutate-r1.py` (24 mutations);
+`jobs/a13-gpu/a13-pilot-r1.sh` (00:30:00) and `a13-measure-r1.sh` with `jobs/a13-gpu/SOURCES-r1.sha256`. The round-0 scripts and
+manifests are kept.
 
 ## Stage 6: A37 and §9.6 in T12 (fixed before the tests were written)
 
@@ -836,19 +1019,23 @@ Job 7636529 failed only on `tests.adapters.test_t04_evaluation_layout.TaskDeadli
 - **n2.** The nominal sidecar's planes come from the nominal geometry text (`planes N` of `nominal_geometry_text()`), not a literal 8.
 - n1 (W6 restates part of W4) and n3 (`visible-chi2` run natively) are not taken: W6 keeps its own statement (the χ²-only judge), and the
   χ² side's power is shown on toys.
-## A13: recorded blocked-by-resource (stage 5; no GPU job)
+## A13: reopened by the user (stage 5)
 
-The user answered Q1 on 2026-11-13: "Record blocked-by-resource (Recommended)". No T07-T09 recipe has a GPU subchain (the ACTS build,
-calo-cluster and photon-likelihood are CPU code), so A13 stays `blocked-by-resource` under R14, with the CPU measurements recorded instead.
-There are no GPU jobs: neither the tiny confirmation job of R30 nor a pilot. U8 ("Use the site GPU partition") stands for any later GPU
-subchain, which would reopen A13 only on the user's word. The CPU engineering benchmark (T12-14) stays in scope, in stage 4, and its timings
-are the CPU measurements recorded beside A13.
+The user answered Q1 on 2026-11-13 "Record blocked-by-resource (Recommended)"; later the same day the user reopened A13: "A13: GPU part:
+allow use GPU", with the subchain (T10 destriper: its baseline solve on the GPU against the CPU recipe on the same pointing, the one recipe
+with a frozen reproducibility tolerance) and the partition (B6000 devel, `b6000-al9_devel`, `--gres=gpu:1`, no `--qos`). Q1's answer is
+superseded; R14's `blocked-by-resource` no longer applies to A13. R30's tiny hardware job ran first (job 7648670, PASS). U8 ("Use the site
+GPU partition") stands. The T07-T09 recipes still have no GPU subchain (CPU code); A13 covers the destriper only, and the CPU engineering
+benchmark (T12-14) is recorded beside it. See "Stage 5".
 
 ## Questions and rulings
 
-- **Q1 (A13 subchain): answered** by the user, 2026-11-13: "Record blocked-by-resource (Recommended)". A13 is `blocked-by-resource`
-  (R14), no GPU job; CPU measurements recorded (T12-14, T12-17).
-- **Q2 (A13 reproducibility): moot** while A13 is `blocked-by-resource` (Q1); it returns with a GPU subchain.
+- **Q1 (A13 subchain): superseded** by the user's word, 2026-11-13: "A13: GPU part: allow use GPU" (subchain T10 destriper, partition
+  B6000 devel). The earlier answer, "Record blocked-by-resource (Recommended)", stands only as history.
+- **Q2 (A13 reproducibility): a coordinator ruling for the user to confirm** (stage 5 brief and fix round 1, M5, 2026-11-13): the stage
+  4 numerical comparator with T10's frozen tolerance under the OI-8 ruling, on the frozen pointing only; larger sizes `incomplete`
+  (OI-12). Its ground is the user's choice of the subchain: the T10 destriper, "the only recipe with a frozen reproducibility tolerance"
+  (as the stage 5 brief records the user's choice, 2026-11-13). The user has not ruled on Q2 itself.
 - **Q3 (A37 in T12): answered** by the coordinator, 2026-11-13: T12's part needs its own reprocessing run of fixtures 7003 and 7004
   through the T12 loop machinery, because T12-19's acceptance says "inside a T12 reprocessing" and R31 says "reused", not cited. Stage 6
   (T12-19) runs it; T10's reading of the recorded log (`t10_a37.py` `witness_check`) is not T12's evidence.
