@@ -14,9 +14,6 @@ conditional ratio, so it composes with weights on upstream nodes).
   folds (F = 1 trains and applies on the same events: no cross-fitting, which G4-L refuses from the record).
 - Probability calibration: Platt scaling (logit' = a logit + b) on a calibration split of the training events not used
   for fitting; `none` keeps the raw logit (G4-L refuses it from the record).
-- Feature clamp (A30): each fold model keeps the box (per-feature min and max) of both classes' fitting rows and
-  evaluates on features clipped to it, so the polynomial never extrapolates into the tails (calibration rows and
-  applied events outside the box get the boundary value).
 - Prior-ratio correction: log r = logit' - log(n_1 / n_0), the class sizes of the set the logit is calibrated on.
 - V_learn = the variation between repeated trainings (independent training MC and a new initialization seed) + the
   square of the closure bias on held-out samples (section 6.2): `v_learn`, its two parts kept apart
@@ -160,8 +157,6 @@ class FoldModel:
     train: np.ndarray                 # the event indices it was trained (fitted or calibrated) on
     converged: bool
     iterations: int
-    lo: np.ndarray | None = None      # the training box of the features (A30): evaluation features are clipped to it
-    hi: np.ndarray | None = None
 
 
 @dataclass
@@ -182,10 +177,7 @@ class TrainedRatio:
 
     # ---- evaluation
     def base(self, F: np.ndarray, fm: FoldModel) -> np.ndarray:
-        F = np.asarray(F, float)
-        if fm.lo is not None:             # never extrapolate the polynomial beyond the training rows (A30)
-            F = np.clip(F, fm.lo, fm.hi)
-        Z = (F - fm.z_mean) / fm.z_scale
+        Z = (np.asarray(F, float) - fm.z_mean) / fm.z_scale
         cols = [np.prod(Z[:, list(e)], axis=1) for e in self.exps]
         B = (np.stack(cols, axis=1) - fm.col_mean) / fm.col_scale if cols else np.zeros((len(Z), 0))
         return np.concatenate([np.ones((len(Z), 1)), B], axis=1)
@@ -336,11 +328,8 @@ def train(stored: np.ndarray, sampler, spec: dict, theta0: dict, support: dict, 
         col_scale = np.where(col_scale > 0, col_scale, 1.0)
         fm = FoldModel(np.zeros((1 + len(exps), taus.shape[1])), 1.0, 0.0, 0.0, z_mean, z_scale, col_mean, col_scale,
                        idx, True, 0)
-        F1s = [sampler(pt, fit_idx, [*key, 2, k, t]) for t, pt in enumerate(pts)]
-        rows = np.concatenate([stored[fit_idx], *F1s])          # both classes' fitting rows (A30)
-        fm.lo, fm.hi = rows.min(axis=0), rows.max(axis=0)
         B0 = tr.base(stored[fit_idx], fm)
-        B1s = [tr.base(F1, fm) for F1 in F1s]
+        B1s = [tr.base(sampler(pt, fit_idx, [*key, 2, k, t]), fm) for t, pt in enumerate(pts)]
         x0 = r.normal(0.0, 1e-3, B0.shape[1] * taus.shape[1])            # the initialization seed (section 6.6)
         beta, ok, nit = _fit_logistic(B0, B1s, taus, float(s["l2"]), float(s["label_smoothing"]), x0,
                                       s["max_iterations"])

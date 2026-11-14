@@ -288,7 +288,7 @@ def merge(out_dir: Path, out: Path, tasks=None, reps: int = REPS, n_ref: int = N
 
 
 SMOKE = [{"kind": "reference", "i0": 900000, "n": 2}, {"kind": "actual", "i0": 900000, "n": 2}]
-SMOKE_CONFIG = {"exposure": 2000, "mc_events": 10_000}   # A30: at 4000 MC the nominal fit failed the ln det diagnostic (smoke only)
+SMOKE_CONFIG = {"exposure": 2000, "mc_events": 4000}
 
 
 def local(out: Path) -> dict:
