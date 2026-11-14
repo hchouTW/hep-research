@@ -66,16 +66,26 @@ def hints(problem, direction, names) -> list:
     return out
 
 
-def p3(problem, beta_ref: np.ndarray, ref: L.Reference | None = None) -> dict:
+def _block(problem, S, block):
+    """The judged theta block (phase 5, A26: the fixed effects of a pooled fit; None: every theta, the default)."""
+    names = list(problem.layout.theta)
+    sp = F.sigma_prior(problem)
+    if block is None:
+        return S, names, sp
+    idx = list(block)
+    return (None if S is None else S[np.ix_(idx, idx)]), [names[i] for i in idx], np.asarray(sp, float)[idx]
+
+
+def p3(problem, beta_ref: np.ndarray, ref: L.Reference | None = None, block=None) -> dict:
     """P3 at the prior centre with Asimov data (section 8.2): not identifiable when lambda_min(R_corr) < 0.1 or any
-    sigma_post / sigma_prior > 0.4 (remedy level contract; plan for efficiency-map error, phase 3)."""
+    sigma_post / sigma_prior > 0.4 (remedy level contract; plan for efficiency-map error, phase 3). `block`: the theta
+    indices judged (the others are profiled with the nuisances; pooled fits, A26)."""
     d = len(problem.layout.theta)
-    S = _sigma_theta(information(problem, beta_ref, ref), d)
-    names = problem.layout.theta
+    S, names, sp = _block(problem, _sigma_theta(information(problem, beta_ref, ref), d), block)
     if S is None:
         return {"gate": "P3", "status": "failed", "finding": "p3.not_identifiable", "singular": True,
-                "hints": hints(problem, np.ones(d) / math.sqrt(d), names), "remedy": "contract"}
-    m = measures(S, F.sigma_prior(problem))
+                "hints": hints(problem, np.ones(len(names)) / math.sqrt(len(names)), names), "remedy": "contract"}
+    m = measures(S, sp)
     bad = m["lambda_min"] < P3_LAMBDA or max(m["ratio"]) > P3_RATIO
     res = {"gate": "P3", "status": "failed" if bad else "passed", **m, "thresholds": [P3_LAMBDA, P3_RATIO],
            "finding": "p3.not_identifiable" if bad else None, "remedy": "contract"}
@@ -131,25 +141,24 @@ def profile_reach(problem, fit: F.Fit, i: int, seed=None, points: int = 8) -> di
     return out
 
 
-def g5(problem, fit: F.Fit, seed=None, profile: bool = True) -> dict:
+def g5(problem, fit: F.Fit, seed=None, profile: bool = True, block=None) -> dict:
     """G5 at theta-hat (section 8.2): lambda_min >= 0.05, sigma_post/sigma_prior <= 0.5, profile Delta >= 4; fails
     also by section 7.4 admission. Remedy level contract, plan when the failure comes only from non-converged
-    profile scan points (section 7.3, note 8)."""
+    profile scan points (section 7.3, note 8). `block`: the theta indices judged and profiled (pooled fits, A26)."""
     d = len(problem.layout.theta)
-    names = problem.layout.theta
     flags = set(fit.flags)
     if "no-admitted-endpoint" in flags or "nonidentified-below" in flags:
         return {"gate": "G5", "status": "failed", "finding": "g5.not_identifiable", "remedy": "contract",
                 "reason": "section 7.4 admission", "nonidentified": fit.nonidentified}
-    S = None if fit.F is None else _sigma_theta(fit.F, d)
+    S, names, sp = _block(problem, None if fit.F is None else _sigma_theta(fit.F, d), block)
     if S is None:
         return {"gate": "G5", "status": "failed", "finding": "g5.not_identifiable", "singular": True,
-                "hints": hints(problem, np.ones(d) / math.sqrt(d), names), "remedy": "contract"}
-    m = measures(S, F.sigma_prior(problem))
+                "hints": hints(problem, np.ones(len(names)) / math.sqrt(len(names)), names), "remedy": "contract"}
+    m = measures(S, sp)
     bad = m["lambda_min"] < G5_LAMBDA or max(m["ratio"]) > G5_RATIO
     prof, numerical = [], False
     if profile and not bad:
-        for i in range(d):
+        for i in (range(d) if block is None else block):
             pr = profile_reach(problem, fit, i, seed)
             prof.append(pr)
             if not all(pr["sides"].values()):

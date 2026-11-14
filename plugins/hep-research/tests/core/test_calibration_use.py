@@ -330,5 +330,30 @@ class IdentityCarriedOver(unittest.TestCase):
         self.assertNotIn("made-up-flag", use.FLAGS)
 
 
+class PartialPoolingFlag(unittest.TestCase):
+    def test_the_flag_is_informational(self):
+        """A26 (1): `partial-pooling` is a known information flag with no effect on grade or use: over every
+        combination of the grade inputs below, judge() with the flag gives the grade and uses it gives without it.
+        Negative: a use-blocking flag in the same place changes the uses (publication removed), and a made-up flag is
+        rejected by check_inputs."""
+        self.assertIn("partial-pooling", use.INFORMATION_FLAGS)
+        self.assertNotIn("partial-pooling", use.USE_BLOCKING_FLAGS | use.GRADE_CAPPING_FLAGS)
+        n = 0
+        for vmode, mgf, v_pass, real, flags in itertools.product(("none", "holdout", "cross-validation"),
+                                                                 (False, True), (False, True), (False, True),
+                                                                 ((), ("multimodal",), ("closure-not-tested",))):
+            c = base(vmode=vmode, mandatory_gate_failed=mgf, v_pass=v_pass, real_data=real, own_flags=list(flags))
+            a, b = use.judge(c, []), use.judge(dict(c, own_flags=list(flags) + ["partial-pooling"]), [])
+            self.assertEqual((a["effective_grade"], a["uses"]), (b["effective_grade"], b["uses"]), c)
+            self.assertIn("partial-pooling", b["flags"])
+            n += 1
+        self.assertEqual(n, 72)
+        c = base()
+        self.assertIn("publication", use.judge(dict(c, own_flags=["partial-pooling"]), [])["uses"])
+        self.assertNotIn("publication", use.judge(dict(c, own_flags=["provisional-thresholds"]), [])["uses"])
+        with self.assertRaises(ValueError):
+            use.check_inputs(dict(c, own_flags=["partially-pooled"]))
+
+
 if __name__ == "__main__":
     unittest.main()

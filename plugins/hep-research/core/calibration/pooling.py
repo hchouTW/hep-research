@@ -29,11 +29,24 @@ the effective event count; D14 asks for a section-qualified name: ambiguity P3).
 - `frequency_decision`: section 15.3.18 as A25 reads it: tau_pool_hat = 0 in at least half of the replicas under
   equal truth, and 0 inside the 95% set in at least 95%.
 
+Grade and gates of a pooled result (approval A26 (1), WP-Q2):
+- `grade` / `grade_report`: the Appendix C rules as for any result (`use.aggregate`, `use.judge`); `partial-pooling`
+  is an information flag (no effect on grade or use).
+- `holdout_evidence`: the holdout validates the pooled model jointly, one V test over the held-out units of all
+  segments (`Segmented.val`, `h_val`, `val_columns`), the joint Sigma_beta in C_r.
+- G1 on the joint fit (`fit_pooled`); `p2` and `g2` count only the real observation rows and the real parameters'
+  bounds, never the pseudo-rows or the numerical z bounds; `p3` (Asimov at the prior centre, so tau_pool = 0) and
+  `g6` on the joint problem; `g5` per pooled parameter on theta_bar (identify.py with `block` = the fixed effects,
+  the z_s,j profiled); G8 with segment-level pseudo-data (`segment_truths`: a common truth or spread truths,
+  `closure_point`, then `closure.g8`), judged on the fixed effects. Joint toys: `Segmented.simulate` draws each
+  pseudo-row from N(z, 1), the random-effects bootstrap in the linear model.
+
 Scope of this phase: Gaussian blocks only (no Poisson or binomial blocks, no N_d,c constraints, no efficiency-map
 term), the same model and theta names in every segment; anything else is rejected with a `pooling.*` code.
 """
 from __future__ import annotations
 
+import dataclasses
 import math
 from dataclasses import dataclass, field
 from typing import Any
@@ -320,6 +333,90 @@ class Segmented:
             b[self.layout.slices()["phi_P"]] = self.observed.phi0
         return b
 
+    # -- the gates on pooled fits (A26): the real rows, the fixed effects, toys and the held-out units
+    @property
+    def n_real(self) -> int:
+        """The real observation rows (every segment's); the S x P N(0, 1) pseudo-rows follow them."""
+        return sum(self.n_link)
+
+    def fixed_block(self) -> list[int]:
+        """The theta indices of the fixed effects (theta_bar in link space, the common theta): the block P3, G5 and
+        G8 judge. The z_s,j are random effects, profiled with their N(0, 1) term like constrained nuisances."""
+        return list(range(self.P + self.Q))
+
+    def z_block(self) -> list[int]:
+        return list(range(self.P + self.Q, self.d))
+
+    def segment_beta(self, s: int, beta) -> np.ndarray:
+        """Segment s's beta (its physical theta, the common phi_P, its nu and eta) at a joint beta."""
+        tp = np.asarray(beta, float)[:self.d + len(self.phi)]
+        return self._seg_beta(s, self.segment_theta(tp)[s], np.asarray(beta, float))
+
+    def simulate(self, beta_truth, rng, phis=None, nominal: bool = True) -> L.Observations:
+        """Toy data of the joint problem (G2, G6): each segment's data at its theta_s and nuisances, and each pseudo-row
+        drawn from N(z_s,j, 1). In the linear model this is the parametric bootstrap of the random-effects model
+        (z* ~ N(0, 1), pseudo-rows 0): -2 ln L at the minimum depends on the noise only, and the pseudo-row noise has the
+        same N(0, 1) law as -z*."""
+        b = np.asarray(beta_truth, float)
+        obs = [p.simulate(self.segment_beta(s, b), rng) if nominal else
+               p.simulate(self.segment_beta(s, b), rng, nominal=False) for s, p in enumerate(self.seg)]
+        z = b[self.P + self.Q:self.d]
+        phi0 = self.observed.phi0
+        if self.phi:
+            phi0 = rng.multivariate_normal(b[self.layout.slices()["phi_P"]], np.asarray(self.observed.phi_cov, float))
+        cat = (lambda key, sizes: np.concatenate([np.asarray(getattr(o, key), float) for o in obs])
+               if sum(sizes) else None)
+        return L.Observations(y_gauss=np.concatenate([np.asarray(o.y_gauss, float) for o in obs]
+                                                     + [z + rng.normal(size=z.size)]),
+                              phi0=phi0, phi_cov=self.observed.phi_cov, nu0=cat("nu0", self.n_nu),
+                              eta0=cat("eta0", self.n_eta))
+
+    def replica_pert(self, rng, tp=None) -> np.ndarray:
+        """Each segment's replica-difference MC perturbation; none on the pseudo-rows (they carry no MC)."""
+        ths = self.segment_theta(tp) if tp is not None else [None] * self.S
+        return np.concatenate([np.asarray(p.replica_pert(rng, t), float)[:n]
+                               for p, t, n in zip(self.seg, ths, self.n_link)] + [np.zeros(self.S * self.P)])
+
+    @property
+    def has_bootstrap(self) -> bool:
+        return any(getattr(p, "has_bootstrap", False) for p in self.seg)
+
+    def _vals(self) -> list:
+        vs = [p.cfg.val if hasattr(p, "cfg") else getattr(p, "val", None) for p in self.seg]
+        if any(v is None for v in vs):
+            raise PoolingError("pooling.validation", "every segment needs its held-out units for the joint V test")
+        return vs
+
+    @property
+    def val(self) -> dict:
+        """The held-out units of all segments as one validation set (A26: one V test over them): V_data and V_MC
+        block-diagonal, each segment's deterministic constraints padded to the joint coordinates."""
+        vs = self._vals()
+        nv = [len(v["m0"]) for v in vs]
+        cons = []
+        for s, v in enumerate(vs):
+            for c in v.get("constraints") or []:
+                full = np.zeros(sum(nv))
+                full[sum(nv[:s]):sum(nv[:s + 1])] = np.asarray(c, float)
+                cons.append(full)
+        return {"m0": np.concatenate([np.asarray(v["m0"], float) for v in vs]),
+                "V_data": _block_diag([v["V_data"] for v in vs]), "V_MC": _block_diag([v["V_MC"] for v in vs]),
+                "constraints": cons, "units": dict(zip(self.names, nv))}
+
+    def h_val(self, tp, phis=None):
+        return np.concatenate([p.h_val(t) for p, t in zip(self.seg, self.segment_theta(tp))])
+
+    def val_columns(self):
+        nv = [len(v["m0"]) for v in self._vals()]
+        cols = [p.val_columns() for p in self.seg]
+        return (_block_diag([u for u, _ in cols], (sum(nv), sum(self.n_nu))),
+                _block_diag([e for _, e in cols], (sum(nv), sum(self.n_eta))))
+
+    def set_val_point(self, tp) -> None:
+        for p, t in zip(self.seg, self.segment_theta(tp)):
+            if hasattr(p, "set_val_point"):
+                p.set_val_point(t)
+
     # -- the REML linearization
     def linearize(self, tp) -> Lin:
         """The linear model at a joint point: fixed effects (theta_bar, common theta), random effects u_s,j =
@@ -603,6 +700,180 @@ def planned_power(S: int, lam: float, c: float = TAU_POOL_C) -> float:
     k = S - 1
     xs = optimize.brentq(lambda x: k * (x - 1.0 - math.log(x)) - c, 1.0 + 1e-12, 1e6)
     return float(stats.ncx2.sf(k * xs, k, lam)) if lam > 0 else float(stats.chi2.sf(k * xs, k))
+
+
+# ------------------------------------------------------------------ the gates on pooled fits (A26)
+def p2(contract: dict) -> dict:
+    """P2 of a pooled contract (A26: only real observation rows count, never the N(0, 1) pseudo-rows): every segment
+    brings its own calibration data, so n_c and dim N_d,c are S times one segment's; d_free is the fixed effects
+    (theta_bar for a pooled theta, the common theta, an unconstrained profile phi): each z_s,j comes with its
+    pseudo-row (a constraint term and a parameter) and, as a constrained nuisance does, leaves ndf unchanged."""
+    from . import design as D
+    spec = declaration(contract)
+    one = D.p2(contract)
+    S = len(spec.segments)
+    n_c, dim, d_free = S * one["n_c"], S * one["dim_N_dc"], one["d_free"]
+    ndf = n_c - dim - d_free
+    need = max(3, d_free)
+    ok = ndf >= need
+    return {"gate": "P2", "status": "passed" if ok else "failed", "n_c": n_c, "dim_N_dc": dim, "d_free": d_free,
+            "ndf": ndf, "required": need, "segments": S, "pseudo_rows_excluded": S * len(spec.pooled),
+            "findings": [] if ok else [{"code": "p2.insufficient_ndf", "message": f"ndf = {ndf} < max(3, d_free) = "
+                                        f"{need} over the real rows of {S} segments: G6 cannot test; add calibration "
+                                        "observables (remedy: contract)"}]}
+
+
+def _block_names(joint: Segmented) -> list:
+    return [joint.layout.theta[i] for i in joint.fixed_block()]
+
+
+def p3(joint: Segmented, ref: L.Reference | None = None) -> dict:
+    """P3 on the joint problem (A26): at the prior centre with Asimov data, which are equal-truth data (REML gives
+    tau_pool_hat = 0 on them), so tau_pool = 0; lambda_min and sigma_post / sigma_prior over the fixed effects
+    (`fixed_block`), the z_s,j profiled with their N(0, 1) terms; the information sums the segments."""
+    from . import identify as I
+    saved = joint.tau.copy()
+    joint.set_tau(np.zeros(joint.P))
+    try:
+        out = I.p3(joint, joint.initial_beta(), ref, block=joint.fixed_block())
+    finally:
+        joint.set_tau(saved)
+    return {**out, "pooled": {"tau_pool": 0.0, "judged": _block_names(joint), "segments": joint.S}}
+
+
+def g5(joint: Segmented, fit, seed=None, profile: bool = True) -> dict:
+    """G5 on a pooled fit (A26): per pooled parameter on theta_bar (and on each common theta) at the joint fit point
+    with tau_pool_hat; the profile scans move theta_bar with the z_s,j and the rest minimized."""
+    from . import identify as I
+    out = I.g5(joint, fit, seed, profile, block=joint.fixed_block())
+    return {**out, "pooled": {"tau_pool": joint.tau.tolist(), "judged": _block_names(joint)}}
+
+
+def g2(joint: Segmented, fit, n_toys: int, seed, alpha: float = 0.01) -> dict:
+    """G2 on a pooled fit (A26): the physical bounds of the real parameters only; a z_s,j at its numerical bound
+    (+-Z_BOUND) is not a constraint of the model and never enters the active set or the chi-bar^2 components. The
+    weight toys are joint toys (`Segmented.simulate`) at the restricted fit."""
+    z = set(joint.z_block())
+    real = [i for i in fit.active if i not in z]
+    f = dataclasses.replace(fit, active=real)
+    out = F.g2(joint, f, F.null_toys(joint, f, n_toys, seed), alpha=alpha)
+    return {**out, "z_at_bound_excluded": [joint.layout.theta[i] for i in fit.active if i in z]}
+
+
+def g6(joint: Segmented, fit, n_toys: int, seed, alpha: float = 0.01) -> dict:
+    """G6 on the joint problem (A26): T_obs = -2 ln L of the joint fit (real rows and pseudo-rows), locally linear joint
+    toys at the fit point (pseudo-rows drawn around z-hat: the random-effects bootstrap, `Segmented.simulate`)."""
+    out = F.g6(joint, fit, F.null_toys(joint, fit, n_toys, seed), alpha=alpha)
+    return {**out, "rows": {"real": joint.n_real, "pseudo": joint.S * joint.P}}
+
+
+def holdout_evidence(joint: Segmented, fit, y_v: dict, kappa: str, alpha: float, omit=()) -> dict:
+    """The holdout of a pooled result (A26): one V test over the held-out units of all segments (`y_v` = {segment:
+    values}), validating the pooled model jointly; the residual covariance carries the joint Sigma_beta, so units of
+    different segments are coupled through theta_bar and the common theta. Analytic path (chi2_k, k the sum over the
+    segments' units). Returns {evidence (validate.holdout_evidence's sealed record, for DecisionBook), segments,
+    units}. `omit` is for negative controls only."""
+    from . import validate as VV
+    missing = [s for s in joint.names if s not in y_v]
+    if missing:
+        raise PoolingError("pooling.validation", f"no held-out units for segments {missing}: one V test covers all "
+                           "segments")
+    yv = np.concatenate([np.asarray(y_v[s], float) for s in joint.names])
+    if not omit:
+        ev = VV.holdout_evidence(joint, fit, yv, kappa, alpha)
+    else:
+        joint.set_val_point(fit.beta[:joint.d + len(joint.phi)])
+        pc = VV.holdout_pieces(joint, fit, yv, omit=omit)
+        Cp, k = VV.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])
+        T = VV.t_v(pc["r"], Cp)
+        ev = {"kind": "holdout", "T": T, "k": int(k), "p": float(stats.chi2.sf(T, k)) if k else None, "omit": list(omit)}
+    return {"evidence": ev, "segments": list(joint.names), "units": joint.val["units"]}
+
+
+def segment_truths(joint: Segmented, bar_link, common, tau_true=None, rng=None) -> list:
+    """The physical theta of each segment for G8 pseudo-data (A26): a common truth (tau_true None or 0: theta_s =
+    theta_bar) or spread truths theta_s,j = theta_bar_j + tau_true_j x_s,j in link space with x ~ N(0, 1) from rng."""
+    bar_link = np.asarray(bar_link, float)
+    t = np.zeros(joint.P) if tau_true is None else np.asarray(tau_true, float)
+    out = []
+    for _ in range(joint.S):
+        x = rng.normal(size=joint.P) if (rng is not None and np.any(t > 0)) else np.zeros(joint.P)
+        th = np.zeros(joint.d0)
+        for k, (i, n) in enumerate(zip(joint.pooled_idx, joint.pooled)):
+            th[i] = L.inv_link(np.array([bar_link[k] + t[k] * x[k]]), joint.links[n])[0]
+        th[joint.common_idx] = np.asarray(common, float)
+        out.append(th)
+    return out
+
+
+def closure_point(make_joint, truth_fixed, n_req: int, seeds, fitter=None) -> dict:
+    """One G8 injection point of a pooled fit (A26: segment-level pseudo-data): `make_joint(seed)` returns a Segmented
+    whose segments hold pseudo-data drawn per segment (from a common truth or spread truths, `segment_truths`);
+    `fitter(joint, seed)` (default fit_pooled) returns a PooledFit. The error and the 68%/95% coverage are judged on
+    the fixed effects against `truth_fixed` (theta_bar in link space, the common theta); then `closure.g8`."""
+    from . import closure as C
+    truth = np.asarray(truth_fixed, float)
+    fitter = fitter or fit_pooled
+
+    def fit_and_cover(joint, s):
+        res = fitter(joint, s)
+        if not res.converged:
+            return False, None, None, None, {"n": 0, "X": 0}, True
+        k = joint.P + joint.Q
+        err = np.asarray(res.fit.beta[:k], float) - truth
+        st = np.asarray(res.fit.sigma_tot[:k], float)
+        return True, err, np.abs(err) <= st, np.abs(err) <= 1.96 * st, {"n": 0, "X": 0}, True
+    return C.run_point(make_joint, fit_and_cover, n_req, seeds)
+
+
+def grade(gates: dict, p7: str, v: str, vmode: str, real_data: bool, design_only: bool = False,
+          validation_data_reuse: str = "none", earlier_failure_record: str = "none",
+          validation_data_simulated: bool = False, own_flags=(), upstreams=()) -> dict:
+    """The grade and use of a pooled result (A26): the same Appendix C rules as any calibration result. The recorded
+    gate states (G1 on the joint fit, the others as A26 applies them) give the rule-0 inputs (`use.aggregate`), the
+    flags `partial-pooling` (informational) and any C.1 flag are added, and `use.judge` grades the result."""
+    from . import use as U
+    agg = U.aggregate(gates, p7, v, vmode)
+    flags = sorted((set(own_flags) & U.FLAGS) | set(agg["flags"]) | {"partial-pooling"})
+    inputs = {**agg["inputs"], "real_data": bool(real_data), "design_only": bool(design_only), "vmode": vmode,
+              "validation_data_reuse": validation_data_reuse, "earlier_failure_record": earlier_failure_record,
+              "validation_data_simulated": bool(validation_data_simulated), "own_flags": flags}
+    ups = list(upstreams)
+    return {"inputs": inputs, "upstreams": ups, "undecided": agg["undecided"], "reasons": agg["reasons"],
+            "judgment": U.judge(inputs, ups)}
+
+
+GRADE_KEYS = ("gates", "p7", "v", "vmode", "real_data", "design_only", "validation_data_reuse",
+              "earlier_failure_record", "validation_data_simulated", "own_flags", "upstreams")
+GRADE_REQUIRED = ("gates", "p7", "v", "vmode", "real_data")
+
+
+def check_grade_inputs(given) -> None:
+    """The grade inputs a caller supplies for a pooled result (`calib_fit.py pool --grade`): the recorded states of
+    the gates decided elsewhere, P7, V, the validation mode and the data kind; PoolingError (exit 2) otherwise."""
+    if not isinstance(given, dict) or set(given) - set(GRADE_KEYS) or any(k not in given for k in GRADE_REQUIRED) \
+            or not isinstance(given["gates"], dict):
+        raise PoolingError("pooling.grade", f"--grade holds {{{', '.join(GRADE_REQUIRED)}}} (and optionally the other "
+                           f"Appendix C.1 inputs {[k for k in GRADE_KEYS if k not in GRADE_REQUIRED]})")
+
+
+def grade_report(decided: dict, given: dict | None = None) -> dict:
+    """What the pooled run can say about its grade (A26): without `given`, the gate states it decided and the inputs
+    still needed (`status` inputs-needed); with `given` (check_grade_inputs), the states decided here replace the
+    given ones for the same gate and `grade` judges the result."""
+    from . import use as U
+    if given is None:
+        return {"status": "inputs-needed", "decided": dict(decided),
+                "needed": [g for g in U.MANDATORY if g not in decided] + ["p7", "v", "vmode", "real_data"],
+                "rule": "A26: Appendix C (use.aggregate, use.judge); partial-pooling is informational"}
+    check_grade_inputs(given)
+    gates = {**given["gates"], **decided}
+    try:
+        g = grade(gates, given["p7"], given["v"], given["vmode"], given["real_data"],
+                  **{k: given[k] for k in GRADE_KEYS if k in given and k not in GRADE_REQUIRED})
+    except (ValueError, KeyError, TypeError) as exc:
+        raise PoolingError("pooling.grade", f"grade inputs: {exc}") from None
+    return {"status": "graded", "decided": dict(decided), **g}
 
 
 # ------------------------------------------------------------------ a segmented linear toy (synthetic)
