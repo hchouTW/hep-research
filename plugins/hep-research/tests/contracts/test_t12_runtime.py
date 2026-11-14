@@ -13,10 +13,13 @@ import hashlib
 import io
 import json
 import math
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -485,6 +488,7 @@ class CommandLine(Scratch):
             code = rt.main(argv)
         return code, json.loads(stream.getvalue())
 
+    @unittest.skipUnless(SLOW, "slow (the whole run, every scenario again: about 2 min here, up to 8 on a CI runner; each scenario has its own tests above): set HEP_SLOW_TESTS=1")
     def test_run_writes_the_record_and_exits_ok(self):
         out = self.folder / "record.json"
         code, printed = self.run_main(["run", "--out", str(out)])
