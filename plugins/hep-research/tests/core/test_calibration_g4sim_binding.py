@@ -113,6 +113,8 @@ class Refusals(unittest.TestCase):
 
     def test_discrete_model_seeds_and_run_block(self):
         for document, pointer in (("run-card", "/physics/reference_list"), ("run-card", "/physics/fast_sim/model"),
+                                  ("run-card", "/physics/xtr/0/radiator_class"), ("run-card", "/physics/pai/0/model"),
+                                  ("run-card", "/physics/optical/cerenkov"), ("run-card", "/physics/decay/mode"),
                                   ("run-card", "/run/events"), ("response-pipeline", "/run_seed"),
                                   ("condition-snapshot", "/iovs/0/rows/0/dead"),
                                   ("condition-snapshot", "/iovs/0/rows/0/temperature_K"),
