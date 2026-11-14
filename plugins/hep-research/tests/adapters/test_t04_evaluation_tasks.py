@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import os
+import shlex
 import sys
 import tempfile
 import unittest
@@ -692,7 +693,7 @@ class TimedOutIsIncomplete(unittest.TestCase):
                 self.assertLess(__import__("time").monotonic() - started, 10)
                 self.assertIn("sacct did not answer", str(caught.exception))
                 counter = Path(folder) / "n"
-                (Path(folder) / "sacct").write_text(f"#!/bin/sh\nif [ -e {counter} ]; then echo '901_3|COMPLETED|0:0|00:02:00'; else touch {counter}; sleep 30; fi\n")
+                (Path(folder) / "sacct").write_text(f"#!/bin/sh\nif [ -e {shlex.quote(str(counter))} ]; then echo '901_3|COMPLETED|0:0|00:02:00'; else touch {shlex.quote(str(counter))}; sleep 30; fi\n")
                 self.assertEqual(tasks.sacct_state("901_3", timeout=0.5, attempts=2, pause=0), ("COMPLETED", 0, "00:02:00"))
             finally:
                 os.environ.clear()
@@ -715,7 +716,7 @@ class SacctNoAnswerIsIncomplete(unittest.TestCase):
 
     def sacct(self, body):
         script = self.folder / "sacct"
-        script.write_text(f"#!/bin/sh\necho x >> {self.calls}\n" + body)
+        script.write_text(f"#!/bin/sh\necho x >> {shlex.quote(str(self.calls))}\n" + body)
         script.chmod(0o755)
 
     def count(self):
@@ -742,7 +743,7 @@ class SacctNoAnswerIsIncomplete(unittest.TestCase):
             tasks.sacct_state("901_3", timeout=5, attempts=2, pause=0)
 
     def test_a_row_on_the_third_attempt_is_read(self):
-        self.sacct(f"[ \"$(wc -l < {self.calls})\" -ge 3 ] && echo '901_3|COMPLETED|0:0|00:02:00'\nexit 0\n")
+        self.sacct(f"[ \"$(wc -l < {shlex.quote(str(self.calls))})\" -ge 3 ] && echo '901_3|COMPLETED|0:0|00:02:00'\nexit 0\n")
         self.assertEqual(tasks.sacct_state("901_3", timeout=5, attempts=3, pause=0), ("COMPLETED", 0, "00:02:00"))
         self.assertEqual(self.count(), 3)
 
