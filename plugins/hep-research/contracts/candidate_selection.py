@@ -110,7 +110,7 @@ def _indexed_recipe(row: dict, index: dict, recipes: dict) -> dict | None:
     """SEL04: only the recipe this row binds, of a method the index lists, is a candidate."""
     recipe = recipes.get(row["recipe_id"])
     method = next((item for item in index["methods"] if item["card_ref"] == row["method_ref"]), None)
-    if recipe is None or recipe_identity(recipe) != row["recipe_sha256"] or recipe["method"] != {"card_ref": method["card_ref"], "card_sha256": method["card_sha256"]}:
+    if recipe is None or method is None or recipe_identity(recipe) != row["recipe_sha256"] or recipe["method"] != {"card_ref": method["card_ref"], "card_sha256": method["card_sha256"]}:
         return None
     return recipe
 

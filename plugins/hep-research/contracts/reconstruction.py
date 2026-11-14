@@ -63,8 +63,8 @@ def _same_measure(first: dict | None, second: dict | None) -> bool:
     """One measure in two units is one measure (K05: meaning, not spelling); a unit that cannot be converted compares as text."""
     if first is None or second is None or first["unit"] == second["unit"]:
         return first == second
-    converted = _in_base_unit(first), _in_base_unit(second)
-    return None not in converted and converted[0][0] == converted[1][0] and math.isclose(converted[0][1], converted[1][1], rel_tol=1e-12)
+    one, other = _in_base_unit(first), _in_base_unit(second)
+    return one is not None and other is not None and one[0] == other[0] and math.isclose(one[1], other[1], rel_tol=1e-12)
 
 
 def _as_fractions(matrix) -> list[list[Fraction]]:
@@ -402,7 +402,8 @@ def _check_frames(frames: dict, report: Report, path: str) -> None:
     if not report.ok:
         return
     _check_frame_outputs(frames, keys, report, path)
-    accounts, windows = frames["accounts"], {}
+    accounts = frames["accounts"]
+    windows: dict[str, list] = {}
     for key_output in frames["outputs"]:
         windows.setdefault(key_output["window"], []).append(key_output["key"])
     expected = {"observed": len(keys) - len(frames["missing_keys"]), "owned": len(frames["outputs"]), "missing": len(frames["missing_keys"]),
@@ -1031,9 +1032,9 @@ def _live_revision(candidates: dict, identity: str) -> dict | None:
 def selected_objects(product: dict) -> list[tuple]:
     """W4: what final counting sees, one (hypothesis, revision) per exclusive group under the selection policy."""
     candidates = product["candidates"]
-    return [(identity, _live_revision(candidates, identity)["revision"])
+    return [(identity, live["revision"])
             for _, identity in sorted(candidates["selection_policy"]["selected"].items())
-            if _live_revision(candidates, identity) is not None]
+            if (live := _live_revision(candidates, identity)) is not None]
 
 
 def _check_candidate_link(reference: dict, products, report: Report, path: str) -> None:
@@ -1192,9 +1193,10 @@ def _check_sample_interval(source_port: dict, target_port: dict, converter: dict
     """Section 8.4, check 2. A converter changes the interval only if it says so (contract map: its own input and output
     semantics); else the two ports must agree."""
     entering, leaving = source_port.get("sample_interval"), target_port.get("sample_interval")
-    resamples = converter is not None and ("input_sample_interval" in converter or "output_sample_interval" in converter)
-    agrees = _same_measure(entering, converter.get("input_sample_interval")) and _same_measure(leaving, converter.get("output_sample_interval")) \
-        if resamples else _same_measure(entering, leaving)
+    if converter is not None and ("input_sample_interval" in converter or "output_sample_interval" in converter):
+        agrees = _same_measure(entering, converter.get("input_sample_interval")) and _same_measure(leaving, converter.get("output_sample_interval"))
+    else:
+        agrees = _same_measure(entering, leaving)
     if not agrees:
         report.add("error", "$.sample_interval", "reconstruction.connect.sample_interval_mismatch", f"sample interval {entering} does not reach {leaving}")
 

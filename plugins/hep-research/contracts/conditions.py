@@ -183,7 +183,8 @@ def affected_payloads(changed, payloads) -> list[str] | None:
     if not isinstance(changed, (list, tuple, set)):
         raise TypeError("changed is a collection of identities")
     documents = list(payloads.values()) if isinstance(payloads, dict) else payloads
-    reached, found = set(changed), []
+    reached = set(changed)
+    found: list[str] = []
     while True:
         step = [payload["payload_id"] for payload in documents
                 if payload["payload_id"] not in reached and reached & set(_parent_payloads(payload))]

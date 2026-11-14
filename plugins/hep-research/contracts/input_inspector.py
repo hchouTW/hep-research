@@ -32,8 +32,10 @@ import time
 
 try:
     import resource
-except ImportError:  # not on every platform; a declared memory limit then stops inspection (_peak_resident_bytes)
-    resource = None
+except ImportError:  # not on every platform (Windows); a declared memory limit then stops inspection (_peak_resident_bytes)
+    HAS_GETRUSAGE = False
+else:
+    HAS_GETRUSAGE = True
 
 from contracts.schema import Report, load_schema
 from contracts.sidecar_reader import MALFORMED_DOCUMENT, read_document, reader_path
@@ -46,7 +48,7 @@ CSV_PROBE = "probe.csv-head"
 # this bounds the signatures one file can make. window_bytes: a CSV is read through one window, enough for a wide header and a
 # sample of rows. reader_version is the version of these rules: the standard library's parsers have no separate one, and
 # Section 5.6 item 2's "verified" is the read-back check that a record names exactly this version and these parameters.
-PROBES = {JSON_PROBE: {"reader": "json", "reader_version": "1", "parameters": {"byte_ceiling": 16 * 1024 * 1024, "document_ceiling": 1024}},
+PROBES: dict[str, dict] = {JSON_PROBE: {"reader": "json", "reader_version": "1", "parameters": {"byte_ceiling": 16 * 1024 * 1024, "document_ceiling": 1024}},
           CSV_PROBE: {"reader": "csv", "reader_version": "1", "parameters": {"window_bytes": 64 * 1024}}}
 # A43: the extension picks a reader and establishes nothing else.
 PROBE_BY_SUFFIX = {".json": JSON_PROBE, ".csv": CSV_PROBE}
@@ -108,7 +110,7 @@ DIMENSION_KEYS = {"sampling": ("sampling.interval.value", "sampling.interval.uni
 
 def _peak_resident_bytes() -> int | None:
     """Peak resident size of this process. getrusage gives kibibytes on Linux and bytes on macOS."""
-    if resource is None:
+    if not HAS_GETRUSAGE:
         return None
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return peak if sys.platform == "darwin" else peak * 1024
@@ -154,7 +156,7 @@ class _Spending:
     def __init__(self, limits: dict | None, clock):
         self.limits, self.clock = limits, clock
         self.memory_base = _peak_resident_bytes() if limits else 0
-        self.spent = {"probes": 0, "bytes": 0, "seconds": 0, "memory_bytes": 0, "tools": 0}
+        self.spent: dict[str, float] = {"probes": 0, "bytes": 0, "seconds": 0, "memory_bytes": 0, "tools": 0}
         self.readers: set = set()
         self.plans: list = []
         self.records: dict = {}
@@ -469,7 +471,10 @@ def _planned_probe(index: int, entry) -> dict:
     else:
         return dict(plan, stop_reason="input-malformed")
     try:
-        path = os.fspath(entry.get("path"))
+        given = entry.get("path")
+        if given is None:  # os.fspath(None) is the same TypeError
+            raise TypeError("no path")
+        path = os.fspath(given)
         status = os.stat(path)
     except (TypeError, ValueError):
         return dict(plan, stop_reason="input-malformed")
@@ -492,6 +497,8 @@ def _planned_probe(index: int, entry) -> dict:
 def _budget_stop(spending: _Spending, plan: dict) -> str | None:
     """Section 5.6 item 5: the limit that forbids this probe, before it starts."""
     limits, spent = spending.limits, spending.spent
+    if limits is None:  # _run_probes never asks: an undeclared budget has stopped already
+        return "budget-not-declared"
     if spent["probes"] >= limits["probes"]:
         return "budget-probes"
     if PROBES[plan["probe"]]["reader"] not in spending.readers and len(spending.readers) >= limits["tools"]:
@@ -532,7 +539,7 @@ def _run_probe(plan: dict, spending: _Spending) -> dict:
 def _probe_record(plan: dict, scanned: dict | None, stop_reason: str | None) -> dict:
     """Section 5.6 item 2: reading scope, sampling rule, cost and unread portion of one probe, run or not."""
     scanned = scanned or {"outcome": "not-run", "stop_reason": stop_reason, "warnings": [], "bytes_read": 0, "seconds": 0, "memory_bytes": 0, "documents_refused": 0}
-    registered = PROBES.get(plan["probe"], {"reader": None, "reader_version": None, "parameters": {}})
+    registered: dict = PROBES.get(plan["probe"], {"reader": None, "reader_version": None, "parameters": {}})
     if scanned["outcome"] == "not-run":
         scope, sampling = "nothing", "none"
     elif plan["planned"] < plan["size"]:
@@ -877,7 +884,7 @@ def _judged_condition(signature: dict, condition) -> dict:
             parts = [_judged_condition(signature, item) for item in items]
             if shape == {"all_of"}:
                 return _joined(parts, ("conflicting", "unsatisfied", "unknown", "satisfied"), [key for part in parts for key in part["branch"]])
-            used = next((part["branch"] for part in parts if part["state"] == "satisfied"), [])
+            used: list = next((part["branch"] for part in parts if part["state"] == "satisfied"), [])
             return _joined(parts, ("conflicting", "satisfied", "unknown", "unsatisfied"), used)
     return _condition_state("unknown", open_keys=["malformed condition"])
 
