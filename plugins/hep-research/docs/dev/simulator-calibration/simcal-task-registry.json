@@ -512,6 +512,13 @@
    "registered_at": "2026-11-14T13:17:05Z",
    "card_commit": "9f289535",
    "reason": "phase-5 gate run and studies S1-S4 registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "03fed4a854ba00a5c3b4af8d452f8845c08e27eb60d151b0a85b1fec888750d1",
+   "registered_at": "2026-11-14T13:35:16Z",
+   "card_commit": "c1ee7bb6",
+   "reason": "S4 re-registered smaller (A28) before any task ran"
   }
  ]
 }
