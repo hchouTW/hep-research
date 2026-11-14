@@ -14,12 +14,17 @@ conditional ratio, so it composes with weights on upstream nodes).
   folds (F = 1 trains and applies on the same events: no cross-fitting, which G4-L refuses from the record).
 - Probability calibration: Platt scaling (logit' = a logit + b) on a calibration split of the training events not used
   for fitting; `none` keeps the raw logit (G4-L refuses it from the record).
+- Log-ratio clip (A31): each fold model keeps the range of its log ratio (after Platt scaling and the prior-ratio
+  correction) over its own fitting rows of both classes at their training points, and clips evaluated log ratios
+  to it: a polynomial excursion outside the training rows never becomes an extreme weight.
 - Prior-ratio correction: log r = logit' - log(n_1 / n_0), the class sizes of the set the logit is calibrated on.
 - V_learn = the variation between repeated trainings (independent training MC and a new initialization seed) + the
   square of the closure bias on held-out samples (section 6.2): `v_learn`, its two parts kept apart
   (V_learn^bias is sampled by the toys of section 6.6). Readings of the open details (L2): full matrices, the
   training part the sample covariance over R repeats, the bias part b b^T with b the fold-averaged held-out closure
-  difference at the evaluation point.
+  difference at the evaluation point minus the same difference at theta_0, where the ratio is 1 (a control variate
+  that removes most of the closure comparison's own MC noise, A29; toy.ChainEvaluator.v_learn), and V_bias = b b^T
+  minus the covariance of b's remaining MC noise, negative eigenvalues set to 0 (A29).
 
 Everything is `synthetic` when it runs on the toy chain; results carry `provisional-thresholds` (no section 8.7 row
 calibrates G4-L, ambiguity L8)."""
@@ -155,6 +160,8 @@ class FoldModel:
     train: np.ndarray                 # the event indices it was trained (fitted or calibrated) on
     converged: bool
     iterations: int
+    lr_lo: float | None = None        # the log ratio's range over the fold's own fitting rows (A31): evaluations are
+    lr_hi: float | None = None        # clipped to it, so a polynomial excursion never becomes an extreme weight
 
 
 @dataclass
@@ -213,7 +220,8 @@ class TrainedRatio:
         if not np.any(t):
             return np.zeros(len(F))                   # theta_0: the ratio is 1 by construction
         s = self.base(F, fm) @ fm.beta @ t
-        return fm.a * s + fm.b - fm.log_prior
+        lr = fm.a * s + fm.b - fm.log_prior
+        return lr if fm.lr_lo is None else np.clip(lr, fm.lr_lo, fm.lr_hi)
 
     def record(self) -> dict:
         """The structural record G4-L checks: folds, and whether every fold's training events are disjoint from the
@@ -341,19 +349,33 @@ def train(stored: np.ndarray, sampler, spec: dict, theta0: dict, support: dict, 
             fm.a, fm.b = _platt(s0, s1)
             n0, n1 = len(s0), len(s1)
         fm.log_prior = math.log(n1 / n0) if s["prior_ratio"] else 0.0
+        # A31: the range of the log ratio (after Platt and the prior-ratio correction) over this fold's fitting rows,
+        # both classes, each at its training point
+        lr_fit = [fm.a * np.concatenate([B0 @ beta @ tau, B1 @ beta @ tau]) + fm.b - fm.log_prior
+                  for B1, tau in zip(B1s, taus)]
+        fm.lr_lo = float(min(v.min() for v in lr_fit))
+        fm.lr_hi = float(max(v.max() for v in lr_fit))
         tr.folds.append(fm)
     return tr
 
 
 # ------------------------------------------------------------------ V_learn (section 6.2)
-def v_learn(preds: list, bias) -> dict:
+def v_learn(preds: list, bias, bias_noise=None) -> dict:
     """V_learn = the variation between repeated trainings + the square of the closure bias on held-out samples.
-    preds: the predictions of R >= 2 repeated trainings at one point (observable space); bias: the fold-averaged
-    held-out closure difference there. Full matrices (reading L2): V_train the sample covariance, V_bias = b b^T."""
+    preds: the predictions of R >= 2 repeated trainings at one point (observable space); bias: the held-out closure
+    difference there. Full matrices (reading L2): V_train the sample covariance; V_bias = b b^T, or, with bias_noise
+    (the covariance of b's own MC noise, A29), b b^T - bias_noise with negative eigenvalues set to 0 (E[b b^T] =
+    bias bias^T + bias_noise: the subtraction removes the noise, the clipping keeps V_bias positive semi-definite)."""
     P = np.atleast_2d(np.asarray(preds, float))
     if P.shape[0] < 2:
         raise LearnedError("learned.spec", "V_learn needs >= 2 repeated trainings")
     Vt = np.atleast_2d(np.cov(P, rowvar=False, ddof=1))
     b = np.asarray(bias, float).reshape(-1)
     Vb = np.outer(b, b)
-    return {"V_learn": Vt + Vb, "V_learn_train": Vt, "V_learn_bias": Vb, "bias": b, "repeats": int(P.shape[0])}
+    out: dict = {"repeats": int(P.shape[0])}
+    if bias_noise is not None:
+        N = np.asarray(bias_noise, float).reshape(b.size, b.size)
+        lam, U = np.linalg.eigh(0.5 * ((Vb - N) + (Vb - N).T))
+        Vb = (U * np.clip(lam, 0.0, None)) @ U.T
+        out["V_learn_bias_noise"] = N
+    return {"V_learn": Vt + Vb, "V_learn_train": Vt, "V_learn_bias": Vb, "bias": b, **out}

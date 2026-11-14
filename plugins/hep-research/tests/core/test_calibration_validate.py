@@ -537,6 +537,25 @@ class S4Driver(unittest.TestCase):
         self.assertFalse(X.judge(ref, rows(10)[:199], reps=200, n_ref=99)["passed"])      # a missing repetition
         self.assertEqual(X.pvalue(5.0, [None, 1.0, 6.0]), 0.75)          # a non-converged toy counts as T >= T_obs
 
+    def test_pilot_summary(self):
+        """The A30 pilot's soundness flags, fixed before it runs: chi2_2-like reference and actual T with no
+        non-converged toy are sound (control); 3% non-converged reference toys or a heavy reference tail are flagged
+        (negatives). Never a pass condition (judged False); the pilot's seeds are disjoint from both registrations."""
+        import calibration_phase5_tv as X
+        from scipy import stats
+        q = stats.chi2.ppf((np.arange(200) + 0.5) / 200, 2)
+        ref = [{"i": i, "learned": float(t)} for i, t in enumerate(q)]
+        act = [{"i": i, "status": "ok", "T": float(t)} for i, t in enumerate(q)]
+        good = X.pilot_summary(ref, act)
+        self.assertTrue(good["all_sound"], good)
+        self.assertFalse(good["judged"])
+        bad = X.pilot_summary([{**r, "learned": None} if r["i"] < 6 else r for r in ref], act)
+        self.assertFalse(bad["sound"]["reference_nonconverged_share"])
+        heavy = X.pilot_summary([{**r, "learned": r["learned"] * 3} for r in ref], act)
+        self.assertFalse(heavy["sound"]["reference_q95"])
+        self.assertEqual(len({X.PILOT_SEED0, X.SEED0, 20261540, 20261591, 20261593}), 5)
+        self.assertEqual(sum(t["n"] for t in X.PILOT_TASKS), 400)
+
     def test_local_smoke(self):
         import contextlib
         import io as _io
