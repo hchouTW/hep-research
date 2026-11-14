@@ -60,9 +60,39 @@ SIMCAL_DOCS = "docs/dev/simulator-calibration/"
 # ------------------------------------------------------------------ item 1: negatives (placeholders, filled later)
 # TODO(main session, after WP-Q, WP-R and WP-S merge): fill each list with {test id: "negative" | "positive"}; the
 # card registers the lists before the gate run. While a list is empty the item fails (status `lists-not-filled`).
-G4L: dict = {}               # TODO section 15.3.1 G4-L and section 15.3.16 (WP-R)
-POOLING: dict = {}           # TODO section 15.3.18 partial pooling (WP-Q)
-VMODEL_INFERRED: dict = {}   # TODO inferred V_model tests (a)-(d), as accepted per V6 (WP-S)
+L, Q, V = "test_calibration_learned.", "test_calibration_pooling.", "test_calibration_vmodel_infer."
+G4L: dict = {               # section 15.3.1 G4-L, section 15.3.16 and the A25 (1) boundary (WP-R)
+    L + "G4L.test_correct_ratio_passes": "positive",
+    L + "G4L.test_15_3_1_no_cross_fitting": "negative",
+    L + "G4L.test_uncalibrated_classifier": "negative",
+    L + "G4L.test_alpha_declared_in_the_contract": "negative",
+    L + "G4L.test_prior_ratio_and_calibration_required_in_the_record": "negative",
+    L + "G4L.test_too_few_points": "negative",
+    L + "Classifier.test_ratio_outside_its_support_is_refused": "negative",
+    L + "Classifier.test_learned_closure_is_held_out": "positive",
+    L + "P0OnTheLearnedPath": "negative",
+    L + "SBIBoundary": "negative",
+    L + "Fixture.test_15_3_16_learned_plan_makes_p0_and_g4l_apply": "positive",
+    L + "DefaultOff": "positive",
+}
+POOLING: dict = {           # section 15.3.18 partial pooling in A25 (6)'s reading (WP-Q)
+    Q + "TauReturnsToZero.test_tau_returns_to_zero": "positive",
+    Q + "TauReturnsToZero.test_naive_estimator_is_caught": "negative",
+    Q + "TauReturnsToZero.test_decision_thresholds": "negative",
+    Q + "TauReturnsToZero.test_different_truths_are_detected_at_the_planned_power": "negative",
+    Q + "Declaration": "negative",
+    Q + "Reml": "positive",
+    Q + "JointFit": "positive",
+}
+VMODEL_INFERRED: dict = {   # inferred V_model tests (a)-(d), A25 (7) (WP-S)
+    V + "Refusals.test_a_inferred_without_holdout": "negative",
+    V + "Refusals.test_b_conditional_likelihood_refused": "negative",
+    V + "Refusals.test_b_conditional_runs_off_marginal_finite": "negative",
+    V + "SeparateVersion": "negative",
+    V + "Recovery.test_d_marginal_estimates_cover_the_truth": "negative",
+    V + "Refusals.test_inputs_refused_with_controls": "negative",
+    V + "Script": "positive",
+}
 NEGATIVES = {"G4L": ("section 15.3.1 G4-L and section 15.3.16", G4L),
              "POOLING": ("section 15.3.18 partial pooling", POOLING),
              "VMODEL_INFERRED": ("inferred V_model tests (a)-(d) (V6)", VMODEL_INFERRED)}
