@@ -27,6 +27,7 @@ from contracts.conditions import reuse_decision  # noqa: E402
 from control_layer_support import derivation as dv  # noqa: E402
 from tests.contracts import t12_reprocessing as rp  # noqa: E402
 from tests.contracts.reconstruction_fixtures import calibration_payload, iov  # noqa: E402
+from tests._platform import needs  # noqa: E402
 
 T08_CONFIGURATION = ROOT / "adapters" / "calo-cluster" / "assets" / "t08-grid-1.configuration.json"
 T09_BUDGET = ROOT / "adapters" / "photon-likelihood" / "assets" / "t09-multistart-1.budget.json"
@@ -37,6 +38,7 @@ def sha(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
+@needs("process_groups")  # run_workflow.py refuses a host without them (missing-dependency, tests/core/test_hostcaps.py)
 class Workspace(unittest.TestCase):
     """Each test gets a fresh reprocessing workspace that has run once in full."""
 
@@ -254,7 +256,8 @@ class SourceScope(unittest.TestCase):
     def test_r9_a_module_imported_from_a_live_root_is_rejected(self):
         code, out = self.check("--import", "livemod", env_path=self.live)
         self.assertEqual((code, out["status"]), (2, "rejected"), out)
-        self.assertIn(str((self.live / "livemod.py").resolve()), json.dumps(out["offending"]))
+        # compared as paths, not as a substring of JSON text: json.dumps escapes a non-ASCII or Windows path
+        self.assertIn(str((self.live / "livemod.py").resolve()), [item.get("path") for item in out["offending"]])
 
     def test_r9_a_live_path_entry_is_rejected_even_unused(self):
         code, out = self.check(env_path=self.live)

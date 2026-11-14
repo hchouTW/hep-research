@@ -247,8 +247,16 @@ def _release_or_seal(timings: SealedTimings, record: _Record, out: Path) -> dict
 
 # ================================================================ measuring
 
+# Peak RSS and CPU seconds per process come from os.wait4, which POSIX hosts have and native Windows does not; there the benchmark
+# stops as incomplete with this reason, never a reading without its peak memory (Windows CI round of PR #411).
+MEASURABLE = hasattr(os, "wait4")
+NOT_MEASURABLE = "needs os.wait4 (peak RSS and CPU seconds per process, POSIX only): this platform cannot be measured"
+
+
 def run_measured(argv, cwd=None, env=None) -> dict:
     """One process: wall time, exit code, peak RSS (wait4), user and system CPU seconds, output (stdout and stderr together)."""
+    if not MEASURABLE:
+        raise RuntimeError(NOT_MEASURABLE)
     full_env = dict(os.environ if env is None else env)
     full_env.update(SUBPROCESS_ENV_THREADS)
     full_env["PYTHONDONTWRITEBYTECODE"] = "1"

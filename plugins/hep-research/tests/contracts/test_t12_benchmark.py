@@ -17,6 +17,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -110,7 +111,11 @@ class SameWork(unittest.TestCase):
         self.assertEqual(found["first_difference"], 2)
 
 
+NEEDS_WAIT4 = unittest.skipUnless(bench.MEASURABLE, "needs os.wait4 (peak RSS per process; not on native Windows)")
+
+
 class Measured(unittest.TestCase):
+    @NEEDS_WAIT4
     def test_a_measured_process_has_wall_exit_and_peak_memory(self):
         found = bench.run_measured([sys.executable, "-c", "print('x')"])
         self.assertEqual(found["exit"], 0)
@@ -119,12 +124,26 @@ class Measured(unittest.TestCase):
         self.assertEqual(found["stdout"].strip(), "x")
         self.assertEqual(bench.run_measured([sys.executable, "-c", "raise SystemExit(4)"])["exit"], 4)
 
+    def test_without_wait4_the_benchmark_is_incomplete_and_says_why(self):
+        with mock.patch.object(bench, "MEASURABLE", False):
+            with self.assertRaisesRegex(RuntimeError, "needs os.wait4"):
+                bench.run_measured([sys.executable, "-c", "print('x')"])
+            with tempfile.TemporaryDirectory() as scratch:
+                source = Path(scratch) / "noisy.timestream.json"
+                source.write_bytes((json.dumps(cmp.destriper_fixture(), sort_keys=True, separators=(",", ":")) + "\n").encode())
+                out = io.StringIO()
+                with redirect_stdout(out):
+                    code = bench.main(["destriper", "--timestream", str(source), "--out", str(Path(scratch) / "run"), "--repetitions", "1"])
+        self.assertEqual(code, 3, out.getvalue())
+        self.assertEqual(json.loads(out.getvalue()), {"status": "incomplete", "reason": f"RuntimeError: {bench.NOT_MEASURABLE}"})
+
     def test_quantiles(self):
         found = bench.quantiles([float(v) for v in range(1, 101)])
         self.assertEqual(set(found), {"p50", "p90", "p99"})
         self.assertAlmostEqual(found["p50"], 50.5)
 
 
+@NEEDS_WAIT4
 class Destriper(unittest.TestCase):
     """C1, C2, C6, C8 on the frozen fixture; one repetition."""
 
@@ -175,6 +194,7 @@ class Destriper(unittest.TestCase):
             self.assertEqual(record["denominators"]["succeeded"], 1)
 
 
+@NEEDS_WAIT4
 class CaloCluster(unittest.TestCase):
     """C3 on the tracked block-1 example (2 events)."""
 
@@ -192,6 +212,7 @@ class CaloCluster(unittest.TestCase):
         self.assertEqual(record["denominators"], {"attempted": 1, "succeeded": 1, "failed": {}})
 
 
+@NEEDS_WAIT4
 class PhotonLikelihood(unittest.TestCase):
     """C4 on the tracked block-1 example (2 events): command-line level, the inner components recorded as not separated."""
 
@@ -214,6 +235,7 @@ class CommandLine(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn(T07, json.loads(out.getvalue())["not_measured"])
 
+    @NEEDS_WAIT4
     def test_destriper_command_writes_bench_json_and_never_overwrites(self):
         with tempfile.TemporaryDirectory() as scratch:
             folder = Path(scratch)

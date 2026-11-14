@@ -38,6 +38,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from core.interpreter_guard import child_flags  # noqa: E402
 from core.status import exit_code  # noqa: E402
 
 ADAPTERS = ROOT / "adapters"
@@ -463,7 +464,8 @@ def build_response(space: "CaloSpace", product_path: Path, name: str, events, pr
         provenance = (f"T12 stage 7 matched sample from calo-cluster product sha256 {sha256_hex(Path(product_path).read_bytes())} "
                       f"configuration sha256 {header['configuration']['sha256']}")
     artifact = space.folder / f"{name}.response.json"
-    argv = [sys.executable, "-I", "-B", str(BUILD_RESPONSE), "build", str(sample), "--truth-col", "truth", "--reco-col", "reco",
+    # child_flags: -X utf8 on Windows, where the skill script's guard needs UTF-8 mode and -I ignores PYTHONUTF8
+    argv = [sys.executable, "-I", *child_flags(), "-B", str(BUILD_RESPONSE), "build", str(sample), "--truth-col", "truth", "--reco-col", "reco",
             "--unweighted", "--selected-col", "selected", "--truth-edges", *RESPONSE_EDGES, "--reco-edges", *RESPONSE_EDGES,
             "--variable", "energy", "--unit", "MeV", "--normalization", "conditional_on_generated", "--acceptance", "inside_matrix",
             "--residual", "ratio", "--intended-use", "forward_folding", "--artifact-id", f"t12s7.response.{name}",

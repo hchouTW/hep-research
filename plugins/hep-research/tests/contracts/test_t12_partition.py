@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from tests.adapters import t04_evaluation_layout as layout  # noqa: E402
 from tests.contracts import t12_partition as tp  # noqa: E402
+from tests._platform import needs  # noqa: E402
 
 R = layout.EventRange
 EXAMPLES = ("t07-refit", "t08", "t09-multistart", "t09-topology")
@@ -373,6 +374,7 @@ class Recovery(unittest.TestCase):
         self.assertEqual(shifted.accounts["failure"], [1])
 
 
+@needs("process_groups")  # run_workflow.py refuses a host without them (missing-dependency, tests/core/test_hostcaps.py)
 class Runner(unittest.TestCase):
     """K5-K8: run_workflow.py, unchanged, on a timed-out, killed, resubmitted and repeatedly failing step."""
 
