@@ -16,6 +16,7 @@ the same repetitions against a reference whose toys neither retrain nor draw the
   python3 calibration_phase5_tv.py --task K --out DIR            one task of the array
   python3 calibration_phase5_tv.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
   python3 calibration_phase5_tv.py --local --out FILE            a tiny smoke (`smoke`; never judged as the study)
+  ... --pilot with --list, --task or --merge                     the A30 pilot (200 + 200, 8 tasks; report-only)
 
 Tasks: tasks 0..N_REF_TASKS-1 make reference toys (both constructions), the rest actual repetitions. Seeds: toy or
 repetition i of kind j uses SeedSequence([SEED0, j, i]); no stream is shared. Every record is `synthetic` and
@@ -303,6 +304,47 @@ def local(out: Path) -> dict:
     return rep
 
 
+# ------------------------------------------------------------------ the pilot (A30): report-only, never judged
+PILOT_SEED0 = 20261592                   # disjoint from 20261540 (first), 20261590 (second), 20261591/3 (local pilots)
+PILOT_REPS = PILOT_REF = 200
+PILOT_TASKS = [{"kind": "reference", "i0": i, "n": 50} for i in range(0, PILOT_REF, 50)] + \
+    [{"kind": "actual", "i0": i, "n": 50} for i in range(0, PILOT_REPS, 50)]
+# "sound", fixed before the pilot runs (A30): each a reported flag, none a pass condition of S4
+SOUND = {"reference_nonconverged_share_max": 0.01,       # the section 7.3 counting then moves the size by <= 0.01
+         "reference_q95_band": (4.8, 7.2),                # learned reference q95 against chi2_2's 5.99 (+-20%)
+         "actual_nonconverged_share_max": 0.05,
+         "actual_median_band": (1.11, 1.66)}              # actual T median against chi2_2's 1.386 (+-20%)
+
+
+def pilot_summary(ref_rows: list, rows: list) -> dict:
+    """The pilot's soundness flags (SOUND), reported only: the share of non-converged learned reference toys, the
+    learned reference's q95, the share of non-converged actual repetitions and the actual T median."""
+    ref = [r["learned"] for r in ref_rows]
+    done = np.asarray([t for t in ref if t is not None], float)
+    ok = np.asarray([r["T"] for r in rows if r.get("status") == "ok"], float)
+    v = {"reference_nonconverged_share": (len(ref) - done.size) / max(len(ref), 1),
+         "reference_q95": float(np.quantile(done, 0.95)) if done.size else None,
+         "actual_nonconverged_share": (len(rows) - ok.size) / max(len(rows), 1),
+         "actual_median": float(np.median(ok)) if ok.size else None}
+    sound = {"reference_nonconverged_share": v["reference_nonconverged_share"] <= SOUND["reference_nonconverged_share_max"],
+             "reference_q95": v["reference_q95"] is not None and
+             SOUND["reference_q95_band"][0] <= v["reference_q95"] <= SOUND["reference_q95_band"][1],
+             "actual_nonconverged_share": v["actual_nonconverged_share"] <= SOUND["actual_nonconverged_share_max"],
+             "actual_median": v["actual_median"] is not None and
+             SOUND["actual_median_band"][0] <= v["actual_median"] <= SOUND["actual_median_band"][1]}
+    return {"values": v, "sound": sound, "criteria": SOUND, "all_sound": all(sound.values()), "judged": False}
+
+
+def merge_pilot(out_dir: Path, out: Path) -> dict:
+    rep = merge(out_dir, out, PILOT_TASKS, PILOT_REPS, PILOT_REF)
+    recs = [json.loads(f.read_text()) for f in sorted(out_dir.glob("task_*.json"))]
+    ref_rows = [row for r in recs if r["kwargs"]["kind"] == "reference" for row in r["rows"]]
+    rows = [row for r in recs if r["kwargs"]["kind"] == "actual" for row in r["rows"]]
+    rep.update(label="pilot (A30): report-only, not judged", passed=None, pilot=pilot_summary(ref_rows, rows))
+    io.write_json(str(out), io.jsonable(rep))
+    return rep
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--list", action="store_true")
@@ -310,16 +352,25 @@ def main(argv=None) -> int:
     ap.add_argument("--merge")
     ap.add_argument("--local", dest="smoke", action="store_true")
     ap.add_argument("--out")
+    ap.add_argument("--pilot", action="store_true", help="the A30 pilot (PILOT_TASKS, PILOT_SEED0; report-only)")
     args = ap.parse_args(argv)
+    global SEED0
+    tasks = TASKS
+    if args.pilot:
+        SEED0, tasks = PILOT_SEED0, PILOT_TASKS
     if args.list:
-        print(json.dumps([{"task": i, **kw} for i, kw in enumerate(TASKS)]))
+        print(json.dumps([{"task": i, **kw} for i, kw in enumerate(tasks)]))
         return 0
     if not args.out:
         ap.error("--out is required with --task, --merge and --local")
     if args.task is not None:
-        r = run_task(args.task, Path(args.out))
+        r = run_task(args.task, Path(args.out), tasks)
         print(json.dumps({"task": r["task"], "status": r["status"], "seconds": r["seconds"]}))
         return 0 if r["status"] == "ok" else 1
+    if args.merge and args.pilot:
+        r = merge_pilot(Path(args.merge), Path(args.out))
+        print(json.dumps({"complete": r["complete"], "pilot": r["pilot"]}))
+        return 0 if r["complete"] else 1
     if args.merge:
         r = merge(Path(args.merge), Path(args.out))
         print(json.dumps({"complete": r["complete"], "passed": r["passed"], "missing": len(r["missing_tasks"])}))
