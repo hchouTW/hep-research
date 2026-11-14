@@ -143,7 +143,7 @@ def _windows_peak_reader():
     return peak
 
 
-WINDOWS_PEAK = _windows_peak_reader() if sys.platform == "win32" and not HAS_GETRUSAGE else None
+_WINDOWS_PEAK = _windows_peak_reader() if sys.platform == "win32" and not HAS_GETRUSAGE else None
 
 
 def _peak_resident_bytes() -> int | None:
@@ -152,7 +152,7 @@ def _peak_resident_bytes() -> int | None:
     if HAS_GETRUSAGE:
         peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         return peak if sys.platform == "darwin" else peak * 1024
-    return WINDOWS_PEAK() if WINDOWS_PEAK is not None else None
+    return _WINDOWS_PEAK() if _WINDOWS_PEAK is not None else None
 
 
 def _inside_import(frame) -> bool:

@@ -107,9 +107,13 @@ class HonestInputs(Scratch):
         self.assertEqual(fact_values(signature, "sample_rows"), [2])
 
     def test_every_tracked_csv_gives_a_reading_or_an_honest_stop(self):
-        """All 14, found and not listed by hand. The four CRDB exports hold no header row, so they stay unknown."""
+        """All 14, found and not listed by hand (13 in a copy without the examples' output folders, as the AMS-optional check
+        builds; one CSV is an example output). The four CRDB exports hold no header row, so they stay unknown."""
         found = sorted(path for top in ("skills", "examples", "tests", "adapters") for path in (ROOT / top).rglob("*.csv"))
-        self.assertGreaterEqual(len(found), 14)
+        outputs = [path for path in found if "output" in path.relative_to(ROOT).parts]
+        self.assertGreaterEqual(len(found) - len(outputs), 13)
+        if (ROOT / "examples" / "geant4-thin-silicon" / "output").is_dir():
+            self.assertGreaterEqual(len(found), 14)
         for path in found:
             record = inspect_inputs([{"product": "product.a", "path": str(path)}], BUDGET)
             self.assertEqual(code_list(read_sidecar(record)), [], path.name)
@@ -1335,10 +1339,10 @@ class BudgetBoundsTheWork(Scratch):
 
     def test_the_peak_comes_from_getrusage_or_the_windows_counter(self):
         self.assertEqual(input_inspector.HAS_GETRUSAGE, sys.platform != "win32")
-        self.assertEqual(input_inspector.WINDOWS_PEAK is not None, sys.platform == "win32")
-        with mock.patch.object(input_inspector, "HAS_GETRUSAGE", False), mock.patch.object(input_inspector, "WINDOWS_PEAK", lambda: 5 * 1024 * 1024):
+        self.assertEqual(input_inspector._WINDOWS_PEAK is not None, sys.platform == "win32")
+        with mock.patch.object(input_inspector, "HAS_GETRUSAGE", False), mock.patch.object(input_inspector, "_WINDOWS_PEAK", lambda: 5 * 1024 * 1024):
             self.assertEqual(input_inspector._peak_resident_bytes(), 5 * 1024 * 1024)
-        with mock.patch.object(input_inspector, "HAS_GETRUSAGE", False), mock.patch.object(input_inspector, "WINDOWS_PEAK", None):
+        with mock.patch.object(input_inspector, "HAS_GETRUSAGE", False), mock.patch.object(input_inspector, "_WINDOWS_PEAK", None):
             self.assertIsNone(input_inspector._peak_resident_bytes())  # neither: a declared memory limit then stops (budget-memory)
             record = self.inspected("a.json", product())
         self.assertEqual((record["state"], record["stop_reason"]), ("stopped", "budget-memory"))
