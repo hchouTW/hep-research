@@ -106,6 +106,38 @@ class Classifier(unittest.TestCase):
                              [{"strength": 0.05}, {"strength": 0.15}, {"strength": 0.3}])
         self.assertEqual((r["status"], r["finding"]), ("rejected", "learned.outside_support"))
 
+    @staticmethod
+    def clamp_violations(tr, F, theta) -> list:
+        """The check of the feature clamp (A30): per fold, rows outside the fold's training box must get the log ratio
+        of their boundary point (no extrapolation). Returns the folds that extrapolate."""
+        bad = []
+        for k, fm in enumerate(tr.folds):
+            lo, hi = (fm.lo, fm.hi) if fm.lo is not None else (fm.z_mean - 3 * fm.z_scale, fm.z_mean + 3 * fm.z_scale)
+            a = tr.log_weights(F, theta, fold=k)
+            b = tr.log_weights(np.clip(F, lo, hi), theta, fold=k)
+            if not np.allclose(a, b, rtol=1e-12, atol=1e-12):
+                bad.append(k)
+        return bad
+
+    def test_feature_clamp(self):
+        """Positive: in-range features give the same log ratio as the unclamped polynomial, and an out-of-range point
+        gets its boundary value. Negative: the same fold models with the box removed (the code before A30)
+        extrapolate, and the check catches it."""
+        import copy as _copy
+        x, y = self.features()
+        F = np.stack([x, y], 1)
+        th = {"strength": 0.2}
+        fm = self.tr.folds[0]
+        self.assertIsNotNone(fm.lo)
+        inside = F[np.all((F > fm.lo) & (F < fm.hi), axis=1)][:500]
+        raw = _copy.deepcopy(self.tr)
+        for f in raw.folds:
+            f.lo = f.hi = None
+        np.testing.assert_array_equal(self.tr.log_weights(inside, th, fold=0), raw.log_weights(inside, th, fold=0))
+        far = np.array([[fm.hi[0] + 3.0, fm.hi[1] + 6.0], [fm.lo[0] - 3.0, fm.lo[1] - 6.0], [0.0, fm.hi[1] + 6.0]])
+        self.assertEqual(self.clamp_violations(self.tr, far, th), [])                      # positive
+        self.assertNotEqual(self.clamp_violations(raw, far, th), [])                       # negative: extrapolates
+
     def test_v_learn_parts(self):
         """V_learn = V_train + V_bias; b = the fold-averaged closure difference at theta minus the same at theta_0
         (A29: was the difference at theta alone, so V_bias = b b^T exactly); V_bias = b b^T - the covariance of b's
