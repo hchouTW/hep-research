@@ -364,12 +364,19 @@ class G4simEvaluator:
                  effects_off=(), seeds: dict | None = None, names=None) -> dict:
         """The prediction at theta (phi and psi bound like theta): reweighting of node 0, the Birks rerun and the
         re-digitization on the batch `seeds['batch']` (default: the nominal batch), so every theta uses the same
-        Geant4 events and Philox keys; resimulation-level theta read the batch told for that point."""
+        Geant4 events and Philox keys; resimulation-level theta read the batch told for that point. effects_off
+        ({effect: {parameter: value after removal}}, section 10.5) sets those parameters last, with the same methods."""
         if model != "nominal":
             raise DG.CheckError("evaluator.model", "enumerated models are separate g4sim specifications (phase 4)")
-        if effects_off:
-            raise DG.CheckError("evaluator.effects_off", "effects_off (section 10.5) is phase 4")
-        values = {**self.nominal_theta, **(psi or {}), **(phi or {}), **(theta or {})}
+        try:                                                       # section 10.5: the declared values after removal
+            removal = engine_evaluator.removal_values(effects_off)
+        except ValueError as exc:
+            raise DG.CheckError("evaluator.effects_off", str(exc)) from exc
+        unknown = sorted(set(removal) - set(self.nominal_theta))
+        if unknown:
+            raise DG.CheckError("evaluator.effects_off", f"effects_off removes parameters {unknown} that this "
+                                "evaluator does not evaluate")
+        values = {**self.nominal_theta, **(psi or {}), **(phi or {}), **(theta or {}), **removal}
         bname, batch = self._batch(seeds, values)
         return self._observe(values, bname, batch, names)
 

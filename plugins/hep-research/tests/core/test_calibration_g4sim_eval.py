@@ -166,6 +166,21 @@ class Redigitization(unittest.TestCase):
         self.assertGreater(r1["pred"][k], r0["pred"][k])
         self.assertEqual(r0["pred"][r0["names"].index("vis_mean")], r1["pred"][r1["names"].index("vis_mean")])
 
+    def test_effects_off_sets_the_removal_values_last(self):
+        """Section 10.5 (calib_contrib on g4sim plans): effects_off {effect: {parameter: value after removal}} gives the
+        prediction at those values, applied after theta; an unknown parameter or two values for one parameter are
+        refused; without effects_off the prediction is unchanged (control)."""
+        e = make()
+        k = e.evaluate({})["names"].index("pe_mean")
+        off = e.evaluate({"light_yield": 240.0}, effects_off={"yield": {"light_yield": 190.0}})
+        np.testing.assert_allclose(off["pred"], e.evaluate({"light_yield": 190.0})["pred"])
+        self.assertNotAlmostEqual(off["pred"][k], e.evaluate({"light_yield": 240.0})["pred"][k])
+        with self.assertRaises(DG.CheckError):
+            e.evaluate({}, effects_off={"x": {"not_a_parameter": 1.0}})
+        with self.assertRaises(DG.CheckError):
+            e.evaluate({}, effects_off={"a": {"light_yield": 190.0}, "b": {"light_yield": 210.0}})
+        np.testing.assert_allclose(e.evaluate({}, effects_off={})["pred"], e.evaluate({})["pred"])
+
     def test_common_random_numbers(self):
         """Section 15.2 g4sim (common random numbers): the same Geant4 events and Philox key at two theta give a
         difference with a smaller MC variance than two independent sets of events."""
