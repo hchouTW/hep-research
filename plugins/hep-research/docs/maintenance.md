@@ -347,7 +347,11 @@ state the current contract. So a version bump needs no reference machine, and th
   it: on a network home, temporary-folder cleanup and the sticky-directory test fail, and the name extractors refuse a
   folder inside a project.
 - Each release manifest adds about 0.9 MB, so keep the README's "(about N files, X MB uncompressed)" statement within
-  `tools/check_packaging.py`'s 10 % of the measured size. Generate `release-manifests/X.Y.Z.json` last, after the
+  `tools/check_packaging.py`'s 10 % of the measured upload zip (the files `git archive HEAD:plugins/hep-research` keeps:
+  `tests/` is `export-ignore` in the plugin's `.gitattributes` except the files shipped code reads at run time, each
+  listed there with `-export-ignore` and its folders); the check also fails above the documented upload limits (5,000
+  files, counted with their folders, or 200 MB) and when a shipped reference into `tests/` or `docs/dev/` does not
+  resolve in the zip. When shipped code starts reading a new file under `tests/`, add it to that list. Generate `release-manifests/X.Y.Z.json` last, after the
   VALIDATION release check and any README change, and verify it on a `git archive` export.
 
 ## Evidence ledgers

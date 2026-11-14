@@ -260,7 +260,12 @@ Taken from Anthropic's documentation, read on 2026-10-04 ([Plugins](https://clau
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Or **Add > Upload plugin** with a `.zip` holding exactly one `.claude-plugin/plugin.json`, built from a clean
    checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 5400 files, 107.0 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The zip leaves out most of the test suite
+   (`tests/` is `export-ignore` in the plugin's `.gitattributes`, except the few files shipped code reads at run time,
+   such as the tests profile capabilities cite and the emulator's default artifact), so it (about 4,100 files,
+   90.3 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). `tools/check_packaging.py` measures
+   this archive, checks both limits, and fails when a reference from a shipped file into `tests/` or `docs/dev/` does
+   not resolve inside it. An uploaded plugin does not update from GitHub.
 
 - The plugin is saved to the account: available in Chat, Cowork, and Claude Code sessions signed in to the same account
   (synced plugin; run `/reload-plugins`). Pick a skill with `/` and `hep-research:`, or describe the task.
