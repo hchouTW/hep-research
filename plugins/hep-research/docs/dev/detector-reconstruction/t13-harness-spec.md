@@ -157,7 +157,14 @@ anything other than `rep-1` to `rep-3` per task. Under `--design frozen` it requ
 6. **Report extraction and normalisation.** The harness takes the last fenced `t13-report` JSON block of the final
    answer and stores the raw block beside the normalised one. It normalises references as follows:
    - A `cmd:<command>` reference is matched, with runs of whitespace collapsed on both sides, to the observed command
-     with that text (its last occurrence), and rewritten as `cmd:<id>`.
+     with that text (its last occurrence), and rewritten as `cmd:<id>`. When the text as written matches none, one or
+     more leading no-op `cd` segments are dropped first (the user's decision, 2026-11-14, after the shakedown probe
+     cited `cd <rep dir> && <command>` for the command it ran): `cd <dir> &&` or `cd <dir>;` where `<dir>` is one
+     word (unquoted, single- or double-quoted) that resolves to the session's working folder, after collapsing
+     quotes, `./`, repeated and trailing separators, taking a relative `<dir>` from the working folder, and reading
+     `~` and `$HOME` as the session folder inside the sandbox only. Nothing else is loosened: the remainder must equal
+     an observed command after whitespace collapsing, and a `cd` to any other folder (or with an option, `$(...)`,
+     `$PWD` or `||`) keeps the reference unresolved.
    - `file:` and `read:` references, and the observed file and read paths, are written relative to the rep directory
      when they lie inside it, and absolute otherwise. The scorer then also collapses `./`, repeated separators and
      trailing separators.

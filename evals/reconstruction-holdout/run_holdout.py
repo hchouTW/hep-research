@@ -504,9 +504,52 @@ def squash(text: str) -> str:
     return " ".join(str(text).split())
 
 
-def normalise_report(report, commands: list, rep_dirs: list):
+# a leading `cd <dir> &&` or `cd <dir>;`: <dir> one word, unquoted (no shell-active character; ~ or $HOME/${HOME} only
+# at its start), single-quoted (literal) or double-quoted ($HOME/${HOME} only at its start; no other $, ` or \)
+NOOP_CD_RE = re.compile(r"""^cd[ \t]+(?:(?P<u>(?:~|\$HOME\b|\$\{HOME\})?[^\s;&|<>()$`"'\\*?\[\]{}~!#=]*)"""
+                        r"""|'(?P<s>[^']*)'|"(?P<d>(?:\$HOME\b|\$\{HOME\})?[^"$`\\]*)")"""
+                        r"""[ \t]*(?:&&|;)[ \t]*(?P<rest>.*)$""", re.S)
+HOME_PREFIX_RE = re.compile(r"^(?:~|\$HOME\b|\$\{HOME\})")
+
+
+def strip_noop_cd(text: str, rep_dirs: list, home: str | None = None):
+    """The command text without its leading `cd <dir> &&` / `cd <dir>;` segments whose <dir> is the session's working
+    folder (round 12: the probe cited `cd <rep dir> && <command>` for the command it ran). ~ and $HOME stand for the
+    session folder only when `home` is given (inside the sandbox HOME is the session folder); a relative <dir> is
+    taken from the working folder; ./, repeated separators and trailing separators are collapsed. Yields the text
+    after each stripped segment; stops at the first segment that is not such a no-op."""
+    while True:
+        m = NOOP_CD_RE.match(text)
+        if not m:
+            return
+        if m.group("s") is not None:
+            d = m.group("s")
+        else:
+            quoted = m.group("u") is None
+            d = m.group("d") if quoted else m.group("u")
+            h = HOME_PREFIX_RE.match(d)
+            if h and quoted and d.startswith("~"):  # a tilde inside double quotes is literal
+                h = None
+            if h:
+                if home is None or (d[h.end():] and not d[h.end():].startswith("/")):
+                    return
+                d = home + d[h.end():]
+        if not d:
+            return
+        p = d if d.startswith("/") else posixpath.join(rep_dirs[0], d)
+        p = posixpath.normpath(p)
+        if p.startswith("//"):
+            p = "/" + p.lstrip("/")
+        if p not in {posixpath.normpath(r) for r in rep_dirs}:
+            return
+        text = m.group("rest")
+        yield text
+
+
+def normalise_report(report, commands: list, rep_dirs: list, home: str | None = None):
     """A copy of the report with cmd:, file: and read: references in the observed forms. A command reference that
-    matches no observed command becomes 'unresolved-cmd:...' so that it can never pass as an observed command id."""
+    matches no observed command becomes 'unresolved-cmd:...' so that it can never pass as an observed command id.
+    A command reference is matched as written, then without leading no-op `cd` segments (strip_noop_cd)."""
     out = copy.deepcopy(report)
     if not isinstance(out, dict) or not isinstance(out.get("claims"), list):
         return out
@@ -522,6 +565,11 @@ def normalise_report(report, commands: list, rep_dirs: list):
                 kind, _, name = ref.partition(":")
                 if kind == "cmd":
                     cid = by_text.get(squash(name))
+                    if not cid:
+                        for rest in strip_noop_cd(squash(name), rep_dirs, home):
+                            cid = by_text.get(rest)
+                            if cid:
+                                break
                     ref = f"cmd:{cid}" if cid else f"unresolved-cmd:{name}"
                 elif kind in ("file", "read") and name.strip():
                     ref = f"{kind}:{normalise_path(name, rep_dirs)}"
@@ -2159,7 +2207,8 @@ class Harness:
             "observed": {"commands": commands, "files": files, "reads": list(obs.reads), "unreadable": unreadable,
                          "skills_loaded": list(obs.skills), "searches": obs.searches,
                          "tool_writes": obs.tool_writes, "ignored_links": links},
-            "reported": normalise_report(parsed, commands, rep_dirs) if parsed is not None else None,
+            "reported": (normalise_report(parsed, commands, rep_dirs, str(rep_dir) if self.sandboxed else None)
+                         if parsed is not None else None),
             "reported_raw": raw_report,
             "metrics": {"tokens": usage, "cost_usd": res.get("total_cost_usd"), "turns": res.get("num_turns"),
                         "tool_calls": obs.tool_calls, "clarifications": obs.clarifications,
