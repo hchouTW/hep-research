@@ -9479,6 +9479,8 @@ zdcsim layout check, build, run, conversion and reconstruction, the scenario ste
 
 Not in the job: `tests/adapters/test_calo_records.py` (D2 stage 5, the records test) ran on the login node only, in no job. It pins the SHA-256 that job 7557963's manifest gives each declared test module and each `adapter.json` asset, so a changed byte in any of them fails it until a new job of record runs them.
 
+PR #411 CI fix round (2026-11-14): job 7655492 (hpa-wn26, AMD EPYC 9645, 18 min 36 s, JOB RESULT PASS; source manifest `a237d5a7…`, 6,068 files at `29bc0235`, run from a checked copy) ran the changed `tests/adapters/test_calo_cluster.py`, `tests/examples/test_reconstruction_calorimetry.py` and the example's `run.py` and renewed the two test pins: the calo modules 181 run, OK (10 more, OK, in the reduce venv); the example twice live (byte-equal), its offline replay and its tests 12 run, OK; the records test judged in the job, failing only on those two pins. Readings: the live recording equals the committed one in all 5 files, and the replay output the committed output. The job of record for adapter 0.2.0 stays job 7557963; no asset changed.
+
 **Result.** JOB RESULT PASS, every step exit 0, 14 min 03 s; 203 tests in the six adapter modules, and 43 in the affected modules. Every
 input was synthetic: the frozen fixture t08-grid/1 on block 1 (tuning; block 6 only for the generator check) and hand-made events, besides
 1,000 zdcsim events labelled `simulated-unvalidated`, which exercise the format and bookkeeping only. The checks compare the recipe with an
@@ -9523,6 +9525,7 @@ fire (+0.0539). MaxRSS 1.09 GB (sacct), 44 MB of evidence.
 The close-out has 20 met, 15 met with readings, 2 open and 1 gap. Open at this record: the quality verdict and the calibration of the
 topology score at K09; the verdicts of v4 9.4's negative checks run on evaluation events at K09. BP06's original method sources are met with
 readings by the user-approved literature check (decisions.md U-W6; `t09-sources.md`).
+**PR #411 CI fix round (2026-11-14).** Job 7655492 (hpa-wn26, AMD EPYC 9645, 18 min 36 s, JOB RESULT PASS; source manifest `a237d5a7…`, 6,068 files at `29bc0235`, run from a checked copy) ran the changed test and example files and renewed their pins in the records test (`test_photon_likelihood_time.py`, `test_photon_likelihood_topology.py`, the example's test and `run.py`): the five unit modules 226 run, OK; the example twice live (byte-equal), its offline replay and its tests 32 run, OK; the records test failing only on those four pins and the example's count. Readings: the live recording equals the committed one in all 7 files, and the replay output the committed output. The job of record for adapter 0.3.0 stays the D4 E1 job; no asset changed.
 
 **Adapter 0.2.0 (D3 stage 5).** Adapter 0.2.0 (`adapters/photon-likelihood`, task T09 of the detector reconstruction plan v9.2), first record of this adapter: status
 `demonstrated-on-synthetic-data` for its one tool and the adapter, with the tested versions. Job of record for adapter 0.2.0: job 7578442, the D3 stage 5 job,
@@ -9580,7 +9583,7 @@ events (the two-source control: 500 events) and runs the topology readings; the 
 | `tests/adapters/test_photon_likelihood_multistart.py` (multistart, the truth-start comparator, product `/3`) | 37 run, OK |
 | `tests/adapters/test_photon_likelihood_topology.py` (H2, the topology choice, product `/4`, the two-source control's files, the readings) | 47 run, OK |
 | `tests/adapters/test_photon_likelihood_negative.py` (D4 E1: the single-photon density and its configuration, the relabelling of dead channels, the fires rules) | 34 run, OK (job 7584387, the D4 E1 job; `7584387.out` line 420, with the four modules above: 226 run) |
-| `tests/examples/test_reconstruction_photon_likelihood.py` (the example's replay, its checks on hand-made events, a live run) | 31 run, OK (job 7578442, the D3 stage 5 job) |
+| `tests/examples/test_reconstruction_photon_likelihood.py` (the example's replay, its checks on hand-made events, a live run) | 32 run, OK (job 7655492, the PR #411 CI fix round's pin renewal; 31 run, OK in job 7578442, the D3 stage 5 job) |
 | `tests/adapters/test_photon_likelihood_records.py` (the records agree; the code is the bytes the jobs of record ran) | 21 run, OK (job 7578442, the D3 stage 5 job); renewed for 0.3.0: 21 run, OK (job 7584387, the D4 E1 job; `7584387.out` line 569) |
 | `test_adapter_declarations`, `test_tool_contract`, `test_cli_robustness` | 43 run, OK |
 | frozen files, generator check, GOLDEN lines | 7 frozen files unchanged; all 61 GOLDEN lines equal job 7477787's |
@@ -9817,6 +9820,8 @@ except two `test_revocation` cases that fail whenever TMPDIR is on this cluster'
 main, and two hep-statistics/hep-computing extractor modules that fail in the AMS copy only because this login node's
 /tmp holds a `.git` folder (they pass with another TMPDIR). Open: `test_photon_likelihood_records` (5) and `test_calo_records` (2) fail on their job-of-record pins of the
 changed test modules and photon `run.py` until a job of record renews them.
+
+Pins renewed: job 7655492 (hpa-wn26, 2026-11-14, 18 min 36 s, JOB RESULT PASS; manifest `a237d5a7…` at `29bc0235`, from a checked copy with the live tree hidden) ran the photon-likelihood and calo-cluster adapter modules, both examples twice live and their test modules (photon 32, calo 12), and both records tests, which failed only on the six pins of the changed files and the photon example's count; the live recordings and the offline replays equal the committed ones. The six pins and the count are renewed from its manifest; the jobs of record (7584387, 7557963) and the adapter versions are unchanged.
 
 ## RECO-SIX-CRITERIA — 2026-11-14 (records only; no job)
 

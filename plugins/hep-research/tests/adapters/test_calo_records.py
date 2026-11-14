@@ -13,7 +13,8 @@ What is checked:
 - The tested versions are the ones the job of record logged, and the VALIDATION section states each of them.
 - adapter.json, the VALIDATION section, the matrix row and the close-out name one and the same job of record for the declared version.
 - Every declared test module and every asset `adapter.json` lists has the SHA-256 that job 7557963's manifest (`SOURCES.sha256`
-  `c176ffb4...`, 820 files) gives it, pinned below. One changed byte in any of them makes this test fail, until a new job of record
+  `c176ffb4...`, 820 files) gives it, and for the files the PR #411 CI fix round changed, the values of job 7655492's manifest
+  (a237d5a7…), pinned below. One changed byte in any of them makes this test fail, until a new job of record
   runs the changed files and the pins and the record are renewed. Exempt: this module (it ran in no job, and the section says so) and the
   records it reads (`adapter.json`, `VALIDATION.md`, `docs/capability-matrix.md`, `t08-closeout.md`, `t08-scenarios.md`), which this
   stage changes. A file declared later without a pin fails too.
@@ -50,7 +51,8 @@ TOOL_VERSIONS = (
     ("uproot 5.7.7", "awkward 2.14.0", "NumPy 2.5.4", "Python 3.13.2", "Geant4 11.4.3", "GCC 11.5.0"),
 )
 # The SHA-256 of each declared test module and adapter.json asset in job 7557963's manifest (SOURCES.sha256 c176ffb4..., paths from the
-# plugin root). D2 stage 5 fix round 1 (review M4): the job of record ran these bytes; the records claim no change since.
+# plugin root). D2 stage 5 fix round 1 (review M4): the job of record ran these bytes; the records claim no change since. For the files the
+# PR #411 CI fix round changed (test_calo_cluster.py, the example's test), the values of job 7655492's manifest (a237d5a7…).
 JOB_OF_RECORD_PINS = {
     "adapters/calo-cluster/assets/calo_cluster.py": "31b362e5dd84e889363a4f6c63475cb7e01af4d7722cd600a132ac36c9b19ec9",
     "adapters/calo-cluster/assets/calo_recipe/__init__.py": "a0e23ddcfa478f2fa3922c554f1b2448f721faf4d8a0261ed26ed9f41941e683",
@@ -70,11 +72,11 @@ JOB_OF_RECORD_PINS = {
     "adapters/calo-cluster/assets/t08-grid-1.configuration.json": "5fbbea3b4ca81d962c5ca70fa024ddc82dd6e1d2f06e39b354fda56d26483723",
     "adapters/calo-cluster/assets/zdcsim-prototype-v2.configuration.json": "b82b08db784151d4754bb5b53b1bdeae5c1b67c036cd755447475a25ec2f9e1f",
     "tests/adapters/test_calo_cai.py": "f1c4e9061065f902f0ff6f845431a1453e48068b422598d215a3361ebdf5e67f",
-    "tests/adapters/test_calo_cluster.py": "a0dd3fecea69b5e55159c67b84ab74e5004936cd284733aa1423724b4daec5f1",
+    "tests/adapters/test_calo_cluster.py": "d7fa15c502ff0d5c3e36109b268337073eaa8987fdf62a97f6bdf3a4a716734b",
     "tests/adapters/test_calo_scenarios.py": "78ccdc815727a1dd4b0139e404db8833651b8ea092363f09ee09c0e85ce83490",
     "tests/adapters/test_calo_zdcsim.py": "66088e8fc43dffee9cbd60b163d8ba50bab7d31f38d9ac579df292319eb2c8c8",
     "tests/adapters/test_calo_zdcsim_root.py": "853eafe49bbe4710ad9c8f85c67aecae28a5ea9785bd9b3c806cb05e37c99f6d",
-    "tests/examples/test_reconstruction_calorimetry.py": "e74afeec904b505b9bde5b6bf0fd1e5e95a19368730a962f285c93fd2232bd62",
+    "tests/examples/test_reconstruction_calorimetry.py": "e5f9996b3f4cdec3f7e2d194a0ad5a19f37cc009ea91553c4a0a92635975986a",
 }
 SHEET_PARTS = ("Background / Objective", "Scope", "Non-goals", "Files", "Input", "Interfaces", "Steps", "Acceptance", "Open item", "Stop")
 
