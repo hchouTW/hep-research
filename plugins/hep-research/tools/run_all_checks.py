@@ -60,8 +60,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 MODULE_TIMEOUT = float(os.environ.get("HEP_MODULE_TIMEOUT", "600"))  # seconds per test module or check
-# check_ams_optional.py reruns the generic suites in a copy of the tree: about 190 s locally, 7-10 min on CI runners
-AMS_OPTIONAL_TIMEOUT = 1200.0
+# check_ams_optional.py reruns the generic suites in a copy of the tree: about 15 min on CI runners (924 s on PR #411),
+# slower in the hostile-paths relocated run, which sets HEP_AMS_OPTIONAL_TIMEOUT
+AMS_OPTIONAL_TIMEOUT = float(os.environ.get("HEP_AMS_OPTIONAL_TIMEOUT", "1200"))
 TIMINGS = ROOT / "tools" / "module_timings.json"
 OPTIONAL_MODULES = ROOT / "tools" / "optional_modules.json"
 SLOW_MODULE_SECONDS = 60.0  # a fast-tier module above this belongs in the slow tier (HEP_SLOW_TESTS=1)

@@ -17,7 +17,7 @@ Feldman-Cousins tables, the 10,000-mutation contract fuzz and the full theory-co
 runs each test module in its own process with a time limit (`--module-timeout`, default 600 s, or the
 `HEP_MODULE_TIMEOUT` environment variable) and records every module's duration. The slow tier needs more:
 `tests.examples.test_stats_benchmarks` alone takes about 525-545 s there and timed out under parallel load, so the
-weekly `latest` CI job, which runs the slow tier, sets `HEP_MODULE_TIMEOUT=1800`; do the same for a local slow-tier
+weekly `latest` CI job, which runs the slow tier, sets `HEP_MODULE_TIMEOUT=1800`; the AMS-optional rerun has its own limit, 1200 s or `HEP_AMS_OPTIONAL_TIMEOUT` (2400 s in the hostile-paths relocated run); do the same for a local slow-tier
 run (`HEP_SLOW_TESTS=1 HEP_MODULE_TIMEOUT=1800 python3 tools/run_all_checks.py`) rather than reducing toys, seeds or
 tolerances. A fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Modules start
 slowest first, using the durations recorded in `tools/module_timings.json`. CI splits the run into parallel jobs:
