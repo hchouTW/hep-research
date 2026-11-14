@@ -240,15 +240,15 @@ directory of a file you wrote>" or "read:<path of a file you read>". Report only
 |---|---|---|
 | Frozen scorer and tests | agent | done: `score_holdout.py` ff9755a5..., 39 tests on synthetic fake fixtures |
 | Writer brief | agent | done: `t13-holdout-writer-brief.md` |
-| User agrees to the custody procedure of section 1 (recorded in `decisions.md`) | user | not yet |
-| Holdout written off-host and held; SHA-256 of tasks and answers recorded in `decisions.md` | user (U9) | not yet |
+| User agrees to the custody procedure of section 1 (recorded in `decisions.md`) | user | done: "Agree, one account (Recommended)", 2026-11-13, with the stated limit of one Unix user; section 7's five readings "Adopt all five (Recommended)" the same day (`decisions.md`, "T13: the holdout session, custody and section 7's readings") |
+| Holdout written off-host and held; SHA-256 of tasks and answers recorded in `decisions.md` | user (U9) | not yet: holdout not established (T13 and T16 `blocked-by-decision`) |
 | Development set for the harness shakedown (K11, agent-written, in the repository, never the holdout) | agent | done: `evals/reconstruction-holdout/dev-set/` (6 tasks, valid with `--design none`) |
-| Harness code (sections 3.1-3.10), tested with a fake CLI as `evals/routing/tests/fake_claude.py` does, then frozen by hash | agent | done: `evals/reconstruction-holdout/run_holdout.py`, tested on `tests/fake_claude.py`, frozen in `FROZEN-HARNESS.sha256` |
-| Harness shakedown on the development set with the real CLI (cost per session measured; the holdout budget estimated from it) | agent, on the user's word (paid model calls) | `not-started` |
-| SUT fixed (`t13-sut.json`, `t13-settings.json`) | user | not yet; after the other lanes and the T07 decision (decisions.md, 'Recorded for the record (2026-11-13)', Phase G) |
-| Runner named | user | not yet |
-| Execution resources for `requires_execution` tasks (section 6) | user | not decided |
-| Budget for 3 x (number of tasks) sessions | user | not decided |
+| Harness code (sections 3.1-3.10), tested with a fake CLI as `evals/routing/tests/fake_claude.py` does, then frozen by hash | agent | done: `evals/reconstruction-holdout/run_holdout.py`, tested on `tests/fake_claude.py`, frozen in `FROZEN-HARNESS.sha256`; merged as `316a097b`, job of record 7651192 PASS, sandbox checks 7650762, 7650958, 7651068, 7651151 exit 0 |
+| Harness shakedown on the development set with the real CLI (cost per session measured; the holdout budget estimated from it) | agent, on the user's word (paid model calls) | in progress: the user's "go-ahead" (2026-11-14, `decisions.md`, "T13 design"); SUT model `claude-opus-5-5`, plugin `316a097b`, `session_budget_usd` 5, at most 7 paid sessions (`<private>/jobs/t13-shakedown/`); probe job 7652238 submitted 2026-11-14, pending when this row was written. Development material only, not the holdout |
+| SUT fixed (`t13-sut.json`, `t13-settings.json`) | user | for the shakedown only: the development-set records above. For the holdout run: not yet (the user's) |
+| Runner named | user | decided as design: "Slurm compute nodes (Recommended)", the runner submits jobs and the run window is away from the login node (2026-11-14, `decisions.md`, "T13 design"); the person or session who runs the holdout window is the user's (`RUNNER-BRIEF.md`, a draft in `<private>/jobs/t13-shakedown/`) |
+| Execution resources for `requires_execution` tasks (section 6) | user | decided: "Locally in the job (Recommended)", inside the session's allocation with backends read-only, no Slurm access from the sandbox (2026-11-14, `decisions.md`, "T13 design") |
+| Budget for 3 x (number of tasks) sessions | user | not decided (the shakedown's cap of 7 sessions at $5 is not this budget) |
 
 ## 5. What is recorded, and where
 

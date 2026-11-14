@@ -123,3 +123,16 @@ Also open, though no sheet row carries it:
 - **K12.** Cost lines are printed, warm only. No target exists before P2 (`t04-values-v4.md` section 12).
 - **Reproducibility.** The charge-only and one-seed products were byte-equal across nodes and jobs (equality steps of 7566770, 7571207 and
   7575617). A reading for these runs, not a claim in general.
+
+## Note added at G3 (2026-11-14): the topology-score calibration row after evaluation attempt 1
+
+Appended; the row above ("Open item, BP06 panel: multiple-topology scores require mis-ID and efficiency calibration", `open`) is left as it
+was written. Its closing condition was "the two mis-ID rate tests and the fit-failure test run at K09". Evaluation attempt 1 on block 11
+ran them at the frozen gates: summary 7613459, `outcome.json`, gates `mis-ID H1 truth`, `mis-ID H2 truth` and `fit failure` all `pass`
+(`decisions.md`, "Evaluation attempt 1 on block 11").
+
+What that settles: on the frozen synthetic fixture and its strata, the topology choice's mis-ID rates and the fit-failure rate pass their
+rate tests at the frozen limits. What it does not settle: a calibration of the score itself (no score-to-probability curve or efficiency
+map is formed); any light model other than the fit's own (every result is a shared-model closure); the B1 strata, where the pulls stay
+ungated (open obligations in the same outcome record). The records do not say whether this closes the row, so it stays `open` here; closing
+it as `met with readings` on the evidence above is a ruling for the coordinator or the user.

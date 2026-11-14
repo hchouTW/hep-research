@@ -15,8 +15,10 @@ Validation status: [docs/capability-matrix.md](docs/capability-matrix.md). Test 
 - **Profiles** (`profiles/`): optional experiment and theory-domain profiles, and the reference profile of the sourced
   detector atlas.
 - **Tool adapters** (`adapters/`): batch schedulers, cosmic-ray propagation, CRDB, environments, Geant4, geomagnetic
-  backtracing, HEPData, literature lookup, pyhf/Combine, recasting, ROOT/uproot, unbinned fit, unfolding.
-- **Worked examples** (`examples/`): 26 examples on synthetic data, most with a `run.py` and committed outputs.
+  backtracing, HEPData, literature lookup, pyhf/Combine, recasting, ROOT/uproot, unbinned fit, unfolding; and five
+  detector-reconstruction adapters on synthetic data (ACTS tracking, calorimeter clustering, photon likelihood, timing
+  and PID, destriping; see [Detector reconstruction](#detector-reconstruction)).
+- **Worked examples** (`examples/`): 30 examples on synthetic data, most with a `run.py` and committed outputs.
 - **Bilingual routing**: requests in Traditional Chinese are routed the same way; answers come in the language of the
   request.
 
@@ -363,6 +365,31 @@ not verified.
 **Scope of software checks**
 - Software checks establish contract consistency only. They do not establish physical validity, proof, statistical
   coverage, or authorization to unblind.
+
+## Detector reconstruction
+
+Work of the detector reconstruction plan v9.2. Every input is synthetic or simulated; nothing here is validated on
+detector data, and no reconstruction quality is claimed for any real detector. Overall state: **incomplete** (see
+[the final report](docs/dev/detector-reconstruction/final-report.md)).
+
+| Part | What it is | State |
+|---|---|---|
+| `contracts/reconstruction.py`, `conditions.py`, `sidecar_reader.py` and eight sidecar schemas | ports, products, recipes, conditions payloads, binding evidence, selection records, input signatures; none is an artifact type | contract checks pass on the seven witnesses W1-W7 |
+| `contracts/input_inspector.py` | bounded inspection of JSON sidecars, envelope artifacts and CSV tables; ROOT stays unknown | what it cannot read stays unknown with a stop reason |
+| `contracts/candidate_selection.py` | judges a finite candidate index on one input signature and writes a replayable selection record | rules on artificial fixtures; the one two-candidate selection on simulated events found no qualified candidate |
+| `adapters/acts-tracking` | tracking and vertexing on ACTS 48.2.0, planar telescope | evaluation attempt 1 **failed** (final) |
+| `adapters/calo-cluster` | calorimeter cell chain and clustering, development binding in Python | passed attempt 1 with a narrowed claim; no native backend |
+| `adapters/photon-likelihood` | all-channel photon likelihood, development binding in Python | passed attempt 1 with a narrowed claim (shared-model closure); no native backend |
+| `adapters/timing-pid` | time chain, TOF, PID and dE/dx; native counter channels as a counts product | demonstrated on synthetic data; no cross-system example |
+| `adapters/destriper` | the scan/global reference replay, development binding in Python | passes the comparator the user froze; no native solver |
+| `evals/reconstruction-holdout/` | frozen scorer and sandboxed harness for the AI evaluation | built; no holdout exists and no model session has run |
+
+- The examples `examples/reconstruction-tracking/`, `reconstruction-calorimetry/` and
+  `reconstruction-photon-likelihood/` replay recordings made on a Slurm node; `--live` reruns them where the backend
+  or generator is available (ACTS is not installed on E2).
+- A development binding is plugin code written for this plan. It is not a native backend and stands for none.
+- Evidence per job: [VALIDATION.md](VALIDATION.md), sections `ACTS-TRACKING-T07` to `RECO-SIX-CRITERIA`. Plan records:
+  [docs/dev/detector-reconstruction/](docs/dev/detector-reconstruction/).
 
 ## Validation and maintainer checks
 

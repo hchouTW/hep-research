@@ -121,3 +121,21 @@ After the evaluation, three further principled candidates were tested on develop
 merged vertices almost unchanged). The user accepted the outcome on 2026-11-14: **T07 failed at attempt 1, final**; no return to Freeze B,
 no attempt 2 (decisions.md, "T07: final at failed at attempt 1").
 
+
+## Note added at G3 (2026-11-14): user items and failing-first, settled 2026-11-11
+
+Appended; the rows and sections above are left as they were written. On 2026-11-11 the user accepted the coordinator's suggestions
+("accept the suggestions"; `decisions.md`, "The user's answers to the remaining Freeze B, K09 and later items"). They settle items this file
+lists as open:
+
+- **The six user items** ("Also open", above). n6, the vertex primary's "most tracks": settled by U-K1 (tracks with weight at least 0.5).
+  The D2 departure: accepted by U-W2 (nominal geometry identity `t07-telescope-nominal/1`). The K04 schema limit: accepted for now by U-W3
+  (a typed file-input field in a later contract version). The Freeze B vertex values: given with Freeze B (U-B1 to U-B13 and the user's
+  "Freeze B as listed", 2026-11-13). F1 and m6, with the stage 11 corrections: approved by U-W1 as one amendment of the task sheet labelled
+  "after development", applied after evaluation; not yet applied in `t07-t09-task-sheets.md`, so they stay in `STATE.md` `user_items_open`.
+- **Failing check first, stages 1 to 7 (with 5b to 5e, 6b, 6c, 7b) and 10** (the sheet row and the summary line, `open`): waived by the user,
+  U-B15, recorded as "waived by the user, not shown". The row is closed by the waiver, not by evidence of a red run.
+- **Stop row, the K04 schema limit** (`met with readings`): its user item is settled by U-W3.
+
+Still open after these: material effects, A01 (T15b found no qualified candidate, job 7627683), the quality verdict (now final: failed at
+attempt 1, section "Final" above), the R33 gaps, R34's two T07 rows, and the `coverage.md` obligations.

@@ -1108,3 +1108,33 @@ The user's answer, verbatim: "accept T07 failed at attempt 1, auto continue". T0
 return to Freeze B and no attempt 2; block 12 stays unread. The recorded cause: AMVF at ACTS defaults merges 3-track vertex pairs 5 to 7.5 u_v
 apart, which the fixture's far range [5, 25) u_v admits and v4 section 17 lists as "where confusion really happens". A Freeze A amendment
 of the far range, the only other route the diagnosis names, was not taken.
+
+## Ledger records copied into the tracked folder (G3, 2026-11-14)
+
+On the coordinator's instruction, two ledger files cited above are now also in this folder, each headed by a note naming its source and
+SHA-256: `t07-vz-diagnosis.md` (ledger SHA-256 af11380e1d13a5b4199c36b2e6d726cb7930b6a959336c0a5f4591ce84afed55) and
+`e6-result-lines-audit.md` (ledger SHA-256 ba01bb028f60aaeed8f7e5083c80f00fb69c26e0f970738d4bca7da6cf0f573e). Earlier sections that cite
+them by name mean these files; the lines above are not edited. `t07-vz-diagnosis-review.md`, also cited, stays in the ledger folder
+`<private>/worktree/.superpowers/sdd/finish-plan/` only.
+
+## A13: left as it is (the user, 2026-11-14)
+
+Asked with the mid-size proposal `<private>/jobs/a13-midsize/PROPOSAL.md` (SHA-256
+f8ba1460ce19ddcaa8966f509bc560e0eff3a0c6c26bf208efb16b1d4a48a211; branch `a13/midsize-proposal` at 316a097b; nothing frozen, no job), as
+relayed by the coordinator, the user: "Leave A13 as is (Recommended)". What the proposal showed, kept as readings:
+- At a 4,096-sample pointing (`a13-mid-4k`) T10's exact method is tractable: kappa 9.303845, G 1.028937, so tau 9.4e-9 (baselines) and
+  9.6e-9 (map) at T10's stopping 1e-10 and safety 10; the same procedure run on t10-destripe/1 reproduces T10's frozen records exactly.
+- The GPU is predicted about 4 times slower than the CPU there in warm compute (slower end to end), with a predicted warm-compute crossover
+  near 29,000 samples. These are extrapolations from released timings only (a two-point CPU model), not measurements.
+- 65,536 samples (`a13-mid-64k`, predicted about 2 times faster on the GPU) would need a ruling on the reduced-form derivation of kappa
+  and G and an in-memory comparator path, since no product of that size can be written (OI-13).
+The choice: A13 keeps its released result on the frozen pointing (6 of 6 GPU runs within T10's frozen tolerance, job 7649143); the proposal
+and the crossover prediction are recorded as readings; OI-12 stays open and the GPU timings at scan sizes stay sealed; nothing is frozen.
+
+## G3 on the user's word (2026-11-14)
+
+The user's words, verbatim, after the coordinator listed what waited on them (the T13 holdout items, the optional A13 mid-size pointing, G3):
+"do \"Waiting on you\"". Read and recorded as: G3 proceeds (final report, final checkpoint, whole-branch review, integration with the
+current main, the PR, and the final backup, with merging only after all CI passes); the A13 mid-size pointing prepared as a proposal (the user
+then chose "Leave A13 as is (Recommended)", above); the T13 runner brief drafted. The holdout writer session and the runner stay the user's by
+design (U9; t13-harness-spec.md section 1), and the holdout budget follows the shakedown's measured cost.

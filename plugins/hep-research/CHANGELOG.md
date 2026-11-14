@@ -27,6 +27,65 @@ script run by a script interpreter (`sh`, `bash`, `root -q`, ...) is recorded as
 given as an option value is not examined. `--incremental` now also reruns a step whose `seeds` changed. Steps with neither keep their records' keys and their
 skip. `geant4_run.py scan` declares each step's executable and build record as `native_inputs`, so a scan reruns when the binary changes.
 `ext_computational_run.json` does not yet list the two new keys (the extension is open; follow-up once the schema is no longer frozen).
+This covers common tools too: a step whose `argv[0]` is a bare `python3` or `cp`, not declared in `native_inputs`, now reruns in every run instead of
+being skipped on matching input hashes. Declare the program to keep the skip.
+
+Detector reconstruction, task T07 (new adapter `adapters/acts-tracking` 0.3.0, `demonstrated-on-synthetic-data`; tool contract
+`contracts/tool_contracts/acts_tracking.json`). A native C++ driver and finder on ACTS 48.2.0 for a planar silicon telescope: seeding, combinatorial
+Kalman filter, greedy ambiguity resolution, Kalman fit and optional adaptive multi-vertex finding, on hits alone, with every candidate, outcome and
+failure category in a finding record and search truncation marked on every candidate. A refit of a known hit set at zero field or 1 T is truth-assisted
+and counted apart, never reported as finding. Its own product format keeps predicted, filtered and smoothed states apart and has a byte-exact round
+trip. Formed in plugin code: unbiased residuals, the full residual covariance and alignment derivatives in the R32 parametrization, and a refit under a
+supplied alignment payload whose identity the product records. A thin Python wrapper forwards to the built programs; the data side never opens a
+truth file. Example `examples/reconstruction-tracking/` (offline replay of a recording made on a Slurm node). Evaluation attempt 1 on block 11
+failed (one record of 1,260: the vertex pull z tail of fixture 7002, stratum 9), and that outcome is final: no tracking or vertexing quality
+is claimed. Two recorded post-freeze changes: the sidecar of an alignment payload that moves nothing now states every plane at nominal (it
+was refused by the R32 reader), and a test no longer fails inside Slurm jobs with less than an hour left. Gaps on a recorded probe: cluster size
+and charge per measurement, and a trajectory export with scattering parameters.
+
+Detector reconstruction, task T08 (new adapter `adapters/calo-cluster` 0.2.0, `demonstrated-on-synthetic-data`; tool contract
+`contracts/tool_contracts/calo_cluster.json`). A development binding in Python, not a native backend: cell chain with payload identities in chain
+order, clustering per `t04-values-v4.md` section 7.1, a gain payload with its channel map, and a product format with a refusing reader and a
+double-count gate. A second input path reads the ROOT output of a user-supplied zdcsim program through uproot, labelled
+`simulated-unvalidated`; its thresholds are carried over and Unresolved. Example `examples/reconstruction-calorimetry/`. Evaluation attempt 1 on
+block 11 passed its 8 gates with a narrowed claim (26 open obligations listed in the outcome record). The recipe script writes no bytecode
+(a recorded change after evaluation; the outcome stays bound to the evaluated bytes).
+
+Detector reconstruction, task T09 (new adapter `adapters/photon-likelihood` 0.3.0, `demonstrated-on-synthetic-data`; tool contract
+`contracts/tool_contracts/photon_likelihood.json`). A development binding in Python: an all-channel likelihood over live, unhit and dead channels
+with a joint charge and time term, seeded multistart fits from data-side starts, a two-hypothesis topology choice, and the two negative checks of
+`t04-values-v4.md` section 9.4. The fixture and the fit share one analytic light model, so every result is a shared-model closure: it tests the
+code, not the model. Example `examples/reconstruction-photon-likelihood/`. Evaluation attempt 1 on block 11 passed its 13 gates with a narrowed
+claim (65 open obligations listed in the outcome record). The recipe script writes no bytecode (recorded after evaluation, as T08).
+
+Detector reconstruction, task T10 (new adapters `adapters/timing-pid` 0.2.0 and `adapters/destriper` 0.2.0, `demonstrated-on-synthetic-data`; tool
+contract `contracts/tool_contracts/destriper.json`). `timing-pid`: a time chain that keeps each hit's value before and after each step with that
+step's payload, event times, TOF and beta, species hypotheses, truncated-mean dE/dx, a missing subsystem delivered as `missing-input` and never as
+zeros, a method card that lists unconstrained modes with their named constraints, and native counter channels written as a T06
+`reconstruction:counts-v1` product. `destriper`: the scan/global reference replay chosen by the user, a conjugate-gradient destriper with the zero-sum
+baseline constraint, compared with an independent exact rational reference at a tolerance the user froze. Both are development bindings, not native
+backends; the native scan or global solver stays a recorded gap. No timing, PID or map-making quality is claimed.
+
+Detector reconstruction, evaluation harness (tests only, D4). `tests/adapters/t04_evaluation_core.py`, `t04_evaluation_layout.py`,
+`t04_evaluation_tasks.py`, `t04_bin_scorer.py` and the per-workflow scorers `t07_evaluation_scoring.py`, `t08_scoring.py` and `t09_scoring.py` score the
+frozen recipes per bin against the values frozen at Freeze A and Freeze B, with attempt selection and crash rules. They ship as tests and change no
+plugin behaviour.
+
+Detector reconstruction, task T12 (tests only). Harnesses under `tests/contracts/` (`t12_outer_loop.py`, `t12_reprocessing.py`, `t12_partition.py`,
+`t12_comparators.py`, `t12_benchmark.py`, `t12_a13_gpu.py`, `t12_degeneracy.py`, `t12_runtime.py`) show the outer calibration loop, invalidation and
+native identity, partition merges and processing accounts, byte, numerical and statistical comparators, quality before speed, a CPU benchmark, a
+GPU subchain of the destriper against its CPU recipe, the g×E degeneracy and the A26-A36 run time on synthetic fixtures and recorded development
+products. Most comparators answer `incomplete`, never a pass, because no reproducibility tolerance is frozen for those recipes. The GPU tests
+join the PyTorch backend leg in CI. No speed claim: timings are records, and the GPU timings at scan sizes stay sealed.
+
+Detector reconstruction, task T13 (`evals/reconstruction-holdout/`). A frozen scorer, `score_holdout.py`, for an AI-evaluation holdout written and
+held off this host; a harness, `run_holdout.py`, that runs fresh headless sessions of the system under test in a bubblewrap sandbox (own home, read-only
+system and plugin snapshot; the repository, the runner's home and the run root absent) and writes the scorer's run records; `run_holdout_slurm.py`,
+which chains those sessions as Slurm jobs; a six-task development set; and a CI step for its tests (fake CLI, no model calls). No holdout exists yet
+and no model session has run, so holdout independence is not established.
+
+`.gitattributes` marks `*.cells`, `*.readout` and `*.t07data` as binary. The plan records for this work, with the final report, are in
+`docs/dev/detector-reconstruction/`.
 
 ## 0.58.0 (2026-11-07)
 

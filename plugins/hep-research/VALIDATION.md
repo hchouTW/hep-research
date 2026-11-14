@@ -9306,3 +9306,133 @@ job 7593065, crashed on a test defect (the freeze was foreseeable) with every re
 
 Not claimed: map-making quality; a native scan or global solver (recorded gap, U7 B2, as U12 A); the RF and retarding W7 subcases at run
 time (they stay T06 contract checks).
+
+## RECO-CONTRACTS-T06-T14-T15A — 2026-11-07 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Tasks T06 (reconstruction contracts and the witnesses W1-W7), T14 (bounded input inspector) and T15a (offline candidate selection) of the
+detector reconstruction plan v9.2. Records: `docs/dev/detector-reconstruction/baseline.md` ("Gate C checkpoint"), `decisions.md` (T06
+readings, T14 rulings, T15a readings).
+
+| Job | Commit | Result |
+|---|---|---|
+| Gate C checkpoint, rerun: 7487578, hpa-wn30, 9 min 48 s | `596b6875` (before the 0.58.0 rebase; reachable through the local ref `pre-rebase-0.57.0`) | Slurm `FAILED` 1:0 on the known LCG test only (a site CVMFS stall, `baseline.md`); the 14 new contract modules ran, 766 tests pass; clean by the reading rule fixed before the job. T06, T14 and T15a `done` |
+| Re-baseline at 0.58.0: 7488410, hpa-wn30, 10 min 13 s | `31a96930` | `--part units` 7,686 run, 7,304 passed, 0 failures, 1 error (the LCG test), 381 skipped; the 766 contract tests pass again |
+
+Every fixture is artificial. The witnesses show that the contracts can express each case; they are not instrument validation and do not
+replace a run on a backend (plan §12.1). T15a's selection rules are shown on artificial candidates only; no claim on real recipes.
+
+## RECO-EVALUATION-D4 — 2026-11-12 to 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Freeze B and evaluation attempt 1 of the three required P2 workflows (T07 tracking and vertexing, T08 calorimetry, T09 photon likelihood).
+Records: `docs/dev/detector-reconstruction/freeze-b.md`, `decisions.md` ("Freeze B", "Evaluation attempt 1 on block 11", "T07: failed at
+attempt 1", "T07: final at failed at attempt 1"), `t07-closeout.md` (final section).
+
+**Freeze-B run, block 2.** Jobs 7585954 (T07), 7585955 (T08), arrays 7585956 and 7585957 (T09), collection 7585958: all 31 jobs and tasks
+COMPLETED, collection JOB RESULT PASS, 39.67 CPU-hours, on AMD EPYC 9645 (hpa-wn33, hpa-wn34). Recipe commit `5228a3e2`, manifest `915042c4…`
+(898 files). The rate-check supplement 7590984 (read-only): `U_dev <= C` (0.005) in all 12 noise bins. Freeze B was given by the user on
+2026-11-13 ("Freeze B as listed") on `freeze-b.md` SHA-256 `cfea4fc7…`; the evaluation harness is frozen by its manifest `d98f5e6f…`.
+
+**Evaluation attempt 1, block 11** (submitted with `jobs/evaluation/submit.sh` `2fd84fe9…`; 46 `sbatch` calls; evidence
+`<private>/evidence/evaluation-b11/`):
+
+| Workflow | Summary job of record | Outcome |
+|---|---|---|
+| T07 | 7613452 | **fail**, R11 `failed`: 1,259 of 1,260 records and 46 of 47 gates pass; the failing record is fixture 7002, stratum 9, `vertex pull z`, tail rate 200 of 18,907 objects, estimate 1.058 %, Clopper-Pearson lower 0.938 %, upper 1.189 %, against L 1 % |
+| T08 | 7620411 (checks counted from the rerun 7620410 under the user's block-1/6 ruling; 7613455 read incomplete and kept) | **pass**, `done (narrowed claim)`: 8 of 8 gates; `outcome.json` lists 26 open obligations |
+| T09 | 7613459 | **pass**, `done (narrowed claim)`: 13 of 13 gates; `outcome.json` lists 65 open obligations; the 24 single-photon refusals of sample 10 read `rejected` by hand |
+
+**After the evaluation (development data only; T07's outcome unchanged).** Diagnosis (job 7623497; `docs/dev/detector-reconstruction/t07-vz-diagnosis.md`, a copy of the ledger file): the adaptive
+multi-vertex finder at ACTS defaults merges close three-track vertex pairs 5 to 7.5 vertex-resolution units apart; every occupancy-1 bin sits
+near 0.9 % on blocks 1 and 2. Six principled candidates, each pre-registered, failed their criteria on block 1: C1 7623624, C2 7624555,
+C3 7625490 (pre-registration `ac3cd0b3…`), seeders S1 7632710 and S2 7636593 (S2 not counted), and the post-fit split test 7649462
+(pre-registration `d6151d34…`). The user, 2026-11-14: "accept T07 failed at attempt 1, auto continue". No return to Freeze B and no attempt 2;
+block 12 stays unread.
+
+**Recorded changes after the freeze** (the outcomes stay bound to the evaluated bytes in `freeze-b.md`): the bytecode line in
+`calo_cluster.py` and `photon_likelihood.py`, job of record 7626930 (hpa-wn34, PASS; full suite failing only the LCG test); the TaskDeadline
+test and the zero-payload alignment sidecar, job of record 7647958 (hpa-wn33, PASS).
+
+Not claimed: any tracking, vertexing, calorimetry or photon-likelihood quality on detector data; every sample is synthetic, and T09 is a
+shared-model closure. T08 and T09 passed only against their frozen synthetic gates, with the open obligations named in their outcome records.
+
+## RECO-T15B-K16 — 2026-11-13 (NSTCCore Slurm, partition edr2-al9_short_serial)
+
+T15b, the plan's one two-candidate selection (K16), on simulated `element_sim` events (fixture 1601, block 21, digitization off). Spec
+`docs/dev/detector-reconstruction/t15b-element-sim-spec.md` (SHA-256 `99a678e5…`, frozen by the user); record `decisions.md` ("T15b: K16
+selection, attempt 1 on block 21").
+
+Job of record 7627683 on hpa-wn33, 2026-11-13, JOB RESULT PASS (script `t15b-k16.sh` `c9a635b0…`, manifest `015690d6…`, scorer `c3ab9825…`).
+Result: **no qualified candidate**. `simreco-pr-a` and `simreco-pr-b` each fail 13 of 96 required tests: the `rho_pull` tail rate (1.5-2.0 % in
+bins 0-2; antiproton in bin 3) and the fake rate in bins 1-3 (1.5-2.6 %), against L 1 %; efficiency, charge flip, centres and widths pass.
+Gates were not lowered. The claim is scoped to the declared baseline and the tested domain; no post-selection quality claim without K18
+confirmation data (block 23 untouched). A01 (a second tracking backend for T07) therefore stays open.
+
+## RECO-T12 — 2026-11-12 to 2026-11-14 (NSTCCore Slurm, partitions edr2-al9_short_serial and b6000-al9_devel)
+
+T12, reprocessing and performance. Close-out: `docs/dev/detector-reconstruction/t12-closeout.md` (27 obligations: 7 met, 20 met with readings;
+open items OI-1 to OI-7, OI-9 to OI-13). Every job ran from a checked snapshot; JOB RESULT PASS; the full unit suite fails only the known LCG
+test, static gate 31 pass.
+
+| Stage | Job of record | Node, elapsed | Commit (merge) |
+|---|---|---|---|
+| 1, outer loop | 7606257 | hpa-wn33, 26:14 | `0e310d34` |
+| 2, conditions, invalidation, identity | 7627669 | hpa-wn34, 20:11 | `7eda91a2` (`aed73a78`) |
+| 3, partitioning, recovery, accounts | 7647776 | hpa-wn34, 22:56 | `bbfa7b4e` |
+| 4 part A, comparators, quality before speed | 7648553 | hpa-wn34, 19:26 | `b0e3c013` (`d1f6fc30`) |
+| 5 with 4 part B, CPU benchmark and A13 | CPU 7649128; GPU pilot 7649129, measurement 7649143; hardware check 7648670 | hpa-wn33, 34:09; hp-rtx6kp02 (1 GPU), 3:18, 10:11, 1:04 | `8dfd7d38` (`eb4ef5c9`) |
+| 6, g×E degeneracy, weak-mode witness | 7648001 | hpa-wn34, 23:12 | `781e7d31` (`a844897d`) |
+| 7, A10 and A26-A36 run time | 7648050 | hpa-wn33, 25:46 | `f8209933` (`c5e41e41`) |
+| carried review minors | 7649615 | hpa-wn33 | `b1b84464` (`ce250473`) |
+
+A13 on the GPU (NVIDIA RTX PRO 6000 Blackwell Server Edition, torch 2.14.1+cu130): on the frozen pointing 6 of 6 runs passed the comparator at
+T10's frozen tolerance (differences 4e-16 to 2e-15). The scans of 1,048,576 and 16,777,216 samples answer `incomplete` (no tolerance is
+frozen for them), and their GPU timings stay sealed. The `Q2` reading behind the frozen-pointing comparison is a coordinator ruling the
+user has not confirmed. P4 run time: executed A28, A32 (harness-side check) and A34; A26, A27, A29, A30, A31, A33, A35 and A36 are gaps for
+want of a covering backend, so P4 execution is incomplete.
+
+Not claimed: any reconstruction quality beyond the evaluation above; any speed for T07; any GPU speed at scan sizes; byte reproducibility
+across node classes; numerical or statistical reproducibility for any recipe but the destriper on its record's pointing and the T07 fake rate.
+
+## RECO-T13-HARNESS — 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `t13/harness`)
+
+T13's harness for the AI-evaluation holdout (`evals/reconstruction-holdout/`). Spec: `docs/dev/detector-reconstruction/t13-harness-spec.md`.
+
+Job of record 7651192 on hpa-wn33 (AMD EPYC 9645), 2026-11-14 from 04:33:04 UTC, JOB RESULT PASS; tree `cd762c06` from a checked snapshot of
+5,662 files (manifest `fef87f3f…`), the live tree hidden. Steps: `test_no_bytecode` OK; the harness tests (fake CLI with the real frozen scorer)
+143 run, OK, 54 s; the full unit suite 473 s with no unexpected failure (the LCG test did not fail in this run, a reading); static 31 pass,
+profile suites pass. Merged as `316a097b` after the merge gate (143 tests OK, static exit 0). Sandbox checks on compute nodes, jobs 7650762,
+7650958, 7651068 and 7651151 (bubblewrap 0.6.3, hpa-wn33 and hpa-wn34): exit 0.
+
+Not established: a holdout (the user's writer session off this account and host; no `holdout_id` or SHA-256 recorded), the system under test
+and its budget, and any real model session on the holdout. The development-set shakedown (not the holdout) started on 2026-11-14 with probe job 7652238,
+pending when this entry was last updated; no result is recorded here. Holdout independence is therefore not
+established, and the P6 gate is not passed. Stated limit: the custody procedure runs on one Unix user, not an enforced boundary.
+
+## RECO-CHECKPOINTS — 2026-11-13 to 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial)
+
+Whole-suite checkpoints of the branch, each from a checked snapshot with the live tree hidden.
+
+| Job | Tree | Result |
+|---|---|---|
+| Gate D, 7628236 (hpa-wn34) | `93d95a16` | JOB RESULT PASS: units fail only the known LCG test (allowed); static 31 pass |
+| 7650906 (hpa-wn33, from 2026-11-14T03:01:47Z) | `ce250473` | JOB RESULT PASS: units with no failing ID (the LCG test did not fail, a reading); static 31 pass, 0 fail |
+
+Job 7650906 is entered in `STATE.md` (`checkpoint-ce250473-1`) from its log, at G3. Finish-plan G3 step 2 (the final
+checkpoint job on the integrated tip and a whole-branch review by a fresh reviewer) has not run.
+
+## RECO-SIX-CRITERIA — 2026-11-14 (records only; no job)
+
+The six-criterion evidence table of plan v9.2 §3.2 and P6, written from the records of this branch at `316a097b`. Correctness and
+applicability are hard conditions; the criteria are not combined into a score (§3.2). Paths are under `docs/dev/detector-reconstruction/`
+unless they start with a plugin folder.
+
+| Criterion | Primary acceptance (§3.2) | Evidence: job of record, commit, record | State |
+|---|---|---|---|
+| Reasonableness | No rebuilt native framework; ordinary questions do not carry full records | ACTS 48.2.0 used through a thin driver and wrapper, not rebuilt (`t07-closeout.md`, job 7548207; adapter 0.3.0, job 7584388); reconstruction contracts as sidecars, none an artifact type, `hep-detector` writes `response` only for a response product (CHANGELOG T06; Gate C 7487578, `596b6875`); layering checked in the adapter jobs (`tools/check_layering.py`, e.g. 7548207, 7557963, 7593003) | **Partly evidenced.** The design rules hold in the code. Whether ordinary questions stay light was to be measured by the AI evaluation (T13), which has not run |
+| Correctness (hard) | Positive and negative cases, truth leakage, interleaved IOVs, full-chain physics and statistical checks | Freeze A and Freeze B (`freeze-a.md`, `freeze-b.md`); evaluation attempt 1: T07 7613452 **fail**, T08 7620411 pass (narrowed), T09 7613459 pass (narrowed, shared-model closure) (`decisions.md`); truth kept from the data side (T07 A39, job 7548207); IOV subdivision on synthetic keys (T12-24, 7627669); W1-W7 (7487578) | **Not met for the required workflows.** Tracking and vertexing failed at attempt 1, final. T08 and T09 pass only on synthetic gates with 26 and 65 open obligations. No data-control evidence (U11) |
+| Flexibility | Switch backends, change input levels, keep several candidates, local or conservative recompute | Candidates and outcomes kept per seed (T07 A07, 7548207); multistart and topology hypotheses (T09, 7575617); a second T08 input level, zdcsim, `simulated-unvalidated` (7557963); local recompute and both versions kept (T12-05, T12-25, 7627669); A01 open; T15b no qualified candidate (7627683) | **Partly met.** No backend switch is shown on any required workflow (A01 open); the only two-candidate selection found none qualified |
+| Efficiency | Startup tokens and time, I/O, latency, throughput, memory, and quality | CPU benchmark of the destriper, T08 and T09 (7649128); A13 GPU subchain (7649143); quality before speed (T12-15, 7648553); K12 targets adopted (`k12-targets-draft.md` `679a1a12…`) | **Partly evidenced.** Timings are records, not gates. No speed for T07 (failed); GPU speed sealed at scan sizes; AI startup tokens and time not measured (T13 not run; §14.2 intervals outside T13 by the user's reading 5) |
+| Generality | Event, waveform, continuous, graph, image, count, scan and global inputs without fabricated fields | Contract witnesses W1-W7 (7487578); executed: event data (T07-T09), native counts (T10, 7627284), scan/global replay (destriper, 7596623); `t10-closeout.md`: A20-A24 gaps; T12-20 (7648050): 8 of 11 A26-A36 scenarios without a covering backend | **Contract level met; execution incomplete.** Image, graph, waveform and continuous inputs are shown only by witnesses, which §12.1 says cannot stand for execution. P4 execution incomplete |
+| Applicability (hard) | Correct delivery scope when raw data, timing or backends are missing, domains exceeded or boundary information lost | Unknown inputs stop with a reason (T14, 7487578); restricted delivery for a missing backend or evidence (T15a, 7487578); `missing-input`, never zeros (T10, 7627284); a product without raw retention refuses a trace rerun (T12-21, 7648050); T09 single-photon refusals read `rejected` (7613459); native-backend gaps recorded (U12 A, U7 B2) | **Met with readings on synthetic data; not established on real data.** Every check is on synthetic or simulated input; the data-control layer is incomplete (U11) |
+
+Overall (final report, `final-report.md`): **incomplete**.
