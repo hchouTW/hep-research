@@ -83,6 +83,15 @@ POOLING: dict = {           # section 15.3.18 partial pooling in A25 (6)'s readi
     Q + "Declaration": "negative",
     Q + "Reml": "positive",
     Q + "JointFit": "positive",
+    # A26 (1): the grade, the joint holdout and the gates of pooled fits (WP-Q2)
+    "test_calibration_use.PartialPoolingFlag": "negative",
+    Q + "PooledGrade": "negative",
+    Q + "PooledHoldout": "negative",
+    Q + "PooledP2": "negative",
+    Q + "PooledIdentifiability": "negative",
+    Q + "PooledG2G6": "negative",
+    Q + "PooledG8.test_ignoring_the_spread_is_caught_by_spread_truths": "negative",
+    Q + "PooledG8.test_correct_pooled_fit_passes": "positive",
 }
 VMODEL_INFERRED: dict = {   # inferred V_model tests (a)-(d), A25 (7) (WP-S)
     V + "Refusals.test_a_inferred_without_holdout": "negative",

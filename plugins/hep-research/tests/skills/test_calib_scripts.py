@@ -941,12 +941,29 @@ class Phase5PoolScripts(unittest.TestCase):
         code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan,
                         "--values", self.write("v1.json", {"segments": {"A": vals["A"]}}), "--sigma-noise", 0)
         self.assertEqual((code, out.get("code")), (2, "pooling.values"))
+        # A26 (WP-Q2): malformed grade inputs and too few toys are rejected before the fit (negatives)
         code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
-                        timeout=600)
+                        "--grade", self.write("g0.json", {"gates": {}}))
+        self.assertEqual((code, out.get("code")), (2, "pooling.grade"))
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
+                        "--toys", 100)
+        self.assertEqual(code, 2, out)
+        gates = {g: "passed" for g in ("P0", "P2", "P3", "P4", "P5", "P6", "P8", "G8", "G4", "G4-L", "G7", "G2", "G3",
+                                       "G5", "G6", "G9")}
+        grade = self.write("g.json", {"gates": gates, "p7": "passed", "v": "passed", "vmode": "holdout",
+                                      "real_data": False})
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
+                        "--grade", grade, timeout=600)
         self.assertIn(code, (0, 1), out)
         self.assertEqual(out["status"], "passed" if code == 0 else "failed")
         self.assertIn("pde", out["pooling"]["tau_pool"])
         self.assertIn("partial-pooling", out["flags"])
+        # the grade (A26): G1 decided here replaces the given state; synthetic values -> projection (rule 2), a failed
+        # G1 -> failed (rule 1). --toys (G2, G6 on the joint problem) is tested on the engine (test_calibration_pooling)
+        # since toy-detector toys take minutes.
+        self.assertEqual((out["grade"]["status"], out["grade"]["decided"]), ("graded", {"G1": out["G1"]["status"]}))
+        self.assertEqual(out["grade"]["judgment"]["effective_grade"], "projection" if code == 0 else "failed")
+        self.assertIn("partial-pooling", out["grade"]["judgment"]["flags"])
 
 
 if __name__ == "__main__":

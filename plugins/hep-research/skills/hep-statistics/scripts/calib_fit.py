@@ -10,6 +10,7 @@ the ratio test; phase 2).
   calib_fit.py g3   --region FILE --limits FILE
   calib_fit.py kstar --n N [--no-replacement]
   calib_fit.py pool --contract FILE --plan FILE --values FILE [--release FILE] [--seed S] [--sigma-noise X]
+                    [--toys N] [--grade FILE]
 The fit runs section 7.4 (max(2d, 16) Sobol starts, basins, ties, `multimodal`) and the section 7.3 iteration with
 the ln det diagnostic; G1 per basin; then the fit-point recomputation (D10, D21): the locking-stage checks of
 calib_data at theta-hat with the release's declarations, decided by calib_contract's rules; a contract error there is
@@ -20,7 +21,10 @@ linear toys with the linearity check, --full the full toys (D46); g2 the chi-bar
 incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 2 (section 17).
 pool (phase 5, section 3.7 partial pooling, approval A25 (6)): the contract's `pooling` segments, --values
 {"segments": {name: {observable: value}}}; tau_pool by REML with its 95% set, the joint fit with G1 and sigma_tot of
-each segment's pooled theta (core/calibration/pooling.py); a declaration error is rejected (exit 2).
+each segment's pooled theta (core/calibration/pooling.py); a declaration error is rejected (exit 2). Approval A26:
+--toys N (>= 500) adds G2 (real parameters' bounds only) and G6 on the joint problem; the output's `grade` lists the
+gate states decided here and the inputs still needed, or, with --grade FILE ({gates, p7, v, vmode, real_data, ...}:
+the states recorded elsewhere), the Appendix C grade and uses (flag `partial-pooling`, informational).
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -88,6 +92,11 @@ def _pool(args):
         raise io.InputError("--plan is needed (or a fixture with a plan)")
     try:
         spec = pooling.declaration(contract)
+        given = io.load(args.grade) if args.grade else None
+        if given is not None:
+            pooling.check_grade_inputs(given)
+        if args.toys is not None and args.toys < 500:
+            raise io.InputError("--toys: at least 500 (card reading of sections 8.2, 8.5)")
         doc = io.load(args.values)
         vals = doc.get("segments") if isinstance(doc, dict) else None
         missing = [s for s in spec.segments if not isinstance(vals, dict) or not isinstance(vals.get(s), dict)]
@@ -108,8 +117,18 @@ def _pool(args):
     flags = ["provisional-thresholds", "synthetic"] + res.flags + (
         ["sigma-noise-user-supplied"] if args.sigma_noise is not None else [])
     status = "passed" if res.converged and g1["status"] == "passed" else "failed"
-    return io.jsonable({"status": status, "pooling": res.record(spec.pooled), "G1": g1,
-                        "segments": spec.segments, "conditions": spec.conditions, "flags": flags})
+    out = {"status": status, "pooling": res.record(spec.pooled), "G1": g1,
+           "segments": spec.segments, "conditions": spec.conditions, "flags": flags}
+    decided = {"G1": g1["status"]}
+    if args.toys is not None and status == "passed":
+        out["G2"] = pooling.g2(joint, res.fit, args.toys, args.seed + 2)
+        out["G6"] = pooling.g6(joint, res.fit, args.toys, args.seed + 1)
+        decided.update(G2=out["G2"]["status"], G6=out["G6"]["status"])
+    try:
+        out["grade"] = pooling.grade_report(decided, given)
+    except pooling.PoolingError as exc:
+        return {"status": "rejected", "code": exc.code, "error": str(exc)}
+    return io.jsonable(out)
 
 
 def main(argv=None) -> int:
@@ -134,6 +153,8 @@ def main(argv=None) -> int:
     g3.add_argument("--limits", required=True)
     pl = sub.add_parser("pool")
     _common(pl)
+    pl.add_argument("--toys", type=int, help="G2 and G6 on the joint problem (A26), at least 500")
+    pl.add_argument("--grade", help="the grade inputs recorded elsewhere: {gates, p7, v, vmode, real_data, ...}")
     k = sub.add_parser("kstar")
     k.add_argument("--n", type=int, required=True)
     k.add_argument("--no-replacement", action="store_true")
