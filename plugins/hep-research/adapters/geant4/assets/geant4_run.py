@@ -36,6 +36,7 @@ Subcommands:
              spec that fails check-spec
   run        one spec -> <work>/<run-id>/ (events.csv, materials.json, datapaths.json, log.txt, spec.json) and --record
   scan       base spec + parameter grid -> specs and a workflow.json for skills/hep-computing/scripts/run_workflow.py
+             (each step declares the executable and the build record as native_inputs, hashed before every skip)
              (point k gets seeds [s0, s1 + k] unless the grid scans run.seeds; from adapter 0.2.0 a base spec without
              run.seeding, and every point of a base spec that declares per-event seeding, gets per-event seeding with
              its own run.logical_run_seed S = H(study_id, role, point id), study_id from --study-id (default the grid
@@ -961,6 +962,13 @@ def _set(doc: dict, dotted: str, value):
     doc[keys[-1]] = value
 
 
+def native_path(path) -> str:
+    """A scan step's native input, in the form run_workflow.py resolves: the record form of tilde() (~/... or absolute), with
+    '<plugin root>' written as the runner's {plugin} placeholder."""
+    shown = tilde(expand(str(path)))
+    return "{plugin}" + shown[len("<plugin root>"):] if shown.startswith("<plugin root>") else shown
+
+
 def cmd_scan(args) -> tuple[str, dict]:
     base = json.loads(expand(str(args.base)).read_text(encoding="utf-8"))
     validate_any(base)
@@ -1002,6 +1010,8 @@ def cmd_scan(args) -> tuple[str, dict]:
                                                   encoding="utf-8")
         steps.append({"id": sid, "needs": [], "inputs": [f"specs/{sid}.json"],
                       "outputs": [f"records/{sid}.computational-run.json"],
+                      # T12 stage 2 (G05): the executable and its build record are hashed by run_workflow.py before every skip
+                      "native_inputs": [native_path(args.exe), native_path(args.build_record)],
                       "parameters": dict(zip(names, combo)), "estimated_s": round(est, 1),
                       "argv": ["{python}", "{plugin}/adapters/geant4/assets/geant4_run.py", "run", "--spec",
                                f"specs/{sid}.json", "--exe", tilde(expand(args.exe)), "--build-record",

@@ -1,0 +1,18 @@
+{
+ "channels": 1600,
+ "derived_against": [
+  "a07149e340d83a507780b04ab6de908c9426e335c440a52a9cf9668b1b06bac0"
+ ],
+ "format": "calo-calibration-payload/1",
+ "operation": "multiply",
+ "origin": "nominal",
+ "producer": {
+  "kind": "external",
+  "source": "t08-grid/1 fixture constant: gain, kept as its own field; raw = value / gain + pedestal, so the gain multiplies"
+ },
+ "role": "conditions",
+ "round": null,
+ "step": "gain",
+ "unit": "MeV/adc",
+ "value": 1.0
+}

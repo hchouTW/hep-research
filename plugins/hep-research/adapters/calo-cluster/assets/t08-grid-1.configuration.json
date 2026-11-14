@@ -1,0 +1,13 @@
+{
+ "format": "calo-cluster-configuration/1",
+ "recipe": "reco.calo.cell-cluster/1",
+ "source": "t04-values-v4.md sections 4.2 and 7.1 (Freeze A): written constants of the fixture t08-grid/1 and of the clustering definition. None is derived from pulls or from T08 targets (section 2.2)",
+ "grid": {"nx": 40, "ny": 40, "cell_width": 1.0},
+ "shower_width_cells": 1.0,
+ "cell_quantum_mev": 0.2,
+ "noise_sigma_mev": 0.2,
+ "cell_threshold_mev": 0.6,
+ "seed_threshold_mev": 10.0,
+ "sharing_iterations": 30,
+ "peaks_kept": 2
+}

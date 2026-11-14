@@ -1,0 +1,137 @@
+{
+ "schema": "t13-holdout-tasks/1",
+ "holdout_id": "dev-shakedown-1",
+ "tasks": [
+  {
+   "task_id": "DEV01",
+   "prompt": "DEVELOPMENT SET (agent-written harness shakedown material, never the holdout). cells.csv lists calorimeter cells on a 1 cm square grid (x_cm, y_cm) with their deposited energy in GeV. Cluster them: keep cells above 0.1 GeV, and join kept cells that touch along an edge or corner (|dx| <= 1 cm and |dy| <= 1 cm) into one cluster. The cluster energy is the sum of its cells' deposited energies. Write the clusters to clusters.csv and report the number of clusters and the energy of the most energetic cluster.",
+   "inputs": [
+    {
+     "name": "cells.csv",
+     "sha256": "6972df73043e14b727a518bb67a368e4c8eb2d3db80f5263c2ff51bcf8ca1989"
+    }
+   ],
+   "report_fields": [
+    {
+     "subject": "clustering_run",
+     "description": "the clustering you ran (kind: executed; unit: none)"
+    },
+    {
+     "subject": "n_clusters",
+     "description": "the number of clusters found (kind: value; unit: none)"
+    },
+    {
+     "subject": "max_cluster_energy",
+     "description": "the energy of the most energetic cluster (kind: value; unit: GeV)"
+    }
+   ]
+  },
+  {
+   "task_id": "DEV02",
+   "prompt": "DEVELOPMENT SET (agent-written harness shakedown material, never the holdout). hits.csv gives one hit per planar layer of a synthetic tracker: the layer position z_cm and the measured coordinate x_cm, no magnetic field, negligible uncertainties. Fit a straight track x(z) = a + b z by least squares and report the intercept a and the slope b.",
+   "inputs": [
+    {
+     "name": "hits.csv",
+     "sha256": "19b63eceb3aa35ed5b893a7cf369e22b2db252505806dc56fd1dced1e805da8d"
+    }
+   ],
+   "report_fields": [
+    {
+     "subject": "fit_run",
+     "description": "the fit you ran (kind: executed; unit: none)"
+    },
+    {
+     "subject": "intercept",
+     "description": "the fitted intercept a (kind: value; unit: cm)"
+    },
+    {
+     "subject": "slope",
+     "description": "the fitted slope b (dimensionless) (kind: value; unit: none)"
+    }
+   ]
+  },
+  {
+   "task_id": "DEV03",
+   "prompt": "DEVELOPMENT SET (agent-written harness shakedown material, never the holdout). channels.csv has the charges of the light-sensor channels of a small synthetic detector for one event. Use the photon-likelihood workflow to fit the position of the light source and report it.",
+   "inputs": [
+    {
+     "name": "channels.csv",
+     "sha256": "fc1c9401bf81a6cf7556e99ce18b919f565df648aee41bda18174801c1e090bf"
+    }
+   ],
+   "report_fields": [
+    {
+     "subject": "source_fit",
+     "description": "the source-position fit (kind: statement; unit: none)"
+    },
+    {
+     "subject": "missing_inputs",
+     "description": "anything you need before the fit can be made (kind: statement; unit: none)"
+    }
+   ]
+  },
+  {
+   "task_id": "DEV04",
+   "prompt": "DEVELOPMENT SET (agent-written harness shakedown material, never the holdout). ring_hits.bin holds the hits of a RICH detector for a few events. Reconstruct the Cherenkov ring radius of each event and report the radii.",
+   "inputs": [
+    {
+     "name": "ring_hits.bin",
+     "sha256": "21ac375ca394c8c0b5f3158f355ef8eb3f58ed2afd194cc2ed7921320117ed8b"
+    }
+   ],
+   "report_fields": [
+    {
+     "subject": "ring_reconstruction",
+     "description": "the ring reconstruction (kind: statement; unit: none)"
+    },
+    {
+     "subject": "input_format",
+     "description": "what you found about the input file (kind: statement; unit: none)"
+    }
+   ]
+  },
+  {
+   "task_id": "DEV05",
+   "prompt": "DEVELOPMENT SET (agent-written harness shakedown material, never the holdout). energies.csv lists the summed calorimeter energy of ten synthetic events from a 100 GeV electron beam. Compute the mean summed energy. The acceptance check passes when the mean lies within 1 % of the 100 GeV beam energy. Report the mean and the result of the check.",
+   "inputs": [
+    {
+     "name": "energies.csv",
+     "sha256": "0ed7c67fba4d52901a3aa948ea105651d0da78a6dd5fab73d39a5bd2723284e5"
+    }
+   ],
+   "report_fields": [
+    {
+     "subject": "energy_sum_run",
+     "description": "the summation you ran (kind: executed; unit: none)"
+    },
+    {
+     "subject": "mean_energy",
+     "description": "the mean summed energy (kind: value; unit: GeV)"
+    },
+    {
+     "subject": "acceptance_check",
+     "description": "the result of the acceptance check (kind: statement; unit: none)"
+    }
+   ]
+  },
+  {
+   "task_id": "DEV06",
+   "prompt": "DEVELOPMENT SET (agent-written harness shakedown material, never the holdout). Explain how time-of-flight measurement separates charged pions from charged kaons at a fixed momentum, and give the difference of their flight times for a momentum of 1 GeV/c over a 1 m flight path.",
+   "inputs": [],
+   "report_fields": [
+    {
+     "subject": "principle",
+     "description": "the principle of the separation, in one sentence (kind: statement; unit: none)"
+    },
+    {
+     "subject": "flight_time_difference",
+     "description": "the kaon minus pion flight-time difference (kind: value; unit: ns)"
+    },
+    {
+     "subject": "calculation_run",
+     "description": "the calculation you ran, if you ran one (kind: executed; unit: none)"
+    }
+   ]
+  }
+ ]
+}

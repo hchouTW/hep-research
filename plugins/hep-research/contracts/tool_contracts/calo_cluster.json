@@ -1,0 +1,285 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "calo_cluster",
+ "entry": "adapters/calo-cluster/assets/calo_cluster.py",
+ "operations": [
+  {
+   "operation_id": "reconstruct",
+   "summary": "reco.calo.cell-cluster/1, a development binding: the cell chain (pedestal, then gain, each with its payload identity in chain order; raw kept beside calibrated) and t04-values-v4.md section 7.1 clustering of every event of a calo-cells/1 readout, written as calo-cluster-product/1 (or /2 with a calo-gain-payload/1 gain) with sharing fractions per object; energy kind clustered deposited energy, never incident energy",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--cells",
+      "input": "cells"
+     },
+     {
+      "flag": "--pedestal-payload",
+      "input": "pedestal_payload"
+     },
+     {
+      "flag": "--gain-payload",
+      "input": "gain_payload"
+     },
+     {
+      "flag": "--product",
+      "input": "product"
+     },
+     {
+      "flag": "--product-id",
+      "input": "product_id"
+     },
+     {
+      "flag": "--configuration",
+      "input": "configuration"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "cells",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a calo-cells/1 file, role reconstruction-input, readout kind analog: raw values, live and saturated flags only; a dead cell has no value (NaN); or a calo-cells/2 file, the same with a label (simulated-unvalidated) and the provenance of the simulation it was converted from (D2 stage 3), which needs a calo-cluster-configuration/2 for its label and a calo-calibration-payload/1 gain"
+    },
+    {
+     "name": "pedestal_payload",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a calo-calibration-payload/1 file, role conditions, step pedestal, operation subtract, derived against no upstream payload; its unit is the readout's raw unit (D2 stage 4: a calibrated readout is never calibrated again)"
+    },
+    {
+     "name": "gain_payload",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a calo-gain-payload/1 file (gain per channel of its channel map, the map's identity, its role, and for a derived payload the payload it came from and the channels it changed), or a calo-calibration-payload/1 file with step gain; role conditions, operation multiply or divide (its role in the chain), derived against the pedestal payload given; a calo-gain-payload/1 for another channel map than the readout grid's is refused; its unit is MeV per raw unit (multiply) or raw units per MeV (divide) of the readout, else refused (D2 stage 4)"
+    },
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the product file to write: calo-cluster-product/1 for a calo-calibration-payload/1 gain, calo-cluster-product/2 for a calo-gain-payload/1 gain (its gain step names that payload's format, channel map and source), calo-cluster-product/3 for a calo-cells/2 input (it carries the input's label and provenance); written only when the run finishes; an existing file is refused, never overwritten, so a product made with one payload is never replaced by another's"
+    },
+    {
+     "name": "product_id",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a non-empty identity, recorded in the product header"
+    },
+    {
+     "name": "configuration",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "a calo-cluster-configuration/1 file with exactly the written constants of t04-values-v4.md sections 4.2 and 7.1; default the t08-grid/1 configuration beside the script; or, for a calo-cells/2 input only, a calo-cluster-configuration/2 written for its label, naming the source of each constant or null where it has none, with the profile width and the response model either all given or all null (null: two kept peaks are not split, no uncertainty is formed)"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "events",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "objects",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "sharing_failures",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "uncertainty_failures",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "energy_kind",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "product",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "input_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "configuration_sha256",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "chain",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "seconds",
+     "kind": "duration",
+     "unit": "s"
+    },
+    {
+     "name": "label",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "a component's sharing was undefined (a zero denominator); the product is written and records the failure. A component whose two-peak uncertainty is undefined keeps no object and is counted in uncertainty_failures with exit 0"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a gain payload for another channel map, a configuration key that is not version 4's, a product file that already exists, a labelled readout without a configuration for its label or with a calo-gain-payload/1 gain, an unlabelled readout with a calo-cluster-configuration/2, a pedestal or gain payload whose unit is not the readout's raw unit's); stdout carries status rejected (core/status.py) and the reason; no product is written"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy or scipy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "check-product",
+   "summary": "Read a calo-cluster-product/1, /2 or /3 back, refusing a malformed or incomplete product, and check on every event that no cell is counted twice (the T08 sheet's stop)",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--product",
+      "input": "product"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "product",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a calo-cluster-product/1, /2 or /3 file; a /3 product without its label or provenance is refused"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "operation",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "exit_code",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "events",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "objects",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "energy_kind",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "double_count_defects",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "first_defects",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "a cell is counted twice in at least one event; the first defects are listed"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a configuration key that is not version 4's); stdout carries status rejected (core/status.py) and the reason; no product is written"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "numpy or scipy is missing: stdout carries status missing-dependency, nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

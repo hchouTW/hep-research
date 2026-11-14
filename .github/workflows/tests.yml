@@ -142,6 +142,10 @@ jobs:
         if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
         working-directory: .
         run: python -m unittest discover -s evals/research_communication/tests -t evals/research_communication/tests
+      - name: T13 holdout scorer tests (synthetic fake fixtures, no model calls)
+        if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
+        working-directory: .
+        run: python -m unittest discover -s evals/reconstruction-holdout/tests -t evals/reconstruction-holdout/tests
       - name: Behavioral-harness tests, case validation and invariant coverage (fake host, no model calls)
         if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
         working-directory: .
@@ -293,7 +297,7 @@ jobs:
           mkdir -p ../../check-runs
           python tools/run_required_backends.py --require torch==2.14.1,torchvision==0.29.1 \
             --allow-skip-reason "only meaningful when PyTorch is not installed" \
-            --modules tests.skills.hep_ml.test_assets_smoke,tests.skills.hep_ml.test_audit_domain_method,tests.skills.hep_ml.test_audit_metric_layer,tests.skills.hep_ml.test_audit_small_corrections,tests.skills.hep_ml.test_audit_train_keys,tests.skills.hep_ml.test_hep_losses,tests.skills.hep_ml.test_hep_ml_skill,tests.skills.hep_ml.test_set_classifier,tests.skills.hep_ml.test_training_pipeline \
+            --modules tests.contracts.test_t12_a13_gpu,tests.skills.hep_ml.test_assets_smoke,tests.skills.hep_ml.test_audit_domain_method,tests.skills.hep_ml.test_audit_metric_layer,tests.skills.hep_ml.test_audit_small_corrections,tests.skills.hep_ml.test_audit_train_keys,tests.skills.hep_ml.test_hep_losses,tests.skills.hep_ml.test_hep_ml_skill,tests.skills.hep_ml.test_set_classifier,tests.skills.hep_ml.test_training_pipeline \
             --out ../../check-runs/torch-backend.json
       - name: Keep the report
         if: always()
@@ -590,6 +594,8 @@ jobs:
           cd "$HOSTILE/work/plugins/hep-research"
           if [ -n "$SHARD" ]; then part=(--part units --shard "$SHARD"); else part=(--part checks); fi
           export TMPDIR="$HOSTILE/tmp"  # the relocated copy's own path has spaces too
+          # the relocated AMS-optional rerun is slower than the 1200 s default (PR #411); this job allows 60 min
+          export HEP_AMS_OPTIONAL_TIMEOUT=2400
           python tools/check_relocation.py "${part[@]}" --jobs 4 --no-cli
       - name: Keep the record
         if: always() && steps.sel.outputs.scope == 'full' && matrix.leg.shard != ''

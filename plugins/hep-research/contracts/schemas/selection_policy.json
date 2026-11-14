@@ -1,0 +1,33 @@
+{
+ "$comment": "selection-policy/1 (contract-map.md, T15a; plan Sections 5.9, 5.13; K16, K18): what is fixed before a selection. K16's gates and objective are the user's, so role is a constant and only an artificial policy can be read until K16 is decided and T15b widens it. Read through contracts/sidecar_reader.py, not an artifact type.",
+ "type": "object",
+ "required": ["schema", "policy_id", "version", "role", "granularity", "target", "deliverable", "quality_contract", "objective", "shared_overhead", "baseline", "sample_roles", "sample_groups", "required_extensions"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "selection-policy/1"},
+  "policy_id": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "version": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "role": {"$comment": "K16: a fixture's values test rules only, and say so", "const": "artificial-witness"},
+  "granularity": {"$comment": "Section 5.11, K16: a per-event policy is a separate recipe", "enum": ["dataset", "run", "conditions-stratum"]},
+  "target": {"$comment": "SEL01: an irreplaceable goal; with none, this document is refused and nothing is selected", "$ref": "reconstruction_common.json#/$defs/name"},
+  "deliverable": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "quality_contract": {"$comment": "null: no quality gate is fixed, so no objective is either (Section 5.9 item 3). What a contract holds is K16's; here it names the checks evidence must cover (Section 8.4 check 6)", "anyOf": [{"type": "null"}, {"$ref": "#/$defs/quality_contract"}]},
+  "objective": {"$comment": "Section 5.14, DS1: the one objective a witness states. null: not fixed, so only the declared baseline can be chosen", "anyOf": [{"type": "null"}, {"$ref": "#/$defs/objective"}]},
+  "shared_overhead": {"$comment": "Section 5.14: inspection and selection overhead shared by all candidates. DS1 fixes it at 0, a value real comparisons cannot reuse", "$ref": "#/$defs/cost"},
+  "baseline": {"$comment": "Section 5.9 item 4, K16: the predeclared conservative baseline, a recipe_id of the index, or null. It is the declared fallback of SEL08 and Section 5.13", "$ref": "#/$defs/optional_name"},
+  "sample_roles": {"$comment": "Section 5.10, SEL07: selection may read development, calibration and selection data, never confirmation data", "type": "array", "minItems": 1, "items": {"enum": ["development", "calibration", "selection"]}},
+  "sample_groups": {"$comment": "Sections 5.10, 5.13; K08: groups by common origin, the data groups a replay must name", "type": "array", "minItems": 1, "items": {"$ref": "reconstruction_common.json#/$defs/name"}},
+  "required_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "optional_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "extensions": {"$ref": "reconstruction_common.json#/$defs/extension_fields"}
+ },
+ "$defs": {
+  "optional_name": {"anyOf": [{"type": "null"}, {"$ref": "reconstruction_common.json#/$defs/name"}]},
+  "cost": {"type": "object", "required": ["value", "unit"], "additionalProperties": false,
+   "properties": {"value": {"type": "number", "minimum": 0}, "unit": {"$ref": "reconstruction_common.json#/$defs/name"}}},
+  "quality_contract": {"type": "object", "required": ["contract_id", "required_checks"], "additionalProperties": false,
+   "properties": {"contract_id": {"$ref": "reconstruction_common.json#/$defs/name"}, "required_checks": {"type": "array", "minItems": 1, "items": {"$ref": "reconstruction_common.json#/$defs/name"}}}},
+  "objective": {"type": "object", "required": ["kind", "cap"], "additionalProperties": false,
+   "properties": {"kind": {"const": "minimum-cost"}, "cap": {"$ref": "#/$defs/cost"}}}
+ }
+}

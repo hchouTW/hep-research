@@ -1,0 +1,28 @@
+{
+ "format": "calo-cluster-configuration/2",
+ "recipe": "reco.calo.cell-cluster/1",
+ "label": "simulated-unvalidated",
+ "source": "D2 stage 3 configuration for the zdcsim prototype v2 grid (t07-t09-task-sheets.md, T08, input second), label simulated-unvalidated. Thresholds, by the user's decision of 2026-11-10 (\"Carry over, Unresolved\"): T_c 0.6 MeV and T_s 10 MeV: Unresolved (plan 1.1), carried over from t08-grid/1's written constants for the zdcsim format exercise only; owner: the user; exit: a sourced ZDC prototype threshold before any physics use. Their sources stay null: they have none. Shower profile W and response model q, sigma_n: null, by the coordinator's ruling of 2026-11-10 (none is sourced for this geometry, and the brief forbids inventing a noise model), so the rule is one unsplit object per component and no uncertainty (kind unsplit or one-peak, status no-response-model), as stated in the question the user answered. This is a departure from section 7.1 for this input, recorded by the coordinator in decisions.md. Nothing here is fitted or tuned on a zdcsim sample, which supports no performance number",
+ "grid": {"nx": 6, "ny": 6, "cell_width": 1.0},
+ "shower_width_cells": null,
+ "cell_quantum_mev": null,
+ "noise_sigma_mev": null,
+ "cell_threshold_mev": 0.6,
+ "seed_threshold_mev": 10.0,
+ "sharing_iterations": 30,
+ "peaks_kept": 2,
+ "unresolved": {
+  "cell_threshold_mev": {"status": "Unresolved (plan 1.1)", "decision": "user 2026-11-10: \"Carry over, Unresolved\"", "scope": "carried over from t08-grid/1's written constants for the zdcsim format exercise only", "owner": "the user", "exit": "a sourced ZDC prototype threshold before any physics use"},
+  "seed_threshold_mev": {"status": "Unresolved (plan 1.1)", "decision": "user 2026-11-10: \"Carry over, Unresolved\"", "scope": "carried over from t08-grid/1's written constants for the zdcsim format exercise only", "owner": "the user", "exit": "a sourced ZDC prototype threshold before any physics use"}
+ },
+ "sources": {
+  "grid": "zdcsim geometry file prototype_v2.yaml of the user's study: n_crystals 6, one cell per crystal (cell id iy * n + ix in zdcsim.cc), in cell units; the pitch, crystal_x_mm + 2 wrap_um / 1000 + gap_mm = 20.33 mm, is recorded in the readout's provenance and used by no step",
+  "shower_width_cells": null,
+  "cell_quantum_mev": null,
+  "noise_sigma_mev": null,
+  "cell_threshold_mev": null,
+  "seed_threshold_mev": null,
+  "sharing_iterations": "t04-values-v4.md section 7.1 (30 iterations); not used without a profile",
+  "peaks_kept": "t04-values-v4.md section 7.1 (the two highest peaks); kept peaks are recorded, not split"
+ }
+}

@@ -9321,3 +9321,521 @@ The first CI run of PR #357 failed on `lint`, 15 `mypy` errors in `core/geometry
 Open: GB13, GB20 and GB21 were not tested on arm64; killed energy at 1 TeV is not detectable by the absolute conservation check; the pure-EM residual reaches 5e-5 MeV, within its limit, for a reason not established; the thin-layer comparison of Section 11 has not run. The custodian's re-evaluation of qualification follows this release and is not recorded here.
 
 Passing checks show software consistency, not physical validity.
+
+## ACTS-TRACKING-T07 — 2026-11-10 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+**Adapter 0.3.0 (D4 builds E2 and E5).** Adapter 0.3.0 adds two scoring-side tools for the Freeze-B run and changes no native code and no
+recipe file; its status stays `demonstrated-on-synthetic-data`, with the tested versions below. Job of record for adapter 0.3.0: job 7584388, the D4 E2 job
+(its result below). What changed: `assets/fixture_tools/t07_fake_rate.py`, the scorer of
+the noise fixture's fake rate per bin (`t04-values-v4.md` section 7's match rule; section 5.2's rate rule: `DEFF_hat`, `U_A`, `U_B`, the step 1
+lower bound; section 8.3's `r_dev`, `L_dev`, `U_dev` and the check `U_dev <= C`, C = 0.005), its record `t07-noise-fake-rate/1` with a refusing
+reader (at blocks 2 to 5 the check also needs all 12 noise bins; `L_dev` one-sided at 95 %, as Freeze A's closed form of F2,
+`calc-closed-form.py` lines 194-199), and the runner of the frozen generator and the finder (with the vertex step) on any tuning or Freeze-B
+block and event count, which deletes a noise data file only after its SHA-256 equals the finding record's and the truth file's (U-B11), in a
+second pass after every bin passed and the rate record was written and read back;
+`assets/fixture_tools/t07_negative_cases.py`, which writes section 11's negative-case input file once from block 1 (clean stratum 0, event 0),
+kept with its description and SHA-256 sums in `tests/adapters/data/t07-negative-cases/`, and which `tests/adapters/test_acts_finding.py`
+(class `NegativeCases`) now reads; the new unit
+module `tests/adapters/test_acts_fake_rate.py`. The job builds the native code, shows the binaries equal to job 7551619's and the block-1
+finding readings and records equal to that job's, runs the changed and new unit modules, the scorer on the 12 noise bins of block 1 at 3,000
+events (job 7551619's sample) and on one bin at 1,000 (the event-count argument; the Freeze-B size, 12,000, is the default and not
+run), the construction the builder replaced (read from git at `fd5abbf7`) against the kept case file, the agreement of `U_dev` with the frozen coding `calc-rate-rule.py`, the deletion,
+the negative-case file and the records test. Its `r_dev`, `L_dev` and `U_dev` are development readings of block 1, not the Freeze-B record.
+The earlier job of record is job 7551619 (adapter 0.2.0, below).
+
+Job 7584388: hpa-wn33 (AMD EPYC 9645), 2026-11-11 23:20:58-23:28:34 UTC (sacct), 7 min 36 s, COMPLETED, JOB RESULT PASS (log line 1036);
+19 steps, each exit 0; stderr empty. It ran commit `fd5abbf7` plus the uncommitted E2 change and the coordinator's records, build.sh
+`59a4607f…`, SOURCES.sha256 `718246ba…` (246 files). After the job its ID was written here, in `adapter.json` and the capability matrix,
+and its negative-case folder was copied into the tree (byte-equal to its evidence); these records differ from the job's manifest. Lines are
+those of the job's log.
+
+| Step | Result |
+|---|---|
+| code-unchanged, frozen-unchanged | 237 of 241 files of job 7551619's manifest equal the tree (46 native sources), the 4 changed and 5 added files exactly (lines 107-108); 31 frozen files unchanged (line 142) |
+| configure, build; binaries-equal | 9 programs byte-equal to job 7551619's (lines 228-236) |
+| negative-cases, negative-cases-old-code (E5) | 203 cases from block 1 clean stratum 0 event 0, case file `06a7741a…` (224,928 bytes), written twice byte-equal and read back, no host path (lines 240-247); the `fd5abbf7` construction gives the same bytes (line 252) |
+| `tests/adapters/test_acts_fake_rate.py` (hand-made events and counts, the frozen coding; `RecordedRunAgreement` in step agreement) | 60 run, OK (line 998) |
+| `tests/adapters/test_acts_tracking.py` (records test and pins among them) | 139 run, OK (line 999) |
+| `tests/adapters/test_acts_finding.py` (24 development strata, NegativeCases on the kept file) | 70 run, OK (line 1000); the 98 finding lines and the 41 negative-case lines equal job 7551619's (lines 808-809) |
+| rate-block1, rate-equal: 12 noise bins of block 1, 3,000 events each | `k` 0 in strata 0 to 10, 1 in stratum 11 (n 107,837); `k` and `n` equal job 7551619's in all 12 bins (lines 829-840); the records of strata 2, 5, 8, 11 equal its kept records but `product_id` (lines 841-844); no event without a track; `U_dev` 9.980790119965865e-4 in 11 bins and 1.0159522786237073e-3 in stratum 11 (`r_dev` 9.273255005239388e-6, `L_dev` 4.756458619725791e-7, `DEFF_hat` 1.0000082789058808), all `U_dev <= C` (0.005) (lines 814-826) |
+| rate-1000, arguments-equal | 1,000 events of stratum 0: the 3,000-event run's counts event by event (line 852); `n` 5,997, `k` 0, `U_dev` 2.991249545095295e-3 (line 853) |
+| agreement | `U_dev` equal to `calc-rate-rule.py`'s `bound` in all 13 bins, difference 0.0 (12 and 1 bins, lines 868, 876) |
+| deletion (U-B11) | 13 noise data files deleted after their hash matched, none left, 13 truth files kept (lines 885, 887) |
+| check-layering, check-naming | no violation; naming status pass |
+
+The block-1 `r_dev`, `L_dev` and `U_dev` are development readings, not the Freeze-B record (block 2, the user's). No tracking quality claim.
+
+**Adapter 0.2.0 (D1 stage 11).** Adapter 0.2.0 (`adapters/acts-tracking`, task T07 of the detector reconstruction plan v9.2), first record of this adapter: status
+`demonstrated-on-synthetic-data` and the tool's tested version. Job of record for adapter 0.2.0: job 7551619, the D1 stage 11 job, the build job of
+T07's close-out (`docs/dev/detector-reconstruction/t07-closeout.md`). It reruns every step below, with the A05 and A17 scenario module
+(`tests/adapters/test_acts_scenarios.py`), `examples/reconstruction-tracking` with its test, and an equality step against the run below.
+Job 7551619: hpa-wn34 (AMD EPYC 9645), 2026-11-10 05:45-06:02 UTC, 17 min 05 s, COMPLETED, JOB RESULT PASS; 36 steps, each exit 0; stderr
+empty; no built test skipped. It ran commit `b2c1219f` plus the uncommitted stage 11 change (receipt: `git diff HEAD` sha256 `d52967b2…`, untracked
+files list `4456b49d…`), build.sh `66f6e12f…`, SOURCES.sha256 `6a3b9479…` (241 files). A05: finder over 400 interleaved events and refit of
+1200 tracks forward and reversed, 0 defects. The example's recording equal in two live runs. Every earlier step's reading lines equal
+those of the run below. After the job, its ID was written into this section, `adapter.json` and the capability matrix, and the example's recording was
+copied from its evidence; these record files differ from the job's manifest, as stated in the commit.
+
+The run below is the latest before it: job 7548207 (adapter 0.1.0, proposed), T07 stage 10's build job, on the same native code (no C++
+changed in stage 11; stage 11 changes the refit's sidecar mapping, the claims test and the records). It ran commit `e4dabbc7` plus the
+uncommitted stage 10 change, whose `git diff HEAD` hash its receipt pins. Its code files are byte-equal to those of `b2c1219f`;
+`b2c1219f` also adds the coordinator's records (`STATE.md`, `decisions.md`, `deviations.md`), so its diff hash differs from the receipt's.
+
+Environment of that run: NSTCCore (ASGC/TWGrid), a worker of partition `edr2-al9_short_serial`, host hpa-wn34 (AMD EPYC 9645, glibc 2.34;
+the host, CPU and glibc are logged by the job, the node is not pinned; EL9 is read from the partition name and glibc, as the job does not
+log the OS release). ACTS 48.2.0 from the conda-forge package `acts-core`, one library `libActsCore.so`, in a project-local conda
+environment. Compiler: that environment's GCC 15.3.0 (`x86_64-conda-linux-gnu-g++`); CMake 4.4.5. Python 3.13.18 with NumPy 2.4.6 and
+SciPy 1.17.1. The driver's self-test asserts the ACTS version ("PASS ACTS is 48.2.0"), and every product header records it.
+
+Command: one Slurm job (script and source manifest of 236 files, both hashed, in the task's private job folder; no node pin). It
+configures and builds `adapters/acts-tracking/assets/native` with CMake. It then runs the driver and wrapper self-tests, the recorded
+CAI-T07-3 probes, the frozen generator check (small and full size), `tools/check_layering.py`, `tools/check_naming.py` and
+`python -m unittest tests.adapters.<module> -v` for each module below, with `HEP_ACTS_TRACKING_BUILD` naming the build. A skipped test
+fails the job. Of the adapter's declared test files, `tests/adapters/test_acts_truth_seeded_diagnosis.py` is not among them: it last ran
+in job 7512409 (stage 6b), and neither this run nor the D1 stage 11 job reruns it.
+
+| Step (module or check) | Result |
+|---|---|
+| configure, build (9 programs) | exit 0, 95 s |
+| finder links and symbols: no generator, seed or truth code in the finder, driver or check program | 25 checks pass, none fails |
+| driver self-test, wrapper self-test | 69 checks pass, ALL PASS; the wrapper's self-test status ok |
+| `test_acts_tracking` (contract, product format, data-file separation, generator checks, wrapper, straight-line case) | 137 run, OK |
+| `test_acts_refit_field` (refit of known hit sets at 1 T, truth-assisted, counted apart) | 35 run, OK |
+| `test_acts_track_outputs` (R33 outputs, CAI-T07-1, CAI-T07-2) | 45 run, OK |
+| `test_acts_cai_refit` (CAI-T07-3 payload refit and refusals, CAI-T07-4 weak mode, the wrapper's refit) | 20 run, OK |
+| `test_acts_finding_r33` (R33 outputs of found tracks, the wrapper's find) | 7 run, OK |
+| `test_acts_finding` (seeds, CKF, ambiguity resolution on block 1; negative cases: wrong hits, branch explosion, seed failure, search-truncated marking) | 64 run, OK |
+| `test_acts_finding_diagnosis`, `test_acts_truth_seeded`, `test_acts_truth_seeded_replica` (ACTS's removal order; the truth-seeded comparator, never finding; the exact replica check) | 10, 20, 26 run, OK |
+| `test_acts_vertexing` (AMVF on the delivered tracks) | 34 run, OK |
+| frozen generator check, full size; GOLDEN lines; frozen files | RESULT PASS, 0 FAIL lines; 32 GOLDEN lines equal the check of record (job 7492427); 31 frozen files unchanged |
+| byte equality with earlier jobs of record | finder lines (job 7502411), truth-seeded lines (7503215), replica lines (7515600), refit lines (7524096), and 97 output files and the reading lines of 26 logs (7546791) equal |
+| check-layering, check-naming | no layering violation; naming status pass, no new finding (992 violations, all known gaps) |
+
+Result of that run: JOB RESULT PASS, every step exit 0, 19 min 03 s (1,119 s of steps). 398 unit tests ran in the 10 modules (the 11
+straight-line tests are among the 137). Every input was synthetic: the frozen fixtures `t07-telescope-clean/1`, `-noise/1` and
+`-cai/1` on block 1 (tuning; block 6 only for the generator check), and hand-made events. The checks compare ACTS with independent
+replicas (a linear Kalman replica, closed-form least squares), closed forms and earlier jobs' outputs, and drive each judge with one
+defect. No reference output from outside the plugin was compared, so the tool is not raised to `tested-in-declared-environment`.
+
+Passing checks show software and interface consistency on synthetic data, not physical validity. No tracking, vertexing or alignment
+quality claim is made for any detector (R31). The development readings these jobs printed are not gates. T07's quality verdict waits
+for K09 at Freeze B. Open at this record: A01 (a second backend), material effects, the K04 schema items and the user items listed in
+the close-out.
+
+## CALO-CLUSTER-T08 — 2026-11-10 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Adapter 0.2.0 (`adapters/calo-cluster`, task T08 of the detector reconstruction plan v9.2), first record of this adapter: status
+`demonstrated-on-synthetic-data` for both tools and the adapter, with the tested versions. Job of record for adapter 0.2.0: job 7557963,
+T08 stage 4's build job, which reran every step of the earlier T08 jobs (7552825, 7554028, 7555555). T08's close-out is
+`docs/dev/detector-reconstruction/t08-closeout.md`.
+
+**Date.** 2026-11-10. Job 7557963 ran on hpa-wn34 (AMD EPYC 9645) from 15:46:39 to 16:00:42 (sacct), 14 min 03 s, COMPLETED, JOB RESULT
+PASS; 44 steps, each exit 0; stderr empty; no test skipped.
+
+**Commit.** The job ran commit `4b2eb849` plus the uncommitted stage 4 change (receipt: `git diff HEAD` sha256 `47cc99e2…`, untracked files
+list `414cea10…`, contents `b12b68f4…`), build.sh `11a5bf19…`, SOURCES.sha256 `c176ffb4…` (820 files). The change was committed as
+`ed1d08e6`; `d589c61a` adds `*.cells binary` to `.gitattributes`. At `d589c61a` every file of the job's manifest is byte-equal to the
+manifest but `t08-scenarios.md`, whose statuses were set after the PASS; the example's recording equals the job's evidence byte for byte.
+The `adapter.json` the job ran declared 0.1.0, `proposed`. Version 0.2.0 changes records only: `adapter.json`, this section, the capability
+matrix row, `t08-closeout.md`, and `t08-scenarios.md`'s two pointer lines (its introduction and its last section) to the close-out and this record. It adds `tests/adapters/test_calo_records.py`, which reads those
+records and ran on the login node (D2 stage 5), in no job. No code file of the adapter changed after the job, so no job reruns it at 0.2.0.
+
+**Environment.** NSTCCore (ASGC/TWGrid), a worker of partition `edr2-al9_short_serial`, host hpa-wn34 (glibc 2.34; the host, CPU and glibc
+are logged by the job, the node is not pinned; EL9 is read from the partition name, as the job does not log the OS release).
+- The recipe, the scoring-side tools, the example and every unit module but one: Python 3.13.18 with NumPy 2.4.6 and SciPy 1.17.1, the
+  project's `env/py313`.
+- The zdcsim ROOT reader and `tests/adapters/test_calo_zdcsim_root.py`: S3's reduce venv, Python 3.13.2 (Anaconda build) with uproot 5.7.7,
+  awkward 2.14.0, awkward_cpp 57, NumPy 2.5.4, cramjam 2.14.0, xxhash 4.0.2 and fsspec 2026.9.0 (`pip freeze --all` in the receipt). Before
+  compute the job checked the dist-info RECORD hashes against values fixed in the script and 1,630 files against their RECORD entries:
+  0 differ.
+- zdcsim: the user-supplied `zdcsim.cc` (SHA-256 `28018224…`, read in place, never copied), built in the job with the system GCC 11.5.0
+  (Red Hat 11.5.0-11) through `geant4-config` against Geant4 11.4.3 (conda-forge environment; `geant4-config --version` and the datasets in
+  the receipt), and run for 1,000 events (e+ at 500 MeV, seed 930001, FTFP_BERT_EMZ, one thread).
+
+**Command.** One Slurm job (script and source manifest of 820 files, both hashed, in the task's private job folder; no node pin). It checks the
+frozen files and the generator (block 6) and its 61 GOLDEN lines, then runs `python -m unittest` on each module below (a skipped test fails
+the job), `tools/check_layering.py` and `tools/check_naming.py`, the 15 development strata of t08-grid/1 block 1 (harness, `reconstruct`,
+`check-product` with the double-count gate, readings), CAI-T08-1 and -2 on main E3 iso, far and near with both gain roles, the refusals, the
+zdcsim layout check, build, run, conversion and reconstruction, the scenario steps (`a38-accounting`, `reference-selection`,
+`scenario-variants`) and the example twice live, and compares the outputs of jobs 7552825, 7554028 and 7555555.
+
+| Step (module or check) | Result |
+|---|---|
+| `tests/adapters/test_calo_cluster.py` (cell chain, section 7.1 clustering, product format, harness, readings) | 58 run, OK |
+| `tests/adapters/test_calo_cai.py` (gain payload, CAI-T08-1, CAI-T08-2) | 31 run, OK |
+| `tests/adapters/test_calo_zdcsim.py` (converter, labelled readout, configuration, product `/3`) | 69 run, OK |
+| `tests/adapters/test_calo_zdcsim_root.py` (the ROOT reader, in the reduce venv) | 10 run, OK |
+| `tests/adapters/test_calo_scenarios.py` (A15, A32, A38) | 23 run, OK |
+| `tests/examples/test_reconstruction_calorimetry.py` (the example's replay and a live run) | 12 run, OK |
+| `test_adapter_declarations`, `test_tool_contract`, `test_cli_robustness` | 43 run, OK |
+| frozen files, generator check, GOLDEN lines | 8 frozen files unchanged; all 61 GOLDEN lines equal job 7477787's |
+| 15 development strata (block 1, 3,000 events each) | 15 double-count gates PASS, 0 cells counted twice; clustered plus unclustered equals the input to at most 8.6e-16 relative |
+| CAI-T08-1, CAI-T08-2 | 6 runs PASS, largest \|change − formula\| / scale 5.98e-16 against 1e-12; the 6 planted controls fail; 12 CAI products pass the double-count gate; 6 refusals exit 2, and the nominal product unchanged |
+| zdcsim (labelled simulated-unvalidated) | layout, build, run, conversion repeat byte-equal; label, events, double-count and conservation gates PASS; 5 refusals exit 2 |
+| scenarios | 15 of 15 selection-and-accounting gates PASS, 0 events with a defect; reference-selection PASS; 16 scenario-variant checks PASS |
+| example | 7 files equal in two live runs; no host path |
+| byte equality with earlier jobs | 127 comparisons equal job 7552825's, 223 equal job 7554028's, 233 equal job 7555555's |
+| check-layering, check-naming | no layering violation; naming status pass |
+
+Not in the job: `tests/adapters/test_calo_records.py` (D2 stage 5, the records test) ran on the login node only, in no job. It pins the SHA-256 that job 7557963's manifest gives each declared test module and each `adapter.json` asset, so a changed byte in any of them fails it until a new job of record runs them.
+
+PR #411 CI fix round (2026-11-14): job 7655492 (hpa-wn26, AMD EPYC 9645, 18 min 36 s, JOB RESULT PASS; source manifest `a237d5a7…`, 6,068 files at `29bc0235`, run from a checked copy) ran the changed `tests/adapters/test_calo_cluster.py`, `tests/examples/test_reconstruction_calorimetry.py` and the example's `run.py` and renewed the two test pins: the calo modules 181 run, OK (10 more, OK, in the reduce venv); the example twice live (byte-equal), its offline replay and its tests 12 run, OK; the records test judged in the job, failing only on those two pins. Readings: the live recording equals the committed one in all 5 files, and the replay output the committed output. The job of record for adapter 0.2.0 stays job 7557963; no asset changed.
+
+**Result.** JOB RESULT PASS, every step exit 0, 14 min 03 s; 203 tests in the six adapter modules, and 43 in the affected modules. Every
+input was synthetic: the frozen fixture t08-grid/1 on block 1 (tuning; block 6 only for the generator check) and hand-made events, besides
+1,000 zdcsim events labelled `simulated-unvalidated`, which exercise the format and bookkeeping only. The checks compare the recipe with an
+independent coding of section 7.1 (job 7479146's reference clusterer and its constants), closed forms and earlier jobs' outputs, and drive
+each check with one defect. No reference output from outside the plugin was compared, so no tool is raised to
+`tested-in-declared-environment`.
+
+Passing checks show software and interface consistency on synthetic data, not physical validity. The adapter is a development binding, not
+a native backend (U12 A; the gap stays open). No calorimetry quality or performance claim is made (R31). The development readings these jobs
+printed are not gates; T08's quality verdict waits for K09 at Freeze B. Open at this record: the zdcsim thresholds (Unresolved, owner the
+user), the zdcsim clustering rule (a user item), failing-first for stage 1 (shown by mutation), A15, A38 (exposure) and the quality verdict,
+as the close-out lists them.
+
+## PHOTON-LIKELIHOOD-T09 — 2026-11-11 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+**Adapter 0.3.0 (D4 build E1).** Adapter 0.3.0 adds `t04-values-v4.md` section 9.4's two negative checks; its status stays
+`demonstrated-on-synthetic-data`, with the tested versions below. Job of record for adapter 0.3.0: job 7584387, the D4 E1 job. What changed: the single-photon-density variant (E1b), a whole configuration of its own
+(`assets/t09-sphere-1-single-photon.configuration.json`, the main file's constants under the format `light-likelihood-configuration/1-single-photon`)
+with `assets/light_recipe/single_photon.py` (the hit channel's time term one photon's arrival density in place of the first arrival; every
+other part the main recipe's) and its product `light-likelihood-product/3-single-photon` (`product.py`); the main reader takes an expected
+format (`configuration.py`), so each reader refuses the other's file; `photon_likelihood.py` builds the variant only from its file; and on the
+scoring side `assets/fixture_tools/t09_negative_checks.py`: the relabelling of the dead control's dead channels as live-unhit (E1a, the frozen
+recipe fitting it unchanged) and both fires rules, read as development readings, never a verdict before K09. The job runs the unit modules
+(the new `tests/adapters/test_photon_likelihood_negative.py` among them), the affected modules, the example's tests and the records test;
+refits the first 250 block-1 events of the dead control and of main B4 `r/R_s` [0.4, 0.7) with the main recipe, whose products must be
+byte-equal to job 7575617's but for the product id; and reads E1a and E1b on those events. The earlier job of record is job 7578442 (adapter
+0.2.0, below); the stage 4 chain (jobs 7575617, 7576269, 7576270) is the latest run of the strata.
+
+**Job of record (D4 E1).** Job 7584387 on hpa-wn33 (AMD EPYC 9645), 2026-11-11 from 23:20:58 to 23:41:35 (sacct), 20 min 37 s, COMPLETED,
+JOB RESULT PASS (`7584387.out` line 669), every step exit 0, stderr empty. It ran commit `fd5abbf7` plus the uncommitted D4 E1 and E2
+changes (receipt: `git diff HEAD` sha256 `5f5829a0…`, untracked contents sha256 `389fbf77…`), Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1,
+glibc 2.34 (lines 29-31); the source manifest of 832 files (`ad7afb75…`). Steps (line numbers of `7584387.out`): 7 frozen files unchanged
+(line 96); 818 of 828 files of job 7578442's manifest equal the tree, the others this build's or E2's, exactly 4 files added (lines
+110-111); the five unit modules 226 run, OK (line 420), the affected modules 43 run, OK (line 427); check-layering and check-naming exit 0
+(lines 436, 461); the main recipe's refits of the dead control and main B4 `r/R_s` [0.4, 0.7) (block 1, 250 events each): inputs, one-seed
+and multistart products equal to job 7575617's but for the product id, 6 PASS EQUAL (lines 463-476), check-product exit 0 on them and on
+array 7576269's recorded /4 (line 477); the relabelling, 200 channels in each of 250 events (line 480); the variant's product refused by the
+main reader (line 499); the example's tests 31 run, OK with a live run (line 541); the records test 21 run, OK (line 569). Readings, no
+verdict before K09 (lines 484-505): E1a, dead read as unhit, fires on z (centre -0.4207, |centre| - 1.645 se +0.3038) and t0 (+0.3087,
++0.2009), the masked fit does not fire; E1b, single-photon density, fires on t0 (centre -7.7058, +7.3301), the first-arrival fit does not
+fire (+0.0539). MaxRSS 1.09 GB (sacct), 44 MB of evidence.
+The close-out has 20 met, 15 met with readings, 2 open and 1 gap. Open at this record: the quality verdict and the calibration of the
+topology score at K09; the verdicts of v4 9.4's negative checks run on evaluation events at K09. BP06's original method sources are met with
+readings by the user-approved literature check (decisions.md U-W6; `t09-sources.md`).
+**PR #411 CI fix round (2026-11-14).** Job 7655492 (hpa-wn26, AMD EPYC 9645, 18 min 36 s, JOB RESULT PASS; source manifest `a237d5a7…`, 6,068 files at `29bc0235`, run from a checked copy) ran the changed test and example files and renewed their pins in the records test (`test_photon_likelihood_time.py`, `test_photon_likelihood_topology.py`, the example's test and `run.py`): the five unit modules 226 run, OK; the example twice live (byte-equal), its offline replay and its tests 32 run, OK; the records test failing only on those four pins and the example's count. Readings: the live recording equals the committed one in all 7 files, and the replay output the committed output. The job of record for adapter 0.3.0 stays the D4 E1 job; no asset changed.
+
+**Adapter 0.2.0 (D3 stage 5).** Adapter 0.2.0 (`adapters/photon-likelihood`, task T09 of the detector reconstruction plan v9.2), first record of this adapter: status
+`demonstrated-on-synthetic-data` for its one tool and the adapter, with the tested versions. Job of record for adapter 0.2.0: job 7578442, the D3 stage 5 job,
+T09's close-out job (`docs/dev/detector-reconstruction/t09-closeout.md`). It runs `examples/reconstruction-photon-likelihood` twice live (the
+recordings must be byte-equal), the example's test with a third live run, `tests/adapters/test_photon_likelihood_records.py`, the four unit
+modules below and the affected modules, and an equality step: every file of job 7575617's manifest equals the tree but the two records this
+stage changes (`adapter.json`, the capability matrix row), and the files the stage 5 manifest adds are exactly the new ones. Its result is
+written into this section by the coordinator after its PASS, with its ID, as for T07 (ruling M3: a job's ID cannot sit in a file of its own
+manifest). It does not rerun the development strata: no code of stages 1 to 4 changes, which its equality step shows, so their evidence is
+the run below (T08 stage 5's ruling: a rerun of unchanged code adds no evidence about the code).
+
+The run below is the latest of the same code before it: the T09 stage 4 chain, main job 7575617, H2 array 7576269 and collection 7576270
+(adapter 0.1.0, proposed). The main job reran every step of job 7571207 (stage 3), itself every step of jobs 7566770 (stage 2) and 7565328
+(stage 1), with equality steps against their outputs.
+
+**Job of record (D3 stage 5).** Job 7578442 on hpa-wn34 (AMD EPYC 9645), 2026-11-11 from 15:16:06 to 15:26:08 (sacct), 10 min 02 s,
+COMPLETED, JOB RESULT PASS, every step exit 0. It ran commit `4aa57176` plus the uncommitted stage 5 change (receipt: `git diff HEAD` sha256
+`72af2b7b…`, untracked contents sha256 `c150e449…`), Python 3.13.18 (interpreter sha256 `32545eb5…`), NumPy 2.4.6, SciPy 1.17.1, glibc 2.34;
+the source manifest of 828 files (`453b9200…`). Steps: 7 frozen files unchanged and the generator hash freeze-a.md's; 820 of 822 files of
+job 7575617's manifest equal the tree, the 2 records changed, exactly 6 files added; the four unit modules 192 run, OK, the affected modules
+43 run, OK; the example twice live with 9 recorded and output files byte-equal and no host path, its test 31 run, OK with a third live run;
+its products' event lines equal to jobs 7575617 and 7576269 (4 PASS EQUAL); the records test 21 run, OK; check-layering, check-naming pass.
+The committed recording is that job's; on the login node (Intel, another platform) its offline replay passes 9 of 9 checks, check 9 within
+the stated tolerances. The stage 4 chain below is the latest run of the strata, fixed points and H2 array on the same code.
+
+**Date.** 2026-11-11. Main job 7575617 on hpa-wn33 (AMD EPYC 9645) from 10:27:59 to 11:51:52 (sacct), 1 h 23 min 53 s, COMPLETED, JOB RESULT
+PASS; its stderr empty; no test skipped. Array 7576269, 13 tasks on hpa-wn33 from 11:54:25, each COMPLETED in 8 min 40 s to 15 min 21 s, every
+stderr empty; collection 7576270 from 12:09:48 to 12:09:54, COMPLETED, JOB RESULT PASS. (The first array, 7575618, failed in all 13 tasks before
+any compute, from an apostrophe in its script's usage line, and the first collection, 7575619, was cancelled by its dependency; no code
+changed in the fix.)
+
+**Commit.** The chain ran commit `aaa90d83` plus the uncommitted stage 4 change (receipt: `git diff HEAD` sha256 `7049ffc3…`, untracked files
+list `e3e9bd2e…`, contents `a8760466…`), main script `0ac3954e…`, array script `235bf633…`, collection script `2f5d85c4…`, one
+SOURCES.sha256 `0c4e5c9c…` (822 files) checked by all three. The change was committed as `4aa57176`, at which every file of the manifest is
+byte-equal to it (`sha256sum -c`). The `adapter.json` the chain ran declared 0.1.0, `proposed`.
+
+**Environment.** NSTCCore (ASGC/TWGrid), a worker of partition `edr2-al9_short_serial`, host hpa-wn33 (glibc 2.34; the host, CPU and glibc are
+logged by the job, the node is not pinned; EL9 is read from the partition name, as the job does not log the OS release). Python 3.13.18 with
+NumPy 2.4.6 and SciPy 1.17.1, the project's `env/py313` (receipt: "Python 3.13.18", "numpy 2.4.6 scipy 1.17.1"); the array's tasks ran the same
+interpreter, by its SHA-256 in their logs. The frozen generator t09-sphere/1 (`gen_t09_sphere.py`, SHA-256 `2657f56b…`, freeze-a.md's) is read
+in place from the task's private evidence, never copied into the plugin.
+
+**Command.** Three Slurm jobs (scripts and the source manifest of 822 files, all hashed, in the task's private job folder; no node pin), in this
+order: the main job; the array, afterok on it; the collection, afterok on the array, both with kill-on-invalid-dep. The main job checks the
+frozen files and the generator (block 6) and its 61 GOLDEN lines, runs `python -m unittest` on each module below (a skipped test fails the job),
+`tools/check_layering.py` and `tools/check_naming.py`, v4 section 9.3's checks at the 50 fixed points, and the 14 development strata of block 1
+(the harness, the charge-only, one-seed and multistart fits, check-product, the truth-start fit and the comparator on the scoring side,
+readings), and compares the outputs of jobs 7566770 and 7571207. Each array task fits H2 and makes the topology choice on one stratum's 250
+events (the two-source control: 500 events) and runs the topology readings; the collection reads the 13 tasks.
+
+| Step (module or check) | Result |
+|---|---|
+| `tests/adapters/test_photon_likelihood.py` (readout, charge-only likelihood, fit, product, harness, exit codes) | 61 run, OK |
+| `tests/adapters/test_photon_likelihood_time.py` (time term, t0, the fixed-point driver, product `/2`) | 47 run, OK |
+| `tests/adapters/test_photon_likelihood_multistart.py` (multistart, the truth-start comparator, product `/3`) | 37 run, OK |
+| `tests/adapters/test_photon_likelihood_topology.py` (H2, the topology choice, product `/4`, the two-source control's files, the readings) | 47 run, OK |
+| `tests/adapters/test_photon_likelihood_negative.py` (D4 E1: the single-photon density and its configuration, the relabelling of dead channels, the fires rules) | 34 run, OK (job 7584387, the D4 E1 job; `7584387.out` line 420, with the four modules above: 226 run) |
+| `tests/examples/test_reconstruction_photon_likelihood.py` (the example's replay, its checks on hand-made events, a live run) | 32 run, OK (job 7655492, the PR #411 CI fix round's pin renewal; 31 run, OK in job 7578442, the D3 stage 5 job) |
+| `tests/adapters/test_photon_likelihood_records.py` (the records agree; the code is the bytes the jobs of record ran) | 21 run, OK (job 7578442, the D3 stage 5 job); renewed for 0.3.0: 21 run, OK (job 7584387, the D4 E1 job; `7584387.out` line 569) |
+| `test_adapter_declarations`, `test_tool_contract`, `test_cli_robustness` | 43 run, OK |
+| frozen files, generator check, GOLDEN lines | 7 frozen files unchanged; all 61 GOLDEN lines equal job 7477787's |
+| v4 9.3 at the 50 fixed points (block 6), against an independent evaluation | likelihood check joint 1.819e-12, charge-only 9.095e-13 (limit 1e-9 absolute); per-channel sum 0 failures in 50,000 channels: 3 gates PASS |
+| 14 development strata (block 1, 500 events each; the multistart and truth-start fits on the first 250) | 112 gates PASS (per-channel sum, dead channels never unhit, the comparator); the 28 scoring-side runs classified passed |
+| byte equality with earlier jobs | 216 PASS EQUAL lines (jobs 7566770 and 7571207: products, truth files, READING and GATE lines) |
+| H2 array (13 tasks) and collection | 13 TASK RESULT PASS; 26 gates PASS (per-channel sum at H2's points, 0 failures; each `/4` carries its `/3` unchanged) |
+| check-layering, check-naming | no layering violation; naming, no new finding |
+
+**Result.** JOB RESULT PASS in the main job and the collection, every array task PASS; 192 tests in the four adapter modules and 43 in the
+affected modules. Every input was synthetic: the frozen fixture t09-sphere/1 on block 1 (tuning; block 6 only for the generator check and the
+fixed points), its dead, saturation and two-source controls, and hand-made events. Every result is a shared-model closure: the fixture and the
+fit share the analytic light model of `t04-values-v4.md` section 4.3, so the run tests the code, not the model. The checks compare the recipe
+with an independently written evaluation of the same likelihood that shares no code with it, second codings in the tests and earlier jobs'
+outputs, and drive each check with one defect. No reference output from outside the plugin was compared, so the tool is not raised to
+`tested-in-declared-environment`.
+
+`tests/adapters/test_photon_likelihood_records.py` pins the SHA-256 of each declared test module, each `adapter.json` asset and the example's
+`run.py` (the stage 1 to 4 files as job 7575617's manifest has them), so a changed byte in any of them fails it until a new job of record runs
+them.
+
+Passing checks show software and interface consistency on synthetic data, not physical validity. The adapter is a development binding, not a
+native backend (U12 A; the gap stays open). No photon-likelihood quality or performance claim is made (R31). The development readings these jobs
+printed are not gates; T09's quality verdict waits for K09 at Freeze B. At 0.2.0: the close-out had 20 met, 13 met with readings, 4 open and 1 gap.
+Open at this record, as the close-out lists them: v4 9.4's two negative checks, the quality verdict, the calibration of the topology score at K09, and BP06's original method
+sources (`source-unverified`).
+
+## TIMING-PID-T10 — 2026-11-13 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+**Adapter 0.2.0 (T10 close-out).** First record of `adapters/timing-pid` (task T10 of the detector reconstruction plan v9.2, recipe
+`reco.timing.time-chain/1`, a development binding, not a native backend): status `demonstrated-on-synthetic-data` for its one tool and the
+adapter, Python 3.13.18 with NumPy 2.4.6 (the project's env/py313). The jobs ran `adapter.json` at 0.1.0, `proposed`; 0.2.0 changes records
+only (`adapter.json`, this section, the capability matrix row, `docs/dev/detector-reconstruction/t10-closeout.md`).
+
+**Job of record, stage 1.** Job 7593003 on hpa-wn33 (AMD EPYC 9645), 2026-11-12, 4 min 56 s, JOB RESULT PASS, stderr empty; script
+`t10-timing.sh` (cc701385…), manifest `SOURCES.sha256` (90e0925b…, 4,951 files), run from a checked copy; Python 3.13.18, NumPy 2.4.6 and
+SciPy 1.17.1 gated, glibc 2.34. Units: `test_timing_chain` 29, `test_timing_cai` 14, `test_adapter_declarations` 3, OK. `t10_cai.py run`
+on 10,000 seeded synthetic events: CAI-T10-1a to f and CAI-T10-2 PASS (largest time deviation 5.690e-15 ns against 1e-12; β error ratio
+0.4962 to 0.4988); the ten controls each failed their item in 200 of 200 events; the repeat byte-equal; check-layering and check-naming exit 0.
+
+**Job of record, stage 2.** Job 7627284 on hpa-wn34 (AMD EPYC 9645), 2026-11-13, 26 min 17 s, JOB RESULT PASS, stderr empty; script
+`t10-stage2-r1.sh` (7f31e360…), manifest `SOURCES-r1.sha256` (333aef85…, 5,636 files), a clone of base `4c08da43` with the manifest's files
+copied over it and checked; the interpreter gated by its SHA-256 and Python 3.13.18 (NumPy not gated separately: the same interpreter as
+job 7593003). Units: `test_timing_chain` 36, `test_timing_cai` 14, `test_timing_pid` 16, `test_timing_a37` 18, `test_timing_counts` 7,
+`test_adapter_declarations` 3, OK, no skip. Stage 1 regression (10,000 events) PASS and its ten controls with their exact failed items;
+`t10_stage2.py` pid (2,000 events), counts (2,000 events) and a37 (T07's run record of CAI-T07-4, job 7546791, `cai-refit.log` SHA-256
+pinned in the tool) PASS, and the eleven stage 2 controls each failing only its own item (the counts controls with their exact contract
+codes). Readings: pid largest log-likelihood deviation 5.97e-13; migration on 8,942 tracks, 722 outside support, P(sel b | true b) 0.9826,
+P(true b | sel b) 0.9823 and 0.7445 at the two stated compositions; A37 witness 8 cells, smallest q/p change 4.9543 σ, largest |Δχ²/ndf|/se
+1.753; g×E rank 9 of 10 without and 10 with the named constraint. The full suite: units fail only on the LCG ID and on `test_no_bytecode`
+with exactly `calo_cluster.py` and `photon_likelihood.py` (held, base 4c08da43); static 31 pass.
+
+Not claimed: any timing, TOF, PID, dE/dx, calibration or counting quality; a native timing backend (gap, as U12 A). Open at this record:
+the cross-system TOF example (no flight-path length to a timing plane in the records), A20 to A24 (recorded gaps), and the native scan or
+global solver (U7 B2; the replay is `adapters/destriper`, section DESTRIPER-T10).
+
+## DESTRIPER-T10 — 2026-11-13 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+**Adapter 0.2.0 (T10 close-out).** First record of `adapters/destriper` (T10's scan/global reference replay, U7 option B2, recipe
+`reco.scan.destriper/1`, a development binding, not a native backend): status `demonstrated-on-synthetic-data` for its one tool and the
+adapter, Python 3.13.18 with NumPy 2.4.6. The jobs ran `adapter.json` at 0.1.0, `proposed`; 0.2.0 changes records only.
+
+**Tolerance.** Frozen by the user on 2026-11-12, "Freeze as proposed (Recommended)" (decisions.md): noisy replay at eps 1e-10, baselines
+within 2.5e-8 and map within 2.2e-8 of ||a_ref||_2, zero sum within 1e-13 Σ|a|; noiseless at eps 1e-13 (2.5e-11, 2.2e-11); records
+`t10-replay.tolerance.json` (217a38bc…) and `t10-replay-noiseless.tolerance.json` (12738ebc…); the exact reference 440a1e0d…
+
+**Job of record.** Job 7596623, the replay's attempt 3, on hpa-wn33 (AMD EPYC 9645), 2026-11-12 from 23:40:38 UTC (about two minutes by its
+step timestamps), JOB RESULT PASS, stderr empty; script `t10-replay.sh` (73587671…), manifest `SOURCES.sha256` (cd29f627…, 2,575 files) after
+the bytecode line in `destriper.py`; Python 3.13.18 and NumPy 2.4.6 gated. Units: `test_destriper_fixture` 9, `test_destriper` 18,
+`test_destriper_reference` 15, `test_adapter_declarations` 3, OK. Comparator PASS: noisy baselines 6.847e-16 and map 4.666e-16 of
+||a_ref||_2 in 15 iterations; noiseless 3.136e-16 and 1.729e-16; the stopping ladder with 4 informative steps (at least 2 needed); the zero
+sum; the noiseless reference equal to the truth exactly; every negative variant refused with its codes on every product; the runtime
+null-mode drift without the constraint shown. Its values are bit-identical to attempt 2, job 7594892 (PASS, 1 min 20 s, 64 MB). Attempt 1,
+job 7593065, crashed on a test defect (the freeze was foreseeable) with every replay step run; method and frozen values unchanged.
+
+Not claimed: map-making quality; a native scan or global solver (recorded gap, U7 B2, as U12 A); the RF and retarding W7 subcases at run
+time (they stay T06 contract checks).
+
+## RECO-CONTRACTS-T06-T14-T15A — 2026-11-07 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Tasks T06 (reconstruction contracts and the witnesses W1-W7), T14 (bounded input inspector) and T15a (offline candidate selection) of the
+detector reconstruction plan v9.2. Records: `docs/dev/detector-reconstruction/baseline.md` ("Gate C checkpoint"), `decisions.md` (T06
+readings, T14 rulings, T15a readings).
+
+| Job | Commit | Result |
+|---|---|---|
+| Gate C checkpoint, rerun: 7487578, hpa-wn30, 9 min 48 s | `596b6875` (before the 0.58.0 rebase; reachable through the local ref `pre-rebase-0.57.0`) | Slurm `FAILED` 1:0 on the known LCG test only (a site CVMFS stall, `baseline.md`); the 14 new contract modules ran, 766 tests pass; clean by the reading rule fixed before the job. T06, T14 and T15a `done` |
+| Re-baseline at 0.58.0: 7488410, hpa-wn30, 10 min 13 s | `31a96930` | `--part units` 7,686 run, 7,304 passed, 0 failures, 1 error (the LCG test), 381 skipped; the 766 contract tests pass again |
+
+Every fixture is artificial. The witnesses show that the contracts can express each case; they are not instrument validation and do not
+replace a run on a backend (plan §12.1). T15a's selection rules are shown on artificial candidates only; no claim on real recipes.
+
+## RECO-EVALUATION-D4 — 2026-11-12 to 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `feature/detector-reconstruction`)
+
+Freeze B and evaluation attempt 1 of the three required P2 workflows (T07 tracking and vertexing, T08 calorimetry, T09 photon likelihood).
+Records: `docs/dev/detector-reconstruction/freeze-b.md`, `decisions.md` ("Freeze B", "Evaluation attempt 1 on block 11", "T07: failed at
+attempt 1", "T07: final at failed at attempt 1"), `t07-closeout.md` (final section).
+
+**Freeze-B run, block 2.** Jobs 7585954 (T07), 7585955 (T08), arrays 7585956 and 7585957 (T09), collection 7585958: all 31 jobs and tasks
+COMPLETED, collection JOB RESULT PASS, 39.67 CPU-hours, on AMD EPYC 9645 (hpa-wn33, hpa-wn34). Recipe commit `5228a3e2`, manifest `915042c4…`
+(898 files). The rate-check supplement 7590984 (read-only): `U_dev <= C` (0.005) in all 12 noise bins. Freeze B was given by the user on
+2026-11-13 ("Freeze B as listed") on `freeze-b.md` SHA-256 `cfea4fc7…`; the evaluation harness is frozen by its manifest `d98f5e6f…`.
+
+**Evaluation attempt 1, block 11** (submitted with `jobs/evaluation/submit.sh` `2fd84fe9…`; 46 `sbatch` calls; evidence
+`<private>/evidence/evaluation-b11/`):
+
+| Workflow | Summary job of record | Outcome |
+|---|---|---|
+| T07 | 7613452 | **fail**, R11 `failed`: 1,259 of 1,260 records and 46 of 47 gates pass; the failing record is fixture 7002, stratum 9, `vertex pull z`, tail rate 200 of 18,907 objects, estimate 1.058 %, Clopper-Pearson lower 0.938 %, upper 1.189 %, against L 1 % |
+| T08 | 7620411 (checks counted from the rerun 7620410 under the user's block-1/6 ruling; 7613455 read incomplete and kept) | **pass**, `done (narrowed claim)`: 8 of 8 gates; `outcome.json` lists 26 open obligations |
+| T09 | 7613459 | **pass**, `done (narrowed claim)`: 13 of 13 gates; `outcome.json` lists 65 open obligations; the 24 single-photon refusals of sample 10 read `rejected` by hand |
+
+**After the evaluation (development data only; T07's outcome unchanged).** Diagnosis (job 7623497; `docs/dev/detector-reconstruction/t07-vz-diagnosis.md`, a copy of the ledger file): the adaptive
+multi-vertex finder at ACTS defaults merges close three-track vertex pairs 5 to 7.5 vertex-resolution units apart; every occupancy-1 bin sits
+near 0.9 % on blocks 1 and 2. Six principled candidates, each pre-registered, failed their criteria on block 1: C1 7623624, C2 7624555,
+C3 7625490 (pre-registration `ac3cd0b3…`), seeders S1 7632710 and S2 7636593 (S2 not counted), and the post-fit split test 7649462
+(pre-registration `d6151d34…`). The user, 2026-11-14: "accept T07 failed at attempt 1, auto continue". No return to Freeze B and no attempt 2;
+block 12 stays unread.
+
+**Recorded changes after the freeze** (the outcomes stay bound to the evaluated bytes in `freeze-b.md`): the bytecode line in
+`calo_cluster.py` and `photon_likelihood.py`, job of record 7626930 (hpa-wn34, PASS; full suite failing only the LCG test); the TaskDeadline
+test and the zero-payload alignment sidecar, job of record 7647958 (hpa-wn33, PASS).
+
+Not claimed: any tracking, vertexing, calorimetry or photon-likelihood quality on detector data; every sample is synthetic, and T09 is a
+shared-model closure. T08 and T09 passed only against their frozen synthetic gates, with the open obligations named in their outcome records.
+
+## RECO-T15B-K16 — 2026-11-13 (NSTCCore Slurm, partition edr2-al9_short_serial)
+
+T15b, the plan's one two-candidate selection (K16), on simulated `element_sim` events (fixture 1601, block 21, digitization off). Spec
+`docs/dev/detector-reconstruction/t15b-element-sim-spec.md` (SHA-256 `99a678e5…`, frozen by the user); record `decisions.md` ("T15b: K16
+selection, attempt 1 on block 21").
+
+Job of record 7627683 on hpa-wn33, 2026-11-13, JOB RESULT PASS (script `t15b-k16.sh` `c9a635b0…`, manifest `015690d6…`, scorer `c3ab9825…`).
+Result: **no qualified candidate**. `simreco-pr-a` and `simreco-pr-b` each fail 13 of 96 required tests: the `rho_pull` tail rate (1.5-2.0 % in
+bins 0-2; antiproton in bin 3) and the fake rate in bins 1-3 (1.5-2.6 %), against L 1 %; efficiency, charge flip, centres and widths pass.
+Gates were not lowered. The claim is scoped to the declared baseline and the tested domain; no post-selection quality claim without K18
+confirmation data (block 23 untouched). A01 (a second tracking backend for T07) therefore stays open.
+
+## RECO-T12 — 2026-11-12 to 2026-11-14 (NSTCCore Slurm, partitions edr2-al9_short_serial and b6000-al9_devel)
+
+T12, reprocessing and performance. Close-out: `docs/dev/detector-reconstruction/t12-closeout.md` (27 obligations: 7 met, 20 met with readings;
+open items OI-1 to OI-7, OI-9 to OI-13). Every job ran from a checked snapshot; JOB RESULT PASS; the full unit suite fails only the known LCG
+test, static gate 31 pass.
+
+| Stage | Job of record | Node, elapsed | Commit (merge) |
+|---|---|---|---|
+| 1, outer loop | 7606257 | hpa-wn33, 26:14 | `0e310d34` |
+| 2, conditions, invalidation, identity | 7627669 | hpa-wn34, 20:11 | `7eda91a2` (`aed73a78`) |
+| 3, partitioning, recovery, accounts | 7647776 | hpa-wn34, 22:56 | `bbfa7b4e` |
+| 4 part A, comparators, quality before speed | 7648553 | hpa-wn34, 19:26 | `b0e3c013` (`d1f6fc30`) |
+| 5 with 4 part B, CPU benchmark and A13 | CPU 7649128; GPU pilot 7649129, measurement 7649143; hardware check 7648670 | hpa-wn33, 34:09; hp-rtx6kp02 (1 GPU), 3:18, 10:11, 1:04 | `8dfd7d38` (`eb4ef5c9`) |
+| 6, g×E degeneracy, weak-mode witness | 7648001 | hpa-wn34, 23:12 | `781e7d31` (`a844897d`) |
+| 7, A10 and A26-A36 run time | 7648050 | hpa-wn33, 25:46 | `f8209933` (`c5e41e41`) |
+| carried review minors | 7649615 | hpa-wn33 | `b1b84464` (`ce250473`) |
+
+A13 on the GPU (NVIDIA RTX PRO 6000 Blackwell Server Edition, torch 2.14.1+cu130): on the frozen pointing 6 of 6 runs passed the comparator at
+T10's frozen tolerance (differences 4e-16 to 2e-15). The scans of 1,048,576 and 16,777,216 samples answer `incomplete` (no tolerance is
+frozen for them), and their GPU timings stay sealed. The `Q2` reading behind the frozen-pointing comparison is a coordinator ruling the
+user has not confirmed. P4 run time: executed A28, A32 (harness-side check) and A34; A26, A27, A29, A30, A31, A33, A35 and A36 are gaps for
+want of a covering backend, so P4 execution is incomplete.
+
+Not claimed: any reconstruction quality beyond the evaluation above; any speed for T07; any GPU speed at scan sizes; byte reproducibility
+across node classes; numerical or statistical reproducibility for any recipe but the destriper on its record's pointing and the T07 fake rate.
+
+## RECO-T13-HARNESS — 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial; branch `t13/harness`)
+
+T13's harness for the AI-evaluation holdout (`evals/reconstruction-holdout/`). Spec: `docs/dev/detector-reconstruction/t13-harness-spec.md`.
+
+Job of record 7651192 on hpa-wn33 (AMD EPYC 9645), 2026-11-14 from 04:33:04 UTC, JOB RESULT PASS; tree `cd762c06` from a checked snapshot of
+5,662 files (manifest `fef87f3f…`), the live tree hidden. Steps: `test_no_bytecode` OK; the harness tests (fake CLI with the real frozen scorer)
+143 run, OK, 54 s; the full unit suite 473 s with no unexpected failure (the LCG test did not fail in this run, a reading); static 31 pass,
+profile suites pass. Merged as `316a097b` after the merge gate (143 tests OK, static exit 0). Sandbox checks on compute nodes, jobs 7650762,
+7650958, 7651068 and 7651151 (bubblewrap 0.6.3, hpa-wn33 and hpa-wn34): exit 0.
+
+Not established: a holdout (the user's writer session off this account and host; no `holdout_id` or SHA-256 recorded), the system under test
+and its budget, and any real model session on the holdout. Holdout independence is therefore not
+established, and the P6 gate is not passed. Stated limit: the custody procedure runs on one Unix user, not an enforced boundary.
+
+Development-set shakedown (not the holdout; real `claude-opus-5-5` sessions in the sandbox on compute nodes, plugin `316a097b`, $5 cap per
+session; `<private>/jobs/t13-shakedown/`). Probe job 7652238 (DEV02): completed; its `cmd:` citations did not resolve (a no-op `cd` prefix),
+fixed in round 12. Plan 2, jobs 7652648 to 7652653: 6 sessions, $1.03, no stop; scored 4 pass, DEV05 false success (outcome executed with
+no executed claim), DEV06 fail (a value reported in ps where ns was meant); 13 flags, mostly code text. Rounds 13 and 14 (`ed2573da`):
+report fields state kind and unit, an executed outcome needs an executed claim citing `cmd:`, the flag scan judges path literals in code
+(round 14 closed round 13's false negatives; 163 harness tests OK, mutation 22 of 22 killed, sandbox checks 7653074 and 7653717 exit 0).
+Plan 3, jobs 7653721 to 7653726 (harness `8d3c259a…`, SUT record `79daebb9…`): 6 sessions, $0.98, no stop; frozen scorer `ff9755a5…`:
+6 of 6 pass, no false success; 1 flag (DEV04 ran `cd /tmp`, a real reference outside the allowed roots). The development set is 6 tasks
+written by this account, so it shows the harness works end to end; it says nothing about holdout performance.
+
+## RECO-CHECKPOINTS — 2026-11-13 to 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial)
+
+Whole-suite checkpoints of the branch, each from a checked snapshot with the live tree hidden.
+
+| Job | Tree | Result |
+|---|---|---|
+| Gate D, 7628236 (hpa-wn34) | `93d95a16` | JOB RESULT PASS: units fail only the known LCG test (allowed); static 31 pass |
+| 7650906 (hpa-wn33, from 2026-11-14T03:01:47Z) | `ce250473` | JOB RESULT PASS: units with no failing ID (the LCG test did not fail, a reading); static 31 pass, 0 fail |
+
+Job 7650906 is entered in `STATE.md` (`checkpoint-ce250473-1`) from its log, at G3. Finish-plan G3 step 2 (the final
+checkpoint job on the integrated tip and a whole-branch review by a fresh reviewer) has not run.
+
+### RECO-CHECKPOINTS, CI fix round of PR #411 — 2026-11-14 (login node, Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1; no job)
+
+GitHub CI on `fdcfbaca` failed where the Slurm checkpoints passed. Root causes and fixes, each pinned by a test:
+
+- lint: mypy 2.4.0 found 18 errors in the 3.28.0 contracts (unannotated empty containers, Optional values indexed
+  without narrowing, `resource` rebound to None). Annotated and narrowed; no behaviour change.
+- static: the T13 harness probed `/usr/bin/bwrap` before judging the settings binds, so on a runner without bwrap a
+  non-canonical bind was refused as "bwrap not found". The binds are judged first
+  (`test_settings_are_judged_before_the_bwrap_probe`); FROZEN-HARNESS.sha256 re-frozen, the scorer's FROZEN.sha256
+  unchanged. The `digest-mismatch: error` line in that log is an input of actions/download-artifact, not a failure.
+- units 2/3 and macOS: GitHub's x86 runners take NumPy's non-AVX-512 exp/log/pow kernels and other OpenBLAS kernels
+  than the login node and the recording host; reproduced with `NPY_DISABLE_CPU_FEATURES` (AVX-512 off) and
+  `OPENBLAS_CORETYPE=Haswell`. The photon example's off-platform check 9 compared each /4 header exactly, but a /4
+  names its /3 by SHA-256: each side's /4 must now name its own /3. The yield-edge fit ends on YIELD_DOMAIN to the
+  last bit, so it fails as not-converged or non-finite by one bit; the test accepts and checks either. macOS only,
+  reasoned and not run on a Mac: the two-source harness hash pins come from libm bytes (skipped off Linux/glibc), the
+  dead-cell hole image is now built exactly mirror-symmetric, and the calorimetry byte-for-byte rerun is stated as
+  bound to x86-64 with NumPy's OpenBLAS (fails locally with OpenBLAS's Prescott kernel). Recordings unchanged.
+- hostile paths: both examples replaced folder names in `json.dumps` text, which escapes non-ASCII names (now in the
+  decoded strings); the T04 fake `sacct` scripts used unquoted paths; the T12 R9 test matched a path inside JSON text.
+- Windows: the input inspector had no peak-memory reading (no `resource`), so every budgeted inspection stopped with
+  budget-memory; it now reads the peak working set (K32GetProcessMemoryInfo), opens files with O_NONBLOCK and O_BINARY
+  only where defined, and the FIFO cases skip there. `t12_runtime` ran a guarded script with `-I`, which drops
+  PYTHONUTF8 (now `child_flags()`). The T12 benchmark (os.wait4) and the workflow tests (process groups) are POSIX-only
+  by design: they skip with the reason, and the incomplete benchmark is pinned. Reasoned, not run on Windows.
+- AMS optional: timed out at 1200 s on CI, which reports nothing per module. Locally the whole check (no plan,
+  `--jobs 4`) took 895 s and found one real failure: `test_reconstruction_old_recipes` compared the example responses,
+  which the check's copy (no `output/` folders) lacks; without them it now compares everything else. The new T12
+  modules had no recorded timing, and `check_ams_optional.py` starts such a module last (`test_t12_runtime` alone
+  350-420 s locally); their local timings are now recorded. Why CI passed 1200 s is not established.
+
+Local evidence: mypy and ruff clean; holdout tests 164 OK; the hostile-path pull-request subset (151 modules) passes
+except two `test_revocation` cases that fail whenever TMPDIR is on this cluster's shared file system, unchanged from
+main, and two hep-statistics/hep-computing extractor modules that fail in the AMS copy only because this login node's
+/tmp holds a `.git` folder (they pass with another TMPDIR). Open: `test_photon_likelihood_records` (5) and `test_calo_records` (2) fail on their job-of-record pins of the
+changed test modules and photon `run.py` until a job of record renews them.
+
+Pins renewed: job 7655492 (hpa-wn26, 2026-11-14, 18 min 36 s, JOB RESULT PASS; manifest `a237d5a7…` at `29bc0235`, from a checked copy with the live tree hidden) ran the photon-likelihood and calo-cluster adapter modules, both examples twice live and their test modules (photon 32, calo 12), and both records tests, which failed only on the six pins of the changed files and the photon example's count; the live recordings and the offline replays equal the committed ones. The six pins and the count are renewed from its manifest; the jobs of record (7584387, 7557963) and the adapter versions are unchanged.
+
+## RECO-SIX-CRITERIA — 2026-11-14 (records only; no job)
+
+The six-criterion evidence table of plan v9.2 §3.2 and P6, written from the records of this branch at `316a097b`. Correctness and
+applicability are hard conditions; the criteria are not combined into a score (§3.2). Paths are under `docs/dev/detector-reconstruction/`
+unless they start with a plugin folder.
+
+| Criterion | Primary acceptance (§3.2) | Evidence: job of record, commit, record | State |
+|---|---|---|---|
+| Reasonableness | No rebuilt native framework; ordinary questions do not carry full records | ACTS 48.2.0 used through a thin driver and wrapper, not rebuilt (`t07-closeout.md`, job 7548207; adapter 0.3.0, job 7584388); reconstruction contracts as sidecars, none an artifact type, `hep-detector` writes `response` only for a response product (CHANGELOG T06; Gate C 7487578, `596b6875`); layering checked in the adapter jobs (`tools/check_layering.py`, e.g. 7548207, 7557963, 7593003) | **Partly evidenced.** The design rules hold in the code. Whether ordinary questions stay light was to be measured by the AI evaluation (T13), which has not run |
+| Correctness (hard) | Positive and negative cases, truth leakage, interleaved IOVs, full-chain physics and statistical checks | Freeze A and Freeze B (`freeze-a.md`, `freeze-b.md`); evaluation attempt 1: T07 7613452 **fail**, T08 7620411 pass (narrowed), T09 7613459 pass (narrowed, shared-model closure) (`decisions.md`); truth kept from the data side (T07 A39, job 7548207); IOV subdivision on synthetic keys (T12-24, 7627669); W1-W7 (7487578) | **Not met for the required workflows.** Tracking and vertexing failed at attempt 1, final. T08 and T09 pass only on synthetic gates with 26 and 65 open obligations. No data-control evidence (U11) |
+| Flexibility | Switch backends, change input levels, keep several candidates, local or conservative recompute | Candidates and outcomes kept per seed (T07 A07, 7548207); multistart and topology hypotheses (T09, 7575617); a second T08 input level, zdcsim, `simulated-unvalidated` (7557963); local recompute and both versions kept (T12-05, T12-25, 7627669); A01 open; T15b no qualified candidate (7627683) | **Partly met.** No backend switch is shown on any required workflow (A01 open); the only two-candidate selection found none qualified |
+| Efficiency | Startup tokens and time, I/O, latency, throughput, memory, and quality | CPU benchmark of the destriper, T08 and T09 (7649128); A13 GPU subchain (7649143); quality before speed (T12-15, 7648553); K12 targets adopted (`k12-targets-draft.md` `679a1a12…`) | **Partly evidenced.** Timings are records, not gates. No speed for T07 (failed); GPU speed sealed at scan sizes; AI startup tokens and time not measured (T13 not run; §14.2 intervals outside T13 by the user's reading 5) |
+| Generality | Event, waveform, continuous, graph, image, count, scan and global inputs without fabricated fields | Contract witnesses W1-W7 (7487578); executed: event data (T07-T09), native counts (T10, 7627284), scan/global replay (destriper, 7596623); `t10-closeout.md`: A20-A24 gaps; T12-20 (7648050): 8 of 11 A26-A36 scenarios without a covering backend | **Contract level met; execution incomplete.** Image, graph, waveform and continuous inputs are shown only by witnesses, which §12.1 says cannot stand for execution. P4 execution incomplete |
+| Applicability (hard) | Correct delivery scope when raw data, timing or backends are missing, domains exceeded or boundary information lost | Unknown inputs stop with a reason (T14, 7487578); restricted delivery for a missing backend or evidence (T15a, 7487578); `missing-input`, never zeros (T10, 7627284); a product without raw retention refuses a trace rerun (T12-21, 7648050); T09 single-photon refusals read `rejected` (7613459); native-backend gaps recorded (U12 A, U7 B2) | **Met with readings on synthetic data; not established on real data.** Every check is on synthetic or simulated input; the data-control layer is incomplete (U11) |
+
+Overall (final report, `final-report.md`): **incomplete**.

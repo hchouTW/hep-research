@@ -208,6 +208,11 @@ class Lock(Base):  # T-LOCK
         plan, digest = self.prepare()
         proc = self.controller(plan)
         self.started_pid()
+        # the backend writes "started" itself; the controller records its pid in the lock a moment later (on_start).
+        # Kill only after that write, or a slow runner (macOS CI) kills before it and the record names no pid.
+        lock = self.store / ".pending" / f"{canonical.run_id(digest, 0)}.lock"
+        self.assertTrue(wait_for(lambda: detsim_run.read_lock_state(lock).get("record", {}).get("pid") is not None),
+                        "the controller did not record the backend's pid")
         proc.kill()  # the test's own controller process
         proc.wait()
         code, answer = self.call("inspect", "--workspace", str(self.project), "--run", canonical.run_id(digest, 0))

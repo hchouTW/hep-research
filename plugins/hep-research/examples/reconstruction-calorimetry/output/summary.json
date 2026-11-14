@@ -1,0 +1,91 @@
+{
+ "block": 1,
+ "checks": [
+  {
+   "check": "every operation is ok with exit 0",
+   "passed": true
+  },
+  {
+   "check": "the recipe's commands name no truth file",
+   "passed": true
+  },
+  {
+   "check": "the product names the recorded cells file and payloads",
+   "passed": true
+  },
+  {
+   "check": "the product was made with the t08-grid/1 configuration",
+   "passed": true
+  },
+  {
+   "check": "the product reads back whole, clustered deposited energy, never incident energy",
+   "passed": true
+  },
+  {
+   "check": "no cell is counted twice",
+   "passed": true
+  },
+  {
+   "check": "the kept cells are section 7.1's selection and hit and unhit cells account for the input (A38)",
+   "passed": true
+  },
+  {
+   "check": "the recipe run again on the recorded cells writes the recorded product",
+   "passed": true
+  }
+ ],
+ "configuration_sha256": "5fbbea3b4ca81d962c5ca70fa024ddc82dd6e1d2f06e39b354fda56d26483723",
+ "data": "synthetic",
+ "energy_kind": "clustered-deposited-energy",
+ "events": [
+  {
+   "components": 1,
+   "components_without_objects": 0,
+   "dead_cells": 0,
+   "event": 0,
+   "kept_cells": 90,
+   "kinds": {
+    "two-peak": 2
+   },
+   "objects": 2,
+   "saturated_cells": 0,
+   "unclustered_cells": 1510
+  },
+  {
+   "components": 1,
+   "components_without_objects": 0,
+   "dead_cells": 0,
+   "event": 1,
+   "kept_cells": 92,
+   "kinds": {
+    "two-peak": 2
+   },
+   "objects": 2,
+   "saturated_cells": 0,
+   "unclustered_cells": 1508
+  }
+ ],
+ "events_generated": 2,
+ "example": "reconstruction-calorimetry",
+ "files_sha256": {
+  "cells": "d5b8708a3a27773fa0a14a4b6dc88290d8433b2680706217f44c1dc3423f7b2b",
+  "gain": "310c37ec8359d3c23ac8956c017732033974334b7c11a3713ffd1859586e5aba",
+  "pedestal": "a07149e340d83a507780b04ab6de908c9426e335c440a52a9cf9668b1b06bac0",
+  "truth": "6d19fa0e0aac99ff045eb0066d434713c0d282c62b544fe9fe0cb33d27213c00"
+ },
+ "generator": "t08-grid/1",
+ "generator_sha256": "d901362c62431282ce37eeaac88efb864339aec9eb6915aa9e7d69808f7946f9",
+ "product_format": "calo-cluster-product/1",
+ "product_refused": null,
+ "quality_claim": "none: counts the programs wrote, not an efficiency or a resolution (K09 at Freeze B)",
+ "recipe": "reco.calo.cell-cluster/1",
+ "recorded_sha256": {
+  "events.cells": "d5b8708a3a27773fa0a14a4b6dc88290d8433b2680706217f44c1dc3423f7b2b",
+  "events.gain.json": "310c37ec8359d3c23ac8956c017732033974334b7c11a3713ffd1859586e5aba",
+  "events.pedestal.json": "a07149e340d83a507780b04ab6de908c9426e335c440a52a9cf9668b1b06bac0",
+  "events.product": "1107dcec6509d236f13954439d650384f389bab0a32096df6bb82f76fd729cc8",
+  "runs.json": "7915412f2843ff24aa1c2dc04bac1d72e98ef31edf52e36ba6f8aec748e6473e"
+ },
+ "stratum": 7,
+ "variant": "main"
+}

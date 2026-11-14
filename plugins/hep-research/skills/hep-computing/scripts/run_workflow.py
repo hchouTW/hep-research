@@ -20,6 +20,19 @@ declare "parameter_digest": {"argv": [...], "replaces": [INPUT, ...]}: the comma
 parameter_digest (evaluate_design.py run --digest-only), recorded as extension.parameter_digest, and the listed inputs
 (candidate files) are then compared by that digest instead of their file hash, so a change to a parameter the step
 does not read does not rerun it.
+Native inputs (T12 stage 2, G05, plan v9.2 Section 9.8): a step may declare "native_inputs": [PATH, ...], the native binaries,
+libraries, scripts and configurations it runs. PATH takes the placeholders ({plugin}, {workflow}; recommended, since an absolute path is
+written into the record as given), a leading ~/ (expanded), an absolute path, or a path relative to the work folder (without ..). Each is
+hashed afresh when the step's record is formed, in every run and before the skip decision, never read from a stored manifest, and recorded
+as extension.native_sha256 {PATH as written: SHA-256}; the receipt lists them as native_inputs. A native input that is missing, not a
+regular file or unreadable is refused (exit 2): before any step runs when no step can write it (absolute, ~ or a placeholder), else when
+its step is reached, before anything of that step runs. --incremental also needs native_sha256 and the step's seeds to be unchanged.
+Undeclared native code: the program (argv[0]; a bare name is found through PATH) that is not the running interpreter and not a declared
+input or native input, and, when the program is a script interpreter (sh, bash, dash, zsh, ksh, root, root.exe, Rscript, perl, ruby,
+node), its script (the first later argument naming an existing file; for root a trailing (...) is removed) when it is not a .py file and
+not declared, is recorded as extension.undeclared_native, and the step is never skipped. Limits: an executable named in another argument
+(an option value such as --exe PATH) is not examined and is closed only when declared; the script interpreter itself is not hashed; a
+library the step loads without naming it is not observed. A step with neither gets no new record or receipt key.
 Output freshness and termination (reconstruction v12 B1, OUT-01, CACHE-01, EXEC-02): every input, output and stdout
 path is relative to the work folder, without `..` and not through a symlink (anything else is refused before any step
 runs; outputs, stdout and the run record are checked again after the step, which may have made a parent directory a
@@ -90,6 +103,7 @@ import hashlib
 import json
 import math
 import os
+import shutil
 import platform
 import re
 import signal
@@ -255,6 +269,13 @@ def load(path: Path) -> dict:
         for key in ("needs", "inputs", "outputs"):
             if not isinstance(s.get(key, []), list):
                 raise WorkflowError(f"step {s['id']}: '{key}' must be a list")
+        native = s.get("native_inputs", [])
+        if not isinstance(native, list) or not all(isinstance(n, str) and n for n in native) or len(set(native)) != len(native):
+            raise WorkflowError(f"step {s['id']}: 'native_inputs' must be a list of distinct non-empty paths")
+        bad = [n for n in native if not _outside_work(n) and not safe_relative(n)]
+        if bad:
+            raise WorkflowError(f"step {s['id']}: a work-relative native input is relative to the work folder, without '..' "
+                                f"(OUT-01): {bad}")
         paths = [*s.get("inputs", []), *s.get("outputs", [])] + ([s["stdout"]] if "stdout" in s else [])
         bad = [p for p in paths if not safe_relative(p)]
         if bad:
@@ -314,6 +335,90 @@ def script_hashes(rec_cmd: list[str], cmd: list[str], work: Path) -> dict:
             if p.is_file():
                 out[shown] = sha256(p)
     return out
+
+
+# Programs whose first file argument is the code they run (N3' of T12 stage 2); the interpreter itself is not hashed.
+SCRIPT_INTERPRETERS = {"sh", "bash", "dash", "zsh", "ksh", "root", "root.exe", "Rscript", "perl", "ruby", "node"}
+
+
+def _fill(arg: str, table: dict) -> str:
+    for k, v in table.items():
+        arg = arg.replace(k, v)
+    return arg
+
+
+def _outside_work(native: str) -> bool:
+    """A native input that names a file outside the work folder (absolute, ~, or a placeholder): no step can write it."""
+    return Path(native).is_absolute() or native.startswith("~") or "{" in native
+
+
+def _resolve(token: str, work: Path) -> Path:
+    token = os.path.expanduser(token) if token.startswith("~") else token
+    return Path(token) if Path(token).is_absolute() else work / token
+
+
+def native_hashes(step: dict, subst: dict, work: Path, only_outside: bool = False) -> tuple[dict, list]:
+    """G05: SHA-256 of each declared native input, keyed by the path as written, hashed now; and the declared paths that are
+    missing, not regular files or unreadable. only_outside: just those no step can write (checked before the first step)."""
+    found, missing = {}, []
+    for shown in step.get("native_inputs", []):
+        if only_outside and not _outside_work(shown):
+            continue
+        path = _resolve(_fill(shown, subst), work)
+        try:
+            if not path.is_file():
+                raise FileNotFoundError(shown)
+            found[shown] = sha256(path)
+        except OSError:
+            missing.append(shown)
+    return found, missing
+
+
+def _program(token: str, work: Path) -> Path | None:
+    """The program file argv[0] names: a bare name through PATH (shutil.which), else a path (absolute or work-relative)."""
+    if os.sep not in token and "/" not in token:
+        found = shutil.which(token)
+        return Path(found) if found else None
+    path = _resolve(token, work)
+    return path if path.is_file() else None
+
+
+def undeclared_native(step: dict, rec_cmd: list[str], cmd: list[str], work: Path, subst: dict) -> list:
+    """G05, N3': the program (argv[0], through PATH) when it is not this interpreter and not declared; and, for a script interpreter
+    (SCRIPT_INTERPRETERS), its script: the first later token naming an existing regular file ('(...)' removed for root), when it is
+    not a .py file and not declared. Executables in other tokens (an option value) are not examined: they are closed only when
+    declared."""
+    declared = set()
+    for path in [*step.get("inputs", []), *step.get("native_inputs", [])]:
+        try:
+            declared.add(_resolve(_fill(path, subst), work).resolve())
+        except OSError:
+            continue
+    interpreter = Path(sys.executable).resolve()
+    program = _program(cmd[0], work)
+    if program is None:
+        return []
+    try:
+        resolved = program.resolve()
+    except OSError:
+        return []
+    if resolved == interpreter:
+        return []
+    if Path(cmd[0]).name not in SCRIPT_INTERPRETERS and resolved.name not in SCRIPT_INTERPRETERS:
+        return [] if resolved in declared else [rec_cmd[0]]
+    for shown, real in zip(rec_cmd[1:], cmd[1:]):
+        name = real.split("(", 1)[0] if program.name.startswith("root") else real
+        if real.startswith("-") or not name:
+            continue
+        path = _resolve(name, work)
+        try:
+            if not path.is_file():
+                continue
+            target = path.resolve()
+        except OSError:
+            continue
+        return [] if name.endswith(".py") or target in declared else [shown]
+    return []
 
 
 def stat_key(path: Path):
@@ -482,10 +587,15 @@ def execute(cmd: list[str], cwd: Path, timeout: float) -> dict:
 
 def record(wf_name: str, step: dict, cmd: list[str], inputs: list[dict], outputs: dict, code: int, created: str,
            label: str, scripts: dict | None = None, release: dict | None = None, digest: str | None = None,
-           end: str = "success", termination: str = "confirmed", leftover: list | None = None) -> dict:
+           end: str = "success", termination: str = "confirmed", leftover: list | None = None,
+           native: dict | None = None, undeclared: list | None = None) -> dict:
     plugin_version = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))["version"]
     status = [label] if code == 0 else [label, "failed"]
     extra = {"parameter_digest": digest} if digest else {}
+    if "native_inputs" in step:
+        extra["native_sha256"] = native or {}  # G05: hashed afresh in this run
+    if undeclared:
+        extra["undeclared_native"] = list(undeclared)
     if "check" in step:
         extra["check"] = step["check"]  # the declared identity of a check run (A2 fields)
     return {"contract_version": CONTRACTS_VERSION, "artifact_id": f"{wf_name}-{step['id']}-run",
@@ -521,6 +631,12 @@ def skip_reason(prev: dict | None, rec: dict, work: Path, replaced: set[str]) ->
             return f"{key} changed"
     if pe.get("parameter_digest") != ne.get("parameter_digest"):
         return "a parameter the step reads changed"
+    if ne.get("undeclared_native"):
+        return "an undeclared native file is in argv: its identity is not closed (G05)"
+    if pe.get("native_sha256") != ne.get("native_sha256"):
+        return "a native input changed (G05)"
+    if pe.get("seeds") != ne.get("seeds"):
+        return "the seeds changed"
     keep = lambda m: [i for i in m if i.get("path") not in replaced]  # noqa: E731
     if keep(pe.get("input_manifest") or []) != keep(ne["input_manifest"]):
         return "an input changed"
@@ -588,6 +704,14 @@ def main(argv=None) -> int:
     subst = {"{python}": sys.executable, "{plugin}": str(PLUGIN), "{workflow}": str(args.workflow.resolve().parent)}
     shown = {"{python}": "python3", "{plugin}": "<plugin root>", "{workflow}": "<workflow>"}
     results, status = [], "ok"
+    # G05, N1': a native input no step can write (absolute, ~, a placeholder) is checked before the first step runs.
+    early = {sid: native_hashes(steps[sid], subst, work, only_outside=True)[1] for sid in seq}
+    early = {sid: missing for sid, missing in early.items() if missing}
+    if early:
+        print(json.dumps({"status": "rejected", **base, "order": seq, "steps": results,
+                          "error": f"declared native input(s) missing, not regular files or unreadable, before any step ran (G05): "
+                                   f"{early}"}, indent=1))
+        return exit_code("rejected")
     for sid in seq:
         step = steps[sid]
         outs = list(step.get("outputs", [])) + ([step["stdout"]] if step.get("stdout") else [])
@@ -610,6 +734,13 @@ def main(argv=None) -> int:
         cmd = [fill(a, subst) for a in step["argv"]]
         rec_cmd = [fill(a, shown) for a in step["argv"]]
         scripts = script_hashes(rec_cmd, cmd, work)
+        native, native_missing = native_hashes(step, subst, work)
+        if native_missing:
+            print(json.dumps({"status": "rejected", **base, "order": seq, "steps": results,
+                              "error": f"step {sid}: declared native input(s) {native_missing} missing, not regular files or "
+                                       "unreadable (G05); nothing of this step ran"}, indent=1))
+            return exit_code("rejected")
+        undeclared = undeclared_native(step, rec_cmd, cmd, work, subst)
         stdout_path = step.get("stdout")
         if stdout_path:
             rec_cmd += [">", stdout_path]
@@ -637,7 +768,7 @@ def main(argv=None) -> int:
             except ValueError:
                 prev = None
             probe = record(wf.get("workflow", args.workflow.stem), step, rec_cmd, inputs, {}, 0, created, args.status,
-                           scripts, release, digest)
+                           scripts, release, digest, native=native, undeclared=undeclared)
             why = skip_reason(prev, probe, work, replaced)
             if why is None:
                 results.append({"id": sid, "skipped": True, "exit_status": 0,
@@ -675,7 +806,8 @@ def main(argv=None) -> int:
             code = 1  # an unbound check result is not a result of the declared check
         end = p["end"] if p["end"] != "success" or code == 0 else "failure"
         doc = record(wf.get("workflow", args.workflow.stem), step, rec_cmd, inputs, outputs, code, created, args.status,
-                     scripts, release, digest, end=end, termination=p["termination"], leftover=p["leftover"])
+                     scripts, release, digest, end=end, termination=p["termination"], leftover=p["leftover"],
+                     native=native, undeclared=undeclared)
         if bind is not None:
             doc["extension"]["check_result"] = bind
         rec_bytes = (json.dumps(doc, indent=1, sort_keys=True) + "\n").encode("utf-8")
@@ -694,6 +826,8 @@ def main(argv=None) -> int:
                        "ended": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
                        "usage": {"wall_s": round(t1 - t0, 3), "cpu_s": round(cpu1 - cpu0, 3)},
                        "check_result": bind}
+            if "native_inputs" in step:
+                receipt["native_inputs"] = [{"path": k, "sha256": v} for k, v in sorted(native.items())]
             rpath = args.receipt_dir / f"{attempt}.receipt.json"
             rpath.parent.mkdir(parents=True, exist_ok=True)
             try:

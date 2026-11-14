@@ -23,6 +23,9 @@ HIDE = ("import runpy, sys; [sys.modules.__setitem__(m, None) for m in sys.argv[
 UNFOLD_IN = {"response": [[0.8, 0.1], [0.1, 0.8]], "data": [10.0, 12.0]}
 # adapter -> (arguments with @TMP for a scratch folder, {file name under @TMP: content}); the hidden module varies
 ARGS = {
+    "adapters/calo-cluster/assets/calo_cluster.py": (["check-product", "--product", "@TMP/product.json"], {}),
+    "adapters/photon-likelihood/assets/photon_likelihood.py": (["check-product", "--product", "@TMP/product.json"], {}),
+    "adapters/destriper/assets/destriper.py": (["check-product", "--product", "@TMP/product.json"], {}),
     "adapters/cr-propagation/assets/emulator_provider.py": (
         ["--request", "@TMP/request.json", "--response", "@TMP/response.json"], {}),
     "adapters/cr-propagation/assets/dragon2_to_prediction.py": (
@@ -61,7 +64,8 @@ def adapter_tools():
 def third_party_imports(rel):
     """Top-level names of the modules a tool imports that are neither the standard library nor the plugin's own."""
     path = ROOT / rel
-    local = {Path(p).stem for p in glob.glob(str(path.parent / "*.py"))}
+    local = ({Path(p).stem for p in glob.glob(str(path.parent / "*.py"))}
+             | {Path(p).parent.name for p in glob.glob(str(path.parent / "*" / "__init__.py"))})  # sibling packages
     names = set()
     for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
         if isinstance(node, ast.Import):

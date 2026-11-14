@@ -55,6 +55,7 @@
    "tests.skills.hep_detector.test_reference_values"
   ],
   "torch-cpu": [
+   "tests.contracts.test_t12_a13_gpu",
    "tests.skills.hep_ml.test_assets_smoke",
    "tests.skills.hep_ml.test_audit_domain_method",
    "tests.skills.hep_ml.test_audit_metric_layer",

@@ -1,0 +1,14 @@
+{
+ "format": "light-likelihood-topology/1",
+ "starts": [
+  "h1 + residual",
+  "h1 + residual, reversed",
+  "h1 + residual, mirrored",
+  "h1 + residual, turned",
+  "h1 + largest residual",
+  "h1 + mirrored h1",
+  "charge split",
+  "charge split, reversed"
+ ],
+ "tie_tolerance": 1e-06
+}

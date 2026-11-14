@@ -1,0 +1,247 @@
+{
+ "block": 1,
+ "files_sha256": {
+  "main": {
+   "readout": "5c7f64623b7a420e11e94973de555e3ef991fa86c1e893500bb98063c97ff975",
+   "truth": "43c4b209db9266b4e36e0da159200012f05bc73e6d4eb23ff784fe633809a90f"
+  },
+  "two-source": {
+   "readout": "4e5bf7b28264215595b1bbc87e0b86a5fe7bb9064179bb3597c7b02ef06ca39c",
+   "truth": "8f4a25ee72e5240c5a23426b822a936db48ed356becb7bc32639441d7e51dcbf"
+  }
+ },
+ "generator": "t09-sphere/1",
+ "generator_sha256": "2657f56bfc1fc7f68a93e205b2c66f80b52018494a78346bcd4e955a9be7da76",
+ "platform": {
+  "cpu": "AMD EPYC 9645 96-Core Processor",
+  "machine": "x86_64",
+  "numpy": "2.4.6",
+  "python": "3.13.18",
+  "scipy": "1.17.1"
+ },
+ "runs": [
+  {
+   "data_side_files": [
+    "main.readout"
+   ],
+   "exit_code": 0,
+   "harness": "fixture_tools/t09_fixture_files.py",
+   "operation": "generate",
+   "sample": "main",
+   "status": "ok"
+  },
+  {
+   "budget_sha256": "70220b7ddf1679d01d4a9c5397d1fdf124c6f0bd8ed4dca562d9c18e04180307",
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/photon-likelihood/assets/photon_likelihood.py",
+    "fit",
+    "--readout",
+    "<work>/main.readout",
+    "--product",
+    "<work>/main.multistart.product",
+    "--product-id",
+    "example-reconstruction-photon-likelihood-main-multistart",
+    "--likelihood",
+    "charge-time",
+    "--starts",
+    "multistart"
+   ],
+   "configuration_sha256": "ce4f430756f8ea0be1ab1b08eb638f9c38bf305968aa2d6d4e743d5fc68a1508",
+   "converged": 2,
+   "events": 2,
+   "exit_code": 0,
+   "fit_failures": {},
+   "input_sha256": "5c7f64623b7a420e11e94973de555e3ef991fa86c1e893500bb98063c97ff975",
+   "label": "shared-model closure",
+   "likelihood": "charge-time",
+   "operation": "fit",
+   "probability_failures": 0,
+   "product": "<work>/main.multistart.product",
+   "reason": "",
+   "sample": "main",
+   "starts": "multistart",
+   "status": "ok"
+  },
+  {
+   "choices": {
+    "H1": 2
+   },
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/photon-likelihood/assets/photon_likelihood.py",
+    "topology",
+    "--readout",
+    "<work>/main.readout",
+    "--h1-product",
+    "<work>/main.multistart.product",
+    "--product",
+    "<work>/main.topology.product",
+    "--product-id",
+    "example-reconstruction-photon-likelihood-main-topology"
+   ],
+   "configuration_sha256": "ce4f430756f8ea0be1ab1b08eb638f9c38bf305968aa2d6d4e743d5fc68a1508",
+   "events": 2,
+   "exit_code": 0,
+   "h1_product_sha256": "9d44ae712dc4b758cc9cbd4311c17fd1e31568cccd6377250c65aeaa60eee6b1",
+   "h2_starts": {
+    "converged": 1,
+    "no-finite-covariance": 15
+   },
+   "input_sha256": "5c7f64623b7a420e11e94973de555e3ef991fa86c1e893500bb98063c97ff975",
+   "label": "shared-model closure",
+   "operation": "topology",
+   "penalty": 30.0,
+   "probability_failures": 0,
+   "product": "<work>/main.topology.product",
+   "reason": "",
+   "sample": "main",
+   "status": "ok",
+   "topology_budget_sha256": "104262a1bfb0f5403a075884d9acd5f5ccbf1fc012d5237b578297f4d98ed7df"
+  },
+  {
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/photon-likelihood/assets/photon_likelihood.py",
+    "check-product",
+    "--product",
+    "<work>/main.topology.product"
+   ],
+   "converged": 2,
+   "events": 2,
+   "exit_code": 0,
+   "first_failures": [],
+   "format": "light-likelihood-product/4",
+   "label": "shared-model closure",
+   "operation": "check-product",
+   "probability_failures": 0,
+   "reason": "",
+   "sample": "main",
+   "status": "ok"
+  },
+  {
+   "data_side_files": [
+    "two-source.readout"
+   ],
+   "exit_code": 0,
+   "harness": "fixture_tools/t09_fixture_files.py",
+   "operation": "generate",
+   "sample": "two-source",
+   "status": "ok"
+  },
+  {
+   "budget_sha256": "70220b7ddf1679d01d4a9c5397d1fdf124c6f0bd8ed4dca562d9c18e04180307",
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/photon-likelihood/assets/photon_likelihood.py",
+    "fit",
+    "--readout",
+    "<work>/two-source.readout",
+    "--product",
+    "<work>/two-source.multistart.product",
+    "--product-id",
+    "example-reconstruction-photon-likelihood-two-source-multistart",
+    "--likelihood",
+    "charge-time",
+    "--starts",
+    "multistart"
+   ],
+   "configuration_sha256": "ce4f430756f8ea0be1ab1b08eb638f9c38bf305968aa2d6d4e743d5fc68a1508",
+   "converged": 1,
+   "events": 1,
+   "exit_code": 0,
+   "fit_failures": {},
+   "input_sha256": "4e5bf7b28264215595b1bbc87e0b86a5fe7bb9064179bb3597c7b02ef06ca39c",
+   "label": "shared-model closure",
+   "likelihood": "charge-time",
+   "operation": "fit",
+   "probability_failures": 0,
+   "product": "<work>/two-source.multistart.product",
+   "reason": "",
+   "sample": "two-source",
+   "starts": "multistart",
+   "status": "ok"
+  },
+  {
+   "choices": {
+    "H2": 1
+   },
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/photon-likelihood/assets/photon_likelihood.py",
+    "topology",
+    "--readout",
+    "<work>/two-source.readout",
+    "--h1-product",
+    "<work>/two-source.multistart.product",
+    "--product",
+    "<work>/two-source.topology.product",
+    "--product-id",
+    "example-reconstruction-photon-likelihood-two-source-topology"
+   ],
+   "configuration_sha256": "ce4f430756f8ea0be1ab1b08eb638f9c38bf305968aa2d6d4e743d5fc68a1508",
+   "events": 1,
+   "exit_code": 0,
+   "h1_product_sha256": "f1dcfe9d5918e71e4a4d9377e94843607a8e6a8298e7c0da1ce52ccee4014395",
+   "h2_starts": {
+    "converged": 8
+   },
+   "input_sha256": "4e5bf7b28264215595b1bbc87e0b86a5fe7bb9064179bb3597c7b02ef06ca39c",
+   "label": "shared-model closure",
+   "operation": "topology",
+   "penalty": 30.0,
+   "probability_failures": 0,
+   "product": "<work>/two-source.topology.product",
+   "reason": "",
+   "sample": "two-source",
+   "status": "ok",
+   "topology_budget_sha256": "104262a1bfb0f5403a075884d9acd5f5ccbf1fc012d5237b578297f4d98ed7df"
+  },
+  {
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/photon-likelihood/assets/photon_likelihood.py",
+    "check-product",
+    "--product",
+    "<work>/two-source.topology.product"
+   ],
+   "converged": 1,
+   "events": 1,
+   "exit_code": 0,
+   "first_failures": [],
+   "format": "light-likelihood-product/4",
+   "label": "shared-model closure",
+   "operation": "check-product",
+   "probability_failures": 0,
+   "reason": "",
+   "sample": "two-source",
+   "status": "ok"
+  }
+ ],
+ "samples": [
+  {
+   "events": 2,
+   "fixture": "main",
+   "sample": "main",
+   "stratum": 7
+  },
+  {
+   "events": 1,
+   "fixture": "two-source",
+   "sample": "two-source",
+   "stratum": 0
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+{
+ "format": "light-likelihood-multistart/1",
+ "starts": ["prefit", "reversed", "turned +e1", "turned -e1", "turned +e2", "turned -e2", "mirrored", "charge seed"],
+ "tie_tolerance": 1e-06
+}

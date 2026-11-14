@@ -17,7 +17,7 @@ Feldman-Cousins tables, the 10,000-mutation contract fuzz and the full theory-co
 runs each test module in its own process with a time limit (`--module-timeout`, default 600 s, or the
 `HEP_MODULE_TIMEOUT` environment variable) and records every module's duration. The slow tier needs more:
 `tests.examples.test_stats_benchmarks` alone takes about 525-545 s there and timed out under parallel load, so the
-weekly `latest` CI job, which runs the slow tier, sets `HEP_MODULE_TIMEOUT=1800`; do the same for a local slow-tier
+weekly `latest` CI job, which runs the slow tier, sets `HEP_MODULE_TIMEOUT=1800`; the AMS-optional rerun has its own limit, 1200 s or `HEP_AMS_OPTIONAL_TIMEOUT` (2400 s in the hostile-paths relocated run); do the same for a local slow-tier
 run (`HEP_SLOW_TESTS=1 HEP_MODULE_TIMEOUT=1800 python3 tools/run_all_checks.py`) rather than reducing toys, seeds or
 tolerances. A fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Modules start
 slowest first, using the durations recorded in `tools/module_timings.json`. CI splits the run into parallel jobs:
@@ -321,6 +321,9 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/geant4-thin-silicon/` (offline replay of recorded Geant4 11.4.3 runs; `--live` reruns them) | J14 |
 | `examples/design-minimal-spectrometer/` (offline replay of the recorded J15 campaign; `live.py` reruns it) | J15 |
 | `examples/design-search-j16/` (searches on Examples A and B; offline replay of the recorded Example A confirmation; `live.py` reruns it) | J16 |
+| `examples/reconstruction-tracking/` (T07: generate, find and refit through the ACTS wrapper; offline replay of a recording made by the T07 build job on its Slurm node, not on E2, where ACTS is not installed; `--live` with the built programs reruns it) | - |
+| `examples/reconstruction-calorimetry/` (T08: generate a few t08-grid/1 events, reconstruct with the calo-cluster development binding, check the product; offline replay of a recording made by the T08 job, since the frozen generator is outside the repository; `--live --generator` reruns it; its expected readings are stated in `run.py`'s module text) | - |
+| `examples/reconstruction-photon-likelihood/` (T09: generate a few t09-sphere/1 events, fit them with the photon-likelihood development binding (multistart, then topology), check the product; offline replay of a recording made by the T09 job, since the frozen generator is outside the repository; `--live --generator` reruns it; its expected readings are stated in `run.py`'s module text) | - |
 
 `tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and
@@ -344,7 +347,14 @@ state the current contract. So a version bump needs no reference machine, and th
   it: on a network home, temporary-folder cleanup and the sticky-directory test fail, and the name extractors refuse a
   folder inside a project.
 - Each release manifest adds about 0.9 MB, so keep the README's "(about N files, X MB uncompressed)" statement within
-  `tools/check_packaging.py`'s 10 % of the measured size. Generate `release-manifests/X.Y.Z.json` last, after the
+  `tools/check_packaging.py`'s 10 % of the measured upload zip (the files `git archive HEAD:plugins/hep-research` keeps:
+  `tests/` is `export-ignore` in the plugin's `.gitattributes` except the files shipped code reads at run time, each
+  listed there with `-export-ignore` and its folders); the check also fails above the documented upload limits (5,000
+  files, counted with their folders, or 200 MB) and when a shipped reference into `tests/` or `docs/dev/` does not
+  resolve in the zip. When shipped code starts reading a new file under `tests/`, add it to that list. Measured on 2026-11-14 the zip held
+  4,883 entries (4,120 files) and 91.4 MB (after merging 0.67.0), so about 117 entries of room were left; every release manifest, example or
+  `docs/dev/` addition uses some of it. The next lever is to make `docs/dev/` (about 569 files) `export-ignore` as well,
+  after rewriting the shipped links into it; that is the maintainer's decision. Generate `release-manifests/X.Y.Z.json` last, after the
   VALIDATION release check and any README change, and verify it on a `git archive` export.
 
 ## Evidence ledgers

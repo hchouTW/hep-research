@@ -504,6 +504,50 @@ class RunAndPartition(_Tmp):
         self.assertEqual(code, 2, out)
         self.assertIn("partition", out["error"])
 
+    def test_scan_declares_its_executable_so_a_changed_binary_reruns(self):
+        """T12 stage 2 fix round 1 (I1, N7 of t12-stage-plan.md): the scan's steps declare the executable and the build record as
+        native_inputs, so run_workflow.py --incremental skips when nothing changed and reruns when the binary changes, with the
+        executable outside home and under home (written ~/...). The runner runs in this process with a pinned release digest, as
+        test_workflow_b1.py does: in a development tree INC-03 never skips."""
+        import contextlib
+        import importlib.util
+        import io
+        from unittest import mock
+        spec_ = importlib.util.spec_from_file_location("run_workflow_g4scan", PLUGIN / "skills" / "hep-computing" / "scripts"
+                                                       / "run_workflow.py")
+        runner = importlib.util.module_from_spec(spec_)
+        spec_.loader.exec_module(runner)
+        runner.plugin_release = lambda root=None: {"release": "g4scan-test", "digest": "d" * 64, "source": "pinned by the test"}
+        rec, _ = self.fake_install()
+        base = self.write("base.json", spec())
+        grid = self.write("grid.json", {"name": "cuts", "parameters": {"physics.default_cut_mm": [1.0]}})
+        for case, home in (("outside home", self.d / "elsewhere"), ("under home", self.d)):
+            with self.subTest(case=case):
+                home.mkdir(exist_ok=True)
+                env = {**os.environ, "HOME": str(home)}
+                out_dir = self.d / f"scan-{case.replace(' ', '-')}"
+                exe = self.fake_exe()
+                code, out = run(asset("geant4_run.py"), "scan", "--base", base, "--grid", grid, "--exe", exe, "--build-record", rec,
+                                "--out-dir", out_dir, "--events-per-second", "1000", "--created", "2026-11-13", env=env)
+                self.assertEqual(code, 0, out)
+                step = json.loads((out_dir / "workflow.json").read_text())["steps"][0]
+                expected = [str(exe), str(rec)] if case == "outside home" else ["~" + str(exe)[len(str(home)):],
+                                                                                "~" + str(rec)[len(str(home)):]]
+                self.assertEqual(step["native_inputs"], expected)
+
+                def go(*extra):
+                    buffer = io.StringIO()
+                    with mock.patch.dict(os.environ, {"HOME": str(home)}), contextlib.redirect_stdout(buffer):
+                        code_ = runner.main([str(out_dir / "workflow.json"), "--work", str(out_dir), "--created", "2026-11-13",
+                                             *extra])
+                    return code_, json.loads(buffer.getvalue())
+                self.assertEqual(go()[0], 0)
+                code, out = go("--incremental")
+                self.assertEqual((code, [s_.get("skipped", False) for s_ in out["steps"]]), (0, [True]), out)
+                exe.write_text(exe.read_text() + "# rebuilt\n")
+                code, out = go("--incremental")
+                self.assertEqual((code, [s_.get("skipped", False) for s_ in out["steps"]]), (0, [False]), out)
+
     def test_partition_merge_equals_a_single_run_and_refuses_nothing_twice(self):
         rec, _ = self.fake_install()
         s = spec()

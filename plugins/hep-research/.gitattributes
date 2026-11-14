@@ -6,3 +6,45 @@
 *.root binary
 *.dat binary
 *.npz binary
+*.cells binary
+*.readout binary
+*.t07data binary
+# Upload package (maintainer decision, 2026-11-14: "Exclude tests/ except runtime needs"). `git archive HEAD:plugins/hep-research`
+# reads attributes only from the archived tree, so these lines live here, not in a repository-root .gitattributes. Every
+# path under tests/ is left out of the uploaded zip, which keeps it inside the documented limits (5,000 files, 200 MB),
+# except what shipped code reads at runtime. The last matching line wins, and git archive skips a whole folder whose
+# own path is export-ignore, so each kept file's folders are unset as well. tools/check_packaging.py measures this
+# archive and fails when a shipped reference into tests/ does not resolve inside it.
+/tests/** export-ignore
+# folders that hold kept files
+/tests/examples -export-ignore
+/tests/skills -export-ignore
+/tests/skills/hep_detector -export-ignore
+/tests/adapters -export-ignore
+/tests/adapters/fixtures -export-ignore
+/tests/adapters/fixtures/cr_propagation -export-ignore
+/tests/adapters/fixtures/cr_propagation/e1 -export-ignore
+# the tests that profile capabilities cite (contracts/registry.py requires them), with the modules they import
+/tests/__init__.py -export-ignore
+/tests/_outputs.py -export-ignore
+/tests/examples/__init__.py -export-ignore
+/tests/examples/test_ams_flux_ratio.py -export-ignore
+/tests/examples/test_eic_profile_routing.py -export-ignore
+/tests/examples/test_collider_angular.py -export-ignore
+/tests/examples/test_detector_resolution_and_recasting.py -export-ignore
+/tests/examples/test_qed_prediction.py -export-ignore
+/tests/skills/__init__.py -export-ignore
+/tests/skills/hep_detector/__init__.py -export-ignore
+/tests/skills/hep_detector/test_detector_atlas.py -export-ignore
+# the emulator's default artifact (adapters/cr-propagation/assets/emulator_provider.py, DEFAULT_ARTIFACT), its folder,
+# and the module its campaign script imports
+/tests/adapters/fixtures/cr_propagation/e2 -export-ignore
+/tests/adapters/fixtures/cr_propagation/e2/** -export-ignore
+/tests/adapters/fixtures/cr_propagation/e1/active_addition.py -export-ignore
+# the fake schedulers examples/batch-partition/run.py runs against
+/tests/adapters/batch_shims -export-ignore
+/tests/adapters/batch_shims/** -export-ignore
+# the recorded mirror runs adapters/geant4/assets/g4sim_inventory.py collects (SOURCES["mirrors"])
+/tests/adapters/fixtures/geant4 -export-ignore
+/tests/adapters/fixtures/geant4/records -export-ignore
+/tests/adapters/fixtures/geant4/records/mirror-* -export-ignore

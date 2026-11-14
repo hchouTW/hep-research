@@ -1,0 +1,16 @@
+{
+ "format": "method-card/1",
+ "recipe": "reco.scan.destriper/1",
+ "method": "destriping: joint fit of map and baselines, conjugate gradient for the baseline amplitudes, then binning (t11-cells.md F38, from astro-ph/0412517, astro-ph/0501504 and 0904.3623 as recorded there); model y_t = m_p(t) + a_b(t) + n_t with white noise of one variance",
+ "binding": "development binding in Python (env/py313, NumPy), not a native backend: the native scan or global solver stays a recorded gap (decisions.md, U7 and U12 A)",
+ "unconstrained_modes": [
+  {
+   "mode": "common offset: m + c on every pixel and a - c on every baseline leaves every sample, so the data never determine it (plan section 9.6, A34)",
+   "constrained_by": "the stated zero-sum constraint on the baselines, sum_b a_b = 0 (astro-ph/0501504's explicit zero-sum condition, as t11-cells.md F38 records it); without it the product names every parameter unidentifiable and reports only differences and map-plus-baseline sums",
+   "constraining_data": "none: more samples of the same kind leave the mode free; the constraint is a convention, not information",
+   "independent_observables": "an external absolute level of one pixel or one baseline (for example an absolute calibrator); none exists in the synthetic fixture, so the absolute level is not validated",
+   "precondition": "the scan is one connected component of pixels and baselines (t11-cells.md F38: baselines sufficiently connected, null space one-dimensional); each further component adds one more offset mode, which the one constraint cannot fix, so such a scan is refused"
+  }
+ ],
+ "not_claimed": "no map-making quality, no correlated or cross-detector noise, no filtering or transfer function, no beam or bandpass; synthetic data only (t10-options.md, option B, does not prove)"
+}

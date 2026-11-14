@@ -18,13 +18,22 @@ content rules below apply to every text file (a known text suffix, or no NUL byt
   slurm or htcondor backend or section, and everything below it; keys compared case-insensitively): partition,
   account, QoS, constraint, gres, requirements and container image must be placeholders ("<...>") or start with
   "synthetic"; campaign_dir must not be an absolute path
-- the README's stated package size ("about N files, X MB uncompressed") within 10% of the measured file count and
-  byte total, so the figure an uploader relies on does not drift
+- the README's stated package size ("about N files, X MB uncompressed") within 10% of the file count and byte total
+  of the upload zip it describes, `git archive --format=zip HEAD:plugins/hep-research`: the scanned files minus every
+  path that git archive leaves out because it or one of its folders is marked export-ignore in a .gitattributes inside
+  the plugin (git archive of a subtree reads only the attributes in that tree; tests/ is left out except the files
+  shipped code reads at run time, maintainer decision 2026-11-14; docs/dev/ is kept); and that zip inside the documented upload limits, 5,000 entries (files plus the
+  folder entries git archive writes, the stricter reading of "5,000 files") and 200 MB (10^6 bytes per MB) uncompressed
+- every runtime reference from a shipped file into tests/ or docs/dev/ resolves inside that zip: the tests a profile
+  capability cites, plugin-root path constants and "tests/..." path strings in Python files, and relative Markdown links
+  (maintainer tools that run the test suite, MAINTAINER_TOOLS, and code below a folder named tests are not checked)
 Usage: python3 tools/check_packaging.py [--root PLUGIN_ROOT]   Exit 0 clean, 1 findings. Output: JSON.
 """
 from __future__ import annotations
 
+import fnmatch
 import json
+import os
 import re
 import subprocess
 import sys
@@ -118,22 +127,207 @@ def batch_site_facts(obj, inside: bool = False) -> list[str]:
 
 SIZE_RE = re.compile(r"\(about\s+([\d,]+)\s+files,\s+([\d.]+)\s+MB\s+uncompressed\)")
 SIZE_MARGIN = 0.10
+MAX_UPLOAD_ENTRIES = 5000          # documented upload limit "5,000 files", read as zip entries (files and folders)
+MAX_UPLOAD_BYTES = 200 * 10**6     # documented upload limit "200 MB", uncompressed
+
+
+def _attribute_rules(fl: list[Path]) -> list[tuple[str, str, bool, bool]]:
+    """export-ignore lines of every .gitattributes among the scanned files, outermost file first:
+    (folder of the file, pattern without its slashes, directory-only, set). A line that unsets the attribute
+    (-export-ignore or !export-ignore) is kept with set=False, so a later line can override an earlier one."""
+    rules = []
+    for ga in sorted((p for p in fl if p.name == ".gitattributes" and p.is_file()),
+                     key=lambda p: len(p.relative_to(ROOT).parts)):
+        base = ga.parent.relative_to(ROOT).as_posix()
+        base = "" if base == "." else base
+        for line in ga.read_text(encoding="utf-8", errors="replace").splitlines():
+            parts = line.split()
+            if not parts or parts[0].startswith("#"):
+                continue
+            pattern, attrs = parts[0], parts[1:]
+            state = None
+            for a in attrs:
+                if a == "export-ignore":
+                    state = True
+                elif a in ("-export-ignore", "!export-ignore"):
+                    state = False
+            if state is None:
+                continue
+            dir_only = pattern.endswith("/")
+            rules.append((base, pattern.rstrip("/"), dir_only, state))
+    return rules
+
+
+def _rule_matches(rule: tuple[str, str, bool, bool], path: str, is_dir: bool) -> bool:
+    """gitattributes matching of one rule against a path relative to the plugin root: a pattern holding a slash is
+    anchored to the folder of its .gitattributes, one without matches the last path component at any depth."""
+    base, pattern, dir_only, _ = rule
+    if dir_only and not is_dir:
+        return False
+    if base:
+        if not path.startswith(base + "/"):
+            return False
+        path = path[len(base) + 1:]
+    if "/" in pattern:
+        return fnmatch.fnmatchcase(path, pattern.lstrip("/"))
+    return fnmatch.fnmatchcase(path.rsplit("/", 1)[-1], pattern)
+
+
+def upload_files(fl: list[Path]) -> list[Path]:
+    """The files the upload zip holds: the scanned regular files minus those that git archive leaves out because the
+    file or one of its folders is marked export-ignore (the last matching line wins; a deeper .gitattributes comes
+    later). Read from the .gitattributes files themselves, so it works the same outside a git checkout."""
+    rules = _attribute_rules(fl)
+
+    def ignored(path: str, is_dir: bool) -> bool:
+        state = False
+        for rule in rules:
+            if _rule_matches(rule, path, is_dir):
+                state = rule[3]
+        return state
+
+    out = []
+    for p in fl:
+        if not p.is_file() or p.is_symlink():
+            continue
+        parts = p.relative_to(ROOT).parts
+        folders = ["/".join(parts[:k]) for k in range(1, len(parts))]
+        if not any(ignored(d, True) for d in folders) and not ignored("/".join(parts), False):
+            out.append(p)
+    return out
+
+
+def zip_entries(files_kept: list[Path]) -> int:
+    """Entries of the zip git archive writes for these files: one per file and one per folder holding any of them."""
+    folders = {parent for p in files_kept for parent in p.relative_to(ROOT).parents if parent != Path(".")}
+    return len(files_kept) + len(folders)
+
+
+# Files that may lose their tests in the upload zip: maintainer tools that run or list the test suite. Test and gate code
+# (any file below a folder named tests) is not checked either; everything else that ships is.
+MAINTAINER_TOOLS = {"tools/run_all_checks.py", "tools/check_routing_static.py", "tools/check_ams_optional.py",
+                    "tools/ci_plan.py", "tools/check_host_neutral.py"}
+LEFT_OUT_PREFIXES = ("tests", "docs/dev")   # the trees export-ignore may thin out; a reference into them must resolve
+PATH_VAR = re.compile(r"^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(Path\(__file__\)\.resolve\(\)|[A-Z_][A-Z0-9_]*)((?:\.parent\b|\.parents\[\d+\])*)\s*(?:#.*)?$", re.M)
+PATH_JOIN = re.compile(r"\b([A-Z_][A-Z0-9_]*)((?:\s*/\s*(?:\"[^\"\n]+\"|'[^'\n]+'))+)")
+PATH_LITERAL = re.compile(r"[\"']((?:tests|docs/dev)/[\w./*-]+)[\"']")
+MD_LINK = re.compile(r"\]\(([^)\s]+)\)")
+
+
+def _checked(rel: str) -> bool:
+    return rel not in MAINTAINER_TOOLS and "tests" not in rel.split("/")[:-1]
+
+
+def _under_left_out(rel: str) -> bool:
+    return any(rel == p or rel.startswith(p + "/") for p in LEFT_OUT_PREFIXES)
+
+
+def _relative(path: str) -> str | None:
+    """A path (absolute, or normalised against ROOT) relative to the plugin root, or None outside it."""
+    full = os.path.normpath(path)
+    root = os.path.normpath(str(ROOT))
+    if full == root:
+        return ""
+    return full[len(root) + 1:].replace(os.sep, "/") if full.startswith(root + os.sep) else None
+
+
+def _python_targets(p: Path, text: str) -> list[tuple[str, str]]:
+    """Plugin-relative paths a Python file builds: NAME / "a" / "b" where NAME is Path(__file__).resolve() moved up by
+    .parent / .parents[k] (directly or through another such name), and whole string literals "tests/..." (read
+    against the plugin root, as glob patterns are)."""
+    bases: dict[str, str] = {}
+    for m in PATH_VAR.finditer(text):
+        name, start, steps = m.groups()
+        base = str(p) if start.startswith("Path(") else bases.get(start)
+        if base is None:
+            continue
+        for step in re.findall(r"\.parent\b|\.parents\[(\d+)\]", steps):
+            base = os.path.dirname(base) if step == "" else os.path.normpath(os.path.join(base, *[".."] * (int(step) + 1)))
+        bases[name] = base
+    out = []
+    for m in PATH_JOIN.finditer(text):
+        if m.group(1) in bases:
+            parts = re.findall(r"\"([^\"\n]+)\"|'([^'\n]+)'", m.group(2))
+            rel = _relative(os.path.join(bases[m.group(1)], *[a or b for a, b in parts]))
+            if rel is not None:
+                out.append((rel, f"{m.group(1)} / ..."))
+    out += [(m.group(1).rstrip("/"), "a path string") for m in PATH_LITERAL.finditer(text)]
+    return out
+
+
+def unresolved_references(fl: list[Path], kept: list[Path]) -> list[tuple[str, str]]:
+    """Runtime references from shipped files into tests/ or docs/dev/ that do not resolve inside the upload zip:
+    the tests a profile capability cites (contracts/registry.py requires them), plugin-root path constants and path
+    strings in Python files, and relative Markdown links. A folder or glob resolves when a kept file lies below or
+    matches it. Only targets the scanned tree holds are judged: the finding is a reference export-ignore broke.
+    Returns (referring file, detail)."""
+    kept_rels = {p.relative_to(ROOT).as_posix() for p in kept}
+    all_rels = {p.relative_to(ROOT).as_posix() for p in fl if p.is_file()}
+
+    def present(rel: str, among: set[str]) -> bool:
+        if rel in among or any(k.startswith(rel + "/") for k in among):
+            return True
+        return any(ch in rel for ch in "*?[") and any(fnmatch.fnmatchcase(k, rel) or fnmatch.fnmatchcase(k, rel + "/*")
+                                                       for k in among)
+
+    def resolved(rel: str) -> bool:
+        # a target the package never held (a broken link, prose that looks like one) is not this check's finding
+        return present(rel, kept_rels) or not present(rel, all_rels)
+    found = []
+    for p in kept:
+        rel = p.relative_to(ROOT).as_posix()
+        if not _checked(rel):
+            continue
+        targets: list[tuple[str, str]] = []
+        if p.name == "profile.json" and rel.startswith("profiles/"):
+            try:
+                doc = json.loads(p.read_text(encoding="utf-8"))
+            except ValueError:
+                doc = {}
+            for cap in doc.get("capabilities") or [] if isinstance(doc, dict) else []:
+                for t in (cap.get("tests") or []) if isinstance(cap, dict) else []:
+                    target = _relative(os.path.join(str(p.parent), str(t)))
+                    if target is not None:
+                        targets.append((target, f"a test of capability '{cap.get('name')}'"))
+        elif p.suffix == ".py":
+            targets = _python_targets(p, p.read_text(encoding="utf-8", errors="replace"))
+        elif p.suffix == ".md":
+            for m in MD_LINK.finditer(p.read_text(encoding="utf-8", errors="replace")):
+                link = m.group(1).split("#", 1)[0]
+                if not link or ":" in link or link.startswith("<"):
+                    continue
+                target = _relative(os.path.join(str(p.parent), link))
+                if target is not None:
+                    targets.append((target, "a Markdown link"))
+        for target, how in targets:
+            if _under_left_out(target) and not resolved(target):
+                found.append((rel, f"{target} ({how}) is not in the upload zip"))
+    return found
 
 
 def size_drift(fl: list[Path]) -> list[str]:
-    """Problems with the README's size statement: missing, or more than SIZE_MARGIN off the measured package."""
+    """Problems with the upload zip and the README's statement of its size: the statement missing or more than
+    SIZE_MARGIN off the measured zip, or the zip over the documented upload limits."""
     readme = ROOT / "README.md"
     m = SIZE_RE.search(readme.read_text(encoding="utf-8")) if readme.is_file() else None
-    if not m:
-        return ["README.md has no '(about N files, X MB uncompressed)' statement"]
-    n_said, mb_said = int(m.group(1).replace(",", "")), float(m.group(2))
-    real = [p for p in fl if p.is_file()]
-    n, mb = len(real), sum(p.stat().st_size for p in real) / 1e6
+    kept = upload_files(fl)
+    n, nbytes = len(kept), sum(p.stat().st_size for p in kept)
+    mb = nbytes / 1e6
     out = []
-    if abs(n - n_said) > SIZE_MARGIN * n:
-        out.append(f"README says about {n_said} files, the package has {n}")
-    if abs(mb - mb_said) > SIZE_MARGIN * mb:
-        out.append(f"README says {mb_said} MB, the package has {mb:.1f} MB")
+    if not m:
+        out.append("README.md has no '(about N files, X MB uncompressed)' statement")
+    else:
+        n_said, mb_said = int(m.group(1).replace(",", "")), float(m.group(2))
+        if abs(n - n_said) > SIZE_MARGIN * n:
+            out.append(f"README says about {n_said} files, the upload zip has {n}")
+        if abs(mb - mb_said) > SIZE_MARGIN * mb:
+            out.append(f"README says {mb_said} MB, the upload zip has {mb:.1f} MB")
+    entries = zip_entries(kept)
+    if entries > MAX_UPLOAD_ENTRIES:
+        out.append(f"the upload zip has {entries} entries ({n} files and their folders), over the documented limit "
+                   f"of 5,000 files ({MAX_UPLOAD_ENTRIES} entries)")
+    if nbytes > MAX_UPLOAD_BYTES:
+        out.append(f"the upload zip holds {mb:.1f} MB uncompressed, over the documented limit of 200 MB")
     return out
 
 
@@ -190,6 +384,8 @@ def main(argv=None) -> int:
                     break
     for problem in size_drift(fl):
         add("README.md", "size-statement-drift", problem)
+    for path, problem in unresolved_references(fl, upload_files(fl)):
+        add(path, "shipped-reference-unresolved", problem)
     rep = {"files_scanned": len(fl), "findings": findings, "ok": not findings}
     print(json.dumps(rep, indent=1))
     return 0 if rep["ok"] else 1

@@ -1,0 +1,21 @@
+"""reco.timing.time-chain/1: the T10 timing development binding (t10-timing-stage-plan.md; decisions.md, U12 A as for T08, T09).
+
+A development binding in Python, not a native backend: the native timing-backend gap stays open. Modules:
+
+- timing_payload: timing-payload/1, one conditions payload per chain step (offset, walk, propagation) keyed by the channel map
+  timing-channel-map/1, with derived payloads that record their source (plan R32, R37).
+- time_chain: per hit, the value before and after each step in chain order with that step's payload identity, the amplitude,
+  both ends' times or the position with its source, and the path length (plan R35); single-ended and two-ended counters.
+- event_time: external, common linear, per-track leave-one-out linear and median event times, each recording its source,
+  estimator, hits with their track_id and weights (plan R35); time of flight and beta.
+- dedx (stage 2): dE/dx with every sample and path length kept before truncation and normalization (plan R35).
+- pid (stage 2): TOF species hypotheses, LLRs (never probabilities), support, working point, priors, missing input; migration
+  P(selected | true) and purity P(true | selected) with its composition (plan BP07).
+- method_card (stage 2): the card timing-method-card/1 with each unconstrained mode and its named constraint (section 9.6, A37).
+- counts (stage 2): counter counts with thresholds and per-channel valid exposure as a T06 counts product (W6, A19).
+
+Synthetic constants only (R31); no timing, TOF or PID quality is claimed. The calibration-interface checks CAI-T10-1 and -2 are
+fixture_tools/t10_cai.py, outside the recipe; the recipe never imports it.
+"""
+
+RECIPE = "reco.timing.time-chain/1"
