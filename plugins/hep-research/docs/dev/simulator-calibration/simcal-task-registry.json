@@ -477,6 +477,13 @@
    "registered_at": "2026-11-13T23:07:29Z",
    "card_commit": "ad100511",
    "reason": "phase-4 card refreshed at the phase start (A21; work packages; gate designs)"
+  },
+  {
+   "card": "simcal-tasks/phase-4.md",
+   "sha256": "e3377a7de99176d0ccb6171b721f7743e9866fe0a0512dc65f2f7e75abf36da5",
+   "registered_at": "2026-11-14T00:37:47Z",
+   "card_commit": "b49d098c",
+   "reason": "phase-4 gate run registered before the run (A22, A23)"
   }
  ]
 }
