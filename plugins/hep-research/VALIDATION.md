@@ -9732,9 +9732,18 @@ profile suites pass. Merged as `316a097b` after the merge gate (143 tests OK, st
 7650958, 7651068 and 7651151 (bubblewrap 0.6.3, hpa-wn33 and hpa-wn34): exit 0.
 
 Not established: a holdout (the user's writer session off this account and host; no `holdout_id` or SHA-256 recorded), the system under test
-and its budget, and any real model session on the holdout. The development-set shakedown (not the holdout) started on 2026-11-14 with probe job 7652238,
-pending when this entry was last updated; no result is recorded here. Holdout independence is therefore not
+and its budget, and any real model session on the holdout. Holdout independence is therefore not
 established, and the P6 gate is not passed. Stated limit: the custody procedure runs on one Unix user, not an enforced boundary.
+
+Development-set shakedown (not the holdout; real `claude-opus-5-5` sessions in the sandbox on compute nodes, plugin `316a097b`, $5 cap per
+session; `<private>/jobs/t13-shakedown/`). Probe job 7652238 (DEV02): completed; its `cmd:` citations did not resolve (a no-op `cd` prefix),
+fixed in round 12. Plan 2, jobs 7652648 to 7652653: 6 sessions, $1.03, no stop; scored 4 pass, DEV05 false success (outcome executed with
+no executed claim), DEV06 fail (a value reported in ps where ns was meant); 13 flags, mostly code text. Rounds 13 and 14 (`ed2573da`):
+report fields state kind and unit, an executed outcome needs an executed claim citing `cmd:`, the flag scan judges path literals in code
+(round 14 closed round 13's false negatives; 163 harness tests OK, mutation 22 of 22 killed, sandbox checks 7653074 and 7653717 exit 0).
+Plan 3, jobs 7653721 to 7653726 (harness `8d3c259a…`, SUT record `79daebb9…`): 6 sessions, $0.98, no stop; frozen scorer `ff9755a5…`:
+6 of 6 pass, no false success; 1 flag (DEV04 ran `cd /tmp`, a real reference outside the allowed roots). The development set is 6 tasks
+written by this account, so it shows the harness works end to end; it says nothing about holdout performance.
 
 ## RECO-CHECKPOINTS — 2026-11-13 to 2026-11-14 (NSTCCore Slurm, partition edr2-al9_short_serial)
 

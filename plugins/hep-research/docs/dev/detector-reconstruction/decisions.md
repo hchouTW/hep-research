@@ -1138,3 +1138,10 @@ The user's words, verbatim, after the coordinator listed what waited on them (th
 current main, the PR, and the final backup, with merging only after all CI passes); the A13 mid-size pointing prepared as a proposal (the user
 then chose "Leave A13 as is (Recommended)", above); the T13 runner brief drafted. The holdout writer session and the runner stay the user's by
 design (U9; t13-harness-spec.md section 1), and the holdout budget follows the shakedown's measured cost.
+
+## T13 shakedown plan 3 (the user, 2026-11-14)
+
+After plan 2 (DEV05 false success, DEV06 fail) the user chose "Fix the instructions (Recommended)", whose text read "Re-freeze the harness and
+rerun the 6 development sessions (~$1) to confirm". Read as the user's word for plan 3's 6 paid sessions beyond the 7 first approved (probe 1
+and plan 2), at the same $5 cap per session. Harness rounds 13 and 14 were made and reviewed first; plan 3 ran as jobs 7653721 to 7653726
+($0.98, 6 of 6 pass; VALIDATION RECO-T13-HARNESS).

@@ -164,11 +164,11 @@ are `met`, `met with readings`, `open` or `gap` (`t07-closeout.md`). These are k
 - **Cannot be claimed.** **Holdout independence is not established**: the holdout is to be written in the user's session off this account
   and host, and no `holdout_id` or SHA-256 is recorded (`t13-harness-spec.md`, sections 1 and 6). The system under test and the budget for
   3 × (number of tasks) sessions are the user's and not given (`decisions.md`, "T13 design"). No model session on the holdout has run. The
-  development-set shakedown (not the holdout) started: probe job 7652238 ran on 2026-11-14; its unresolved `cmd:` citations led to the
-  round-12 harness fix, and the six-session plan 2 run followed (`<private>/jobs/t13-shakedown/`, harness REPORT). So the P6 gate is not passed. Stated limits: custody on one
+  development-set shakedown (not the holdout) is done: after harness rounds 12 to 14, plan 3 (6 real sessions, $0.98) scored 6 of 6
+  pass with no false success (VALIDATION RECO-T13-HARNESS); it shows the harness works end to end, not holdout performance. So the P6 gate is not passed. Stated limits: custody on one
   Unix user; shell network flagged, not blocked (`t13-harness-spec.md`, section 8).
-- **Continue.** The user's holdout and its hashes, the SUT and budget; the paid shakedown first, with the SUT model and plugin commit
-  confirmed with the user (`decisions.md`, "T13 design").
+- **Continue.** The user's holdout and its hashes, the SUT and budget (the shakedown measured about $0.16 per session;
+  `decisions.md`, "T13 design" and "T13 shakedown plan 3").
 
 ### T15b two-candidate selection
 
@@ -222,7 +222,7 @@ Each stays open; none is turned into a pass by this report.
    the T07 refit format gap; A32's harness-side check; **P4 execution incomplete, 8 gaps**; the loop-fixture findings; the shared-runner
    follow-ups.
 6. **T13:** harness built and sandboxed; holdout not established (`blocked-by-decision`: the writer session is the user's); SUT and budget
-   not given; no holdout session run (the development-set shakedown is in progress). **Holdout independence not established; the P6 gate is not passed.**
+   not given; no holdout session run (the development-set shakedown passed 6 of 6, plan 3). **Holdout independence not established; the P6 gate is not passed.**
 7. **T16:** `blocked-by-decision` with T13.
 8. **U11:** no real data; the data-control layer is incomplete.
 9. **T15b:** no qualified candidate; comparative selection not demonstrated; no K18 confirmation.
