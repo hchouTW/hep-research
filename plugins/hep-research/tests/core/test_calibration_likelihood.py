@@ -1,4 +1,5 @@
-"""The joint likelihood of Part B section 2.1 and V_model of section 5.4 (phase 2, WP1)."""
+"""The joint likelihood of Part B section 2.1 and V_model of section 5.4 (phase 2, WP1); V_learn in V_G on the learned
+path (phase 5, WP-R2: section 2.1 V_G = V_data^unc + V_MC + V_emu + V_learn)."""
 from __future__ import annotations
 
 import sys
@@ -10,6 +11,7 @@ from scipy import special
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 from core.calibration import likelihood as L  # noqa: E402
 
@@ -265,6 +267,103 @@ class Bootstrap(unittest.TestCase):
         with self.assertRaises(L.LikelihoodError):
             L.bootstrap_covariance(np.zeros((400, 3)))
         self.assertAlmostEqual(L.bootstrap_report_factor(2500, 50), 2448 / 2499)
+
+
+# ------------------------------------------------------------------ V_learn in V_G (phase 5, WP-R2)
+LIGHT = {"folds": 2, "repeats": 3, "training_points": 4, "degree": 2}   # a fast, deliberately inexact classifier
+
+
+class LearnedCovariance(unittest.TestCase):
+    """Section 2.1 on the learned path (post-hoc fixture, synthetic): V_learn (the evaluator's v_learn in link space at
+    theta_ref) enters V_G, only when the plan declares a learned ratio; its scale is checked against the prediction
+    error at the known truth (negative: V_learn left out of V_G understates it; positive: included)."""
+
+    @classmethod
+    def setUpClass(cls):
+        import warnings
+        warnings.filterwarnings("ignore", message="The balance properties of Sobol")
+        import calibration_phase5_tv as X
+        cls.X = X
+        cls.pr = X.posthoc_problem(20_000, 4000, mc_seed=31, validation=False, learned=LIGHT)
+        cls.tp = np.array([0.17])
+
+    def test_v_learn_enters_v_g(self):
+        pr, tp = self.pr, self.tp
+        ref = pr.reference(tp, tp)
+        pr.learned_omit = ("V_G",)
+        try:
+            ref0 = pr.reference(tp, tp)                    # negative control: the construction without V_learn
+        finally:
+            pr.learned_omit = ()
+        self.assertFalse(hasattr(ref0, "V_learn"))
+        np.testing.assert_allclose(ref.V_G - ref0.V_G, ref.V_learn, atol=1e-18)
+        r = pr._predict({"strength": 0.17})
+        g = pr._dlink(r["pred"])
+        v = pr.ev.v_learn({"strength": 0.17}, names=pr.names)
+        np.testing.assert_allclose(ref.V_learn, v["V_learn"] * np.outer(g, g), rtol=1e-12)
+        self.assertTrue(np.all(np.diag(ref.V_learn) > 0))
+        self.assertGreater(ref.ln_det, ref0.ln_det)        # V_learn adds variance: the likelihood sees it
+
+    def test_plan_without_learned_ratio_is_untouched(self):
+        """Default off: no learned ratio in the plan, no V_learn, and v_learn is never asked (the phase-0..4 path)."""
+        pr = self.X.posthoc_problem(20_000, 4000, mc_seed=31, validation=False, learned={"learned": None})
+
+        def refuse(*a, **k):
+            raise AssertionError("v_learn called without a learned ratio")
+        pr.ev.v_learn = refuse
+        ref = pr.reference(self.tp, self.tp)
+        self.assertFalse(hasattr(ref, "V_learn"))
+        np.testing.assert_array_equal(ref.V_G, ref.V_std + ref.V_MC)
+
+    def test_evaluator_problem_reads_the_evaluators_v_learn(self):
+        """evaluator_problem (section 7.1 evaluators): a V_learn returned by `evaluate` enters V_G in link space; an
+        evaluator returning None (control: every phase-3 evaluator) leaves V_G = V_data + V_MC."""
+        import copy
+        from core.calibration import evaluator as E
+        from core.calibration import evaluator_problem as EP
+        from core.calibration import linear, toy
+        c, p = toy.posthoc_fixture()
+        p = copy.deepcopy(p)
+        p["evaluator"]["spec"]["runs"][0]["n"] = 4000
+        p["evaluator"]["learned"].update(LIGHT)
+        ev = E.make(p, c)
+
+        class WithVLearn:
+            def evaluate(self, theta, **kw):
+                return {**ev.evaluate(theta, **kw), "V_learn": ev.v_learn(theta, names=kw.get("names"))["V_learn"]}
+        tp = np.array([0.15])
+        base = EP.EvaluatorProblem(ev, c, p)
+        with_l = EP.EvaluatorProblem(WithVLearn(), c, p)
+        r0, r1 = base.reference(tp, None), with_l.reference(tp, None)
+        np.testing.assert_array_equal(r0.V_G, np.add(*base.V_parts(tp)))
+        self.assertIsNone(base.V_learn_link(tp))
+        pr = ev.evaluate({"strength": 0.15}, names=base.names)
+        g = linear.to_link_delta(np.asarray(pr["pred"], float), base.links)
+        Vl = ev.v_learn({"strength": 0.15}, names=base.names)["V_learn"] * np.outer(g, g)
+        np.testing.assert_allclose(r1.V_G - r0.V_G, Vl, rtol=1e-10, atol=1e-18)
+
+    def test_v_learn_scale_against_the_truth(self):
+        """The prediction error at the known truth over R independent nominal MC samples (each with its own trained
+        classifiers): sum_r e_r^T (V_MC + V_learn)^-1 e_r is not above the chi2_{kR} 0.999 quantile with V_learn in
+        V_G (positive), and is above it with V_learn left out (negative; this inexact classifier's bias dominates).
+        Calibration rows and the validation rows of section 9.2 (their own evaluator). Only the scale is tested (A25
+        (2), section 19-15)."""
+        from scipy import stats
+        R, truth = 12, 0.2                   # the support edge: this classifier's bias is largest there
+        chi = {"cal+": 0.0, "cal-": 0.0, "val+": 0.0, "val-": 0.0}
+        k = {"cal": 0, "val": 0}
+        for r in range(R):
+            pr = self.X.posthoc_problem(20_000, 4000, mc_seed=(41, r), val_mc_seed=(42, r), learned=LIGHT)
+            for side, val in (("cal", False), ("val", True)):
+                q = self.X.prediction_error(pr, truth, validation=val)
+                e = q["e"]
+                chi[side + "+"] += float(e @ np.linalg.solve(q["V_MC"] + q["V_learn"], e))
+                chi[side + "-"] += float(e @ np.linalg.solve(q["V_MC"], e))
+                k[side] += e.size
+        for side in ("cal", "val"):
+            crit = stats.chi2.ppf(0.999, k[side])
+            self.assertLessEqual(chi[side + "+"], crit, (side, chi))
+            self.assertGreater(chi[side + "-"], crit, (side, chi))
 
 
 if __name__ == "__main__":
