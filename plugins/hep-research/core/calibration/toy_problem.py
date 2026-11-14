@@ -342,7 +342,10 @@ class ToyProblem:
         V_G = Vd + V_mc + V_emu                           # V_emu: surrogate (section 6.4)
         V_learn = None
         if _learned(self.ev) and "V_G" not in self.learned_omit:
-            V_learn = self.v_learn_link(params)["V_learn"]
+            if bootstrap_frozen and getattr(frozen, "V_learn", None) is not None:
+                V_learn = frozen.V_learn                  # A27: frozen at theta_ref in the ln det diagnostic (section 7.3)
+            else:
+                V_learn = self.v_learn_link(params)["V_learn"]
             V_G = V_G + V_learn                           # section 2.1: V_G = V_data + V_MC + V_emu + V_learn
         ref = L.Reference(V_G=V_G, V_std=Vd, U=U, S=S, tau=tau)
         ref.V_MC = V_mc

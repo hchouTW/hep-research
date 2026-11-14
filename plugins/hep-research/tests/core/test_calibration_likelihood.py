@@ -304,6 +304,17 @@ class LearnedCovariance(unittest.TestCase):
         self.assertTrue(np.all(np.diag(ref.V_learn) > 0))
         self.assertGreater(ref.ln_det, ref0.ln_det)        # V_learn adds variance: the likelihood sees it
 
+    def test_v_learn_frozen_in_the_ln_det_diagnostic(self):
+        """A27: in the section 7.3 ln det diagnostic (bootstrap_frozen) V_learn is the reference's at theta_ref, as the
+        bootstrap part; elsewhere it is recomputed at theta (control: another theta gives another V_learn)."""
+        pr, tp = self.pr, self.tp
+        ref = pr.reference(tp, tp)
+        other = np.array([0.12])
+        frozen = pr.reference(other, other, ref, bootstrap_frozen=True)
+        np.testing.assert_array_equal(frozen.V_learn, ref.V_learn)
+        fresh = pr.reference(other, other)
+        self.assertFalse(np.allclose(fresh.V_learn, ref.V_learn))
+
     def test_plan_without_learned_ratio_is_untouched(self):
         """Default off: no learned ratio in the plan, no V_learn, and v_learn is never asked (the phase-0..4 path)."""
         pr = self.X.posthoc_problem(20_000, 4000, mc_seed=31, validation=False, learned={"learned": None})

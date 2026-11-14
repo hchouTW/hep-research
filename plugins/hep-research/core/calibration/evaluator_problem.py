@@ -99,10 +99,16 @@ class EvaluatorProblem:
         Vd, Vm = self.V_parts(tp)
         n = len(self.names)
         V_G = Vd + Vm
-        Vl = self.V_learn_link(tp)
+        if _kw.get("bootstrap_frozen") and getattr(frozen, "V_learn", None) is not None:
+            Vl = frozen.V_learn               # A27: V_learn frozen at theta_ref in the ln det diagnostic (section 7.3)
+        else:
+            Vl = self.V_learn_link(tp)
         if Vl is not None:                    # section 2.1: V_G = V_data + V_MC + V_emu + V_learn (phase 5)
             V_G = V_G + Vl
-        return L.Reference(V_G=V_G, V_std=Vd, U=np.zeros((n, 0)), S=np.zeros((n, 0)), constraints=[]).finalize()
+        ref = L.Reference(V_G=V_G, V_std=Vd, U=np.zeros((n, 0)), S=np.zeros((n, 0)), constraints=[]).finalize()
+        if Vl is not None:
+            ref.V_learn = Vl
+        return ref
 
     def bounds(self):
         return list(self._bounds)
