@@ -48,6 +48,14 @@ Simulator parameter calibration workflow, phase 3 (surrogate model and g4sim eva
 - **Schemas**: `calibration_contract`, `calibration_plan` and `calibration_fixture` gain the g4sim evaluator, bindings and map fields.
 - **Evidence** (`docs/dev/simulator-calibration/simcal-gates/phase-3.md`): every phase-3 gate item passes on the toy detector, the synthetic ZDC fixture and Geant4 products of the ZDC fixture and the AMS-02 RICH replica (`synthetic`, `provisional-thresholds`).
 
+Simulator parameter calibration workflow, phase 4 (dependency graph and specialization). Part of the same minor release.
+
+- **`core/calibration/`**: `deps` — section 10.3 upstream invalidation (a revised or downgraded upstream marks its downstreams for a redo; a same-kappa re-judgment does not), the redo on a change of simulation identity, and the T2 carry-over (approvals A21, A24: the shift propagated through the result's design-stage A_theta, TOST per theta at 0.1 sigma_tot, a pre-registered power condition, the basis bound to the result's hash; flag `identity-carried-over`, provisional thresholds); forced joint fits reported, no versions for xi. `propagate.export_g4sim` — a result exported as a g4sim `condition-snapshot/1` or `alignment-overlay/1` with its hash, grade, flags and stated use in `source_of_facts` (a use the result does not allow is refused); `use.check_export`. `contrib` — the section 10.5 contribution decomposition (Shapley terms through `effects_off`, every evaluated subset at G4's ESS threshold or no output, bootstrap covariances). `chain`: the run card's PAI, XTR, optical and decay fields are discrete model choices, never theta.
+- **Geant4 adapter** `g4sim_calib_eval.py`: `effects_off`; the light yield by analytic reweighting in the Poisson interval (section 11.4 Table 2); P0's reference re-digitizes it.
+- **Scripts**: `calib_contrib.py` (new); `calib_deps.py invalidate`, `identity`; `calib_propagate.py g4sim`; `calib_use.py export`.
+- **hep-detector**: eight specialization pages in `references/simulation-calibration/` (ECAL, HCAL, RICH, DIRC, TRD, Tracker, TOF, muon detector) with node-binding examples in `assets/simulation-calibration/`; **hep-review**: the calibration domain card (`references/domains/detector.md`).
+- **Evidence** (`docs/dev/simulator-calibration/simcal-gates/phase-4.md`): every phase-4 gate item passes (`synthetic` fixtures; the T2 margin `provisional-thresholds`).
+
 ## 0.66.1 (2026-11-12)
 
 Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.1 and `adapters/geant4` 0.15.0 unchanged. Ships PRs #391 and #392 (issues #388 and #389): a new hep-detector reference on DIS kinematic reconstruction, `experiment:eic` 0.6.1, and two EIC routing cases that now expect the profile.
