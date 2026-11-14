@@ -499,6 +499,7 @@
   "tests.skills.test_calib_scripts": 16.4,
   "tests.core.test_calibration_toy": 2.5,
   "tests.core.test_calibration_reweight": 3.3,
+  "tests.core.test_calibration_learned": 25.0,
   "tests.core.test_calibration_linear": 2.6,
   "tests.core.test_calibration_design": 5.5,
   "tests.core.test_calibration_emulator": 32.0,

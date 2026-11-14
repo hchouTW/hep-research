@@ -380,6 +380,24 @@ class Phase1Scripts(unittest.TestCase):
                       self.put("t4.json", {"mu": "abc"}))
         self.assertEqual((rc, out["status"]), (2, "rejected"))                       # review F10
 
+    def test_calib_reweight_g4l(self):
+        """Phase 5: G4-L through the CLI on the post-hoc fixture (passed), without a learned ratio (not-applicable),
+        without cross-fitting (rejected) and with an SBI target (rejected)."""
+        fx = json.loads((FIXTURE_DIR / "toy_posthoc.json").read_text())
+        fx["plan"]["evaluator"]["spec"]["runs"][0]["n"] = 8000
+        rc, out = run("calib_reweight.py", "g4l", "--contract", self.put("fx.json", fx), timeout=300)
+        self.assertEqual((rc, out["status"], out["M"]), (0, "passed", 3))
+        c, p = self.chain(H.gaussian_chain())
+        rc, out = run("calib_reweight.py", "g4l", "--contract", c, "--plan", p)
+        self.assertEqual((rc, out["status"]), (0, "not-applicable"))
+        fx["plan"]["evaluator"]["learned"]["folds"] = 1
+        rc, out = run("calib_reweight.py", "g4l", "--contract", self.put("f1.json", fx), timeout=300)
+        self.assertEqual((rc, out["status"], out["finding"]), (2, "rejected", "g4l.no_cross_fitting"))
+        fx["plan"]["evaluator"]["learned"].update(folds=5, target="posterior")
+        rc, out = run("calib_reweight.py", "g4l", "--contract", self.put("f2.json", fx))
+        self.assertEqual(rc, 2)
+        self.assertIn("learned.sbi_refused", out["error"])
+
     def test_calib_emulator(self):
         """Phase 3: the ask/tell state file through the CLI, training, the surrogate domain, P6 on the toy detector
         and on arrays, and the G8 spot check's bookkeeping (not-decided)."""
