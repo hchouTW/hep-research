@@ -16,6 +16,7 @@ PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "design-space-spectrometer" / "run.py"
 sys.path.insert(0, str(PLUGIN))
 from contracts.design import derive  # noqa: E402
+from tests._platform import RECORDING_ERFC_REASON, recording_erfc  # noqa: E402
 
 
 class DesignSpaceSpectrometer(unittest.TestCase):
@@ -39,7 +40,11 @@ class DesignSpaceSpectrometer(unittest.TestCase):
         self.assertEqual(self.code, 0, self.r["pass"])
         self.assertTrue(all(self.r["pass"].values()), self.r["pass"])
 
+    @unittest.skipUnless(recording_erfc(), RECORDING_ERFC_REASON)
     def test_reproduces_committed_output(self):
+        """Byte for byte: the charge confusion is 0.5 erfc(z / sqrt 2) (charge_confusion_rate.py gaussian-core), whose last bit
+        is the C library's. On ubuntu-26.04 cand-L's is one ulp above the committed 6.4394109427811344e-06 (main's full runs from
+        PR #405 on). Every other test here runs on any C library."""
         committed = (SCRIPT.parent / "output" / "results.json").read_bytes()
         self.assertEqual((self.out / "results.json").read_bytes(), committed)
 
