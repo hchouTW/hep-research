@@ -7,8 +7,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## 0.68.0 (2026-11-15)
 
-Minor release; contracts 3.28.0 (the reconstruction sidecars of task T06, with T14 and T15a), `CORE_VERSION` 1.14.0 unchanged (nothing under `core/` changed). Ships detector reconstruction plan v9.2 (PR #411): the new adapters `acts-tracking` 0.3.0, `calo-cluster` 0.2.0, `photon-likelihood` 0.3.0, `timing-pid` 0.2.0 and `destriper` 0.2.0, all `demonstrated-on-synthetic-data`; a behaviour change of the shared runner (`run_workflow.py` steps with `native_inputs`, below); the `evals/reconstruction-holdout/` harness; and the upload package fix that restores the upload route (issue #409); with the CI speed-ups of PR #412. No tracking, vertexing, timing, PID or map-making quality is claimed.
+Minor release; contracts 3.28.0 (the reconstruction sidecars of task T06, with T14 and T15a), `CORE_VERSION` 1.14.0 unchanged (nothing under `core/` changed). Ships detector reconstruction plan v9.2 (PR #411): the new adapters `acts-tracking` 0.3.0, `calo-cluster` 0.2.0, `photon-likelihood` 0.3.0, `timing-pid` 0.2.0 and `destriper` 0.2.0, and `adapters/geant4` 0.17.0, all `demonstrated-on-synthetic-data`; a behaviour change of the shared runner (`run_workflow.py` steps with `native_inputs`, below); the `evals/reconstruction-holdout/` harness; and the upload package fix that restores the upload route (issue #409); with the CI speed-ups of PR #412 and the full-run CI fixes of PR #413 (ubuntu-26.04 `erfc` rounding, timeouts, `adapters/geant4` 0.17.0). No tracking, vertexing, timing, PID or map-making quality is claimed.
 
+- `adapters/geant4` 0.17.0 (from 0.16.0): `geant4_run.py scan` declares each step's executable and build record as
+  `native_inputs` (T12 stage 2, PR #411, below), so `run_workflow.py` hashes them before every skip and a scan reruns
+  when the binary changes. The version bump PR #411 left out (`docs/adapter-authoring.md`, "Changing an adapter").
 - CI: faster runs with the same coverage (every command, module and check still runs; estimates from the PR #411
   run, to be confirmed on GitHub). The `hostile-paths (checks)` leg, the critical path at 21.8 min, is split into
   three parallel legs: packaging scan with the pull-request subset, relocated `--part static`, relocated

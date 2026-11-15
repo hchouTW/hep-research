@@ -30,6 +30,7 @@ from pathlib import Path
 
 import numpy
 
+from tests._platform import RECORDING_ERFC_REASON, recording_erfc
 from tests.adapters import test_photon_likelihood as stage1
 from tests.adapters import test_photon_likelihood_time as stage2
 from tests.adapters import test_photon_likelihood_multistart as stage3
@@ -869,10 +870,15 @@ class TwoSourceHarness(unittest.TestCase):
         ("timed", "dead"): ("9108ff60cf01611037cba752f8615339ed0375b37e2a4843fb07188f0b6b4413", "177382c40fe41ff7ec0c51e51a6b1c842191de67740d75d6a42a58392e37aead"),
         ("timed", "saturation"): ("a9fcf64b4bd04a151fd3df644ce4d46322b3c4cf8989cee17a218ce06848f114", "14eef0581dd3f8980ba4ee91521f14cacf0c147c4596fc50f56a27797413ef19")}
 
-    @unittest.skipUnless(platform.system() == "Linux" and platform.libc_ver()[0] == "glibc",
-                         "the pins are the bytes of values from Python's math module (the C library's exp, cos, sqrt), pinned on Linux "
-                         "with glibc; macOS's libm rounds some of them otherwise (macOS CI run of PR #411)")
+    @unittest.skipUnless(platform.system() == "Linux" and platform.libc_ver()[0] == "glibc" and recording_erfc(),
+                         "the pins are the bytes of values from Python's math module (the C library's erfc, exp, cos, sqrt), pinned on "
+                         "Linux with glibc 2.34 (job 7655492; ubuntu-24.04's 2.39 agrees); macOS's libm and ubuntu-26.04's correctly "
+                         "rounded erfc round some of them otherwise (macOS CI run of PR #411; main's full runs at cd41d5f7 and f6f8f8b6). "
+                         + RECORDING_ERFC_REASON)
     def test_main_dead_and_saturation_outputs_are_unchanged(self):
+        """The timed generator's median first arrivals are bisections on erfc (test_photon_likelihood_time.py): with mpmath's
+        correctly rounded erfc in place of the C library's, the three timed pins become exactly the ubuntu-26.04 values, and
+        NumPy's CPU dispatch (X86_V3/X86_V4 disabled) and OpenBLAS's core type (Haswell, Prescott) leave all six unchanged."""
         for (name, fixture), want in self.PINNED.items():
             gen = stage1.HandMadeGenerator() if name == "stage1" else stage3.TimedGenerator()
             with self.subTest(generator=name, fixture=fixture), tempfile.TemporaryDirectory() as folder:
