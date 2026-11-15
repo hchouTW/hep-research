@@ -9913,3 +9913,29 @@ that bundle holds 4028 files, against 5010 for 0.67.0. A git checkout of the tag
 tests too, so its tree digest is not the release digest. The check reads the export, not a checkout.
 
 Passing checks show software consistency, not physical validity.
+
+## 0.69.0 release check (2026-11-15, CI and NSTCCore Slurm, partition edr1/edr2-al9_short_serial)
+
+Release commit `f5f6cbd6` on `release/0.69.0`, based on main `85b93f31` (PR #416 merged). Minor release:
+- simulator parameter calibration phase 5 (PR #416): `core/calibration/` `pooling`, `learned` and `vmodel_infer`, the scripts `calib_fit.py pool`, `calib_reweight.py g4l` and `calib_likelihood.py vmodel-infer`; every result synthetic, G4-L `provisional-thresholds`. Evidence: `docs/dev/simulator-calibration/simcal-gates/phase-5.md` (gate run 3 at `20b31a1b`; gate items 1, 2 and 4 confirmed again after merging 0.68.0, at `3754681d`);
+- `adapters/geant4` 0.17.0 -> 0.17.1 (PR #416): `build` and `build-sim` judge their inputs before checking for cmake; `test_geant4` and `test_geant4_register` 81 run, OK (7 skipped, live Geant4), on the login host and, through CI's hostile-paths job run on Slurm (`campaigns/p5-ci-local-2`, array 7658875), on nodes without cmake;
+- the statistics CLI fuzz in three modules and two `vmodel_infer` tests in the slow tier (PR #416; both modules had timed out at 600 s on GitHub's runners);
+- the AMS-optionality CI rerun in two shards (PR #415).
+
+What changed on the release branch:
+- version 0.69.0 in the same 14 files as 0.68.0;
+- `CORE_VERSION` 1.15.0 (from 1.14.0; `core/calibration/` gained three modules); contracts 3.28.0 unchanged;
+- a CHANGELOG `0.69.0` section, made from the former `Unreleased` entries; simcal phase 5 status `merged`.
+
+No regeneration: committed outputs keep the versions that wrote them, and the release changes no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` and `platforms.yml` on PR #416 at `6a4f3509` | success (38 pass, 3 skipped) |
+| CI on the release PR (#417) | recorded in the PR |
+| Slurm job 7660366 at `f5f6cbd6`, hpa-wn34 (AMD EPYC 9645, 24 CPUs; env/py313: Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1; cmake 3.28.6 from the site module), from a local clone checked out at the commit (6088 tracked files): `run_all_checks.py --jobs 12` | 34 pass, 0 fail; 10719 tests, 0 failures, 570 skipped, 1032 s |
+| the same job, `check_relocation.py --jobs 12` alongside (copy in a path with spaces, outside the repository) | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed) |
+
+The first job at the same commit, 7660144 (hpa-wn19), failed one test, `tests.adapters.test_t04_evaluation_tasks.TimedOutIsIncomplete.test_a_script_past_the_deadline_is_stopped_and_incomplete`: its script has a 1 s deadline and, with 24 test workers on the node, was stopped before it printed `started`. The relocation run in the same job passed it; on the login host it passes five times of five and its module passes; job 7660366 passed it. It is a timing margin in that test, not a change of this release (the test and the code it runs are unchanged since 0.68.0). Most skips are tests that need optional packages; the CI optional legs run those. **E2, E5 and E6 were not rerun for this release.**
+
+Passing checks show software consistency, not physical validity.
