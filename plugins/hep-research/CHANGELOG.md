@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+## 0.69.0 (2026-11-15)
+
+Minor release; contracts 3.28.0 unchanged, `CORE_VERSION` 1.15.0 (from 1.14.0: `core/calibration/` gains `pooling`, `learned` and `vmodel_infer`). Ships phase 5 of the simulator parameter calibration workflow (PR #416): partial pooling, the learned density ratio with G4-L (`provisional-thresholds`), and the inferred V_model, every result synthetic; `adapters/geant4` 0.17.1; the AMS-optionality CI rerun in two shards (PR #415); and the statistics CLI fuzz split into three modules.
+
 - **Geant4 adapter: input refusals no longer depend on cmake** (`adapters/geant4` 0.17.1, from 0.17.0). `geant4_examples.py build` and `geant4_run.py build-sim` judge the build record, the installation and the example source before checking for cmake on PATH, so a refused input (exit 2, or a missing `geant4-config` / CMake configuration, exit 3) is reported the same on a host without cmake; before, such a host got "cmake not found on PATH" first. `test_geant4_register`: the example-source test passes on a host without cmake, and the `build-sim` refusal test runs there instead of skipping. Found by running CI's hostile-paths job on compute nodes without cmake.
 - **hep-ml: learned density ratios for reweighting stored MC** (documentation; simulator calibration phase 5, WP-T). New reference `skills/hep-ml/references/learned-density-ratio-reweighting.md`: the likelihood-ratio trick for one post-hoc correction node, cross-fitting, probability calibration and the prior-ratio correction, the effective sample size of the weights, and the boundary of approval A25 (a learned ratio only reweights stored MC; SBI is not a method of the calibration workflow). Linked from `ml-analysis.md`, `sbi-training.md` and `ml-analysis-weights.md`.
 - **Tests: the statistics CLI input fuzz in three modules.** `tests/skills/hep_statistics/test_cli_input_fuzz.py` keeps
