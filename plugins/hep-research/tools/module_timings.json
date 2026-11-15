@@ -1,5 +1,5 @@
 {
- "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. tests.contracts.test_t12_runtime timed out (600 s) in the PR #411 run (it is not on main there), before its whole-run test moved to the slow tier and its E34 negatives reused the class fixture's codes: it carries one local run (login node, Python 3.13, 163 s) until the next CI refresh.",
+ "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. tests.contracts.test_t12_runtime timed out (600 s) in the PR #411 run (it is not on main there), before its whole-run test moved to the slow tier and its E34 negatives reused the class fixture's codes: it carries one local run (login node, Python 3.13, 163 s) until the next CI refresh. PR #416 split tests.skills.hep_statistics.test_cli_input_fuzz (the calib_*.py scripts into _calib_a and _calib_b) and moved two tests of tests.core.test_calibration_vmodel_infer to the slow tier after both timed out (600 s) there: their four entries are estimates (about twice the local seconds, login node: 97, 90, 81 and about 50 s) until the next CI refresh.",
  "source": "median of the passing runs of each module in the checks units shards of GitHub Actions runs 43645622814 (PR #411, merge commit 666a7f93) and 43584205117 (main, c7e5a610), ubuntu-24.04, --jobs 4, Python 3.13 (1-2 samples per module: modules new in PR #411 have one); refreshed 2026-11-14",
  "seconds": {
   "tests.adapters.test_acts_cai_refit": 1.1,
@@ -254,7 +254,7 @@
   "tests.core.test_calibration_toy_problem": 72.2,
   "tests.core.test_calibration_use": 239.3,
   "tests.core.test_calibration_validate": 66.0,
-  "tests.core.test_calibration_vmodel_infer": 135.0,
+  "tests.core.test_calibration_vmodel_infer": 100.0,
   "tests.core.test_canonical": 0.2,
   "tests.core.test_constant_literals": 13.6,
   "tests.core.test_constants": 0.2,
@@ -544,7 +544,9 @@
   "tests.skills.hep_statistics.test_bayes_diagnostics": 2.0,
   "tests.skills.hep_statistics.test_build_covariance": 3.7,
   "tests.skills.hep_statistics.test_cap_override_s7": 10.2,
-  "tests.skills.hep_statistics.test_cli_input_fuzz": 443.5,
+  "tests.skills.hep_statistics.test_cli_input_fuzz": 200.0,
+  "tests.skills.hep_statistics.test_cli_input_fuzz_calib_a": 190.0,
+  "tests.skills.hep_statistics.test_cli_input_fuzz_calib_b": 170.0,
   "tests.skills.hep_statistics.test_combine_asymmetric": 4.5,
   "tests.skills.hep_statistics.test_combine_measurements": 0.9,
   "tests.skills.hep_statistics.test_core_stats_guide": 16.8,

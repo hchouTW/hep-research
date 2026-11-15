@@ -5,7 +5,9 @@ with fields is expected, NaN inside the input, negative counts, a confidence lev
 bins and empty arrays. Each must be refused with exit 2 (the validators may also answer 1, their 'errors' verdict)
 and a JSON message on stdout, never a traceback. A second test runs `--help` with NumPy and SciPy hidden: every
 script must still print its help. Kept separate from tests/skills/test_cli_robustness.py (missing files, owned by the
-hep-computing plan). All inputs SYNTHETIC."""
+hep-computing plan). The simulator-calibration scripts (`calib_*.py`) are fuzzed by the same tests in
+`test_cli_input_fuzz_calib_a.py` and `test_cli_input_fuzz_calib_b.py` (each half of them), so that each module stays
+within the 600 s module limit on CI runners. All inputs SYNTHETIC."""
 import json
 import re
 import subprocess
@@ -17,6 +19,8 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 CORE = sorted(p for p in (PLUGIN / "core" / "stats").glob("*.py") if not p.name.startswith("_") and p.name != "__init__.py")
 SCRIPTS = sorted((PLUGIN / "skills" / "hep-statistics" / "scripts").glob("*.py"))
+CALIB = [p for p in SCRIPTS if p.name.startswith("calib_")]  # fuzzed in test_cli_input_fuzz_calib_a.py and _b.py
+CALIB_A, CALIB_B = CALIB[: len(CALIB) // 2], CALIB[len(CALIB) // 2:]
 HIDE = ("import runpy, sys; sys.modules['numpy'] = None; sys.modules['scipy'] = None; "
         "sys.argv = sys.argv[1:]; runpy.run_path(sys.argv[0], run_name='__main__')")
 VALIDATORS = {"validate_covariance.py", "validate_response.py"}
@@ -79,7 +83,10 @@ def base_args(script, sub, required, methods, input_path):
     return args
 
 
-class CliInputFuzz(unittest.TestCase):
+class FuzzCases:
+    """The fuzz tests over `TARGETS`; mixed into a TestCase by this module and by test_cli_input_fuzz_calib.py."""
+    TARGETS: list = []
+
     def check(self, cp, label, allow_one=False):
         self.assertNotIn("Traceback", cp.stderr, (label, cp.stderr[-1500:]))
         ok_codes = (1, 2) if allow_one else (2,)
@@ -105,7 +112,7 @@ class CliInputFuzz(unittest.TestCase):
                 p = Path(td) / f"{k}.json"
                 p.write_text(json.dumps(d))
                 paths[k] = str(p)
-            for script in CORE + SCRIPTS:
+            for script in self.TARGETS:
                 if script.name in NO_CLI:
                     continue
                 for sub in subcommands(script):
@@ -126,7 +133,7 @@ class CliInputFuzz(unittest.TestCase):
             self.skipTest("NumPy and SciPy needed")
         mutations = {"--cl": ["1.5", "0", "nan"], "--n": ["-1"], "--b": ["-2", "nan"], "--bins": ["0"], "--y": ["0"],
                      "--toys": ["-5"], "--width": ["0"]}
-        for script in CORE + SCRIPTS:
+        for script in self.TARGETS:
             if script.name in NO_CLI or script.name in VALIDATORS:
                 continue
             for sub in subcommands(script):
@@ -150,6 +157,28 @@ class CliInputFuzz(unittest.TestCase):
                                 json.loads(cp.stdout)
                             else:
                                 self.check(cp, f"{script.name} {sub} {opt}={v}")
+
+    def test_help_without_numpy(self):
+        for script in self.TARGETS:
+            if script.name in NO_CLI:
+                continue
+            with self.subTest(script.name):
+                cp = run([script, "--help"], hide=True)
+                self.assertEqual(cp.returncode, 0, (script.name, cp.stdout[-300:], cp.stderr[-600:]))
+                self.assertTrue(cp.stdout.strip(), script.name)
+
+
+class CliInputFuzz(FuzzCases, unittest.TestCase):
+    TARGETS = CORE + [p for p in SCRIPTS if p not in CALIB]
+
+    def test_targets_cover_every_script_with_the_calib_modules(self):
+        """The three modules together fuzz every core/stats module and every hep-statistics script, each once."""
+        from tests.skills.hep_statistics.test_cli_input_fuzz_calib_a import CalibCliInputFuzzA
+        from tests.skills.hep_statistics.test_cli_input_fuzz_calib_b import CalibCliInputFuzzB
+        every = self.TARGETS + CalibCliInputFuzzA.TARGETS + CalibCliInputFuzzB.TARGETS
+        self.assertEqual(sorted(every), sorted(CORE + SCRIPTS))
+        self.assertEqual(len(every), len(set(every)))
+        self.assertTrue(CalibCliInputFuzzA.TARGETS and CalibCliInputFuzzB.TARGETS)
 
     def test_confirmed_audit_crashes(self):
         """The crashes the audit confirmed: pcl ratio --y 0 (ZeroDivisionError), sbc --bins 0 (modulo by zero),
@@ -175,15 +204,6 @@ class CliInputFuzz(unittest.TestCase):
             self.check(run([sc / "result_artifact.py", "--cli-output", lst, "--poi", "mu", "--construction", "asymptotic",
                             "--test-statistic", "q_mu", "--label", "observed", "--artifact-id", "x",
                             "--out", Path(td) / "o.json"]), "result_artifact list")
-
-    def test_help_without_numpy(self):
-        for script in CORE + SCRIPTS:
-            if script.name in NO_CLI:
-                continue
-            with self.subTest(script.name):
-                cp = run([script, "--help"], hide=True)
-                self.assertEqual(cp.returncode, 0, (script.name, cp.stdout[-300:], cp.stderr[-600:]))
-                self.assertTrue(cp.stdout.strip(), script.name)
 
 
 if __name__ == "__main__":

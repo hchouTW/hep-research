@@ -7,6 +7,11 @@ Software checks establish contract consistency only, not physical validity.
 
 - **Geant4 adapter: input refusals no longer depend on cmake** (`adapters/geant4` 0.17.1, from 0.17.0). `geant4_examples.py build` and `geant4_run.py build-sim` judge the build record, the installation and the example source before checking for cmake on PATH, so a refused input (exit 2, or a missing `geant4-config` / CMake configuration, exit 3) is reported the same on a host without cmake; before, such a host got "cmake not found on PATH" first. `test_geant4_register`: the example-source test passes on a host without cmake, and the `build-sim` refusal test runs there instead of skipping. Found by running CI's hostile-paths job on compute nodes without cmake.
 - **hep-ml: learned density ratios for reweighting stored MC** (documentation; simulator calibration phase 5, WP-T). New reference `skills/hep-ml/references/learned-density-ratio-reweighting.md`: the likelihood-ratio trick for one post-hoc correction node, cross-fitting, probability calibration and the prior-ratio correction, the effective sample size of the weights, and the boundary of approval A25 (a learned ratio only reweights stored MC; SBI is not a method of the calibration workflow). Linked from `ml-analysis.md`, `sbi-training.md` and `ml-analysis-weights.md`.
+- **Tests: the statistics CLI input fuzz in three modules.** `tests/skills/hep_statistics/test_cli_input_fuzz.py` keeps
+  `core/stats` and the non-calibration scripts; the `calib_*.py` scripts move to `test_cli_input_fuzz_calib_a.py` and
+  `_b.py` (the same tests through a shared mixin; a test checks the three together cover every script once), and two
+  tests of `tests/core/test_calibration_vmodel_infer.py` (neither gate-listed) move to the slow tier. Both modules timed
+  out at 600 s on GitHub's runners in PR #416 once the phase-5 subcommands were added.
 - CI: the AMS-optionality rerun runs as two parallel shards, with the same coverage. `tools/check_ams_optional.py
   --shard K/N` splits its test modules with the units' shard planner (slowest first by `tools/module_timings.json`,
   deterministic) and runs its fixed steps (registry, Paths B and C, the two profile suites, a few seconds) in every

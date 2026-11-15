@@ -9,6 +9,7 @@ import copy
 import io
 import json
 import math
+import os
 import subprocess
 import sys
 import tempfile
@@ -28,6 +29,9 @@ import calibration_phase5_vmodel_s3 as X  # noqa: E402
 from core.calibration import contract as cc  # noqa: E402
 from core.calibration import linear  # noqa: E402
 from core.calibration import vmodel_infer as VI  # noqa: E402
+
+# slow tier (docs/maintenance.md): about 50 s and 30 s here, several times that on CI runners; neither is a gate-listed test
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
 
 SCRIPT = ROOT / "skills" / "hep-statistics" / "scripts" / "calib_likelihood.py"
 CFG = {"sigma": 0.01, "components": [{"n": 40, "f": 0.05, "length": 0.06, "f_scale": 0.1,
@@ -301,6 +305,7 @@ class Intervals(unittest.TestCase):
                                        VI.kernel_block(comp["z"], math.exp(x[2 * k]), math.exp(x[2 * k + 1])),
                                        atol=1e-15)
 
+    @unittest.skipUnless(SLOW, "slow (about 50 s; a weakly identified component over many draws): set HEP_SLOW_TESTS=1")
     def test_weak_component_laplace_undercovers_quantile_interval_covers(self):
         """The S3 failure, reproduced on its weakly determined component alone (n 25, f 0.02 with sigma 0.01,
         ell 0.15, bounds [0.02, 2]; 32 fixed draws). Negative (caught): WP-S's prior with the Laplace sd at the mode
@@ -366,6 +371,7 @@ class StudyS3(unittest.TestCase):
             seen.setdefault(name, set()).update(range(kw["r0"], kw["r0"] + kw["reps"]))
         self.assertEqual(seen, {k: set(range(X.REPS)) for k in X.CONFIGS})
 
+    @unittest.skipUnless(SLOW, "slow (about 30 s; the S3 driver's local configuration): set HEP_SLOW_TESTS=1")
     def test_local_smoke(self):
         with tempfile.TemporaryDirectory() as d:
             out = Path(d) / "s3.json"
