@@ -9938,4 +9938,8 @@ No regeneration: committed outputs keep the versions that wrote them, and the re
 
 The first job at the same commit, 7660144 (hpa-wn19), failed one test, `tests.adapters.test_t04_evaluation_tasks.TimedOutIsIncomplete.test_a_script_past_the_deadline_is_stopped_and_incomplete`: its script has a 1 s deadline and, with 24 test workers on the node, was stopped before it printed `started`. The relocation run in the same job passed it; on the login host it passes five times of five and its module passes; job 7660366 passed it. It is a timing margin in that test, not a change of this release (the test and the code it runs are unchanged since 0.68.0). Most skips are tests that need optional packages; the CI optional legs run those. **E2, E5 and E6 were not rerun for this release.**
 
+Release manifest: `release-manifests/0.69.0.json` is generated from a `git archive HEAD:plugins/hep-research` export of the
+release branch, the bundle `release_manifest.py check-published` compares with each tag, after this section, and verified
+on that export (`verify`: identical). The bundle holds about 4,030 files (`tests/` is `export-ignore`).
+
 Passing checks show software consistency, not physical validity.
