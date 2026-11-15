@@ -11,7 +11,16 @@ ams_optional_modules run, as the units shards run only the plan's modules; a sui
 skipped. The registry validator, Path B and Path C and the two profile suites (a few seconds) always run. The output
 names the modules that ran (modules_run), which the gate compares with the plan.
 
-Usage: python3 tools/check_ams_optional.py [--keep] [--jobs N] [--plan FILE]
+With --shard K/N only shard K of N of those modules runs, split by the planner of the units shards (tools/run_all_checks.py
+shard_modules: slowest first by tools/module_timings.json, each module on the least loaded shard; deterministic), so CI
+can run the rerun on N runners. The output records the shard (shard: the shard, its modules, the pool they were split
+from with its SHA-256, and the timings digest), which tools/reconcile_check_runs.py --ams-optional-shards N checks
+across shards: every module in exactly one shard. A suite with no module in this shard is reported as skipped. The fixed
+steps (the AMS-02 profile absent, the registry validator, Path B and Path C, the two profile suites; a few seconds) run
+in every shard, so each shard's copy is checked on its own and every shard reports the same check names. Without
+--shard the whole rerun runs, as before.
+
+Usage: python3 tools/check_ams_optional.py [--keep] [--jobs N] [--plan FILE] [--shard K/N]
 """
 from __future__ import annotations
 
@@ -81,11 +90,43 @@ def load_selection(path: Path) -> tuple[dict, list[str]]:
     return plan, list(plan["ams_optional_modules"])
 
 
-def merge_suite(name: str, rows: list[dict], selected: bool = True) -> dict:
+def _runner():
+    """tools/run_all_checks.py, for the shard planner the units shards use."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("run_all_checks", ROOT / "tools" / "run_all_checks.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def parse_shard(text: str) -> tuple[int, int]:
+    """K/N with 1 <= K <= N; ValueError otherwise."""
+    k, n = (int(x) for x in text.split("/"))
+    if not 1 <= k <= n:
+        raise ValueError(f"need 1 <= K <= N, got {text}")
+    return k, n
+
+
+def shard_plan(pool: list[str], shard: tuple[int, int], timings: dict[str, float]) -> dict:
+    """Shard K of N of the modules in pool, by the units' planner (run_all_checks.shard_modules), with what the gate needs
+    to check that the shards partition pool: the pool and its digest, and the digest of the timings it was planned from."""
+    import hashlib
+    runner = _runner()
+    pool = sorted(set(pool))
+    return {"shard": f"{shard[0]}/{shard[1]}", "modules": sorted(runner.shard_modules(pool, *shard, timings)),
+            "all_modules": pool, "all_modules_sha256": runner.modules_digest(pool),
+            "timings_sha256": hashlib.sha256(json.dumps(timings, sort_keys=True).encode()).hexdigest()}
+
+
+def merge_suite(name: str, rows: list[dict], selected: bool = True, in_shard: bool = True, shard: str = "") -> dict:
     """One result per suite, as 'unittest discover' gave: fail when any of its modules failed (or it has none). A suite
-    the CI plan selects no module of is skipped (selected False)."""
+    the CI plan selects no module of is skipped (selected False), and so is one whose modules are all in other shards
+    (in_shard False)."""
     if not selected:
         return {"name": name, "exit_code": 0, "status": "skip", "modules": 0, "reason": "no module selected by the CI plan"}
+    if not in_shard:
+        return {"name": name, "exit_code": 0, "status": "skip", "modules": 0,
+                "reason": f"no module of this suite in shard {shard}"}
     bad = [r for r in rows if r["status"] != "pass"]
     return {"name": name, "exit_code": max((r["exit_code"] or 1 for r in bad), default=0),
             "status": "fail" if bad or not rows else "pass", "modules": len(rows),
@@ -109,6 +150,14 @@ def main(argv=None) -> int:
             plan, chosen = load_selection(Path(args[i + 1]))
         except (IndexError, OSError, ValueError, KeyError) as exc:
             print(f"--plan wants a CI plan file: {exc}", file=sys.stderr)
+            return 2
+    shard = None
+    if "--shard" in args:
+        i = args.index("--shard")
+        try:
+            shard = parse_shard(args[i + 1])
+        except (IndexError, ValueError) as exc:
+            print(f"--shard wants K/N with 1 <= K <= N: {exc}", file=sys.stderr)
             return 2
     tmp = Path(tempfile.mkdtemp(prefix="hep research no ams "))  # a path with spaces on purpose
     dst = tmp / "hep-research"
@@ -134,6 +183,12 @@ def main(argv=None) -> int:
     suites = suite_table(dst)
     if chosen is not None:
         suites = {suite: [m for m in modules if m in set(chosen)] for suite, modules in suites.items()}
+    planned = suites  # before sharding: what all shards together run
+    split = None
+    if shard:
+        split = shard_plan([m for mods in suites.values() for m in mods], shard, _runner().load_timings())
+        mine = set(split["modules"])
+        suites = {suite: [m for m in modules if m in mine] for suite, modules in suites.items()}
     for suite, modules in suites.items():
         tasks += [(m, suite, [py, "-m", "unittest", m], dst) for m in modules]
     for prof in ("experiments/synthetic-collider", "theory/qed-benchmark"):
@@ -149,12 +204,16 @@ def main(argv=None) -> int:
     checks = [{"name": "ams_profile_absent", "status": "pass" if not (dst / "profiles" / "experiments" / "ams-02").exists()
                and AMS not in (dst / "profiles" / "registry.json").read_text() else "fail"}]
     checks += [r for t, r in zip(tasks, rows) if t[1] is None]
-    checks += [merge_suite(suite, [r for t, r in zip(tasks, rows) if t[1] == suite], chosen is None or bool(suites[suite]))
+    checks += [merge_suite(suite, [r for t, r in zip(tasks, rows) if t[1] == suite], chosen is None or bool(planned[suite]),
+                           not split or bool(suites[suite]) or not planned[suite], split["shard"] if split else "")
                for suite in suites]
     ok = all(c["status"] in ("pass", "skip") for c in checks)
     selection = {"plan_sha256": plan["plan_sha256"], "full": plan["full"]} if plan else None
-    print(json.dumps({"ok": ok, "copy": str(dst), "selection": selection,
-                      "modules_run": sorted(t[0] for t in tasks if t[1] is not None), "checks": checks}, indent=1))
+    report = {"ok": ok, "copy": str(dst), "selection": selection,
+              "modules_run": sorted(t[0] for t in tasks if t[1] is not None), "checks": checks}
+    if split:
+        report["shard"] = split
+    print(json.dumps(report, indent=1))
     if "--keep" not in args:
         shutil.rmtree(tmp, ignore_errors=True)
     return 0 if ok else 1

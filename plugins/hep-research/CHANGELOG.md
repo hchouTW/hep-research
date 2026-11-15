@@ -7,6 +7,16 @@ Software checks establish contract consistency only, not physical validity.
 
 - **Geant4 adapter: input refusals no longer depend on cmake** (`adapters/geant4` 0.17.1, from 0.17.0). `geant4_examples.py build` and `geant4_run.py build-sim` judge the build record, the installation and the example source before checking for cmake on PATH, so a refused input (exit 2, or a missing `geant4-config` / CMake configuration, exit 3) is reported the same on a host without cmake; before, such a host got "cmake not found on PATH" first. `test_geant4_register`: the example-source test passes on a host without cmake, and the `build-sim` refusal test runs there instead of skipping. Found by running CI's hostile-paths job on compute nodes without cmake.
 - **hep-ml: learned density ratios for reweighting stored MC** (documentation; simulator calibration phase 5, WP-T). New reference `skills/hep-ml/references/learned-density-ratio-reweighting.md`: the likelihood-ratio trick for one post-hoc correction node, cross-fitting, probability calibration and the prior-ratio correction, the effective sample size of the weights, and the boundary of approval A25 (a learned ratio only reweights stored MC; SBI is not a method of the calibration workflow). Linked from `ml-analysis.md`, `sbi-training.md` and `ml-analysis-weights.md`.
+- CI: the AMS-optionality rerun runs as two parallel shards, with the same coverage. `tools/check_ams_optional.py
+  --shard K/N` splits its test modules with the units' shard planner (slowest first by `tools/module_timings.json`,
+  deterministic) and runs its fixed steps (registry, Paths B and C, the two profile suites, a few seconds) in every
+  shard; `run_all_checks.py --part ams-optional --shard K/N` and `check_relocation.py` pass it on, and without `--shard`
+  nothing changes. The checks matrix's "AMS optional" leg and the hostile-paths "relocated AMS optional" leg each
+  become legs 1/2 and 2/2 (timeouts unchanged: 1800 s, 2400 s relocated). `checks-complete` runs
+  `reconcile_check_runs.py --ams-optional-shards 2`, which fails when a shard record is missing, a module is in no shard
+  or in two, the shards split different module lists or were planned from different timings, or a shard did not run
+  its planned modules; the unsharded record is still the default. Expected (an estimate, to be confirmed on GitHub): a
+  full-plan `tests` run's critical path from about 21 min to about 11-13 min.
 
 Simulator parameter calibration workflow, phase 5 (extensions). Part of the same minor release.
 
