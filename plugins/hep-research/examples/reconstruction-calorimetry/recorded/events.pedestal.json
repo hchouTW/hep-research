@@ -1,0 +1,16 @@
+{
+ "channels": 1600,
+ "derived_against": [],
+ "format": "calo-calibration-payload/1",
+ "operation": "subtract",
+ "origin": "nominal",
+ "producer": {
+  "kind": "external",
+  "source": "t08-grid/1 fixture constant: pedestal, kept as its own field (t04-values-v4.md section 4.2)"
+ },
+ "role": "conditions",
+ "round": null,
+ "step": "pedestal",
+ "unit": "adc",
+ "value": 0.0
+}

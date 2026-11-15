@@ -15,12 +15,12 @@
   },
   "hep-computing": {
    "references": 41,
-   "bytes": 403677,
+   "bytes": 404785,
    "uncited": 0
   },
   "hep-detector": {
    "references": 58,
-   "bytes": 844704,
+   "bytes": 844831,
    "uncited": 0
   },
   "hep-measurement": {
@@ -63,7 +63,7 @@
     "skills/hep-authoring/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/academic-papers-guide.md",
@@ -92,7 +92,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "0bac705e 2026-10-29"
+   "last_commit": "0bac705e5 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/artifact-packaging-for-release.md",
@@ -106,7 +106,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
@@ -133,7 +133,7 @@
     "hep-citations",
     "hep-measurement"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/citations-and-bibliography.md",
@@ -162,7 +162,7 @@
     "hep-citations",
     "hep-computing"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-authoring/references/code-review-report.md",
@@ -177,7 +177,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/code-to-methodology-synthesis.md",
@@ -190,7 +190,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/collaboration-results-lifecycle.md",
@@ -203,7 +203,7 @@
     "skills/hep-authoring/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/comment-and-reply-exchange.md",
@@ -218,7 +218,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/conflict-of-interest-and-ethics-statements.md",
@@ -230,7 +230,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagram-captions.md",
@@ -243,7 +243,7 @@
     "skills/hep-authoring/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagram-figure-style.md",
@@ -257,7 +257,7 @@
     "skills/hep-authoring/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagrams-computer-science.md",
@@ -270,7 +270,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagrams-hep.md",
@@ -283,7 +283,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/diagrams-statistics.md",
@@ -296,7 +296,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/equation-and-notation-auditing.md",
@@ -316,7 +316,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
@@ -330,7 +330,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/evidence-linked-writing.md",
@@ -349,7 +349,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/figures-and-tables.md",
@@ -373,7 +373,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/general-diagram-principles.md",
@@ -386,7 +386,7 @@
     "skills/hep-authoring/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/grant-and-fellowship-proposal-writing.md",
@@ -399,7 +399,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/graphviz-patterns.md",
@@ -412,7 +412,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/independent-review.md",
@@ -429,7 +429,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "9d16210f 2026-10-29"
+   "last_commit": "9d16210fc 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -451,7 +451,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-authoring/references/latex-venue-setup.md",
@@ -475,7 +475,7 @@
     "tests/skills/hep_authoring/test_venues_and_sources_com4.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4eae529b 2026-10-22"
+   "last_commit": "4eae529bb 2026-10-22"
   },
   {
    "path": "skills/hep-authoring/references/legends-panels-and-export.md",
@@ -488,7 +488,7 @@
     "skills/hep-authoring/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/logical-consistency-and-argument-uniformity.md",
@@ -507,7 +507,7 @@
     "hep-citations",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/manuscript-consistency-auditing.md",
@@ -524,7 +524,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/mermaid-patterns.md",
@@ -537,7 +537,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/multi-venue-reformatting.md",
@@ -549,7 +549,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/outreach-and-public-facing-summaries.md",
@@ -566,7 +566,7 @@
     "skills/hep-authoring/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/paper-genre-variants.md",
@@ -583,7 +583,7 @@
     "tests/skills/hep_authoring/test_paper_blueprints.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/paper-structure.md",
@@ -608,7 +608,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ffcdf17b 2026-10-29"
+   "last_commit": "ffcdf17b7 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
@@ -621,7 +621,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/physics-plots.md",
@@ -641,7 +641,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
@@ -654,7 +654,7 @@
     "skills/hep-authoring/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/plantuml-patterns.md",
@@ -666,7 +666,7 @@
     "skills/hep-authoring/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/poster-and-talk-design.md",
@@ -682,7 +682,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/preprint-to-journal-reconciliation.md",
@@ -696,7 +696,7 @@
     "skills/hep-authoring/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/preregistration-and-registered-reports.md",
@@ -708,7 +708,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/reproducibility-auditing.md",
@@ -731,7 +731,7 @@
     "hep-citations",
     "hep-computing"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/reviewer-style-assessment.md",
@@ -745,7 +745,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9d16210f 2026-10-29"
+   "last_commit": "9d16210fc 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/revision-impact-tracking.md",
@@ -771,7 +771,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c888be49 2026-10-29"
+   "last_commit": "c888be495 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/scientific-style.md",
@@ -801,7 +801,7 @@
     "hep-citations",
     "hep-statistics"
    ],
-   "last_commit": "5f4489ee 2026-10-29"
+   "last_commit": "5f4489eed 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/statistics-and-ml-papers.md",
@@ -824,7 +824,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/submission-and-peer-review.md",
@@ -847,7 +847,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5b94e1bf 2026-10-29"
+   "last_commit": "5b94e1bfc 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/supplementary-material-planning.md",
@@ -859,7 +859,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/thesis-by-publication-assembly.md",
@@ -872,7 +872,7 @@
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/tikz-patterns.md",
@@ -891,7 +891,7 @@
     "skills/hep-authoring/scripts/check_diagram_sources.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/citation-databases.md",
@@ -910,7 +910,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/citation-verification.md",
@@ -941,7 +941,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-citations/references/claim-evidence-mapping.md",
@@ -967,7 +967,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/interpreting-scientific-graphics.md",
@@ -987,7 +987,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-discovery-and-search.md",
@@ -1000,7 +1000,7 @@
     "skills/hep-citations/references/literature-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-guide.md",
@@ -1019,7 +1019,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-lookup-recipes.md",
@@ -1037,7 +1037,7 @@
     "tests/adapters/fixtures/literature_lookup/rate-limit/inspire-arxiv-2501.99999-429.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/literature-review.md",
@@ -1057,7 +1057,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -1082,7 +1082,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "3f4f9985 2026-10-21"
+   "last_commit": "3f4f99853 2026-10-21"
   },
   {
    "path": "skills/hep-citations/references/reading-papers.md",
@@ -1106,7 +1106,7 @@
     "hep-authoring",
     "hep-statistics"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-citations/references/systematic-review-screening.md",
@@ -1120,7 +1120,7 @@
     "skills/hep-citations/references/literature-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/acceptance-criteria.md",
@@ -1134,7 +1134,7 @@
     "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "351029c0b 2026-10-07"
   },
   {
    "path": "skills/hep-computing/references/agile-development-guide.md",
@@ -1155,7 +1155,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-computing/references/analysis-data-pipelines.md",
@@ -1179,24 +1179,25 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "5dbb8c4d 2026-10-26"
+   "last_commit": "5dbb8c4de 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 8025,
-   "lines": 94,
+   "bytes": 9133,
+   "lines": 104,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/preservation-checklist.md",
     "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
     "skills/hep-computing/scripts/run_workflow.py",
+    "tests/contracts/test_reconstruction_records.py",
     "tests/skills/hep_computing/test_workflow_c6.py",
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d3ee1c15 2026-11-01"
+   "last_commit": "d3ee1c153 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1210,7 +1211,7 @@
     "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "8eefac0f 2026-10-13"
+   "last_commit": "8eefac0ff 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
@@ -1238,7 +1239,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0aebec94 2026-10-29"
+   "last_commit": "0aebec946 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1251,7 +1252,7 @@
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6815df4b 2026-10-10"
+   "last_commit": "6815df4ba 2026-10-10"
   },
   {
    "path": "skills/hep-computing/references/batch-site-nstccore-slurm.md",
@@ -1263,7 +1264,7 @@
     "skills/hep-computing/references/batch-scheduling.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "746f13aa 2026-10-15"
+   "last_commit": "746f13aad 2026-10-15"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1280,7 +1281,7 @@
     "tests/contracts/test_naming_check.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "fe8f71ef 2026-10-13"
+   "last_commit": "fe8f71ef3 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/columnar-and-large-scale-data.md",
@@ -1295,7 +1296,7 @@
     "tests/skills/hep_computing/test_chunked_histogram_c5.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "63d31062 2026-10-17"
+   "last_commit": "63d310622 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
@@ -1312,7 +1313,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "8eefac0f 2026-10-13"
+   "last_commit": "8eefac0ff 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/crash-and-memory-debugging.md",
@@ -1331,7 +1332,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-computing/references/design-and-estimation.md",
@@ -1345,7 +1346,7 @@
     "tests/tools/test_example_authoring.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f4372374 2026-10-13"
+   "last_commit": "f43723746 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
@@ -1362,7 +1363,7 @@
     "skills/hep-computing/references/semantic-naming.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d3ee1c15 2026-11-01"
+   "last_commit": "d3ee1c153 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1382,7 +1383,7 @@
     "skills/hep-computing/references/sensor-and-gas-simulation-operations.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d3ee1c15 2026-11-01"
+   "last_commit": "d3ee1c153 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/event-display-checklist.md",
@@ -1396,7 +1397,7 @@
     "skills/hep-computing/references/event-displays.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bbb78c3b 2026-11-01"
+   "last_commit": "bbb78c3bc 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/event-display-facts.md",
@@ -1413,7 +1414,7 @@
     "skills/hep-computing/references/event-displays.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bbb78c3b 2026-11-01"
+   "last_commit": "bbb78c3bc 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/event-displays.md",
@@ -1428,7 +1429,7 @@
     "skills/hep-computing/references/event-display-checklist.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bbb78c3b 2026-11-01"
+   "last_commit": "bbb78c3bc 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/host-notes.md",
@@ -1441,7 +1442,7 @@
     "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "364918e6 2026-10-09"
+   "last_commit": "364918e68 2026-10-09"
   },
   {
    "path": "skills/hep-computing/references/implementation-discipline.md",
@@ -1455,7 +1456,7 @@
     "skills/hep-computing/scripts/validate_agile_notes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f4372374 2026-10-13"
+   "last_commit": "f43723746 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/loop-engineering.md",
@@ -1473,7 +1474,7 @@
     "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4665f433 2026-10-13"
+   "last_commit": "4665f4332 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/numerical-and-computational-methods.md",
@@ -1495,7 +1496,7 @@
     "hep-citations",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/performance-profiling.md",
@@ -1511,7 +1512,7 @@
     "skills/hep-computing/references/symbolic-and-numerical-computation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-computing/references/preservation-checklist.md",
@@ -1525,7 +1526,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c398d5e0 2026-10-29"
+   "last_commit": "c398d5e0c 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -1539,7 +1540,7 @@
     "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "351029c0b 2026-10-07"
   },
   {
    "path": "skills/hep-computing/references/python-balanced-design-guidelines.md",
@@ -1560,7 +1561,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "5dbb8c4d 2026-10-26"
+   "last_commit": "5dbb8c4de 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/python-hep-coding-patterns.md",
@@ -1581,7 +1582,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
@@ -1599,7 +1600,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "a6a9d27b 2026-10-31"
+   "last_commit": "a6a9d27b1 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1613,7 +1614,7 @@
     "skills/hep-computing/references/software-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f4372374 2026-10-13"
+   "last_commit": "f43723746 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
@@ -1634,7 +1635,7 @@
     "skills/hep-computing/references/root-usage-patterns.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "56a5a6c9 2026-10-23"
+   "last_commit": "56a5a6c91 2026-10-23"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",
@@ -1649,7 +1650,7 @@
     "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-computing/references/root-usage-patterns.md",
@@ -1668,7 +1669,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/semantic-naming.md",
@@ -1730,7 +1731,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "7be56d2b 2026-10-26"
+   "last_commit": "7be56d2bc 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
@@ -1747,7 +1748,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "ca931ccd 2026-11-02"
+   "last_commit": "ca931ccdf 2026-11-02"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",
@@ -1762,7 +1763,7 @@
     "skills/hep-computing/references/risk-and-quality.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "351029c0b 2026-10-07"
   },
   {
    "path": "skills/hep-computing/references/status-updates-and-completion.md",
@@ -1775,7 +1776,7 @@
     "skills/hep-computing/references/implementation-discipline.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "351029c0b 2026-10-07"
   },
   {
    "path": "skills/hep-computing/references/storage-cern-eos.md",
@@ -1790,7 +1791,7 @@
     "tests/core/test_side_effects_f13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "50decbd0 2026-10-17"
+   "last_commit": "50decbd0e 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/symbolic-and-numerical-computation.md",
@@ -1805,7 +1806,7 @@
     "skills/hep-computing/references/numerical-and-computational-methods.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "46cea2cb 2026-10-13"
+   "last_commit": "46cea2cb4 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/task-authoring-guide.md",
@@ -1825,7 +1826,7 @@
     "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "338f8d78 2026-10-19"
+   "last_commit": "338f8d78e 2026-10-19"
   },
   {
    "path": "skills/hep-computing/references/task-quality-checklist.md",
@@ -1840,7 +1841,7 @@
     "tools/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c0 2026-10-07"
+   "last_commit": "351029c0b 2026-10-07"
   },
   {
    "path": "skills/hep-computing/references/validation-and-done.md",
@@ -1858,7 +1859,7 @@
     "skills/hep-computing/references/software-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
@@ -1867,6 +1868,7 @@
    "lines": 335,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/timing-pid/assets/timing-method-card.json",
     "contracts/naming/surfaces.json",
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/hep-computing/references/research-workflow-control.md",
@@ -1892,13 +1894,14 @@
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/propagate_scale_distortion.py",
     "skills/hep-detector/scripts/stability_monitor.py",
+    "tests/contracts/t12_degeneracy.py",
     "tests/skills/hep_detector/test_adding_layer_d6.py",
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "5e3b104e 2026-10-29"
+   "last_commit": "5e3b104ef 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -1924,7 +1927,7 @@
     "skills/hep-detector/scripts/calorimeter_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7cfaea3d 2026-11-06"
+   "last_commit": "7cfaea3d8 2026-11-06"
   },
   {
    "path": "skills/hep-detector/references/charge-confusion.md",
@@ -1941,7 +1944,7 @@
     "skills/hep-detector/scripts/charge_confusion_rate.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4c1cb871 2026-10-17"
+   "last_commit": "4c1cb8713 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -1965,7 +1968,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "a1267715 2026-10-25"
+   "last_commit": "a1267715b 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
@@ -1981,7 +1984,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "e03c03967 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2008,7 +2011,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2028,7 +2031,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2043,7 +2046,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/detector-comparison-tables.md",
@@ -2058,7 +2061,7 @@
     "tests/skills/hep_detector/test_detector_atlas.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
@@ -2074,7 +2077,7 @@
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "97c6b0b5 2026-10-24"
+   "last_commit": "97c6b0b5e 2026-10-24"
   },
   {
    "path": "skills/hep-detector/references/detector-glossary.md",
@@ -2090,7 +2093,7 @@
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/detector-measurement-framework.md",
@@ -2120,7 +2123,7 @@
     "hep-citations",
     "hep-measurement"
    ],
-   "last_commit": "9ff83cdf 2026-10-30"
+   "last_commit": "9ff83cdf3 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2134,7 +2137,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2150,7 +2153,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
@@ -2178,7 +2181,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/detector-systems-overview.md",
@@ -2206,7 +2209,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/dis-kinematic-reconstruction.md",
@@ -2225,15 +2228,16 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "28ad9ffa 2026-11-12"
+   "last_commit": "28ad9ffa2 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 25323,
-   "lines": 341,
+   "bytes": 25450,
+   "lines": 342,
    "linked_from_skill_md": false,
    "cited_by": [
+    "adapters/calo-cluster/assets/calo_recipe/__init__.py",
     "profiles/experiments/eic/modules/facility/interaction-region.md",
     "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -2252,7 +2256,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "9359950e 2026-11-12"
+   "last_commit": "9359950e2 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2276,7 +2280,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "af7ad3bb 2026-10-21"
+   "last_commit": "af7ad3bbf 2026-10-21"
   },
   {
    "path": "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md",
@@ -2289,7 +2293,7 @@
     "skills/hep-detector/references/timestream-to-map-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/front-end-calibration.md",
@@ -2303,7 +2307,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e2957da1 2026-10-25"
+   "last_commit": "e2957da10 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
@@ -2331,7 +2335,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9c12f2b6 2026-10-26"
+   "last_commit": "9c12f2b64 2026-10-26"
   },
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
@@ -2351,7 +2355,7 @@
     "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
@@ -2363,7 +2367,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2386,7 +2390,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2412,7 +2416,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "e0a10d44 2026-11-07"
+   "last_commit": "e0a10d440 2026-11-07"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2430,7 +2434,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "da7df3d1 2026-11-12"
+   "last_commit": "da7df3d16 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -2456,7 +2460,7 @@
     "hep-ml",
     "hep-statistics"
    ],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "267d534a8 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/multimessenger-analysis.md",
@@ -2469,7 +2473,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/muon-systems.md",
@@ -2490,7 +2494,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/neutrino-astronomy.md",
@@ -2511,7 +2515,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "267d534a8 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -2530,7 +2534,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2547,7 +2551,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "c398d5e0 2026-10-29"
+   "last_commit": "c398d5e0c 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/particle-identification.md",
@@ -2556,6 +2560,9 @@
    "lines": 297,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/timing-pid/assets/timing-method-card.json",
+    "adapters/timing-pid/assets/timing_recipe/dedx.py",
+    "adapters/timing-pid/assets/timing_recipe/pid.py",
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "profiles/experiments/eic/modules/detector/epic-pid.md",
     "skills/hep-detector/SKILL.md",
@@ -2586,7 +2593,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "81c8d4f6 2026-11-13"
+   "last_commit": "81c8d4f67 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -2608,7 +2615,7 @@
     "skills/hep-detector/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "e03c03967 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
@@ -2617,6 +2624,7 @@
    "lines": 265,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/photon-likelihood/assets/light_recipe/__init__.py",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
@@ -2626,7 +2634,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7cfaea3d 2026-11-06"
+   "last_commit": "7cfaea3d8 2026-11-06"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2646,7 +2654,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/readout-digitization-and-overlay.md",
@@ -2661,7 +2669,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e2957da1 2026-10-25"
+   "last_commit": "e2957da10 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -2688,7 +2696,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "5e3b104e 2026-10-29"
+   "last_commit": "5e3b104ef 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/response-and-forward-folding.md",
@@ -2719,7 +2727,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "e03c03967 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
@@ -2734,7 +2742,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "f035491a 2026-11-02"
+   "last_commit": "f035491a0 2026-11-02"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2759,7 +2767,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "a1267715 2026-10-25"
+   "last_commit": "a1267715b 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/dirc.md",
@@ -2772,7 +2780,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/ecal.md",
@@ -2786,7 +2794,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/hcal.md",
@@ -2814,7 +2822,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/index.md",
@@ -2939,7 +2947,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "9cf8a372 2026-11-14"
+   "last_commit": "9cf8a372f 2026-11-14"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
@@ -2952,7 +2960,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/rich.md",
@@ -2965,7 +2973,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/tof.md",
@@ -2978,7 +2986,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/tracker.md",
@@ -2991,7 +2999,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/trd.md",
@@ -3004,7 +3012,7 @@
     "tests/core/test_calibration_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
@@ -3036,7 +3044,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "c90b601b 2026-10-22"
+   "last_commit": "c90b601b2 2026-10-22"
   },
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
@@ -3052,7 +3060,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bbeb133f 2026-10-25"
+   "last_commit": "bbeb133f9 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
@@ -3064,7 +3072,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9359950e 2026-11-12"
+   "last_commit": "9359950e2 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/timestream-to-map-reconstruction.md",
@@ -3077,7 +3085,7 @@
     "skills/hep-detector/references/frequency-and-scan-encoded-spectroscopy-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9359950e 2026-11-12"
+   "last_commit": "9359950e2 2026-11-12"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
@@ -3096,7 +3104,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
@@ -3134,7 +3142,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "7cfaea3d 2026-11-06"
+   "last_commit": "7cfaea3d8 2026-11-06"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -3161,7 +3169,7 @@
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a1267715 2026-10-25"
+   "last_commit": "a1267715b 2026-10-25"
   },
   {
    "path": "skills/hep-measurement/references/analysis-design.md",
@@ -3194,7 +3202,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-measurement/references/analysis-validation.md",
@@ -3214,7 +3222,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-measurement/references/backgrounds.md",
@@ -3253,7 +3261,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "ccc1eb2a 2026-10-17"
+   "last_commit": "ccc1eb2a8 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/correction-chain.md",
@@ -3282,7 +3290,7 @@
     "hep-detector",
     "hep-theory"
    ],
-   "last_commit": "f146d22b 2026-10-22"
+   "last_commit": "f146d22bb 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/cosmic-ray-measurements.md",
@@ -3298,7 +3306,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3c10ac23 2026-10-22"
+   "last_commit": "3c10ac23f 2026-10-22"
   },
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
@@ -3322,7 +3330,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "e3f794ab 2026-10-26"
+   "last_commit": "e3f794ab7 2026-10-26"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3345,7 +3353,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-measurement/references/measurements-and-unfolding.md",
@@ -3371,7 +3379,7 @@
     "hep-detector",
     "hep-statistics"
    ],
-   "last_commit": "7a584954 2026-10-17"
+   "last_commit": "7a5849546 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
@@ -3385,7 +3393,7 @@
     "tests/skills/hep_measurement/test_rare_event_m10.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c4d801c4 2026-10-17"
+   "last_commit": "c4d801c42 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
@@ -3407,7 +3415,7 @@
     "tests/skills/test_review_question_tables.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6a70f37e 2026-10-29"
+   "last_commit": "6a70f37eb 2026-10-29"
   },
   {
    "path": "skills/hep-measurement/references/systematics.md",
@@ -3463,7 +3471,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-measurement/references/weights-normalization.md",
@@ -3489,7 +3497,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/ablation-and-design-review.md",
@@ -3515,7 +3523,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/architecture-selection.md",
@@ -3528,7 +3536,7 @@
     "skills/hep-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/checkpointing.md",
@@ -3544,7 +3552,7 @@
     "skills/hep-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/custom-autograd-and-hooks.md",
@@ -3558,7 +3566,7 @@
     "skills/hep-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/data-loading.md",
@@ -3572,7 +3580,7 @@
     "skills/hep-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/data-strategy.md",
@@ -3586,7 +3594,7 @@
     "skills/hep-ml/scripts/check_split_integrity.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/debugging-pytorch.md",
@@ -3602,7 +3610,7 @@
     "skills/hep-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/deep-learning-guide.md",
@@ -3625,7 +3633,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-ml/references/distributed-training.md",
@@ -3640,7 +3648,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/efficient-finetuning.md",
@@ -3656,7 +3664,7 @@
     "skills/hep-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/evaluation-metrics.md",
@@ -3671,7 +3679,7 @@
     "skills/hep-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/evaluation-strategy.md",
@@ -3688,7 +3696,7 @@
    "cited_by_other_skills": [
     "hep-authoring"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/export-and-deployment.md",
@@ -3702,7 +3710,7 @@
     "skills/hep-ml/references/serving-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/fast-simulation-validation.md",
@@ -3717,7 +3725,7 @@
     "skills/hep-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/generative-models.md",
@@ -3733,7 +3741,7 @@
     "skills/hep-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/geometric-and-equivariant-learning.md",
@@ -3748,7 +3756,7 @@
     "skills/hep-ml/references/scientific-machine-learning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/interpretability-and-explainability.md",
@@ -3762,7 +3770,7 @@
     "skills/hep-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/learned-density-ratio-reweighting.md",
@@ -3776,7 +3784,7 @@
     "skills/hep-ml/references/sbi-training.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "24a2150d1 2026-11-14"
   },
   {
    "path": "skills/hep-ml/references/mixed-precision.md",
@@ -3793,7 +3801,7 @@
     "skills/hep-ml/references/performance-memory.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis-decorrelation-and-systematics.md",
@@ -3808,7 +3816,7 @@
     "skills/hep-ml/references/robustness-and-distribution-shift.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis-training-and-data.md",
@@ -3824,7 +3832,7 @@
     "tests/skills/hep_ml/test_pretraining_freeze.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis-validation-and-deployment.md",
@@ -3838,7 +3846,7 @@
     "skills/hep-ml/references/serving-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis-weights.md",
@@ -3859,7 +3867,7 @@
     "tests/skills/hep_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "33bd6464 2026-10-22"
+   "last_commit": "24a2150d1 2026-11-14"
   },
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
@@ -3900,7 +3908,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "97471b3f 2026-10-19"
+   "last_commit": "24a2150d1 2026-11-14"
   },
   {
    "path": "skills/hep-ml/references/monitoring-and-lifecycle.md",
@@ -3914,7 +3922,7 @@
     "skills/hep-ml/references/robustness-and-distribution-shift.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
@@ -3939,7 +3947,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "33bd6464 2026-10-22"
+   "last_commit": "33bd6464c 2026-10-22"
   },
   {
    "path": "skills/hep-ml/references/optimization-and-training-dynamics.md",
@@ -3951,7 +3959,7 @@
     "skills/hep-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/parallelism-strategy.md",
@@ -3967,7 +3975,7 @@
     "tests/skills/hep_ml/test_hep_ml_skill.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/particle-and-jet-architectures.md",
@@ -3986,7 +3994,7 @@
     "skills/hep-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/performance-memory.md",
@@ -4003,7 +4011,7 @@
     "skills/hep-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/reproducibility.md",
@@ -4024,7 +4032,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-ml/references/robustness-and-distribution-shift.md",
@@ -4046,7 +4054,7 @@
     "tests/skills/hep_ml/test_era_changes_ml1.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1a844ba0 2026-10-17"
+   "last_commit": "1a844ba0d 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/sbi-training.md",
@@ -4062,7 +4070,7 @@
     "skills/hep-ml/references/scientific-machine-learning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "24a2150d1 2026-11-14"
   },
   {
    "path": "skills/hep-ml/references/scientific-machine-learning.md",
@@ -4082,7 +4090,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "fc8606a1 2026-10-29"
+   "last_commit": "fc8606a17 2026-10-29"
   },
   {
    "path": "skills/hep-ml/references/sequence-models.md",
@@ -4097,7 +4105,7 @@
     "skills/hep-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/serving-architecture.md",
@@ -4110,7 +4118,7 @@
     "skills/hep-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/space-and-astroparticle-ml.md",
@@ -4128,7 +4136,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "f3e0ff6d 2026-10-17"
+   "last_commit": "f3e0ff6d4 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/tensor-shapes.md",
@@ -4140,7 +4148,7 @@
     "skills/hep-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/training-at-scale.md",
@@ -4157,7 +4165,7 @@
     "skills/hep-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-ml/references/training-loop.md",
@@ -4172,7 +4180,7 @@
     "skills/hep-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/transfer-learning.md",
@@ -4187,7 +4195,7 @@
     "skills/hep-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/transformer-architectures.md",
@@ -4202,7 +4210,7 @@
     "skills/hep-ml/references/sequence-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/uncertainty-and-calibration.md",
@@ -4226,7 +4234,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "485e96cb0 2026-10-17"
   },
   {
    "path": "skills/hep-review/references/domains/computing.md",
@@ -4240,7 +4248,7 @@
     "skills/hep-review/references/domains/index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "dbebc92ce 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/domains/detector.md",
@@ -4258,7 +4266,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-review/references/domains/index.md",
@@ -4383,7 +4391,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "e661b3fd 2026-11-13"
+   "last_commit": "e661b3fde 2026-11-13"
   },
   {
    "path": "skills/hep-review/references/domains/statistics.md",
@@ -4425,7 +4433,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "dbebc92ce 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/evaluation-and-claims.md",
@@ -4438,7 +4446,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "92975d12 2026-10-29"
+   "last_commit": "92975d122 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/evidence-and-adjudication.md",
@@ -4451,7 +4459,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "dbebc92ce 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/host-and-trust-boundaries.md",
@@ -4464,7 +4472,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1dfb15fa 2026-10-29"
+   "last_commit": "1dfb15fa0 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/storage-continuity-and-export.md",
@@ -4477,7 +4485,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "dbebc92ce 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/support-matrix.md",
@@ -4492,7 +4500,7 @@
     "skills/hep-review/references/evaluation-and-claims.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "92975d12 2026-10-29"
+   "last_commit": "92975d122 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/workflow-and-tiers.md",
@@ -4506,7 +4514,7 @@
     "tests/skills/hep_review/test_g1_review_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b491ff9e 2026-10-29"
+   "last_commit": "b491ff9e1 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
@@ -4535,7 +4543,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "e03c03967 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/combinations.md",
@@ -4553,7 +4561,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6a70f37e 2026-10-29"
+   "last_commit": "6a70f37eb 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
@@ -4575,7 +4583,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "f453828b 2026-10-29"
+   "last_commit": "f453828b2 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -4601,7 +4609,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "3a349fce 2026-11-13"
+   "last_commit": "3a349fce9 2026-11-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -4630,7 +4638,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "2b221f92 2026-10-22"
+   "last_commit": "2b221f928 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -4656,7 +4664,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "09237aee 2026-10-17"
+   "last_commit": "09237aeef 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -4677,7 +4685,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
@@ -4703,7 +4711,7 @@
     "hep-computing",
     "hep-measurement"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-statistics/references/pdf-fit-statistics.md",
@@ -4722,7 +4730,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "6c7b8ea3 2026-10-23"
+   "last_commit": "6c7b8ea31 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/roofit-and-roostats-methods.md",
@@ -4739,7 +4747,7 @@
     "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "09237aee 2026-10-17"
+   "last_commit": "09237aeef 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -4766,7 +4774,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "e03c03967 2026-10-22"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -4781,7 +4789,7 @@
     "skills/hep-statistics/references/inference-recipes.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "578c12ff 2026-10-13"
+   "last_commit": "578c12ffd 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/time-series-inference.md",
@@ -4810,7 +4818,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "d8ab97cb 2026-10-23"
+   "last_commit": "d8ab97cb5 2026-10-23"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
@@ -4852,7 +4860,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "97471b3f 2026-10-19"
+   "last_commit": "97471b3fb 2026-10-19"
   },
   {
    "path": "skills/hep-theory/references/amplitudes-and-widths.md",
@@ -4866,7 +4874,7 @@
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "83ae4f6b 2026-10-13"
+   "last_commit": "83ae4f6b3 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/astroparticle-essentials.md",
@@ -4881,7 +4889,7 @@
     "tests/skills/hep_theory/test_astroparticle_essentials.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4cedacd8 2026-10-17"
+   "last_commit": "4cedacd82 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-new-physics.md",
@@ -4896,7 +4904,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e70b1a84 2026-10-23"
+   "last_commit": "e70b1a845 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
@@ -4916,7 +4924,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "afebe106 2026-10-29"
+   "last_commit": "afebe106d 2026-10-29"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
@@ -4952,7 +4960,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "930ba0b2 2026-10-23"
+   "last_commit": "930ba0b2d 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/dark-matter-phenomenology.md",
@@ -4970,7 +4978,7 @@
     "tests/skills/hep_theory/test_dark_matter_phenomenology.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "98460703 2026-10-17"
+   "last_commit": "98460703e 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
@@ -4992,7 +5000,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "10db758c 2026-11-12"
+   "last_commit": "10db758c8 2026-11-12"
   },
   {
    "path": "skills/hep-theory/references/dis-structure-functions.md",
@@ -5014,7 +5022,7 @@
     "tests/skills/hep_theory/test_hadron_structure_th14.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9648218d 2026-10-23"
+   "last_commit": "9648218d4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/drell-yan.md",
@@ -5030,7 +5038,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9648218d 2026-10-23"
+   "last_commit": "9648218d4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
@@ -5048,7 +5056,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-theory/references/exclusive-and-gpd.md",
@@ -5062,7 +5070,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2414de9a 2026-10-23"
+   "last_commit": "2414de9a3 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/fragmentation-functions.md",
@@ -5076,7 +5084,7 @@
     "skills/hep-theory/references/sidis-and-tmd.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bd9d753e 2026-10-23"
+   "last_commit": "bd9d753e9 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/global-fits-theory-inputs.md",
@@ -5091,7 +5099,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "6c7b8ea3 2026-10-23"
+   "last_commit": "6c7b8ea31 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/hadron-structure-essentials.md",
@@ -5119,7 +5127,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "10db758c 2026-11-12"
+   "last_commit": "10db758c8 2026-11-12"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -5137,7 +5145,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bb6cb81e 2026-10-23"
+   "last_commit": "bb6cb81eb 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/light-nuclei-coalescence.md",
@@ -5153,7 +5161,7 @@
     "tests/skills/hep_theory/test_light_nuclei_coalescence.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7321e6dc 2026-10-17"
+   "last_commit": "7321e6dcb 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
@@ -5176,7 +5184,7 @@
     "hep-citations",
     "hep-statistics"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ebb581365 2026-10-19"
   },
   {
    "path": "skills/hep-theory/references/neutrino-oscillations.md",
@@ -5194,7 +5202,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "69f359f5 2026-10-17"
+   "last_commit": "69f359f5b 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/nuclear-cross-sections.md",
@@ -5213,7 +5221,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "151889fb 2026-10-17"
+   "last_commit": "151889fbb 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/nuclear-parton-effects.md",
@@ -5236,7 +5244,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "f046cc692 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/nuclear-physics-essentials.md",
@@ -5251,7 +5259,7 @@
     "tests/skills/hep_theory/test_nuclear_physics_essentials.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "87421c11 2026-10-17"
+   "last_commit": "87421c118 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/particle-physics-essentials.md",
@@ -5266,7 +5274,7 @@
     "tests/skills/hep_theory/test_particle_physics_essentials.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c0b6b6d8 2026-10-17"
+   "last_commit": "c0b6b6d89 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",
@@ -5285,7 +5293,7 @@
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f046cc69 2026-10-23"
+   "last_commit": "f046cc692 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/polarized-dis.md",
@@ -5298,7 +5306,7 @@
     "skills/hep-theory/references/hadron-structure-essentials.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9648218d 2026-10-23"
+   "last_commit": "9648218d4 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",
@@ -5311,7 +5319,7 @@
     "tests/adapters/test_recasting_templates.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9257d7b5d 2026-10-15"
   },
   {
    "path": "skills/hep-theory/references/regularization-and-schemes.md",
@@ -5330,7 +5338,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "16214af17 2026-10-26"
   },
   {
    "path": "skills/hep-theory/references/selection-rules.md",
@@ -5344,7 +5352,7 @@
     "skills/hep-theory/references/particle-physics-essentials.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "195e4d1e 2026-10-13"
+   "last_commit": "195e4d1e1 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/sidis-and-tmd.md",
@@ -5362,7 +5370,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bd9d753e 2026-10-23"
+   "last_commit": "bd9d753e9 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/small-x-and-saturation.md",
@@ -5376,7 +5384,7 @@
     "skills/hep-theory/scripts/dipole_lo.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2414de9a 2026-10-23"
+   "last_commit": "2414de9a3 2026-10-23"
   },
   {
    "path": "skills/hep-theory/references/smeft-and-eft.md",
@@ -5390,7 +5398,7 @@
     "skills/hep-theory/scripts/eft_truncation.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "fa29fcf3 2026-10-13"
+   "last_commit": "fa29fcf34 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/solar-modulation-models.md",
@@ -5407,7 +5415,7 @@
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e70b1a84 2026-10-23"
+   "last_commit": "e70b1a845 2026-10-23"
   }
  ],
  "overlap_pairs": [],

@@ -1,0 +1,37 @@
+{
+ "id": "adapter:destriper",
+ "version": "0.2.0",
+ "status": "demonstrated-on-synthetic-data",
+ "purpose": "T10's scan/global reference replay (finish-plan E1, option B2 of t10-options.md; decisions.md, the user's answer to U7) as a development binding in Python, recipe reco.scan.destriper/1, not a native backend, whose gap stays recorded as with U12 A: destriping as t11-cells.md F38 records it (joint fit of map and baselines, conjugate gradient for the baseline amplitudes, then binning), on the reduced baseline system restricted to the zero-sum subspace (the stated constraint that fixes the common offset m + c, a - c), the map by binning; a scan with an unobserved pixel or more than one connected component is refused; the product destriper-product/1 embeds a reconstruction-product/1 with reconstruction:scan-v1, subcase global (with the constraint: every value reported; without it: every parameter named unidentifiable and only differences and one sum reported), checked by contracts.reconstruction.read_sidecar; the method card names the unconstrained mode and its constraint (plan section 9.6, A34). On the scoring side: the synthetic fixture t10-destripe/1 (seed recorded; noiseless, noisy and a disconnected scan with a second null mode) with its negative variants (jitter, chunk average, a uniqueness claim without a constraint, a disconnected scan claimed determined), an independently written exact rational reference that shares no code with the solver, and the comparator with drafted K09 tolerances (noisy and noiseless), the stopping ladder (fix round 1, replacing the eps/2 halving gate, which stays a reading) and an a-posteriori bound as a reading; a runtime null-mode drift case without the constraint; synthetic data only, no map-making quality claim; optional, required by no skill",
+ "tools": [
+  {
+   "name": "destriper development binding (Python with NumPy)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "Python 3.13.18 with NumPy 2.4.6 (the project's env/py313) on an NSTCCore Slurm worker of partition edr2-al9_short_serial (AMD EPYC 9645, glibc 2.34), as job 7596623 gated them (the interpreter's SHA-256, Python 3.13.18, NumPy 2.4.6)"
+   ]
+  }
+ ],
+ "environment": "NSTCCore (ASGC/TWGrid) Slurm, a worker of partition edr2-al9_short_serial (glibc 2.34; the job is not pinned to a node); Python 3.13.18 with NumPy 2.4.6, the project's env/py313. Job of record: job 7596623, the T10 replay's attempt 3 (t10-replay.sh 73587671, manifest cd29f627, 2,575 files; hpa-wn33, 2026-11-12, JOB RESULT PASS, stderr empty), after the bytecode line in destriper.py; it reran every step of attempt 2, job 7594892 (PASS, 1 min 20 s, 64 MB), with the comparator values bit-identical: the noisy replay at eps 1e-10 within the frozen tolerance (baselines 6.847e-16, map 4.666e-16 of ||a_ref||_2; 15 iterations), the noiseless at eps 1e-13 (3.136e-16, 1.729e-16), the stopping ladder with 4 informative steps, the zero sum, the noiseless reference equal to the truth, every negative variant refused with its codes, and the runtime null-mode drift without the constraint. Tolerance frozen by the user, 2026-11-12: \"Freeze as proposed (Recommended)\" (decisions.md; records t10-replay.tolerance.json 217a38bc, t10-replay-noiseless.tolerance.json 12738ebc). The jobs ran adapter.json at 0.1.0, proposed; 0.2.0 changes records only (this file, VALIDATION.md section DESTRIPER-T10, the capability matrix row and docs/dev/detector-reconstruction/t10-closeout.md)",
+ "assets": [
+  "assets/destriper.py",
+  "assets/destriper.method-card.json",
+  "assets/t10-replay.tolerance.json",
+  "assets/t10-replay-noiseless.tolerance.json",
+  "assets/destripe_recipe/__init__.py",
+  "assets/destripe_recipe/timestream.py",
+  "assets/destripe_recipe/solver.py",
+  "assets/destripe_recipe/product.py",
+  "assets/fixture_tools/t10_fixture.py",
+  "assets/fixture_tools/t10_exact_reference.py",
+  "assets/fixture_tools/t10_comparator.py",
+  "assets/fixture_tools/t10_replay.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_destriper_fixture.py",
+  "../../tests/adapters/test_destriper.py",
+  "../../tests/adapters/test_destriper_reference.py"
+ ],
+ "owner_skill": "hep-detector",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; demonstrated-on-synthetic-data: the solver and its scoring-side tools ran in job 7596623 (and 7594892) on the synthetic fixture t10-destripe/1 and hand-made systems only, against an independently written exact rational reference that shares no code with the solver, under the comparator tolerance the user froze (K09); not tested-in-declared-environment, because no run read a real scan and no reference output from outside the plugin was compared; a development binding, not a native backend, whose gap stays recorded (U7 B2, as U12 A); no map-making quality claim"
+}

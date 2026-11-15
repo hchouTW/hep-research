@@ -1,0 +1,20 @@
+{
+ "format": "t10-replay-tolerance/1",
+ "state": "frozen",
+ "frozen_by": "the user, 2026-11-12: \"Freeze as proposed (Recommended)\" (decisions.md, The user's freeze of T10's replay comparator tolerance)",
+ "k09": "drafted in fix round 1 for the noiseless comparison (t10-replay-stage-plan.md, section 4, fix round 1); the user freezes it before the run",
+ "stopping": 1e-13,
+ "safety": 10,
+ "kappa": 24.47,
+ "map_gain": 0.8757,
+ "tau_baselines": 2.5e-11,
+ "tau_map": 2.2e-11,
+ "norm": "2-norm of the difference over all baselines (tau_baselines) or all pixels (tau_map), each relative to the 2-norm of the reference baselines",
+ "derivation": "on 1-perp, ||a_cg - a_ref||_2 <= eps ||b||_2 / lambda_min <= eps kappa ||a_ref||_2 and ||m_cg - m_ref||_2 <= G ||a_cg - a_ref||_2; tau = safety x kappa x eps (baselines) and safety x G x kappa x eps (map), rounded up (here at eps 1e-13); kappa = lambda_max / lambda_min of D on 1-perp and G = ||M^-1 P^T F||_2 of the fixture t10-destripe/1 (seed 20260), recomputed by the comparator",
+ "zero_sum_relative": 1e-13,
+ "ladder": null,
+ "min_informative_steps": null,
+ "ladder_rule": "none: the ladder is the noisy replay's",
+ "readings": "the a-posteriori bound, as in the noisy record",
+ "expected_difference": "near rounding (the noiseless constrained solution is the integer truth); a PASS means only below tau"
+}

@@ -232,8 +232,9 @@ class Declaration(unittest.TestCase):
             self.assertIn(f"assets/layered_sim/{src}", listed)
         # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset; adapter
         # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py; 0.4.0 (B2.9): every file
-        # under simreco/ and simreco_spec.py; 0.6.0: g4sim/Geant4FromConfig.cmake (registered installations)
-        self.assertEqual(doc["version"], "0.16.0")
+        # under simreco/ and simreco_spec.py; 0.6.0: g4sim/Geant4FromConfig.cmake (registered installations);
+        # 0.17.0: geant4_run.py scan steps declare the executable and build record as native_inputs (PR #411)
+        self.assertEqual(doc["version"], "0.17.0")
         on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot", "simreco")
                    for p in (ASSETS / d).iterdir() if p.is_file()}
         self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py",
@@ -503,6 +504,50 @@ class RunAndPartition(_Tmp):
                         "--build-record", rec, "--out-dir", self.d / "slow", "--events-per-second", "0.001")
         self.assertEqual(code, 2, out)
         self.assertIn("partition", out["error"])
+
+    def test_scan_declares_its_executable_so_a_changed_binary_reruns(self):
+        """T12 stage 2 fix round 1 (I1, N7 of t12-stage-plan.md): the scan's steps declare the executable and the build record as
+        native_inputs, so run_workflow.py --incremental skips when nothing changed and reruns when the binary changes, with the
+        executable outside home and under home (written ~/...). The runner runs in this process with a pinned release digest, as
+        test_workflow_b1.py does: in a development tree INC-03 never skips."""
+        import contextlib
+        import importlib.util
+        import io
+        from unittest import mock
+        spec_ = importlib.util.spec_from_file_location("run_workflow_g4scan", PLUGIN / "skills" / "hep-computing" / "scripts"
+                                                       / "run_workflow.py")
+        runner = importlib.util.module_from_spec(spec_)
+        spec_.loader.exec_module(runner)
+        runner.plugin_release = lambda root=None: {"release": "g4scan-test", "digest": "d" * 64, "source": "pinned by the test"}
+        rec, _ = self.fake_install()
+        base = self.write("base.json", spec())
+        grid = self.write("grid.json", {"name": "cuts", "parameters": {"physics.default_cut_mm": [1.0]}})
+        for case, home in (("outside home", self.d / "elsewhere"), ("under home", self.d)):
+            with self.subTest(case=case):
+                home.mkdir(exist_ok=True)
+                env = {**os.environ, "HOME": str(home)}
+                out_dir = self.d / f"scan-{case.replace(' ', '-')}"
+                exe = self.fake_exe()
+                code, out = run(asset("geant4_run.py"), "scan", "--base", base, "--grid", grid, "--exe", exe, "--build-record", rec,
+                                "--out-dir", out_dir, "--events-per-second", "1000", "--created", "2026-11-13", env=env)
+                self.assertEqual(code, 0, out)
+                step = json.loads((out_dir / "workflow.json").read_text())["steps"][0]
+                expected = [str(exe), str(rec)] if case == "outside home" else ["~" + str(exe)[len(str(home)):],
+                                                                                "~" + str(rec)[len(str(home)):]]
+                self.assertEqual(step["native_inputs"], expected)
+
+                def go(*extra):
+                    buffer = io.StringIO()
+                    with mock.patch.dict(os.environ, {"HOME": str(home)}), contextlib.redirect_stdout(buffer):
+                        code_ = runner.main([str(out_dir / "workflow.json"), "--work", str(out_dir), "--created", "2026-11-13",
+                                             *extra])
+                    return code_, json.loads(buffer.getvalue())
+                self.assertEqual(go()[0], 0)
+                code, out = go("--incremental")
+                self.assertEqual((code, [s_.get("skipped", False) for s_ in out["steps"]]), (0, [True]), out)
+                exe.write_text(exe.read_text() + "# rebuilt\n")
+                code, out = go("--incremental")
+                self.assertEqual((code, [s_.get("skipped", False) for s_ in out["steps"]]), (0, [False]), out)
 
     def test_partition_merge_equals_a_single_run_and_refuses_nothing_twice(self):
         rec, _ = self.fake_install()

@@ -1,0 +1,16 @@
+{
+ "attenuation_length_m": 30.0,
+ "charge_threshold": 0.25,
+ "dark_mean_per_window": 0.002,
+ "emission_f": 0.6,
+ "emission_k": 5.0,
+ "format": "light-likelihood-configuration/1-single-photon",
+ "photon_charge_mean": 1.0,
+ "photon_charge_sigma": 0.3,
+ "photon_speed_m_per_ns": 0.22,
+ "sensor_area_m2": 0.094,
+ "sensors": 1000,
+ "sphere_radius_m": 5.0,
+ "time_spread_ns": 1.5,
+ "window_ns": 200.0
+}

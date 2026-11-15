@@ -1,0 +1,82 @@
+{
+ "block": 1,
+ "events": 2,
+ "files_sha256": {
+  "cells": "d5b8708a3a27773fa0a14a4b6dc88290d8433b2680706217f44c1dc3423f7b2b",
+  "gain": "310c37ec8359d3c23ac8956c017732033974334b7c11a3713ffd1859586e5aba",
+  "pedestal": "a07149e340d83a507780b04ab6de908c9426e335c440a52a9cf9668b1b06bac0",
+  "truth": "6d19fa0e0aac99ff045eb0066d434713c0d282c62b544fe9fe0cb33d27213c00"
+ },
+ "generator": "t08-grid/1",
+ "generator_sha256": "d901362c62431282ce37eeaac88efb864339aec9eb6915aa9e7d69808f7946f9",
+ "runs": [
+  {
+   "data_side_files": [
+    "events.cells",
+    "events.gain.json",
+    "events.pedestal.json"
+   ],
+   "exit_code": 0,
+   "harness": "fixture_tools/t08_fixture_files.py",
+   "operation": "generate",
+   "status": "ok"
+  },
+  {
+   "chain": [
+    "a07149e340d83a507780b04ab6de908c9426e335c440a52a9cf9668b1b06bac0",
+    "310c37ec8359d3c23ac8956c017732033974334b7c11a3713ffd1859586e5aba"
+   ],
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/calo-cluster/assets/calo_cluster.py",
+    "reconstruct",
+    "--cells",
+    "<work>/events.cells",
+    "--pedestal-payload",
+    "<work>/events.pedestal.json",
+    "--gain-payload",
+    "<work>/events.gain.json",
+    "--product",
+    "<work>/events.product",
+    "--product-id",
+    "example-reconstruction-calorimetry"
+   ],
+   "configuration_sha256": "5fbbea3b4ca81d962c5ca70fa024ddc82dd6e1d2f06e39b354fda56d26483723",
+   "energy_kind": "clustered-deposited-energy",
+   "events": 2,
+   "exit_code": 0,
+   "input_sha256": "d5b8708a3a27773fa0a14a4b6dc88290d8433b2680706217f44c1dc3423f7b2b",
+   "objects": 4,
+   "operation": "reconstruct",
+   "product": "<work>/events.product",
+   "reason": "",
+   "sharing_failures": 0,
+   "status": "ok",
+   "uncertainty_failures": 0
+  },
+  {
+   "command": [
+    "<python>",
+    "-I",
+    "-B",
+    "<plugin>/adapters/calo-cluster/assets/calo_cluster.py",
+    "check-product",
+    "--product",
+    "<work>/events.product"
+   ],
+   "double_count_defects": 0,
+   "energy_kind": "clustered-deposited-energy",
+   "events": 2,
+   "exit_code": 0,
+   "first_defects": [],
+   "objects": 4,
+   "operation": "check-product",
+   "reason": "",
+   "status": "ok"
+  }
+ ],
+ "stratum": 7,
+ "variant": "main"
+}

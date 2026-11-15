@@ -14,6 +14,123 @@ Simulator parameter calibration workflow, phase 5 (extensions). Part of the same
 - **Scripts**: `calib_fit.py pool` (with `--grade`); `calib_reweight.py g4l` (G4-L; a points file must carry the worst-ESS point and the spot checks); `calib_likelihood.py vmodel-infer`.
 - **Evidence** (`docs/dev/simulator-calibration/simcal-gates/phase-5.md`): every phase-5 gate item passes, and the gates of phases 0 to 4 pass again at the phase-5 code. Studies: the G4-L false-alarm rate passes (9 of 1000); the learned-path T_v size passes at its second registration (0.0502); the inferred-V_model recovery fails on one weakly identified configuration (recorded as prior shrinkage, A30). G4-L keeps `provisional-thresholds`; every result is `synthetic`.
 
+## 0.68.0 (2026-11-15)
+
+Minor release; contracts 3.28.0 (the reconstruction sidecars of task T06, with T14 and T15a), `CORE_VERSION` 1.14.0 unchanged (nothing under `core/` changed). Ships detector reconstruction plan v9.2 (PR #411): the new adapters `acts-tracking` 0.3.0, `calo-cluster` 0.2.0, `photon-likelihood` 0.3.0, `timing-pid` 0.2.0 and `destriper` 0.2.0, and `adapters/geant4` 0.17.0, all `demonstrated-on-synthetic-data`; a behaviour change of the shared runner (`run_workflow.py` steps with `native_inputs`, below); the `evals/reconstruction-holdout/` harness; and the upload package fix that restores the upload route (issue #409); with the CI speed-ups of PR #412 and the full-run CI fixes of PR #413 (ubuntu-26.04 `erfc` rounding, timeouts, `adapters/geant4` 0.17.0). No tracking, vertexing, timing, PID or map-making quality is claimed.
+
+- `adapters/geant4` 0.17.0 (from 0.16.0): `geant4_run.py scan` declares each step's executable and build record as
+  `native_inputs` (T12 stage 2, PR #411, below), so `run_workflow.py` hashes them before every skip and a scan reruns
+  when the binary changes. The version bump PR #411 left out (`docs/adapter-authoring.md`, "Changing an adapter").
+- CI: faster runs with the same coverage (every command, module and check still runs; estimates from the PR #411
+  run, to be confirmed on GitHub). The `hostile-paths (checks)` leg, the critical path at 21.8 min, is split into
+  three parallel legs: packaging scan with the pull-request subset, relocated `--part static`, relocated
+  `--part ams-optional` (still `HEP_AMS_OPTIONAL_TIMEOUT=2400`); `checks-complete` still needs every leg. The units
+  part runs in four shards instead of three, in the checks matrix and the hostile-paths legs (reconciled with
+  `--shards 4`), balanced by a `tools/module_timings.json` refreshed from the PR #411 and main CI shards (slowest
+  shard, simulated: 807 s with the old timings and three shards, 518 s now). `test_t12_runtime`'s E34 negatives
+  reuse the codes the class fixture computed (that test 84 s to 21 s locally; the module runs five times per full
+  run). In `platforms.yml` the macOS units part (23-26 min on one runner) runs as three shards, reconciled by a new
+  `macos-complete` job. Expected: a full-plan PR run from about 22 min to about 13-16 min, bounded by the two
+  AMS-optional runs; macOS to about 9-11 min.
+- **Upload package** (maintainer decision 2026-11-14, "Exclude tests/ except runtime needs"): `tests/` is marked
+  `export-ignore` in the plugin's `.gitattributes` (`git archive HEAD:plugins/hep-research` reads attributes only from the
+  archived tree), with `-export-ignore` lines for what shipped code reads at run time: the six tests that profile
+  capabilities cite (with `tests/__init__.py`, `tests/_outputs.py` and their package files), the cr-propagation emulator's
+  default artifact folder, the fake schedulers of `examples/batch-partition` and the mirror records `g4sim_inventory.py`
+  collects. The zip the README describes holds about 4,100 files, 91.4 MB uncompressed, inside the documented limits
+  (5,000 files, 200 MB); it was about 5,400 files, over the file limit. `tools/check_packaging.py` measures that archive
+  (export-ignore respected) for the README figure, fails when the zip passes 5,000 entries (files and their folders) or
+  200 MB, and fails when a reference from a shipped file into `tests/` or `docs/dev/` (a profile capability's test, a
+  plugin-root path in Python code, a Markdown link) does not resolve inside the zip. This restores the upload route (issue #409).
+
+Detector reconstruction, task T06 (contracts 3.28.0, a minor; with T14 and T15a below). New sidecars, none an artifact type: `reconstruction_port.json`,
+`reconstruction_product.json`, `reconstruction_recipe.json`, `conditions_payload.json`, `binding_evidence.json`, `selection_record.json`, `input_signature.json` and
+`reconstruction_common.json`, read by `contracts/reconstruction.py` and `contracts/conditions.py` through `contracts/sidecar_reader.py`, which reads a document the same way on every path: an unknown format or required extension stops it. Old recipes, tool contracts and
+responses keep their results and their validators. `hep-detector` writes the `response` artifact only when the deliverable is a response product; `event-reconstruction.md` checks
+qualified internal or joint constraints before restricting delivery without an external t0; `analysis-workflows.md` limits byte-identical reruns to recipes that declare byte
+reproducibility.
+
+Detector reconstruction, task T14. `contracts/input_inspector.py` forms per-product input signatures from the plugin's JSON sidecars, its envelope artifacts (through `validate_artifact`, with no physics inferred) and CSV tables under a budget the caller
+declares (probes, bytes, seconds, memory, tools), and records every probe, its cost and what stayed unread in the new sidecar `input_inspection.json`. What it cannot read stays
+unknown with a stop reason, and a conflict is never a clean end. ROOT files stay unknown until `uproot` is approved, and a file name establishes nothing. `input-signature/1` now tells a number from a boolean when it looks for a hidden conflict.
+
+Detector reconstruction, CI fix round of PR #411 (T14 on Windows). `contracts/input_inspector.py` reads the peak working set
+(GetProcessMemoryInfo) where `resource.getrusage` does not exist, so a declared memory budget is kept on Windows instead of
+stopping every inspection with `budget-memory` (still the stop where neither counter can be read); files are opened with
+`O_NONBLOCK` and `O_BINARY` only where the platform defines them. The T13 harness refuses a non-canonical bind before it
+looks for `bwrap`.
+
+Detector reconstruction, task T15a. `judge_candidates` now ranks a conflict above an unsatisfied item at every level of a condition, reads a fact only inside its own product, and treats two values of a constraint in scopes of one product as a conflict. `binding-evidence/1` refuses two rows for one check. `contracts/candidate_selection.py` judges a finite candidate index on one input signature, necessary conditions first, then quality evidence, then a fixed objective, and writes a replayable
+selection record with the hashes of its inputs, rules and readers. New sidecars `candidate_index.json` and `selection_policy.json`, and an optional `formal` block in `selection_record.json`. Rules only: a new sidecar not labelled artificial
+is refused, and nothing is claimed about selection on real recipes. A missing backend and insufficient evidence stay two reasons of a restricted delivery, and an old decision replays only on the inputs it was made from.
+
+Detector reconstruction, task T12 stage 2 (shared runner, behaviour change). `run_workflow.py` steps may declare `native_inputs` (native binaries, libraries,
+scripts and configurations): each is hashed afresh in every run before the skip decision and recorded as `extension.native_sha256` and in the receipt; a changed
+byte reruns the step. A native input no step can write is checked before the first step runs. An undeclared program (`argv[0]`, also through `PATH`) or a
+script run by a script interpreter (`sh`, `bash`, `root -q`, ...) is recorded as `extension.undeclared_native` and its step is never skipped; an executable
+given as an option value is not examined. `--incremental` now also reruns a step whose `seeds` changed. Steps with neither keep their records' keys and their
+skip. `geant4_run.py scan` declares each step's executable and build record as `native_inputs`, so a scan reruns when the binary changes.
+`ext_computational_run.json` does not yet list the two new keys (the extension is open; follow-up once the schema is no longer frozen).
+This covers common tools too: a step whose `argv[0]` is a bare `python3` or `cp`, not declared in `native_inputs`, now reruns in every run instead of
+being skipped on matching input hashes. Declare the program to keep the skip.
+
+Detector reconstruction, task T07 (new adapter `adapters/acts-tracking` 0.3.0, `demonstrated-on-synthetic-data`; tool contract
+`contracts/tool_contracts/acts_tracking.json`). A native C++ driver and finder on ACTS 48.2.0 for a planar silicon telescope: seeding, combinatorial
+Kalman filter, greedy ambiguity resolution, Kalman fit and optional adaptive multi-vertex finding, on hits alone, with every candidate, outcome and
+failure category in a finding record and search truncation marked on every candidate. A refit of a known hit set at zero field or 1 T is truth-assisted
+and counted apart, never reported as finding. Its own product format keeps predicted, filtered and smoothed states apart and has a byte-exact round
+trip. Formed in plugin code: unbiased residuals, the full residual covariance and alignment derivatives in the R32 parametrization, and a refit under a
+supplied alignment payload whose identity the product records. A thin Python wrapper forwards to the built programs; the data side never opens a
+truth file. Example `examples/reconstruction-tracking/` (offline replay of a recording made on a Slurm node). Evaluation attempt 1 on block 11
+failed (one record of 1,260: the vertex pull z tail of fixture 7002, stratum 9), and that outcome is final: no tracking or vertexing quality
+is claimed. Two recorded post-freeze changes: the sidecar of an alignment payload that moves nothing now states every plane at nominal (it
+was refused by the R32 reader), and a test no longer fails inside Slurm jobs with less than an hour left. Gaps on a recorded probe: cluster size
+and charge per measurement, and a trajectory export with scattering parameters.
+
+Detector reconstruction, task T08 (new adapter `adapters/calo-cluster` 0.2.0, `demonstrated-on-synthetic-data`; tool contract
+`contracts/tool_contracts/calo_cluster.json`). A development binding in Python, not a native backend: cell chain with payload identities in chain
+order, clustering per `t04-values-v4.md` section 7.1, a gain payload with its channel map, and a product format with a refusing reader and a
+double-count gate. A second input path reads the ROOT output of a user-supplied zdcsim program through uproot, labelled
+`simulated-unvalidated`; its thresholds are carried over and Unresolved. Example `examples/reconstruction-calorimetry/`. Evaluation attempt 1 on
+block 11 passed its 8 gates with a narrowed claim (26 open obligations listed in the outcome record). The recipe script writes no bytecode
+(a recorded change after evaluation; the outcome stays bound to the evaluated bytes).
+
+Detector reconstruction, task T09 (new adapter `adapters/photon-likelihood` 0.3.0, `demonstrated-on-synthetic-data`; tool contract
+`contracts/tool_contracts/photon_likelihood.json`). A development binding in Python: an all-channel likelihood over live, unhit and dead channels
+with a joint charge and time term, seeded multistart fits from data-side starts, a two-hypothesis topology choice, and the two negative checks of
+`t04-values-v4.md` section 9.4. The fixture and the fit share one analytic light model, so every result is a shared-model closure: it tests the
+code, not the model. Example `examples/reconstruction-photon-likelihood/`. Evaluation attempt 1 on block 11 passed its 13 gates with a narrowed
+claim (65 open obligations listed in the outcome record). The recipe script writes no bytecode (recorded after evaluation, as T08).
+
+Detector reconstruction, task T10 (new adapters `adapters/timing-pid` 0.2.0 and `adapters/destriper` 0.2.0, `demonstrated-on-synthetic-data`; tool
+contract `contracts/tool_contracts/destriper.json`). `timing-pid`: a time chain that keeps each hit's value before and after each step with that
+step's payload, event times, TOF and beta, species hypotheses, truncated-mean dE/dx, a missing subsystem delivered as `missing-input` and never as
+zeros, a method card that lists unconstrained modes with their named constraints, and native counter channels written as a T06
+`reconstruction:counts-v1` product. `destriper`: the scan/global reference replay chosen by the user, a conjugate-gradient destriper with the zero-sum
+baseline constraint, compared with an independent exact rational reference at a tolerance the user froze. Both are development bindings, not native
+backends; the native scan or global solver stays a recorded gap. No timing, PID or map-making quality is claimed.
+
+Detector reconstruction, evaluation harness (tests only, D4). `tests/adapters/t04_evaluation_core.py`, `t04_evaluation_layout.py`,
+`t04_evaluation_tasks.py`, `t04_bin_scorer.py` and the per-workflow scorers `t07_evaluation_scoring.py`, `t08_scoring.py` and `t09_scoring.py` score the
+frozen recipes per bin against the values frozen at Freeze A and Freeze B, with attempt selection and crash rules. They ship as tests and change no
+plugin behaviour.
+
+Detector reconstruction, task T12 (tests only). Harnesses under `tests/contracts/` (`t12_outer_loop.py`, `t12_reprocessing.py`, `t12_partition.py`,
+`t12_comparators.py`, `t12_benchmark.py`, `t12_a13_gpu.py`, `t12_degeneracy.py`, `t12_runtime.py`) show the outer calibration loop, invalidation and
+native identity, partition merges and processing accounts, byte, numerical and statistical comparators, quality before speed, a CPU benchmark, a
+GPU subchain of the destriper against its CPU recipe, the g×E degeneracy and the A26-A36 run time on synthetic fixtures and recorded development
+products. Most comparators answer `incomplete`, never a pass, because no reproducibility tolerance is frozen for those recipes. The GPU tests
+join the PyTorch backend leg in CI. No speed claim: timings are records, and the GPU timings at scan sizes stay sealed.
+
+Detector reconstruction, task T13 (`evals/reconstruction-holdout/`). A frozen scorer, `score_holdout.py`, for an AI-evaluation holdout written and
+held off this host; a harness, `run_holdout.py`, that runs fresh headless sessions of the system under test in a bubblewrap sandbox (own home, read-only
+system and plugin snapshot; the repository, the runner's home and the run root absent) and writes the scorer's run records; `run_holdout_slurm.py`,
+which chains those sessions as Slurm jobs; a six-task development set; and a CI step for its tests (fake CLI, no model calls). No holdout exists yet
+and no model session has run, so holdout independence is not established.
+
+`.gitattributes` marks `*.cells`, `*.readout` and `*.t07data` as binary. The plan records for this work, with the final report, are in
+`docs/dev/detector-reconstruction/`.
+
 ## 0.67.0 (2026-11-14)
 
 Minor release; contracts 3.27.0 unchanged (the calibration schemas carry their own schema versions, `calibration-*/1`), `CORE_VERSION` 1.14.0 (`core/calibration/`), `adapters/geant4` 0.16.0 (the calibration evaluator `g4sim_calib_eval.py`). Ships the simulator parameter calibration workflow, phases 0 to 4 (PRs #385, #386, #396, #400, #401, #403, #404, #406, #407), and the hep-detector method-text additions (PR #402 and those below). Every calibration result is `synthetic` and, where a §8.7 value is not calibrated, `provisional-thresholds`.

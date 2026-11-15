@@ -1,0 +1,8 @@
+CAI-T08-2 main-E3-iso-multiply role multiply: 3000 events; objects nominal 3000, changed 3000; components nominal 3000, changed 3000; components without objects nominal 0, changed 0
+CAI-T08-2 main-E3-iso-multiply kept cells: entered 93 (changed-gain channels 93), left 0 (changed-gain channels 0)
+CAI-T08-2 main-E3-iso-multiply counterparts of nominal objects: by peak channel 2958, by overlap 42, none 0; changed objects with no nominal counterpart 0
+CAI-T08-2 main-E3-iso-multiply membership changes per object (channels in one member set only) 0:2909 1:89 2:2 3+:0, largest 2; of objects with a changed member 0:1833 1:4 2:0 3+:0
+CAI-T08-2 main-E3-iso-multiply energy change of objects with a changed member: n 1837 mean +11.0365 MeV, min +0.1501, max +139.9556, mean relative +0.00501; without a changed member: n 1163, largest |change| 1.359 MeV
+CAI-T08-2 main-E3-iso-multiply change minus the fixed-membership formula: one-peak, membership unchanged n 2909 largest 3.329e-16 of the scale; two-peak, membership unchanged n 0 largest 0 MeV (the re-sharing); membership changed n 91 largest 1.359 MeV (a reading, no assertion: R37)
+CAI-T08-2 main-E3-iso-multiply event clustered-sum change minus the formula over the nominal kept cells: min -7.674e-13 max +1.359 MeV; >= 0 in 3000 of 3000 events, <= 0 in 2909 of 3000 (to rounding: 1e-12 of the nominal sum)
+CAI-T08-2 main-E3-iso-multiply RECORD recorded without a numeric assertion (R37)

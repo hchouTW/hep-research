@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.27.0"
+CONTRACTS_VERSION = "3.28.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,16 @@ CONTRACTS_VERSION = "3.27.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.28.0 (minor; detector reconstruction T06) adds eight schemas read by contracts/reconstruction.py and contracts/conditions.py, through contracts/sidecar_reader.py:
+# reconstruction_common.json, reconstruction_port.json (reconstruction-port/1), reconstruction_product.json (reconstruction-product/1),
+# reconstruction_recipe.json (reconstruction-recipe/1), conditions_payload.json (conditions-payload/1), binding_evidence.json (binding-evidence/1),
+# selection_record.json (selection-record/1) and input_signature.json (input-signature/1). None is an artifact type; no rule, vocabulary term, envelope
+# field or capability changes: every 3.27 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
+# The same minor (T14) adds input_inspection.json (input-inspection/1), written by contracts/input_inspector.py and read through contracts/sidecar_reader.py, again no artifact
+# type, and input-signature/1 now tells a number from a boolean when it looks for a hidden conflict.
+# The same minor (T15a) adds candidate_index.json (candidate-index/1) and selection_policy.json (selection-policy/1), read through contracts/sidecar_reader.py, again no artifact type,
+# and an optional formal block in selection-record/1, written by contracts/candidate_selection.py. A record without that block keeps its meaning.
+# judge_candidates now ranks a conflict above an unsatisfied item at every level, by the user's T14 ruling, and reads a fact only inside its own product.
 # 3.27.0 (minor; g4sim S9) adds alignment_overlay.json (alignment-overlay/1: shifts and small rotations of IR placements, applied by
 # core/geometry/alignment.py after expansion) and condition_snapshot.json (condition-snapshot/1: IOV-indexed conditions of a readout's cells, for
 # the response layer, core/simulation/conditions.py), and the optional `alignment` field of geometry_ir.json's physical part (the IR's minor change:

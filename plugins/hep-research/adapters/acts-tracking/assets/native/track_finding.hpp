@@ -1,0 +1,234 @@
+// Pattern recognition of recipe reco.track.acts-ckf-planar/1 (t04-values-v4.md section 8.1): seeds from the hits, the ACTS combinatorial Kalman
+// filter, greedy ambiguity resolution, and a Kalman fit of each selected hit set. Data side: it reads hits and what section 4.1 states of the
+// telescope, and nothing here may reach truth, a generator or seed code. Section 7's truth-seeded run shares the steps after the start, by one code path
+// (TrackFinder::search_resolve_fit), so "the same recipe" holds by construction; its entry, find_from_starts, is defined in truth_seeded_search.cpp, which
+// only the scoring-side program acts_truth_seeded_run compiles (CMakeLists.txt), so the finder holds no route to it. Its output is not this recipe's.
+//
+// Every number below is development configuration and belongs to Freeze B (section 2.2, Configuration and Algorithmic budgets). None comes from
+// a pull or a T08 target. Each is section 4.1 or 7, or arithmetic on them, as its comment says, except seed_prior_inflation, tuned on block 1 as
+// stated beside it (section 3.2 makes block 1 tuning).
+#pragma once
+
+#include <Acts/Definitions/Algebra.hpp>
+#include <Acts/Definitions/TrackParametrization.hpp>
+#include <Acts/EventData/BoundTrackParameters.hpp>
+#include <Acts/EventData/ParticleHypothesis.hpp>
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "kalman_refit.hpp"
+#include "t07_data_file.hpp"
+#include "telescope_geometry.hpp"
+
+namespace t07 {
+
+struct SeedPlanes {
+  int first = 0;
+  int middle = 0;
+  int last = 0;
+};
+
+// Any two lost planes leave one of these whole, so a track with 6 of 8 hits, section 7's reconstructable track, always has a seed, whichever
+// two it lost. Four is the fewest that do it, and these have the smallest doublet and middle windows of the four-triple sets, so the fewest
+// chance triples on section 4.1's noise (exhaustive search over the 56 triples). Upstream first, so that the track found first starts earliest.
+inline constexpr std::array<SeedPlanes, 4> seed_plane_triples{{{1, 2, 3}, {1, 2, 4}, {3, 4, 5}, {6, 7, 8}}};
+// Section 4.1: lowest bin edge 1.5 GeV, so a curvature of at most k B / p = 2e-4 per mm.
+inline constexpr double seed_lowest_momentum_gev = 1.5;
+// Section 4.1: vertex slopes up to 0.15, plus the bend k B L / p = 0.09 over the 450 mm to plane 8, and 0.15 / cos(0.24) along v.
+inline constexpr double seed_largest_slope_u = 0.25;
+inline constexpr double seed_largest_slope_v = 0.16;
+// Hit noise allowed around a triple's interpolation, in the sigma of that interpolation: two-sided 5.7e-7 per coordinate, so no triple of true
+// hits is lost to this cut at any size this fixture reaches.
+inline constexpr double seed_window_sigma = 5.0;
+// A seed starts on ACTS's helix for its three hits, with the covariance of that start from the hits' own errors (seed_start_of). Both are needed.
+// Along u that helix passes through all three hits. Along v it passes through the first hit with the slope from the first to the last hit, over their
+// straight transverse distance (the chord): libActsCore's estimateTrackParamsFromSeed takes the slope of the last two hits alone (D1 stage 5d report), which
+// job 7496491 showed costs o3 noise tracks, 781 lost against 584 with the chord (user's choice, decisions.md "Recipe choice after stage 5d"). The chord
+// against the arc: at 1.5 GeV a slope low by at most 4e-5 of itself, under 1e-3 mm at the seed's own hits and at plane 1 (D1 stage 5e report).
+// ACTS makes a hole only when no hit passes, so on a plane where a track lost its hit a foreign hit inside the window is taken with no hole beside
+// it and drags the track off: a diagonal prior's window of 30 to 300 mm^2 at plane 1 cost job 7493849 1 to 2 % of noise-fixture tracks (D1 stage 5
+// report, Fix round 1). And a correlated prior holds only about a centre on the track: job 7494285's, a parabola, missed a 6-7-8 seed's own hits by
+// up to 0.5 mm at 1.5 GeV where the prior allows 0.03 mm, and left out the factor between curvature and q/p (Fix round 2).
+// The inflation: the filter meets the seed's hits a second time, which shrinks the covariance, so a true hit can fail the cut. In a linear model 1.5
+// refuses as often as the diagonal did, 0.14 % of 1-2-3 seeds against 0.13 %, a rate job 7493849's clean fixture shows to be harmless; 1 refuses
+// four times as often, and 2 widens every window by 1.8 in area.
+inline constexpr double seed_prior_inflation = 1.5;
+// Chi2 of a hit against a prediction, two coordinates: exp(-16 / 2) = 3.4e-4 of true hits lost per plane, and at the converged prediction a
+// radius near 0.11 mm, inside the 0.15 mm circle of section 4.1's p_w. The same value bounds outliers, so no hit above the cut joins a track.
+inline constexpr double finding_chi2_cut = 16.0;
+// Section 7: reconstructable means at least 6 hits on distinct planes, of 8. So a branch with 3 holes cannot reach 6 and stops.
+inline constexpr std::size_t finding_least_measurements = 6;
+inline constexpr unsigned int finding_most_holes = 2;
+// Budgets (K10). The widest window, 6-7-8 at plane 1, is about 9 mm^2 with the chord slope (seed_start_probe prints it; 14 with the last two's slope,
+// job 7496491), so under 0.7 hits at o3 where tracks fan out at 0.04 per mm^2 over 0.0115 of noise: 16 per surface leaves an honest event far from the limit, and 32
+// per seed likewise, so a mark means something. A seed reaching either limit is marked search-truncated. Correction: with the diagonal prior this
+// comment gave a tail of 1e-7 from noise alone, leaving out the fan; job 7493849 reached the limits in 43 % of o3 noise events.
+inline constexpr std::size_t finding_most_branches_per_surface = 16;
+inline constexpr std::size_t finding_most_branches_per_seed = 32;
+// 336 chance triples are expected per event at o3, closed form (tests/adapters/test_acts_finding.py), so this is thirty times that.
+inline constexpr std::size_t finding_most_seeds_per_event = 10000;
+// 32 branches of at most nine legs of a few steps stay under 1,000, so this never binds before the branch budget: a guard against a loop.
+inline constexpr unsigned int finding_most_propagator_steps = 10000;
+// A selected hit set is fitted, then fitted again from its own q/p: the filter's q/p can sit outside the domain kalman_refit.hpp states. Iterations (K10).
+inline constexpr int finding_fit_passes = 2;
+// The name does not say what the value means. resolve() leaves its loop only when the largest shared count among the tracks left is below this value
+// (libActsCore, the jb at 0x852033; the doc comment "Maximum amount of shared hits per track" says otherwise). So 2 means each selected track holds at most
+// one hit that another selected track also holds, and two delivered tracks may share a hit. Each eviction goes to the track with the largest share of shared
+// hits, then the fewest hits, then the largest chi2. A development value for Freeze B (user, decisions.md "Recipe choice after stage 5d"), by the rule fixed in
+// the D1 stage 5d report before its job: it recovers o3 noise losses on the paired table, 163 of 174 ambiguity losses in job 7496491 and none lost in exchange,
+// with fakes and duplicates on both fixtures inside RARE_RATE_LIMIT. Section 7's reason: a track that took one foreign hit, on a plane where it has none of its
+// own, still matches its particle, so it should not cost that hit's owner or itself. Not from a pull or a T08 target. The consequence for duplicates: two tracks
+// of one particle hold at least 4 of its hits each (section 7, more than 50 % of at least 6) and share at most one: at least 12 hits on the pair, at most 9 of
+// them the particle's (8 planes, one counted twice), so at least 3 hits not its own.
+// Correction: until stage 5e the value was ACTS's default 1, which means no shared hit, and this comment first said "at most one hit" of that value.
+inline constexpr std::uint32_t ambiguity_most_shared_hits = 2;
+// ACTS's default: each iteration evicts one candidate, and an o3 event holds far fewer. Reaching it with a conflict left marks the event and all its
+// candidates search-truncated.
+inline constexpr std::uint32_t ambiguity_most_iterations = 1000;
+
+// Where a seed's search starts: at x = refit_start_x_mm, upstream of plane 1, so that the filter reaches every plane.
+struct SeedStart {
+  Acts::Vector3 position_mm;
+  Acts::Vector3 direction;
+  double q_over_p = 0.0;
+  Acts::BoundMatrix covariance = Acts::BoundMatrix::Zero();
+};
+// From three points on planes, along the track. Empty for a seed with no usable helix, which is counted as failed.
+std::optional<SeedStart> seed_start_of(const std::array<Acts::Vector3, 3>& points, double sigma_loc0_mm, double sigma_loc1_mm, double field_along_v_tesla);
+
+struct HitTriple {
+  SeedPlanes planes;
+  std::array<std::uint32_t, 3> hit_keys{};
+};
+
+struct SeedSearch {
+  std::vector<HitTriple> triples;
+  bool reached_budget = false;
+};
+
+// Triples of hits compatible with a track of section 4.1: a pair inside the slope window, a middle hit inside the curvature window. Hits only.
+SeedSearch find_seeds(const DataEvent& event, double hit_sigma_mm, double field_along_v_tesla);
+
+// What became of one seed. Outcome: skipped (all three hits already on one candidate), no-start (no usable helix), filter-error, step-limit (propagator budget),
+// no-candidate (the search kept no branch of finding_least_measurements hits) or candidates. candidates counts this seed's entries in EventFinding::candidates
+// from first_candidate on. short_branches counts the branches the filter returned under finding_least_measurements hits; branches stop_branch dropped leave no trace.
+struct SeedRecord {
+  HitTriple triple;
+  std::string outcome;
+  std::size_t first_candidate = 0;
+  std::size_t candidates = 0;
+  std::size_t short_branches = 0;
+};
+
+// A branch of at least finding_least_measurements hits that survived the search. Shorter ones are not candidates. Outcome: selected, evicted by ambiguity
+// resolution, or fit-failed. t04-prereg.md's failure classes.
+struct FoundCandidate {
+  std::string key;
+  SeedPlanes seed_planes;
+  std::string outcome;
+  std::string failure_category;  // none, ambiguity or fit
+  bool search_truncated = false;  // its seed's budget, the event's seed budget, or the event's ambiguity budget
+  std::int32_t measurements = 0;
+  std::int32_t holes = 0;
+  double search_chi2 = 0.0;  // the filter's, with the seed's prior: for ambiguity resolution only
+  double q_over_p = 0.0;     // the filter's last value
+  double fit_chi2 = 0.0;     // of the selected hit set's own fit
+  std::int32_t fit_coordinates = 0;
+  std::vector<std::uint32_t> hit_keys;  // along the track
+};
+
+// One traced search: ACTS's own VERBOSE lines of the CKF and the navigator, every branch it returned with its states, and this file's budget marks.
+struct SearchTrace {
+  std::size_t search = 0;   // position in EventFinding::seeds
+  std::string result;       // ok, or the error ACTS returned for the whole search
+  bool truncated = false;   // a per-surface or per-seed branch budget, or the step limit, acted
+  bool step_limit = false;  // the propagator's step budget ended the search
+  std::size_t extra_branches = 0;
+  std::string acts_log;
+  std::string branches;
+};
+
+struct EventFinding {
+  std::uint32_t event_ordinal = 0;
+  std::size_t hit_count = 0;
+  std::size_t seeds_found = 0;
+  std::size_t seeds_run = 0;
+  std::size_t seeds_skipped = 0;   // all three hits already on one candidate
+  std::size_t seeds_failed = 0;    // no usable estimate, or the filter returned an error: SeedRecord tells them apart
+  std::size_t seeds_without_candidate = 0;
+  std::size_t seeds_truncated = 0;
+  bool seed_budget_reached = false;
+  bool ambiguity_budget_reached = false;
+  std::string failure_category;  // none, seed-or-finding, search-truncated: of an event with no selected track
+  std::vector<SeedRecord> seeds;  // every seed found, in search order
+  std::vector<FoundCandidate> candidates;
+  std::vector<RefitResult> fits;  // of the selected candidates that were fitted
+  std::string ambiguity_trace;    // ACTS's own VERBOSE lines from resolve(), for an event asked for by name only: an output, nothing reads it back
+  std::vector<SearchTrace> search_traces;  // for searches asked for by index only (D1 stage 6b): an output, nothing reads it back
+
+  bool search_truncated() const { return seed_budget_reached || ambiguity_budget_reached || seeds_truncated > 0; }
+};
+
+// Every limit and cut, by name: BP03, "All seed/branch/resource limits enter the effective configuration".
+std::vector<std::pair<std::string, std::string>> effective_configuration();
+
+// A start given on a telescope plane rather than made from this event's hits: bound parameters loc0, loc1, phi, theta, q/p, time and their covariance.
+// Only section 7's truth-seeded run makes these, on the scoring side (acts_truth_seeded_run.cpp); the finder's program has no input that could carry one.
+struct PlaneStart {
+  std::uint32_t label = 0;  // what the record names the start by: the particle's position in its truth event
+  int plane = 0;            // 1..8
+  Acts::BoundVector parameters = Acts::BoundVector::Zero();
+  Acts::BoundMatrix covariance = Acts::BoundMatrix::Zero();
+};
+
+class TrackFinder {
+ public:
+  TrackFinder(const TelescopeGeometry& telescope, double field_along_v_tesla, double sigma_loc0_mm, double sigma_loc1_mm);
+  ~TrackFinder();
+
+  // The recipe: seeds from the hits, then the steps after the start. trace_ambiguity asks for ACTS's own removal sequence of this event (D1 stage 6
+  // brief): the same configuration with a VERBOSE logger, so the decisions are the same; it fills EventFinding::ambiguity_trace.
+  EventFinding find(const DataEvent& event, std::uint32_t event_ordinal, bool trace_ambiguity = false) const;
+
+  // Section 7's truth-seeded run: the same steps after the start, one search from each start in order, none skipped. Defined in truth_seeded_search.cpp,
+  // compiled only into the scoring-side program: the finder's binary has no such symbol (the build job reads it).
+  EventFinding find_from_starts(const DataEvent& event, std::uint32_t event_ordinal, const std::vector<PlaneStart>& starts) const;
+  // The same, with ACTS's own log of the searches whose start labels are named, and of the event's ambiguity resolution if trace_ambiguity (D1 stage 6b).
+  EventFinding find_from_starts(const DataEvent& event, std::uint32_t event_ordinal, const std::vector<PlaneStart>& starts, const std::set<std::uint32_t>& traced_labels,
+                                bool trace_ambiguity) const;
+
+ private:
+  // One search's start, as find and find_from_starts hand it over. outcome "skipped" or "no-start" settles the search before it runs (no parameters);
+  // otherwise the CKF runs from parameters.
+  struct StartStep {
+    HitTriple triple;
+    std::string outcome;
+    std::optional<Acts::BoundTrackParameters> parameters;
+  };
+  // Asked for the next start until it answers none; it sees which candidates hold each hit so far, for the finder's skip rule.
+  using StartSource = std::function<std::optional<StartStep>(const std::vector<std::vector<std::size_t>>& candidates_of_hit)>;
+  // The steps after the start, one code path for both: the CKF search with this recipe's selector, windows, branch stopper and budgets from each start,
+  // then greedy ambiguity resolution and the fit of each selected hit set. finding arrives with its event fields set.
+  void search_resolve_fit(const DataEvent& event, EventFinding& finding, const StartSource& next_start, bool trace_ambiguity,
+                          const std::set<std::size_t>& traced_searches) const;
+  Acts::ParticleHypothesis hypothesis() const;
+
+  struct Machinery;
+  const TelescopeGeometry& m_telescope;
+  double m_field_along_v_tesla;
+  double m_sigma_loc0_mm;
+  double m_sigma_loc1_mm;
+  KalmanRefit m_fitter;
+  std::unique_ptr<Machinery> m_machinery;
+};
+
+}  // namespace t07

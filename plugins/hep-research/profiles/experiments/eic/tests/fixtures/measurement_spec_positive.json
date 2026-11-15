@@ -1,5 +1,5 @@
 {
- "contract_version": "3.27.0",
+ "contract_version": "3.28.0",
  "artifact_id": "eic-measurement-spec-positive",
  "artifact_type": "measurement-spec",
  "objective": "SYNTHETIC test fixture for the EIC configuration checker: inclusive electron-proton cross section at the 18x275 configuration; values are placeholders, not physics",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "3.27.0",
+  "contracts": "3.28.0",
   "profiles": {}
  },
  "provenance": {

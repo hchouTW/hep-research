@@ -1,0 +1,554 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "acts_tracking",
+ "entry": "adapters/acts-tracking/assets/acts_tracking.py",
+ "operations": [
+  {
+   "operation_id": "self-test",
+   "summary": "The driver's own checks: ACTS version, geometry, propagation, data file and product round trip; backend smoke, no tracking quality",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--work-dir",
+      "input": "work_dir"
+     },
+     {
+      "flag": "--build-dir",
+      "input": "build_dir"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "work_dir",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a writable folder"
+    },
+    {
+     "name": "build_dir",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "folder of the built programs; else HEP_ACTS_TRACKING_BUILD"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "program_exit",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "program_stdout",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the native program failed or did not finish, or a refit fitted no track; stdout carries status failed and the reason"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data ends here"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "the built program is missing: stdout carries status missing-dependency (core/status.py), nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": true
+   }
+  },
+  {
+   "operation_id": "generate-fixture",
+   "summary": "Events of t07-telescope-clean/1 or t07-telescope-noise/1 through the ACTS propagator: measurements in one file, truth with role truth in another",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--fixture",
+      "input": "fixture"
+     },
+     {
+      "flag": "--block",
+      "input": "block"
+     },
+     {
+      "flag": "--stratum",
+      "input": "stratum"
+     },
+     {
+      "flag": "--first-event",
+      "input": "first_event"
+     },
+     {
+      "flag": "--count",
+      "input": "count"
+     },
+     {
+      "flag": "--data-file",
+      "input": "data_file"
+     },
+     {
+      "flag": "--truth-file",
+      "input": "truth_file"
+     },
+     {
+      "flag": "--build-dir",
+      "input": "build_dir"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "fixture",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "clean or noise"
+    },
+    {
+     "name": "block",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "a seed block of t04-values-v4.md section 3.2"
+    },
+    {
+     "name": "stratum",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "3 x momentum bin + occupancy level, 0 to 11"
+    },
+    {
+     "name": "first_event",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "a non-negative event index"
+    },
+    {
+     "name": "count",
+     "kind": "count",
+     "unit": "1",
+     "required": true,
+     "constraint": "events to write"
+    },
+    {
+     "name": "data_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "path of the measurements"
+    },
+    {
+     "name": "truth_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "path of the truth, suffix .t07truth"
+    },
+    {
+     "name": "build_dir",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "folder of the built programs; else HEP_ACTS_TRACKING_BUILD"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "program_exit",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "program_stdout",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the native program failed or did not finish, or a refit fitted no track; stdout carries status failed and the reason"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data ends here"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "the built program is missing: stdout carries status missing-dependency (core/status.py), nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": true
+   }
+  },
+  {
+   "operation_id": "refit",
+   "summary": "ACTS Kalman refit of known hit sets, at zero field or the fixture's 1 T: truth-assisted, counted apart, never reported as finding; predicted, filtered and smoothed states kept apart",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--data-file",
+      "input": "data_file"
+     },
+     {
+      "flag": "--hit-sets",
+      "input": "hit_sets"
+     },
+     {
+      "flag": "--field-tesla",
+      "input": "field_tesla"
+     },
+     {
+      "flag": "--product-id",
+      "input": "product_id"
+     },
+     {
+      "flag": "--product-file",
+      "input": "product_file"
+     },
+     {
+      "flag": "--alignment-payload",
+      "input": "alignment_payload"
+     },
+     {
+      "flag": "--build-dir",
+      "input": "build_dir"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "data_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "measurements; a truth file is refused"
+    },
+    {
+     "name": "hit_sets",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "acts-tracking-hit-sets/1 bound to the data file by its SHA-256"
+    },
+    {
+     "name": "field_tesla",
+     "kind": "parameter",
+     "unit": "T",
+     "required": true,
+     "constraint": "0, or the fixture's 1 T"
+    },
+    {
+     "name": "product_id",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "identity of the product"
+    },
+    {
+     "name": "product_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "acts-tracking-product/2 to write, with the R33 outputs of each fit; with alignment_payload its header line alignment_payload records the payload applied (content identity, origin, derived_against, derived_from, round none), without it the product is as before, byte for byte"
+    },
+    {
+     "name": "alignment_payload",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "path of a t07-alignment-payload/1 file, role alignment conditions (R32; its sidecar is conditions-payload/1): applied by the driver through the placement route and read and checked by the driver alone; among the refusals, exit 2, before any fit: a malformed payload, a plane the telescope has not, one labelled nominal that moves a plane, one derived against another nominal geometry (acts_tracking_driver geometry-id), a truth path, and the product file itself"
+    },
+    {
+     "name": "build_dir",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "folder of the built programs; else HEP_ACTS_TRACKING_BUILD"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "program_exit",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "program_stdout",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "tracks",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "failed_tracks",
+     "kind": "count",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the native program failed or did not finish, or a refit fitted no track; stdout carries status failed and the reason"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data, and an alignment payload the driver refuses, end here, with the driver's own refusal as the reason (its stderr, trimmed)"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "the built program is missing: stdout carries status missing-dependency (core/status.py), nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": true
+   }
+  },
+  {
+   "operation_id": "find",
+   "summary": "ACTS pattern recognition on hits alone, recipe reco.track.acts-ckf-planar/1: seeds from hits, combinatorial Kalman filter, greedy ambiguity resolution and a fit of each selected hit set; data side; limits reached marked search-truncated; candidates, selected branches and failure categories in the record; predicted, filtered and smoothed states kept apart in the product",
+   "invocation": {
+    "kind": "cli",
+    "options": [
+     {
+      "flag": "--data-file",
+      "input": "data_file"
+     },
+     {
+      "flag": "--product-id",
+      "input": "product_id"
+     },
+     {
+      "flag": "--product-file",
+      "input": "product_file"
+     },
+     {
+      "flag": "--record-file",
+      "input": "record_file"
+     },
+     {
+      "flag": "--product-events",
+      "input": "product_events"
+     },
+     {
+      "flag": "--r33-outputs",
+      "input": "r33_outputs"
+     },
+     {
+      "flag": "--build-dir",
+      "input": "build_dir"
+     }
+    ],
+    "output": "json-stdout"
+   },
+   "inputs": [
+    {
+     "name": "data_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "measurements; a truth file is refused"
+    },
+    {
+     "name": "product_id",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "identity of the product"
+    },
+    {
+     "name": "product_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "acts-tracking-product/1 to write; acts-tracking-product/2, with R33's outputs of each delivered track of the first product_events events, with r33_outputs"
+    },
+    {
+     "name": "record_file",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "acts-tracking-finding-record/1 to write"
+    },
+    {
+     "name": "product_events",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "events, from the first, whose selected tracks keep their states in the product"
+    },
+    {
+     "name": "r33_outputs",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "t07-r33/1, the R33 conventions, the one value the finder takes (another is refused, exit 2): the product becomes acts-tracking-product/2; an output only, it takes no input and the record is the same with or without it"
+    },
+    {
+     "name": "build_dir",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "folder of the built programs; else HEP_ACTS_TRACKING_BUILD"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "reason",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "program_exit",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "program_stdout",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "tracks",
+     "kind": "count",
+     "unit": "1"
+    },
+    {
+     "name": "failed_tracks",
+     "kind": "count",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the native program failed or did not finish, or every fit of a selected track failed; stdout carries status failed and the reason"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data, and an r33_outputs other than t07-r33/1, end here, with the finder's own refusal as the reason (its stderr, trimmed)"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "the built program is missing: stdout carries status missing-dependency (core/status.py), nothing ran"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": true
+   }
+  }
+ ]
+}

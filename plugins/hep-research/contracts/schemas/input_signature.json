@@ -1,0 +1,27 @@
+{
+ "$comment": "input-signature/1 (contract-map.md; plan Section 5.5; K15): what is known of one product and scope. Multi-label, and each fact keeps its value, scope, source, method and validity. T14 fills it; here it is a readable and honest record. Read by contracts/reconstruction.py, not an artifact type.",
+ "type": "object",
+ "required": ["schema", "signature_id", "scope", "facts", "unknown", "conflicts", "family_candidates", "required_extensions"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "input-signature/1"},
+  "signature_id": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "scope": {"type": "object", "required": ["product", "window"], "additionalProperties": false,
+   "properties": {"product": {"$ref": "reconstruction_common.json#/$defs/name"}, "window": {"$ref": "reconstruction_common.json#/$defs/name"}}},
+  "facts": {"type": "array", "items": {"$ref": "#/$defs/fact"}},
+  "unknown": {"$ref": "reconstruction_common.json#/$defs/names"},
+  "conflicts": {"$comment": "keys with conflicting facts; a conflict stays visible", "$ref": "reconstruction_common.json#/$defs/names"},
+  "family_candidates": {"$ref": "reconstruction_common.json#/$defs/names"},
+  "required_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "optional_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "extensions": {"$ref": "reconstruction_common.json#/$defs/extension_fields"}
+ },
+ "$defs": {
+  "fact": {"type": "object", "required": ["key", "value", "scope", "source", "reader_version", "method", "validity"], "additionalProperties": false,
+   "properties": {"key": {"$ref": "reconstruction_common.json#/$defs/name"}, "value": {"type": ["string", "number", "boolean"]}, "scope": {"$ref": "reconstruction_common.json#/$defs/name"},
+    "source": {"type": "object", "required": ["kind", "reference"], "additionalProperties": false,
+     "properties": {"kind": {"enum": ["reader", "declaration", "derivation", "llm-extraction", "file-name", "array-shape", "model-confidence"]}, "reference": {"$ref": "reconstruction_common.json#/$defs/name"}}},
+    "reader_version": {"$ref": "reconstruction_common.json#/$defs/name"}, "method": {"enum": ["observed", "declared", "derived", "unknown", "conflict"]},
+    "validity": {"$ref": "reconstruction_common.json#/$defs/name"}}}
+ }
+}

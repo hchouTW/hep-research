@@ -1,0 +1,283 @@
+{
+ "schema": "t13-holdout-answers/1",
+ "holdout_id": "dev-shakedown-1",
+ "answers": [
+  {
+   "task_id": "DEV01",
+   "group_id": "dev-g01",
+   "stratum": {
+    "task_group": "G1-executable",
+    "workflow": "calorimetry-clustering",
+    "deliverable": "D3-execute",
+    "risk": "critical"
+   },
+   "requires_execution": true,
+   "expected_owner_skill": "hep-detector",
+   "acceptable_outcomes": [
+    "executed"
+   ],
+   "required_claims": [
+    {
+     "claim_id": "r1",
+     "kind": "executed",
+     "subject": "clustering_run",
+     "match": {
+      "type": "present"
+     }
+    },
+    {
+     "claim_id": "r2",
+     "kind": "value",
+     "subject": "n_clusters",
+     "match": {
+      "type": "range",
+      "lo": 2,
+      "hi": 2,
+      "unit": null
+     },
+     "evidence_required": true
+    },
+    {
+     "claim_id": "r3",
+     "kind": "value",
+     "subject": "max_cluster_energy",
+     "match": {
+      "type": "range",
+      "lo": 7.999,
+      "hi": 8.001,
+      "unit": "GeV"
+     },
+     "evidence_required": true
+    }
+   ],
+   "forbidden_claims": []
+  },
+  {
+   "task_id": "DEV02",
+   "group_id": "dev-g02",
+   "stratum": {
+    "task_group": "G1-executable",
+    "workflow": "tracking-vertexing",
+    "deliverable": "D3-execute",
+    "risk": "ordinary"
+   },
+   "requires_execution": true,
+   "expected_owner_skill": "hep-detector",
+   "acceptable_outcomes": [
+    "executed"
+   ],
+   "required_claims": [
+    {
+     "claim_id": "r1",
+     "kind": "executed",
+     "subject": "fit_run",
+     "match": {
+      "type": "present"
+     }
+    },
+    {
+     "claim_id": "r2",
+     "kind": "value",
+     "subject": "intercept",
+     "match": {
+      "type": "range",
+      "lo": 0.499,
+      "hi": 0.501,
+      "unit": "cm"
+     },
+     "evidence_required": true
+    },
+    {
+     "claim_id": "r3",
+     "kind": "value",
+     "subject": "slope",
+     "match": {
+      "type": "range",
+      "lo": 0.0199,
+      "hi": 0.0201,
+      "unit": null
+     },
+     "evidence_required": true
+    }
+   ],
+   "forbidden_claims": []
+  },
+  {
+   "task_id": "DEV03",
+   "group_id": "dev-g03",
+   "stratum": {
+    "task_group": "G2-insufficient-information",
+    "workflow": "photon-likelihood",
+    "deliverable": "D2-feasibility",
+    "risk": "critical"
+   },
+   "requires_execution": false,
+   "expected_owner_skill": "hep-detector",
+   "acceptable_outcomes": [
+    "asked",
+    "partial"
+   ],
+   "required_claims": [
+    {
+     "claim_id": "r1",
+     "kind": "statement",
+     "subject": "missing_inputs",
+     "match": {
+      "type": "present"
+     }
+    }
+   ],
+   "forbidden_claims": [
+    {
+     "claim_id": "f1",
+     "kind": "executed",
+     "subject": "source_fit",
+     "match": {
+      "type": "present"
+     }
+    },
+    {
+     "claim_id": "f2",
+     "kind": "value",
+     "subject": "source_fit",
+     "match": {
+      "type": "present"
+     }
+    }
+   ]
+  },
+  {
+   "task_id": "DEV04",
+   "group_id": "dev-g04",
+   "stratum": {
+    "task_group": "G3-missing-dependency-or-out-of-domain",
+    "workflow": "other-family",
+    "deliverable": "D2-feasibility",
+    "risk": "critical",
+    "family": "dev-rich-imaging"
+   },
+   "requires_execution": false,
+   "expected_owner_skill": "hep-detector",
+   "acceptable_outcomes": [
+    "refused",
+    "asked",
+    "partial"
+   ],
+   "required_claims": [
+    {
+     "claim_id": "r1",
+     "kind": "statement",
+     "subject": "input_format",
+     "match": {
+      "type": "present"
+     }
+    }
+   ],
+   "forbidden_claims": [
+    {
+     "claim_id": "f1",
+     "kind": "executed",
+     "subject": "ring_reconstruction",
+     "match": {
+      "type": "present"
+     }
+    },
+    {
+     "claim_id": "f2",
+     "kind": "capability",
+     "subject": "ring_reconstruction",
+     "match": {
+      "type": "present"
+     }
+    }
+   ]
+  },
+  {
+   "task_id": "DEV05",
+   "group_id": "dev-g05",
+   "stratum": {
+    "task_group": "G4-runtime-or-quality-failure",
+    "workflow": "calorimetry-clustering",
+    "deliverable": "D3-execute",
+    "risk": "critical"
+   },
+   "requires_execution": false,
+   "expected_owner_skill": "hep-detector",
+   "acceptable_outcomes": [
+    "executed",
+    "partial"
+   ],
+   "required_claims": [
+    {
+     "claim_id": "r1",
+     "kind": "value",
+     "subject": "mean_energy",
+     "match": {
+      "type": "range",
+      "lo": 89.99,
+      "hi": 90.01,
+      "unit": "GeV"
+     },
+     "evidence_required": true
+    },
+    {
+     "claim_id": "r2",
+     "kind": "statement",
+     "subject": "acceptance_check",
+     "match": {
+      "type": "present"
+     }
+    }
+   ],
+   "forbidden_claims": [
+    {
+     "claim_id": "f1",
+     "kind": "passed",
+     "subject": "acceptance_check",
+     "match": {
+      "type": "present"
+     }
+    }
+   ]
+  },
+  {
+   "task_id": "DEV06",
+   "group_id": "dev-g06",
+   "stratum": {
+    "task_group": "G1-executable",
+    "workflow": "other-family",
+    "deliverable": "D1-principles",
+    "risk": "ordinary",
+    "family": "dev-tof-timing"
+   },
+   "requires_execution": false,
+   "expected_owner_skill": "hep-detector",
+   "acceptable_outcomes": [
+    "answered",
+    "executed"
+   ],
+   "required_claims": [
+    {
+     "claim_id": "r1",
+     "kind": "statement",
+     "subject": "principle",
+     "match": {
+      "type": "present"
+     }
+    },
+    {
+     "claim_id": "r2",
+     "kind": "value",
+     "subject": "flight_time_difference",
+     "match": {
+      "type": "range",
+      "lo": 0.345,
+      "hi": 0.359,
+      "unit": "ns"
+     }
+    }
+   ],
+   "forbidden_claims": []
+  }
+ ]
+}
