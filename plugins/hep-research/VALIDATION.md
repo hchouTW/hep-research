@@ -9823,6 +9823,47 @@ changed test modules and photon `run.py` until a job of record renews them.
 
 Pins renewed: job 7655492 (hpa-wn26, 2026-11-14, 18 min 36 s, JOB RESULT PASS; manifest `a237d5a7…` at `29bc0235`, from a checked copy with the live tree hidden) ran the photon-likelihood and calo-cluster adapter modules, both examples twice live and their test modules (photon 32, calo 12), and both records tests, which failed only on the six pins of the changed files and the photon example's count; the live recordings and the offline replays equal the committed ones. The six pins and the count are renewed from its manifest; the jobs of record (7584387, 7557963) and the adapter versions are unchanged.
 
+### RECO-CHECKPOINTS, main full-run fixes after PR #411 — 2026-11-15 (login node, Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1, glibc 2.34; no job)
+
+Main's full `tests` runs 43653363099 (`cd41d5f7`) and 43657072905 (`f6f8f8b6`) failed in legs pull requests skip. Root causes and fixes:
+
+- optional legs, `test_design_space_spectrometer.test_reproduces_committed_output` and the three `timed` pins of
+  `TwoSourceHarness.test_main_dead_and_saturation_outputs_are_unchanged`: one cause, the C library's erfc. The optional legs
+  run on `ubuntu-latest`, ubuntu-26.04 since October 2026 (the checks jobs on ubuntu-24.04, PR #405); its glibc erfc is
+  correctly rounded, glibc 2.34 (NSTCCore, this login node) and 2.39 (ubuntu-24.04) are not. On z = 0x1.8ad12d913e8abp+1
+  (cand-L at 1000 GV) glibc 2.34 gives erfc one ulp below mpmath's correctly rounded value; 0.5 erfc is then
+  6.4394109427811344e-06 (committed) against 6.439410942781135e-06 (CI's bytes, equal to the correctly rounded value).
+  With mpmath's correctly rounded erfc patched into `math`, the three `timed` hash pairs become exactly CI's (`ef3459a3`,
+  `64bf7d92`, `de72caee`) and the stage-1 pins stay; with NumPy's X86_V3 and X86_V4 dispatch disabled and
+  `OPENBLAS_CORETYPE` Haswell or Prescott all six pins and the design-space bytes are unchanged, so NumPy's CPU dispatch and
+  the BLAS core type do not enter these pins. The design-space test has failed in every optional leg since `0504faee` (PR
+  #405), also on `c7e5a610`, whose run was green only because the optional legs are `continue-on-error`; PR #411 changed
+  nothing it computes. Fix: `tests/_platform.py` `recording_erfc()` probes math.erfc on that input; both tests run only where
+  it holds (on ubuntu-24.04 and NSTCCore) and skip elsewhere with a reason naming it. Committed output and pins unchanged.
+  Locally: both pass with the C library's erfc and skip with the patched one. The topology module is pinned by
+  `test_photon_likelihood_records` (job 7655492's manifest), which fails on that pin until a job of record renews it.
+- optional legs, timeouts: the full suites took 24-39 min, and hepdata and root-uproot (run 43653363099), torch-cpu and
+  hepdata (run 43657072905) were cancelled at the 40 min job limit ("exceeded the maximum execution time"), not by
+  fail-fast (`fail-fast: false`). Full runs now allow 60 min; pull requests keep 40.
+- checks (AMS optional): `check_ams_optional.py` on the full plan took 1189 s (run 43657072905) and more than its 1200 s
+  limit (run 43653363099); PR runs take about 15.0 min and the relocated run 20.7 min (2400 s allowed). That leg now sets
+  `HEP_AMS_OPTIONAL_TIMEOUT=1800` and a 40 min job limit; the other checks legs keep 1200 s and 30 min.
+- optional-selection: `tests.adapters.test_calo_zdcsim_root` (needs uproot and awkward) runs only with columnar and
+  root-uproot and was not in `tools/optional_modules.json`, so a pull request's selective optional legs would never run it.
+  Added to both; `optional_selection.py verify` on run 43657072905's records passes (fails with the old list on exactly
+  these two entries). `test_check_histogram_errors` was listed already; the log shows it under `unlocked_modules`, not `unlisted`.
+- `adapters/geant4` 0.16.0 -> 0.17.0: PR #411 changed `geant4_run.py` (scan steps declare `native_inputs`) without the bump
+  `docs/adapter-authoring.md` requires; `test_geant4` 55 run, OK (6 skipped, live Geant4 tests).
+
+Pin renewed: job 7658281 (hpa-wn33, AMD EPYC 9645, 2026-11-15, 12 min 37 s, JOB RESULT PASS; manifest `e86bfafe…` at `77bbfb1b`,
+from a checked copy with the live tree hidden) ran the changed `tests/adapters/test_photon_likelihood_topology.py` on the recording
+platform: `recording_erfc()` true (glibc 2.34), the five photon-likelihood adapter modules 226 run, OK with no skip, among them
+`TwoSourceHarness.test_main_dead_and_saturation_outputs_are_unchanged` run and passed; the calo-cluster modules 181 and 10 run, OK; both
+examples twice live (byte-equal) and their tests (photon 32, calo 12) run, OK; both records tests failing only on that one pin. Readings:
+both examples' live recordings and offline replays equal the committed ones. The pin is renewed from its manifest (`9145bd66…`); the
+jobs of record (7584387, 7557963) and the adapter versions are unchanged. (Job 7658214, the same code on hpa-wn12, ended FAIL only
+because the job's own check read the harness test's verbose result on one line, where its docstring puts it on the next.)
+
 ## RECO-SIX-CRITERIA — 2026-11-14 (records only; no job)
 
 The six-criterion evidence table of plan v9.2 §3.2 and P6, written from the records of this branch at `316a097b`. Correctness and

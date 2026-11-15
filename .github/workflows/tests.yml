@@ -103,7 +103,9 @@ jobs:
     name: checks (Python ${{ matrix.python }}, ${{ matrix.part.name }})
     needs: plan
     runs-on: ubuntu-24.04  # pinned: on ubuntu-26.04 test_design_space_spectrometer differs in one last digit (PR #404)
-    timeout-minutes: 30
+    # AMS optional: check_ams_optional.py on the full plan took 1189 s and over 1200 s on main (runs 43657072905,
+    # 43653363099); its leg allows 1800 s for the check and 40 min for the job (main full-run fix round)
+    timeout-minutes: ${{ matrix.part.key == 'ams-optional' && 40 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -133,6 +135,8 @@ jobs:
         if: steps.sel.outputs.run == 'true'
         run: python -m pip install -r requirements-ci.lock
       - name: ${{ matrix.part.name }}
+        env:
+          HEP_AMS_OPTIONAL_TIMEOUT: ${{ matrix.part.key == 'ams-optional' && '1800' || '1200' }}
         run: python tools/run_all_checks.py --no-cli --jobs 4 ${{ matrix.part.args }} --plan ../../ci-plan/plan.json --out ../../check-runs --summary "$GITHUB_STEP_SUMMARY"
       - name: Tool-contract scopes (every scoped operation has a passing contract, task P5.4)
         if: matrix.part.key == 'static' && steps.sel.outputs.run == 'true'
@@ -382,7 +386,8 @@ jobs:
   optional-python:
     name: optional (${{ matrix.extra }})
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # full suite on main, weekly and manual runs: 24-39 min, and hepdata and root-uproot hit 40 min in run 43653363099
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 40 || 60 }}
     continue-on-error: true
     strategy:
       fail-fast: false
@@ -422,7 +427,7 @@ jobs:
   optional-root:
     name: optional (ROOT)
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 40 || 60 }}  # the full suite took 22-29 min on main
     continue-on-error: true
     container: rootproject/root:6.38.00-ubuntu25.10
     steps:
