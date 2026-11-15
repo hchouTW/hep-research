@@ -354,12 +354,17 @@ class E34NullModes(unittest.TestCase):
 
     def test_jitter_chunk_averages_and_a_unique_claim_are_refused_with_their_codes(self):
         """Amendment 1 (after green-1): T10's rule (t10_replay.py negatives: the variant's code is among the refusal codes). On a
-        zero-sum product, removing the constraint while single parameters stay reported also raises the unidentifiable codes."""
+        zero-sum product, removing the constraint while single parameters stay reported also raises the unidentifiable codes.
+        The variants' codes are the ones setUpClass's case_a34 computed (contract_codes(scan_negative(...)) on this same zero-sum
+        product): the reader is deterministic, so recomputing them here cost about 85 s and tested nothing more."""
         embedded = self.zero["product"]["reconstruction_product"]
-        for name, code in (("jitter", "reconstruction.scan.jitter_precision"), ("chunk-average", "reconstruction.scan.chunk_average"),
-                           ("unique-without-constraint", "reconstruction.scan.unique_claim")):
+        negative_codes = self.case["readings"]["negative_codes"]
+        variants = (("jitter", "reconstruction.scan.jitter_precision"), ("chunk-average", "reconstruction.scan.chunk_average"),
+                    ("unique-without-constraint", "reconstruction.scan.unique_claim"))
+        self.assertEqual(sorted(negative_codes), sorted(name for name, _ in variants))
+        for name, code in variants:
             with self.subTest(variant=name):
-                self.assertIn(code, rt.contract_codes(rt.scan_negative(embedded, name)))
+                self.assertIn(code, negative_codes[name])
         self.assertEqual(rt.contract_codes(embedded), [], "the unmodified product passes")
 
     def test_the_case_passes_every_item(self):

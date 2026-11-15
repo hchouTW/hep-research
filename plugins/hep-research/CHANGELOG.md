@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- CI: faster runs with the same coverage (every command, module and check still runs; estimates from the PR #411
+  run, to be confirmed on GitHub). The `hostile-paths (checks)` leg, the critical path at 21.8 min, is split into
+  three parallel legs: packaging scan with the pull-request subset, relocated `--part static`, relocated
+  `--part ams-optional` (still `HEP_AMS_OPTIONAL_TIMEOUT=2400`); `checks-complete` still needs every leg. The units
+  part runs in four shards instead of three, in the checks matrix and the hostile-paths legs (reconciled with
+  `--shards 4`), balanced by a `tools/module_timings.json` refreshed from the PR #411 and main CI shards (slowest
+  shard, simulated: 807 s with the old timings and three shards, 518 s now). `test_t12_runtime`'s E34 negatives
+  reuse the codes the class fixture computed (that test 84 s to 21 s locally; the module runs five times per full
+  run). In `platforms.yml` the macOS units part (23-26 min on one runner) runs as three shards, reconciled by a new
+  `macos-complete` job. Expected: a full-plan PR run from about 22 min to about 13-16 min, bounded by the two
+  AMS-optional runs; macOS to about 9-11 min.
 - **Upload package** (maintainer decision 2026-11-14, "Exclude tests/ except runtime needs"): `tests/` is marked
   `export-ignore` in the plugin's `.gitattributes` (`git archive HEAD:plugins/hep-research` reads attributes only from the
   archived tree), with `-export-ignore` lines for what shipped code reads at run time: the six tests that profile
