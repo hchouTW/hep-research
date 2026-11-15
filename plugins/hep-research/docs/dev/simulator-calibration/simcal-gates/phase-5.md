@@ -12,13 +12,13 @@
 | --- | --- |
 | Phase | 5 (Extensions) |
 | Worktree | `/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-5` (private ceph folder) |
-| Branch | `simcal/phase-5`, from `origin/main` `c7e5a610` (release 0.67.0, phases 0–4 merged) |
-| Commit | Gate run 3 at `20b31a1b` from the clean worktree `tmp/wt-p5-gates-3` (`campaigns/p5-gates-3/gate.json`, SHA-256 `12d804bd…`; not dirty); later commits change this record, the card, the status, the changelog and the harness's own unit test (two skip guards; disclosed below) only |
+| Branch | `simcal/phase-5`, from `origin/main` `c7e5a610` (release 0.67.0, phases 0–4 merged); release 0.68.0 (`c76a5e06`) merged in at `bd4bca87` |
+| Commit | Gate run 3 at `20b31a1b` from the clean worktree `tmp/wt-p5-gates-3` (`campaigns/p5-gates-3/gate.json`, SHA-256 `12d804bd…`; not dirty); later commits change this record, the card, the status, the changelog and the harness's own unit test (two skip guards; disclosed below) only; then the merge of release 0.68.0 (`bd4bca87`) and the Geant4 adapter bump to 0.17.1 (`3754681d`), confirmed below ("After the 0.68.0 merge") |
 | Task-card SHA-256 (as registered) | the last phase-5 registration in `simcal-task-registry.json` (`f73fe69f…`, gate run 3, before its run) |
 | Environment | Login host, Python 3.13.2 (conda env `ml`), NumPy 2.2.2, SciPy 1.16.1 for items 1, 2, 4 and the phase-4 rerun; Slurm `edr1-al9_short_serial`, account `ams`, node interpreter Python 3.13.18 / NumPy 2.4.6 for the phase 0–3 reruns and the studies; one BLAS thread |
-| hep-research and g4sim versions | hep-research 0.67.0 plus this branch; g4sim stages S0–S9 merged |
+| hep-research and g4sim versions | hep-research 0.68.0 plus this branch (gate run 3: 0.67.0 plus this branch); g4sim stages S0–S9 merged; `adapters/geant4` 0.17.1 |
 | Approvals | A25–A33 (`simcal-approvals.md`) |
-| Date | 2026-11-14 |
+| Date | 2026-11-14 (the 0.68.0 confirmation: 2026-11-15) |
 
 | Gate (§17, split at semicolons) | Threshold as registered | Observed | Verdict | Evidence |
 | --- | --- | --- | --- | --- |
@@ -72,6 +72,16 @@ Earlier gate runs are kept as records, not evidence: gate run 1 at `429caf0f` pa
 - At `9b37677b` (gate run 2, `campaigns/p5-checks/`): apart from module timeouts under login load (four rerun at low load: pass), `test_executor_b2` ×3 (it fails the same way at the phase base `c7e5a610`: environmental) and the three environment-only failures of phase 0.
 - At `20b31a1b` (the gate commit; `campaigns/p5-checks-3/check-run-2026-11-14T211843Z.json`): 7,889 tests in 588 modules, 7,582 passed, 302 skipped, 5 failed, 8 modules timed out (600 s) and `ams_optional` timed out (1,200 s), at a login load of ≈ 17. Rerun at low load (`campaigns/p5-checks-3/rerun/`): the 8 timed-out modules (249 tests) and the two timing failures (`test_workflow_b1` termination; `test_hep_detector_audit` f04, `build_response.py` over its 10 s limit) pass; `ams_optional` (the generic suites in a copy without the AMS-02 profile and without git) failed, in the copy only, on two phase-5 harness self-tests that read the repository (`test_calibration_phase5_gates` `Static.test_static_item_at_this_commit` and `test_protected_paths_are_repository_relative`), and otherwise only on the environment-only failures; those two tests now skip outside a repository checkout that holds the phase base (see the disclosure on the post-gate commit). The remaining three are the environment-only failures (`test_revocation` ×2, `test_export_bundle_check`; they also fail on a clean `origin/main`). Every other check passes, including the 15 profile suites, naming and plugin validation.
 - The commit gate (every calibration test module, the script tests, layering, naming, packaging, wiring, the reference inventory, the routing and soft budgets, CLI fuzz, the guide, the skill-script list), ruff and mypy passed on every phase-5 commit.
+
+## After the 0.68.0 merge (2026-11-15)
+
+Release 0.68.0 (`c76a5e06`) was merged into this branch at `bd4bca87` (A32: push, PR, merge and release only after 0.68.0; the user: update this task to the new plugin version). Conflicts were mechanical: the CHANGELOG (the released section kept, the phase-5 lines under Unreleased), the reference inventory (regenerated) and `tools/module_timings.json` (the release's values kept, the three phase-5 modules added). From the phase base `c7e5a610` to `c76a5e06`, nothing changed under `core/`, `skills/hep-statistics/`, `tests/core/` or `docs/dev/simulator-calibration/`. `3754681d` bumps `adapters/geant4` to 0.17.1 for `6fceb436` (`docs/adapter-authoring.md`); `test_geant4` and `test_geant4_register`: 81 run, OK (7 skipped, live Geant4).
+
+Confirmation at `3754681d` (clean worktree `tmp/wt-p5-ci`, not dirty; records in `campaigns/p5-confirm-0680/` and `campaigns/p5-ci-local-2/`):
+- **Gate items 1, 2 and 4 pass again** (`gate.json`, SHA-256 `5a86aad1…`; login host, 469 s): `negatives` (G4L, POOLING, VMODEL_INFERRED), `prior_gates_static` (the diff from `c7e5a610` now includes the release, still no phase-0–4 gate file, card or record), `default_off_identity` (55 of 55 byte-identical). **Item 3 was not rerun** (the run reports it `not-run`): the release touches no calibration code, card or gate record, so its result at `20b31a1b` stands; a rerun is ≈ 45 core-hours. This is the coordinator's choice under the user's "auto continue with your recommendation"; the gate's verdict remains gate run 3.
+- **Lint:** ruff (`check core contracts`) and mypy (193 files) pass; shellcheck on CI's three scripts passes.
+- **`run_all_checks`** (login host, `--jobs 4`): 10,678 tests in 655 modules, 10,238 passed, 434 skipped, 6 failed, 2 modules timed out (600 s), `ams_optional` timed out (1,200 s). The two timed-out modules (`test_calibration_evaluator_problem`, `test_design_search_j16`) pass when rerun (18 run, OK). The failures are environmental: revocation ×2 and `export_bundle` (as at `20b31a1b`), and three photon-likelihood tests (`test_photon_likelihood_time` vertex edge; the offline replay of `examples/reconstruction-photon-likelihood` ×2) that fail identically at the release `c76a5e06` on this host (`photon-at-0680.log`): they are the release's, not this branch's.
+- **CI jobs on Slurm** (`p5-ci-local-2/SUMMARY.md`): optional-python, all five extras 0 failures (torch-cpu after one rerun: its two-process `torchrun` smoke test timed out once at 300 s on the node); hostile-paths, only environmental failures (600 s module timeouts on ceph, revocation ×2, the 1 s lease test `test_takeover_only_when_expired_and_after_reconciliation` racing on ceph, `test_executor_b2` G2 on a node, which passes on the login host; `ams_optional` past 1,200 s); the packaging scan flags exactly the planted files. The Geant4 failure of the previous local run is gone on a node without cmake.
 
 ## Open items carried forward
 
