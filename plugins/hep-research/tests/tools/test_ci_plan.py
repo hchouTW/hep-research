@@ -177,6 +177,34 @@ class RunnerRecord(unittest.TestCase):
             self.assertEqual(rows[fixed]["status"], "pass", rows[fixed])
 
 
+    def test_check_ams_optional_shard_runs_its_part_of_the_planned_modules_and_every_fixed_step(self):
+        ams = _load("check_ams_optional")
+        runner = _load("run_all_checks")
+        mods = ["tests.core.test_constants", "tests.examples.test_qed_prediction"]
+        p = PLAN._finish(dict(plan(P + "CHANGELOG.md"), ams_optional_modules=mods, parts=["static", "ams-optional"]))
+        mine = runner.shard_modules(mods, 2, 2, runner.load_timings())
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "plan.json"
+            f.write_text(json.dumps(p))
+            import contextlib
+            import io
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = ams.main(["--jobs", "2", "--plan", str(f), "--shard", "2/2"])
+        doc = json.loads(buf.getvalue())
+        self.assertEqual(code, 0, doc)
+        self.assertEqual(len(mine), 1)
+        self.assertEqual(doc["modules_run"], mine)
+        self.assertEqual({k: doc["shard"][k] for k in ("shard", "modules", "all_modules")},
+                         {"shard": "2/2", "modules": mine, "all_modules": mods})
+        rows = {c["name"]: c for c in doc["checks"]}
+        for fixed in ("ams_profile_absent", "registry", "path_b", "path_c",
+                      "profile-tests:experiments/synthetic-collider", "profile-tests:theory/qed-benchmark"):
+            self.assertEqual(rows[fixed]["status"], "pass", rows[fixed])  # in every shard
+        other = "tests_core" if mine[0].startswith("tests.examples.") else "tests_paths_b_c"
+        self.assertEqual((rows[other]["status"], rows[other]["reason"]), ("skip", "no module of this suite in shard 2/2"))
+
+
 SHA = "a" * 40
 MODULES = ["tests.a", "tests.b", "tests.c", "tests.d", "tests.e"]
 CHECKS = {"static": ["check_layering"], "ams-optional": ["ams_optional"]}
@@ -272,6 +300,39 @@ class GateWithPlan(unittest.TestCase):
         lost[1]["checks"][0]["plan"]["modules"] = ["tests.b"]
         lost[1]["checks"][0]["modules"] = lost[1]["checks"][0]["modules"][:1]
         self.assertIn("modules in no shard: ['tests.d']", " ".join(gate(lost, full)["problems"]))
+
+    def test_sharded_ams_optional_runs_must_together_run_the_plans_modules(self):
+        pl = ci_plan(["tests.a", "tests.c"], ["static", "ams-optional"], ams=["tests.a", "tests.c"])
+
+        def sharded(split):
+            runs = [r for r in runs_for(pl) if r["part"] != "ams-optional"]
+            sel = {"plan_sha256": pl["plan_sha256"], "full": False, "selected": True}
+            for k, mods in enumerate(split, 1):
+                shard = {"shard": f"{k}/2", "modules": mods, "all_modules": ["tests.a", "tests.c"],
+                         "all_modules_sha256": REC._runner().modules_digest(["tests.a", "tests.c"]), "timings_sha256": "t"}
+                runs.append({"environment": {"python": "3.13.4"}, "git_commit": SHA, "part": "ams-optional",
+                             "shard": f"{k}/2", "selection": dict(sel), "_file": f"ams{k}.json",
+                             "checks": [{"name": "ams_optional", "status": "pass",
+                                         "detail": {"modules_run": mods, "shard": shard}}]})
+            return runs
+
+        def sharded_gate(runs, plan_=pl):
+            return REC.reconcile(runs, ["3.13"], 2, ["static", "ams-optional"], SHA, MODULES, CHECKS, plan_, ams_shards=2)
+
+        rep = sharded_gate(sharded([["tests.a"], ["tests.c"]]))
+        self.assertTrue(rep["ok"], rep["problems"])
+        self.assertIn("modules in no shard: ['tests.c']", " ".join(sharded_gate(sharded([["tests.a"], []]))["problems"]))
+        narrow = ci_plan(["tests.a", "tests.c"], ["static", "ams-optional"], ams=["tests.a"])
+        self.assertIn("AMS-optionality module list differs from the CI plan",
+                      " ".join(sharded_gate(sharded([["tests.a"], ["tests.c"]]), narrow)["problems"]))
+        unselected = ci_plan(["tests.a", "tests.c"], ["static"])
+        runs = [r for r in runs_for(unselected) if r["part"] != "ams-optional"]
+        for k in (1, 2):
+            runs.append({"environment": {"python": "3.13.4"}, "git_commit": SHA, "part": "ams-optional", "shard": f"{k}/2",
+                         "selection": {"plan_sha256": unselected["plan_sha256"], "full": False, "selected": False},
+                         "checks": [], "_file": f"ams{k}.json"})
+        rep = sharded_gate(runs, unselected)
+        self.assertTrue(rep["ok"], rep["problems"])  # an unselected part: both shards write an empty record
 
 
 if __name__ == "__main__":

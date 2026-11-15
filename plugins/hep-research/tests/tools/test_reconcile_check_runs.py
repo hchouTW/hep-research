@@ -151,6 +151,112 @@ class ReconcileTests(unittest.TestCase):
                     self.assertEqual(REC.main([td, "--python", "3.11,3.13", "--shards", "2", "--sha", SHA]), 0)
 
 
+AMS_MODULES = ["tests.core.p", "tests.core.q", "tests.core.r"]
+
+
+def ams_shard_run(py, k, n, modules, pool=AMS_MODULES):
+    """A check-run record of run_all_checks.py --part ams-optional --shard k/n: the check_ams_optional.py output it
+    carries names the shard, the shard's modules and the pool they were split from."""
+    detail = {"ok": True, "modules_run": sorted(modules), "checks": [],
+              "shard": {"shard": f"{k}/{n}", "modules": sorted(modules), "all_modules": sorted(pool),
+                        "all_modules_sha256": RUNNER.modules_digest(pool), "timings_sha256": "t" * 64}}
+    return {"environment": {"python": f"{py}.4"}, "git_commit": SHA, "part": "ams-optional", "shard": f"{k}/{n}",
+            "checks": [{"name": "ams_optional", "status": "pass", "detail": detail}]}
+
+
+def sharded_runs(shards=(["tests.core.p", "tests.core.r"], ["tests.core.q"])):
+    runs = [r for r in good_runs(("3.13",)) if r["part"] != "ams-optional"]
+    runs += [ams_shard_run("3.13", k, len(shards), mods) for k, mods in enumerate(shards, 1)]
+    for i, r in enumerate(runs):
+        r["_file"] = f"run{i}.json"
+    return runs
+
+
+def check_sharded(runs, ams_modules=AMS_MODULES, ams_shards=2):
+    return REC.reconcile(runs, ["3.13"], 2, ["static", "ams-optional"], SHA, MODULES, PARTS,
+                         ams_shards=ams_shards, ams_modules=ams_modules)
+
+
+class AmsOptionalShardTests(unittest.TestCase):
+    """--ams-optional-shards N: the AMS-optionality rerun split like the units; its shards must partition the module
+    list it reruns (no module lost or run twice), from one pool and one timing file, and every shard must be present."""
+
+    def assert_fails(self, runs, needle, **kw):
+        rep = check_sharded(runs, **kw)
+        self.assertFalse(rep["ok"])
+        self.assertTrue(any(needle in p for p in rep["problems"]), rep["problems"])
+
+    def test_sharded_runs_reconcile(self):
+        rep = check_sharded(sharded_runs())
+        self.assertTrue(rep["ok"], rep["problems"])
+        self.assertEqual((rep["runs"], rep["expected_runs"]), (5, 5))
+
+    def test_the_unsharded_record_is_still_accepted_by_default(self):
+        self.assertTrue(check(good_runs())["ok"])
+        rep = check_sharded(sharded_runs(), ams_shards=1)
+        self.assertFalse(rep["ok"])  # one shard where the whole run was expected
+        self.assertTrue(any("missing run: Python 3.13, ams-optional" in p for p in rep["problems"]), rep["problems"])
+
+    def test_a_missing_shard_fails(self):
+        runs = [r for r in sharded_runs() if r.get("shard") != "2/2" or r["part"] != "ams-optional"]
+        self.assert_fails(runs, "missing run: Python 3.13, ams-optional 2/2")
+
+    def test_an_unsharded_record_where_shards_are_expected_fails(self):
+        runs = [r for r in sharded_runs() if r["part"] != "ams-optional"] + [dict(part_run("3.13", "ams-optional"), _file="x.json")]
+        self.assert_fails(runs, "unexpected run: Python 3.13, ams-optional")
+        self.assert_fails(runs, "missing run: Python 3.13, ams-optional 1/2")
+
+    def test_a_module_in_two_shards_and_one_in_none_fail_at_equal_counts(self):
+        self.assert_fails(sharded_runs((["tests.core.p", "tests.core.r"], ["tests.core.r"])),
+                         "AMS-optionality module tests.core.r in two shards")
+        self.assert_fails(sharded_runs((["tests.core.p", "tests.core.r"], ["tests.core.r"])),
+                         "AMS-optionality modules in no shard: ['tests.core.q']")
+
+    def test_shards_from_different_pools_or_timings_fail(self):
+        runs = sharded_runs()
+        runs[-1]["checks"][0]["detail"]["shard"]["all_modules"] = ["tests.core.q"]
+        runs[-1]["checks"][0]["detail"]["shard"]["all_modules_sha256"] = RUNNER.modules_digest(["tests.core.q"])
+        self.assert_fails(runs, "AMS-optionality shards split different module lists")
+        runs = sharded_runs()
+        runs[-1]["checks"][0]["detail"]["shard"]["timings_sha256"] = "u" * 64
+        self.assert_fails(runs, "AMS-optionality shards planned from different module timings")
+
+    def test_a_digest_that_does_not_match_its_list_fails(self):
+        runs = sharded_runs()
+        runs[-1]["checks"][0]["detail"]["shard"]["all_modules_sha256"] = "0" * 64
+        self.assert_fails(runs, "all_modules_sha256 does not match")
+
+    def test_the_pool_must_be_the_module_list_the_check_reruns(self):
+        self.assert_fails(sharded_runs(), "AMS-optionality module list differs",
+                         ams_modules=AMS_MODULES + ["tests.core.s"])
+
+    def test_a_shard_must_run_its_planned_modules(self):
+        runs = sharded_runs()
+        runs[-1]["checks"][0]["detail"]["modules_run"] = []
+        self.assert_fails(runs, "AMS-optionality modules run differ from the shard plan")
+
+    def test_a_shard_record_without_its_plan_fails(self):
+        runs = sharded_runs()
+        del runs[-1]["checks"][0]["detail"]["shard"]
+        self.assert_fails(runs, "AMS-optionality shard run without a recorded shard plan")
+        runs = sharded_runs()
+        runs[-1]["checks"][0]["detail"]["shard"]["shard"] = "1/2"
+        self.assert_fails(runs, "names shard '1/2'")
+
+    def test_cli_option(self):
+        with tempfile.TemporaryDirectory() as td:
+            for i, r in enumerate(sharded_runs()):
+                (Path(td) / f"check-run-{i}.json").write_text(json.dumps(r))
+            with mock.patch.object(REC, "_runner") as runner, mock.patch.object(REC, "_ams_modules", lambda: AMS_MODULES):
+                runner.return_value.test_modules.return_value = MODULES
+                runner.return_value.planned_check_names.side_effect = lambda p: PARTS[p]
+                with mock.patch("sys.stdout"):
+                    self.assertEqual(REC.main([td, "--python", "3.13", "--shards", "2", "--sha", SHA,
+                                               "--ams-optional-shards", "2"]), 0)
+                    self.assertEqual(REC.main([td, "--python", "3.13", "--shards", "2", "--sha", SHA]), 1)
+                    self.assertEqual(REC.main([td, "--python", "3.13", "--shards", "2", "--ams-optional-shards", "0"]), 2)
+
+
 class RunnerRecordTests(unittest.TestCase):
     """What run_all_checks.py records for the reconciliation and for people reading a failed CI log."""
 

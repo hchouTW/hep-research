@@ -2,11 +2,13 @@
 an unknown option is refused instead of being ignored."""
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 TOOL = Path(__file__).resolve().parents[2] / "tools" / "run_all_checks.py"
 
@@ -169,6 +171,44 @@ class AmsOptionalSuiteTests(unittest.TestCase):
         self.assertIn("m2: AssertionError", row["tail"])
         self.assertEqual(mod.merge_suite("s", [])["status"], "fail", "a suite with no modules is not a pass")
         self.assertEqual(mod.merge_suite("s", [], selected=False)["status"], "skip")  # the CI plan selected none of it
+        self.assertEqual(mod.merge_suite("s", [], in_shard=False)["status"], "skip")  # another shard runs its modules
+
+    def test_shards_partition_the_rerun_with_the_units_planner(self):
+        mod = _load("check_ams_optional", TOOL.parent / "check_ams_optional.py")
+        runner = _load("run_all_checks", TOOL)
+        pool, timings = mod.all_modules(), runner.load_timings()
+        plans = [mod.shard_plan(pool, (k, 2), timings) for k in (1, 2)]
+        self.assertEqual(sorted(m for p in plans for m in p["modules"]), sorted(pool))
+        self.assertFalse(set(plans[0]["modules"]) & set(plans[1]["modules"]))
+        for k, p in enumerate(plans, 1):
+            self.assertEqual(p["modules"], sorted(runner.shard_modules(pool, k, 2, timings)))
+            self.assertEqual((p["shard"], p["all_modules"], p["all_modules_sha256"]),
+                             (f"{k}/2", sorted(pool), runner.modules_digest(pool)))
+        self.assertEqual(plans, [mod.shard_plan(list(reversed(pool)), (k, 2), timings) for k in (1, 2)])  # deterministic
+
+    def test_bad_shard_is_refused_before_any_work(self):
+        mod = _load("check_ams_optional", TOOL.parent / "check_ams_optional.py")
+        import contextlib
+        import io
+        for bad in (["--shard"], ["--shard", "3/2"], ["--shard", "x"], ["--shard", "0/2"]):
+            with self.subTest(args=bad), contextlib.redirect_stderr(io.StringIO()) as err:
+                self.assertEqual(mod.main(bad), 2)
+                self.assertIn("--shard", err.getvalue())
+
+    def test_run_all_checks_passes_the_shard_to_the_ams_optional_part_only(self):
+        runner = _load("run_all_checks", TOOL)
+        (name, cmd), = runner.planned_scripts("ams-optional", "py", 4, True, None, (2, 2))
+        self.assertEqual((name, cmd[-2:]), ("ams_optional", ["--shard", "2/2"]))
+        self.assertNotIn("--shard", runner.planned_scripts("ams-optional", "py", 4, True)[0][1])
+        seen = []
+        fake = lambda name, cmd, cwd=None, timeout=None: seen.append(cmd) or {"name": name, "status": "pass", "seconds": 0.0}
+        with tempfile.TemporaryDirectory() as td, mock.patch.object(runner, "run_script", fake), mock.patch("sys.stdout"):
+            self.assertEqual(runner.main(["--part", "ams-optional", "--shard", "1/2", "--no-cli", "--out", td]), 0)
+            doc = json.loads(next(Path(td).glob("check-run-*.json")).read_text())
+        self.assertEqual((doc["part"], doc["shard"]), ("ams-optional", "1/2"))
+        self.assertEqual(seen[0][-2:], ["--shard", "1/2"])
+        with mock.patch("sys.stderr"):
+            self.assertEqual(runner.main(["--part", "static", "--shard", "1/2", "--no-cli"]), 2)
 
 
 

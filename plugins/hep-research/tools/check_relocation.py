@@ -8,7 +8,8 @@ are not ignored, so a local venv or cache is never copied), else the tree; in bo
 .pytest_cache or output-* directories. Fails if the copy contains a symlink or if any file in it names the source
 checkout's absolute path. Runs tools/run_all_checks.py inside the copy with cwd set to an unrelated temporary
 directory and records the summary. --part, --shard, --jobs and --no-cli are passed to run_all_checks.py, so CI can
-split the relocated run across runners (the hostile-paths matrix in tests.yml); without them every check runs.
+split the relocated run across runners (the hostile-paths matrix in tests.yml: units K/4 and ams-optional K/2 pass
+--part with --shard); without them every check runs.
 Exit 0 when the relocated run passes, 1 otherwise.
 """
 from __future__ import annotations
@@ -52,7 +53,7 @@ def main(argv=None) -> int:
     ap.add_argument("--keep", action="store_true", help="keep the relocated copy for inspection")
     ap.add_argument("--part", choices=("all", "units", "checks", "static", "ams-optional"),
                     help="run_all_checks.py --part (default: all)")
-    ap.add_argument("--shard", metavar="K/N", help="run_all_checks.py --shard (with --part units)")
+    ap.add_argument("--shard", metavar="K/N", help="run_all_checks.py --shard (with --part units or ams-optional)")
     ap.add_argument("--jobs", type=int, metavar="N", help="run_all_checks.py --jobs")
     ap.add_argument("--no-cli", action="store_true", help="run_all_checks.py --no-cli (skip the host CLI checks)")
     args = ap.parse_args(argv)

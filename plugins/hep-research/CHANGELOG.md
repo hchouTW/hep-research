@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- CI: the AMS-optionality rerun runs as two parallel shards, with the same coverage. `tools/check_ams_optional.py
+  --shard K/N` splits its test modules with the units' shard planner (slowest first by `tools/module_timings.json`,
+  deterministic) and runs its fixed steps (registry, Paths B and C, the two profile suites, a few seconds) in every
+  shard; `run_all_checks.py --part ams-optional --shard K/N` and `check_relocation.py` pass it on, and without `--shard`
+  nothing changes. The checks matrix's "AMS optional" leg and the hostile-paths "relocated AMS optional" leg each
+  become legs 1/2 and 2/2 (timeouts unchanged: 1800 s, 2400 s relocated). `checks-complete` runs
+  `reconcile_check_runs.py --ams-optional-shards 2`, which fails when a shard record is missing, a module is in no shard
+  or in two, the shards split different module lists or were planned from different timings, or a shard did not run
+  its planned modules; the unsharded record is still the default. Expected (an estimate, to be confirmed on GitHub): a
+  full-plan `tests` run's critical path from about 21 min to about 11-13 min.
+
 ## 0.68.0 (2026-11-15)
 
 Minor release; contracts 3.28.0 (the reconstruction sidecars of task T06, with T14 and T15a), `CORE_VERSION` 1.14.0 unchanged (nothing under `core/` changed). Ships detector reconstruction plan v9.2 (PR #411): the new adapters `acts-tracking` 0.3.0, `calo-cluster` 0.2.0, `photon-likelihood` 0.3.0, `timing-pid` 0.2.0 and `destriper` 0.2.0, and `adapters/geant4` 0.17.0, all `demonstrated-on-synthetic-data`; a behaviour change of the shared runner (`run_workflow.py` steps with `native_inputs`, below); the `evals/reconstruction-holdout/` harness; and the upload package fix that restores the upload route (issue #409); with the CI speed-ups of PR #412 and the full-run CI fixes of PR #413 (ubuntu-26.04 `erfc` rounding, timeouts, `adapters/geant4` 0.17.0). No tracking, vertexing, timing, PID or map-making quality is claimed.
