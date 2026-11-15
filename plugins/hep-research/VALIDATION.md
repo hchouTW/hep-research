@@ -9880,3 +9880,36 @@ unless they start with a plugin folder.
 | Applicability (hard) | Correct delivery scope when raw data, timing or backends are missing, domains exceeded or boundary information lost | Unknown inputs stop with a reason (T14, 7487578); restricted delivery for a missing backend or evidence (T15a, 7487578); `missing-input`, never zeros (T10, 7627284); a product without raw retention refuses a trace rerun (T12-21, 7648050); T09 single-photon refusals read `rejected` (7613459); native-backend gaps recorded (U12 A, U7 B2) | **Met with readings on synthetic data; not established on real data.** Every check is on synthetic or simulated input; the data-control layer is incomplete (U11) |
 
 Overall (final report, `final-report.md`): **incomplete**.
+
+## 0.68.0 release check (2026-11-15, CI and NSTCCore Slurm, partition edr2-al9_short_serial)
+
+Release commit `41e20e7e` on `release/0.68.0`, based on main `f6f8f8b6`, with main `4113ec49` merged in (`0131d192`). Minor release:
+- detector reconstruction plan v9.2 (PR #411): contracts 3.28.0, the adapters acts-tracking 0.3.0, calo-cluster 0.2.0, photon-likelihood 0.3.0, timing-pid 0.2.0 and destriper 0.2.0, the `evals/reconstruction-holdout/` harness, and the upload package that restores the upload route (issue #409);
+- the CI speed-ups (PR #412);
+- the full-run CI fixes (PR #413), with `adapters/geant4` 0.17.0. Records: the RECO-* sections above and RECO-CHECKPOINTS.
+
+What changed on the release branch:
+- version 0.68.0 in the same 14 files as 0.67.0: both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- `CORE_VERSION` 1.14.0 unchanged, since nothing under `core/` changed since 0.67.0; contracts 3.28.0, from PR #411;
+- a CHANGELOG `0.68.0` section, made from the former `Unreleased` entries.
+
+No regeneration: committed outputs keep the versions that wrote them, and the release changes no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` and `platforms.yml` on PR #411 at `3daa5e12` | success (29 pass, 3 skipped) |
+| CI on PR #412 at `4833921a` | success (36 pass, 3 skipped) |
+| CI on PR #413 at `35f608a2` | success (31 pass, 3 skipped) |
+| CI on the release PR | recorded in the PR |
+| `run_all_checks.py --jobs 4` at `41e20e7e`, login host (env/py313: Python 3.13.18, NumPy 2.4.6, no uproot), `TMPDIR` under `/var/tmp` | 34 pass, 0 fail; 10577 tests, 0 failures, 570 skipped, 1843 s |
+| Slurm job 7658439 at `0131d192`, hpa-wn33 (AMD EPYC 9645, 24 CPUs; the same Python; cmake 3.28.6 from the site module), from a local clone checked out at the commit: `run_all_checks.py --jobs 12` | 34 pass, 0 fail; 10577 tests, 0 failures, 566 skipped, 358 s |
+| the same job, `check_relocation.py --jobs 12` alongside (copy in a path with spaces, outside the repository) | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed) |
+
+Most of the skips are tests that need optional packages, such as uproot, which this interpreter does not have. The CI optional legs run those with their extras. 0.67.0's one environment-only failure, `test_event_display_templates...test_export_bundle_check`, ran under uproot 5.5.2; here it does not run. **E2, E5 and E6 were not rerun for this release.** The reconstruction evidence is in its own sections and jobs of record: 7584387, 7557963, and the pin renewals 7655492 and 7658281. No hep-ml GPU path or batch-scheduler adapter changed; the A13 GPU run is in RECO-T12.
+
+Release manifest: `release-manifests/0.68.0.json` is generated from a `git archive HEAD:plugins/hep-research` export,
+the bundle that `release_manifest.py check-published` compares with each tag. Since `tests/` is `export-ignore` (PR #411),
+that bundle holds 4028 files, against 5010 for 0.67.0. A git checkout of the tag, such as a marketplace install, holds the
+tests too, so its tree digest is not the release digest. The check reads the export, not a checkout.
+
+Passing checks show software consistency, not physical validity.
