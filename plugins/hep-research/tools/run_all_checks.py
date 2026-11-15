@@ -13,7 +13,9 @@ Test modules start slowest first (tools/module_timings.json). --part and --shard
 'units' runs the test modules (all of them, or shard K of N, balanced by the recorded timings), 'checks' runs the
 profile suites and the static and host checks; every module belongs to exactly one shard. 'checks' is 'static' (profile
 suites, static and host checks) plus 'ams-optional' (tools/check_ams_optional.py, the generic suites in a copy without
-the AMS-02 profile), so CI can run the two in parallel jobs.
+the AMS-02 profile), so CI can run the two in parallel jobs. '--part ams-optional --shard K/N' passes the shard to
+check_ams_optional.py, which splits its modules with the same planner (its fixed steps run in every shard); the record
+names the shard, and tools/reconcile_check_runs.py --ams-optional-shards N checks that the shards partition its modules.
 Every check records its seconds; a units run records its plan (the full module list with its digest and the modules
 of this shard), which tools/reconcile_check_runs.py checks across shards. --extra NAME (with --part units) runs only
 the modules tools/optional_modules.json lists for an optional extra: the CI optional jobs on pull requests; pushes to
@@ -61,7 +63,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 MODULE_TIMEOUT = float(os.environ.get("HEP_MODULE_TIMEOUT", "600"))  # seconds per test module or check
 # check_ams_optional.py reruns the generic suites in a copy of the tree: about 15 min on CI runners (924 s on PR #411),
-# slower in the hostile-paths relocated run, which sets HEP_AMS_OPTIONAL_TIMEOUT
+# slower in the hostile-paths relocated run, which sets HEP_AMS_OPTIONAL_TIMEOUT (CI runs it in two shards, each about
+# half of that; the limits were kept, not halved, until the shard times are measured on GitHub)
 AMS_OPTIONAL_TIMEOUT = float(os.environ.get("HEP_AMS_OPTIONAL_TIMEOUT", "1200"))
 TIMINGS = ROOT / "tools" / "module_timings.json"
 OPTIONAL_MODULES = ROOT / "tools" / "optional_modules.json"
@@ -345,13 +348,16 @@ def _ci_plan():
     return mod
 
 
-def planned_scripts(part: str, py: str, jobs: int, no_cli: bool, plan: Path | None = None) -> list[tuple[str, list[str]]]:
+def planned_scripts(part: str, py: str, jobs: int, no_cli: bool, plan: Path | None = None,
+                    shard: tuple[int, int] | None = None) -> list[tuple[str, list[str]]]:
     """The check scripts a run of this part executes, in order (profile suites and host checks are added by main). With
-    a CI plan, the AMS-optionality check runs only the modules the plan selects for it."""
+    a CI plan, the AMS-optionality check runs only the modules the plan selects for it; with a shard (--part
+    ams-optional only), only its shard of them."""
     out = []
     if part in ("all", "checks", "ams-optional"):
         out.append(("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(jobs)]
-                    + (["--plan", str(plan.resolve())] if plan else [])))
+                    + (["--plan", str(plan.resolve())] if plan else [])
+                    + (["--shard", f"{shard[0]}/{shard[1]}"] if shard and part == "ams-optional" else [])))
     if part in ("all", "checks", "static"):
         for name, args in STATIC_SCRIPTS:
             out.append((name, [py, *args] + (["--no-cli"] if name == "measure_entrypoints" and no_cli else [])))
@@ -381,7 +387,8 @@ def parse_args(argv=None) -> argparse.Namespace:
                     help="units: the test modules only; checks: static plus ams-optional; static: profile suites, static and "
                          "host checks; ams-optional: tools/check_ams_optional.py only (default all)")
     ap.add_argument("--shard", type=parse_shard, metavar="K/N",
-                    help="run only shard K of N of the test modules, balanced by tools/module_timings.json")
+                    help="run only shard K of N of the test modules, balanced by tools/module_timings.json (with --part "
+                         "ams-optional: shard K of N of the AMS-optionality rerun's modules)")
     ap.add_argument("--extra", metavar="NAME",
                     help="run only the test modules listed for this optional extra in tools/optional_modules.json (the "
                          "modules with tests that run only when the extra is installed); with --part units")
@@ -397,8 +404,9 @@ def parse_args(argv=None) -> argparse.Namespace:
 
 def main(argv=None) -> int:
     opts = parse_args(argv)
-    if opts.shard and opts.part not in ("all", "units"):
-        print(f"--shard applies to the test modules; it cannot be combined with --part {opts.part}", file=sys.stderr)
+    if opts.shard and opts.part not in ("all", "units", "ams-optional"):
+        print(f"--shard applies to the test modules (--part units or ams-optional); it cannot be combined with --part "
+              f"{opts.part}", file=sys.stderr)
         return 2
     if opts.extra and (opts.part != "units" or opts.shard):
         print("--extra selects test modules: use it with --part units and without --shard", file=sys.stderr)
@@ -426,7 +434,7 @@ def main(argv=None) -> int:
     run_part = selection is None or selection["selected"]
     static = opts.part in ("all", "checks", "static") and run_part
     checks = units + (run_profile_tests() if static else [])
-    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli, opts.plan) if run_part else []:
+    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli, opts.plan, opts.shard) if run_part else []:
         checks.append(run_script(name, cmd, timeout=max(t, AMS_OPTIONAL_TIMEOUT) if name == "ams_optional" else t))
     if static:
         checks += [host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},

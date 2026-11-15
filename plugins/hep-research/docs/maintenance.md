@@ -23,14 +23,22 @@ tolerances. A fast-tier module listed under `slow_modules` (over 60 s) belongs i
 slowest first, using the durations recorded in `tools/module_timings.json`. CI splits the run into parallel jobs:
 `--part units --shard K/N` runs one of N shards of the test modules, balanced by those durations, `--part static`
 runs the profile suites and the static and host checks, and `--part ams-optional` runs `tools/check_ams_optional.py`
-(the generic suites again in a copy without the AMS-02 profile; the slowest check, so it has its own job).
-`--part checks` is `static` plus `ams-optional`. Refresh the durations from the CI check-runs (the median per module
+(the generic suites again in a copy without the AMS-02 profile; the slowest check, so it has its own jobs).
+`--part ams-optional --shard K/N` passes the shard to `check_ams_optional.py --shard K/N`, which splits its test modules
+with the units' planner (`shard_modules`: slowest first by the same durations, deterministic) and runs its few-second
+fixed steps (AMS-02 profile absent, registry, Paths B and C, the two profile suites) in every shard, so each shard
+reports the same checks; CI runs it as two shards, in the checks matrix and in the relocated hostile-paths legs.
+Without `--shard` it runs whole, as locally. `--part checks` is `static` plus `ams-optional`. Refresh the durations from the CI check-runs (the median per module
 over the units shards of one run on main) when the balance drifts; a module with no record gets the median and still
 runs. Every check records its seconds; failed test ids with their traceback tails are printed and, with
 `--summary FILE` (CI: `$GITHUB_STEP_SUMMARY`), written as Markdown. Each units run records its plan (the full module
 list, its SHA-256 and the shard's modules), and the `checks-complete` job runs `tools/reconcile_check_runs.py` over
 every checks record of the run: each expected run present once, of the tested commit, passing, with only the host CLI
-checks skipped, every planned check reported, and the shards partitioning the module list of this tree. A missing
+checks skipped, every planned check reported, and the shards partitioning the module list of this tree. With
+`--ams-optional-shards 2` (CI) it expects one AMS-optionality record per shard instead of one record: each carries its
+shard plan (its modules, the pool split and its digest, the timings digest) and ran exactly those modules, and the
+shards must partition the AMS-optionality module list (the plan's, or this tree's): none missing, none in two shards,
+no shard record missing. The default (1) expects the unsharded record. A missing
 record fails the gate; equal test counts are never taken as evidence. Every subprocess call in the tests and tools
 has a timeout (`tests/tools/test_subprocess_timeouts.py`).
 
@@ -57,13 +65,15 @@ has a timeout (`tests/tools/test_subprocess_timeouts.py`).
   - a part the plan does not select skips installing the pinned set and writes a record that says so (`selection`).
 - **What the gate checks.** `checks-complete` recomputes the plan itself and passes it to
   `reconcile_check_runs.py --plan`. Every record must name that plan's digest, the shards must cover exactly the
-  selected modules, the AMS-optionality run must have run exactly its planned modules, and every part, selected or
-  not, must have its record.
+  selected modules, the AMS-optionality runs must together have run exactly its planned modules (each once, across
+  its two shards), and every part, selected or not, must have its record (an unselected AMS-optionality part: one
+  empty record per shard).
 - **Making selection work for more changes.** Extend the impact groups. A path they do not cover keeps the full run,
   which is the safe default.
 
-`check_ams_optional.py` has its own limit (`AMS_OPTIONAL_TIMEOUT`, 1200 s). It takes about 190 s locally and 7–10 min
-on CI runners, which had reached the 600 s module limit.
+`check_ams_optional.py` has its own limit (`AMS_OPTIONAL_TIMEOUT`, 1200 s). It took about 190 s locally and 7–10 min
+on CI runners when it got its limit, about 15–20 min on the full plan of PR #411 and main; CI sets 1800 s for each of
+its two shards (2400 s relocated), kept from the unsharded run until shard times are measured.
 
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.
