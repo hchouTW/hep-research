@@ -9855,6 +9855,15 @@ Main's full `tests` runs 43653363099 (`cd41d5f7`) and 43657072905 (`f6f8f8b6`) f
 - `adapters/geant4` 0.16.0 -> 0.17.0: PR #411 changed `geant4_run.py` (scan steps declare `native_inputs`) without the bump
   `docs/adapter-authoring.md` requires; `test_geant4` 55 run, OK (6 skipped, live Geant4 tests).
 
+Pin renewed: job 7658281 (hpa-wn33, AMD EPYC 9645, 2026-11-15, 12 min 37 s, JOB RESULT PASS; manifest `e86bfafe…` at `77bbfb1b`,
+from a checked copy with the live tree hidden) ran the changed `tests/adapters/test_photon_likelihood_topology.py` on the recording
+platform: `recording_erfc()` true (glibc 2.34), the five photon-likelihood adapter modules 226 run, OK with no skip, among them
+`TwoSourceHarness.test_main_dead_and_saturation_outputs_are_unchanged` run and passed; the calo-cluster modules 181 and 10 run, OK; both
+examples twice live (byte-equal) and their tests (photon 32, calo 12) run, OK; both records tests failing only on that one pin. Readings:
+both examples' live recordings and offline replays equal the committed ones. The pin is renewed from its manifest (`9145bd66…`); the
+jobs of record (7584387, 7557963) and the adapter versions are unchanged. (Job 7658214, the same code on hpa-wn12, ended FAIL only
+because the job's own check read the harness test's verbose result on one line, where its docstring puts it on the next.)
+
 ## RECO-SIX-CRITERIA — 2026-11-14 (records only; no job)
 
 The six-criterion evidence table of plan v9.2 §3.2 and P6, written from the records of this branch at `316a097b`. Correctness and

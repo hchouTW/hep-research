@@ -19,7 +19,9 @@ What is checked:
 - Every declared test module, every asset `adapter.json` lists, and the example's `run.py` have the SHA-256 pinned below: for the stage
   1 to 4 files the values of job 7575617's manifest (`SOURCES.sha256` `0c4e5c9c...`, 822 files), for the example and its test the values
   of the D3 stage 5 job's manifest (job 7578442), for the files D4 build E1 changes or adds the values of the D4 E1 job's manifest, and
-  for the files the PR #411 CI fix round changed, the values of job 7655492's manifest (a237d5a7…). One changed byte in any of them makes this test fail, until a new job of record runs the changed
+  for the files the PR #411 CI fix round changed, the values of job 7655492's manifest (a237d5a7…), but for
+  `tests/adapters/test_photon_likelihood_topology.py`, changed again in the main full-run fix round after PR #411, the value of job
+  7658281's manifest (e86bfafe…). One changed byte in any of them makes this test fail, until a new job of record runs the changed
   files and the pins and the record are renewed. Exempt: this module and the records it reads (`adapter.json`, `VALIDATION.md`,
   `docs/capability-matrix.md`, `t09-closeout.md`). A file declared later without a pin fails too.
 - The VALIDATION table's test counts equal the test methods each declared module defines now; the modules the D4 E1 job runs first
@@ -62,7 +64,8 @@ TOOL_VERSIONS = (("Python 3.13.18", "NumPy 2.4.6", "SciPy 1.17.1"),)
 # (job 7578442), the files D4 build E1 changes or adds (configuration.py, product.py, photon_likelihood.py; single_photon.py,
 # t09_negative_checks.py, the single-photon configuration, the negative-check module) as the D4 E1 job's manifest; for the files the PR #411
 # CI fix round changed (test_photon_likelihood_time.py, test_photon_likelihood_topology.py, the example's test and run.py), the values of job
-# 7655492's manifest (a237d5a7…).
+# 7655492's manifest (a237d5a7…); for test_photon_likelihood_topology.py, changed again in the main full-run fix round after PR #411
+# (the TwoSourceHarness skip condition needs recording_erfc()), the value of job 7658281's manifest (e86bfafe…).
 JOB_OF_RECORD_PINS: dict = {
     "adapters/photon-likelihood/assets/fixture_tools/t09_fixed_points.py": "652af9311ec9ef51c1a7d2da715180e134264314b715b3b86efde48170ee1081",
     "adapters/photon-likelihood/assets/fixture_tools/t09_fixture_files.py": "20640f670329b249c3f81317976f8e5ddaeea9957f7c2a7d50c88359d184f4ed",
@@ -95,7 +98,7 @@ JOB_OF_RECORD_PINS: dict = {
     "tests/adapters/test_photon_likelihood_multistart.py": "f77444ede6b99af7ab05337e2d0e5c5d1c7a342c69cb3d29b7279bce9f3da214",
     "tests/adapters/test_photon_likelihood_negative.py": "58b0fec0ad352d67b38491b5aab70f9eee81da4113f94ececef15b2dfb14c049",
     "tests/adapters/test_photon_likelihood_time.py": "41acddee43e0f102262dfdf9e4b92d74a6f4f41ac4d8dc4c64707db7829d569e",
-    "tests/adapters/test_photon_likelihood_topology.py": "5ee1fb513dae07d7807dddb9ef131d6a98aa1bc4b39576fb1e037c2ae8eca89b",
+    "tests/adapters/test_photon_likelihood_topology.py": "9145bd6614cec0d520bc9999f70d0e745f7a6daceb40c9a6cf8b517a1a0666b2",
     "tests/examples/test_reconstruction_photon_likelihood.py": "fe47323b1d9a7529147ad912734d8b2f9dd4c9e54818c5c1bc2b5c496e11504d",
 }
 SHEET_PARTS = ("Background / Objective", "Scope", "Non-goals", "Existing work checked", "Files", "Input", "Likelihood", "Interfaces",
