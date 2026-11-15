@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- `adapters/geant4` 0.17.0 (from 0.16.0): `geant4_run.py scan` declares each step's executable and build record as
+  `native_inputs` (T12 stage 2, PR #411, below), so `run_workflow.py` hashes them before every skip and a scan reruns
+  when the binary changes. The version bump PR #411 left out (`docs/adapter-authoring.md`, "Changing an adapter").
 - CI: faster runs with the same coverage (every command, module and check still runs; estimates from the PR #411
   run, to be confirmed on GitHub). The `hostile-paths (checks)` leg, the critical path at 21.8 min, is split into
   three parallel legs: packaging scan with the pull-request subset, relocated `--part static`, relocated
