@@ -9907,4 +9907,9 @@ No regeneration: committed outputs keep the versions that wrote them, and the re
 
 Most of the skips are tests that need optional packages, such as uproot, which this interpreter does not have. The CI optional legs run those with their extras. 0.67.0's one environment-only failure, `test_event_display_templates...test_export_bundle_check`, ran under uproot 5.5.2; here it does not run. **E2, E5 and E6 were not rerun for this release.** The reconstruction evidence is in its own sections and jobs of record: 7584387, 7557963, and the pin renewals 7655492 and 7658281. No hep-ml GPU path or batch-scheduler adapter changed; the A13 GPU run is in RECO-T12.
 
+Release manifest: `release-manifests/0.68.0.json` is generated from a `git archive HEAD:plugins/hep-research` export,
+the bundle that `release_manifest.py check-published` compares with each tag. Since `tests/` is `export-ignore` (PR #411),
+that bundle holds 4028 files, against 5010 for 0.67.0. A git checkout of the tag, such as a marketplace install, holds the
+tests too, so its tree digest is not the release digest. The check reads the export, not a checkout.
+
 Passing checks show software consistency, not physical validity.
