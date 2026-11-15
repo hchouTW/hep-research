@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Geant4 adapter: input refusals no longer depend on cmake** (`adapters/geant4` 0.17.1, from 0.17.0). `geant4_examples.py build` and `geant4_run.py build-sim` judge the build record, the installation and the example source before checking for cmake on PATH, so a refused input (exit 2, or a missing `geant4-config` / CMake configuration, exit 3) is reported the same on a host without cmake; before, such a host got "cmake not found on PATH" first. `test_geant4_register`: the example-source test passes on a host without cmake, and the `build-sim` refusal test runs there instead of skipping. Found by running CI's hostile-paths job on compute nodes without cmake.
+- **hep-ml: learned density ratios for reweighting stored MC** (documentation; simulator calibration phase 5, WP-T). New reference `skills/hep-ml/references/learned-density-ratio-reweighting.md`: the likelihood-ratio trick for one post-hoc correction node, cross-fitting, probability calibration and the prior-ratio correction, the effective sample size of the weights, and the boundary of approval A25 (a learned ratio only reweights stored MC; SBI is not a method of the calibration workflow). Linked from `ml-analysis.md`, `sbi-training.md` and `ml-analysis-weights.md`.
+- **Tests: the statistics CLI input fuzz in three modules.** `tests/skills/hep_statistics/test_cli_input_fuzz.py` keeps
+  `core/stats` and the non-calibration scripts; the `calib_*.py` scripts move to `test_cli_input_fuzz_calib_a.py` and
+  `_b.py` (the same tests through a shared mixin; a test checks the three together cover every script once), and two
+  tests of `tests/core/test_calibration_vmodel_infer.py` (neither gate-listed) move to the slow tier. Both modules timed
+  out at 600 s on GitHub's runners in PR #416 once the phase-5 subcommands were added.
 - CI: the AMS-optionality rerun runs as two parallel shards, with the same coverage. `tools/check_ams_optional.py
   --shard K/N` splits its test modules with the units' shard planner (slowest first by `tools/module_timings.json`,
   deterministic) and runs its fixed steps (registry, Paths B and C, the two profile suites, a few seconds) in every
@@ -15,6 +22,12 @@ Software checks establish contract consistency only, not physical validity.
   or in two, the shards split different module lists or were planned from different timings, or a shard did not run
   its planned modules; the unsharded record is still the default. Expected (an estimate, to be confirmed on GitHub): a
   full-plan `tests` run's critical path from about 21 min to about 11-13 min.
+
+Simulator parameter calibration workflow, phase 5 (extensions). Part of the same minor release.
+
+- **`core/calibration/`**: `pooling` — partial pooling (approvals A25, A26): random effects non-centred in link space, REML on the model linearized at the joint point with tau plugged in, P2 "covers 0" as q(0) <= chi2_1(0.90), pooled results graded by Appendix C with one joint V test over all segments' held-out units; flag `partial-pooling` (informational). `learned` — the learned density ratio for one post-hoc correction node (A25, A27, A29, A31, A33): L2 logistic regression with Platt calibration, five-fold cross-fitting and five replicas, the prior-ratio correction, each fold's log ratio clipped to its training range; G4-L at P0's points on the held-out closure (a record whose cross-fitting index sets overlap or are missing is refused); V_learn (training repeats plus a bias term from a theta0 control variate minus its MC-noise covariance) in V_G, in the validation C_r and in sigma_tot^design; the classifier/SBI boundary of A25 refused. `vmodel_infer` — the inferred V_model (section 5.4 V6): the restricted marginal likelihood over nu with eta and phi_P marginalized, the Jeffreys measure times a Half-Normal weight within declared bounds, marginal posterior medians with nested-Laplace quantile intervals, a separate `vmodel-version` record linked by hash, holdout only. Every new behaviour is opt-in: a contract that uses none gives byte-identical outputs.
+- **Scripts**: `calib_fit.py pool` (with `--grade`); `calib_reweight.py g4l` (G4-L; a points file must carry the worst-ESS point and the spot checks); `calib_likelihood.py vmodel-infer`.
+- **Evidence** (`docs/dev/simulator-calibration/simcal-gates/phase-5.md`): every phase-5 gate item passes, and the gates of phases 0 to 4 pass again at the phase-5 code. Studies: the G4-L false-alarm rate passes (9 of 1000); the learned-path T_v size passes at its second registration (0.0502); the inferred-V_model recovery fails on one weakly identified configuration (recorded as prior shrinkage, A30). G4-L keeps `provisional-thresholds`; every result is `synthetic`.
 
 ## 0.68.0 (2026-11-15)
 

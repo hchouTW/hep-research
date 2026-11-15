@@ -43,6 +43,8 @@ on 2026-10-13. For a review of the field, see Cranmer, Brehmer, Louppe, PNAS 117
 1. **Ratio calibration** (NRE): with r = p₁/p₀, the identities E₀[r] = 1 and E₁[1/r] = 1 on held-out data, plus
    the classifier's reliability, with the power of that test stated. `hep-statistics/scripts/ratio_estimation.py` is an
    experimental starting point.
+   A classifier ratio used only to reweight stored MC for one correction node (cross-fitting, calibration, the
+   prior ratio, effective sample size) is not SBI: [learned-density-ratio-reweighting.md](learned-density-ratio-reweighting.md).
 2. **Closure on a known problem:** a toy where the likelihood is analytic, processed by the same pipeline.
 3. **Posterior calibration** (NPE/NLE):
    - **Simulation-based calibration (SBC):** rank histograms should be uniform (Talts et al., arXiv:1804.06788).

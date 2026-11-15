@@ -498,6 +498,41 @@
    "registered_at": "2026-11-14T02:06:53Z",
    "card_commit": "2fa39893",
    "reason": "phase-4 gate run, third registration (harness pathspec)"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "ca4bd46f5aec3cef4842dfe62da657e0c6d2da27afe87d286cd596d0763a5f9f",
+   "registered_at": "2026-11-14T10:26:15Z",
+   "card_commit": "0feb083d",
+   "reason": "phase-5 card refreshed at the phase start (A25; work packages; gate designs)"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "1f954d136e7c23a18862bee0875cdc7e5a98e1991d868db55d66bfabf7fd3952",
+   "registered_at": "2026-11-14T13:17:05Z",
+   "card_commit": "9f289535",
+   "reason": "phase-5 gate run and studies S1-S4 registered before any run"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "03fed4a854ba00a5c3b4af8d452f8845c08e27eb60d151b0a85b1fec888750d1",
+   "registered_at": "2026-11-14T13:35:16Z",
+   "card_commit": "c1ee7bb6",
+   "reason": "S4 re-registered smaller (A28) before any task ran"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "d21ced70b7aae24a8fe226ceb4116b506343a34a24be8129ac840e30c4a70cbf",
+   "registered_at": "2026-11-14T16:28:11Z",
+   "card_commit": "a7306cd1d",
+   "reason": "S4 pilot (A30/A31) and S4 second registration (A29-A31), before they run"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "f73fe69fa41dd33ff1fc9ef2d6aa11266d440f2b8f7fa266e0ed3fb4365cc41e",
+   "registered_at": "2026-11-14T19:36:07Z",
+   "card_commit": "3ecb86b4b",
+   "reason": "gate run 3 (A33): G4L list +4 negatives, identity 55 cases, before it runs"
   }
  ]
 }

@@ -6,8 +6,11 @@ An experiment's adapter implements five functions:
         -> {pred, V_MC, n_eff[observable], node_diag[node], V_emu, V_learn, grad (optional)}
     resample(node, theta, phi, psi, model, inputs, seeds)          -> direct sampling of that node
     evaluate_from(node, samples, theta, phi, psi, model, seeds)    -> observables from a node output (for P0)
-    learned_closure(fold)                                         -> phase 5 (G4-L)
+    learned_closure(fold)                                         -> held-out closure of a learned ratio (G4-L)
     ask(requests) / tell(run_ids)                                 -> the asynchronous interface (below)
+
+V_learn (phase 5, a learned density ratio only, section 6.2): observable space, a matrix or v_learn's record; the toy
+evaluator returns a lazy handle (toy.LazyVLearn, computed on first use; `linear.v_learn_of` reads all three forms).
 
 ask/tell (resimulation and surrogate models, phase 3): the engine keeps the state file (calibration-ask-tell/1,
 core/calibration/emulator.py: new_state, ask, tell, drive), one entry per evaluation with its `run_id`, parameter

@@ -1,5 +1,6 @@
 """Validation of Part B section 9 (phase 2, WP4): C_r^+ on N_d, declaration checks, the holdout statistic, power,
-cross-validation bookkeeping and the decision records with the real ledger."""
+cross-validation bookkeeping and the decision records with the real ledger. Phase 5 (WP-R2): V_learn in the residual
+covariance (section 9.2) and the toys of the learned path (section 6.6), with the S4 driver."""
 from __future__ import annotations
 
 import sys
@@ -11,6 +12,7 @@ from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests" / "core"))
 
 from core.calibration import data_release as DR  # noqa: E402
 from core.calibration import fit as F  # noqa: E402
@@ -377,6 +379,203 @@ class CrossValidation(unittest.TestCase):
         self.assertEqual(st["status"], "ok")
         self.assertEqual(len(st["parts"]), 4)
         self.assertEqual(ens["eps_max"], 0.02)
+
+
+# ------------------------------------------------------------------ the learned path (phase 5, WP-R2)
+LIGHT = {"folds": 2, "repeats": 3, "training_points": 4, "degree": 2}   # a fast, deliberately inexact classifier
+
+
+class LearnedPath(unittest.TestCase):
+    """Sections 9.2 and 6.6 on the learned path (post-hoc fixture, synthetic): V_learn in V_vv of C_r; the toy truth
+    is the nominal MC with the learned weights; each replica retrains its classifier (line 1192; no training shared
+    between toys, A25 (4)); each toy draws N(0, V_learn^bias) once (line 1209; only its scale is tested, A25 (2)).
+    Each negative has its positive control."""
+
+    @classmethod
+    def setUpClass(cls):
+        import warnings
+        warnings.filterwarnings("ignore", message="The balance properties of Sobol")
+        import calibration_phase5_tv as X
+        cls.X = X
+        cls.gen = {"strength": 0.15}
+        cls.pr = X.posthoc_problem(2000, 4000, mc_seed=51, val_mc_seed=52, generation=cls.gen, learned=LIGHT)
+
+    def _fit(self):
+        from core.calibration import likelihood as L
+        pr = self.pr
+        truth = np.array([0.15])
+        p = pr.with_data(L.Observations(y_gauss=pr.h(truth)))
+        f = F.iterate(p, truth, lndet=False)
+        self.assertTrue(f.converged, f.reason)
+        p.set_val_point(f.beta[:1])
+        return p, f
+
+    def test_v_learn_in_the_residual_covariance(self):
+        p, f = self._fit()
+        yv = p.h_val(f.beta[:1])
+        self.assertIn("V_learn", p.val)
+        pc = V.holdout_pieces(p, f, yv)
+        p0 = V.holdout_pieces(p, f, yv, omit=("learn",))          # negative control: V_learn left out
+        np.testing.assert_allclose(pc["C_r"] - p0["C_r"], p.val["V_learn"], atol=1e-18)
+        np.testing.assert_allclose(p.val["V_learn"], p.v_learn_link({"strength": float(f.beta[0])}, True)["V_learn"])
+        self.assertTrue(np.all(np.diag(p.val["V_learn"]) > 0))
+        q = self.X.posthoc_problem(2000, 4000, mc_seed=51, val_mc_seed=52, learned={"learned": None})
+        self.assertNotIn("V_learn", q.val)                        # default off: no learned ratio, no key
+
+    def test_toy_truth_carries_the_learned_weights(self):
+        """The toys' true value is m_nom(truth) (section 6.6): the events the toy data are drawn from carry the learned
+        weights, so their weighted mean is the evaluator's prediction (positive); the reweighting weights alone (the
+        construction before phase 5) leave the generation sample's mean (negative)."""
+        pr = self.pr
+        t = {"strength": 0.19}
+        ev_, w = pr._weighted_events(t)
+        y = ev_["run"]["correction"]["y"]
+        pred = pr.ev.evaluate(t, names=["y_mean"])["pred"][0]
+        self.assertAlmostEqual(float(np.sum(w["run"] * y) / np.sum(w["run"])), float(pred), places=12)
+        nom = pr.ev.nominal
+        full = {**pr.model.nominal, **t}
+        w0 = pr.ev.weights(full, nom, nodes=pr.ev.reweighted_nodes(full, nom))
+        m0 = float(np.sum(w0["run"] * y) / np.sum(w0["run"]))
+        self.assertGreater(abs(m0 - float(pred)), 0.05)
+        self.assertLess(abs(m0 - float(np.mean(nom["runs"]["run"]["events"]["correction"]["y"]))), 1e-12)
+
+    def _trainings(self, omit=()):
+        """The trainings used by the replicas of three toys (calibration side): {toy: [training seeds]}."""
+        pr = self.pr
+        ev = pr.ev
+        nominal_seed = ev.learned_ratio().seed
+        seen: list = []
+        orig = ev.learned_ratio
+
+        def recording(sample=None, repeat=0):
+            tr = orig(sample, repeat)
+            if sample is not None and sample["seed"] != ev.nominal["seed"]:      # a replica's sample
+                seen.append(tuple(tr.seed))
+            return tr
+        ev.learned_ratio = recording
+        pr.learned_omit = omit
+        out = {}
+        try:
+            for i in range(3):
+                seen.clear()
+                pr.replica_pert(np.random.default_rng([7, i]))
+                out[i] = list(seen)
+        finally:
+            ev.learned_ratio = orig
+            pr.learned_omit = ()
+        return out, tuple(nominal_seed)
+
+    @staticmethod
+    def shared(trainings: dict, nominal) -> list:
+        """The check: each toy's two replicas each train their own classifier, never the nominal's and never one
+        another toy used (section 6.6 line 1192, A25 (4)); returns the violations."""
+        bad = []
+        used: dict = {}
+        for i, seeds in trainings.items():
+            if len(set(seeds)) != 2:
+                bad.append((i, "not two own trainings", seeds))
+            for s in set(seeds):
+                if s == nominal:
+                    bad.append((i, "nominal training reused", s))
+                if s in used and used[s] != i:
+                    bad.append((i, f"training shared with toy {used[s]}", s))
+                used.setdefault(s, i)
+        return bad
+
+    def test_replicas_retrain_their_classifiers(self):
+        tr, nominal = self._trainings()
+        self.assertEqual(self.shared(tr, nominal), [])                       # positive
+        self.assertFalse(any(k[0] not in (repr(self.pr.ev.nominal["seed"]),) for k in self.pr.ev._learned),
+                         "replica trainings are dropped after their toy (never reused)")
+        tr0, _ = self._trainings(omit=("retrain",))                         # negative: replicas share the nominal's
+        self.assertTrue(any("nominal training reused" in b[1] for b in self.shared(tr0, nominal)))
+
+    def test_each_toy_draws_the_bias_once(self):
+        """The toy perturbation = replica difference + one N(0, V_learn^bias) draw at the generation point: the
+        difference to the construction without the draw is exactly that draw (calibration and validation rows); the
+        draws' covariance has V_learn^bias's scale (positive), and the construction without draws has none
+        (negative)."""
+        pr = self.pr
+        for val in (False, True):
+            f = pr.replica_pert_val if val else pr.replica_pert
+            a = f(np.random.default_rng(3))
+            pr.learned_omit = ("bias_draw",)
+            try:
+                rng = np.random.default_rng(3)
+                b = f(rng)
+            finally:
+                pr.learned_omit = ()
+            np.testing.assert_allclose(a - b, pr.learned_bias_draw(rng, validation=val), atol=1e-14)
+            Vb = pr.v_learn_link(self.gen, val)["V_learn_bias"]
+            rng = np.random.default_rng(4)
+            D = np.array([pr.learned_bias_draw(rng, validation=val) for _ in range(4000)])
+            ratio = np.trace(np.cov(D, rowvar=False)) / np.trace(Vb)
+            self.assertLess(abs(ratio - 1.0), 0.1, (val, ratio))
+            self.assertGreater(np.trace(Vb), 0.0)
+
+
+class S4Driver(unittest.TestCase):
+    """The S4 driver (tests/core/calibration_phase5_tv.py, optional, L9): the task table, the decision rule with a
+    failing configuration reported failed (negative) next to a passing control, and the local smoke."""
+
+    def test_task_table_and_rule(self):
+        import calibration_phase5_tv as X
+        ref = [i for t in X.TASKS if t["kind"] == "reference" for i in range(t["i0"], t["i0"] + t["n"])]
+        act = [i for t in X.TASKS if t["kind"] == "actual" for i in range(t["i0"], t["i0"] + t["n"])]
+        self.assertEqual((ref, act), (list(range(X.N_REF)), list(range(X.REPS))))
+        self.assertEqual(len({X._seed(j, i, k) for j in range(3) for i in range(40) for k in range(5)}), 600)
+
+    def test_judge(self):
+        import calibration_phase5_tv as X
+        ref = [{"i": i, "learned": float(i), "no-learned-toys": float(i) / 2} for i in range(99)]
+
+        def rows(n_rej):            # p = (#{T_ref >= T} + 1) / 100: T = 99 rejects at alpha 0.05, T = 0 does not
+            return [{"i": i, "status": "ok", "T": 99.0 if i < n_rej else 0.0, "T_without_V_learn": 0.0,
+                     "p_chi2": 0.5} for i in range(200)]
+        self.assertTrue(X.judge(ref, rows(10), reps=200, n_ref=99)["passed"])             # control: 0.05
+        self.assertFalse(X.judge(ref, rows(14), reps=200, n_ref=99)["passed"])            # negative: 0.07
+        self.assertFalse(X.judge(ref, rows(10)[:199], reps=200, n_ref=99)["passed"])      # a missing repetition
+        self.assertEqual(X.pvalue(5.0, [None, 1.0, 6.0]), 0.75)          # a non-converged toy counts as T >= T_obs
+
+    def test_pilot_summary(self):
+        """The A30 pilot's soundness flags, fixed before it runs: chi2_2-like reference and actual T with no
+        non-converged toy are sound (control); 3% non-converged reference toys or a heavy reference tail are flagged
+        (negatives). Never a pass condition (judged False); the pilot's seeds are disjoint from both registrations."""
+        import calibration_phase5_tv as X
+        from scipy import stats
+        q = stats.chi2.ppf((np.arange(200) + 0.5) / 200, 2)
+        ref = [{"i": i, "learned": float(t)} for i, t in enumerate(q)]
+        act = [{"i": i, "status": "ok", "T": float(t)} for i, t in enumerate(q)]
+        good = X.pilot_summary(ref, act)
+        self.assertTrue(good["all_sound"], good)
+        self.assertFalse(good["judged"])
+        bad = X.pilot_summary([{**r, "learned": None} if r["i"] < 6 else r for r in ref], act)
+        self.assertFalse(bad["sound"]["reference_nonconverged_share"])
+        heavy = X.pilot_summary([{**r, "learned": r["learned"] * 3} for r in ref], act)
+        self.assertFalse(heavy["sound"]["reference_q95"])
+        self.assertEqual(len({X.PILOT_SEED0, X.SEED0, 20261540, 20261591, 20261593}), 5)
+        self.assertEqual(sum(t["n"] for t in X.PILOT_TASKS), 400)
+
+    def test_local_smoke(self):
+        import contextlib
+        import io as _io
+        import json
+        import tempfile
+
+        import calibration_phase5_tv as X
+        smoke = X.SMOKE
+        X.SMOKE = [{"kind": "reference", "i0": 900000, "n": 1}, {"kind": "actual", "i0": 900000, "n": 1}]
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                out = Path(d) / "local.json"
+                with contextlib.redirect_stdout(_io.StringIO()):
+                    self.assertEqual(X.main(["--local", "--out", str(out)]), 0)
+                rep = json.loads(out.read_text())
+        finally:
+            X.SMOKE = smoke
+        self.assertEqual((rep["label"], rep["error_tasks"], rep["missing_tasks"]), ("smoke", [], []))
+        self.assertEqual(rep["result"]["repetitions"] + rep["result"]["reference_toys"], 2)
+        self.assertIn("provisional-thresholds", rep["flags"])
 
 
 if __name__ == "__main__":

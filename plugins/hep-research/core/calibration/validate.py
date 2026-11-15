@@ -140,7 +140,9 @@ def remove_directions(s: np.ndarray, constraints: list, removed: list) -> list:
 def holdout_pieces(problem, fit, y_v: np.ndarray, d_cols=None, omit=()) -> dict:
     """The holdout residual and its covariance at the fit (Gaussian validation rows): r = y_v - (h_v(theta-hat) +
     U_v nu-hat + S_v eta-hat); J_v over (theta, phi_P, nu, eta) and zeros for the other nuisances; V_vv = validation
-    V_data + V_MC; s_i from the validation V_data (sigma_i^(0))."""
+    V_data + V_MC (+ V_learn on the learned path, phase 5: the validation block's "V_learn", section 9.2 line "V
+    contains only V_data^unc, V_MC, V_emu, V_learn"); s_i from the validation V_data (sigma_i^(0)). `omit` "learn"
+    drops V_learn (a negative control only)."""
     lay = problem.layout
     lk = L.Likelihood(lay, problem.observed, fit.ref)
     sl = lk.layout_slices
@@ -166,6 +168,8 @@ def holdout_pieces(problem, fit, y_v: np.ndarray, d_cols=None, omit=()) -> dict:
     mu = hv + (U @ fit.beta[sl["nu"]] if lay.n_nu else 0.0) + (S @ fit.beta[sl["eta"]] if lay.n_eta else 0.0)
     r = np.asarray(y_v, float) - mu
     V_vv = np.asarray(v["V_data"], float) + np.asarray(v["V_MC"], float)
+    if v.get("V_learn") is not None and "learn" not in omit:
+        V_vv = V_vv + np.asarray(v["V_learn"], float)
     C = residual_covariance(V_vv, Jv, fit.cov_beta, d_cols=d_cols, omit=omit)
     s = np.sqrt(np.diag(np.asarray(v["V_data"], float)))
     return {"r": r, "C_r": C, "s": s, "J_v": Jv, "constraints": list(v.get("constraints", []))}

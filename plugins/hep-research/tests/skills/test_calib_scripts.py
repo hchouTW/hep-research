@@ -380,6 +380,56 @@ class Phase1Scripts(unittest.TestCase):
                       self.put("t4.json", {"mu": "abc"}))
         self.assertEqual((rc, out["status"]), (2, "rejected"))                       # review F10
 
+    def test_calib_reweight_g4l(self):
+        """Phase 5: G4-L through the CLI on the post-hoc fixture (passed), without a learned ratio (not-applicable),
+        without cross-fitting (rejected) and with an SBI target (rejected)."""
+        fx = json.loads((FIXTURE_DIR / "toy_posthoc.json").read_text())
+        fx["plan"]["evaluator"]["spec"]["runs"][0]["n"] = 8000
+        rc, out = run("calib_reweight.py", "g4l", "--contract", self.put("fx.json", fx), timeout=300)
+        self.assertEqual((rc, out["status"], out["M"]), (0, "passed", 3))
+        c, p = self.chain(H.gaussian_chain())
+        rc, out = run("calib_reweight.py", "g4l", "--contract", c, "--plan", p)
+        self.assertEqual((rc, out["status"]), (0, "not-applicable"))
+        fx["plan"]["evaluator"]["learned"]["folds"] = 1
+        rc, out = run("calib_reweight.py", "g4l", "--contract", self.put("f1.json", fx), timeout=300)
+        self.assertEqual((rc, out["status"], out["finding"]), (2, "rejected", "g4l.no_cross_fitting"))
+        fx["plan"]["evaluator"]["learned"].update(folds=5, target="posterior")
+        rc, out = run("calib_reweight.py", "g4l", "--contract", self.put("f2.json", fx))
+        self.assertEqual(rc, 2)
+        self.assertIn("learned.sbi_refused", out["error"])
+
+    def test_calib_reweight_g4l_points(self):
+        """A33 (review F13): g4l --points must contain the worst-ESS point of P0's scan (section 8.2 note 1): without it
+        rejected, g4l.worst_ess_missing (negative); P0's own points given explicitly pass (control). The section 5.4
+        spot checks (g4sim plans, which refuse learned ratios) are checked first: with a required spot check absent,
+        g4l.spot_checks_missing (negative), present it goes on to the worst-ESS check (control)."""
+        import copy
+        import importlib.util
+        from unittest import mock
+
+        from core.calibration import evaluator, kernel_check
+        fx = json.loads((FIXTURE_DIR / "toy_posthoc.json").read_text())
+        fx["plan"]["evaluator"]["spec"]["runs"][0]["n"] = 8000
+        c, p = copy.deepcopy(fx["contract"]), copy.deepcopy(fx["plan"])
+        ev = evaluator.make(p, c)
+        pts = kernel_check.default_points(ev, c, p)
+        hi = c["parameters"][0]["sampling_bounds"][1]
+        others = pts[1:] + [{"strength": 0.5 * (pts[1]["strength"] + pts[2]["strength"])}]
+        fxp = self.put("fx.json", fx)
+        rc, out = run("calib_reweight.py", "g4l", "--contract", fxp, "--points", self.put("o.json", others),
+                      timeout=300)
+        self.assertEqual((rc, out["status"], out["finding"]), (2, "rejected", "g4l.worst_ess_missing"))
+        rc, out = run("calib_reweight.py", "g4l", "--contract", fxp, "--points", self.put("w.json", pts), timeout=300)
+        self.assertEqual((rc, out["status"]), (0, "passed"))
+        spec = importlib.util.spec_from_file_location("calib_reweight_t", S / "calib_reweight.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        req = [{"parameter": "strength", "gate": "P0", "reason": "test", "points": [{"strength": float(hi)}]}]
+        with mock.patch.object(kernel_check, "required_spot_checks", lambda *_a: req):
+            self.assertEqual([f["code"] for f in mod.required_points_missing(ev, c, p, pts)],
+                             ["g4l.spot_checks_missing"])
+            self.assertEqual(mod.required_points_missing(ev, c, p, pts + [{"strength": float(hi)}]), [])
+
     def test_calib_emulator(self):
         """Phase 3: the ask/tell state file through the CLI, training, the surrogate domain, P6 on the toy detector
         and on arrays, and the G8 spot check's bookkeeping (not-decided)."""
@@ -877,6 +927,75 @@ class Phase4ExportScripts(unittest.TestCase):
                                   "upstreams": {}})
         code, out = run("calib_deps.py", "packages", "--input", y)
         self.assertEqual((code, out["forced_joint_fits"]), (0, []))
+
+
+class Phase5PoolScripts(unittest.TestCase):
+    """Phase 5, WP-Q: calib_fit.py pool (partial pooling, section 3.7, A25 (6)) on a two-segment toy-detector
+    contract; the declaration errors are rejected (exit 2), the declared contract runs to a decision (control)."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.d = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def write(self, name, record):
+        p = self.d / name
+        p.write_text(json.dumps(record))
+        return p
+
+    def test_pool(self):
+        import numpy as np
+        from core.calibration import toy, toy_problem as TP
+        cal = ["beam1_e_mean", "beam2_e_mean", "beam4_e_mean", "light_e_mean", "light_e_width", "spe_e_mean"]
+        theta = {"pde": {"bounds": (0.01, 0.99), "prior": (0.2, 0.3)}, "gain": {"bounds": (1, 100), "prior": (8, 12)}}
+        p = TP.ToyProblem(lambda n: toy.build_toy(n, "subgraph"), cal, theta, 100, 500)
+        rng = np.random.default_rng(3)
+        vals = {s: dict(zip(cal, np.exp(p.simulate(np.array([pde, 10.0]), rng, nominal=False).y_gauss).tolist()))
+                for s, pde in (("A", 0.23), ("B", 0.27))}
+        contract = {"observables": [{"name": n, "role": "calibration", "block": "gaussian", "link": "log"} for n in cal],
+                    "exposure": {"all": 100},
+                    "parameters": [{"name": "pde", "role": "theta", "sampling_bounds": [0.2, 0.3],
+                                    "physical_bounds": [0.01, 0.99],
+                                    "index": {"mechanism": "yield", "channel_set": "all",
+                                              "conditioning": "partial-pooling"}},
+                                   {"name": "gain", "role": "theta", "sampling_bounds": [8, 12],
+                                    "physical_bounds": [1, 100]}]}
+        plan = self.write("p.json", {"evaluator": {"kind": "toy-detector-subgraph", "events": 500},
+                                     "design": {"bootstrap_B": 50}})
+        v = self.write("v.json", {"segments": vals})
+        code, out = run("calib_fit.py", "pool", "--contract", self.write("c0.json", contract), "--plan", plan,
+                        "--values", v, "--sigma-noise", 0)
+        self.assertEqual((code, out.get("code")), (2, "pooling.no_segments"))
+        contract["pooling"] = {"segments": [{"name": "A"}, {"name": "B"}], "parameters": {"pde": {"link": "logit"}}}
+        c = self.write("c.json", contract)
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan,
+                        "--values", self.write("v1.json", {"segments": {"A": vals["A"]}}), "--sigma-noise", 0)
+        self.assertEqual((code, out.get("code")), (2, "pooling.values"))
+        # A26 (WP-Q2): malformed grade inputs and too few toys are rejected before the fit (negatives)
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
+                        "--grade", self.write("g0.json", {"gates": {}}))
+        self.assertEqual((code, out.get("code")), (2, "pooling.grade"))
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
+                        "--toys", 100)
+        self.assertEqual(code, 2, out)
+        gates = {g: "passed" for g in ("P0", "P2", "P3", "P4", "P5", "P6", "P8", "G8", "G4", "G4-L", "G7", "G2", "G3",
+                                       "G5", "G6", "G9")}
+        grade = self.write("g.json", {"gates": gates, "p7": "passed", "v": "passed", "vmode": "holdout",
+                                      "real_data": False})
+        code, out = run("calib_fit.py", "pool", "--contract", c, "--plan", plan, "--values", v, "--sigma-noise", 0,
+                        "--grade", grade, timeout=600)
+        self.assertIn(code, (0, 1), out)
+        self.assertEqual(out["status"], "passed" if code == 0 else "failed")
+        self.assertIn("pde", out["pooling"]["tau_pool"])
+        self.assertIn("partial-pooling", out["flags"])
+        # the grade (A26): G1 decided here replaces the given state; synthetic values -> projection (rule 2), a failed
+        # G1 -> failed (rule 1). --toys (G2, G6 on the joint problem) is tested on the engine (test_calibration_pooling)
+        # since toy-detector toys take minutes.
+        self.assertEqual((out["grade"]["status"], out["grade"]["decided"]), ("graded", {"G1": out["G1"]["status"]}))
+        self.assertEqual(out["grade"]["judgment"]["effective_grade"], "projection" if code == 0 else "failed")
+        self.assertIn("partial-pooling", out["grade"]["judgment"]["flags"])
 
 
 if __name__ == "__main__":

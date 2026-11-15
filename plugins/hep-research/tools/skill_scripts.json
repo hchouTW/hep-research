@@ -1170,6 +1170,7 @@
    "path": "skills/hep-statistics/scripts/calib_reweight.py",
    "depth": 3,
    "skills": [
+    "hep-ml",
     "hep-statistics"
    ]
   },

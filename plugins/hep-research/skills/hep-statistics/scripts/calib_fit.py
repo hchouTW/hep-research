@@ -9,6 +9,8 @@ the ratio test; phase 2).
   calib_fit.py g7   --theta-hats FILE --sigma-mc FILE [--alpha A]
   calib_fit.py g3   --region FILE --limits FILE
   calib_fit.py kstar --n N [--no-replacement]
+  calib_fit.py pool --contract FILE --plan FILE --values FILE [--release FILE] [--seed S] [--sigma-noise X]
+                    [--toys N] [--grade FILE]
 The fit runs section 7.4 (max(2d, 16) Sobol starts, basins, ties, `multimodal`) and the section 7.3 iteration with
 the ln det diagnostic; G1 per basin; then the fit-point recomputation (D10, D21): the locking-stage checks of
 calib_data at theta-hat with the release's declarations, decided by calib_contract's rules; a contract error there is
@@ -17,6 +19,12 @@ linear toys with the linearity check, --full the full toys (D46); g2 the chi-bar
 --toys >= 500 (card reading). --sigma-noise overrides the estimate of section 8.1 and is flagged
 `sigma-noise-user-supplied`. Output: one JSON object; passed (exit 0), failed (exit 1), rejected (exit 2),
 incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 2 (section 17).
+pool (phase 5, section 3.7 partial pooling, approval A25 (6)): the contract's `pooling` segments, --values
+{"segments": {name: {observable: value}}}; tau_pool by REML with its 95% set, the joint fit with G1 and sigma_tot of
+each segment's pooled theta (core/calibration/pooling.py); a declaration error is rejected (exit 2). Approval A26:
+--toys N (>= 500) adds G2 (real parameters' bounds only) and G6 on the joint problem; the output's `grade` lists the
+gate states decided here and the inputs still needed, or, with --grade FILE ({gates, p7, v, vmode, real_data, ...}:
+the states recorded elsewhere), the Appendix C grade and uses (flag `partial-pooling`, informational).
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -40,7 +48,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, fit as F, problems, toy_problem, data_checks, contract as cc
+    from core.calibration import io, fit as F, problems, toy_problem, data_checks, contract as cc, pooling
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -77,6 +85,52 @@ def _common(p, values=True):
     p.add_argument("--seed", type=int, default=20261130)
 
 
+def _pool(args):
+    """Partial pooling: one problem per declared segment (the segment's values), REML tau_pool, the joint fit."""
+    contract, plan, extras = io.contract_and_plan(args.contract, args.plan)
+    if plan is None:
+        raise io.InputError("--plan is needed (or a fixture with a plan)")
+    try:
+        spec = pooling.declaration(contract)
+        given = io.load(args.grade) if args.grade else None
+        if given is not None:
+            pooling.check_grade_inputs(given)
+        if args.toys is not None and args.toys < 500:
+            raise io.InputError("--toys: at least 500 (card reading of sections 8.2, 8.5)")
+        doc = io.load(args.values)
+        vals = doc.get("segments") if isinstance(doc, dict) else None
+        missing = [s for s in spec.segments if not isinstance(vals, dict) or not isinstance(vals.get(s), dict)]
+        if missing:
+            raise pooling.PoolingError("pooling.values", f"no values for segments {missing} (--values "
+                                       "{\"segments\": {name: {observable: value}}})")
+        segs = []
+        for s in spec.segments:
+            p = problems.from_inputs(contract, plan, vals[s], io.systematics(args.release, extras))
+            p.sigma_noise = float(args.sigma_noise) if args.sigma_noise is not None else \
+                toy_problem.estimate_sigma_noise(p, p.initial_beta())
+            segs.append(p)
+        joint = pooling.Segmented(segs, spec.segments, spec.pooled, spec.links, spec.tau_bound)
+        res = pooling.fit_pooled(joint, args.seed)
+    except (pooling.PoolingError, problems.ProblemError, F.FitError) as exc:
+        return {"status": "rejected", "code": exc.code, "error": str(exc)}
+    g1 = F.g1(res.fit, joint) if res.fit is not None else {"status": "failed", "reason": res.reason}
+    flags = ["provisional-thresholds", "synthetic"] + res.flags + (
+        ["sigma-noise-user-supplied"] if args.sigma_noise is not None else [])
+    status = "passed" if res.converged and g1["status"] == "passed" else "failed"
+    out = {"status": status, "pooling": res.record(spec.pooled), "G1": g1,
+           "segments": spec.segments, "conditions": spec.conditions, "flags": flags}
+    decided = {"G1": g1["status"]}
+    if args.toys is not None and status == "passed":
+        out["G2"] = pooling.g2(joint, res.fit, args.toys, args.seed + 2)
+        out["G6"] = pooling.g6(joint, res.fit, args.toys, args.seed + 1)
+        decided.update(G2=out["G2"]["status"], G6=out["G6"]["status"])
+    try:
+        out["grade"] = pooling.grade_report(decided, given)
+    except pooling.PoolingError as exc:
+        return {"status": "rejected", "code": exc.code, "error": str(exc)}
+    return io.jsonable(out)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     if _missing(argv):
@@ -97,6 +151,10 @@ def main(argv=None) -> int:
     g3 = sub.add_parser("g3")
     g3.add_argument("--region", required=True)
     g3.add_argument("--limits", required=True)
+    pl = sub.add_parser("pool")
+    _common(pl)
+    pl.add_argument("--toys", type=int, help="G2 and G6 on the joint problem (A26), at least 500")
+    pl.add_argument("--grade", help="the grade inputs recorded elsewhere: {gates, p7, v, vmode, real_data, ...}")
     k = sub.add_parser("kstar")
     k.add_argument("--n", type=int, required=True)
     k.add_argument("--no-replacement", action="store_true")
@@ -113,6 +171,8 @@ def main(argv=None) -> int:
                                                                                              float), alpha=args.alpha))
         if args.cmd == "g3":
             return F.g3(io.load(args.region), io.load(args.limits))
+        if args.cmd == "pool":
+            return _pool(args)
         if getattr(args, "toys", 1000) < 500:
             raise io.InputError("--toys: at least 500 (card reading of sections 8.2, 8.5)")
         try:

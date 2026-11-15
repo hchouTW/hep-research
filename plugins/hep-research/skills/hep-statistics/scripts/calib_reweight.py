@@ -9,6 +9,14 @@ observable the N_eff over the events entering it (D41), the largest weight fract
 (events not recorded at a reweighted node: zero suppression, filtering). With S_q empty and theta' at the generation
 point every weight is 1. Output: one JSON object; ok (exit 0), failed (exit 1: missing support), rejected (exit 2),
 incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 1 (section 17).
+
+  calib_reweight.py g4l --contract FILE [--plan FILE] [--points FILE] [--alpha A]
+G4-L (phase 5, section 8.2): for a plan with a learned density ratio (one post-hoc correction node, section 6.2),
+the held-out closure of every fold at >= 3 theta' (default P0's points), propagated to theta with A, in the form of P0;
+the structural record (cross-fitting, probability calibration, prior-ratio correction) and the contract's alpha
+declaration first. --points must contain the worst-ESS point of P0's scan (g4l.worst_ess_missing) and the section 5.4
+spot checks (g4l.spot_checks_missing, g4sim plans), as section 8.2 note 1 requires; rejected (exit 2) otherwise
+(A33). not-applicable without a learned ratio; passed (0), failed (1), rejected (2), incomplete (3).
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -52,11 +60,16 @@ def main(argv=None) -> int:
     g.add_argument("--plan")
     g.add_argument("--theta", required=True)
     g.add_argument("--smoothed", action="store_true", help="PSIS-smoothed weights (Pareto k < 0.7)")
+    gl = sub.add_parser("g4l", help="G4-L: the held-out closure of the learned density ratio (section 8.2, phase 5)")
+    gl.add_argument("--contract", required=True)
+    gl.add_argument("--plan")
+    gl.add_argument("--points", help="JSON list of theta' objects (default: P0's points)")
+    gl.add_argument("--alpha", type=float, help="tighter than the contract's alpha (never looser than 0.01)")
     args = ap.parse_args(argv)
 
     def go():
         contract, plan, _ = io.contract_and_plan(args.contract, args.plan)
-        theta = io.load(args.theta)
+        theta = io.load(args.theta) if args.cmd != "g4l" else {}
         if plan is None or not isinstance(theta, dict):
             raise io.InputError("--plan (or a fixture) and --theta (a JSON object) are needed")
         try:
@@ -65,6 +78,8 @@ def main(argv=None) -> int:
             return {"status": "incomplete", "reason": str(exc)}
         except (KeyError, TypeError, ValueError) as exc:
             raise io.InputError(f"malformed plan: {exc!r}") from None
+        if args.cmd == "g4l":
+            return _g4l(ev, contract, plan, args)
         unknown = set(theta) - set(ev.parameters)
         if unknown:
             raise io.InputError(f"unknown parameters {sorted(unknown)}")
@@ -84,10 +99,59 @@ def main(argv=None) -> int:
         missing = w.pop("_missing_support", [])
         runs = reweight.summary(w)
         r = ev.evaluate(theta)
-        return {"status": "failed" if missing else "ok", "runs": runs,
-                "n_eff": dict(zip(r["names"], r["n_eff"])), "missing_support_runs": missing,
-                "reweighted_nodes": ev.reweighted_nodes(target)}
+        out = {"status": "failed" if missing else "ok", "runs": runs,
+               "n_eff": dict(zip(r["names"], r["n_eff"])), "missing_support_runs": missing,
+               "reweighted_nodes": ev.reweighted_nodes(target)}
+        if getattr(ev, "_learned_spec", None) is not None:      # phase 5: n_eff includes the learned ratio
+            out["learned_record"] = ev.learned_record()
+        return out
     return io.run(lambda: io.jsonable(go()))
+
+
+def required_points_missing(ev, contract, plan, points) -> list:
+    """Section 8.2 note 1 for user-given G4-L points (A33, review F13): the section 5.4 spot checks of the plan (P0's,
+    before any evaluation) and the worst-ESS point of P0's scan (kernel_check.default_points) must be among them."""
+    from core.calibration import emulator, kernel_check
+    out = []
+    spots = kernel_check.missing_spot_checks(points, kernel_check.required_spot_checks(contract, plan), "P0")
+    if spots:
+        out.append({"code": "g4l.spot_checks_missing", "message": f"the section 5.4 spot checks {spots} are not among "
+                    "--points (section 8.2 note 1; they cannot be omitted)"})
+        return out
+    worst = kernel_check.default_points(ev, contract, plan)[0]
+    if not any(emulator._same_point(p, worst, list(worst)) for p in points):
+        out.append({"code": "g4l.worst_ess_missing", "message": f"the worst-ESS point {worst} of P0's scan is not among "
+                    "--points (section 8.2 note 1: >= 3 theta' including the worst-ESS point within the prior)"})
+    return out
+
+
+def _g4l(ev, contract, plan, args):
+    from core.calibration import design as design_mod
+    from core.calibration import kernel_check, learned, linear
+    methods = {p: ev.default_method(p) for p in ev.parameters}
+    if design_mod.applicability(methods)["gates"]["G4-L"] != "applicable":
+        return {"gate": "G4-L", "status": "not-applicable", "reason": "the plan has no learned density ratio "
+                "(section 8.1)"}
+    if args.alpha is not None and not 0 < args.alpha <= reweight.G4L_ALPHA:
+        raise io.InputError(f"--alpha {args.alpha}: 0 < alpha <= {reweight.G4L_ALPHA}")
+    try:
+        d = linear.design(ev, contract, plan)
+        if args.points:
+            pts = io.load(args.points)
+            if not isinstance(pts, list) or not all(isinstance(p, dict) for p in pts):
+                raise io.InputError("--points: a JSON list of theta' objects")
+            missing = required_points_missing(ev, contract, plan, pts)
+            if missing:
+                return {"gate": "G4-L", "status": "rejected", "finding": missing[0]["code"], "findings": missing}
+        else:
+            pts = kernel_check.default_points(ev, contract, plan)
+        alpha = None if args.alpha is None else min(args.alpha, reweight.g4l_alpha(contract))
+        return reweight.g4l_run(ev, contract, d, pts, alpha)
+    except learned.LearnedError as exc:
+        return {"gate": "G4-L", "status": "rejected", "finding": exc.code, "findings": [{"code": exc.code,
+                "message": str(exc)}]}
+    except (linear.DesignError, KeyError, TypeError) as exc:
+        raise io.InputError(f"malformed contract or plan: {exc!r}") from None
 
 
 if __name__ == "__main__":

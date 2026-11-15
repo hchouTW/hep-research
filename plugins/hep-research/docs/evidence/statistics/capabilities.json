@@ -313,7 +313,9 @@
    "status": "supported",
    "gate": "pr",
    "tests": [
-    "tests/skills/hep_statistics/test_cli_input_fuzz.py"
+    "tests/skills/hep_statistics/test_cli_input_fuzz.py",
+    "tests/skills/hep_statistics/test_cli_input_fuzz_calib_a.py",
+    "tests/skills/hep_statistics/test_cli_input_fuzz_calib_b.py"
    ],
    "scope": "the input classes listed in the test"
   }

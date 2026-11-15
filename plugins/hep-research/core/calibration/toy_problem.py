@@ -10,6 +10,11 @@
 - V_MC from the evaluator's per-event influence values; V_G = V-hat + V_MC.
 - Toy data: one data-size event sample generated at the truth, summarized with the same estimators; constraint centres
   sampled around the true nuisances; replicas: two independent nominal-MC samples (new seeds) at the generation point.
+- The learned path (phase 5, only when the plan declares `evaluator.learned`, section 6.2): V_learn at theta_ref (the
+  evaluator's `v_learn`, link space) enters V_G and the validation V (section 9.2); the toy truth is the nominal MC
+  with the learned weights; each replica retrains the classifier on its own events (independent training MC and
+  initialization seed, section 6.6; no replica or training shared between toys, A25 (4)), and each toy draws
+  N(0, V_learn^bias) once at the generation point (sections 6.6, 6.2; only its scale is tested, A25 (2)).
 """
 from __future__ import annotations
 
@@ -30,6 +35,11 @@ def _seed_int(seed):
     if isinstance(seed, (tuple, list)):           # nested seed tuples are flattened through their own integers
         return int(np.random.SeedSequence([_seed_int(s) for s in seed]).generate_state(1)[0])
     return int(seed)
+
+
+def _learned(ev) -> bool:
+    """Whether the evaluator's plan declares a learned density ratio (section 6.2): the phase-5 path, off otherwise."""
+    return getattr(ev, "_learned_spec", None) is not None
 
 
 def per_set_summaries(model, events: dict, names: list, n_sets: int) -> np.ndarray:
@@ -119,6 +129,7 @@ class ToyProblem:
         self.edm_tol = 0.1
         self.has_bootstrap = True
         self.V_depends_on_theta = True
+        self.learned_omit: tuple = ()        # negative controls only: "V_G", "bias_draw", "retrain" (learned path)
         # actual data with absolute counts: the event total is Poisson(exposure) (a generous fixed-size sample is cut)
         self._data_model = build(self.exposure if not self.poisson_total else
                                  int(self.exposure + 8 * math.sqrt(self.exposure) + 20))
@@ -215,6 +226,8 @@ class ToyProblem:
                            for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
         w = ev.weights(target, sample, nodes=ev.reweighted_nodes(target, nom), regenerated=regen)
         w.pop("_missing_support", None)
+        if _learned(ev):                      # the learned ratio's weights (section 6.2): m_nom(truth), section 6.6
+            ev._apply_learned(target, nom, run_events, regen, w)
         return run_events, w
 
     def _hist(self, model, events: dict, name: str, weights=None):
@@ -326,9 +339,59 @@ class ToyProblem:
             pr = self.counts_pred(params)
             tau = {n: L.bb_tau(pr[n]["sumw"], pr[n]["sumw2"]) for n, c in self.count_spec.items() if c.get("bb")}
         V_emu = 0.0 if r.get("V_emu") is None else np.asarray(r["V_emu"], float) * np.outer(D, D)
-        ref = L.Reference(V_G=Vd + V_mc + V_emu, V_std=Vd, U=U, S=S, tau=tau)   # V_emu: surrogate (section 6.4)
+        V_G = Vd + V_mc + V_emu                           # V_emu: surrogate (section 6.4)
+        V_learn = None
+        if _learned(self.ev) and "V_G" not in self.learned_omit:
+            if bootstrap_frozen and getattr(frozen, "V_learn", None) is not None:
+                V_learn = frozen.V_learn                  # A27: frozen at theta_ref in the ln det diagnostic (section 7.3)
+            else:
+                V_learn = self.v_learn_link(params)["V_learn"]
+            V_G = V_G + V_learn                           # section 2.1: V_G = V_data + V_MC + V_emu + V_learn
+        ref = L.Reference(V_G=V_G, V_std=Vd, U=U, S=S, tau=tau)
         ref.V_MC = V_mc
+        if V_learn is not None:
+            ref.V_learn = V_learn
         return ref.finalize()
+
+    # -- the learned density ratio (section 6.2, phase 5; off unless the plan declares evaluator.learned)
+    def v_learn_link(self, params: dict, validation: bool = False) -> dict:
+        """V_learn at `params` in link space (the evaluator's `v_learn`, observable space, times g g^T at the nominal
+        prediction): {V_learn, V_learn_train, V_learn_bias}. validation: the validation rows (their own evaluator)."""
+        params = self._equivalent(params)
+        ev, names = (self.val_ev, self.val_names) if validation else (self.ev, self.names)
+        cache = self._val_cache if validation else self._cache
+        key = ("v_learn", id(ev), tuple(sorted((k, round(float(v), 14)) for k, v in params.items())))
+        if key not in cache:
+            pr = self._val_predict(params) if validation else self._predict(params)
+            D = (self._val_dlink if validation else self._dlink)(pr["pred"])
+            v = ev.v_learn(params, names=names)
+            G = np.outer(D, D)
+            cache[key] = {k: np.asarray(v[k], float) * G for k in ("V_learn", "V_learn_train", "V_learn_bias")}
+        return cache[key]
+
+    def learned_bias_draw(self, rng, validation: bool = False) -> np.ndarray:
+        """One draw of N(0, V_learn^bias) at the generation point (section 6.6: not event noise; each toy draws it once
+        and adds it to the prediction, the likelihood's own assumption; only its scale is tested, A25 (2))."""
+        gen = {**self.model.nominal, **self.generation}
+        V = self.v_learn_link(gen, validation)["V_learn_bias"]
+        lam, U = np.linalg.eigh(0.5 * (V + V.T))
+        return U @ (np.sqrt(np.clip(lam, 0.0, None)) * rng.standard_normal(lam.size))
+
+    def _learned_replicas(self, ev, seeds, rng, validation: bool, ma, mb) -> np.ndarray:
+        """The learned path of `replica_pert`: drop the replicas' trainings (each replica trained its own classifier on
+        its own events, never reused by another toy) and add the toy's N(0, V_learn^bias) draw."""
+        for k in [k for k in ev._learned if k[0] in {repr(s) for s in seeds}]:
+            ev._learned.pop(k)
+        out = (ma - mb) / math.sqrt(2.0)
+        if "bias_draw" not in self.learned_omit:
+            out = out + self.learned_bias_draw(rng, validation)
+        return out
+
+    def _share_nominal_training(self, ev, seeds) -> None:
+        """Negative control only ("retrain" in learned_omit): the replicas reuse the nominal classifier."""
+        if "retrain" in self.learned_omit:
+            for s in seeds:
+                ev._learned[(repr(s), 0)] = ev.learned_ratio()
 
     @property
     def V_MC_link(self):
@@ -417,10 +480,14 @@ class ToyProblem:
         """(m_a - m_b) / sqrt(2) of two independent nominal-MC samples at the generation point (section 6.6)."""
         gen = {**self.model.nominal, **self.generation}
         sa, sb = int(rng.integers(2 ** 62)), int(rng.integers(2 ** 62))
+        if _learned(self.ev):
+            self._share_nominal_training(self.ev, (sa, sb))
         ma = self._to_link(self.ev.evaluate(gen, names=self.names, seeds={"nominal": sa})["pred"])
         mb = self._to_link(self.ev.evaluate(gen, names=self.names, seeds={"nominal": sb})["pred"])
         self.ev._other.pop(sa, None)
         self.ev._other.pop(sb, None)
+        if _learned(self.ev):
+            return self._learned_replicas(self.ev, (sa, sb), rng, False, ma, mb)
         return (ma - mb) / math.sqrt(2.0)
 
     # -- validation observables (holdout and its toys, section 9.2)
@@ -493,7 +560,10 @@ class ToyProblem:
             for rr in dict.fromkeys(runs):
                 idx = [k for k, x in enumerate(runs) if x == rr]
                 Vd[np.ix_(idx, idx)] = L.bootstrap_covariance(Z[:, idx])
-            self.__dict__["_val_block"] = {"V_data": Vd, "V_MC": r["V_MC"] * np.outer(D, D), "constraints": []}
+            blk = {"V_data": Vd, "V_MC": r["V_MC"] * np.outer(D, D), "constraints": []}
+            if _learned(self.val_ev):                     # section 9.2: V = V_data + V_MC + V_emu + V_learn
+                blk["V_learn"] = self.v_learn_link(params, validation=True)["V_learn"]
+            self.__dict__["_val_block"] = blk
         return self.__dict__["_val_block"]
 
     def simulate_val(self, beta_truth, rng, phis=None, nominal: bool = True) -> np.ndarray:
@@ -522,20 +592,18 @@ class ToyProblem:
         """(m_a - m_b) / sqrt(2) of two independent validation nominal-MC samples at the generation point."""
         gen = {**self.model.nominal, **self.generation}
         sa, sb = int(rng.integers(2 ** 62)), int(rng.integers(2 ** 62))
+        if _learned(self.val_ev):
+            self._share_nominal_training(self.val_ev, (sa, sb))
         ma = self._val_link(self.val_ev.evaluate(gen, names=self.val_names, seeds={"nominal": sa})["pred"])
         mb = self._val_link(self.val_ev.evaluate(gen, names=self.val_names, seeds={"nominal": sb})["pred"])
         self.val_ev._other.pop(sa, None)
         self.val_ev._other.pop(sb, None)
+        if _learned(self.val_ev):
+            return self._learned_replicas(self.val_ev, (sa, sb), rng, True, ma, mb)
         return (ma - mb) / math.sqrt(2.0)
 
     def _observe_weighted(self, ev, model, params, rng, names, exposure, to_link):
-        target = {**model.nominal, **self._equivalent(params)}
-        nom = ev.nominal
-        run_events, regen = ev._prepared(target, nom)
-        sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
-                           for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
-        w = ev.weights(target, sample, nodes=ev.reweighted_nodes(target, nom), regenerated=regen)
-        w.pop("_missing_support", None)
+        run_events, w = self._weighted_events(params, ev, model)
         by = {o.name: o for o in model.observables}
         picked = {}
         for rid in sorted({by[n].run for n in names}):          # a fixed order of the draws (determinism)

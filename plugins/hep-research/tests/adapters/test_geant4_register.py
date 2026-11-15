@@ -393,9 +393,7 @@ class GeantConfigBuild(unittest.TestCase):
             inst.config.unlink()
             code, out = run(ASSETS / "geant4_run.py", "build-sim", "--build-record", d / "r.json", "--work", d / "w",
                             "--configure-with", "geant4-config", env=clean_env())
-            if out.get("error") == "cmake not found on PATH":
-                self.skipTest("cmake not found on PATH")
-            self.assertEqual(code, 3, out)
+            self.assertEqual(code, 3, out)  # judged before the cmake check: no skip on a host without cmake
             self.assertIn("no geant4-config", out["error"])
 
 

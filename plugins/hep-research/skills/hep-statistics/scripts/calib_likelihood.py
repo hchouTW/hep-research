@@ -11,6 +11,11 @@ Phase 3 (section 6.7, D28; the engine in core/calibration/map_term.py):
   calib_likelihood.py map-term --input FILE   the map term U(theta) phi_map at theta: {mode: fixed | shared |
                        independent, U: [U_j], rows, n_link, surrogate (record), theta, theta_names?, fallback?}; U,
                        d U / d theta and U U^T; with fallback: true, the nearest design point's covariance (held fixed)
+Phase 5 (section 5.4 "Inferred"; the engine in core/calibration/vmodel_infer.py):
+  calib_likelihood.py vmodel-infer --contract FILE --input FILE [--likelihood marginal|conditional]
+                       f, ell of the components carrying `infer`, by the marginal likelihood over nu, as a separate
+                       version (holdout only); input {names, residual, V, flat?, nuisance?, calibration_rows?} in link
+                       space; the conditional likelihood of nu is rejected (f nu not identifiable)
 Output: one JSON object; ok (exit 0), rejected (exit 2). The engine needs NumPy and SciPy. Phase 2 (section 17).
 """
 from __future__ import annotations
@@ -35,7 +40,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import emulator, io, likelihood as L, linear, map_term as MT
+    from core.calibration import emulator, io, likelihood as L, linear, map_term as MT, vmodel_infer as VI
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -60,10 +65,16 @@ def main(argv=None) -> int:
     sub.add_parser("binomial").add_argument("--moments", required=True)
     sub.add_parser("bootstrap-size").add_argument("--p", type=int, required=True)
     sub.add_parser("map-term").add_argument("--input", required=True)
+    vi = sub.add_parser("vmodel-infer")
+    vi.add_argument("--contract", required=True)
+    vi.add_argument("--input", required=True)
+    vi.add_argument("--likelihood", choices=("marginal", "conditional"), default="marginal")
     args = ap.parse_args(argv)
 
     def go():
         try:
+            if args.cmd == "vmodel-infer":
+                return vmodel_infer(args)
             if args.cmd == "map-term":
                 return map_term(io.load_object(args.input, ("mode", "U", "rows", "n_link")))
             if args.cmd == "bootstrap-size":
@@ -91,9 +102,22 @@ def main(argv=None) -> int:
             if "T_P" in m:
                 out["scope"] = L.binomial_scope(k / n, n, m["S_P"], m["S_F"], m["T_P"], m["T_F"])
             return out
-        except (L.LikelihoodError, MT.MapTermError, emulator.EmulatorError) as exc:
+        except (L.LikelihoodError, MT.MapTermError, emulator.EmulatorError, VI.VmodelInferError) as exc:
             return {"status": "rejected", "code": exc.code, "error": str(exc)}
     return io.run(lambda: io.jsonable(go()))
+
+
+def vmodel_infer(args) -> dict:
+    contract, _, _ = io.contract_and_plan(args.contract)
+    x = io.load_object(args.input, ("names", "residual", "V"))
+    try:
+        rec = VI.infer(contract, list(x["names"]), x["residual"], x["V"], x.get("flat"), x.get("nuisance"),
+                       likelihood=args.likelihood, calibration_rows=x.get("calibration_rows"))
+    except (KeyError, TypeError, ValueError) as exc:
+        if isinstance(exc, VI.VmodelInferError):
+            raise
+        raise io.InputError(f"malformed input: {exc!r}") from None
+    return {"status": "ok", "version": rec}
 
 
 def map_term(x: dict) -> dict:

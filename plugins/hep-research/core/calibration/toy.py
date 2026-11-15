@@ -279,6 +279,27 @@ class Scale(Kernel):
         return {self.out: p[self.gain] * par[self.parent]}
 
 
+class PostHocCorrection(Kernel):
+    """A post-hoc correction applied to a stored node output (the phase-5 fixture, section 6.2): y = x + c x^2 +
+    noise eps, eps ~ N(0, 1), c = p[strength]. The engine sees a samplable black box with no registered density, so
+    the learned density ratio is its candidate (section 3.6); `true_log_ratio` is the oracle the tests compare with."""
+    kind = "black-box"
+    n_u = 1
+
+    def __init__(self, out="y", parent="x", strength="strength", noise=0.5):
+        self.out, self.parent, self.strength, self.noise = out, parent, strength, float(noise)
+        self.outputs, self.params = (out,), (strength,)
+
+    def sample(self, par, p, u, run):
+        x = par[self.parent]
+        return {self.out: x + p[self.strength] * x * x + self.noise * _norm(u[0])}
+
+    def true_log_ratio(self, x, y, c, c0):
+        """log p(y | x; c) / p(y | x; c0) (tests only)."""
+        r1, r0 = y - x - c * x * x, y - x - c0 * x * x
+        return (r0 * r0 - r1 * r1) / (2.0 * self.noise ** 2)
+
+
 # ------------------------------------------------------------------ model
 @dataclass
 class Run:
@@ -413,6 +434,45 @@ def observe(model: Model, run_events: dict, run_weights: dict, names=None) -> di
             "per_event_var": per_event_var, "influence": infl, "runs": [o.run for o in obs], "samples": samples}
 
 
+def _difference_covariance(closures: list, at0: dict, k: int) -> np.ndarray:
+    """The MC-noise covariance of the learned-ratio bias estimate (ChainEvaluator.v_learn): b = mean over folds of the
+    learned closure at theta - direct at theta - (learned - direct at theta_0), all on the same closure events; from
+    the per-event influence values of the four evaluations (observe), summed over runs."""
+    V = np.zeros((k, k))
+    for run, cols in closures[0]["direct"]["influence"].items():
+        js = sorted(cols)
+
+        def m(ev):
+            return np.stack([ev["influence"][run][j][0] for j in js], axis=1)
+        D = np.mean([m(c["learned"]) for c in closures], axis=0) - m(closures[0]["direct"]) \
+            - (m(at0["learned"]) - m(at0["direct"]))
+        V[np.ix_(js, js)] += D.T @ D
+    return V
+
+
+class LazyVLearn:
+    """The section 7.1 `V_learn` of one evaluation on the learned path (A33, review F8): `ChainEvaluator.v_learn` at the
+    evaluation's point and observables (observable space; on the nominal sample whatever the evaluation's seeds: a
+    reference quantity, section 2.1), computed on first use and cached on the evaluator. A fit's evaluations never
+    read it, so they pay nothing; the design stage reads it at theta_ref (`linear.v_learn_of`). Calling it gives
+    v_learn's record, np.asarray the matrix."""
+
+    def __init__(self, ev, theta: dict, names):
+        self.ev, self.theta, self.names = ev, dict(theta), None if names is None else list(names)
+
+    def __call__(self) -> dict:
+        key = (tuple(sorted((k, round(float(v), 14)) for k, v in self.theta.items()
+                            if isinstance(v, (int, float, np.floating, np.integer)))),
+               None if self.names is None else tuple(self.names))
+        cache = self.ev.__dict__.setdefault("_v_learn_cache", {})
+        if key not in cache:
+            cache[key] = self.ev.v_learn(self.theta, self.names)
+        return cache[key]
+
+    def __array__(self, dtype=None, copy=None):
+        return np.asarray(self()["V_learn"], dtype=dtype)
+
+
 # ------------------------------------------------------------------ evaluator
 class ChainEvaluator:
     """The section 7.1 interface on a Model and a plan: nominal events generated at the plan's generation point with its
@@ -440,6 +500,10 @@ class ChainEvaluator:
         self._design_cache: dict = {}
         self._asked: dict = {}                           # ask/tell: run_id -> result
         self._validate()
+        self._learned_spec = spec.get("learned")         # phase 5, section 6.2: off unless the plan declares it
+        self._learned: dict = {}
+        if self._learned_spec is not None or "learned-density-ratio" in self.methods.values():
+            self._learned_setup()
 
     # ---- generation
     def default_method(self, par: str) -> str:
@@ -593,12 +657,14 @@ class ChainEvaluator:
             run_events[rid], regen_all[rid] = ev, regen
         return run_events, regen_all
 
-    def _observe(self, target, nom, run_events, regen, names):
+    def _observe(self, target, nom, run_events, regen, names, learned_fold=None, learned_ratio=None):
         sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
                            for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
         rw = self.reweighted_nodes(target, nom)
         w = self.weights(target, sample, nodes=rw, regenerated=regen)
         missing = w.pop("_missing_support", [])
+        if self._learned_spec is not None:
+            self._apply_learned(target, nom, run_events, regen, w, learned_fold, ratio=learned_ratio)
         out = observe(self.model, run_events, w, names)
         out["missing_support_runs"] = missing
         out["node_diag"] = {n: _node_diag(w) for n in rw}
@@ -630,8 +696,8 @@ class ChainEvaluator:
         run_events, regen = self._prepared(target, nom)
         out = self._observe(target, nom, run_events, regen, names)
         changed = [p for p in self.model.param_nodes if not _same(target.get(p), nom["params"].get(p))]
-        out.update({"V_emu": None, "V_learn": None, "theta": target,
-                    "methods": {p: self.default_method(p) for p in changed}})
+        out.update({"V_emu": None, "V_learn": None if self._learned_spec is None else LazyVLearn(self, target, names),
+                    "theta": target, "methods": {p: self.default_method(p) for p in changed}})
         return out
 
     def resample(self, node: str, theta: dict, phi: dict | None, psi: dict | None, model: str, inputs,
@@ -720,8 +786,187 @@ class ChainEvaluator:
                                                k.support(pv, {**nom["params"], **pt}, r))})
         return out
 
-    def learned_closure(self, fold):
-        raise NotImplementedError("learned density ratios are phase 5")
+    # ---- the learned density ratio (section 6.2, phase 5; core/calibration/learned.py)
+    def _learned_setup(self):
+        from core.calibration import learned
+        spec = self._learned_spec
+        if spec is None:
+            raise ValueError("method learned-density-ratio needs plan.evaluator.learned (section 6.2)")
+        node = spec.get("node") if isinstance(spec, dict) else None
+        io_ = self._learned_node_io(node) if isinstance(node, str) else None
+        bad = learned.check_spec(spec, self.model.param_nodes, io_, None, self.methods)
+        if bad:
+            raise learned.LearnedError(bad[0]["code"], "; ".join(f["message"] for f in bad))
+        if io_ is None or not io_[1]:
+            raise learned.LearnedError("learned.spec", f"node {node!r} is in no run of this chain")
+        self._learned_cfg = learned.settings(spec)
+
+    def _learned_node_io(self, node):
+        ins, outs = set(), set()
+        for run in self.model.runs.values():
+            if node in run.kernels:
+                outs |= set(run.kernels[node].outputs)
+                for pn in run.parents.get(node, []):
+                    ins |= set(run.kernels[pn].outputs)
+        return ins, outs
+
+    def _learned_features(self, run, ev):
+        f = self._learned_spec["features"]
+        node = self._learned_spec["node"]
+        par = _parent_values(run, ev, node)
+        return np.stack([np.asarray(par[v], float) for v in f.get("inputs") or []]
+                        + [np.asarray(ev[node][v], float) for v in f["outputs"]], axis=1)
+
+    def _learned_runs(self):
+        return [(ri, rid, run) for ri, (rid, run) in enumerate(self.model.runs.items())
+                if self._learned_spec["node"] in run.kernels]
+
+    def learned_ratio(self, sample: dict | None = None, repeat: int = 0):
+        """The trained ratio for a sample (default the nominal; a sample of other seeds has its own training MC) and
+        repeated training `repeat` (independent training MC and initialization seed, section 6.6). Cached."""
+        from core.calibration import learned
+        sample = sample or self.nominal
+        sk = sample["seed"]
+        key = (repr(sk), int(repeat))
+        if key in self._learned:
+            return self._learned[key]
+        spec = self._learned_spec
+        node = spec["node"]
+        runs = self._learned_runs()
+        stored = np.concatenate([self._learned_features(run, sample["runs"][rid]["events"]) for _, rid, run in runs])
+        offsets = np.cumsum([0] + [run.n for _, _, run in runs])
+        gen = sample["params"]
+
+        def sampler(theta, idx, k):
+            parts = []
+            for j, (ri, rid, run) in enumerate(runs):
+                sub = idx[(idx >= offsets[j]) & (idx < offsets[j + 1])] - offsets[j]
+                if not len(sub):
+                    continue
+                ev = sample["runs"][rid]["events"]
+                par = {v: np.asarray(a)[sub] for v, a in _parent_values(run, ev, node).items()}
+                kern = run.kernels[node]
+                u = np.random.default_rng(np.random.SeedSequence([*k, ri])).random((kern.n_u, len(sub)))
+                out = kern.sample(par, {**gen, **theta}, u, Run(rid, len(sub), run.kernels, run.parents))
+                f = spec["features"]
+                parts.append(np.stack([np.asarray(par[v], float) for v in f.get("inputs") or []]
+                                      + [np.asarray(out[v], float) for v in f["outputs"]], axis=1))
+            return np.concatenate(parts)
+        bounds = spec.get("support")
+        if not isinstance(bounds, dict) or set(spec["parameters"]) - set(bounds):
+            raise learned.LearnedError("learned.spec", "support: {parameter: [lo, hi]}, the training box")
+        sk_int = [int(x) for x in (sk if isinstance(sk, (tuple, list)) else [sk])]
+        seed = [int(self.seeds.get("learned", 20261501)), *sk_int, int(repeat)]
+        tr = learned.train(stored, sampler, spec, {p: float(gen[p]) for p in spec["parameters"]}, bounds, seed)
+        tr.offsets = {rid: (int(offsets[j]), int(offsets[j + 1])) for j, (_, rid, _) in enumerate(runs)}
+        self._learned[key] = tr
+        return tr
+
+    def _apply_learned(self, target, nom, run_events, regen, w, fold=None, repeat=0, ratio=None):
+        """Multiply the learned ratio into the weights of every run whose post-hoc node keeps its stored output (a
+        node regenerated at the target, by resimulation or by a rerun for P0, leaves the ratio)."""
+        spec = self._learned_spec
+        pars = spec["parameters"]
+        if all(_same(target.get(p), nom["params"].get(p)) for p in pars):
+            return
+        theta = {p: target[p] for p in pars}
+        tr = ratio
+        for _, rid, run in self._learned_runs():
+            if spec["node"] in regen.get(rid, ()):
+                continue
+            tr = tr if tr is not None else self.learned_ratio(nom, repeat)
+            F = self._learned_features(run, run_events[rid])
+            a, b = tr.offsets[rid]
+            lr = tr.log_weights(F, theta, fold=fold, fold_of=None if fold is not None else tr.fold_of[a:b])
+            w[rid] = w[rid] * np.exp(lr)
+
+    def learned_record(self) -> dict:
+        """The structural record of the nominal training (learned.TrainedRatio.record) for G4-L."""
+        if self._learned_spec is None:
+            raise NotImplementedError("the plan has no learned density ratio (section 6.2)")
+        return self.learned_ratio().record()
+
+    def _closure_sample(self):
+        s = self.seeds.get("closure", int(self.seeds["nominal"]) + 7919)
+        if ("closure", s) not in self._other:
+            self._other[("closure", s)] = self.generate(s)
+        return self._other[("closure", s)]
+
+    def learned_closure(self, fold, theta: dict | None = None, names=None, seeds: dict | None = None,
+                        repeat: int = 0) -> dict:
+        """Section 7.1 learned_closure(fold) for G4-L: the classifier of `fold` (trained on the other folds of the
+        nominal events) applied to an independent held-out sample (seeds['closure']), against the same sample with the
+        post-hoc node resampled at theta from its stored inputs and propagated downstream (new random numbers). Returns
+        {fold, point, names, learned, direct} (each an evaluation: pred, V_MC, influence); theta defaults to the
+        learned parameters' support centre."""
+        if self._learned_spec is None:
+            raise NotImplementedError("the plan has no learned density ratio (section 6.2)")
+        spec = self._learned_spec
+        tr = self.learned_ratio(repeat=repeat)
+        if theta is None:
+            theta = {p: 0.5 * sum(tr.support[p]) for p in spec["parameters"]}
+        target = {**self.model.nominal, **theta}
+        tr.check_support(target)
+        cs = self._closure_sample()
+        run_events, regen = self._prepared(target, cs)
+        out_l = self._observe(target, cs, run_events, regen, names, learned_fold=int(fold), learned_ratio=tr)
+        key = ("direct", repr(sorted(target.items())), None if names is None else tuple(names))
+        if key not in self._design_cache:
+            node = spec["node"]
+            ev_d, regen_d = {}, {}
+            seed = [int(self.seeds.get("closure", int(self.seeds["nominal"]) + 7919)), 31]
+            for ri, (rid, run) in enumerate(self.model.runs.items()):
+                ev = dict(run_events[rid])
+                fresh = descendants(run, node) if node in run.kernels else set()
+                for ni, nd in enumerate(self.model.order):
+                    kern = run.kernels.get(nd)
+                    if kern is None or nd not in fresh:
+                        continue
+                    u = _streams(seed, ri, ni + (1000 if nd == node else 2000), kern.n_u, run.n)
+                    ev[nd] = kern.sample(_parent_values(run, ev, nd), target, u, run)
+                ev_d[rid], regen_d[rid] = ev, regen[rid] | fresh
+            self._design_cache[key] = self._observe(target, cs, ev_d, regen_d, names)
+        return {"fold": int(fold), "point": dict(theta), "names": out_l["names"], "learned": out_l,
+                "direct": self._design_cache[key], "sample": "closure", "train_folds":
+                sorted(set(range(len(tr.folds))) - {int(fold)}) if len(tr.folds) > 1 else [0]}
+
+    def v_learn(self, theta: dict, names=None) -> dict:
+        """V_learn at theta (section 6.2; observable space, like V_emu): the covariance of the nominal prediction over
+        the plan's repeated trainings plus b b^T (learned.v_learn). WP-R2 adds it to V_G and to the validation residual
+        covariance.
+
+        b (reading L2, A29): the fold-averaged held-out closure difference at theta minus the same difference at the
+        generation point theta_0, where the ratio is 1 by construction (the learned side is the closure sample's stored
+        outputs, the direct side the same events resampled at theta_0 with the uniforms used at theta). Both terms
+        have the closure's MC noise, the theta_0 term has expectation 0 exactly, so the difference keeps the
+        expectation and removes the noise (a control variate; common random numbers on both sides). Without it b b^T
+        carries the closure comparison's own MC noise (about twice V_MC of the closure sample for event-noise
+        dominated observables): V_learn^bias > 0 at theta_0 and V_learn conservative (S4 of phase 5 failed so).
+        `bias_raw` keeps the uncorrected difference, `bias_theta0` the subtracted one (diagnostics). The MC noise
+        left in b (the closure events' influence values of the four terms, the classifiers held fixed: they never saw
+        the closure sample) is subtracted from b b^T, negative eigenvalues set to 0 (learned.v_learn)."""
+        from core.calibration import learned
+        if self._learned_spec is None:
+            raise NotImplementedError("the plan has no learned density ratio (section 6.2)")
+        target = {**self.model.nominal, **theta}
+        nom = self.nominal
+        run_events, regen = self._prepared(target, nom)
+        preds = []
+        for r in range(int(self._learned_cfg["repeats"])):
+            sample = {"runs": {rid: {"events": run_events[rid], "fractions": nom["runs"][rid].get("fractions")}
+                               for rid in run_events}, "params": nom["params"], "sq": nom["sq"], "comps": nom["comps"]}
+            w = self.weights(target, sample, nodes=self.reweighted_nodes(target, nom), regenerated=regen)
+            w.pop("_missing_support", None)
+            self._apply_learned(target, nom, run_events, regen, w, None, r)
+            preds.append(observe(self.model, run_events, w, names)["pred"])
+        lt = {p: target[p] for p in self._learned_spec["parameters"]}
+        cl = [self.learned_closure(k, lt, names) for k in range(len(self.learned_ratio().folds))]
+        raw = np.mean([c["learned"]["pred"] for c in cl], axis=0) - cl[0]["direct"]["pred"]
+        c0 = self.learned_closure(0, {p: float(nom["params"][p]) for p in lt}, names)    # the ratio is 1 there
+        at0 = np.asarray(c0["learned"]["pred"], float) - np.asarray(c0["direct"]["pred"], float)
+        noise = _difference_covariance(cl, c0, len(raw))
+        return {**learned.v_learn(preds, raw - at0, noise), "names": cl[0]["names"], "theta": dict(theta),
+                "bias_raw": raw, "bias_theta0": at0}
 
     # ---- surrogate model (section 6.4) and ask/tell (section 7.1)
     def attach_surrogate(self, surrogate) -> None:
@@ -964,6 +1209,15 @@ def toy_detector_subgraph(spec: dict, plan: dict) -> ChainEvaluator:
                                     spec.get("runs")), plan)
 
 
+def posthoc_fixture() -> tuple[dict, dict]:
+    """(contract, plan) of the phase-5 fixture with one post-hoc correction node (data/toy_posthoc.json, section 6.2):
+    the learned density ratio is the candidate of its parameter, so P0 and G4-L apply."""
+    import json
+    from pathlib import Path
+    fx = json.loads((Path(__file__).resolve().parent / "data" / "toy_posthoc.json").read_text())
+    return fx["contract"], fx["plan"]
+
+
 # ------------------------------------------------------------------ bimodal variant
 def toy_detector_bimodal(spec: dict, plan: dict) -> ChainEvaluator:
     """The overlapping modules read out as a sum, S = a f + b (1 - f) + eps, f ~ Beta(alpha, beta), eps ~ N(0, s^2):
@@ -995,7 +1249,7 @@ def build_bimodal(n: int = 40_000, alpha: float = 2.0, beta: float = 2.0, s: flo
 
 # ------------------------------------------------------------------ small declared chains (tests, single gates)
 CATALOG = {"normal": Normal, "uniform": Uniform, "poisson": Poisson, "binomial": Binomial, "gamma-sum": GammaSum,
-           "steps": Steps, "scale": Scale}
+           "steps": Steps, "scale": Scale, "post-hoc-correction": PostHocCorrection}
 
 
 def chain_from_spec(spec: dict, plan: dict) -> ChainEvaluator:
