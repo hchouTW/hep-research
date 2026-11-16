@@ -1,7 +1,7 @@
 """Generic-layer sufficiency (Part B section 12, section 17 phase-4 gate): the eight detector-type node-binding examples
-of hep-detector `assets/simulation-calibration/` pass the existing contract checker (calib_contract.py check) and the
-chain derivation (calib_chain.py p4 and candidates, section 11.4) unchanged. Each example is a contract fragment that
-the synthetic fixture of calibration_fixtures completes with what an experiment instance supplies (section 11.2):
+of hep-detector `assets/simulation-calibration/` pass the existing contract checker (simcal_contract.py check) and the
+chain derivation (simcal_chain.py p4 and candidates, section 11.4) unchanged. Each example is a contract fragment that
+the synthetic fixture of simcal_fixtures completes with what an experiment instance supplies (section 11.2):
 observables, event samples, data releases and the five model identity items (synthetic hashes here). Also checks the
 shape of the eight specialization pages (section 11.1 items 1-8; A21: item 7 holds only verified citations or "no
 literature value"; item 8 only simulation settings with an observable). Each negative test has a positive control."""
@@ -20,10 +20,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_fixtures as F  # noqa: E402
-from core.calibration import chain  # noqa: E402
-from core.calibration import contract as cc  # noqa: E402
-from core.calibration import data_release as release  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+from core.simcal import chain  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
+from core.simcal import data_release as release  # noqa: E402
 
 DETECTOR = ROOT / "skills" / "hep-detector"
 EXAMPLES = DETECTOR / "assets" / "simulation-calibration"
@@ -61,7 +61,7 @@ def example(kind: str) -> dict:
 
 
 def completed(kind: str) -> tuple[dict, dict]:
-    """(contract, plan): the example's fragment over the synthetic instance of calibration_fixtures."""
+    """(contract, plan): the example's fragment over the synthetic instance of simcal_fixtures."""
     ex = example(kind)
     fragment = copy.deepcopy(ex["contract_fragment"])
     c = F.contract()
@@ -82,7 +82,7 @@ def codes(findings) -> set:
 
 
 class Engine(unittest.TestCase):
-    """The examples through core.calibration as it is (no change of the generic layer)."""
+    """The examples through core.simcal as it is (no change of the generic layer)."""
 
     def test_every_example_is_accepted_and_derives_its_candidates(self):
         self.assertEqual(sorted(p.name.split(".")[0] for p in EXAMPLES.glob("*.binding.example.json")), sorted(TYPES))
@@ -147,7 +147,7 @@ class Engine(unittest.TestCase):
 
 
 class Scripts(unittest.TestCase):
-    """The same examples through the unchanged CLIs (calib_contract.py check validates the schema first)."""
+    """The same examples through the unchanged CLIs (simcal_contract.py check validates the schema first)."""
 
     def run_script(self, script, *args):
         res = subprocess.run([sys.executable, "-I", str(SCRIPTS / script), *map(str, args)], capture_output=True,
@@ -167,18 +167,18 @@ class Scripts(unittest.TestCase):
                                  "validation_releases": [release.release_hash(rels[F.VAL])]}
                     (d / "c.json").write_text(json.dumps(c))
                     (d / "p.json").write_text(json.dumps(plan))
-                    rc, out = self.run_script("calib_contract.py", "check", "--contract", d / "c.json",
+                    rc, out = self.run_script("simcal_contract.py", "check", "--contract", d / "c.json",
                                               "--release", d / "cal.json", "--release", d / "val.json")
                     self.assertEqual((rc, out["status"]), (0, "accepted"), out.get("findings"))
-                    rc, out = self.run_script("calib_chain.py", "p4", "--contract", d / "c.json")
+                    rc, out = self.run_script("simcal_chain.py", "p4", "--contract", d / "c.json")
                     self.assertEqual((rc, out["status"]), (0, "passed"))
-                    rc, out = self.run_script("calib_chain.py", "candidates", "--contract", d / "c.json",
+                    rc, out = self.run_script("simcal_chain.py", "candidates", "--contract", d / "c.json",
                                               "--plan", d / "p.json")
                     self.assertEqual((rc, methods(out)), (0, EXPECTED[kind]))
             c, _ = completed("ecal")
             c["stage_graph"]["edges"].append({"from": "reco", "to": "source"})       # negative: a cycle
             (d / "cyc.json").write_text(json.dumps(c))
-            rc, out = self.run_script("calib_chain.py", "check", "--contract", d / "cyc.json")
+            rc, out = self.run_script("simcal_chain.py", "check", "--contract", d / "cyc.json")
             self.assertEqual((rc, codes(out["findings"])), (1, {"graph.cycle"}))
 
 

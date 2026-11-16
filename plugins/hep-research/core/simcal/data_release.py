@@ -1,5 +1,5 @@
 """Data releases, raw-unit lineage, reads and failure records (Part B sections 2.1, 5.1, 9.2, 9.5, Appendix C.1;
-owner calib_data.py).
+owner simcal_data.py).
 
 Phase 0 content (section 17): raw-unit lineage; validation-read and fit-read events, including the registration of
 read channels and contract drafts; failure records (pending, final, withdrawn) and their state changes from decision
@@ -196,9 +196,9 @@ OPENING_PRECONDITIONS = (
 
 
 def unmet_preconditions(conditions: dict) -> list[str]:
-    """The opening conditions of section 14 (calib_data, "Opening"): every one must hold, an absent one counts as not
+    """The opening conditions of section 14 (simcal_data, "Opening"): every one must hold, an absent one counts as not
     holding. toy_replicas_ready is required only when k0 > 0 and T_v is calibrated with toys (the caller states it
-    true otherwise). outcome_not_determined is the lookup of calib_use (section 10.2 rule 0)."""
+    true otherwise). outcome_not_determined is the lookup of simcal_use (section 10.2 rule 0)."""
     unknown = set(conditions) - set(OPENING_PRECONDITIONS)
     if unknown:
         raise DataError("open.unknown_condition", f"unknown opening conditions {sorted(unknown)}")
@@ -235,11 +235,11 @@ DECISION_OUTCOMES = ("pass", "fail", "abandoned", "no-testable-direction")
 
 
 class Ledger:
-    """Read events, failure records and contract drafts of one installation, written by calib_data alone. State is a
+    """Read events, failure records and contract drafts of one installation, written by simcal_data alone. State is a
     plain dict (JSON-serialisable): {"seq", "events", "failure_records", "drafts"}."""
 
     def __init__(self, state: dict | None = None):
-        self.state = state or {"schema": "calibration-ledger/1", "seq": 0, "events": [], "failure_records": [],
+        self.state = state or {"schema": "simcal-ledger/1", "seq": 0, "events": [], "failure_records": [],
                                "drafts": {}}
 
     # -- sequence and channels
@@ -248,7 +248,7 @@ class Ledger:
         return self.state["seq"]
 
     def register_draft(self, series: str) -> dict:
-        """Register a new draft of a contract series (calib_data is the sole registrar); returns its read channel."""
+        """Register a new draft of a contract series (simcal_data is the sole registrar); returns its read channel."""
         n = self.state["drafts"].get(series, 0) + 1
         self.state["drafts"][series] = n
         return {"series": series, "draft": n}
@@ -300,7 +300,7 @@ class Ledger:
         if conditions is not None:
             unmet = unmet_preconditions(conditions)
             if unmet:
-                raise DataError("open.precondition", f"not opened: {unmet} (section 14, calib_data 'Opening'); no "
+                raise DataError("open.precondition", f"not opened: {unmet} (section 14, simcal_data 'Opening'); no "
                                 "read and no record")
         ch = self._channel(channel)
         if self.opening_seq(kappa) is not None:
@@ -320,7 +320,7 @@ class Ledger:
         return seq
 
     def apply_decision(self, decision: dict) -> str:
-        """Change kappa's pending records from a decision record of calib_validate (a hand-written stub in phase 0):
+        """Change kappa's pending records from a decision record of simcal_validate (a hand-written stub in phase 0):
         pass -> withdrawn; fail -> final; abandoned -> final; no-testable-direction (k = 0) -> withdrawn, or final
         when the data-side constraint check (including "has a value") was triggered. Records only change state, never
         disappear; a record no longer pending is not changed."""

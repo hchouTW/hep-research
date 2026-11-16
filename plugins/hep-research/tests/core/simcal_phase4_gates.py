@@ -9,7 +9,7 @@ Three items, each from the registered card (`simcal-tasks/phase-4.md`, gate desi
   every commit since the phase base that touches the specialization documents touches no file under the generic layer
   (GENERIC_PATHS).
 
-Usage (from a clean worktree at the registering commit): `python -I tests/core/calibration_phase4_gates.py --run --out
+Usage (from a clean worktree at the registering commit): `python -I tests/core/simcal_phase4_gates.py --run --out
 FILE`; every result `synthetic` where it uses fixtures."""
 from __future__ import annotations
 
@@ -24,9 +24,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase3_gates as P3G  # noqa: E402  (run_tests: the same unit-test runner as phase 3)
+import simcal_phase3_gates as P3G  # noqa: E402  (run_tests: the same unit-test runner as phase 3)
 
-from core.calibration import io  # noqa: E402
+from core.simcal import io  # noqa: E402
 
 LABEL = "synthetic"
 UNIT_RULE = ("every listed test passes (a negative test passing means its negative case is caught and its positive "
@@ -36,7 +36,7 @@ SPECIALIZATION_PATHS = ("plugins/hep-research/skills/hep-detector/references/sim
                         "plugins/hep-research/skills/hep-detector/assets/simulation-calibration/")
 GENERIC_PATHS = ("plugins/hep-research/core/", "plugins/hep-research/contracts/schemas/",
                  "plugins/hep-research/skills/hep-statistics/scripts/")
-M = "test_calibration_"
+M = "test_simcal_"
 
 CONTRIB = {
     "part": "negative tests of the contribution decomposition (section 15.3.18)",
@@ -80,7 +80,7 @@ CASES = [
     ("map varies with theta: wrong replica coupling or surrogate -> rejected; fixed-map linear construction for a "
      "non-linear observable -> rejected", [M + "map.TestMapPlan"]),
     ("shared seed whose mapping runs' primaries.csv disagree -> rejected",
-     [M + "map.TestMapPlan.test_shared_seed_and_interval", "test_calibration_map_patterns"]),
+     [M + "map.TestMapPlan.test_shared_seed_and_interval", "test_simcal_map_patterns"]),
     ("g4sim-digi-job/1 with changed run_seed, replica != 0, keys and conditions, or fields differing from the "
      "documents -> rejected", [M + "design_g4sim.DigiJobs", M + "model_identity.DigiJob"]),
     ("exported condition-snapshot/1 or alignment-overlay/1 without the result's hash in source_of_facts -> rejected "

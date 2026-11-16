@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "toy_detector",
  "description": "Toy detector of section 15.1: calorimeter branch (input, deposition, photon generation, PDE, gain with ENF, electronics; overlapping modules with an energy-ratio comparison node), track branch (input, momentum measurement; overlapping layers with a position-difference comparison node) and the E/p merge node. Graph structure only (phase 0): no simulation.",
  "status": "synthetic",

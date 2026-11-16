@@ -2,9 +2,9 @@
 calibration 6, and the research run on the toy detector's G8 deviation, batch C (task card `docs/dev/
 simulator-calibration/simcal-tasks/phase-2.md`). Not a unit test module.
 
-  python3 calibration_phase2_cals_c.py --task N --out DIR          one task of the array
-  python3 calibration_phase2_cals_c.py --merge DIR --out FILE      merge and judge (exit 0 passed, 1 failed)
-  python3 calibration_phase2_cals_c.py --smoke NAME --out FILE     the code path at tiny sizes (not evidence)
+  python3 simcal_phase2_cals_c.py --task N --out DIR          one task of the array
+  python3 simcal_phase2_cals_c.py --merge DIR --out FILE      merge and judge (exit 0 passed, 1 failed)
+  python3 simcal_phase2_cals_c.py --smoke NAME --out FILE     the code path at tiny sizes (not evidence)
 
 Seeds: default_rng([cal_seed(c, r), j, ...]) for calibration c (the research run uses c = 16), repetition r and
 configuration j. G8 here is the engine's decision (`closure.g8`) on pseudo-data fitted one by one; the intervals of the
@@ -24,14 +24,14 @@ from scipy import stats
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import calibration_phase2_gates as G  # noqa: E402
+import simcal_phase2_gates as G  # noqa: E402
 
-from core.calibration import closure as C  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import interval as IV  # noqa: E402
-from core.calibration import io  # noqa: E402
-from core.calibration import toy_problem as TP  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
+from core.simcal import closure as C  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import interval as IV  # noqa: E402
+from core.simcal import io  # noqa: E402
+from core.simcal import toy_problem as TP  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
 
 cal_seed = G.cal_seed
 D = 3

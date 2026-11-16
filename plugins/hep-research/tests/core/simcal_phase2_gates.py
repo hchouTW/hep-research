@@ -1,7 +1,7 @@
 """The registered gate runs and section 8.7 calibrations of phase 2 of the simulator calibration workflow (task card
 `docs/dev/simulator-calibration/simcal-tasks/phase-2.md`, "Thresholds and test designs"). Not a unit test module.
 
-  python3 calibration_phase2_gates.py --gate segmented --out FILE [--smoke]     gate 2 on the toy detector
+  python3 simcal_phase2_gates.py --gate segmented --out FILE [--smoke]     gate 2 on the toy detector
 
 `--smoke` runs the same code path with tiny sizes to check it; its output is labeled `smoke` and is not evidence.
 Every output records the commit and the SHA-256 of the files that decide it.
@@ -22,18 +22,18 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import io  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
-from core.calibration import propagate as P  # noqa: E402
-from core.calibration import toy  # noqa: E402
-from core.calibration import toy_problem as TP  # noqa: E402
-from core.calibration import validate as V  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import io  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
+from core.simcal import propagate as P  # noqa: E402
+from core.simcal import toy  # noqa: E402
+from core.simcal import toy_problem as TP  # noqa: E402
+from core.simcal import validate as V  # noqa: E402
 from scipy import stats  # noqa: E402
 
-FILES = ["core/calibration/" + f for f in ("likelihood.py", "fit.py", "propagate.py", "toy_problem.py", "toy.py",
+FILES = ["core/simcal/" + f for f in ("likelihood.py", "fit.py", "propagate.py", "toy_problem.py", "toy.py",
                                             "reweight.py", "data/toy_detector_design.json")] + \
-    ["tests/core/calibration_phase2_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-2.md"]
+    ["tests/core/simcal_phase2_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-2.md"]
 
 # gate 2 (card): the calorimeter segment and the track / E-p segment of the toy detector
 # the beam means measure exp(-t/lambda)(1 + eta) (pde and gain from the light-source and single-photoelectron runs), so
@@ -61,7 +61,7 @@ def provenance() -> dict:
 
 
 def bounds_from_fixture():
-    fx = json.loads((ROOT / "core/calibration/data/toy_detector_design.json").read_text())
+    fx = json.loads((ROOT / "core/simcal/data/toy_detector_design.json").read_text())
     out = {}
     for p in fx["contract"]["parameters"]:
         if p["role"] == "theta":
@@ -214,7 +214,7 @@ def _spd(k, rng):
 def cal13_chat(reps: int = 2000) -> dict:
     """Calibration 13: n = max(500, 10k) toys for C-hat_r, k in {5, 20, 60}; the median over repetitions of
     e^T C-hat^+ e (n - k - 2)/(n - 1) / e^T C^+ e within 1 +- 10%."""
-    from core.calibration import validate as V
+    from core.simcal import validate as V
     out = {}
     for k in (5, 20, 60):
         rng0 = np.random.default_rng(cal_seed(13, k))
@@ -240,7 +240,7 @@ def cal14_lower_bound(reps: int = 2000, R: int = 50) -> dict:
     """Calibration 14: known lambda_a in {5, 12.8, 30}, V_Delta / C_r in {0.03, 0.1, 0.3, 1}, R = 50 MC repetitions
     per bound, normal-approximation quantile; levels 1 - alpha_P/(2m) and 1 - alpha_P/m for m = 1, 2; the bound lies
     below the true lambda with frequency >= level - 3 binomial standard errors."""
-    from core.calibration import validate as V
+    from core.simcal import validate as V
     k = 5
     levels = sorted({1 - 0.05 / (2 * m) for m in (1, 2)} | {1 - 0.05 / m for m in (1, 2)})
     out = {}
@@ -270,7 +270,7 @@ def cal3_lambda(reps: int = 2000) -> dict:
     """Calibration 3: lambda_a in {5, 12.8, 30}, k = 5, V_Delta / C_r in {0.03, 0.1, 0.3}: the cross product's mean
     within lambda +- 2% or 3 standard errors (the larger); the single-set estimate biased high by tr(C^+ V_Delta) within
     3 standard errors; single set minus the trace reported."""
-    from core.calibration import validate as V
+    from core.simcal import validate as V
     k = 5
     out = {}
     for lam in (5.0, 12.8, 30.0):
@@ -299,7 +299,7 @@ def cal5_g7(reps: int = 1000) -> dict:
     """Calibration 5: d = 3, K = 10 and 5, V_MC correct, underestimated by 2 and by 3; false-alarm rate with a
     correct V_MC <= 2 alpha (<= 34 of 1000 at alpha = 0.01, using 2 alpha + 3 se as the card's count); detection at
     K = 10, factor 3, >= 0.9; the others reported."""
-    from core.calibration import toys_linear as T
+    from core.simcal import toys_linear as T
     cfg = T.linear_config(n=20, d=3, mc_ratio=0.1, seed=cal_seed(5, 0) % 2 ** 31)
     out = {}
     for K in (10, 5):
@@ -323,8 +323,8 @@ def cal7_jacobian_bias(reps: int = 10_000) -> dict:
     scaled so that max_i |b_J,i| / sigma_tot,i = 0.05, 0.10, 0.15, 0.25; >= 10^4 repetitions per point; the extra
     68% and 95% undercoverage of the interval +-z sigma_tot relative to the same configuration with K_l = 0 is <= 0.01
     at and below the bound (0.10 by approval A9)."""
-    from core.calibration import design_noise as DN
-    from core.calibration import toys_linear as T
+    from core.simcal import design_noise as DN
+    from core.simcal import toys_linear as T
     rng0 = np.random.default_rng(cal_seed(7, 0))
     base = T.linear_config(n=20, d=2, mc_ratio=0.1, seed=int(cal_seed(7, 1) % 2 ** 31))
     g0 = rng0.normal(size=(20, 2))
@@ -371,8 +371,8 @@ def cal9_rounding(reps: int = 10_000) -> dict:
     r = rho / sigma in {0.02, 0.05, 0.1, 0.15, 0.2}, the release rounding the data to its grid with the true values
     uniform on the grid, C_r = C + diag(rho^2 / 12), T_v against chi2_2: size within alpha +- 25%; and a single observable
     with sigma / rho from 0.1 to 10: sizes reported, judged where the condition holds (sigma / rho >= 5). The
-    deterministic items of note 2 are unit tests (test_calibration_data_checks.Rounding)."""
-    from core.calibration import validate as V
+    deterministic items of note 2 are unit tests (test_simcal_data_checks.Rounding)."""
+    from core.simcal import validate as V
     alpha = 0.05
     out, ok = {}, True
     crit2, crit1 = stats.chi2.ppf(1 - alpha, 2), stats.chi2.ppf(1 - alpha, 1)
@@ -414,8 +414,8 @@ def cal12_replica(reps: int = 10_000, n_ref: int = 20_000) -> dict:
     depend on the data or on e_nom, so one reference of n_ref toys per configuration is used for every repetition
     (equivalent in law to regenerating 500 per repetition). Rule: size within alpha +- 25%. Negative control: nominal as
     truth with a single replica as prediction (size too small, about 0.025)."""
-    from core.calibration import toys_linear as T
-    from core.calibration import validate as V
+    from core.simcal import toys_linear as T
+    from core.simcal import validate as V
     alpha = 0.05
     out, ok = {}, True
     for k in (5, 20):
@@ -485,8 +485,8 @@ SEED_GATE3 = 20261150
 def gate_shift(out: Path) -> dict:
     """Gate 3 as registered: each case with seeds 20261150 + case index (data) and + 100 (MC); linear toy n = 20,
     d = 3, truth (0.5, -0.3, 1.0); the shift phi orthogonal to the theta columns with information as stated."""
-    from core.calibration import shift as Sh
-    from core.calibration import toys_linear as T
+    from core.simcal import shift as Sh
+    from core.simcal import toys_linear as T
     truth = [0.5, -0.3, 1.0]
 
     def orth(J, seed):
@@ -562,7 +562,7 @@ SEED_GATE1 = 20261130
 
 
 def _toy_p3(names, theta_names, i, modes=None, exposure=2000, mc=20000):
-    from core.calibration import identify as I
+    from core.simcal import identify as I
     spec = bounds_from_fixture()
     th = {k: spec[k] for k in theta_names}
     p = TP.ToyProblem(build, names, th, exposure, mc, SEED_GATE1 + i, None, None, None, None, SEED_GATE1 + 100 + i)
@@ -610,7 +610,7 @@ def gate1_toy_p3() -> list:
 
 # ------------------------------------------------------------------ gate 1: event samples conditioned on N_tot,s (item 11)
 def _alr(counts):
-    from core.calibration import likelihood as Lk
+    from core.simcal import likelihood as Lk
     return Lk.shape_summary(counts, Lk.logratio_matrix(len(counts), "alr"))
 
 
@@ -620,7 +620,7 @@ def _rate(pvals, alpha=0.05):
 
 def gate1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: int = SEED_GATE1 + 60) -> list:
     """The section 15.3.7 size cases with a bootstrap conditioned on N_tot,s; each with its negative control."""
-    from core.calibration import validate as V
+    from core.simcal import validate as V
     out = []
     # (i) true normalization omega = 0.5: N_tot,s observed = 400 while N_decl = 800; K = 3 shape + efficiency
     P_BIN, EPS = np.array([0.5, 0.3, 0.2]), 0.7
@@ -729,7 +729,7 @@ def gate1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed:
 def gate1_g7_bblite(reps: int = 40, seed: int = SEED_GATE1 + 70) -> dict:
     """G7 for a fit with only Poisson blocks and BB-lite: Sigma_MC from the auxiliary measurements (B_m of section 6.7)
     passes; A V_MC A^T alone (Sigma_MC = 0) diverges (section 15.3.1)."""
-    from core.calibration import toys_linear as T
+    from core.simcal import toys_linear as T
     rng = np.random.default_rng(seed)
     K = 12
     pois = {"a": rng.uniform(20, 80, K), "b": rng.normal(0, 0.4, K), "tau": np.full(K, 200.0)}
@@ -751,9 +751,9 @@ def gate1_g8_lndet(reps: int = 50, seed: int = SEED_GATE1 + 80) -> dict:
     """G8 detects a fitter that omits ln det while V changes with theta (bias ~0.5 sigma) with probability >= 0.8:
     >= 40 detections in 50 repetitions at the standard level; the correct fitter as the positive control."""
     from scipy import optimize
-    from core.calibration import closure as C
-    from core.calibration import likelihood as Lk
-    from core.calibration import toys_linear as T
+    from core.simcal import closure as C
+    from core.simcal import likelihood as Lk
+    from core.simcal import toys_linear as T
     cfg = T.linear_config(n=20, d=1, count_c=1.0, sd=0.5, bounds=[(-2.0, 10.0)], prior=[(-2.0, 3.0)])
     cfg.J[:, 0] = np.abs(cfg.J[:, 0]) + 0.5
     N = C.n_c(1, "standard")["N_c"]
@@ -786,7 +786,7 @@ def gate1_g8_lndet(reps: int = 50, seed: int = SEED_GATE1 + 80) -> dict:
 def gate1_g8_counting(reps: int = 1000, seed: int = SEED_GATE1 + 90) -> dict:
     """Counting non-converged pseudo-data as not covered (negative control) over-rejects at the full level, d = 3,
     eps = 1% concentrated in covered pseudo-data, against replacement (section 7.3, 15.3.1, 15.3.9)."""
-    from core.calibration import closure as C
+    from core.simcal import closure as C
     N = C.n_c(3, "full")["N_c"]
     fa = {"replace": 0, "count": 0}
     for r in range(reps):
@@ -817,7 +817,7 @@ def gate1_power_point_estimate(reps: int = 2000, seed: int = SEED_GATE1 + 100, k
     >= 0.8 in more than 5% of repetitions (negative control); with the one-sided lower bound and the Bonferroni split
     (m = 1: 0.975 each) in at most 5% (section 15.3.10)."""
     from scipy import optimize as so
-    from core.calibration import validate as V
+    from core.simcal import validate as V
     crit = stats.chi2.ppf(0.95, k)
     lam = so.brentq(lambda x: stats.ncx2.sf(crit, k, x) - 0.75, 0.1, 100)
     e = np.zeros(k)
@@ -838,8 +838,8 @@ def gate1_power_point_estimate(reps: int = 2000, seed: int = SEED_GATE1 + 100, k
 def gate1_shape_total(reps: int = 2000, seed: int = SEED_GATE1 + 110) -> dict:
     """A shape conditioned on its total (K = 5, calibration total 500): the size of T_v at N_obs = 300, 1200, 1500,
     3000 is alpha (within alpha +- 25%) with the multinomial and propagation terms scaled per section 2.1 (15.2)."""
-    from core.calibration import likelihood as Lk
-    from core.calibration import validate as V
+    from core.simcal import likelihood as Lk
+    from core.simcal import validate as V
     K = 5
     rng0 = np.random.default_rng(seed)
     A = rng0.normal(size=(K - 1, 2)) * 0.5
@@ -966,7 +966,7 @@ def t1_v_shift(reps: int = 2000, seed: int = SEED_T1 + 20, r0: int = 0, exposure
     symmetric +-1 sigma refits) gives a rejection rate within alpha +- 25%; only the indirect effect, and the refit
     derivative with a minus sign, give a rate outside alpha +- 25%. The nominal MC is 16000 events (V_MC/V_data 0.125): at
     4000 the ln det diagnostic failed 7.45% of the fits and +-1 sigma refits (array 7584442)."""
-    from core.calibration import shift as Sh
+    from core.simcal import shift as Sh
     cal = ["track5_p_mean", "track5_p_width", "track2_p_width", "track5_dx_width"]
     val = ["track5_dx_width", "track2_dx_width", "track2_p_width"]
     res = {"ok": 0, "minus": 0, "indirect": 0}
@@ -1074,7 +1074,7 @@ def hash_free(label: str) -> int:
 def t1_g5(seed: int = SEED_T1 + 50) -> dict:
     """Item 7 (G5), toy detector: with only the momentum widths, momentum scale and sum term enter as the product
     a s (sigma_p = kappa a s p) -> g5.not_identifiable; with the momentum means added -> passes."""
-    from core.calibration import identify as I
+    from core.simcal import identify as I
     res = {}
     for lab, cal in (("product", ["track5_p_width", "track2_p_width"]), ("means", TRACK_CAL)):
         p = _track_fit(hash_free(lab), seed, cal=cal)
@@ -1162,7 +1162,7 @@ def _g8_problem(truth, seed_tuple, exposure=400, mc=200):
 def _nolndet_fit(p, start):
     """The negative-control fitter: -2 ln L minimized with V recomputed at every theta and no ln det term."""
     from scipy import optimize
-    from core.calibration import likelihood as Lk
+    from core.simcal import likelihood as Lk
 
     def chi2(x):
         rf = p.reference(np.asarray(x), None)
@@ -1174,7 +1174,7 @@ def _nolndet_fit(p, start):
 def t1_g8_lndet(reps: int = 50, seed: int = SEED_T1 + 80, r0: int = 0) -> dict:
     """Item 10 (G8), toy detector, standard level, d = 2: the fitter omitting ln det is caught in >= 40 of `reps`
     repetitions; the correct fitter (section 7.3 iteration with the ln det diagnostic) as the positive control."""
-    from core.calibration import closure as C
+    from core.simcal import closure as C
     N = C.n_c(2, "standard")["N_c"]
     p0 = _g8_problem(TRACK_TRUTH, (seed, 0))
     sd = F.iterate(p0, p0.initial_beta()).sigma_tot
@@ -1219,7 +1219,7 @@ def _g8c_points(seed):
     the momentum means, the layer-b offset through the position-difference means; sum_term_a at nominal), whose
     correct fits are unbiased at the full level's resolution. (The resolution parameter sum_term_a carries a residual
     bias of about 0.1 sigma in the toy, which G8 at the full level resolves: recorded as an open item.)"""
-    from core.calibration import closure as C
+    from core.simcal import closure as C
     p0 = _track_fit(0, seed, cal=G8C_CAL, truth=G8C_TRUTH, theta=G8C_THETA, sigma_noise=False, links=G8C_LINKS)
     sd = F.iterate(p0, p0.initial_beta()).sigma_tot
     interior, boundary = C.injection_points([v["prior"] for v in G8C_THETA.values()],
@@ -1256,7 +1256,7 @@ def g8_counting_from_pools(pools: list, reps: int = 1000, seed: int = SEED_T1 + 
     N_c with replacement from the recentred pool of each injection point; 1% of the N_c pseudo-data are non-converged, concentrated in
     covered ones. Replacing them keeps false alarms <= 62 in 1000; counting them as not covered (negative control)
     gives > 62."""
-    from core.calibration import closure as C
+    from core.simcal import closure as C
     pool = {}
     for k in (0, 1):
         rs = [x for x in pools if x["point"] == k]
@@ -1351,7 +1351,7 @@ def t1_p7_cross(pool: int = 16000, seed: int = SEED_T1 + 102) -> dict:
     independent MC sets is unbiased (pool mean within +-2% of the true lambda, the true value from 400000 events),
     while the single-set estimate is biased high (> +2%); with k = 1 (only the momentum mean of track 2, blind to the
     setting) P7 fails with p7.insufficient_power, with k = 5 at a delta of 4x the lambda-12.8 delta it passes."""
-    from core.calibration import design_noise as DN
+    from core.simcal import design_noise as DN
     p, f, Cp, k = _p7_problem()
     d128 = _delta_for(12.8, Cp)
     lam = _true_lambda(d128, Cp)
@@ -1410,7 +1410,7 @@ def t1_cv(seed: int = SEED_T1 + 110, n_ref: int = 500) -> dict:
     fold failing the linearity check is covered by construction, section 9.3, 8.5) and its toy reference gives a
     p-value on actual data at the truth; a split whose training fold keeps only the momentum widths (theta enters as
     a product there) is rejected by design.fold_p3, a split keeping a mean in every training fold passes."""
-    from core.calibration import design_noise as DN
+    from core.simcal import design_noise as DN
     cal = ["track5_p_mean", "track5_p_width", "track2_p_mean", "track2_p_width", "track5_dx_width",
            "track2_dx_width"]
     p = _track_fit(0, seed, cal=cal)
@@ -1432,7 +1432,7 @@ def t1_propagation(seed: int = SEED_T1 + 120) -> dict:
     with R1's theta as its central input zeta); combining the two packages as independent misstates Var(theta_1 +
     theta_2) against the joint value from Sigma (the parent-child counterexample on real fits); the package checks
     on these two results find the source overlap, and a theta/nu split export is rejected."""
-    from core.calibration import deps
+    from core.simcal import deps
     p = _track_fit(0, seed, sigma_noise=False)
     f = F.iterate(p, p.initial_beta())
     S = f.cov_beta[:2, :2]
@@ -1639,26 +1639,26 @@ def t1_event_samples(reps: int = 2000, B: int = 500, n_toys: int = 500, seed: in
 
 
 GATE1_EVIDENCE = {
-    "1 P3": ["harness gate1_toy_p3 (toy detector)", "test_calibration_identify_shift_interval.Identifiability",
-             "test_calibration_design_noise.Folds.test_fold_p3"],
-    "2 P7": ["test_calibration_contract (validation.alternative_shift: nu_k = 2 rejected)",
-             "test_calibration_design_noise.P7", "test_calibration_validate.Power",
-             "test_calibration_validate.CrossValidation (power by toys: cv_ensemble)", "harness gate1_power_point_estimate"],
-    "3 G1": ["test_calibration_fit.Iteration.test_g1_iteration_limit", "test_calibration_fit.Basins"],
-    "4 G2": ["test_calibration_fit.G2G3 (beyond, on, two parameters with chi-bar^2)"],
-    "5 G3": ["test_calibration_fit.G2G3.test_g3_isolation_mode"],
-    "6 G4": ["test_calibration_g4"],
-    "7 G5": ["test_calibration_identify_shift_interval.Identifiability (product; non-converged scan points: plan)"],
-    "8 G6": ["test_calibration_fit.G6 (missing effect; cross-term nonlinearity -> full toys)"],
-    "9 G7": ["test_calibration_fit.G7 (factor 3 detection, rank one, null space)", "harness gate1_g7_bblite"],
-    "10 G8": ["test_calibration_closure", "harness gate1_g8_lndet (50 repetitions)", "harness gate1_g8_counting",
-              "test_calibration_design_noise.Practices (pseudo-data sharing the fit MC rejected)"],
-    "11 V": ["test_calibration_validate (NullSpace, Holdout, ShiftModeResidual, ToyPath, CrossValidation, Records)",
-             "test_calibration_data_checks", "test_calibration_locking", "test_calibration_data (phase 0: reads, failure "
-             "records)", "test_calibration_contract (phase 0 rules of sections 15.3.4-15.3.8)", "harness gate1_event_samples",
+    "1 P3": ["harness gate1_toy_p3 (toy detector)", "test_simcal_identify_shift_interval.Identifiability",
+             "test_simcal_design_noise.Folds.test_fold_p3"],
+    "2 P7": ["test_simcal_contract (validation.alternative_shift: nu_k = 2 rejected)",
+             "test_simcal_design_noise.P7", "test_simcal_validate.Power",
+             "test_simcal_validate.CrossValidation (power by toys: cv_ensemble)", "harness gate1_power_point_estimate"],
+    "3 G1": ["test_simcal_fit.Iteration.test_g1_iteration_limit", "test_simcal_fit.Basins"],
+    "4 G2": ["test_simcal_fit.G2G3 (beyond, on, two parameters with chi-bar^2)"],
+    "5 G3": ["test_simcal_fit.G2G3.test_g3_isolation_mode"],
+    "6 G4": ["test_simcal_g4"],
+    "7 G5": ["test_simcal_identify_shift_interval.Identifiability (product; non-converged scan points: plan)"],
+    "8 G6": ["test_simcal_fit.G6 (missing effect; cross-term nonlinearity -> full toys)"],
+    "9 G7": ["test_simcal_fit.G7 (factor 3 detection, rank one, null space)", "harness gate1_g7_bblite"],
+    "10 G8": ["test_simcal_closure", "harness gate1_g8_lndet (50 repetitions)", "harness gate1_g8_counting",
+              "test_simcal_design_noise.Practices (pseudo-data sharing the fit MC rejected)"],
+    "11 V": ["test_simcal_validate (NullSpace, Holdout, ShiftModeResidual, ToyPath, CrossValidation, Records)",
+             "test_simcal_data_checks", "test_simcal_locking", "test_simcal_data (phase 0: reads, failure "
+             "records)", "test_simcal_contract (phase 0 rules of sections 15.3.4-15.3.8)", "harness gate1_event_samples",
              "harness gate1_shape_total", "cross-validation toys are always complete toys, so a fold failing the "
              "linearity check uses full toys by construction"],
-    "12 propagation": ["test_calibration_propagate"],
+    "12 propagation": ["test_simcal_propagate"],
 }
 
 
@@ -1666,16 +1666,16 @@ def gate_negatives(out: Path, smoke: bool = False) -> dict:
     """Gate 1 as registered: the calibration unit-test modules and the script tests at the commit, and the harness
     items at their registered sizes (smoke: tiny sizes, not evidence)."""
     t0 = time.time()
-    mods = sorted(p.name for p in (ROOT / "tests" / "core").glob("test_calibration_*.py"))
+    mods = sorted(p.name for p in (ROOT / "tests" / "core").glob("test_simcal_*.py"))
     units = {}
     for m in mods:
         r = subprocess.run([sys.executable, "-I", str(ROOT / "tests" / "core" / m)], capture_output=True, text=True,
                            timeout=7200, cwd=ROOT)
         tail = (r.stderr or "").strip().splitlines()[-3:]
         units[m] = {"exit": r.returncode, "summary": tail}
-    r = subprocess.run([sys.executable, "-m", "unittest", "tests.skills.test_calib_scripts"], capture_output=True,
+    r = subprocess.run([sys.executable, "-m", "unittest", "tests.skills.test_simcal_scripts"], capture_output=True,
                        text=True, timeout=7200, cwd=ROOT)
-    units["tests.skills.test_calib_scripts"] = {"exit": r.returncode, "summary": (r.stderr or "").strip().splitlines()[-3:]}
+    units["tests.skills.test_simcal_scripts"] = {"exit": r.returncode, "summary": (r.stderr or "").strip().splitlines()[-3:]}
     s = 0.1 if smoke else 1.0
     items = {"toy_p3": gate1_toy_p3(),
              "event_samples": gate1_event_samples(reps=int(2000 * s)),
@@ -1700,15 +1700,15 @@ def gate_negatives(out: Path, smoke: bool = False) -> dict:
 
 # ------------------------------------------------------------------ gate 1 on the toy detector: array tasks and merge
 def _units() -> dict:
-    mods = sorted(p.name for p in (ROOT / "tests" / "core").glob("test_calibration_*.py"))
+    mods = sorted(p.name for p in (ROOT / "tests" / "core").glob("test_simcal_*.py"))
     units = {}
     for m in mods:
         r = subprocess.run([sys.executable, "-I", str(ROOT / "tests" / "core" / m)], capture_output=True, text=True,
                            timeout=10800, cwd=ROOT)
         units[m] = {"exit": r.returncode, "summary": (r.stderr or "").strip().splitlines()[-3:]}
-    r = subprocess.run([sys.executable, "-m", "unittest", "tests.skills.test_calib_scripts"], capture_output=True,
+    r = subprocess.run([sys.executable, "-m", "unittest", "tests.skills.test_simcal_scripts"], capture_output=True,
                        text=True, timeout=10800, cwd=ROOT)
-    units["tests.skills.test_calib_scripts"] = {"exit": r.returncode,
+    units["tests.skills.test_simcal_scripts"] = {"exit": r.returncode,
                                                 "summary": (r.stderr or "").strip().splitlines()[-3:]}
     return {"item": "unit tests", "units": units, "ok": all(u["exit"] == 0 for u in units.values())}
 

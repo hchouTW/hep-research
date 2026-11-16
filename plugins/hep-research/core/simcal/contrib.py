@@ -1,4 +1,4 @@
-"""Contribution decomposition of Part B section 10.5 (calib_contrib.py; phase 4).
+"""Contribution decomposition of Part B section 10.5 (simcal_contrib.py; phase 4).
 
 A quantity Q of one observable at a parameter point (theta-hat) is split into one term per effect. Each effect is
 declared in the contract (`effects`: [{name, removal: {parameter: value after removal}}]) and removed through the
@@ -11,7 +11,7 @@ total by construction.
 - n > 10: orderings are sampled (uniform permutations, a fixed seed); each term is the mean over the sampled
   orderings and its sampling error (and the sampling covariance between terms) is reported;
 - every subset actually evaluated must pass the ESS threshold of G4 (N_eff,k >= N_req,k, section 6.7, the
-  implementation of calib_reweight: design.g4_inputs_from and reweight.g4); events not recorded at a reweighted node
+  implementation of simcal_reweight: design.g4_inputs_from and reweight.g4); events not recorded at a reweighted node
   (missing support) fail it too. If any one fails, no decomposition is output: status `failed`, finding `contrib.ess`
   and the failing subsets;
 - the covariances between the terms come from an event bootstrap: one multinomial resampling of each run's events,
@@ -29,7 +29,7 @@ import math
 
 import numpy as np
 
-from core.calibration import design, evaluator as E, linear, reweight
+from core.simcal import design, evaluator as E, linear, reweight
 
 EXHAUSTIVE_MAX = 10                      # section 10.5: all 2^n subsets when n <= 10
 OBJECTS = ("variance", "resolution")

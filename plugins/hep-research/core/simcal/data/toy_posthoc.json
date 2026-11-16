@@ -1,10 +1,10 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "toy_posthoc",
  "description": "A declared chain with one post-hoc correction node (phase 5, section 6.2; the toy detector of section 15.1 has none): x ~ N(0, 1) stored, y = x + c x^2 + 0.5 eps by a samplable black box without a registered density, c = strength (generation point 0.1, prior [0, 0.2]). The learned density ratio is the candidate method of strength, so P0 and G4-L apply; the plan declares a cross-fitted (5 folds), Platt-calibrated, prior-ratio-corrected logistic ratio with 5 repeated trainings.",
  "status": "synthetic",
  "contract": {
-  "schema": "calibration-contract/1",
+  "schema": "simcal-contract/1",
   "series": "toy-posthoc",
   "simulator": "toy-chain",
   "stage_graph": {
@@ -138,7 +138,7 @@
   }
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {
    "x": {
     "stored": {

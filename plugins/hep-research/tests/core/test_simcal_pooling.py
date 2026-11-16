@@ -22,15 +22,15 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(HERE))
 
-import calibration_fixtures as CF  # noqa: E402
+import simcal_fixtures as CF  # noqa: E402
 
 from contracts.schema import validate  # noqa: E402
-from core.calibration import closure as CL  # noqa: E402
-from core.calibration import contract as CC  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import pooling as PL  # noqa: E402
-from core.calibration import toys_linear as TL  # noqa: E402
-from core.calibration import use as U  # noqa: E402
+from core.simcal import closure as CL  # noqa: E402
+from core.simcal import contract as CC  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import pooling as PL  # noqa: E402
+from core.simcal import toys_linear as TL  # noqa: E402
+from core.simcal import use as U  # noqa: E402
 
 S = 4
 TRUTH = (0.5, -0.3)
@@ -93,14 +93,14 @@ class Declaration(unittest.TestCase):
     def test_schema_field(self):
         """The optional `pooling` field: accepted when well formed; one segment or an unknown key is a schema error."""
         c, name = pooled_contract()
-        base = len(validate(CF.contract(), "calibration_contract.json").errors)
-        self.assertEqual(len(validate(c, "calibration_contract.json").errors), base)
+        base = len(validate(CF.contract(), "simcal_contract.json").errors)
+        self.assertEqual(len(validate(c, "simcal_contract.json").errors), base)
         bad = copy.deepcopy(c)
         bad["pooling"]["segments"] = bad["pooling"]["segments"][:1]
-        self.assertGreater(len(validate(bad, "calibration_contract.json").errors), base)
+        self.assertGreater(len(validate(bad, "simcal_contract.json").errors), base)
         bad = copy.deepcopy(c)
         bad["pooling"]["parameters"][name]["prior"] = 1
-        self.assertGreater(len(validate(bad, "calibration_contract.json").errors), base)
+        self.assertGreater(len(validate(bad, "simcal_contract.json").errors), base)
 
     def test_default_off(self):
         """A contract without pooling is not touched: no pooling code, the hook is not entered."""
@@ -351,7 +351,7 @@ class PooledGrade(unittest.TestCase):
                          "projection")
 
     def test_grade_report(self):
-        """calib_fit.py pool's grade section: without inputs it lists the states it decided and those still needed;
+        """simcal_fit.py pool's grade section: without inputs it lists the states it decided and those still needed;
         with inputs the decided states replace the given ones (a failed G1 of the joint fit fails the result although
         the inputs say passed); malformed inputs are rejected."""
         r = PL.grade_report({"G1": "passed"})
@@ -444,7 +444,7 @@ class PooledIdentifiability(unittest.TestCase):
         the joint problem of 8 segments; control: the single segment fails. Negative: collinear responses fail on the
         joint problem (lambda_min); judging the z_s,j too would fail every pooled P3 (their prior is N(0, 1))."""
         j, segs = gated_joint(S_=8, n=4, sd=3.0, val=False)
-        from core.calibration import identify as I
+        from core.simcal import identify as I
         one = I.p3(segs[0], TL.initial_beta(segs[0]))
         self.assertEqual(one["status"], "failed")
         r = PL.p3(j)
@@ -590,12 +590,12 @@ class S2Driver(unittest.TestCase):
     incomplete (negative), the complete array is `reported` (control)."""
 
     def test_driver(self):
-        import calibration_phase5_pooling_s2 as D
+        import simcal_phase5_pooling_s2 as D
         self.assertEqual(len(D.TASKS), 10)
         self.assertEqual(sum(t["reps"] for t in D.TASKS), 1000)
         with tempfile.TemporaryDirectory() as scratch:
             d = Path(scratch)
-            out = subprocess.run([sys.executable, str(HERE / "calibration_phase5_pooling_s2.py"), "--local", "--out",
+            out = subprocess.run([sys.executable, str(HERE / "simcal_phase5_pooling_s2.py"), "--local", "--out",
                                   str(d / "smoke.json")], capture_output=True, text=True, timeout=300)
             self.assertEqual(out.returncode, 0, out.stderr)
             rep = json.loads((d / "smoke.json").read_text())

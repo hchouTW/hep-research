@@ -1,5 +1,5 @@
 """Stage graph, candidate methods and reference coverage (Part B sections 3.1, 3.4, 3.6; gate P4; owner
-calib_chain.py).
+simcal_chain.py).
 
 The semantic layer (contract): stage_graph {nodes, edges}, parameters[] (name, role, nodes) and references[] (type,
 edge, observation). The implementation layer (plan): kernels {node: {stored: {inputs, outputs, steps},
@@ -253,7 +253,7 @@ def node_candidates(node: dict, kernel_plan: dict) -> set[str]:
 
 
 def candidate_methods(contract: dict, plan: dict) -> dict:
-    """Candidate methods per parameter (section 3.6 step 1; the final method is P5's, calib_design.py). A parameter
+    """Candidate methods per parameter (section 3.6 step 1; the final method is P5's, simcal_design.py). A parameter
     acting on several nodes takes the methods every one of its nodes allows. With g4sim (a plan with node_binding),
     candidates come from section 11.4 Table 2 (g4sim_candidates)."""
     if plan.get("node_binding"):
@@ -348,7 +348,7 @@ def binding_row(binding: dict) -> tuple[str | None, str | None]:
 def binding_findings(contract: dict) -> list[dict]:
     """Contract-level rules of the binding (section 5.1, 11.4, D86, D87): each theta and phi of a g4sim contract is
     bound to at least one field; each binding lies in a row of Table 2; a theta on the snapshot is conditioned
-    piecewise-independently on its IOVs (D87 (c)). Called by calib_contract.py check."""
+    piecewise-independently on its IOVs (D87 (c)). Called by simcal_contract.py check."""
     out: list[dict] = []
     if contract.get("simulator") != "g4sim":
         return out
@@ -523,7 +523,7 @@ def g4sim_candidates(contract: dict, plan: dict) -> dict:
         if "evaluator" in rows:                   # the PDE split of section 6.7 (routes 2_1, 3 and 1)
             stored = set().union(*[set(b.get("stored", [])) for b in nb]) if nb else set()
             recorded = bool(nb) and all(b.get("recording", plan.get("recording_level")) in RECORDED for b in nb)
-            from core.calibration import pde_split    # NumPy/SciPy: imported only for a PDE split
+            from core.simcal import pde_split    # NumPy/SciPy: imported only for a PDE split
             c, x = pde_split.candidates(par, contract, plan, stored, recorded)
             out[par["name"]] = [_entry(*e) for e in c] if rows == {"evaluator"} else []
             if x:

@@ -3,25 +3,25 @@
 multi-start, G1, G2, G3, G6, G7, locally linear toys and the linearity check, the non-convergence rules and the k* of
 the ratio test; phase 2).
 
-  calib_fit.py fit  --contract FILE --plan FILE --values FILE --release FILE [--seed S] [--sigma-noise X]
-  calib_fit.py g6   --contract FILE --plan FILE --values FILE [--toys N] [--full]
-  calib_fit.py g2   --contract FILE --plan FILE --values FILE [--toys N]
-  calib_fit.py g7   --theta-hats FILE --sigma-mc FILE [--alpha A]
-  calib_fit.py g3   --region FILE --limits FILE
-  calib_fit.py kstar --n N [--no-replacement]
-  calib_fit.py pool --contract FILE --plan FILE --values FILE [--release FILE] [--seed S] [--sigma-noise X]
+  simcal_fit.py fit  --contract FILE --plan FILE --values FILE --release FILE [--seed S] [--sigma-noise X]
+  simcal_fit.py g6   --contract FILE --plan FILE --values FILE [--toys N] [--full]
+  simcal_fit.py g2   --contract FILE --plan FILE --values FILE [--toys N]
+  simcal_fit.py g7   --theta-hats FILE --sigma-mc FILE [--alpha A]
+  simcal_fit.py g3   --region FILE --limits FILE
+  simcal_fit.py kstar --n N [--no-replacement]
+  simcal_fit.py pool --contract FILE --plan FILE --values FILE [--release FILE] [--seed S] [--sigma-noise X]
                     [--toys N] [--grade FILE]
 The fit runs section 7.4 (max(2d, 16) Sobol starts, basins, ties, `multimodal`) and the section 7.3 iteration with
 the ln det diagnostic; G1 per basin; then the fit-point recomputation (D10, D21): the locking-stage checks of
-calib_data at theta-hat with the release's declarations, decided by calib_contract's rules; a contract error there is
+simcal_data at theta-hat with the release's declarations, decided by simcal_contract's rules; a contract error there is
 `rejected` (exit 2). Without --release the recomputation cannot run and the fit is `incomplete`. g6 uses locally
 linear toys with the linearity check, --full the full toys (D46); g2 the chi-bar^2 weights from locally linear toys.
 --toys >= 500 (card reading). --sigma-noise overrides the estimate of section 8.1 and is flagged
 `sigma-noise-user-supplied`. Output: one JSON object; passed (exit 0), failed (exit 1), rejected (exit 2),
-incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 2 (section 17).
+incomplete (exit 3). The engine (core/simcal) needs NumPy and SciPy. Phase 2 (section 17).
 pool (phase 5, section 3.7 partial pooling, approval A25 (6)): the contract's `pooling` segments, --values
 {"segments": {name: {observable: value}}}; tau_pool by REML with its 95% set, the joint fit with G1 and sigma_tot of
-each segment's pooled theta (core/calibration/pooling.py); a declaration error is rejected (exit 2). Approval A26:
+each segment's pooled theta (core/simcal/pooling.py); a declaration error is rejected (exit 2). Approval A26:
 --toys N (>= 500) adds G2 (real parameters' bounds only) and G6 on the joint problem; the output's `grade` lists the
 gate states decided here and the inputs still needed, or, with --grade FILE ({gates, p7, v, vmode, real_data, ...}:
 the states recorded elsewhere), the Appendix C grade and uses (flag `partial-pooling`, informational).
@@ -48,7 +48,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, fit as F, problems, toy_problem, data_checks, contract as cc, pooling
+    from core.simcal import io, fit as F, problems, toy_problem, data_checks, contract as cc, pooling
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -80,7 +80,7 @@ def _common(p, values=True):
     p.add_argument("--release")
     if values:
         p.add_argument("--values", required=True, help="calibration values (JSON {observable: value}) provided by "
-                       "calib_data.py provide, which records the fit read")
+                       "simcal_data.py provide, which records the fit read")
     p.add_argument("--sigma-noise", type=float)
     p.add_argument("--seed", type=int, default=20261130)
 

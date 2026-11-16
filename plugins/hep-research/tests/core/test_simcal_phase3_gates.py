@@ -1,4 +1,4 @@
-"""The phase-3 gate and G8 drivers (tests/core/calibration_phase3_gates.py; wave 3, WP-H): the task table, the
+"""The phase-3 gate and G8 drivers (tests/core/simcal_phase3_gates.py; wave 3, WP-H): the task table, the
 `--local` code path, and the merge's decision logic on synthetic task records, each failing configuration reported as
 failed (negative) next to a passing control. Everything is `synthetic`."""
 from __future__ import annotations
@@ -18,9 +18,9 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import calibration_phase3_gates as H  # noqa: E402
+import simcal_phase3_gates as H  # noqa: E402
 
-from core.calibration import closure as C  # noqa: E402
+from core.simcal import closure as C  # noqa: E402
 
 
 def _rows(n, sd, bias=0.0, seed=0, start=0, nonconv=()):
@@ -119,9 +119,9 @@ class UnitItems(unittest.TestCase):
         self.assertEqual(seen, [str(H.P3.OUT_ROOT), d, None])
 
     def test_runner_records_outcomes(self):
-        out = H.run_tests([H.EMULATOR_TESTS + "P6Arrays.test_bonferroni_z", "test_calibration_emulator.NoSuchClass"])
+        out = H.run_tests([H.EMULATOR_TESTS + "P6Arrays.test_bonferroni_z", "test_simcal_emulator.NoSuchClass"])
         self.assertEqual(out[H.EMULATOR_TESTS + "P6Arrays.test_bonferroni_z"]["outcome"], "passed")
-        self.assertEqual(out["test_calibration_emulator.NoSuchClass"]["outcome"], "error")
+        self.assertEqual(out["test_simcal_emulator.NoSuchClass"]["outcome"], "error")
 
 
 class ThreeMethodJudge(unittest.TestCase):

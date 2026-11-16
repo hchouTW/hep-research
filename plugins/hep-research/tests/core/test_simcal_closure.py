@@ -11,10 +11,10 @@ from scipy import optimize
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import closure as C  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
+from core.simcal import closure as C  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
 
 
 class Design(unittest.TestCase):

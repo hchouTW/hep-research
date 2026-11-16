@@ -1,4 +1,4 @@
-"""Dependencies between calibration results (Part B sections 5.2 clause 5, 10.2, 10.3, 10.4; owner calib_deps.py).
+"""Dependencies between calibration results (Part B sections 5.2 clause 5, 10.2, 10.3, 10.4; owner simcal_deps.py).
 
 Phase 0 content (section 17): hash references, cycle checks, derivation of upstream roles from usage, and the
 acyclic computation of version ids; phase 2: the conflict rules of section 10.4; phase 4: upstream invalidation and the
@@ -15,8 +15,8 @@ import re
 from datetime import datetime
 from statistics import NormalDist
 
-from core.calibration import model_identity
-from core.calibration.data_release import kappa_id
+from core.simcal import model_identity
+from core.simcal.data_release import kappa_id
 from core.canonical import canonical_sha256
 
 # Section 5.2 clause 5: the usages an upstream reference can declare, and the role each implies (section 10.2).
@@ -275,7 +275,7 @@ def _result_hash(r, where: str) -> str:
 
 def kappa(r: dict) -> str:
     """kappa of a result (section 9.5): its `kappa` field, else the hash of (contract hash, plan hash, engine version)
-    (core.calibration.data_release.kappa_id)."""
+    (core.simcal.data_release.kappa_id)."""
     if r.get("kappa"):
         return r["kappa"]
     parts = [r.get(k) for k in ("contract_sha256", "plan_sha256", "engine_version")]
@@ -328,7 +328,7 @@ def invalidate(downstreams: list, changes: list, marked=()) -> dict:
         h = _result_hash(r, f"$.results[{i}]")
         entries = r.get("upstream") or []
         if check_upstream_entries(entries):
-            raise DependencyError("invalidate.upstream", "the upstream[] entries are not valid (calib_deps.py roles)",
+            raise DependencyError("invalidate.upstream", "the upstream[] entries are not valid (simcal_deps.py roles)",
                                   f"$.results[{i}].upstream")
         ups[h] = entries
     redo: dict[str, list] = {}
@@ -366,7 +366,7 @@ PROVISIONAL = "provisional-thresholds"
 T2_MARGIN = 0.1            # x sigma_tot,i^design per theta_i: provisional threshold of A21 as amended by A24
 T2_POWER = 0.025           # se(delta theta_i) <= T2_POWER sigma_tot,i^design: the pre-registered power condition (A24)
 T2_ALPHA = 0.05            # TOST level per theta_i and point; all must pass (intersection-union test)
-T2_SCHEMA = "calibration-identity-equivalence/1"
+T2_SCHEMA = "simcal-identity-equivalence/1"
 THETA_HAT = "theta-hat"
 
 
@@ -575,7 +575,7 @@ def t2_check(record: dict, basis: dict) -> dict:
 
 def identity_decision(result: dict, current: list, record: dict | None = None, basis: dict | None = None) -> dict:
     """basis: only new_build_first_run is read from it (A24); the rest of the T2 basis is the result's `t2_basis`."""
-    """Section 10.3 change of simulation identity with approval A21 (section 19-g7). result: a calibration-result
+    """Section 10.3 change of simulation identity with approval A21 (section 19-g7). result: a simcal-result
     with result_sha256 and model_identities [{model, identity}]; current: the current [{model, identity}] (from
     model_identity.identity). Unchanged identities (theta, phi values and provenance_id are masked, section 5.1):
     `unchanged`. A changed item: `redo`, unless a T2 record (t2_check with basis) passes, which keeps the result

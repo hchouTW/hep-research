@@ -849,7 +849,7 @@ GRADE_REQUIRED = ("gates", "p7", "v", "vmode", "real_data")
 
 
 def check_grade_inputs(given) -> None:
-    """The grade inputs a caller supplies for a pooled result (`calib_fit.py pool --grade`): the recorded states of
+    """The grade inputs a caller supplies for a pooled result (`simcal_fit.py pool --grade`): the recorded states of
     the gates decided elsewhere, P7, V, the validation mode and the data kind; PoolingError (exit 2) otherwise."""
     if not isinstance(given, dict) or set(given) - set(GRADE_KEYS) or any(k not in given for k in GRADE_REQUIRED) \
             or not isinstance(given["gates"], dict):

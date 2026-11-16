@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "toy-detector-design",
  "status": "synthetic",
  "description": "Design-stage contract and plan of the toy detector of section 15.1 (phase 1): priors, exposure, the energy-scale systematic eta, a V_model kernel on the beam energy means, the plan's methods and seeds. All values synthetic.",
@@ -476,7 +476,7 @@
     "observation": "position_difference"
    }
   ],
-  "schema": "calibration-contract/1",
+  "schema": "simcal-contract/1",
   "series": "toy-design",
   "simulator": "toy-detector",
   "observables": [
@@ -894,7 +894,7 @@
   }
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {
    "input": {
     "stored": {
@@ -1056,7 +1056,7 @@
   }
  },
  "release": {
-  "schema": "calibration-data-release/1",
+  "schema": "simcal-data-release/1",
   "status": [
    "synthetic"
   ],

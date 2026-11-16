@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """G8, the closure test (simulator calibration workflow, Part B section 8.4; owner of G8; phase 2).
 
-  calib_closure.py nc --d D --level standard|full        N_bias, N_cov and N_c (the section 8.4 table)
-  calib_closure.py decide --results FILE                  the Holm decision from the pseudo-data results
-  calib_closure.py not-executed --reason TEXT             no decision: closure-not-tested
+  simcal_closure.py nc --d D --level standard|full        N_bias, N_cov and N_c (the section 8.4 table)
+  simcal_closure.py decide --results FILE                  the Holm decision from the pseudo-data results
+  simcal_closure.py not-executed --reason TEXT             no decision: closure-not-tested
 The results file: {level, names, sigma_design, interior: {errors, cover68, cover95, nontruth_basin, X,
 interval_toys}, boundary: {...}, pseudo_data_source?}. Output: one JSON object; passed (exit 0), failed (exit 1, remedy
 plan; contract when the pseudo-data fall in a non-truth basin, D57), incomplete (exit 3), gap (exit 3: the truth MC
@@ -32,7 +32,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, closure
+    from core.simcal import io, closure
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 

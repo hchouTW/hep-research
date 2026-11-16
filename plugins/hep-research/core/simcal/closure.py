@@ -1,4 +1,4 @@
-"""G8, the closure test (Part B section 8.4, with the section 7.3 ensemble rules; phase 2, WP5). `calib_closure.py`
+"""G8, the closure test (Part B section 8.4, with the section 7.3 ensemble rules; phase 2, WP5). `simcal_closure.py`
 is its CLI.
 
 - Injection points: an interior point >= 2 sigma_tot^design from any physical boundary (bias and coverage), and a

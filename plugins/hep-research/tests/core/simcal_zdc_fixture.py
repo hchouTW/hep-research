@@ -61,7 +61,7 @@ def event_steps(seed: int, event: int) -> list:
 
 
 def products(seed: int, first: int, n: int, birks: float = BIRKS0, light_yield: float = LIGHT_YIELD0) -> dict:
-    """cells.csv and primaries.csv rows (g4sim's bin layout, as in calibration_g4sim_eval_fixtures) of the events
+    """cells.csv and primaries.csv rows (g4sim's bin layout, as in simcal_g4sim_eval_fixtures) of the events
     [first, first + n), with the split at (birks, light_yield), and the true step-level visible energy per (event,
     volume) (the `edep_visible` a run at `birks` scores)."""
     cells, prim, vis = [], [], {}
@@ -138,7 +138,7 @@ def plan(batches: dict, nominal: str | None = None, r: float = R0, observables=N
     spec = {"kind": "g4sim", "documents": documents(r), "readout": "zdc", "map": "light",
             "scorers": {"split": SPLIT, "dedx": DEDX}, "batches": batches, "nominal": nominal or next(iter(batches)),
             "observables": copy.deepcopy(obs)}
-    p = {"schema": "calibration-plan/1", "kernels": {}, "evaluator": spec}
+    p = {"schema": "simcal-plan/1", "kernels": {}, "evaluator": spec}
     p.update(extra)
     return p
 
@@ -153,7 +153,7 @@ def contract(thetas=("birks",), observables=("pe_mean", "pe_std"), exposure: int
             for t in thetas]
     obs = [{"name": o, "role": "calibration", "block": "gaussian", "link": "log", "functional": "location"}
            for o in observables]
-    return {"schema": "calibration-contract/1", "simulator": "g4sim", "parameters": pars, "observables": obs,
+    return {"schema": "simcal-contract/1", "simulator": "g4sim", "parameters": pars, "observables": obs,
             "exposure": {"g4sim": exposure}, "validation": {"mode": "holdout", "N_dc": []}}
 
 
@@ -205,7 +205,7 @@ def production_cards(evaluator, state_path: str, nominal: dict, series: str = "s
 def truth_events(evaluator, theta: dict, batch: str) -> dict:
     """Per-event observable values of `batch` at theta with the evaluator's methods (the truth MC of G8), and the run
     label; no event weights (k_B and the response parameters are not reweighted)."""
-    import g4sim_calib_eval as E
+    import g4sim_simcal_eval as E
     b = evaluator.batches[batch]
     tab = E.batch_tables(b, evaluator.scorers)
     events = np.arange(tab["first"], tab["first"] + tab["n"])

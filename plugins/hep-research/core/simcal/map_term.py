@@ -1,5 +1,5 @@
 """The efficiency-map term of the likelihood (Part B section 6.7 "Two efficiency map modes", D28; section 14
-`calib_likelihood.py`; phase 3, WP-D).
+`simcal_likelihood.py`; phase 3, WP-D).
 
 In link space the predictor gains U(theta) phi_map with phi_map ~ N(0, I), profiled with theta in every minimization:
 `likelihood.Likelihood` evaluates U at the theta of each step and adds (d U / d theta_i) phi_map to the Jacobian, so the

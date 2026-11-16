@@ -1,4 +1,4 @@
-"""Event weights of Part B section 3.6 and 6.1 (calib_reweight.py; G4 is phase 2, G4-L phase 5).
+"""Event weights of Part B section 3.6 and 6.1 (simcal_reweight.py; G4 is phase 2, G4-L phase 5).
 
 The weight formula, with S_theta the nodes whose parameters change and S_q the nodes with a broadened proposal:
 
@@ -199,7 +199,7 @@ def g4l(closures: list, design: dict, record: dict, contract: dict | None = None
     finding (g4l_structural) rejects. Remedy level plan; `provisional-thresholds` (no section 8.7 row, L8)."""
     from scipy.stats import norm
 
-    from core.calibration import kernel_check, linear
+    from core.simcal import kernel_check, linear
     structural = g4l_structural(record, contract)
     if len(closures) < 3:
         structural.append({"code": "g4l.too_few_points", "message": f"G4-L needs >= 3 theta' (the P0 form), "
@@ -239,7 +239,7 @@ def g4l_run(evaluator, contract: dict, design: dict, points: list, alpha: float 
     """G4-L on an evaluator with a learned ratio: at each theta' the closure of every fold (learned_closure(fold)),
     averaged over the folds on the same held-out sample, and the repeated-training covariance there (v_learn's
     training part); then `g4l`. The points are P0's (>= 3 theta' including the worst-ESS point, reading L4)."""
-    from core.calibration import learned
+    from core.simcal import learned
     record = evaluator.learned_record()
     spec = evaluator._learned_spec
     bad = learned.check_spec(spec, getattr(evaluator.model, "param_nodes", None), None, contract)

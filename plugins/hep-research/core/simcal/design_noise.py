@@ -1,4 +1,4 @@
-"""The phase-2 items of `calib_design.py` (Part B sections 2.1, 6.6, 6.7, 8.2 note 3, 9.3, 9.4, 14; phase 2, WP4):
+"""The phase-2 items of `simcal_design.py` (Part B sections 2.1, 6.6, 6.7, 8.2 note 3, 9.3, 9.4, 14; phase 2, WP4):
 Sigma_boot by toys and its P5 item, the Jacobian MC-noise bias b_J and its P5 item, P7 (calling the
 implementations of `validate.py`), the fold-split rules of cross-validation (with the P3 of each training fold from
 `identify.py`), the rejected toy and bootstrap practices, and the independence check of toy replicas by

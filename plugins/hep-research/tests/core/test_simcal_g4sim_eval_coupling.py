@@ -15,16 +15,16 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_rich_fixture as R  # noqa: E402
-import calibration_zdc_fixture as Z  # noqa: E402
-import g4sim_calib_eval as E  # noqa: E402
+import simcal_rich_fixture as R  # noqa: E402
+import simcal_zdc_fixture as Z  # noqa: E402
+import g4sim_simcal_eval as E  # noqa: E402
 
 from contracts.schema import validate  # noqa: E402
-from core.calibration import design_g4sim as DG  # noqa: E402
-from core.calibration import evaluator, model_identity  # noqa: E402
-from core.calibration import evaluator_problem as EP  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
+from core.simcal import evaluator, model_identity  # noqa: E402
+from core.simcal import evaluator_problem as EP  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
 from core.simulation import digitize  # noqa: E402
 
 JOB = {"schema": digitize.SCHEMA, "run_seed": 11, "replica": 0, "readout": "bar", "channels": ["a", "b", "c"],
@@ -146,11 +146,11 @@ class ScaleBinding(unittest.TestCase):
             {"document": "detector-spec", "pointer": self.ptr, "form": "scale"}]}]}
         self.assertEqual(DG.contract_bindings(c)["index_scale"]["form"], "scale")
         zc = Z.contract()
-        base = len(validate(zc, "calibration_contract.json").errors)
+        base = len(validate(zc, "simcal_contract.json").errors)
         zc["parameters"][0]["bindings"][0]["form"] = "scale"         # the schema knows the form
-        self.assertEqual(len(validate(zc, "calibration_contract.json").errors), base)
+        self.assertEqual(len(validate(zc, "simcal_contract.json").errors), base)
         zc["parameters"][0]["bindings"][0]["form"] = "log"
-        self.assertGreater(len(validate(zc, "calibration_contract.json").errors), base)
+        self.assertGreater(len(validate(zc, "simcal_contract.json").errors), base)
         ml = model_identity.masks(c)["detector-spec"]
         self.assertEqual(ml, [self.ptr + model_identity.SCALE_SUFFIX])
         det = self.docs["detector"]

@@ -1,14 +1,14 @@
 """Simulator calibration phase 5: the default-off identity cases over the phase-5-modified default-off branches
-(review F3, A33; `calibration_phase5_gates.py` item 4). Not a unit test module.
+(review F3, A33; `simcal_phase5_gates.py` item 4). Not a unit test module.
 
-Each case runs only engine code (`core.calibration`, no test fixtures) of the plugin tree given by --root and prints
+Each case runs only engine code (`core.simcal`, no test fixtures) of the plugin tree given by --root and prints
 its output as JSON. The golden output of a case is captured by running THIS file against a `git archive` of the
-phase-5 base (`calibration_phase5_gates.py --capture-base-cases`); at the gate the same file runs against the gate
+phase-5 base (`simcal_phase5_gates.py --capture-base-cases`); at the gate the same file runs against the gate
 commit's tree. So a difference is a change of the engine between the base and the gate commit with the extensions
 off, never a change of fixtures or of the case code (the harness compares this file's SHA-256 with the capture's).
 
 Cases (each runs a branch the 50 phase-0..4 cases do not reach, review F3):
-- holdout_toy_detector: a holdout fit on the toy detector (problems.from_inputs, the calib_validate path),
+- holdout_toy_detector: a holdout fit on the toy detector (problems.from_inputs, the simcal_validate path),
   validate.holdout_pieces, one validate.holdout_toy (simulate and simulate_val from the weighted nominal MC, i.e.
   ToyProblem._observe_weighted; replica_pert and replica_pert_val; the validation block _val_block).
 - toy_replica_paths: ToyProblem.replica_pert / replica_pert_val / simulate_val (both data paths) directly.
@@ -19,8 +19,8 @@ Cases (each runs a branch the 50 phase-0..4 cases do not reach, review F3):
 Left out: the inferred-V_model version branch of vmodel_columns (`version=`) and every learned-path branch: their APIs
 do not exist at the base (they are phase-5 opt-in features, tested by item 1).
 
-  python -I calibration_phase5_identity_cases.py --root PLUGIN_ROOT --case NAME     (prints the output JSON)
-  python -I calibration_phase5_identity_cases.py --list
+  python -I simcal_phase5_identity_cases.py --root PLUGIN_ROOT --case NAME     (prints the output JSON)
+  python -I simcal_phase5_identity_cases.py --list
 """
 from __future__ import annotations
 
@@ -84,11 +84,11 @@ def vmodel_components() -> list:
 
 def toy_problem():
     """problems.from_inputs on the toy contract with values generated at (0.25, 10) (fresh events, seed 3), as
-    calib_fit.py / calib_validate.py build it; returns (problem, validation values in link space)."""
+    simcal_fit.py / simcal_validate.py build it; returns (problem, validation values in link space)."""
     import numpy as np
 
-    from core.calibration import problems
-    from core.calibration import toy_problem as TP
+    from core.simcal import problems
+    from core.simcal import toy_problem as TP
     contract, plan = toy_contract()
     probe = problems.from_inputs(contract, plan, None, None)
     truth = np.array([0.25, 10.0])
@@ -107,8 +107,8 @@ def ref_summary(ref) -> dict:
 def case_holdout_toy_detector() -> dict:
     import numpy as np
 
-    from core.calibration import fit as F
-    from core.calibration import validate as V
+    from core.simcal import fit as F
+    from core.simcal import validate as V
     p, yv = toy_problem()
     f = F.find_extremum(p, 20261201, p.initial_beta())
     pc = V.holdout_pieces(p, f, yv)
@@ -129,7 +129,7 @@ def case_toy_replica_paths() -> dict:
 
 
 def case_identify_p3_toy() -> dict:
-    from core.calibration import identify
+    from core.simcal import identify
     p, _ = toy_problem()
     b = p.initial_beta()
     return {"p3": identify.p3(p, b), "p3_ref": identify.p3(p, b, p.reference(b, b))}
@@ -138,11 +138,11 @@ def case_identify_p3_toy() -> dict:
 def case_evaluator_problem_standin() -> dict:
     import numpy as np
 
-    from core.calibration import cherenkov_standin as C
-    from core.calibration import evaluator_problem as EP
-    from core.calibration import fit as F
-    from core.calibration import identify
-    from core.calibration import likelihood as L
+    from core.simcal import cherenkov_standin as C
+    from core.simcal import evaluator_problem as EP
+    from core.simcal import fit as F
+    from core.simcal import identify
+    from core.simcal import likelihood as L
     samples = [{"name": "R_p100", "beta": C.beta_of(100.0)}, {"name": "R_p2.4", "beta": C.beta_of(2.4)}]
     centre = {"height_mm": 470.0, "index_scale": 1.0}
     p = EP.EvaluatorProblem(C.CherenkovStandIn(samples), C.contract(samples), degeneracy_modes=[C.MODE])
@@ -160,7 +160,7 @@ def case_evaluator_problem_standin() -> dict:
 
 
 def case_vmodel_columns_components() -> dict:
-    from core.calibration import evaluator, linear
+    from core.simcal import evaluator, linear
     names = CAL
     contract, plan = toy_contract(with_vmodel=True)
     U = linear.vmodel_columns(contract, names)
@@ -182,7 +182,7 @@ def run(name: str) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--root", help="the plugin root whose core.calibration runs the case")
+    ap.add_argument("--root", help="the plugin root whose core.simcal runs the case")
     ap.add_argument("--case", choices=CASES)
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args(argv)

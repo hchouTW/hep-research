@@ -2,10 +2,10 @@
 "Calibrations of this phase"), run as Slurm job arrays: each task writes the raw per-repetition records of one block
 of one configuration, the merge concatenates them and applies the registered rule. Not a unit test module.
 
-  python3 calibration_phase2_cals.py --task N --out DIR          one task of the array
-  python3 calibration_phase2_cals.py --merge DIR --out FILE      merge and judge (exit 0 passed, 1 failed)
-  python3 calibration_phase2_cals.py --local NAME --out FILE     a calibration light enough to run locally
-  python3 calibration_phase2_cals.py --smoke NAME --out FILE     the code path at tiny sizes (not evidence)
+  python3 simcal_phase2_cals.py --task N --out DIR          one task of the array
+  python3 simcal_phase2_cals.py --merge DIR --out FILE      merge and judge (exit 0 passed, 1 failed)
+  python3 simcal_phase2_cals.py --local NAME --out FILE     a calibration light enough to run locally
+  python3 simcal_phase2_cals.py --smoke NAME --out FILE     the code path at tiny sizes (not evidence)
 
 Seeds: a repetition r of calibration c and configuration j draws from default_rng([cal_seed(c, r), j, ...]) (no
 stream shared between calibrations, configurations or repetitions). The G8-based items wait (the user's decision of
@@ -25,17 +25,17 @@ from scipy import stats
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import calibration_phase2_gates as G  # noqa: E402
+import simcal_phase2_gates as G  # noqa: E402
 
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import interval as IV  # noqa: E402
-from core.calibration import io  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
-from core.calibration import shift as Sh  # noqa: E402
-from core.calibration import toy  # noqa: E402
-from core.calibration import toy_problem as TP  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
-from core.calibration import validate as V  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import interval as IV  # noqa: E402
+from core.simcal import io  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
+from core.simcal import shift as Sh  # noqa: E402
+from core.simcal import toy  # noqa: E402
+from core.simcal import toy_problem as TP  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
+from core.simcal import validate as V  # noqa: E402
 
 cal_seed = G.cal_seed
 Z68 = 1.0                                   # +-1 sigma: nominal 0.6827
@@ -337,7 +337,7 @@ def _cal11_config():
 
 
 def _g5(sub, f):
-    from core.calibration import identify as I
+    from core.simcal import identify as I
     return I.g5(sub, f, seed=None)
 
 

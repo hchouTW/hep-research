@@ -1,4 +1,4 @@
-"""The efficiency-map items of `calib_design.py` (Part B sections 6.6, 6.7 "Two efficiency map modes", 8.2 P5 note 3
+"""The efficiency-map items of `simcal_design.py` (Part B sections 6.6, 6.7 "Two efficiency map modes", 8.2 P5 note 3
 fifth item, 14; D28, D83 (1), D84, D85 by approval A12; phase 3, WP-D).
 
 - The theta-noise item of P5 (map varies with theta): on the Sobol scan points (the worst deciding), s_i =
@@ -179,7 +179,7 @@ def g4sim_replica_toys(maps: dict, J_eps, R: int):
 def mapping_seed_findings(plan: dict) -> list:
     """Shared seed: every mapping-run record of the scan has the scan's one logical_run_seed and the interval
     [0, N_map) (written into every mapping-run card). Overlaps with other uses and between the points of an
-    independent-seed scan are design_g4sim.interval_findings' (calib_design.py intervals)."""
+    independent-seed scan are design_g4sim.interval_findings' (simcal_design.py intervals)."""
     out = []
     evs = [e for e in plan.get("evaluations") or [] if e.get("use") == "mapping-run"]
     for scan, cfg in sorted((plan.get("mapping_scans") or {}).items()):
@@ -338,7 +338,7 @@ def job_route_findings(pipeline: dict, map_document: dict, readout: str, rows: l
     run_seed = int(pipeline["run_seed"])
     if int(pipeline.get("replica", 0)) != 0:
         return [_finding("design.replica", "the pipeline's replica is not 0 (section 6.6)")]
-    if job is None:                               # the job of replica r as calib_design.py builds it
+    if job is None:                               # the job of replica r as simcal_design.py builds it
         job = DG.job_from_documents(pipeline, map_document, readout, sorted({int(r[2]) for r in rows}), run_seed,
                                     map_replica=int(replica))
     job = {**job, "timing": None}                 # photoelectrons only: the times are not compared

@@ -1,13 +1,13 @@
-"""The contract checker (Part B section 5.2; owner calib_contract.py check).
+"""The contract checker (Part B section 5.2; owner simcal_contract.py check).
 
 Phase 0 content (section 17): the contract rules of section 5.2 that need no model quantity. Decisions on the DAG and
-injection-point splitting call core.calibration.chain, upstream roles call core.calibration.deps, and decisions that
-read release metadata, lineage or totals call core.calibration.data. The locking-stage checks that need quantities
+injection-point splitting call core.simcal.chain, upstream roles call core.simcal.deps, and decisions that
+read release metadata, lineage or totals call core.simcal.data. The locking-stage checks that need quantities
 produced by the model (rounding negligibility, N_exp of absolute count shapes, n_min, block-conversion conditions,
 sigma_i^(0) > 0, the standardized SVD of N_d and N_d,c, the N_d,c declaration check) are added in phase 2; the
 phase-0 check only confirms that their declarations exist and lists them under "deferred". The g4sim model identity
-(the five masked hashes of section 5.1, core.calibration.model_identity) and the field binding of parameters (section
-11.4, calling core.calibration.chain) are phase 3.
+(the five masked hashes of section 5.1, core.simcal.model_identity) and the field binding of parameters (section
+11.4, calling core.simcal.chain) are phase 3.
 
 check() returns {"status": "accepted"|"rejected", "findings": [...], "deferred": [...]}; a rejected contract produces
 no result (exit 2). Standard library only.
@@ -17,9 +17,9 @@ from __future__ import annotations
 import json
 import math
 
-from core.calibration import data_release as data
-from core.calibration import chain, deps
-from core.calibration import model_identity as mi
+from core.simcal import data_release as data
+from core.simcal import chain, deps
+from core.simcal import model_identity as mi
 from core.canonical import canonical_sha256
 
 ROLES = ("calibration", "validation", "measurement")
@@ -38,11 +38,11 @@ PD_KERNELS = frozenset({"squared-exponential", "exponential", "matern-1/2", "mat
 FORBIDDEN_KEYS = frozenset({"observed_value", "observed_values", "data_values", "observed_counts", "measured_value",
                             "measured_values", "observed_totals"})
 DEFERRED = [
-    "clause 9 item 2: rounding negligibility at the evaluation points (phase 2, calib_data.py)",
-    "clause 9 item 3: recomputation at the fit point (calib_fit.py, phase 2)",
-    "clause 9 item 4: N_exp >= 10 of absolute count validation shapes (phase 2, calib_data.py)",
+    "clause 9 item 2: rounding negligibility at the evaluation points (phase 2, simcal_data.py)",
+    "clause 9 item 3: recomputation at the fit point (simcal_fit.py, phase 2)",
+    "clause 9 item 4: N_exp >= 10 of absolute count validation shapes (phase 2, simcal_data.py)",
     "clause 9 item 8: the value conventions satisfy the declared N_d (phase 2)",
-    "clause 9 item 12: n_min and block-conversion conditions at the evaluation points (phase 2, calib_data.py)",
+    "clause 9 item 12: n_min and block-conversion conditions at the evaluation points (phase 2, simcal_data.py)",
     "clause 9 item 13: sigma_i^(0) > 0 (phase 2)",
     "clause 6 item 2 and clause 7 item 4: the N_d,c and N_d decisions in standardized V_G coordinates (phase 2)",
 ]
@@ -425,7 +425,7 @@ def psi_findings(contract: dict, design: dict) -> list[dict]:
     must be listed as phi. A psi with no declared uncertainty (constraint sigma) cannot be judged."""
     out = []
     if not isinstance(design, dict):
-        raise ValueError("the design is a JSON object (calib_design.py linearize output)")
+        raise ValueError("the design is a JSON object (simcal_design.py linearize output)")
     sig = [float(x) for x in design.get("sigma_tot") or []]
     names = list(design.get("theta") or [])
     effects = design.get("psi_effect") or {}
@@ -442,7 +442,7 @@ def psi_findings(contract: dict, design: dict) -> list[dict]:
         eff = effects.get(p["name"])
         if eff is None:
             out.append({"code": "parameters.psi_not_evaluated", "path": path, "message": f"the design gives no "
-                        f"effect of psi {p['name']!r} (calib_design.py linearize)"})
+                        f"effect of psi {p['name']!r} (simcal_design.py linearize)"})
             continue
         if not isinstance(eff, list):
             raise ValueError(f"design.psi_effect[{p['name']!r}] is a list, one effect per theta")
@@ -479,9 +479,9 @@ def identity_findings(contract: dict, identities: dict) -> list[dict]:
 def check(contract: dict, releases: dict | None = None, series_graph: dict | None = None,
           design: dict | None = None, locking: dict | None = None, identities: dict | None = None) -> dict:
     """Section 5.2 in phase-0 scope, and the D37 rule of phase 1 when the design-stage linearization is given
-    (design: theta, sigma_tot, psi_effect, from calib_design.py linearize). releases maps release hashes to their
-    metadata (calib_data's view: lineage, samples, observables, declarations, totals); series_graph maps a contract
-    series to the series of its upstream results (calib_deps), for the cycle check. With g4sim (phase 3), the five
+    (design: theta, sigma_tot, psi_effect, from simcal_design.py linearize). releases maps release hashes to their
+    metadata (simcal_data's view: lineage, samples, observables, declarations, totals); series_graph maps a contract
+    series to the series of its upstream results (simcal_deps), for the cycle check. With g4sim (phase 3), the five
     identity items of each model (clause 1 item 2) and the field binding of the parameters (chain.binding_findings);
     identities, from the model documents, recomputes the items."""
     out = _Findings()
@@ -506,12 +506,12 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
     out.extend(chain.binding_findings(contract))
     if contract.get("pde_split") is not None or any(b.get("document") == "evaluator" for p in
                                                      contract.get("parameters", []) for b in p.get("bindings") or []):
-        from core.calibration import pde_split    # section 6.7 "Rejected" (NumPy/SciPy: only for a PDE split)
+        from core.simcal import pde_split    # section 6.7 "Rejected" (NumPy/SciPy: only for a PDE split)
         out.extend(pde_split.contract_findings(contract))
     if contract.get("pooling") is not None or any(
             isinstance(p, dict) and isinstance(p.get("index"), dict) and p["index"].get("conditioning") == "partial-pooling"
             for p in contract.get("parameters") or []):
-        from core.calibration import pooling      # section 3.7 partial pooling (phase 5, A25): opt-in declaration
+        from core.simcal import pooling      # section 3.7 partial pooling (phase 5, A25): opt-in declaration
         out.extend(pooling.contract_findings(contract))
     if identities is not None:
         out.extend(identity_findings(contract, identities))
@@ -553,7 +553,7 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
         out.add("contract.locking_stale", "$", "the locking report was not computed for this contract (its contract "
                 "hash differs or is missing): its decisions are not applied")
         locking = None
-    if locking is not None:                     # the locking-stage decisions of calib_data.py (phase 2, section 17)
+    if locking is not None:                     # the locking-stage decisions of simcal_data.py (phase 2, section 17)
         for f in locking.get("findings", []):
             out.add(f["code"], "$.observables", json.dumps({k: v for k, v in f.items() if k != "code"},
                                                            default=str)[:400])
@@ -567,6 +567,6 @@ def check(contract: dict, releases: dict | None = None, series_graph: dict | Non
         for i, p in enumerate(contract.get("parameters", [])):
             if p.get("role") == "psi":                 # D37 cannot be decided without A: never accepted unchecked
                 out.add("parameters.psi_needs_design", f"$.parameters[{i}]", f"psi {p['name']!r}: the D37 bound needs "
-                        "the design-stage A (check --design, from calib_design.py linearize; approval A7)")
+                        "the design-stage A (check --design, from simcal_design.py linearize; approval A7)")
     return {"status": "rejected" if out else "accepted", "findings": list(out), "deferred": deferred,
             "result_flags": flags}

@@ -1,4 +1,4 @@
-"""P0, kernel consistency (Part B section 8.2 note 1, D53; calib_kernel_check.py).
+"""P0, kernel consistency (Part B section 8.2 note 1, D53; simcal_kernel_check.py).
 
 At >= 3 theta' (including the worst-ESS point within the prior, and the spot checks of section 5.4 when there are
 any), the prediction of the plan's non-full-resimulation method is compared with `resample` + `evaluate_from` at the
@@ -23,9 +23,9 @@ from __future__ import annotations
 import numpy as np
 from scipy.stats import norm
 
-from core.calibration import design as design_mod
-from core.calibration import design_g4sim as DG
-from core.calibration import emulator, linear
+from core.simcal import design as design_mod
+from core.simcal import design_g4sim as DG
+from core.simcal import emulator, linear
 
 ALPHA = 0.01
 MARGIN = 0.1
@@ -229,6 +229,6 @@ def default_points(evaluator, contract: dict, plan: dict) -> list[dict]:
     """The default theta' of P0 (section 8.2 note 1): the worst-ESS point of a P5 scan over the parameters the plan
     evaluates by a P0 method, and the next two points of that scan (with only deterministic reruns, every point has
     unit weights and the first three scan points are taken)."""
-    from core.calibration import design as d
+    from core.simcal import design as d
     pars = [p for p in evaluator.parameters if evaluator.default_method(p) in d.P0_METHODS]
     return worst_ess_and_next(d.p5(evaluator, contract, plan, items=("ess",), scan_parameters=pars))

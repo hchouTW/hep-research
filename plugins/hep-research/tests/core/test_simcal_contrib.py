@@ -1,4 +1,4 @@
-"""The contribution decomposition of Part B section 10.5 (core/calibration/contrib.py, phase 4) and the effects_off
+"""The contribution decomposition of Part B section 10.5 (core/simcal/contrib.py, phase 4) and the effects_off
 hook of the section 7.1 evaluator on the toy chain (section 15.1 kernels): section 15.3.18 "when some actually
 evaluated subset does not reach the ESS threshold, no decomposition is output" with its positive control, the
 n > 10 permutation-sampling path, and the required variance-or-resolution declaration. Everything is `synthetic`.
@@ -19,9 +19,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import contrib as C  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import contrib as C  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
 
 
 def chain(n_effects: int, method: str = "resimulation", removal: float = 0.0, n: int = 4000, n_data: int = 200,

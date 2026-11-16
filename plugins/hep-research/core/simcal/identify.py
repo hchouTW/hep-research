@@ -1,5 +1,5 @@
-"""P3 and G5: identifiability (Part B sections 8.2, 8.3, 3.5; phase 2, WP3). `calib_identify.py` is the CLI;
-`calib_design.py` (the P3 of each cross-validation training fold) and `calib_validate.py` (G5 of each fold and toy)
+"""P3 and G5: identifiability (Part B sections 8.2, 8.3, 3.5; phase 2, WP3). `simcal_identify.py` is the CLI;
+`simcal_design.py` (the P3 of each cross-validation training fold) and `simcal_validate.py` (G5 of each fold and toy)
 call these functions (section 14: one implementation).
 
 Measures (section 8.3): lambda_min of the correlation matrix of the theta block of Sigma = F^-1 (F the information

@@ -2,10 +2,10 @@
 """Stage graph, candidate methods and reference coverage (simulator calibration workflow, Part B sections 3.1, 3.4,
 3.6; owner of the DAG and injection-point split, candidate methods and gate P4).
 
-  calib_chain.py check      --contract FILE                 the stage graph and the placement of references
-  calib_chain.py candidates --contract FILE --plan FILE     candidate methods per parameter (section 3.6 step 1)
-  calib_chain.py p4         --contract FILE                 directed reachability: can each theta be constrained?
-FILE is a calibration-contract/1 (or a calibration-fixture/1, whose contract and plan are used). With g4sim (a plan
+  simcal_chain.py check      --contract FILE                 the stage graph and the placement of references
+  simcal_chain.py candidates --contract FILE --plan FILE     candidate methods per parameter (section 3.6 step 1)
+  simcal_chain.py p4         --contract FILE                 directed reachability: can each theta be constrained?
+FILE is a simcal-contract/1 (or a simcal-fixture/1, whose contract and plan are used). With g4sim (a plan
 with node_binding, phase 3) the candidates come from section 11.4 Table 2: each theta/phi's field bindings give its
 rows, the node binding (Table 1) the preconditions; each candidate states whether it forms event weights (D75) and
 each excluded method its reason (moments-only recording, a fast_sim_envelope, D83 (7) for a misaligned geometry).
@@ -31,14 +31,14 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
 import argparse
 import sys
 
-from core.calibration import chain, io
+from core.simcal import chain, io
 
 
 def _contract_and_plan(path, plan_path=None):
     doc = io.load(path)
     if not isinstance(doc, dict):
         raise io.InputError("a contract or fixture is a JSON object")
-    contract, plan = (doc["contract"], doc.get("plan")) if doc.get("schema") == "calibration-fixture/1" else (doc, None)
+    contract, plan = (doc["contract"], doc.get("plan")) if doc.get("schema") == "simcal-fixture/1" else (doc, None)
     if plan_path:
         plan = io.load(plan_path)
     if not isinstance(contract.get("stage_graph"), dict):
@@ -53,7 +53,7 @@ def main(argv=None) -> int:
         p = sub.add_parser(name)
         p.add_argument("--contract", required=True)
         if name == "candidates":
-            p.add_argument("--plan", help="calibration-plan/1 (default: the fixture's plan)")
+            p.add_argument("--plan", help="simcal-plan/1 (default: the fixture's plan)")
     args = ap.parse_args(argv)
 
     def go():

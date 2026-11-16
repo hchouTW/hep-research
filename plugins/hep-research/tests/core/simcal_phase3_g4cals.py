@@ -3,17 +3,17 @@ P6 with a correct surrogate (v = 0, approval A13) on Geant4-produced observables
 (`ams02-rich-replica`, FTFP_BERT_EMZ with optical physics, g4sim_run build 28). Not a unit test module; no Slurm here
 (the main session registers the configuration in the card and submits the arrays).
 
-  python3 calibration_phase3_g4cals.py --cards ROOT              run cards, manifest, check-spec (login host)
-  python3 calibration_phase3_g4cals.py --list [--root ROOT]      the task table (Geant4 tasks, then the P6 tasks)
-  python3 calibration_phase3_g4cals.py --task K --out DIR [--root ROOT]   one task (Geant4 tasks: conda env `geant4`)
-  python3 calibration_phase3_g4cals.py --merge DIR --out FILE [--root ROOT]   merge and judge (exit 0 passed, else 1)
-  python3 calibration_phase3_g4cals.py --local --out DIR         the whole path on STAND-IN products (`smoke`)
+  python3 simcal_phase3_g4cals.py --cards ROOT              run cards, manifest, check-spec (login host)
+  python3 simcal_phase3_g4cals.py --list [--root ROOT]      the task table (Geant4 tasks, then the P6 tasks)
+  python3 simcal_phase3_g4cals.py --task K --out DIR [--root ROOT]   one task (Geant4 tasks: conda env `geant4`)
+  python3 simcal_phase3_g4cals.py --merge DIR --out FILE [--root ROOT]   merge and judge (exit 0 passed, else 1)
+  python3 simcal_phase3_g4cals.py --local --out DIR         the whole path on STAND-IN products (`smoke`)
 
 Design (the toy version's, campaign p3-cals-p6, with Geant4 events; Part B section 8.7 row 2004 and note 4, section
 8.2 note 4, A13): per repetition r, at H held-out points of the RICH design box, a FULL simulation and a known-error
 SURROGATE that is an independent Geant4 simulation at the same point (weight 1, v = 0: no error beyond MC noise; v = 1
 adds an error drawn N(0, V_emu), V_emu = cov_Delta, reported); observables: the mean per-event plane radius
-(calibration_phase3_g4.plane_radius, the p3-g4 observable) of the two beta samples R_p100 and R_p2.4, N = 2000 events per
+(simcal_phase3_g4.plane_radius, the p3-g4 observable) of the two beta samples R_p100 and R_p2.4, N = 2000 events per
 side and sample (the p3-g4 design's events per point); sigma_Delta from the per-event contributions (paired = False);
 the pull chi2 (H >= 30) referenced to its exact null distribution under the joint covariance of the held-out points
 (A13); P6 at alpha = 0.01 (emulator.p6). H = 32 Sobol points (seed DESIGN_SEED) and H = 8 (the first 8 of them: P6's
@@ -24,8 +24,8 @@ Seeds (sections 6.6, 14.1): one seed block per beta sample, S_b = H(simcal-p3g, 
 the 32 points (common random numbers across points, one seed per side as in the toy); repetition r takes members 2r
 (full) and 2r + 1 (surrogate) of N events: events [2rN, (2r + 1)N) and [(2r + 1)N, (2r + 2)N), the same at every point.
 A Geant4 task runs one (sample, point) over a chunk of consecutive repetitions, reduces photons.csv to the per-event
-plane radius (plane_radii, equal to calibration_phase3_g4.plane_radius) and deletes photons.csv and conservation.csv
-(their SHA-256 recorded). The e-draws of v = 1: default_rng([cal_seed(4, r), j, 3]) (calibration_phase3_cals.cal_seed;
+plane radius (plane_radii, equal to simcal_phase3_g4.plane_radius) and deletes photons.csv and conservation.csv
+(their SHA-256 recorded). The e-draws of v = 1: default_rng([cal_seed(4, r), j, 3]) (simcal_phase3_cals.cal_seed;
 c = 4 is not used by the toy families). Everything is `synthetic` and `provisional-thresholds`.
 
 Cost (2026-11-13, local timing on the login host of one task per sample at 10,000 events, cards preflighted): R_p100
@@ -55,13 +55,13 @@ for _p in (str(ROOT), str(HERE), str(ASSETS)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import calibration_phase3_cals as X  # noqa: E402
-import calibration_phase3_g4 as G  # noqa: E402
-import calibration_rich_fixture as R  # noqa: E402
+import simcal_phase3_cals as X  # noqa: E402
+import simcal_phase3_g4 as G  # noqa: E402
+import simcal_rich_fixture as R  # noqa: E402
 
-from core.calibration import design as D  # noqa: E402
-from core.calibration import design_g4sim as DG  # noqa: E402
-from core.calibration import emulator as EM  # noqa: E402
+from core.simcal import design as D  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
+from core.simcal import emulator as EM  # noqa: E402
 
 SERIES = "simcal-p3g"
 OUT_ROOT = Path("/ceph/sharedfs/work/AMS/hsinyichou/simcal-p3g")
@@ -89,7 +89,7 @@ def _provenance() -> str:
 
 
 def provenance() -> dict:
-    """calibration_phase3_g4.provenance, once per process (a task, the merge, or the whole --local path)."""
+    """simcal_phase3_g4.provenance, once per process (a task, the merge, or the whole --local path)."""
     return json.loads(_provenance())
 
 
@@ -223,7 +223,7 @@ def load_manifest(root: Path) -> dict:
 
 # ------------------------------------------------------------------ the per-event plane radius, streamed
 def plane_radii(photons: Path, primaries: Path, detector: dict, first: int, n: int, block: int = 500_000) -> np.ndarray:
-    """calibration_phase3_g4.plane_radius on files, vectorized and streamed in blocks of rows (a 20,000-event R_p100
+    """simcal_phase3_g4.plane_radius on files, vectorized and streamed in blocks of rows (a 20,000-event R_p100
     run has ~2.8 M photons.csv rows): per event the median over the primary's aerogel photons of their radius on the
     detection plane about the primary's crossing; NaN for an event without such photons."""
     prm = detector["params"]
@@ -363,7 +363,7 @@ def run_geant4_task(k: int, root: Path, out: Path, runner=None, program: Path = 
 
 # ------------------------------------------------------------------ the P6 task
 def _result(x: np.ndarray, sample: str, names: list) -> dict:
-    """One side's evaluator-like result at one point for one sample (as calibration_phase3_g4.RichRunsEvaluator):
+    """One side's evaluator-like result at one point for one sample (as simcal_phase3_g4.RichRunsEvaluator):
     the mean over events with a radius, s2, n, the per-event contribution (x - m)/n (0 for NaN events)."""
     ok = np.isfinite(x)
     n = int(ok.sum())
@@ -515,7 +515,7 @@ def interval_check(man: dict, g4: list) -> dict:
 
 
 def judge(rows_by_h: dict, reps: int, max_false_alarms: int = MAX_FALSE_ALARMS) -> dict:
-    """The toy's decision (calibration_phase3_cals.p6_judge: judged at v = 0, v = 1 reported) on the Geant4 rows."""
+    """The toy's decision (simcal_phase3_cals.p6_judge: judged at v = 0, v = 1 reported) on the Geant4 rows."""
     by = {f"{H}|{v}": rows for H, rows in rows_by_h.items() for v in VEMU}
     res = X.p6_judge(by, reps, max_false_alarms)
     res["rule"] = (f"per configuration (H held-out points x 2 observables: the mean plane radius of R_p100 and R_p2.4; "
@@ -575,7 +575,7 @@ SMOKE = {"events": 12, "reps": 4, "points": 32, "h_configs": [8, 32], "chunk": {
 
 
 def standin_runner(root: Path, photons_per_event: float = 12.0):
-    """A runner that writes calibration_phase3_g4.standin_rich_products (analytic Cherenkov emission, labelled
+    """A runner that writes simcal_phase3_g4.standin_rich_products (analytic Cherenkov emission, labelled
     `analytic-stand-in`, never Geant4) for the card the command names."""
     def run(cmd):
         args = dict(zip(cmd[4::2], cmd[5::2]))

@@ -1,9 +1,9 @@
-"""core/calibration/model_identity (simulator calibration phase 3): the g4sim model identity of Part B section 5.1,
+"""core/simcal/model_identity (simulator calibration phase 3): the g4sim model identity of Part B section 5.1,
 clause 1 item 2 of section 5.2, D86, the section 19 derived-fields item (approval A12: integration tests that the
 normalization of response-pipeline/1 and of the run card produces no derived fields, run_seed and replica excluded, the
 overlay hashed and not the IR), the g4sim-digi-job/1 check against the hashed documents, the model-identity cases of
 section 15.3.19 and the g4sim model-identity regression case of section 15.3a. Each negative test has a positive
-control. The documents are g4sim's real formats, checked by g4sim's own readers (calibration_g4sim_fixtures)."""
+control. The documents are g4sim's real formats, checked by g4sim's own readers (simcal_g4sim_fixtures)."""
 from __future__ import annotations
 
 import copy
@@ -16,12 +16,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_g4sim_fixtures as G  # noqa: E402
+import simcal_g4sim_fixtures as G  # noqa: E402
 from contracts import geometry  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from core.calibration import contract as cc  # noqa: E402
-from core.calibration import deps  # noqa: E402
-from core.calibration import model_identity as mi  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
+from core.simcal import deps  # noqa: E402
+from core.simcal import model_identity as mi  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
 from core.geometry import identity as gid  # noqa: E402
 from core.simulation import conditions, response  # noqa: E402
@@ -278,7 +278,7 @@ class ContractClause1Item2(unittest.TestCase):
 class IdentityChangeRedo(unittest.TestCase):
     """Section 10.3 and 15.3.19 (phase 4): after build_hash changes the result is marked as needing a redo, and so
     after any change of the five masked items; theta, phi values and provenance_id alone do not (A21: without a T2
-    record the result is redone; the T2 carry-over itself: test_calibration_deps)."""
+    record the result is redone; the T2 carry-over itself: test_simcal_deps)."""
 
     def setUp(self):
         self.result = {"result_sha256": "ef" * 32, "model_identities": [{"model": "nominal", "identity": ident()}]}
@@ -318,7 +318,7 @@ class IdentityChangeRedo(unittest.TestCase):
 
 class DigiJob(unittest.TestCase):
     """Section 5.1 and 15.3.19: a g4sim-digi-job/1 whose stage, sensor, electronics, timing, channels or efficiencies
-    differ from the hashed documents is rejected (the check calib_design.py calls)."""
+    differ from the hashed documents is rejected (the check simcal_design.py calls)."""
 
     def setUp(self):
         self.map = G.efficiency_map()

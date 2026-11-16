@@ -1,14 +1,14 @@
 """Study S1 of phase 5 (task card `docs/dev/simulator-calibration/simcal-tasks/phase-5.md`, "Studies to register
 before their runs", conditional on reading L8 "G4-L needs its own false-alarm calibration"): the false-alarm rate of
-G4-L with a correct, cross-fitted, calibrated learned ratio on the post-hoc fixture (core/calibration/data/
+G4-L with a correct, cross-fitted, calibrated learned ratio on the post-hoc fixture (core/simcal/data/
 toy_posthoc.json), 1000 repetitions at 40,000 events, the P0 rule form, acceptance <= 16 false alarms of 1000 (the
 phase-1 form of the row-2004 rule). Slurm job array tasks write raw per-repetition records; the merge applies the
 registered rule (failures are reported, never retuned). Not a unit test module.
 
-  python3 calibration_phase5_g4l.py --list                        the task table (JSON)
-  python3 calibration_phase5_g4l.py --task K --out DIR            one task of the array
-  python3 calibration_phase5_g4l.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
-  python3 calibration_phase5_g4l.py --local --out FILE            two repetitions at 4,000 events (`smoke`)
+  python3 simcal_phase5_g4l.py --list                        the task table (JSON)
+  python3 simcal_phase5_g4l.py --task K --out DIR            one task of the array
+  python3 simcal_phase5_g4l.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
+  python3 simcal_phase5_g4l.py --local --out FILE            two repetitions at 4,000 events (`smoke`)
 
 Seeds: repetition r draws its nominal, training, closure and resample seeds from SeedSequence([SEED0 + r, j])
 (j = 0..3): no stream shared between repetitions. A repetition is a false alarm when G4-L fails; a rejected or
@@ -33,20 +33,20 @@ from scipy import stats
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
+sys.path.insert(0, str(HERE))                      # simcal_phase5_taskenv
 
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration import io  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal import io  # noqa: E402
 
-import calibration_phase5_taskenv as TE  # noqa: E402
-from core.calibration import kernel_check, linear, reweight, toy  # noqa: E402
+import simcal_phase5_taskenv as TE  # noqa: E402
+from core.simcal import kernel_check, linear, reweight, toy  # noqa: E402
 
 warnings.filterwarnings("ignore", message="The balance properties of Sobol")
 
 FLAGS = ["synthetic", "provisional-thresholds"]
-FILES = ["core/calibration/" + f for f in ("learned.py", "reweight.py", "toy.py", "kernel_check.py", "linear.py",
+FILES = ["core/simcal/" + f for f in ("learned.py", "reweight.py", "toy.py", "kernel_check.py", "linear.py",
                                             "design.py", "data/toy_posthoc.json")] + \
-    ["tests/core/calibration_phase5_g4l.py", "docs/dev/simulator-calibration/simcal-tasks/phase-5.md"]
+    ["tests/core/simcal_phase5_g4l.py", "docs/dev/simulator-calibration/simcal-tasks/phase-5.md"]
 SEED0 = 20261514
 REPS = 1000
 EVENTS = 40_000

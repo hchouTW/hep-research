@@ -19,7 +19,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "calibration-result/1"
+   "const": "simcal-result/1"
   },
   "contract_sha256": {
    "type": "string",
@@ -283,7 +283,7 @@
    }
   }
  },
- "$comment": "calibration-result/1 (section 10.1; D11, approval A6: k, k0 and the unused observables with their reasons are fields of the result). The own grade is null with a pending input; result_sha256 is computed after version_id (section 10.4). A result with a pending input has own_grade null, both resolutions and the records it waits for.",
+ "$comment": "simcal-result/1 (section 10.1; D11, approval A6: k, k0 and the unused observables with their reasons are fields of the result). The own grade is null with a pending input; result_sha256 is computed after version_id (section 10.4). A result with a pending input has own_grade null, both resolutions and the records it waits for.",
  "anyOf": [
   {
    "properties": {

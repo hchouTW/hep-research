@@ -1,5 +1,5 @@
 {
- "$comment": "calibration-mechanism/1 (Part B section 3.2): a mechanism class of the vocabulary; an extension is namespaced x-<name> and needs review. Correctness decisions never depend on the class.",
+ "$comment": "simcal-mechanism/1 (Part B section 3.2): a mechanism class of the vocabulary; an extension is namespaced x-<name> and needs review. Correctness decisions never depend on the class.",
  "anyOf": [
   {
    "enum": [

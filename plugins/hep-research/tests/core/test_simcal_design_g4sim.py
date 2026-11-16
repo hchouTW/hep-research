@@ -1,4 +1,4 @@
-"""The g4sim items of calib_design.py (Part B sections 6.1, 6.6, 11.4, 14.1, 15.3.19; phase 3, WP-B): g4sim support and
+"""The g4sim items of simcal_design.py (Part B sections 6.1, 6.6, 11.4, 14.1, 15.3.19; phase 3, WP-B): g4sim support and
 recording levels, the event-interval check with run_seed = logical_run_seed and replica = 0, the seed-block registry,
 one digitization path per readout system, and the checks of every g4sim-digi-job/1. Each negative test has its
 positive control."""
@@ -13,9 +13,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_g4sim_eval_fixtures as G  # noqa: E402
+import simcal_g4sim_eval_fixtures as G  # noqa: E402
 
-from core.calibration import design_g4sim as DG  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
 from core.simulation import digitize, seeds  # noqa: E402
 
 NODES = ("src", "transport", "scint", "sensor", "elec", "readout")
@@ -32,7 +32,7 @@ def contract():
 
 
 def plan(**kw):
-    p = {"schema": "calibration-plan/1", "kernels": {},
+    p = {"schema": "simcal-plan/1", "kernels": {},
          "methods": {"beam_mean": "analytic-reweighting", "birks": "rerun", "light_yield": "re-digitization",
                      "gain": "re-digitization"},
          "node_binding": {"nodes": {"src": {"g4sim": "source"}, "transport": {"g4sim": "transport",
@@ -149,12 +149,12 @@ class Intervals(unittest.TestCase):
 
     def test_plan_fields_validate(self):
         from contracts.schema import validate
-        p = {"schema": "calibration-plan/1", "kernels": {}, "evaluations": GOOD, "mapping_scans": {},
+        p = {"schema": "simcal-plan/1", "kernels": {}, "evaluations": GOOD, "mapping_scans": {},
              "seed_blocks": [{"block": "a", "logical_run_seed": 5, "t": 0, "m_blk": 1, "N_ev": 10}],
              "event_time": {"kind": "linear", "t0_ns": 0, "ns_per_event": 1000}}
-        self.assertEqual(validate(p, "calibration_plan.json").errors, [])
+        self.assertEqual(validate(p, "simcal_plan.json").errors, [])
         p["evaluations"] = [{"run_id": "x"}]
-        self.assertTrue(validate(p, "calibration_plan.json").errors)
+        self.assertTrue(validate(p, "simcal_plan.json").errors)
 
     def test_g8_fit_mc_changing_only_the_response(self):
         bad = GOOD + [ev("g8-2", "G8", 11, 0, 1000, set=2, run_seed=11, replica=0)]   # the fit's events re-digitized
@@ -335,7 +335,7 @@ class ContractBindings(unittest.TestCase):
             DG.resolve(self.plan(), c)
         self.assertEqual(cm.exception.code, "binding.multiple")
         one = self.contract([{"document": "response-pipeline", "pointer": self.PTR},
-                             {"document": "alignment-overlay", "pointer": "/a"}])  # overlays are calib_chain.py's
+                             {"document": "alignment-overlay", "pointer": "/a"}])  # overlays are simcal_chain.py's
         self.assertEqual(list(DG.bindings(DG.resolve(self.plan(), one))), ["light_yield"])
 
 

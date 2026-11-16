@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration import toy  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal import toy  # noqa: E402
 
 N = 4000
 
@@ -29,7 +29,7 @@ def small(plan=None, **spec):
 
 class ToyDetector(unittest.TestCase):
     def test_graph_matches_the_phase0_fixture(self):
-        fx = json.loads((ROOT / "core" / "calibration" / "data" / "toy_detector.json").read_text())
+        fx = json.loads((ROOT / "core" / "simcal" / "data" / "toy_detector.json").read_text())
         nodes = {n["id"] for n in fx["contract"]["stage_graph"]["nodes"]}
         model = toy.build_toy(100)
         simulated = {n for r in model.runs.values() for n in r.kernels}

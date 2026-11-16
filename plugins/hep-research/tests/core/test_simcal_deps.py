@@ -1,4 +1,4 @@
-"""core/calibration/deps (simulator calibration phase 0): hash references, cycle checks, roles derived from usage, and
+"""core/simcal/deps (simulator calibration phase 0): hash references, cycle checks, roles derived from usage, and
 acyclic version ids (Part B sections 5.2 clause 5, 10.2, 10.3, 10.4; sections 15.3.2, 15.3.17, 15.3a); phase 4:
 upstream invalidation and the change of simulation identity (section 10.3) with the T2 carry-over of approval A21
 (section 19-g7). Each negative test has a positive control."""
@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import deps  # noqa: E402
+from core.simcal import deps  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
 
 H = [hashlib.sha256(f"result-{i}".encode()).hexdigest() for i in range(8)]
@@ -195,7 +195,7 @@ class UpstreamInvalidation(unittest.TestCase):
 
 
 def ids(build="ab"):
-    """Five synthetic identity items of one model (the real masked hashes: test_calibration_model_identity)."""
+    """Five synthetic identity items of one model (the real masked hashes: test_simcal_model_identity)."""
     return [{"model": "nominal", "identity": {
         "detector_spec": [H[0], None], "simulation_request": H[1], "run_physics": H[2], "response_pipeline": H[3],
         "build_environment": {"build_hash": build * 32, "geant4_version": "11.2.1", "datasets": {"G4EMLOW": "8.5"}}}}]

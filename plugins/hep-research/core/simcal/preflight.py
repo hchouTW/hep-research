@@ -1,7 +1,7 @@
-"""A0, the pre-check of pipeline stage A0 (Part B sections 4.2, 5.1, 14; calib_contract.py preflight). Not a gate.
+"""A0, the pre-check of pipeline stage A0 (Part B sections 4.2, 5.1, 14; simcal_contract.py preflight). Not a gate.
 
 On the calibration data, with the smoothing model the contract declares for each acceptance threshold, decide whether
-the data themselves can reach the threshold. The data come only through calib_data.py, which records the read as a fit
+the data themselves can reach the threshold. The data come only through simcal_data.py, which records the read as a fit
 read with the contract draft as read channel (section 9.5). The summary written into the contract draft records only
 which thresholds are unreachable, never a data value (section 5.1).
 

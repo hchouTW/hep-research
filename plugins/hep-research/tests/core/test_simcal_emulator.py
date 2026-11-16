@@ -1,7 +1,7 @@
 """The surrogate model of phase 3 (Part B sections 6.4, 6.5, 7.1, 8.1, 8.2 note 4, 15.3.1, 15.3.16; approval A12 for
 the G8 hook of section 19-5): the kriging surrogate (weights, V_MC, V_emu, the domain), ask/tell with its state file,
 the training set (D80), P6 with its negative tests (each with a positive control), the surrogate-model tier of
-calib_design.py's final methods, V_emu in the design-stage covariance, and the G8 surrogate pseudo-data and
+simcal_design.py's final methods, V_emu in the design-stage covariance, and the G8 surrogate pseudo-data and
 spot-check bookkeeping. Everything runs on the toy detector of section 15.1 or on synthetic arrays (`synthetic`)."""
 from __future__ import annotations
 
@@ -17,9 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import design, emulator as EM, linear  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import design, emulator as EM, linear  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
 
 warnings.filterwarnings("ignore", message="The balance properties of Sobol")
 SPE = ["spe_e_mean", "spe_e_width", "spe_efficiency"]
@@ -398,7 +398,7 @@ class Combination(unittest.TestCase):
 
 class FinalMethod(unittest.TestCase):
     """Section 3.6 step 2: with no resimulation budget a black-box parameter moves to the surrogate-model tier, whose
-    feasibility is P6 (calib_design.py)."""
+    feasibility is P6 (simcal_design.py)."""
 
     def case(self, n_design):
         c, p = toy_case(n_design=n_design, held_back=12, only_threshold=True)

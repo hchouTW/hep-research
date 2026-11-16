@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "rich",
  "description": "Ring-imaging Cherenkov detector (section 3.1, derivation basis (1)): refractive index and focal length (the section 3.5 degeneracy), photon detection and gain.",
  "status": "synthetic",

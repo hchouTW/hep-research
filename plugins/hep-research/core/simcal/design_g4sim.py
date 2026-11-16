@@ -1,11 +1,11 @@
-"""The g4sim items of `calib_design.py` (Part B sections 6.1, 6.6, 11.4, 14.1; phase 3, WP-B): the support and recording
+"""The g4sim items of `simcal_design.py` (Part B sections 6.1, 6.6, 11.4, 14.1; phase 3, WP-B): the support and recording
 levels of section 6.1 for g4sim (the source of node 0 by `source-density/1`, generation-time filtering by the run card,
 the request and the pipeline, recording levels), the event-interval check of section 6.6 with `run_seed` =
 `logical_run_seed`, `replica` = 0 and the seed-block registry of section 14.1, the checks of every `g4sim-digi-job/1`
 (section 6.6, built from and checked against the hashed documents), and one digitization path per readout system.
 
 The implementation layer of the plan (section 11.4) is read here as (WP-B reading, to be reconciled with the node binding
-of calib_chain.py):
+of simcal_chain.py):
 
     node_binding = {"nodes": {contract node: {"g4sim": "source" | "transport" | "stage:<name>" | "reconstruction",
                                               "recording": "column" | "event_file" | "moments"
@@ -26,8 +26,8 @@ import copy
 import json
 import math
 
-from core.calibration import chain, model_identity
-from core.calibration.design import REWEIGHTING, CheckError, sobol_points
+from core.simcal import chain, model_identity
+from core.simcal.design import REWEIGHTING, CheckError, sobol_points
 from core.simulation import digitize, efficiency_map, response, rng, seeds, source_density
 
 RECORDED = ("column", "event_file")               # section 6.1: moments hold linear quantities only
@@ -83,7 +83,7 @@ CONTRACT_DOCUMENTS = {"detector-spec": "detector", "run-card": "run", "simulatio
 
 def contract_bindings(contract: dict) -> dict:
     """{parameter: {document, pointer}} of the theta and phi of the contract whose one binding is in a document this
-    evaluator writes (alignment overlays, reconstruction and evaluator-level bindings are calib_chain.py's). A theta
+    evaluator writes (alignment overlays, reconstruction and evaluator-level bindings are simcal_chain.py's). A theta
     bound in several documents is rejected here: the g4sim evaluator writes one field per parameter."""
     out = {}
     for p in contract.get("parameters", []) or []:
@@ -189,7 +189,7 @@ def source_support(request: dict, plan: dict, contract: dict, n_scan: int = 16, 
         q = source_density.density(request["source"])
     except source_density.SourceError as exc:
         return [_finding("support.source_density", f"node 0 has no analytic density ({exc}); an external source is "
-                         "rejected by calib_contract.py (section 5.2)")]
+                         "rejected by simcal_contract.py (section 5.2)")]
     sq = _energy_support(q)
     pars = {p["name"]: p for p in contract.get("parameters", [])}
     for name, b in bindings(plan).items():

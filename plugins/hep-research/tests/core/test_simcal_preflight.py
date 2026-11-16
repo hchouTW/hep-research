@@ -14,10 +14,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_fixtures as F  # noqa: E402
-from core.calibration import contract as cc  # noqa: E402
-from core.calibration import data_release as observed  # noqa: E402
-from core.calibration import preflight as pf  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
+from core.simcal import data_release as observed  # noqa: E402
+from core.simcal import preflight as pf  # noqa: E402
 
 E = np.arange(1.0, 9.0)
 KIND = "max_relative_deviation_from_proportionality"
@@ -60,7 +60,7 @@ class A0(unittest.TestCase):
         self.assertEqual(cm.exception.code, "a0.no_value")
 
     def test_read_through_the_provider(self):
-        """The A0 read goes through calib_data's provider: a fit read with the draft's series as channel on every raw
+        """The A0 read goes through simcal_data's provider: a fit read with the draft's series as channel on every raw
         unit; a release the contract does not declare as calibration data is refused."""
         rel = F.release("calibration", ["u1", "u2"], [], {})
         rel["content"] = {"values": linearity_example(0.01)}

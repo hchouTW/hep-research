@@ -11,7 +11,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "calibration-fixture/1"
+   "const": "simcal-fixture/1"
   },
   "fixture": {
    "type": "string",
@@ -36,7 +36,7 @@
      "additionalProperties": false,
      "properties": {
       "stage_graph": {
-       "$ref": "calibration_stage_graph.json"
+       "$ref": "simcal_stage_graph.json"
       },
       "parameters": {
        "type": "array",
@@ -69,7 +69,7 @@
           "minItems": 1
          },
          "mechanism": {
-          "$ref": "calibration_mechanism.json"
+          "$ref": "simcal_mechanism.json"
          },
          "physical_bounds": {
           "type": "array",
@@ -94,7 +94,7 @@
           ]
          },
          "index": {
-          "$ref": "calibration_parameter_index.json"
+          "$ref": "simcal_parameter_index.json"
          },
          "spec_pointer": {
           "type": "string",
@@ -136,13 +136,13 @@
       "references": {
        "type": "array",
        "items": {
-        "$ref": "calibration_reference.json"
+        "$ref": "simcal_reference.json"
        }
       }
      }
     },
     {
-     "$ref": "calibration_contract.json"
+     "$ref": "simcal_contract.json"
     }
    ]
   },
@@ -161,13 +161,13 @@
      }
     },
     {
-     "$ref": "calibration_plan.json"
+     "$ref": "simcal_plan.json"
     }
    ]
   },
   "release": {
-   "$ref": "calibration_data_release.json"
+   "$ref": "simcal_data_release.json"
   }
  },
- "$comment": "calibration-fixture/1: a stage-graph fixture of phase 0 (section 17), graph structure only. A design fixture (phase 1) holds a full calibration-contract/1 and calibration-plan/1 and the synthetic calibration release its contract declares."
+ "$comment": "simcal-fixture/1: a stage-graph fixture of phase 0 (section 17), graph structure only. A design fixture (phase 1) holds a full simcal-contract/1 and simcal-plan/1 and the synthetic calibration release its contract declares."
 }

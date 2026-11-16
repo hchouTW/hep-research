@@ -10,9 +10,9 @@ transit histogram PDE-weighted and integerised to 10^6; route-3 replicas Dirichl
 categories); 1 (p theta, a readout system with an observable not linear in eps: each detected photon kept with
 probability p from its own volume stream `<stage>/pde/<component>`, nested in p, before the sensor stages).
 
-Checks: the contract rules (calib_contract.py: the PDE acts only as the sensor `efficiency`, no angle dependence, the
+Checks: the contract rules (simcal_contract.py: the PDE acts only as the sensor `efficiency`, no angle dependence, the
 efficiency-1 map's sensor surfaces at 1 and its `surfaces_sha256` g4sim's hash of the production surfaces with the sensor
-efficiencies set to 1, no PDE(E) as a constant scale, the `EFFICIENCY > 0` condition); the plan rules (calib_design.py,
+efficiencies set to 1, no PDE(E) as a constant scale, the `EFFICIENCY > 0` condition); the plan rules (simcal_design.py,
 remedy level plan: route 1 where p is theta and an observable is not linear in eps, the route-1 position and stream, key
 distinctness, the `EFFICIENCY > 0` condition over the prior range, route 3's photons.csv against the map, the energy
 grid, the surfaces hash of a theta scan's maps, and the split check with its nested pair of mapping runs). The bounds
@@ -350,7 +350,7 @@ def variance_ratio(cat: dict, b) -> float:
 
 
 def grid_check(map_document: dict, run: dict, tables: list, grid: list | None = None) -> dict:
-    """The route-3 energy grid (calib_design.py, remedy level plan): per bin the pseudo-mass K_cat/2 <= 0.01 n_b, and the
+    """The route-3 energy grid (simcal_design.py, remedy level plan): per bin the pseudo-mass K_cat/2 <= 0.01 n_b, and the
     analytic Dirichlet variance of sum_c eps_bc >= 0.98 of the multinomial variance, for every PDE(E) of `tables` (the
     nominal one, or the tables spanning the prior or design range when the PDE holds theta). Otherwise the grid is
     changed; if no grid meets both, the bin is merged or the map photon number increased."""
@@ -493,7 +493,7 @@ def digitize_route1(job: dict, rows: list, p: float, component: int) -> tuple[li
 
 
 def route1_findings(route1: dict) -> list[dict]:
-    """Route 1's placement and stream (calib_design.py, remedy level plan): the thinning sits before the sensor stages
+    """Route 1's placement and stream (simcal_design.py, remedy level plan): the thinning sits before the sensor stages
     (never after dark counts, cross-talk or saturation), applies to the detected photons (never as a scale of charge or
     codes), and its stream is <stage>/pde/<component>, never efficiency_map/<k>."""
     out = []
@@ -512,7 +512,7 @@ def route1_findings(route1: dict) -> list[dict]:
     return out
 
 
-# ------------------------------------------------------------------ the contract rules (calib_contract.py)
+# ------------------------------------------------------------------ the contract rules (simcal_contract.py)
 def declaration(contract: dict) -> dict | None:
     return contract.get("pde_split") if isinstance(contract.get("pde_split"), dict) else None
 
@@ -662,7 +662,7 @@ def efficiency_test_findings(decl: dict, surfaces: dict, low: float, high: float
 
 
 def document_findings(contract: dict, spec_text, spec_field_types: dict, map_document: dict | None) -> list[dict]:
-    """calib_contract.py with the model documents (fixed map): the efficiency-1 map's surfaces and the EFFICIENCY > 0
+    """simcal_contract.py with the model documents (fixed map): the efficiency-1 map's surfaces and the EFFICIENCY > 0
     condition for the declared PDE(E)."""
     decl = declaration(contract)
     if decl is None or contract.get("simulator") != "g4sim":
@@ -718,7 +718,7 @@ def candidates(par: dict, contract: dict, plan: dict, stored: set, recorded: boo
         return [], [{"method": "rerun", "reason": "re-digitization needs edep_visible_ly_split recorded as column or "
                      "event_file (section 6.1)"}, route0]
     pre = ["the PDE acts in Geant4 only as the sensor EFFICIENCY (no reflectance, transmittance, refractive index, "
-           "window or angle dependence tied to it)", "the split check of section 6.7 passed (calib_design.py "
+           "window or angle dependence tied to it)", "the split check of section 6.7 passed (simcal_design.py "
            "pde-split)", "the efficiency map is built with every sensor surface's efficiency = 1",
            "never as a thinning of charge or of codes, never after dark counts, cross-talk or saturation"]
     if decl.get("model") == "table":
@@ -732,7 +732,7 @@ def candidates(par: dict, contract: dict, plan: dict, stored: set, recorded: boo
     return [("rerun", form, pre)], [route0]
 
 
-# ------------------------------------------------------------------ the plan rules (calib_design.py)
+# ------------------------------------------------------------------ the plan rules (simcal_design.py)
 def p_is_theta(par: dict) -> bool:
     """p moves with the fit: a theta, or a phi in profile mode (section 6.7 route 1)."""
     return par.get("role") == "theta" or (par.get("role") == "phi" and par.get("mode", "profile") == "profile")
@@ -844,7 +844,7 @@ def _q(detections, nominal: dict) -> np.ndarray:
 
 def split_check(map_one: dict, run_one: dict, run_p: dict, nominal: dict, lines: tuple | None = None,
                 propagation: dict | None = None) -> dict:
-    """The split check of section 6.7 (calib_design.py, remedy level plan) on a nested pair of mapping runs (efficiency 1
+    """The split check of section 6.7 (simcal_design.py, remedy level plan) on a nested pair of mapping runs (efficiency 1
     and the nominal PDE p0 or PDE(E), same materials, surfaces, logical_run_seed and event interval).
     1. Nesting (when `lines` = (photons rows at 1, rows at p0) are given): a pair that is not nested fails, and the
        first event that breaks it is recorded.
@@ -1051,7 +1051,7 @@ def record_findings(record: dict | None, geant4_version: str | None, map_documen
 
 
 def design_findings(contract: dict, plan: dict, docs: dict, spec_field_types: dict | None = None) -> dict:
-    """calib_design.py pde-split: every plan rule of section 6.7 for the PDE split (remedy level plan).
+    """simcal_design.py pde-split: every plan rule of section 6.7 for the PDE split (remedy level plan).
     plan.pde_split = {readouts (route_findings), route1 {stage, component, position, applies_to, stream}, photons
     (name of the efficiency-1 mapping run's photons in docs), map (name of the efficiency-1 map), centre_mm, grid
     (energy edges), prior (p range [lo, hi] or PDE(E) tables), replicas R, joint_keys {label: [hi, lo]},
@@ -1128,7 +1128,7 @@ def design_findings(contract: dict, plan: dict, docs: dict, spec_field_types: di
         prop = sc.get("propagation")
         dg = sc.get("digitize")          # delta mu from both maps digitized with one run_seed
         if dg is not None:
-            from core.calibration import design_g4sim
+            from core.simcal import design_g4sim
             pipe = docs["pipelines"][int(dg.get("pipeline", 0))]
             rows = [tuple(r) for r in docs["rows"][dg["rows"]]]
             job = design_g4sim.job_from_documents(pipe, mp, dg["readout"], sorted({r[2] for r in rows}),

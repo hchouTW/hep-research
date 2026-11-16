@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Exhaustive Appendix C checks of core/calibration/use against the reference decision table (simulator calibration
+"""Exhaustive Appendix C checks of core/simcal/use against the reference decision table (simulator calibration
 phase 0 gate; simcal-tasks/phase-0.md, "Thresholds and test designs").
 
 The scope of Appendix C is 31.6 million (own inputs, upstreams) cases: a full pass takes about two core-hours, the
 mutant check about two per mutant, so the gate runs are split into shards (batch work, section 14.1) and the unit
-suite (test_calibration_use.py) runs a fixed strided slice of the same functions. A shard k of n takes the cases with
+suite (test_simcal_use.py) runs a fixed strided slice of the same functions. A shard k of n takes the cases with
 index i, i mod n == k - 1, of the reference's own cases() order.
 
 Checks (--check):
-  agree       calib_use's assign, effective, allowed_uses, variation_upstream_admissible and derive_role equal the
+  agree       simcal_use's assign, effective, allowed_uses, variation_upstream_admissible and derive_role equal the
               reference's on every case of the shard (outcome or rejection);
-  invariants  the reference's check() with calib_use's functions in place of its own, on the shard: no violation;
+  invariants  the reference's check() with simcal_use's functions in place of its own, on the shard: no violation;
   mutants     the reference's 24 mutants (its mutation_check list) each run on the shard with the reference
               functions; status ok only when every one is caught (a violation on a subset is a violation of the scope);
   lookup      the "outcome already determined" lookup against an independent enumeration, and mutant 25 (C.2 only),
@@ -44,7 +44,7 @@ def shard(iterable, k: int, n: int):
 
 
 def run_agree(ref, use, deps, k, n):
-    from test_calibration_use import outcome
+    from test_simcal_use import outcome
     bad, count = [], 0
     for c, ups in shard(ref.cases(), k, n):
         count += 1
@@ -60,7 +60,7 @@ def run_agree(ref, use, deps, k, n):
             pairs.append(("derive_role", deps.derive_role(u["usages"]), ref.derive_role(u["usages"])))
         for name, a, b in pairs:
             if a != b and len(bad) < 20:
-                bad.append({"function": name, "case": repr(c), "upstreams": repr(ups), "calib_use": repr(a),
+                bad.append({"function": name, "case": repr(c), "upstreams": repr(ups), "simcal_use": repr(a),
                             "reference": repr(b)})
     return {"cases": count, "disagreements": bad}, not bad
 
@@ -109,7 +109,7 @@ def run_mutants(ref, use, deps, k, n):
 
 
 def run_lookup(ref, use, deps, k, n):
-    from test_calibration_use import independent_lookup, lookup_scope
+    from test_simcal_use import independent_lookup, lookup_scope
     bad, count, c2_caught = [], 0, 0
     for c, ups, und in shard(lookup_scope(), k, n):
         count += 1
@@ -124,9 +124,9 @@ def run_lookup(ref, use, deps, k, n):
 
 REFERENCE_MUTANTS = 24          # the reference's mutation_check list (Appendix C mutants 1-24)
 SCOPE_CASES = 31593216          # Appendix C scope: 197376 x 141 + 192 x 19600 (reference cases())
-LOOKUP_CASES = 2754048          # lookup scope of test_calibration_use.lookup_scope()
-CODE_FILES = ("tests/core/calibration_exhaustive.py", "tests/core/test_calibration_use.py", "core/calibration/use.py",
-              "core/calibration/deps.py", "docs/dev/simulator-calibration/reference/calib_use_decision_table.py")
+LOOKUP_CASES = 2754048          # lookup scope of test_simcal_use.lookup_scope()
+CODE_FILES = ("tests/core/simcal_exhaustive.py", "tests/core/test_simcal_use.py", "core/simcal/use.py",
+              "core/simcal/deps.py", "docs/dev/simulator-calibration/reference/calib_use_decision_table.py")
 
 
 def provenance() -> dict:
@@ -228,11 +228,11 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "rejected", "error": f"--part must be k/n with 1 <= k <= n, not {args.part!r}"}))
         return 2
     try:
-        from test_calibration_use import REF  # loads the reference after checking its SHA-256
+        from test_simcal_use import REF  # loads the reference after checking its SHA-256
     except AssertionError as exc:
         print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
-    from core.calibration import deps, use
+    from core.simcal import deps, use
     t0 = time.time()
     detail, ok = CHECKS[args.check](REF, use, deps, k, n)
     out = {"status": "ok" if ok else "failed", "check": args.check, "part": f"{k}/{n}",

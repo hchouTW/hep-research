@@ -1,8 +1,8 @@
-"""core/calibration/contract (simulator calibration phase 0): calib_contract check, Part B section 5.2 in phase-0 scope.
+"""core/simcal/contract (simulator calibration phase 0): simcal_contract check, Part B section 5.2 in phase-0 scope.
 
 One negative test per named case of section 15.3.2 (contract rules) and the contract-side cases of sections 15.3.3 and
 15.3.13; D5 (sub-shape after exclusion, approval A6), D38 and clause 9 items 1, 5, 6, 9, 11. Each case changes one
-thing in the valid toy-detector contract of calibration_fixtures and expects its finding code."""
+thing in the valid toy-detector contract of simcal_fixtures and expects its finding code."""
 from __future__ import annotations
 
 import sys
@@ -13,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_fixtures as F  # noqa: E402
-from core.calibration import contract as cc  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
 
 
 def codes(c, rel=None, **kw):

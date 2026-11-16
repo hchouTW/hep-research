@@ -1,4 +1,4 @@
-"""The locking-stage checks of calib_data (Part B sections 2.1, 9.2; phase 2, WP4): resolution and rounding, shapes
+"""The locking-stage checks of simcal_data (Part B sections 2.1, 9.2; phase 2, WP4): resolution and rounding, shapes
 and totals, guaranteed enclosures and the data-side constraint check."""
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import data_checks as D  # noqa: E402
+from core.simcal import data_checks as D  # noqa: E402
 
 
 class Resolution(unittest.TestCase):

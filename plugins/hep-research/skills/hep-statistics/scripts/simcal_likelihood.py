@@ -3,16 +3,16 @@
 functions, nu and eta, the V_model principal components, the event-level bootstrap at theta_ref and the pass/fail
 summaries of weighted MC; phase 2).
 
-  calib_likelihood.py layout   --contract FILE                  the blocks and the order of beta
-  calib_likelihood.py vmodel   --components FILE [--keep-all]   V_model principal components (conditions 1 and 2)
-  calib_likelihood.py binomial --moments FILE                   variance-matched n_eff, k_eff and the scope
-  calib_likelihood.py bootstrap-size --p P                      B >= max(500, 50 p)
-Phase 3 (section 6.7, D28; the engine in core/calibration/map_term.py):
-  calib_likelihood.py map-term --input FILE   the map term U(theta) phi_map at theta: {mode: fixed | shared |
+  simcal_likelihood.py layout   --contract FILE                  the blocks and the order of beta
+  simcal_likelihood.py vmodel   --components FILE [--keep-all]   V_model principal components (conditions 1 and 2)
+  simcal_likelihood.py binomial --moments FILE                   variance-matched n_eff, k_eff and the scope
+  simcal_likelihood.py bootstrap-size --p P                      B >= max(500, 50 p)
+Phase 3 (section 6.7, D28; the engine in core/simcal/map_term.py):
+  simcal_likelihood.py map-term --input FILE   the map term U(theta) phi_map at theta: {mode: fixed | shared |
                        independent, U: [U_j], rows, n_link, surrogate (record), theta, theta_names?, fallback?}; U,
                        d U / d theta and U U^T; with fallback: true, the nearest design point's covariance (held fixed)
-Phase 5 (section 5.4 "Inferred"; the engine in core/calibration/vmodel_infer.py):
-  calib_likelihood.py vmodel-infer --contract FILE --input FILE [--likelihood marginal|conditional]
+Phase 5 (section 5.4 "Inferred"; the engine in core/simcal/vmodel_infer.py):
+  simcal_likelihood.py vmodel-infer --contract FILE --input FILE [--likelihood marginal|conditional]
                        f, ell of the components carrying `infer`, by the marginal likelihood over nu, as a separate
                        version (holdout only); input {names, residual, V, flat?, nuisance?, calibration_rows?} in link
                        space; the conditional likelihood of nu is rejected (f nu not identifiable)
@@ -40,7 +40,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import emulator, io, likelihood as L, linear, map_term as MT, vmodel_infer as VI
+    from core.simcal import emulator, io, likelihood as L, linear, map_term as MT, vmodel_infer as VI
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 

@@ -1,4 +1,4 @@
-"""The design-stage checks owned by calib_design.py in phase 1 (Part B sections 3.6, 6.1, 6.4, 6.7, 8.1, 8.2):
+"""The design-stage checks owned by simcal_design.py in phase 1 (Part B sections 3.6, 6.1, 6.4, 6.7, 8.1, 8.2):
 Sobol design points and the P6 held-back set (D80), P2 (D77), the support condition, P5 with feasibility and the final
 method (D41, D42; Sigma_boot and b_J are phase 2, the theta-noise item phase 3), and the applicability of the
 mandatory gates.
@@ -13,7 +13,7 @@ from typing import Any
 import numpy as np
 from scipy.stats import qmc
 
-from core.calibration import chain, linear
+from core.simcal import chain, linear
 
 F_DEFAULT = 0.1
 REWEIGHTING = ("analytic-reweighting", "step-level-reweighting")
@@ -189,7 +189,7 @@ def _bootstrap_s2(x, w, kind, B, rng):
 
 
 def _tail_check(contract, names):
-    classes = {o["name"]: o.get("functional") for o in contract.get("observables", [])}   # calibration-functional/1
+    classes = {o["name"]: o.get("functional") for o in contract.get("observables", [])}   # simcal-functional/1
     tails = [n for n in names if classes.get(n) in TAIL_CLASSES]
     if tails:
         raise CheckError("p5.tail_functional", f"P5 on tail-type functionals {tails}: their determining region is not "
@@ -399,8 +399,8 @@ def final_methods(evaluator, contract: dict, plan: dict, f: float = F_DEFAULT, n
                 if resim_ok:
                     chosen[p] = m
                     break
-            elif m == "surrogate-model":                    # feasible when P6 passes (calib_emulator.py, phase 3)
-                from core.calibration import emulator
+            elif m == "surrogate-model":                    # feasible when P6 passes (simcal_emulator.py, phase 3)
+                from core.simcal import emulator
                 r6 = emulator.feasibility(evaluator, contract, plan, p)
                 log.append({"parameter": p, "method": m, "feasible": r6["feasible"], "P6": r6["status"],
                             **({"reason": r6["reason"]} if "reason" in r6 else {})})
@@ -453,13 +453,13 @@ def p5_with_final_methods(evaluator, contract: dict, plan: dict, systematics=Non
 def g4_inputs(evaluator, contract: dict, theta: dict, f: float = F_DEFAULT) -> tuple[dict, dict, list]:
     """The inputs of G4 at one parameter point (section 6.7, D41): the event-level product weights of the events
     entering each calibration observable, and N_req,k = s_k^2 / (f V^unc_data,kk) with s_k^2 the weighted influence
-    variance. Returns (weights_by_obs, n_req, missing_support_runs); `calib_reweight.py g4` decides with reweight.g4."""
+    variance. Returns (weights_by_obs, n_req, missing_support_runs); `simcal_reweight.py g4` decides with reweight.g4."""
     names = [o["name"] for o in linear.calibration_observables(contract)]
     return g4_inputs_from(evaluator.evaluate(theta, names=names), contract, f)
 
 
 def g4_inputs_from(r: dict, contract: dict, f: float = F_DEFAULT) -> tuple[dict, dict, list]:
-    """g4_inputs from an evaluation already made (r["names"] are contract observables): also used by calib_contrib
+    """g4_inputs from an evaluation already made (r["names"] are contract observables): also used by simcal_contrib
     on every evaluated subset of effects (section 10.5)."""
     by_name = {o["name"]: o for o in contract.get("observables", [])}
     names = list(r["names"])

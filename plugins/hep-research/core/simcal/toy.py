@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 from scipy import special, stats
 
-from core.calibration import evaluator, reweight
+from core.simcal import evaluator, reweight
 
 STATUS = ["synthetic"]
 
@@ -763,7 +763,7 @@ class ChainEvaluator:
         out["independent_runs"] = independent
         return out
 
-    # ---- queries for the support check of calib_design (section 6.1)
+    # ---- queries for the support check of simcal_design (section 6.1)
     def support_query(self, par: str) -> list[dict]:
         """For each (node, run) where `par` acts: the kernel's kind, whether `par` acts entirely through its density,
         whether the kernel filters at generation, and the supports per event (a function of a parameter point; None
@@ -786,9 +786,9 @@ class ChainEvaluator:
                                                k.support(pv, {**nom["params"], **pt}, r))})
         return out
 
-    # ---- the learned density ratio (section 6.2, phase 5; core/calibration/learned.py)
+    # ---- the learned density ratio (section 6.2, phase 5; core/simcal/learned.py)
     def _learned_setup(self):
-        from core.calibration import learned
+        from core.simcal import learned
         spec = self._learned_spec
         if spec is None:
             raise ValueError("method learned-density-ratio needs plan.evaluator.learned (section 6.2)")
@@ -824,7 +824,7 @@ class ChainEvaluator:
     def learned_ratio(self, sample: dict | None = None, repeat: int = 0):
         """The trained ratio for a sample (default the nominal; a sample of other seeds has its own training MC) and
         repeated training `repeat` (independent training MC and initialization seed, section 6.6). Cached."""
-        from core.calibration import learned
+        from core.simcal import learned
         sample = sample or self.nominal
         sk = sample["seed"]
         key = (repr(sk), int(repeat))
@@ -945,7 +945,7 @@ class ChainEvaluator:
         `bias_raw` keeps the uncorrected difference, `bias_theta0` the subtracted one (diagnostics). The MC noise
         left in b (the closure events' influence values of the four terms, the classifiers held fixed: they never saw
         the closure sample) is subtracted from b b^T, negative eigenvalues set to 0 (learned.v_learn)."""
-        from core.calibration import learned
+        from core.simcal import learned
         if self._learned_spec is None:
             raise NotImplementedError("the plan has no learned density ratio (section 6.2)")
         target = {**self.model.nominal, **theta}

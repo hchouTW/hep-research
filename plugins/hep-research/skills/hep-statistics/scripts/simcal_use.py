@@ -2,10 +2,10 @@
 """Evidence grade, flags and uses of a calibration result (simulator calibration workflow, Part B section 10.2 and
 Appendix C; owner of the grade rules, the "outcome already determined" lookup and variation-upstream eligibility).
 
-  calib_use.py judge  --inputs FILE     grade one result: the Appendix C.1 inputs and its upstreams
-  calib_use.py lookup --inputs FILE --undecided mandatory-gate,p7,v
+  simcal_use.py judge  --inputs FILE     grade one result: the Appendix C.1 inputs and its upstreams
+  simcal_use.py lookup --inputs FILE --undecided mandatory-gate,p7,v
                                         before opening: is the outcome already determined (section 10.2 rule 0)?
-  calib_use.py export --record FILE --result FILE
+  simcal_use.py export --record FILE --result FILE
                                         an exported g4sim condition-snapshot/1 or alignment-overlay/1 against the
                                         calibration result it cites: the contracts schema, the result's hash in
                                         source_of_facts and the use matrix (section 10.4, 15.3.19, A21 19-g6);
@@ -36,7 +36,7 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
 import argparse
 import sys
 
-from core.calibration import io, use
+from core.simcal import io, use
 
 
 def _inputs(path):

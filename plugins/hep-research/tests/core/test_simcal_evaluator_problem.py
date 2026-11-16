@@ -1,8 +1,8 @@
-"""The synthetic ZDC fixture of Part B section 15.2 as a calibration problem (phase 3, WP-F): core/calibration/
+"""The synthetic ZDC fixture of Part B section 15.2 as a calibration problem (phase 3, WP-F): core/simcal/
 evaluator_problem.py over the g4sim evaluator, on products of the fixture's SYNTHETIC TRANSPORT STAND-IN (tests/core/
-calibration_zdc_fixture.py; no Geant4). The section 15.2 "g4sim (synthetic ZDC)" items runnable without Geant4, the G8
+simcal_zdc_fixture.py; no Geant4). The section 15.2 "g4sim (synthetic ZDC)" items runnable without Geant4, the G8
 pseudo-data path of D6 (A12) on the fixture's events, and the Geant4 production the real fixture needs. Items that need
-Geant4 run on the products of campaign p3-g4 under $SIMCAL_G4_PRODUCTS (calibration_phase3_g4.calo_evidence) and are
+Geant4 run on the products of campaign p3-g4 under $SIMCAL_G4_PRODUCTS (simcal_phase3_g4.calo_evidence) and are
 skipped, saying so, when it is unset."""
 from __future__ import annotations
 
@@ -18,15 +18,15 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
 
-import calibration_phase3_g4 as P3  # noqa: E402
-import calibration_zdc_fixture as Z  # noqa: E402
-import g4sim_calib_eval as E  # noqa: E402
+import simcal_phase3_g4 as P3  # noqa: E402
+import simcal_zdc_fixture as Z  # noqa: E402
+import g4sim_simcal_eval as E  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
 
-from core.calibration import evaluator, identify, kernel_check, linear  # noqa: E402
-from core.calibration import evaluator_problem as EP  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
+from core.simcal import evaluator, identify, kernel_check, linear  # noqa: E402
+from core.simcal import evaluator_problem as EP  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
 
 N = 300
 
@@ -216,7 +216,7 @@ class CalorimeterProblem(unittest.TestCase):
     def test_pseudo_data_follow_d6(self):
         events = Z.truth_events(self.ev, {"birks": 0.15}, "truth")
         events["weights"] = -np.ones(len(events["values"]["pe_mean"]))
-        from core.calibration import closure
+        from core.simcal import closure
         with self.assertRaises(closure.ClosureError):                 # negative weights: no pseudo-data (D6)
             self.p.pseudo_data(events, {"kind": "fixed", "events": 100}, np.random.default_rng(1))
         events["weights"] = np.where(np.arange(len(events["weights"])) % 2 == 0, 3.0, 1.0)

@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "toy_detector_bimodal",
  "description": "Bimodal variant of the toy detector (section 15.1): the overlapping modules are read out as a sum S = a f + b (1 - f) + eps, f ~ Beta(alpha, beta); graph structure only.",
  "status": "synthetic",

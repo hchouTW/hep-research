@@ -1,9 +1,9 @@
-"""core/calibration/use (simulator calibration phase 0): the evidence-grade decision table of Part B Appendix C.
+"""core/simcal/use (simulator calibration phase 0): the evidence-grade decision table of Part B Appendix C.
 
-1. calib_use agrees with the reference implementation calib_use_decision_table.py (the version attached to v7.37.4,
+1. simcal_use agrees with the reference implementation calib_use_decision_table.py (the version attached to v7.37.4,
    SHA-256 c5279adf...) input by input over Appendix C's exhaustive scope: assign, effective, allowed_uses,
    variation_upstream_admissible.
-2. It passes the same set of tests: the reference's exhaustive invariant check, run with calib_use's functions in place
+2. It passes the same set of tests: the reference's exhaustive invariant check, run with simcal_use's functions in place
    of the reference's, finds no violation; the reference's own mutant check catches every mutant.
 3. The "outcome already determined" lookup (section 10.2 rule 0, D63, D13), which the reference does not contain, is
    compared over the same scope with an independently written enumeration (C.2 then C.3), and the mutant that looks up
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from core.calibration import deps, use  # noqa: E402
+from core.simcal import deps, use  # noqa: E402
 
 REFERENCE = ROOT / "docs" / "dev" / "simulator-calibration" / "reference" / "calib_use_decision_table.py"
 REFERENCE_SHA256 = "c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3"
@@ -53,14 +53,14 @@ def outcome(fn, *args):
 
 
 # The unit suite runs a fixed strided slice of Appendix C's scope (31.6 million cases); the full scope, sharded, is
-# the phase-0 gate run of tests/core/calibration_exhaustive.py (simcal-tasks/phase-0.md).
+# the phase-0 gate run of tests/core/simcal_exhaustive.py (simcal-tasks/phase-0.md).
 SLICE = 2000          # every 2000th case of the reference's cases() order, from the first
 LOOKUP_SLICE = 23    # coprime to the 4 upstream variants and 7 undecided subsets the scope cycles through
 
 
 class AgreesWithReference(unittest.TestCase):
     def test_input_by_input_slice(self):
-        import calibration_exhaustive as ex
+        import simcal_exhaustive as ex
         detail, ok = ex.run_agree(REF, use, deps, 1, SLICE)
         self.assertTrue(ok, detail["disagreements"])
         self.assertGreater(detail["cases"], 15000)
@@ -69,14 +69,14 @@ class AgreesWithReference(unittest.TestCase):
                 self.assertEqual(use.allowed_uses(g, fs), REF.allowed_uses(g, fs))
 
     def test_reference_invariants_hold_for_calib_use_slice(self):
-        import calibration_exhaustive as ex
+        import simcal_exhaustive as ex
         detail, ok = ex.run_invariants(REF, use, deps, 1, SLICE)
         self.assertTrue(ok, detail["violations"])
 
     def test_reference_mutants_slice(self):
         """Each mutant must be caught by the full scope (gate run); on the slice, the mutants known to be caught there
         must be, so a weakened invariant shows up in the unit suite too."""
-        import calibration_exhaustive as ex
+        import simcal_exhaustive as ex
         detail, ok = ex.run_mutants(REF, use, deps, 1, SLICE)
         self.assertEqual(len(detail["mutants"]), ex.REFERENCE_MUTANTS)
         self.assertTrue(ok, detail["not_caught"])
@@ -146,7 +146,7 @@ def lookup_scope():
 class OutcomeAlreadyDetermined(unittest.TestCase):
     def test_against_independent_enumeration_slice(self):
         """Also mutant 25: the lookup evaluated with C.2 only differs on the slice, so it is caught."""
-        import calibration_exhaustive as ex
+        import simcal_exhaustive as ex
         detail, ok = ex.run_lookup(REF, use, deps, 1, LOOKUP_SLICE)
         self.assertTrue(ok, detail["disagreements"])
         self.assertGreater(detail["cases"], 10000)
@@ -258,7 +258,7 @@ class NamedCases(unittest.TestCase):
 
 
 class IncompleteAggregation(unittest.TestCase):
-    """Rule 0 aggregation (section 10.2; owner calib_use, section 15.3a 'incomplete aggregation')."""
+    """Rule 0 aggregation (section 10.2; owner simcal_use, section 15.3a 'incomplete aggregation')."""
 
     def gates(self, **kw):
         g = {x: "passed" for x in use.MANDATORY}

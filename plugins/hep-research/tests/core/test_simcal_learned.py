@@ -1,9 +1,9 @@
 """The learned density ratio and G4-L (Part B sections 6.2, 8.2, phase 5; A25 on section 19-9): the classifier path
 (cross-fitting, Platt calibration, prior-ratio correction), V_learn and V_learn^bias, learned_closure on the toy
-evaluator, the post-hoc fixture (core/calibration/data/toy_posthoc.json), G4-L and P0 on the learned path. Each
+evaluator, the post-hoc fixture (core/simcal/data/toy_posthoc.json), G4-L and P0 on the learned path. Each
 negative test has a positive control on the same fixture. Section 15.3.1 G4-L: "no cross-fitting"; section 15.3.16:
 a learned plan makes P0 and G4-L apply (the full-resimulation case is
-test_calibration_design.Applicability.test_full_resimulation_only, rerun, not duplicated). Synthetic."""
+test_simcal_design.Applicability.test_full_resimulation_only, rerun, not duplicated). Synthetic."""
 from __future__ import annotations
 
 import copy
@@ -19,9 +19,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import chain, design, kernel_check, learned, linear, reweight, toy  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import chain, design, kernel_check, learned, linear, reweight, toy  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
 
 warnings.filterwarnings("ignore", message="The balance properties of Sobol")
 N = 10_000
@@ -409,18 +409,18 @@ class SBIBoundary(unittest.TestCase):
 
 
 class S1Driver(unittest.TestCase):
-    """The S1 driver (tests/core/calibration_phase5_g4l.py): the task table, the local smoke and the decision rule,
+    """The S1 driver (tests/core/simcal_phase5_g4l.py): the task table, the local smoke and the decision rule,
     where a failing configuration is reported failed (negative) next to a passing control."""
 
     def test_task_table_and_rule(self):
-        import calibration_phase5_g4l as X
+        import simcal_phase5_g4l as X
         reps = [r for t in X.TASKS for r in range(t["r0"], t["r0"] + t["reps"])]
         self.assertEqual(reps, list(range(X.REPS)))
         self.assertEqual((X.MAX_FALSE_ALARMS, X.EVENTS), (16, 40_000))
         self.assertEqual(len({X._seed(r, j) for r in range(50) for j in range(4)}), 200)
 
     def test_judge(self):
-        import calibration_phase5_g4l as X
+        import simcal_phase5_g4l as X
 
         def rows(n_fail, extra=()):
             return [{"r": r, "status": "failed" if r < n_fail else "passed"} for r in range(1000)] + list(extra)
@@ -438,7 +438,7 @@ class S1Driver(unittest.TestCase):
         import json
         import tempfile
 
-        import calibration_phase5_g4l as X
+        import simcal_phase5_g4l as X
         with tempfile.TemporaryDirectory() as d:
             out = Path(d) / "local.json"
             with contextlib.redirect_stdout(_io.StringIO()):
@@ -458,7 +458,7 @@ class TaskEnvironment(unittest.TestCase):
         import json
         import tempfile
 
-        import calibration_phase5_g4l as X
+        import simcal_phase5_g4l as X
         tasks = [{"r0": i, "reps": 1} for i in range(len(numpys))]
         with tempfile.TemporaryDirectory() as d:
             for i, v in enumerate(numpys):

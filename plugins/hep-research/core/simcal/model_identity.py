@@ -1,4 +1,4 @@
-"""The g4sim model identity (Part B section 5.1, clause 1 item 2 of section 5.2; owner calib_contract.py check).
+"""The g4sim model identity (Part B section 5.1, clause 1 item 2 of section 5.2; owner simcal_contract.py check).
 
 A model is "everything other than theta and phi", so it is identified by five items locked with the contract, never by
 g4sim's own geometry_id, request_id or run_id (those change with every design point):
@@ -479,7 +479,7 @@ def digi_job_findings(job: dict, pipeline: dict, theta_values: dict | None = Non
     value}) taking that value instead; its channels are the map's; its efficiencies are `efficiencies` when given
     (the PDE-split or joint-pattern replica the caller computed, section 6.7), else the map's replica map_replica; its
     conditions equal the snapshot (absent when no snapshot is applied); its timing equals `timing` when given.
-    The seed, replica, keys and event-time checks of section 6.6 are calib_design.py's. Returns findings."""
+    The seed, replica, keys and event-time checks of section 6.6 are simcal_design.py's. Returns findings."""
     out = []
     theta_values = theta_values or {}
 

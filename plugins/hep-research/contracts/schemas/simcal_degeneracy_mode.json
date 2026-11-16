@@ -30,5 +30,5 @@
    "minLength": 1
   }
  },
- "$comment": "calibration-degeneracy-mode/1 (section 3.5): a diagnostic hint, never part of a decision."
+ "$comment": "simcal-degeneracy-mode/1 (section 3.5): a diagnostic hint, never part of a decision."
 }

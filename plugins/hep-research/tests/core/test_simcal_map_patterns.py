@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
 
 import g4sim_map_patterns as MP  # noqa: E402
 
-from core.calibration import map_basis as MB  # noqa: E402
+from core.simcal import map_basis as MB  # noqa: E402
 from core.simulation import efficiency_map as em  # noqa: E402
 
 IR = {"physical": {"templates": {"world": {"shape": "box", "half_mm": ["5e2", "5e2", "5e2"], "material": "G4_AIR"},

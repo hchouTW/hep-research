@@ -1,7 +1,7 @@
 """The Geant4 version of the section 8.7 row 2004 calibration (P6 part) on the RICH replica (tests/core/
-calibration_phase3_g4cals.py, simcal phase 3 WP-L): the task table (every repetition's two members at every point and
+simcal_phase3_g4cals.py, simcal phase 3 WP-L): the task table (every repetition's two members at every point and
 sample, exactly once), the seeds, the run cards, the Geant4 task's refusals, the streamed plane radius against
-calibration_phase3_g4.plane_radius, one P6 repetition (a biased surrogate caught next to a correct one), the registered
+simcal_phase3_g4.plane_radius, one P6 repetition (a biased surrogate caught next to a correct one), the registered
 rule, and the whole path on STAND-IN products (never Geant4). Synthetic; no Slurm."""
 from __future__ import annotations
 
@@ -22,11 +22,11 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
 sys.path.insert(0, str(HERE))
 
-import calibration_phase3_g4 as G  # noqa: E402
-import calibration_phase3_g4cals as W  # noqa: E402
-import calibration_rich_fixture as R  # noqa: E402
+import simcal_phase3_g4 as G  # noqa: E402
+import simcal_phase3_g4cals as W  # noqa: E402
+import simcal_rich_fixture as R  # noqa: E402
 
-from core.calibration import design as D  # noqa: E402
+from core.simcal import design as D  # noqa: E402
 
 SMALL = {"events": 6, "reps": 4, "points": 32, "h_configs": [8, 32], "chunk": {"R_p100": 2, "R_p2.4": 4},
          "p6_reps": 2}
@@ -316,7 +316,7 @@ class LocalPath(unittest.TestCase):
 
 class Cli(unittest.TestCase):
     def test_list_prints_the_table(self):
-        cp = subprocess.run([sys.executable, "-I", str(HERE / "calibration_phase3_g4cals.py"), "--list", "--root",
+        cp = subprocess.run([sys.executable, "-I", str(HERE / "simcal_phase3_g4cals.py"), "--list", "--root",
                              str(Path(SCRATCH["dir"].name) / "none")], capture_output=True, text=True, timeout=300)
         self.assertEqual(cp.returncode, 0, cp.stderr[-500:])
         t = json.loads(cp.stdout)

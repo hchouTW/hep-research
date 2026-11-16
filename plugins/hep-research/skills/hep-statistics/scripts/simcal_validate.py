@@ -3,23 +3,23 @@
 the declaration checks (a)(b)(c), the minimum numbers of toys, the G5 proportion, cross-validation, power and its
 lower bound, and the records: kappa, decision records, abandonment and power abandonment; phase 2).
 
-  calib_validate.py kappa         --contract-sha256 H --plan FILE --engine V --book FILE
-  calib_validate.py statistic     --input FILE          {r, C_r, sigma0, constraints}: T_v, k (chi2_k when allowed)
-  calib_validate.py declaration   --input FILE          {C_r0, sigma0, constraints, expectations}: (a)(b)(c)
-  calib_validate.py holdout       --contract FILE --plan FILE --values FILE --validation-values FILE
+  simcal_validate.py kappa         --contract-sha256 H --plan FILE --engine V --book FILE
+  simcal_validate.py statistic     --input FILE          {r, C_r, sigma0, constraints}: T_v, k (chi2_k when allowed)
+  simcal_validate.py declaration   --input FILE          {C_r0, sigma0, constraints, expectations}: (a)(b)(c)
+  simcal_validate.py holdout       --contract FILE --plan FILE --values FILE --validation-values FILE
                                   [--release FILE] [--validation-release FILE] --kappa K --book FILE --ledger FILE
                                   [--path analytic|toys] [--toys N] [--seed S]
                                   the fit, T_v with C_r^+ and its reference, the data-side constraint check, and the
                                   decision record computed from them (pass / fail / no-testable-direction)
-  calib_validate.py cv            --contract FILE --plan FILE --values FILE --folds FILE --kappa K --book FILE
+  simcal_validate.py cv            --contract FILE --plan FILE --values FILE --folds FILE --kappa K --book FILE
                                   --ledger FILE [--toys N] [--seed S]       T_cv with C-hat_{r,f}, its reference, the record
-  calib_validate.py power         --book FILE --kappa K --input FILE        the analytic power lower bound (cross
+  simcal_validate.py power         --book FILE --kappa K --input FILE        the analytic power lower bound (cross
                                   products per alternative), recorded for kappa
-  calib_validate.py abandon       --book FILE --ledger FILE --kappa K
-  calib_validate.py abandon-power --book FILE --kappa K
-  calib_validate.py required-lambda --k K [--alpha A]
+  simcal_validate.py abandon       --book FILE --ledger FILE --kappa K
+  simcal_validate.py abandon-power --book FILE --kappa K
+  simcal_validate.py required-lambda --k K [--alpha A]
 No outcome is ever given by hand: a decision record exists only from a statistic computed here (review F4).
-The decision records drive the failure records of calib_data (pending -> withdrawn / final). Output: one JSON
+The decision records drive the failure records of simcal_data (pending -> withdrawn / final). Output: one JSON
 object; ok/passed (exit 0), failed or refused (exit 1), rejected (exit 2), incomplete (exit 3). Phase 2.
 """
 from __future__ import annotations
@@ -44,8 +44,8 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, data_release, validate as V, problems, fit as F, data_checks as DC
-    from core.calibration import toy_problem as TP
+    from core.simcal import io, data_release, validate as V, problems, fit as F, data_checks as DC
+    from core.simcal import toy_problem as TP
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -95,7 +95,7 @@ def computed_decision(args) -> dict:
             missing = [n for n in p.val_names if n not in vals]
             if missing or not p.val_names:
                 raise io.InputError(f"--validation-values: values for the validation observables {p.val_names}")
-            from core.calibration import likelihood as L
+            from core.simcal import likelihood as L
             yv = np.array([L.link(np.array([float(vals[n])]), p.val_links[n])[0] for n in p.val_names])
             fit = F.find_extremum(p, args.seed, p.initial_beta())
             if not fit.converged:

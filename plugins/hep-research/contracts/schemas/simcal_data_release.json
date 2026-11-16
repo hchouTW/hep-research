@@ -10,7 +10,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "calibration-data-release/1"
+   "const": "simcal-data-release/1"
   },
   "status": {
    "type": "array",
@@ -121,5 +121,5 @@
    "type": "object"
   }
  },
- "$comment": "calibration-data-release/1 (section 5.1): values and their declarations. Validation releases carry only a commitment hash until opened; observed and expected components are sealed (calib_data.py)."
+ "$comment": "simcal-data-release/1 (section 5.1): values and their declarations. Validation releases carry only a commitment hash until opened; observed and expected components are sealed (simcal_data.py)."
 }

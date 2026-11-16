@@ -2,8 +2,8 @@
 """Identifiability (simulator calibration workflow, Part B sections 8.2, 8.3, 3.5; owner of P3 and G5, including the
 P3 of each cross-validation training fold and the G5 of each fold and toy; phase 2).
 
-  calib_identify.py p3 --contract FILE --plan FILE [--release FILE]      Asimov at the prior centre
-  calib_identify.py g5 --contract FILE --plan FILE --values FILE [--seed S]
+  simcal_identify.py p3 --contract FILE --plan FILE [--release FILE]      Asimov at the prior centre
+  simcal_identify.py g5 --contract FILE --plan FILE --values FILE [--seed S]
 P3: lambda_min(R_corr) >= 0.1, sigma_post/sigma_prior <= 0.4; G5: 0.05, 0.5 and the profile Delta(-2 ln L) >= 4,
 and the section 7.4 admission. Hints from section 3.5. Output: one JSON object; passed (exit 0), failed (exit 1, remedy
 level contract; plan for non-converged scan points), rejected (exit 2). Phase 2 (section 17).
@@ -30,7 +30,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, fit as F, identify, problems, toy_problem
+    from core.simcal import io, fit as F, identify, problems, toy_problem
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -62,7 +62,7 @@ def _common(p, values=True):
     p.add_argument("--release")
     if values:
         p.add_argument("--values", required=True, help="calibration values (JSON {observable: value}) provided by "
-                       "calib_data.py provide, which records the fit read")
+                       "simcal_data.py provide, which records the fit read")
     p.add_argument("--sigma-noise", type=float)
     p.add_argument("--seed", type=int, default=20261130)
 

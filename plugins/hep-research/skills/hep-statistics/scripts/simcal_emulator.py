@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """The surrogate model of the simulator calibration workflow (Part B sections 6.4, 6.5, 7.1, 8.2 note 4; owner of the
-training set, P6, V_emu, the surrogate domain and the ask/tell state file; the engine is core/calibration/emulator.py).
+training set, P6, V_emu, the surrogate domain and the ask/tell state file; the engine is core/simcal/emulator.py).
 
-  calib_emulator.py init    --contract FILE [--plan FILE] --purpose training|held-back --out STATE
-  calib_emulator.py ask     --state STATE [--n N]            the next evaluations to submit (marked submitted)
-  calib_emulator.py tell    --state STATE --results FILE     record {run_id: {names, pred, V_MC}}
-  calib_emulator.py train   --contract FILE [--plan FILE] [--state STATE] [--out MODEL]
-  calib_emulator.py p6      --contract FILE [--plan FILE] [--names a,b]  |  p6 --input FILE
-  calib_emulator.py domain  --model MODEL
-  calib_emulator.py spot-check-plan --training-state STATE --points FILE --seeds FILE --out STATE
-  calib_emulator.py spot-check      --state STATE --model MODEL --v-data FILE
-FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; the surrogate settings
+  simcal_emulator.py init    --contract FILE [--plan FILE] --purpose training|held-back --out STATE
+  simcal_emulator.py ask     --state STATE [--n N]            the next evaluations to submit (marked submitted)
+  simcal_emulator.py tell    --state STATE --results FILE     record {run_id: {names, pred, V_MC}}
+  simcal_emulator.py train   --contract FILE [--plan FILE] [--state STATE] [--out MODEL]
+  simcal_emulator.py p6      --contract FILE [--plan FILE] [--names a,b]  |  p6 --input FILE
+  simcal_emulator.py domain  --model MODEL
+  simcal_emulator.py spot-check-plan --training-state STATE --points FILE --seeds FILE --out STATE
+  simcal_emulator.py spot-check      --state STATE --model MODEL --v-data FILE
+FILE is a simcal-contract/1 and a simcal-plan/1, or a simcal-fixture/1 with both; the surrogate settings
 are the plan's design.surrogate (parameters, n_design, held_back, seed, mode interpolate|regression, spot_checks). The
-design points and the held-back set are calib_design.py's (D80). STATE is a calibration-ask-tell/1 state file: one
+design points and the held-back set are simcal_design.py's (D80). STATE is a simcal-ask-tell/1 state file: one
 entry per evaluation with its run_id, parameter point and seeds (common random numbers of the scan, section 6.6).
 train without --state evaluates the training points with the plan's evaluator through ask/tell; with --state it fits
 the completed state. p6 with --contract trains, evaluates the held-back points with full simulation and decides P6
@@ -46,7 +46,7 @@ import sys
 
 try:
     MISSING = None
-    from core.calibration import emulator as EM, evaluator, io, linear
+    from core.simcal import emulator as EM, evaluator, io, linear
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -56,7 +56,7 @@ MODEL_KEYS = ("parameters", "bounds", "points", "values", "length", "nugget")
 def _contract_plan(args):
     contract, plan, _ = io.contract_and_plan(args.contract, args.plan)
     if not isinstance(plan, dict):
-        raise io.InputError("no plan: give --plan or a calibration-fixture/1 with one")
+        raise io.InputError("no plan: give --plan or a simcal-fixture/1 with one")
     return contract, plan
 
 

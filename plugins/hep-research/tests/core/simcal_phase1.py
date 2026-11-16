@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DESIGN_FIXTURE = ROOT / "core" / "calibration" / "data" / "toy_detector_design.json"
+DESIGN_FIXTURE = ROOT / "core" / "simcal" / "data" / "toy_detector_design.json"
 
 
 def toy_design() -> dict:
@@ -28,7 +28,7 @@ def chain_case(nodes: list[dict], observables: list[dict], nominal: dict, params
                     "mechanisms": ["yield"], "samplable": True} for i, nd in enumerate(nodes)]
     edges = [{"from": p, "to": nd["id"]} for nd in nodes for p in nd.get("parents", [])]
     contract = {
-        "schema": "calibration-contract/1", "series": "chain-test", "simulator": "toy-chain",
+        "schema": "simcal-contract/1", "series": "chain-test", "simulator": "toy-chain",
         "stage_graph": {"nodes": graph_nodes, "edges": edges},
         "parameters": [{"name": k, "role": "theta", "nodes": v["nodes"], "sampling_bounds": list(v["bounds"]),
                         "physical_bounds": [v["bounds"][0] - 10, v["bounds"][1] + 10]} for k, v in params.items()],
@@ -46,7 +46,7 @@ def chain_case(nodes: list[dict], observables: list[dict], nominal: dict, params
                              "functional": o.get("functional", "mean"), "tail": o.get("class") == "tail"}
                             for o in observables],
             "nominal": dict(nominal), "param_nodes": {k: v["nodes"] for k, v in params.items()}}
-    plan = {"schema": "calibration-plan/1",
+    plan = {"schema": "simcal-plan/1",
             "kernels": {nd["id"]: {"stored": {"inputs": True, "outputs": True, "steps": nd["kernel"] == "steps"},
                                    "support_declared": True} for nd in nodes},
             "evaluator": {"kind": "chain", "spec": spec}, "seeds": {"nominal": seed, "resample": seed + 1},

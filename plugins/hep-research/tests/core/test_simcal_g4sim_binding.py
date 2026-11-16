@@ -1,7 +1,7 @@
-"""core/calibration/chain, the g4sim binding (simulator calibration phase 3): the node binding (Part B section 11.4
+"""core/simcal/chain, the g4sim binding (simulator calibration phase 3): the node binding (Part B section 11.4
 Table 1) and the candidate methods of Table 2, D75 (k_B: deterministic rerun, no event weights, G4 does not apply), the
 fast_sim_envelope limit (C29, D83 (12)), the misalignment row (D86, D83 (7)), the conditions binding (D87) and the
-binding cases of section 15.3.19. Each negative test has a positive control (the valid fixture, calibration_g4sim_
+binding cases of section 15.3.19. Each negative test has a positive control (the valid fixture, simcal_g4sim_
 fixtures, derives a candidate for every parameter)."""
 from __future__ import annotations
 
@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_g4sim_fixtures as G  # noqa: E402
-from core.calibration import chain  # noqa: E402
-from core.calibration import contract as cc  # noqa: E402
+import simcal_g4sim_fixtures as G  # noqa: E402
+from core.simcal import chain  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
 
 PAR = {p["name"]: i for i, p in enumerate(G.contract()["parameters"])}
 
@@ -171,7 +171,7 @@ class Refusals(unittest.TestCase):
         self.assertEqual(derive(None, p)["status"], "ok")             # control: no alignment parameter
 
     def test_pde_split_parameter_needs_its_declaration(self):
-        """An evaluator binding is the PDE split of section 6.7 (core/calibration/pde_split, WP-E): without the
+        """An evaluator binding is the PDE split of section 6.7 (core/simcal/pde_split, WP-E): without the
         contract's pde_split it has no candidate; with it, re-digitization (control)."""
         c = G.contract()
         c["parameters"].append(G.parameter("pde", "theta", "pde", "evaluator", "/pde"))

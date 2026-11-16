@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """P0, kernel consistency (simulator calibration workflow, Part B section 8.2 note 1, D53; owner of P0).
 
-  calib_kernel_check.py p0 --contract FILE [--plan FILE] [--release FILE] [--points FILE] [--seed S]
+  simcal_kernel_check.py p0 --contract FILE [--plan FILE] [--release FILE] [--points FILE] [--seed S]
 At >= 3 theta' (the worst-ESS point of a P5 scan over the parameters evaluated by a P0 method and the next two scan
 points, unless --points gives a JSON list of theta' objects), the plan's non-full-resimulation prediction is compared with resample + evaluate_from, propagated to
 theta with the design-stage A: |Delta theta_i| <= 0.1 sigma_tot,i^design + z sigma_MC(Delta theta_i), z two-sided
@@ -10,7 +10,7 @@ Bonferroni over d x (number of theta') at alpha = 0.01. Output: one JSON object;
 are wrong), rejected (exit 2), incomplete (exit 3). Results carry provisional-thresholds (sigma_tot^design without
 Sigma_boot, phase 2). With g4sim (phase 3) the section 5.4 spot checks (k_B extremes with the scintillation formula
 downstream, r outside 0.15..1, light-yield extremes) are added to the default points; --points without them is
-rejected (p0.spot_checks_missing, exit 2) before any evaluation. The engine (core/calibration) needs NumPy and SciPy.
+rejected (p0.spot_checks_missing, exit 2) before any evaluation. The engine (core/simcal) needs NumPy and SciPy.
 Phase 1 (section 17); spot checks phase 3.
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ import sys
 
 try:
     MISSING = None
-    from core.calibration import design, evaluator, io, kernel_check, linear
+    from core.simcal import design, evaluator, io, kernel_check, linear
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 

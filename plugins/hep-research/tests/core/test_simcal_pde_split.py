@@ -1,9 +1,9 @@
-"""core/calibration/pde_split (simulator calibration phase 3, WP-E): the PDE split of Part B section 6.7 (decided by the
+"""core/simcal/pde_split (simulator calibration phase 3, WP-E): the PDE split of Part B section 6.7 (decided by the
 author 2026-11-10): routes 2_1, 3 and 1, the route-3 replicas and their energy grid, the split check with its nested pair
-of mapping runs, the contract rules (calib_contract.py) and the plan rules (calib_design.py) of sections 14 and 15.3.19,
+of mapping runs, the contract rules (simcal_contract.py) and the plan rules (simcal_design.py) of sections 14 and 15.3.19,
 the candidate methods (section 11.4 Table 2) and the PDE(E) part of the model identity (section 5.1).
 
-Synthetic: per-photon optics in calibration_pde_fixtures (Geant4 transport NOT run; the section 15.2 items that need it are
+Synthetic: per-photon optics in simcal_pde_fixtures (Geant4 transport NOT run; the section 15.2 items that need it are
 listed in Geant4Items and skipped). Each negative test has a positive control that the same check passes."""
 from __future__ import annotations
 
@@ -19,10 +19,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_g4sim_fixtures as G  # noqa: E402
-import calibration_pde_fixtures as P  # noqa: E402
+import simcal_g4sim_fixtures as G  # noqa: E402
+import simcal_pde_fixtures as P  # noqa: E402
 from contracts.geometry import field_types  # noqa: E402
-from core.calibration import chain, design_g4sim as DG, model_identity as mi, pde_split as S  # noqa: E402
+from core.simcal import chain, design_g4sim as DG, model_identity as mi, pde_split as S  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
 from core.simulation import digitize, efficiency_map as em, rng  # noqa: E402
 
@@ -340,11 +340,11 @@ class SplitCheck(unittest.TestCase):
 
 
 class ContractRules(unittest.TestCase):
-    """Section 6.7 "Rejected" (calib_contract.py, contract error) and section 15.3.19."""
+    """Section 6.7 "Rejected" (simcal_contract.py, contract error) and section 15.3.19."""
 
     def test_valid_declaration(self):
         self.assertEqual(S.contract_findings(contract()), [])
-        from core.calibration import contract as cc
+        from core.simcal import contract as cc
         self.assertFalse({f["code"] for f in cc.check(contract())["findings"]} & {
             "pde_split.tied_property", "pde_split.undeclared"})
 
@@ -361,7 +361,7 @@ class ContractRules(unittest.TestCase):
         c = contract()
         del c["pde_split"]
         self.assertIn("pde_split.undeclared", codes(S.contract_findings(c)))
-        from core.calibration import contract as cc
+        from core.simcal import contract as cc
         self.assertIn("pde_split.undeclared", {f["code"] for f in cc.check(c)["findings"]})
 
     def test_efficiency_one_surfaces(self):
@@ -398,7 +398,7 @@ class ContractRules(unittest.TestCase):
 
 
 class DesignRules(unittest.TestCase):
-    """calib_design.py (remedy level plan): routes, keys, route 3 without photons."""
+    """simcal_design.py (remedy level plan): routes, keys, route 3 without photons."""
 
     def test_route1_where_p_is_theta_and_not_linear(self):
         c = contract()
@@ -495,13 +495,13 @@ class Identity(unittest.TestCase):
 
 
 class Evaluator(unittest.TestCase):
-    """g4sim_calib_eval.py writes p eps_c into the job's efficiencies (route 2_1) or thins per photon (route 1)."""
+    """g4sim_simcal_eval.py writes p eps_c into the job's efficiencies (route 2_1) or thins per photon (route 1)."""
 
     def make(self, route):
         sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
-        import calibration_g4sim_eval_fixtures as GE
-        import g4sim_calib_eval  # noqa: F401  (registers the g4sim evaluator kind)
-        from core.calibration import evaluator
+        import simcal_g4sim_eval_fixtures as GE
+        import g4sim_simcal_eval  # noqa: F401  (registers the g4sim evaluator kind)
+        from core.simcal import evaluator
         plan = GE.plan({"nominal": GE.batch(101, 0, 60, use="fit")})
         plan["evaluator"]["pde"] = {"parameter": "pde", "route": route, "component": 1, "nominal": 1.0}
         return evaluator.make(plan)
@@ -521,9 +521,9 @@ class Evaluator(unittest.TestCase):
         """Route 3 reads the efficiency-1 mapping run's photons.csv: a constant PDE(E) = 0.4 gives exactly the
         prediction of route 2_1 at p = 0.4, and a theta on a table value moves it."""
         sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
-        import calibration_g4sim_eval_fixtures as GE
-        import g4sim_calib_eval  # noqa: F401
-        from core.calibration import evaluator
+        import simcal_g4sim_eval_fixtures as GE
+        import g4sim_simcal_eval  # noqa: F401
+        from core.simcal import evaluator
         ph, pr, emitted, detected = Runs.get("one")
 
         def make(pde):

@@ -1,9 +1,9 @@
-"""Validation (Part B section 9; phase 2, WP4). `calib_validate.py` is its CLI and the sole owner of the validation
+"""Validation (Part B section 9; phase 2, WP4). `simcal_validate.py` is its CLI and the sole owner of the validation
 statistics, C_r^+ on N_d, the declaration checks (a)(b)(c), the decision of bootstrap rank deficiency at opening,
 the toy-replica readiness decision, the minimum numbers of toys, the G5 proportion of cross-validation toys (with
-`calib_design.py` calling it for P7), cross-validation, power and its simultaneous lower bound, the report of k and
+`simcal_design.py` calling it for P7), cross-validation, power and its simultaneous lower bound, the report of k and
 the unused observables, and the records (kappa, decision records, abandonment, power abandonment). The failure-record
-states change in `calib_data.py` (data_release.Ledger.apply_decision) from the decision records written here.
+states change in `simcal_data.py` (data_release.Ledger.apply_decision) from the decision records written here.
 
 Conventions: residuals r_v = y_v - mu_v(beta-hat) in link space for Gaussian rows; S = diag(s_i), s_i = sigma_i^(0)
 the model's data standard deviation at theta_ref without rounding (section 9.2); constraint vectors n_j in the same
@@ -327,17 +327,17 @@ def outcome_of(ev: dict) -> str | None:
 
 
 class DecisionBook:
-    """The decision records of calib_validate (section 9.5): pass, fail, no-testable-direction, abandoned; power
+    """The decision records of simcal_validate (section 9.5): pass, fail, no-testable-direction, abandoned; power
     records and power abandonment. Feeds `data_release.Ledger.apply_decision`."""
 
     def __init__(self, state: dict | None = None):
-        self.state = state or {"schema": "calibration-decisions/1", "kappas": {}, "decisions": [], "power": []}
+        self.state = state or {"schema": "simcal-decisions/1", "kappas": {}, "decisions": [], "power": []}
 
     def register(self, kappa: dict) -> None:
         self.state["kappas"].setdefault(kappa["kappa"], kappa)
 
     def decide_computed(self, ev: dict, ledger=None) -> dict:
-        """The only decision path of calib_validate.py: the outcome follows from the evidence of a computed statistic
+        """The only decision path of simcal_validate.py: the outcome follows from the evidence of a computed statistic
         (T_v or T_cv with its reference, or k = 0), bound to the registered kappa and its alpha; the record stores the
         statistic, k, p, the reference's hash and its ratio-test state."""
         kap = self.state["kappas"].get(ev.get("kappa"))

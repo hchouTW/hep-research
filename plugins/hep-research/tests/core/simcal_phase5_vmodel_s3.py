@@ -1,12 +1,12 @@
 """Study S3 of phase 5 (task card `docs/dev/simulator-calibration/simcal-tasks/phase-5.md`, "S3, from V6 (d)"): the
-recovery of the inferred V_model's f and ell (core/calibration/vmodel_infer.py) over synthetic draws with known truth,
+recovery of the inferred V_model's f and ell (core/simcal/vmodel_infer.py) over synthetic draws with known truth,
 run as a Slurm job array: each task writes the per-draw records of one block of one configuration; the merge
 concatenates them and applies the registered rule (failures are reported, never retuned). Not a unit test module.
 
-  python3 calibration_phase5_vmodel_s3.py --list                        the task table (JSON)
-  python3 calibration_phase5_vmodel_s3.py --task K --out DIR            one task of the array
-  python3 calibration_phase5_vmodel_s3.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
-  python3 calibration_phase5_vmodel_s3.py --local --out FILE            every configuration at tiny sizes (`smoke`)
+  python3 simcal_phase5_vmodel_s3.py --list                        the task table (JSON)
+  python3 simcal_phase5_vmodel_s3.py --task K --out DIR            one task of the array
+  python3 simcal_phase5_vmodel_s3.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
+  python3 simcal_phase5_vmodel_s3.py --local --out FILE            every configuration at tiny sizes (`smoke`)
 
 A draw: link-space residual r = J theta + delta + e with delta ~ N(0, R(f, ell)) (squared-exponential kernel per
 component, C = 0 between components), e ~ N(0, sigma^2 I), J = [1, z] integrated with a flat prior (theta), the prior
@@ -37,16 +37,16 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
+sys.path.insert(0, str(HERE))                      # simcal_phase5_taskenv
 
-from core.calibration import io  # noqa: E402
+from core.simcal import io  # noqa: E402
 
-import calibration_phase5_taskenv as TE  # noqa: E402
-from core.calibration import vmodel_infer as VI  # noqa: E402
+import simcal_phase5_taskenv as TE  # noqa: E402
+from core.simcal import vmodel_infer as VI  # noqa: E402
 
 FLAGS = ["synthetic", "provisional-thresholds"]
-FILES = ["core/calibration/vmodel_infer.py", "core/calibration/likelihood.py", "core/calibration/linear.py",
-         "tests/core/calibration_phase5_vmodel_s3.py", "docs/dev/simulator-calibration/simcal-tasks/phase-5.md"]
+FILES = ["core/simcal/vmodel_infer.py", "core/simcal/likelihood.py", "core/simcal/linear.py",
+         "tests/core/simcal_phase5_vmodel_s3.py", "docs/dev/simulator-calibration/simcal-tasks/phase-5.md"]
 SEED0 = 20261405
 REPS = 1000
 BLOCK = 100

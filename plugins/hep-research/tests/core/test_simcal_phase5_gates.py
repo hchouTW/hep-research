@@ -1,4 +1,4 @@
-"""The phase-5 gate harness (tests/core/calibration_phase5_gates.py): its judging rules on recorded outcomes, the static
+"""The phase-5 gate harness (tests/core/simcal_phase5_gates.py): its judging rules on recorded outcomes, the static
 diff and registry comparison, the rerun dispatcher (dry: files only, nothing submitted) and merge judge, and the
 byte-identity comparison with its mask. Each negative with a positive control."""
 from __future__ import annotations
@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase5_gates as G  # noqa: E402
+import simcal_phase5_gates as G  # noqa: E402
 
 REPO = ROOT.parents[1]
 # The static item reads the repository: the plugin folder at <repo>/plugins/hep-research next to a .git, with the
@@ -54,14 +54,14 @@ class Negatives(unittest.TestCase):
         self.assertEqual((j["passed"], j["status"]), (False, "lists-not-filled"))
 
     def test_an_unloadable_name_fails(self):
-        outs = G.run_tests(["test_calibration_phase5_gates.Negatives.test_does_not_exist"])
-        self.assertFalse(G.judge_tests("x", "p", {"test_calibration_phase5_gates.Negatives.test_does_not_exist":
+        outs = G.run_tests(["test_simcal_phase5_gates.Negatives.test_does_not_exist"])
+        self.assertFalse(G.judge_tests("x", "p", {"test_simcal_phase5_gates.Negatives.test_does_not_exist":
                                                   "negative"}, outs)["passed"])
 
     def test_tests_are_grouped_by_module(self):
-        self.assertEqual(G._module("tests.contracts.test_calibration_schemas"), "tests.contracts.test_calibration_schemas")
-        self.assertEqual(G._module(G.SCRIPTS + "Phase1Scripts.test_x"), "tests.skills.test_calib_scripts")
-        self.assertEqual(G._module("test_calibration_design.P5"), "test_calibration_design")
+        self.assertEqual(G._module("tests.contracts.test_simcal_schemas"), "tests.contracts.test_simcal_schemas")
+        self.assertEqual(G._module(G.SCRIPTS + "Phase1Scripts.test_x"), "tests.skills.test_simcal_scripts")
+        self.assertEqual(G._module("test_simcal_design.P5"), "test_simcal_design")
 
     def test_every_listed_name_loads(self):
         """The negatives lists (while filled) and the earlier unit-test lists of item 3: every name loads."""
@@ -77,7 +77,7 @@ class Static(unittest.TestCase):
     ENTRY = {"card": "simcal-tasks/phase-2.md", "sha256": "a" * 64, "reason": "r"}
 
     def test_unchanged_passes(self):
-        self.assertTrue(G.judge_static(["plugins/hep-research/core/calibration/fit.py"], [self.ENTRY],
+        self.assertTrue(G.judge_static(["plugins/hep-research/core/simcal/fit.py"], [self.ENTRY],
                                        [dict(self.ENTRY)])["passed"])
 
     def test_a_protected_file_or_a_changed_registry_entry_fails(self):
@@ -118,7 +118,7 @@ class Rerun(unittest.TestCase):
             self.assertTrue((self.d / f).is_file(), f)
         p0 = (self.d / "p0.sbatch").read_text()
         self.assertIn("--array=0-68", p0)
-        self.assertIn("calibration_exhaustive.py --item", p0)
+        self.assertIn("simcal_exhaustive.py --item", p0)
         self.assertIn("--array=0-32", (self.d / "p2g1.sbatch").read_text())
         p3 = (self.d / "p3.sbatch").read_text()
         self.assertIn("SIMCAL_G4_PRODUCTS=" + G.G4_PRODUCTS, p3)
@@ -126,19 +126,19 @@ class Rerun(unittest.TestCase):
         self.assertIn("sbatch --array=0-9 --mem=8000M p3.sbatch 27164", submit)
         self.assertIn("sbatch --array=0-15,123 --mem=8000M p3.sbatch", submit)
         misc = (self.d / "misc.sbatch").read_text()
-        for cmd in ("calibration_phase1_gates.py --gate agreement", "calibration_phase2_gates.py --gate segmented",
-                    "calibration_phase2_gates.py --gate shift"):
+        for cmd in ("simcal_phase1_gates.py --gate agreement", "simcal_phase2_gates.py --gate segmented",
+                    "simcal_phase2_gates.py --gate shift"):
             self.assertIn(cmd, misc)
-        self.assertIn("calibration_phase4_gates.py --run", (self.d / "login.sh").read_text())
+        self.assertIn("simcal_phase4_gates.py --run", (self.d / "login.sh").read_text())
         with self.assertRaises(ValueError):
             G.dispatch(self.d, "abc", "/wt")
 
     def test_the_registered_sizes_match_the_earlier_harnesses(self):
-        import calibration_exhaustive as EX
-        import calibration_phase2_gates as P2G
+        import simcal_exhaustive as EX
+        import simcal_phase2_gates as P2G
         self.assertEqual(len(EX.GATE_SHARDS), G.P0_ITEMS)
         self.assertEqual(len(P2G.GATE1T_TASKS), G.P2_GATE1_TASKS)
-        import calibration_phase3_gates as P3G
+        import simcal_phase3_gates as P3G
         self.assertEqual(P3G.TASKS[27164][0], "zdc_fit_g4")
         self.assertEqual(len(P3G.TASKS), 27174)
 
@@ -204,9 +204,9 @@ class Identity(unittest.TestCase):
         self.assertEqual(doc["phase_base"], G.PHASE_BASE)
         cases = doc["cases"]
         scripts = {c["script"] for c in cases.values() if c["kind"] == "cli"}
-        for s in ("calib_contract.py", "calib_chain.py", "calib_design.py", "calib_kernel_check.py", "calib_fit.py",
-                  "calib_identify.py", "calib_closure.py", "calib_validate.py", "calib_propagate.py",
-                  "calib_use.py", "calib_deps.py", "calib_contrib.py", "calib_emulator.py", "calib_reweight.py"):
+        for s in ("simcal_contract.py", "simcal_chain.py", "simcal_design.py", "simcal_kernel_check.py", "simcal_fit.py",
+                  "simcal_identify.py", "simcal_closure.py", "simcal_validate.py", "simcal_propagate.py",
+                  "simcal_use.py", "simcal_deps.py", "simcal_contrib.py", "simcal_emulator.py", "simcal_reweight.py"):
             self.assertIn(s, scripts)
         self.assertTrue(any(c["kind"] == "engine" for c in cases.values()))
 

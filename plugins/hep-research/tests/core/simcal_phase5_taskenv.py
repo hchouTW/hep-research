@@ -1,6 +1,6 @@
 """The task environment of a merged phase-5 study file (A33, review F10): the interpreter, NumPy and file hashes each
 Slurm task recorded in its own `provenance`, so a merged file states what the tasks ran with, not only the merging
-process's `provenance`. Used by the merges of calibration_phase5_{g4l,pooling_s2,vmodel_s3,tv}.py; reported, never
+process's `provenance`. Used by the merges of simcal_phase5_{g4l,pooling_s2,vmodel_s3,tv}.py; reported, never
 a part of a study's registered decision rule."""
 from __future__ import annotations
 

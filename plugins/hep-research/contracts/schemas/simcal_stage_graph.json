@@ -44,7 +44,7 @@
      "mechanisms": {
       "type": "array",
       "items": {
-       "$ref": "calibration_mechanism.json"
+       "$ref": "simcal_mechanism.json"
       }
      },
      "post_hoc_correction": {
@@ -80,5 +80,5 @@
    }
   }
  },
- "$comment": "calibration-stage-graph/1 (section 3.1): the semantic layer of the stage graph; must be a DAG split at every injection point (calib_chain.py)."
+ "$comment": "simcal-stage-graph/1 (section 3.1): the semantic layer of the stage graph; must be a DAG split at every injection point (simcal_chain.py)."
 }

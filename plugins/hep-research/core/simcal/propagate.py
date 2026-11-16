@@ -1,5 +1,5 @@
 """Propagation by the principal components of the joint posterior (Part B section 10.4; phase 2, WP6).
-`calib_propagate.py` is its CLI; the conflict rules over packages are `deps.py`'s (calib_deps).
+`simcal_propagate.py` is its CLI; the conflict rules over packages are `deps.py`'s (simcal_deps).
 
 Export: theta = theta-hat + G_xi xi + G_zeta (zeta - zeta-hat) + G_s (phi_s - phi_s0) / sigma_phi_s, xi ~ N(0, I),
 G_zeta = Sigma_theta_zeta Sigma_zeta_zeta^-1 (one joint regression over zeta = (eta, phi_shared)), G_xi from the
@@ -96,7 +96,7 @@ def marginal_regressions(Sigma: np.ndarray, i_theta, i_eta, i_phi) -> np.ndarray
 # S9 schemas leave source_of_facts optional, so the export writes it itself (accepted 2026-11-09): the key
 # `calibration_result` holds the result's hash, effective grade, uses, flags and the stated use of the record (A21:
 # "exported records state the effective grade and use"); each written pointer maps to "calibration-result:<hash>", the
-# template's own entries stay for the values not written. calib_use.py checks it offline (use.check_export).
+# template's own entries stay for the values not written. simcal_use.py checks it offline (use.check_export).
 EXPORT_SCHEMAS = {"condition-snapshot/1": "condition-snapshot", "alignment-overlay/1": "alignment-overlay"}
 SOURCE_KEY = "calibration_result"
 SOURCE_PREFIX = "calibration-result:"
@@ -117,7 +117,7 @@ def export_g4sim(template: dict, result: dict, contract: dict, use: str, values:
     for). `values` maps a parameter name to its value; default the result's `beta_hat`. Refuses (PropagationError) a
     result without its hash or with no grade (incomplete cannot be cited), a binding outside Table 2 or a pointer that
     does not resolve, a missing value, a template with no theta bound to it, and a use the result's grade and flags do
-    not allow (section 10.2; calib_use.py export checks the written record again)."""
+    not allow (section 10.2; simcal_use.py export checks the written record again)."""
     kind = EXPORT_SCHEMAS.get(str(template.get("schema")))
     if kind is None:
         raise PropagationError("export.schema", f"exports are {sorted(EXPORT_SCHEMAS)}, not {template.get('schema')!r}")

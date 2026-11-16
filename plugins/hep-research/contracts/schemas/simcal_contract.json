@@ -22,7 +22,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "calibration-contract/1"
+   "const": "simcal-contract/1"
   },
   "series": {
    "type": "string",
@@ -37,7 +37,7 @@
    "minLength": 1
   },
   "stage_graph": {
-   "$ref": "calibration_stage_graph.json"
+   "$ref": "simcal_stage_graph.json"
   },
   "parameters": {
    "type": "array",
@@ -70,7 +70,7 @@
       "minItems": 1
      },
      "mechanism": {
-      "$ref": "calibration_mechanism.json"
+      "$ref": "simcal_mechanism.json"
      },
      "physical_bounds": {
       "type": "array",
@@ -95,7 +95,7 @@
       ]
      },
      "index": {
-      "$ref": "calibration_parameter_index.json"
+      "$ref": "simcal_parameter_index.json"
      },
      "spec_pointer": {
       "type": "string",
@@ -217,7 +217,7 @@
       ]
      },
      "functional": {
-      "$ref": "calibration_functional.json"
+      "$ref": "simcal_functional.json"
      },
      "range": {
       "enum": [
@@ -253,7 +253,7 @@
       "type": "object"
      },
      "control_variable": {
-      "$ref": "calibration_control_variable.json"
+      "$ref": "simcal_control_variable.json"
      },
      "sample": {
       "type": "string",
@@ -354,7 +354,7 @@
      "degeneracy_hints": {
       "type": "array",
       "items": {
-       "$ref": "calibration_degeneracy_mode.json"
+       "$ref": "simcal_degeneracy_mode.json"
       }
      }
     }
@@ -396,7 +396,7 @@
   "references": {
    "type": "array",
    "items": {
-    "$ref": "calibration_reference.json"
+    "$ref": "simcal_reference.json"
    }
   },
   "estimators": {
@@ -691,7 +691,7 @@
   },
   "effects": {
    "type": "array",
-   "$comment": "section 7.1, 10.5: the effects of the contribution decomposition, each with its value after removal (calib_contrib.py; core/calibration/contrib.py)",
+   "$comment": "section 7.1, 10.5: the effects of the contribution decomposition, each with its value after removal (simcal_contrib.py; core/simcal/contrib.py)",
    "items": {
     "type": "object",
     "required": [
@@ -706,7 +706,7 @@
      },
      "removal": {
       "type": "object",
-      "$comment": "{parameter: value after removal}, at least one (calib_contrib checks)",
+      "$comment": "{parameter: value after removal}, at least one (simcal_contrib checks)",
       "additionalProperties": {
        "type": "number"
       }
@@ -716,7 +716,7 @@
   },
   "pde_split": {
    "type": "object",
-   "$comment": "section 6.7 PDE split (g4sim): {parameters, model: scale | table, applied_as, table: {energy_eV, value}, angle_dependent, ties, sensor_surfaces, map_mode}; core/calibration/pde_split.contract_findings"
+   "$comment": "section 6.7 PDE split (g4sim): {parameters, model: scale | table, applied_as, table: {energy_eV, value}, angle_dependent, ties, sensor_surfaces, map_mode}; core/simcal/pde_split.contract_findings"
   },
   "pooling": {
    "type": "object",
@@ -768,8 +768,8 @@
      "$comment": "per pooled theta (index.conditioning partial-pooling): the link space of the pooling (default identity) and the upper end of the tau_pool search range in link units (default: the link-space width of the sampling range)"
     }
    },
-   "$comment": "section 3.7 partial pooling (phase 5, approval A25 (6)): theta_s ~ N(theta_bar, tau_pool^2) per pooled theta in link space, tau_pool by REML; core/calibration/pooling.contract_findings"
+   "$comment": "section 3.7 partial pooling (phase 5, approval A25 (6)): theta_s ~ N(theta_bar, tau_pool^2) per pooled theta in link space, tau_pool by REML; core/simcal/pooling.contract_findings"
   }
  },
- "$comment": "calibration-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. calib_contract.py check applies the rules of section 5.2."
+ "$comment": "simcal-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. simcal_contract.py check applies the rules of section 5.2."
 }

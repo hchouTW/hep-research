@@ -3,51 +3,51 @@
 the Sobol design points and the P6 held-back set, P2, P5 with feasibility and the final method, the support condition
 and the applicability of the mandatory gates).
 
-  calib_design.py points        --contract FILE [--plan FILE] --n N --seed S [--held-back H]
-  calib_design.py p2            --contract FILE
-  calib_design.py applicability --plan FILE [--held-back H] [--shift-phi]
-  calib_design.py linearize     --contract FILE [--plan FILE] [--release FILE]
-  calib_design.py support       --contract FILE [--plan FILE] [--parameter P ...]
-  calib_design.py p5            --contract FILE [--plan FILE] [--release FILE] [--items ess,v_mc_diagonal,...]
+  simcal_design.py points        --contract FILE [--plan FILE] --n N --seed S [--held-back H]
+  simcal_design.py p2            --contract FILE
+  simcal_design.py applicability --plan FILE [--held-back H] [--shift-phi]
+  simcal_design.py linearize     --contract FILE [--plan FILE] [--release FILE]
+  simcal_design.py support       --contract FILE [--plan FILE] [--parameter P ...]
+  simcal_design.py p5            --contract FILE [--plan FILE] [--release FILE] [--items ess,v_mc_diagonal,...]
                                 [--declared-methods]
-  calib_design.py methods       --contract FILE [--plan FILE]
-Phase 2 (sections 2.1 (iii), 6.6, 8.2 notes 3 and 5, 9.3, 9.4; the engine in core/calibration/design_noise.py):
-  calib_design.py sigma-boot    --contract FILE --plan FILE --values FILE [--release FILE] [--n-t 10] [--k-b 6]
+  simcal_design.py methods       --contract FILE [--plan FILE]
+Phase 2 (sections 2.1 (iii), 6.6, 8.2 notes 3 and 5, 9.3, 9.4; the engine in core/simcal/design_noise.py):
+  simcal_design.py sigma-boot    --contract FILE --plan FILE --values FILE [--release FILE] [--n-t 10] [--k-b 6]
                                 [--seed S] [--sigma-data FILE]   Sigma_boot by toys; with --sigma-data its P5 item
-  calib_design.py bj            --points FILE [--bound B]          P5's b_J item ({J, W, K: [K_l], sigma_tot} per point)
-  calib_design.py p7            --input FILE                       P7 at the design stage (analytic or toy path)
-  calib_design.py folds         --contract FILE --folds FILE [--plan FILE --values FILE]
+  simcal_design.py bj            --points FILE [--bound B]          P5's b_J item ({J, W, K: [K_l], sigma_tot} per point)
+  simcal_design.py p7            --input FILE                       P7 at the design stage (analytic or toy path)
+  simcal_design.py folds         --contract FILE --folds FILE [--plan FILE --values FILE]
                                                                    the fold-split rules, and P3 of each training fold
-  calib_design.py practices     --plan FILE                        rejected toy, bootstrap and G8 practices
-  calib_design.py seeds         --uses FILE                        independence of seeds across uses
-Phase 3 (sections 6.1, 6.6, 14.1 with g4sim; the engine in core/calibration/design_g4sim.py):
-  calib_design.py g4sim-support --contract FILE --plan FILE --documents FILE   support and recording levels (section 6.1)
-  calib_design.py intervals     --plan FILE      event intervals, run_seed, replica 0, seed blocks, one digitization path
-  calib_design.py digi-jobs     --plan FILE --documents FILE [--contract FILE] every g4sim-digi-job/1 of the plan
-  calib_design.py pde-split     --contract FILE --plan FILE --documents FILE   the PDE split of section 6.7 (routes,
+  simcal_design.py practices     --plan FILE                        rejected toy, bootstrap and G8 practices
+  simcal_design.py seeds         --uses FILE                        independence of seeds across uses
+Phase 3 (sections 6.1, 6.6, 14.1 with g4sim; the engine in core/simcal/design_g4sim.py):
+  simcal_design.py g4sim-support --contract FILE --plan FILE --documents FILE   support and recording levels (section 6.1)
+  simcal_design.py intervals     --plan FILE      event intervals, run_seed, replica 0, seed blocks, one digitization path
+  simcal_design.py digi-jobs     --plan FILE --documents FILE [--contract FILE] every g4sim-digi-job/1 of the plan
+  simcal_design.py pde-split     --contract FILE --plan FILE --documents FILE   the PDE split of section 6.7 (routes,
                                 route 1, keys, EFFICIENCY > 0, photons.csv, energy grid, scan surfaces, split check)
-Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the engine in core/calibration/design_map.py):
-  calib_design.py theta-noise --input FILE   P5's theta-noise item: {surrogate (record), points: [{theta, V_G}],
+Phase 3 efficiency-map items (section 6.7, 8.2 note 3, D28, D83 (1), D84; the engine in core/simcal/design_map.py):
+  simcal_design.py theta-noise --input FILE   P5's theta-noise item: {surrogate (record), points: [{theta, V_G}],
                                              sigma_tot: {p: s}, U: [U_j] | Sigma, seeding}
-  calib_design.py map-g6-size --input FILE   D84: {J, V_G, maps: {component: map}, J_eps, R, n_toys, alpha?, seed?}
-  calib_design.py map-plan    --plan FILE [--theta-noise FILE] [--contract FILE]   the mapping-run seeds (and the
+  simcal_design.py map-g6-size --input FILE   D84: {J, V_G, maps: {component: map}, J_eps, R, n_toys, alpha?, seed?}
+  simcal_design.py map-plan    --plan FILE [--theta-noise FILE] [--contract FILE]   the mapping-run seeds (and the
                                              section 6.6 interval check), the rejected map practices, the fixed-map U
                                              construction, and (with --contract) the Gaussian-block rule
-  calib_design.py map-primaries --primaries CSV CSV [...]   a shared-seed scan's primaries.csv agree event by event
-  calib_design.py map-job-route --documents FILE --rows FILE --replica R [--readout NAME]   the job route with
+  simcal_design.py map-primaries --primaries CSV CSV [...]   a shared-seed scan's primaries.csv agree event by event
+  simcal_design.py map-job-route --documents FILE --rows FILE --replica R [--readout NAME]   the job route with
                                              g4sim's replica r reproduces map_replica = r (documents {pipeline, map})
-  calib_design.py map-schema  --map FILE     a built map against efficiency-map/1, exempting form.uniformity (D83 (1))
+  simcal_design.py map-schema  --map FILE     a built map against efficiency-map/1, exempting form.uniformity (D83 (1))
 --documents: {detector, request, run, pipeline, maps: {name: map}, conditions}, each an object or a path relative to it;
 for pde-split {detector, detectors: {name}, maps: {name}, photons: {name}, primaries: {name}, pipelines: [..], rows:
 {name: edep_visible_ly_split rows}, readouts, build_environment} (detector specs and CSV files read as text).
-FILE is a calibration-contract/1 and a calibration-plan/1, or a calibration-fixture/1 with both; --release a
+FILE is a simcal-contract/1 and a simcal-plan/1, or a simcal-fixture/1 with both; --release a
 calibration data release whose `systematic` component gives the eta columns (the sealed components are never read).
 Output: one JSON object; status passed/ok (exit 0), failed (exit 1: P2, P5 or support failed, remedy level in the
 findings), rejected (exit 2: input error, e.g. a P5 request on a tail-type functional, approval A7), incomplete (exit
 3: phase-2 or phase-3 content, or no evaluator of the plan's kind). p5 first decides the final method (section 3.6
 step 2: an infeasible reweighting moves to the next tier) and judges the P5 items with it; --declared-methods judges
 the plan's declared methods as they are. Results that use f = 0.1 or sigma_tot^design
-carry provisional-thresholds. The engine (core/calibration) needs NumPy and SciPy. Phase 1
+carry provisional-thresholds. The engine (core/simcal) needs NumPy and SciPy. Phase 1
 (section 17).
 """
 from __future__ import annotations
@@ -72,7 +72,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import design, design_g4sim as DG, design_map as DM, design_noise as DN, evaluator, io, \
+    from core.simcal import design, design_g4sim as DG, design_map as DM, design_noise as DN, evaluator, io, \
         linear, problems
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
@@ -125,7 +125,7 @@ def main(argv=None) -> int:
     sub.add_parser("map-g6-size").add_argument("--input", required=True)
     mp = sub.add_parser("map-plan")
     mp.add_argument("--plan", required=True)
-    mp.add_argument("--theta-noise", help="the result of calib_design.py theta-noise for an independent-seed scan")
+    mp.add_argument("--theta-noise", help="the result of simcal_design.py theta-noise for an independent-seed scan")
     mp.add_argument("--contract", help="the contract whose observable blocks the map-varies-with-theta rule reads")
     sub.add_parser("map-primaries").add_argument("--primaries", nargs="+", required=True)
     jr = sub.add_parser("map-job-route")
@@ -248,7 +248,7 @@ def main(argv=None) -> int:
     def pde():
         from pathlib import Path
         from contracts.geometry import field_types
-        from core.calibration import pde_split
+        from core.simcal import pde_split
         spec = io.load_object(args.documents)
         base = Path(args.documents).resolve().parent
 
@@ -285,7 +285,7 @@ def main(argv=None) -> int:
         if args.cmd == "applicability":
             plan = io.load(args.plan) if args.plan else None
             if not isinstance(plan, dict):
-                raise io.InputError("--plan: a calibration-plan/1 object")
+                raise io.InputError("--plan: a simcal-plan/1 object")
             return {"status": "ok", **design.applicability(plan.get("methods") or {}, args.held_back, args.shift_phi)}
         contract, plan, extras = io.contract_and_plan(args.contract, args.plan)
         try:
@@ -347,7 +347,7 @@ def _csv_rows(path):
 def map_items(args, documents) -> dict:
     try:
         if args.cmd == "theta-noise":
-            from core.calibration import emulator
+            from core.simcal import emulator
             x = io.load_object(args.input, ("surrogate", "points", "sigma_tot"))
             pts = [{"theta": {k: float(v) for k, v in p["theta"].items()}, "V_G": np.asarray(p["V_G"], float)}
                    for p in x["points"]]

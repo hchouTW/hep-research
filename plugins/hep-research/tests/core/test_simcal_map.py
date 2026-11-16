@@ -1,6 +1,6 @@
-"""The efficiency-map phi of Part B section 6.7 (phase 3, WP-D): native bases and U (calib_propagate), joint-pattern
-replicas and the analytic covariance (D28), the map term U(theta) phi_map of the likelihood (calib_likelihood), and the
-calib_design items: the theta-noise item of P5, the D84 G6 size check, the seeds of the mapping runs and the rejected
+"""The efficiency-map phi of Part B section 6.7 (phase 3, WP-D): native bases and U (simcal_propagate), joint-pattern
+replicas and the analytic covariance (D28), the map term U(theta) phi_map of the likelihood (simcal_likelihood), and the
+simcal_design items: the theta-noise item of P5, the D84 G6 size check, the seeds of the mapping runs and the rejected
 practices, the primaries and job-route checks, and the D83 (1) schema exemption. Sections 15.2, 15.3.1 (P5), 15.3.19,
 15.3a. Synthetic fixtures with g4sim's map builder and replica law; Geant4 not run. Each negative test has its positive
 control."""
@@ -18,17 +18,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import numpy as np  # noqa: E402
 
-import calibration_g4sim_fixtures as G  # noqa: E402
-import calibration_map_fixtures as MF  # noqa: E402
+import simcal_g4sim_fixtures as G  # noqa: E402
+import simcal_map_fixtures as MF  # noqa: E402
 
 from contracts.schema import validate  # noqa: E402
-from core.calibration import design_g4sim as DG  # noqa: E402
-from core.calibration import design_map as DM  # noqa: E402
-from core.calibration import emulator as EM  # noqa: E402
-from core.calibration import fit as FIT  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
-from core.calibration import map_basis as MB  # noqa: E402
-from core.calibration import map_term as MT  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
+from core.simcal import design_map as DM  # noqa: E402
+from core.simcal import emulator as EM  # noqa: E402
+from core.simcal import fit as FIT  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
+from core.simcal import map_basis as MB  # noqa: E402
+from core.simcal import map_term as MT  # noqa: E402
 from core.simulation import digitize, efficiency_map as em, response, rng  # noqa: E402
 
 MAP = G.efficiency_map()
@@ -360,7 +360,7 @@ class TestSection152FixedMap(unittest.TestCase):
         self.assertLess(cover["without"] / n, 0.55)
 
 
-# ------------------------------------------------------------------ calib_design items
+# ------------------------------------------------------------------ simcal_design items
 class TestThetaNoise(unittest.TestCase):
     """Section 15.3.1 (P5): in the mode where the map varies with theta, P5 fails when s_i > 0.25 or kappa_i > 0.05 at
     the worst point, computed with Sigma_jl = 0 for independent seeds and in the fallback."""

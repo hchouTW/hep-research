@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The joint-pattern input of a shared-seed theta scan (simulator calibration Part B section 6.7, D28; phase 3, WP-D): join each mapping
-run's primaries.csv and photons.csv into {event: bin} and {event: channel}, the arguments of core/calibration/map_basis.pattern_table.
+run's primaries.csv and photons.csv into {event: bin} and {event: channel}, the arguments of core/simcal/map_basis.pattern_table.
 
 The CSV layouts are those g4sim_efficiency_map.py build reads (g4sim S7): a primaries.csv row is (event, energy, x, y, z, ...) with the
 emission point in world mm; a photons.csv row is (event, detector, copy, ..., transit_ns at column 4, ...), the channel being
@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import g4sim_efficiency_map as builder  # noqa: E402
 import g4sim_simulate as simulate_new  # noqa: E402
-from core.calibration import design_map, map_basis  # noqa: E402
+from core.simcal import design_map, map_basis  # noqa: E402
 from core.simulation import efficiency_map  # noqa: E402
 
 

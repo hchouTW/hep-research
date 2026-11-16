@@ -1,4 +1,4 @@
-"""Shift mode of phi: P8 and G9 (Part B sections 5.5, 8.2 notes 10, 7.5; phase 2, WP3). `calib_shift.py` is the CLI.
+"""Shift mode of phi: P8 and G9 (Part B sections 5.5, 8.2 notes 10, 7.5; phase 2, WP3). `simcal_shift.py` is the CLI.
 
 Shift-mode phi are fixed at their nominal values in the fit and enter through refits at phi_l = +-1, +-2 in their
 unit-normal coordinates (section 5.5: they must already be whitened, block-independent of the profile-mode phi;

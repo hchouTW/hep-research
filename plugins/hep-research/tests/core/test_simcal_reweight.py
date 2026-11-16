@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration import kernel_check, reweight  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal import kernel_check, reweight  # noqa: E402
 
 
 def chi2_p(a, b):
@@ -37,7 +37,7 @@ class Formula(unittest.TestCase):
         np.testing.assert_allclose(np.exp(lw), np.array([0.5, 0.2]) / den / 0.5)
 
     def test_json_output_has_no_nan(self):
-        from core.calibration import io
+        from core.simcal import io
         self.assertEqual(io.jsonable({"a": float("nan"), "b": np.float64("inf"), "c": [1.5]}),
                          {"a": None, "b": "inf", "c": [1.5]})              # review F15
 

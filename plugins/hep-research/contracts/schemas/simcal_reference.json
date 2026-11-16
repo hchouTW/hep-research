@@ -115,5 +115,5 @@
    }
   }
  },
- "$comment": "calibration-reference/1 (section 3.4): a known quantity on an edge. A mid-chain injection declares its conversion relation (parameters listed as phi); 'inside' is accepted by the schema so the checker can name an unsplit node."
+ "$comment": "simcal-reference/1 (section 3.4): a known quantity on an edge. A mid-chain injection declares its conversion relation (parameters listed as phi); 'inside' is accepted by the schema so the checker can name an unsplit node."
 }

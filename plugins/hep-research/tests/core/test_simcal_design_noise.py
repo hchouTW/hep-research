@@ -1,4 +1,4 @@
-"""The phase-2 items of calib_design (Part B sections 2.1, 6.6, 8.2 note 3, 9.3, 9.4; phase 2, WP4)."""
+"""The phase-2 items of simcal_design (Part B sections 2.1, 6.6, 8.2 note 3, 9.3, 9.4; phase 2, WP4)."""
 from __future__ import annotations
 
 import sys
@@ -10,9 +10,9 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import design_noise as DN  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
+from core.simcal import design_noise as DN  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
 
 
 class JacobianBias(unittest.TestCase):

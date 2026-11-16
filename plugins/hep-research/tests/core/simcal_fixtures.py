@@ -1,5 +1,5 @@
 """A valid phase-0 calibration contract on the toy detector, with its data releases (all synthetic), for the tests of
-core/calibration and the calib_*.py scripts. Each negative test changes one thing in a deep copy."""
+core/simcal and the simcal_*.py scripts. Each negative test changes one thing in a deep copy."""
 from __future__ import annotations
 
 import copy
@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = ROOT / "core" / "calibration" / "data"
+FIXTURES = ROOT / "core" / "simcal" / "data"
 
 
 def h(text: str) -> str:
@@ -41,7 +41,7 @@ def contract() -> dict:
             p["source"] = "external measurement of the material thickness (synthetic)"
         params.append(p)
     return {
-        "schema": "calibration-contract/1", "series": "toy-holdout", "simulator": "toy-detector",
+        "schema": "simcal-contract/1", "series": "toy-holdout", "simulator": "toy-detector",
         "stage_graph": t["stage_graph"], "parameters": params, "references": t["references"],
         "models": {"enumerated": [{"id": "nominal"}], "absorbed": []},
         "observables": [observable("energy_mean", "calibration", "cal_sample"),
@@ -67,7 +67,7 @@ def contract() -> dict:
 
 def release(name, units, obs, samples, has_value=None):
     has_value = has_value or {o: True for o in obs}
-    return {"schema": "calibration-data-release/1", "status": ["synthetic"], "submitter": "test fixture",
+    return {"schema": "simcal-data-release/1", "status": ["synthetic"], "submitter": "test fixture",
             "lineage": {"raw_units": list(units)},
             "observables": [{"name": o} for o in obs],
             "samples": samples,

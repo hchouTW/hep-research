@@ -1,5 +1,5 @@
 """Efficiency-map bases of the simulator calibration workflow (Part B section 6.7 "Three layers of MC error", "Two
-efficiency map modes", D28, D84; section 14 `calib_propagate.py`; section 15.3a; phase 3, WP-D).
+efficiency map modes", D28, D84; section 14 `simcal_propagate.py`; section 15.3a; phase 3, WP-D).
 
 - Native coordinates: (component, bin, channel), one mapped `efficiency-map/1` per scintillation component, its bins
   in order and its `channels` in order; "not detected" is implied. The centre is g4sim's nominal map eps_0 = k/n
@@ -11,7 +11,7 @@ efficiency map modes", D28, D84; section 14 `calib_propagate.py`; section 15.3a;
   the basis version.
 - U of a study: from predictions at the R replicas (digitized through `g4sim-digi-job/1` or `map_replica`), U = M V with
   M the replica differences of mu divided by sqrt(R - 1) (a secant for mu not linear in eps); or, for an observable
-  the plan records as linear in eps, the linear construction U = J B_map (decided 2026-11-09; calib_design.py rejects
+  the plan records as linear in eps, the linear construction U = J B_map (decided 2026-11-09; simcal_design.py rejects
   it for any other observable).
 - Joint-pattern replicas (map varies with theta, shared seed, D28): the pattern table of the scan (bin of the emission
   point and the category at every design point), the scan key, the draws G_rp ~ Gamma(m_p) from SubStream(key, p, 0)
@@ -151,7 +151,7 @@ def u_digitized(predictions, basis: dict) -> np.ndarray:
 
 def u_linear(J_eps, basis: dict) -> np.ndarray:
     """U = J B_map with J = d mu / d eps at eps_0 (n_obs x n_coords): only for observables recorded as linear in eps
-    (calib_design.py `u_construction_findings`)."""
+    (simcal_design.py `u_construction_findings`)."""
     J = np.atleast_2d(np.asarray(J_eps, float))
     if J.shape[1] != basis["B_map"].shape[0]:
         raise BasisError("basis.jacobian", f"J has {J.shape[1]} columns, the basis {basis['B_map'].shape[0]} coordinates")

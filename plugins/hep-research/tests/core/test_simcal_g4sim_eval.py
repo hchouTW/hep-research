@@ -1,10 +1,10 @@
-"""The g4sim evaluator adapters/geant4/assets/g4sim_calib_eval.py (Part B sections 6.1, 6.6, 7.1, 11.4, 15.2,
+"""The g4sim evaluator adapters/geant4/assets/g4sim_simcal_eval.py (Part B sections 6.1, 6.6, 7.1, 11.4, 15.2,
 15.3.19; phase 3, WP-B) on synthetic g4sim products, with g4sim's Python layers and no Geant4: registration with the
 engine, node-0 reweighting with source-density/1 and the external-source rejection (section 17, S3/S4), the Birks
 deterministic rerun from edep_by_dedx_class with its bound (D75), re-digitization through digitize.py on the
-g4sim-digi-job/1 path with a job that passes calib_design's job check, common random numbers (section 15.2), independent
+g4sim-digi-job/1 path with a job that passes simcal_design's job check, common random numbers (section 15.2), independent
 batches, and resimulation requests through ask/tell. Items that need a Geant4 run read the products of campaign p3-g4
-under $SIMCAL_G4_PRODUCTS (calibration_phase3_g4.calo_evidence) and are skipped, saying so, when it is unset."""
+under $SIMCAL_G4_PRODUCTS (simcal_phase3_g4.calo_evidence) and are skipped, saying so, when it is unset."""
 from __future__ import annotations
 
 import copy
@@ -21,17 +21,17 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_fixtures as F  # noqa: E402
-import calibration_g4sim_eval_fixtures as G  # noqa: E402
-import calibration_phase3_g4 as P3  # noqa: E402
-import g4sim_calib_eval as E  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+import simcal_g4sim_eval_fixtures as G  # noqa: E402
+import simcal_phase3_g4 as P3  # noqa: E402
+import g4sim_simcal_eval as E  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
 
-from core.calibration import contract as C  # noqa: E402
-from core.calibration import design_g4sim as DG  # noqa: E402
-from core.calibration import evaluator  # noqa: E402
+from core.simcal import contract as C  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
+from core.simcal import evaluator  # noqa: E402
 
-EVAL = ROOT / "adapters" / "geant4" / "assets" / "g4sim_calib_eval.py"
+EVAL = ROOT / "adapters" / "geant4" / "assets" / "g4sim_simcal_eval.py"
 N = 300
 
 
@@ -43,7 +43,7 @@ def make(batches=None, **kw):
 class Registration(unittest.TestCase):
     def test_registered_by_the_adapter_only(self):
         self.assertIsInstance(make(), E.G4simEvaluator)
-        code = (f"import sys; sys.path.insert(0, {str(ROOT)!r})\nfrom core.calibration import evaluator\ntry:\n"
+        code = (f"import sys; sys.path.insert(0, {str(ROOT)!r})\nfrom core.simcal import evaluator\ntry:\n"
                 " evaluator.make({'evaluator': {'kind': 'g4sim'}})\nexcept evaluator.EvaluatorUnavailable:\n"
                 " print('unavailable')")
         out = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True, timeout=60)
@@ -167,7 +167,7 @@ class Redigitization(unittest.TestCase):
         self.assertEqual(r0["pred"][r0["names"].index("vis_mean")], r1["pred"][r1["names"].index("vis_mean")])
 
     def test_effects_off_sets_the_removal_values_last(self):
-        """Section 10.5 (calib_contrib on g4sim plans): effects_off {effect: {parameter: value after removal}} gives the
+        """Section 10.5 (simcal_contrib on g4sim plans): effects_off {effect: {parameter: value after removal}} gives the
         prediction at those values, applied after theta; an unknown parameter or two values for one parameter are
         refused; without effects_off the prediction is unchanged (control)."""
         e = make()

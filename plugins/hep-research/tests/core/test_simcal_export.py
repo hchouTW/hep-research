@@ -13,11 +13,11 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_fixtures as F  # noqa: E402
-import calibration_g4sim_fixtures as G4  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+import simcal_g4sim_fixtures as G4  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from core.calibration import deps, model_identity, use  # noqa: E402
-from core.calibration import propagate as P  # noqa: E402
+from core.simcal import deps, model_identity, use  # noqa: E402
+from core.simcal import propagate as P  # noqa: E402
 from core.geometry import alignment  # noqa: E402
 from core.simulation import conditions  # noqa: E402
 
@@ -33,9 +33,9 @@ def inputs(**kw):
 
 
 def result(beta=None, **kw):
-    """A finalized calibration-result/1 (result_sha256 after version_id) graded by use.judge."""
+    """A finalized simcal-result/1 (result_sha256 after version_id) graded by use.judge."""
     j = use.judge(inputs(**kw), [])
-    r = {"schema": "calibration-result/1", "contract_sha256": F.h("c"), "data_sha256": [F.CAL, F.VAL],
+    r = {"schema": "simcal-result/1", "contract_sha256": F.h("c"), "data_sha256": [F.CAL, F.VAL],
          "plan_sha256": F.h("p"), "contract_versions": [F.h("c")], "engine_version": "0.1.0",
          "beta_hat": beta or {"threshold_0": 2.25, "shift_x": 0.0375},
          "grade": {k: j[k] for k in ("own_grade", "effective_grade", "uses", "flags", "variation_flags")},
@@ -119,7 +119,7 @@ class Export(unittest.TestCase):
 
 class CheckExport(unittest.TestCase):
     """Section 15.3.19: an exported condition-snapshot/1 or alignment-overlay/1 without the calibration result's hash in
-    source_of_facts is rejected by calib_use.py (section 10.4); A21 19-g6: the use matrix on the exported record."""
+    source_of_facts is rejected by simcal_use.py (section 10.4); A21 19-g6: the use matrix on the exported record."""
 
     def setUp(self):
         self.r = result()
@@ -168,7 +168,7 @@ class CheckExport(unittest.TestCase):
 
     def test_use_matrix(self):
         """Section 15.3.17 "projection used for a production correction is rejected": the export refuses a use the
-        result does not allow (review F8), and calib_use rejects a record whose stated use was edited to one; production
+        result does not allow (review F8), and simcal_use rejects a record whose stated use was edited to one; production
         simulation accepts only validated-in-scope (section 10.4); calibrated-unvalidated is accepted for systematic
         variations; a use-blocking flag removes publication. Controls: the allowed uses are exported and accepted."""
         def refused(tpl, res, use):

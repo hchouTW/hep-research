@@ -14,11 +14,11 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
 
-import calibration_zdc_fixture as Z  # noqa: E402
-import g4sim_calib_eval  # noqa: E402,F401  (registers the g4sim evaluator)
+import simcal_zdc_fixture as Z  # noqa: E402
+import g4sim_simcal_eval  # noqa: E402,F401  (registers the g4sim evaluator)
 import numpy as np  # noqa: E402
 
-from core.calibration import chain, design, evaluator  # noqa: E402
+from core.simcal import chain, design, evaluator  # noqa: E402
 
 N = 400
 CANDIDATES = {"parameters": {"birks": [{"method": "rerun"}, {"method": "resimulation"}]}}   # section 11.4 Table 2
@@ -70,7 +70,7 @@ class BirksDiscretization(unittest.TestCase):
         self.assertGreater(up[0], mid[0])
         self.assertLess(down[0], mid[0])
         np.testing.assert_allclose(np.asarray(ev.evaluate(pt)["pred"]), mid)    # the hook leaves no state behind
-        with self.assertRaises(g4sim_calib_eval.DG.CheckError):
+        with self.assertRaises(g4sim_simcal_eval.DG.CheckError):
             ev.birks_bound_shift(pt, 2)
 
     def test_the_downward_shift_never_makes_a_visible_energy_negative(self):
@@ -79,7 +79,7 @@ class BirksDiscretization(unittest.TestCase):
         ev._bound_sign = -1
         try:
             rows = [(60, 0.5)]                       # (dE/dx class, energy): a high-dE/dx class, bound >> visible
-            sim = g4sim_calib_eval.simulate
+            sim = g4sim_simcal_eval.simulate
             self.assertLess(sim.reweighted(rows, 0.4) - sim.reweighting_bound(rows, 0.4), 0.0)   # the case exists
             self.assertEqual(ev._kb_visible(rows, 0.4), 0.0)
         finally:

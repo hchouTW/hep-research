@@ -1,5 +1,5 @@
 {
- "$comment": "calibration-functional/1 (section 3.3): the seven classes of functionals of the response distribution; the link is chosen by range, not by class.",
+ "$comment": "simcal-functional/1 (section 3.3): the seven classes of functionals of the response distribution; the link is chosen by range, not by class.",
  "enum": [
   "location",
   "core-width",

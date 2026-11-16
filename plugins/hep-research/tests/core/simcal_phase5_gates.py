@@ -12,22 +12,22 @@ Items:
    its card registered it, driving the earlier harnesses unchanged (nothing is submitted); `--merge-rerun DIR` judges
    each earlier item by its own registered rule. Numerical differences from the recorded evidence are reported, not
    judged.
-4. `default_off_identity`: the outputs of the engine and of `calib_*.py` on a fixed set of phase-0..4 inputs, captured
+4. `default_off_identity`: the outputs of the engine and of `simcal_*.py` on a fixed set of phase-0..4 inputs, captured
    as golden JSON at the phase-5 base (`--capture-golden`, run once, before any WP merges), are byte-identical at the
    gate commit except the fields listed in MASKED_KEYS. Since A33 (review F3) also the `p5base_*` cases of
-   `calibration_phase5_identity_cases.py` over the phase-5-modified default-off branches (holdout pieces and toys,
+   `simcal_phase5_identity_cases.py` over the phase-5-modified default-off branches (holdout pieces and toys,
    the ToyProblem validation and replica paths, EvaluatorProblem.reference, identify.p3, V_model components), whose
    goldens are that file run against a `git archive` of the phase-5 base (`--capture-base-cases`); a case whose code
    changed since its capture (SHA-256) differs.
 
 Usage (from a clean worktree at the gate commit):
-  python -I tests/core/calibration_phase5_gates.py --run --out FILE                items 1, 2, 4 (login host, minutes)
-  python -I tests/core/calibration_phase5_gates.py --dispatch DIR --commit SHA --worktree WT     item 3: write scripts
-  python -I tests/core/calibration_phase5_gates.py --merge-rerun DIR --out FILE                  item 3: judge
-  python -I tests/core/calibration_phase5_gates.py --units KEY --out FILE    an earlier unit-test item (Slurm task)
-  python -I tests/core/calibration_phase5_gates.py --capture-golden          item 4: golden capture (phase-5 base only)
-  python -I tests/core/calibration_phase5_gates.py --capture-base-cases      item 4: the p5base_* goldens (A33, F3)
-  python -I tests/core/calibration_phase5_gates.py --list
+  python -I tests/core/simcal_phase5_gates.py --run --out FILE                items 1, 2, 4 (login host, minutes)
+  python -I tests/core/simcal_phase5_gates.py --dispatch DIR --commit SHA --worktree WT     item 3: write scripts
+  python -I tests/core/simcal_phase5_gates.py --merge-rerun DIR --out FILE                  item 3: judge
+  python -I tests/core/simcal_phase5_gates.py --units KEY --out FILE    an earlier unit-test item (Slurm task)
+  python -I tests/core/simcal_phase5_gates.py --capture-golden          item 4: golden capture (phase-5 base only)
+  python -I tests/core/simcal_phase5_gates.py --capture-base-cases      item 4: the p5base_* goldens (A33, F3)
+  python -I tests/core/simcal_phase5_gates.py --list
 Every result `synthetic` where it uses fixtures."""
 from __future__ import annotations
 
@@ -47,25 +47,25 @@ ROOT = Path(__file__).resolve().parents[2]            # plugin root
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-from core.calibration import io  # noqa: E402
+from core.simcal import io  # noqa: E402
 
-# calibration_phase3_gates is imported only where its merge is needed: its imports register the g4sim evaluator kind,
-# which changes what an earlier unit test expects (test_calibration_toy: an unknown kind "g4sim" is unavailable).
+# simcal_phase3_gates is imported only where its merge is needed: its imports register the g4sim evaluator kind,
+# which changes what an earlier unit test expects (test_simcal_toy: an unknown kind "g4sim" is unavailable).
 
 LABEL = "synthetic"
 PHASE_BASE = "c7e5a610"            # the phase-5 base (card): origin/main at release 0.67.0
 UNIT_RULE = ("every listed test passes (a negative test passing means its negative case is caught and its positive "
              "control passes); any skip, failure or error fails the item; every listed name must load; an empty "
              "list fails")
-M = "test_calibration_"
-SCRIPTS = "tests.skills.test_calib_scripts."
+M = "test_simcal_"
+SCRIPTS = "tests.skills.test_simcal_scripts."
 PLUGIN = "plugins/hep-research/"     # repository-relative prefix of the plugin
 SIMCAL_DOCS = "docs/dev/simulator-calibration/"
 
 # ------------------------------------------------------------------ item 1: negatives (placeholders, filled later)
 # TODO(main session, after WP-Q, WP-R and WP-S merge): fill each list with {test id: "negative" | "positive"}; the
 # card registers the lists before the gate run. While a list is empty the item fails (status `lists-not-filled`).
-L, Q, V = "test_calibration_learned.", "test_calibration_pooling.", "test_calibration_vmodel_infer."
+L, Q, V = "test_simcal_learned.", "test_simcal_pooling.", "test_simcal_vmodel_infer."
 G4L: dict = {               # section 15.3.1 G4-L, section 15.3.16 and the A25 (1) boundary (WP-R)
     L + "G4L.test_correct_ratio_passes": "positive",
     L + "G4L.test_15_3_1_no_cross_fitting": "negative",
@@ -94,7 +94,7 @@ POOLING: dict = {           # section 15.3.18 partial pooling in A25 (6)'s readi
     Q + "Reml": "positive",
     Q + "JointFit": "positive",
     # A26 (1): the grade, the joint holdout and the gates of pooled fits (WP-Q2)
-    "test_calibration_use.PartialPoolingFlag": "negative",
+    "test_simcal_use.PartialPoolingFlag": "negative",
     Q + "PooledGrade": "negative",
     Q + "PooledHoldout": "negative",
     Q + "PooledP2": "negative",
@@ -143,7 +143,7 @@ def _ids(suite) -> list:
 
 
 def run_tests(ids: list) -> dict:
-    """{test id: outcome} of the given names, in this process; the same runner as calibration_phase3_gates.run_tests
+    """{test id: outcome} of the given names, in this process; the same runner as simcal_phase3_gates.run_tests
     (phases 3 and 4), kept here so that running tests does not import that harness (see above)."""
     loader = unittest.TestLoader()
     outcomes: dict = {}
@@ -178,8 +178,8 @@ def negatives_item() -> dict:
 
 
 # ------------------------------------------------------------------ item 2: prior_gates_static
-PROTECTED = tuple([PLUGIN + f"tests/core/calibration_phase{k}_gates.py" for k in (1, 2, 3, 4)]
-                  + [PLUGIN + "tests/core/calibration_exhaustive.py"]
+PROTECTED = tuple([PLUGIN + f"tests/core/simcal_phase{k}_gates.py" for k in (1, 2, 3, 4)]
+                  + [PLUGIN + "tests/core/simcal_exhaustive.py"]
                   + [PLUGIN + SIMCAL_DOCS + f"simcal-tasks/phase-{k}.md" for k in range(5)]
                   + [PLUGIN + SIMCAL_DOCS + f"simcal-gates/phase-{k}.md" for k in range(5)])
 REGISTRY = PLUGIN + SIMCAL_DOCS + "simcal-task-registry.json"
@@ -256,7 +256,7 @@ P0_NAMED = {M + "chain.ReferenceCoverage.test_15_3_1_p4_subgraph": "negative",
             M + "chain.Fixtures.test_15_3_18_p4_both_modules": "positive",
             M + "data.Lineage.test_15_3a_reformatting_does_not_reset_reads": "positive",
             M + "deps.Versions.test_15_3a_rebuild_in_acyclic_order": "positive",
-            "tests.contracts.test_calibration_schemas": "positive"}
+            "tests.contracts.test_simcal_schemas": "positive"}
 P0_FIXTURES = {M + "chain.Fixtures": "positive", SCRIPTS + "Scripts.test_calib_chain": "positive"}
 P1_GATE1 = {M + "preflight.A0.test_linearity_example": "negative",
             SCRIPTS + "Phase1Scripts.test_calib_contract_preflight": "negative",
@@ -268,10 +268,10 @@ P1_GATE1 = {M + "preflight.A0.test_linearity_example": "negative",
             M + "reweight.Formula.test_w_is_one_without_proposal_at_theta0": "negative",
             M + "reweight.AgainstRerun": "positive",
             M + "design.Applicability": "positive",
-            "test_calibration_toy": "positive",
+            "test_simcal_toy": "positive",
             M + "preflight.D37": "negative",
             M + "design.ReviewFixes": "positive", M + "kernel_check.ReviewFixes": "positive",
-            "test_calibration_linear": "positive", "test_calibration_reweight": "positive",
+            "test_simcal_linear": "positive", "test_simcal_reweight": "positive",
             SCRIPTS + "Phase1Scripts": "positive"}
 UNIT_LISTS = {"p0_named": ("phase 0 card item 2: the named cases of section 15.3 and the P4 negative test", P0_NAMED),
               "p0_fixtures": ("phase 0 card item 3: the three fixtures derive candidate methods and reachability",
@@ -292,14 +292,14 @@ RECORDED = {"p0_appendix_c": CAMPAIGNS + "phase0-appendix-c-2/gate-summary.json"
             "p3_gate_e": CAMPAIGNS + "p3-gates-e/merged-E.json",
             "p4_gate": CAMPAIGNS + "p4-gates/gate-3.json"}
 # the small Slurm array "misc": index -> (key, command relative to the plugin root; {out} the output file)
-MISC = [("p0_named", "tests/core/calibration_phase5_gates.py --units p0_named --out {out}"),
-        ("p0_fixtures", "tests/core/calibration_phase5_gates.py --units p0_fixtures --out {out}"),
-        ("p1_gate1", "tests/core/calibration_phase5_gates.py --units p1_gate1 --out {out}"),
-        ("p1_gate2", "tests/core/calibration_phase1_gates.py --gate agreement --out {out}"),
-        ("p2_gate2", "tests/core/calibration_phase2_gates.py --gate segmented --out {out}"),
-        ("p2_gate3", "tests/core/calibration_phase2_gates.py --gate shift --out {out}")]
-P0_ITEMS = 69                  # calibration_exhaustive.GATE_SHARDS
-P2_GATE1_TASKS = 33            # calibration_phase2_gates.GATE1T_TASKS
+MISC = [("p0_named", "tests/core/simcal_phase5_gates.py --units p0_named --out {out}"),
+        ("p0_fixtures", "tests/core/simcal_phase5_gates.py --units p0_fixtures --out {out}"),
+        ("p1_gate1", "tests/core/simcal_phase5_gates.py --units p1_gate1 --out {out}"),
+        ("p1_gate2", "tests/core/simcal_phase1_gates.py --gate agreement --out {out}"),
+        ("p2_gate2", "tests/core/simcal_phase2_gates.py --gate segmented --out {out}"),
+        ("p2_gate3", "tests/core/simcal_phase2_gates.py --gate shift --out {out}")]
+P0_ITEMS = 69                  # simcal_exhaustive.GATE_SHARDS
+P2_GATE1_TASKS = 33            # simcal_phase2_gates.GATE1T_TASKS
 P3_ARRAYS = [("0-15,123", "8000M", 0), ("16-122", "4000M", 0), ("0-9", "8000M", 27164)]   # part E (card, record)
 
 SBATCH = """#!/bin/bash
@@ -313,7 +313,7 @@ SBATCH = """#!/bin/bash
 #SBATCH --array={array}
 #SBATCH -o {log}/task_%A_%a.log
 #SBATCH --export=NONE
-# simcal phase 5, gate item 3 (prior_gates_rerun): {what}. Written by calibration_phase5_gates.py --dispatch; run from
+# simcal phase 5, gate item 3 (prior_gates_rerun): {what}. Written by simcal_phase5_gates.py --dispatch; run from
 # the clean worktree at the phase-5 gate commit; the earlier harness unchanged.
 set -euo pipefail
 TASK=$((SLURM_ARRAY_TASK_ID + ${{1:-0}}))
@@ -343,7 +343,7 @@ def dispatch(out: Path, commit: str, worktree: str, python: str = NODE_PY,
     scripts = {
         "p0.sbatch": dict(common, name="p5-rerun-p0", mem="1000M", time="00:20:00", array=f"0-{P0_ITEMS - 1}",
                           log=out / "p0/logs", what="phase 0 Appendix C campaign (69 items, card test design item 1)",
-                          body=f'"$PY" -I tests/core/calibration_exhaustive.py --item "$TASK" '
+                          body=f'"$PY" -I tests/core/simcal_exhaustive.py --item "$TASK" '
                                f'--out {out}/p0/out/item-"$TASK".json'),
         "misc.sbatch": dict(common, name="p5-rerun-misc", mem="6000M", time="03:55:00", array=f"0-{len(MISC) - 1}",
                             log=out / "misc/logs",
@@ -354,12 +354,12 @@ def dispatch(out: Path, commit: str, worktree: str, python: str = NODE_PY,
         "p2g1.sbatch": dict(common, name="p5-rerun-p2g1", mem="6000M", time="03:55:00",
                             array=f"0-{P2_GATE1_TASKS - 1}", log=out / "p2g1/logs",
                             what="phase 2 gate 1 on the toy detector (33 tasks)",
-                            body=f'"$PY" -I tests/core/calibration_phase2_gates.py --gate1-toy-task "$TASK" '
+                            body=f'"$PY" -I tests/core/simcal_phase2_gates.py --gate1-toy-task "$TASK" '
                                  f'--out {out}/p2g1/out'),
         "p3.sbatch": dict(common, name="p5-rerun-p3", mem="4000M", time="03:55:00", array="16-122",
                           log=out / "p3/logs", what="phase 3 gate part E (tasks 0-123 and 27164-27173)",
                           extra_env=f"\nexport SIMCAL_G4_PRODUCTS={g4_products}",
-                          body=f'"$PY" -I tests/core/calibration_phase3_gates.py --task "$TASK" --out {out}/p3/out'),
+                          body=f'"$PY" -I tests/core/simcal_phase3_gates.py --task "$TASK" --out {out}/p3/out'),
     }
     for name, kw in scripts.items():
         (out / name).write_text(SBATCH.format(**kw))
@@ -367,13 +367,13 @@ def dispatch(out: Path, commit: str, worktree: str, python: str = NODE_PY,
               "set -euo pipefail", f"cd {out}", "sbatch p0.sbatch", "sbatch misc.sbatch", "sbatch p2g1.sbatch"]
     submit += [f"sbatch --array={a} --mem={m} p3.sbatch" + (f" {off}" if off else "") for a, m, off in P3_ARRAYS]
     (out / "submit.sh").write_text("\n".join(submit) + "\n")
-    me = "tests/core/calibration_phase5_gates.py"
+    me = "tests/core/simcal_phase5_gates.py"
     login = ["#!/bin/bash", "# item 3 on the login host: phase 4 (card: about 1 minute), then the merge after every array",
              "set -euo pipefail", f'WT={worktree}', f'COMMIT={commit}',
              '[ "$(git -C "$WT" rev-parse HEAD)" = "$COMMIT" ] || { echo "worktree moved"; exit 9; }',
              '[ -z "$(git -C "$WT" status --porcelain)" ] || { echo "worktree dirty"; exit 9; }',
              'cd "$WT/plugins/hep-research"', "export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1",
-             f'"${{HEP_RESEARCH_PYTHON:-python3}}" -I tests/core/calibration_phase4_gates.py --run --out {out}/p4/gate.json'
+             f'"${{HEP_RESEARCH_PYTHON:-python3}}" -I tests/core/simcal_phase4_gates.py --run --out {out}/p4/gate.json'
              ' || true',
              f'SIMCAL_G4_PRODUCTS={g4_products} "${{HEP_RESEARCH_PYTHON:-python3}}" -I {me} --merge-rerun {out} '
              f'--out {out}/rerun-merged.json']
@@ -463,16 +463,16 @@ def p0_guard(log_dir: Path, commit: str | None, n_items: int = P0_ITEMS) -> dict
 
 def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
     """Judge each earlier item from the outputs in d (layout of `dispatch`), by its own registered rule."""
-    import calibration_exhaustive as EX
-    import calibration_phase2_gates as P2G
-    import calibration_phase3_gates as P3G
+    import simcal_exhaustive as EX
+    import simcal_phase2_gates as P2G
+    import simcal_phase3_gates as P3G
     man = _load(d / "dispatch.json") or {}
     commit = man.get("commit")
     items: dict = {}
     s = EX.summarize(d / "p0/out")
     prov = s.get("provenance") or {}
     guard = p0_guard(d / "p0/logs", commit)          # A33 (review F11): the clean status from the jobs' guard lines
-    items["p0_appendix_c"] = {"rule": "calibration_exhaustive --summarize status ok (phase 0 card test design item 1)",
+    items["p0_appendix_c"] = {"rule": "simcal_exhaustive --summarize status ok (phase 0 card test design item 1)",
                               "status": s["status"], "ok": s["status"] == "ok",
                               "commits": [prov.get("commit")] if prov else [], "dirty": not guard["clean"],
                               "guard": guard, "reported": _reported("p0_appendix_c", s)}
@@ -486,9 +486,9 @@ def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
         items[key] = {"rule": UNIT_RULE, "status": "passed" if j["passed"] else "failed", "ok": j["passed"],
                       "not_run": j["not_run"], "failed": [r["test"] for r in j["tests"] if r["status"] not in
                                                           ("caught", "passed")], "commits": [c], "dirty": dirty}
-    for key, rule in (("p1_gate2", "phase 1 gate 2: calibration_phase1_gates --gate agreement status passed"),
-                      ("p2_gate2", "phase 2 gate 2: calibration_phase2_gates --gate segmented status passed"),
-                      ("p2_gate3", "phase 2 gate 3: calibration_phase2_gates --gate shift status passed")):
+    for key, rule in (("p1_gate2", "phase 1 gate 2: simcal_phase1_gates --gate agreement status passed"),
+                      ("p2_gate2", "phase 2 gate 2: simcal_phase2_gates --gate segmented status passed"),
+                      ("p2_gate3", "phase 2 gate 3: simcal_phase2_gates --gate shift status passed")):
         rec = _load(d / "misc/out" / f"{key}.json")
         c, dirty = _commit_of(rec)
         items[key] = {"rule": rule, "status": (rec or {}).get("status", "missing"),
@@ -496,7 +496,7 @@ def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
                       "commits": [c] if rec else [], "dirty": dirty, "reported": _reported(key, rec)}
     work_dir = Path(tempfile.mkdtemp(prefix="p5-merge-"))
     g1 = P2G.gate1_toy_merge(d / "p2g1/out", work_dir / "p2g1.json")
-    items["p2_gate1"] = {"rule": "phase 2 gate 1: calibration_phase2_gates --gate1-toy-merge status passed (18 items, "
+    items["p2_gate1"] = {"rule": "phase 2 gate 1: simcal_phase2_gates --gate1-toy-merge status passed (18 items, "
                                  "every task, one clean commit)", "status": g1["status"], "ok": g1["status"] == "passed",
                          "missing_tasks": g1["missing_tasks"], "commits": g1["commits"], "dirty": g1["dirty"],
                          "reported": _reported("p2_gate1", g1)}
@@ -508,7 +508,7 @@ def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
         if saved is None:
             os.environ.pop("SIMCAL_G4_PRODUCTS", None)
     tell = (m3.get("products") or {}).get("tell_sha256") or ""
-    items["p3_gate_e"] = {"rule": "phase 3 gate part E: calibration_phase3_gates --merge gate_status passed, with "
+    items["p3_gate_e"] = {"rule": "phase 3 gate part E: simcal_phase3_gates --merge gate_status passed, with "
                                   f"SIMCAL_G4_PRODUCTS at the recorded products (tell.json {G4_TELL_SHA256_PREFIX}...)",
                           "status": m3["gate_status"], "ok": m3["gate_status"] == "passed"
                           and tell.startswith(G4_TELL_SHA256_PREFIX), "products": m3.get("products"),
@@ -519,7 +519,7 @@ def merge_rerun(d: Path, out_file: Path | None = None) -> dict:
                           "dirty": m3["dirty"], "reported": _reported("p3_gate_e", m3)}
     p4 = _load(d / "p4/gate.json")
     c, dirty = _commit_of(p4)
-    items["p4_gate"] = {"rule": "phase 4: calibration_phase4_gates --run gate_status passed",
+    items["p4_gate"] = {"rule": "phase 4: simcal_phase4_gates --run gate_status passed",
                         "status": (p4 or {}).get("gate_status", "missing"),
                         "ok": bool(p4) and p4.get("gate_status") == "passed", "commits": [c] if p4 else [],
                         "dirty": dirty, "reported": _reported("p4_gate", p4)}
@@ -586,7 +586,7 @@ def mask(text: str, keys: tuple | None = None) -> str:
 
 
 S_DIR = ROOT / "skills" / "hep-statistics" / "scripts"
-FIXTURE_DIR = ROOT / "core" / "calibration" / "data"
+FIXTURE_DIR = ROOT / "core" / "simcal" / "data"
 
 
 def _cli(script: str, args: list, files: dict, outputs=()) -> dict:
@@ -596,12 +596,12 @@ def _cli(script: str, args: list, files: dict, outputs=()) -> dict:
 def golden_inputs() -> dict:
     """The fixed set of phase-0..4 inputs (built once, at the capture, from the earlier phases' fixtures; stored in
     GOLDEN so the comparison does not depend on fixture code that a later commit may change)."""
-    import calibration_fixtures as F
-    import calibration_g4sim_fixtures as G4
-    import calibration_phase1 as H
-    import test_calibration_contrib as TC
-    import test_calibration_export as EXT
-    from core.calibration import data_release as observed
+    import simcal_fixtures as F
+    import simcal_g4sim_fixtures as G4
+    import simcal_phase1 as H
+    import test_simcal_contrib as TC
+    import test_simcal_export as EXT
+    from core.simcal import data_release as observed
     fx = {n: json.loads((FIXTURE_DIR / f"{n}.json").read_text()) for n in ("ecal", "rich", "tracker",
                                                                              "toy_detector_design",
                                                                              "toy_detector_subgraph")}
@@ -631,109 +631,109 @@ def golden_inputs() -> dict:
     exp_res, exp_con = EXT.result(), EXT.contract()
     cases = {
         # contract check (phase 0)
-        "contract_check_accepted": _cli("calib_contract.py", ["check", "--contract", "c.json", "--release", "cal.json",
+        "contract_check_accepted": _cli("simcal_contract.py", ["check", "--contract", "c.json", "--release", "cal.json",
                                                               "--release", "val.json"],
                                         {"c.json": good, "cal.json": rels[F.CAL], "val.json": rels[F.VAL]}),
-        "contract_check_rejected": _cli("calib_contract.py", ["check", "--contract", "c.json", "--release", "cal.json",
+        "contract_check_rejected": _cli("simcal_contract.py", ["check", "--contract", "c.json", "--release", "cal.json",
                                                               "--release", "val.json"],
                                         {"c.json": bad, "cal.json": rels[F.CAL], "val.json": rels[F.VAL]}),
         # chain, P4 (phase 0)
-        **{f"chain_{n}_{s}": _cli("calib_chain.py", [s, "--contract", f"{n}.json"], {f"{n}.json": fx[n]})
+        **{f"chain_{n}_{s}": _cli("simcal_chain.py", [s, "--contract", f"{n}.json"], {f"{n}.json": fx[n]})
            for n in ("ecal", "rich", "tracker") for s in ("candidates", "p4")},
-        "chain_subgraph_p4_failed": _cli("calib_chain.py", ["p4", "--contract", "sub.json"], {"sub.json": sub}),
+        "chain_subgraph_p4_failed": _cli("simcal_chain.py", ["p4", "--contract", "sub.json"], {"sub.json": sub}),
         # design, P2, P5, support, methods (phase 1 and 2)
-        "design_p2": _cli("calib_design.py", ["p2", "--contract", "fx.json"], {"fx.json": fx["toy_detector_design"]}),
-        "design_points": _cli("calib_design.py", ["points", "--contract", "fx.json", "--n", 8, "--seed", 1,
+        "design_p2": _cli("simcal_design.py", ["p2", "--contract", "fx.json"], {"fx.json": fx["toy_detector_design"]}),
+        "design_points": _cli("simcal_design.py", ["points", "--contract", "fx.json", "--n", 8, "--seed", 1,
                                                   "--held-back", 2], {"fx.json": fx["toy_detector_design"]}),
-        "design_applicability": _cli("calib_design.py", ["applicability", "--plan", "m.json"],
+        "design_applicability": _cli("simcal_design.py", ["applicability", "--plan", "m.json"],
                                      {"m.json": {"methods": {"a": "rerun"}}}),
-        "design_p5_declared_failed": _cli("calib_design.py", ["p5", "--contract", "c.json", "--plan", "p.json",
+        "design_p5_declared_failed": _cli("simcal_design.py", ["p5", "--contract", "c.json", "--plan", "p.json",
                                                               "--items", "ess", "--declared-methods"],
                                           {"c.json": gc, "p.json": gp}),
-        "design_p5_final_method": _cli("calib_design.py", ["p5", "--contract", "c.json", "--plan", "p.json", "--items",
+        "design_p5_final_method": _cli("simcal_design.py", ["p5", "--contract", "c.json", "--plan", "p.json", "--items",
                                                            "ess"], {"c.json": gc, "p.json": gp}),
-        "design_methods_poisson": _cli("calib_design.py", ["methods", "--contract", "c.json", "--plan", "p.json"],
+        "design_methods_poisson": _cli("simcal_design.py", ["methods", "--contract", "c.json", "--plan", "p.json"],
                                        {"c.json": pc, "p.json": pp}),
-        "design_support_missing": _cli("calib_design.py", ["support", "--contract", "c.json", "--plan", "p.json"],
+        "design_support_missing": _cli("simcal_design.py", ["support", "--contract", "c.json", "--plan", "p.json"],
                                        {"c.json": uc, "p.json": up}),
-        "design_linearize": _cli("calib_design.py", ["linearize", "--contract", "c.json", "--plan", "p.json"],
+        "design_linearize": _cli("simcal_design.py", ["linearize", "--contract", "c.json", "--plan", "p.json"],
                                  {"c.json": lc, "p.json": lp}),
-        "design_bj": _cli("calib_design.py", ["bj", "--points", "pts.json"],
+        "design_bj": _cli("simcal_design.py", ["bj", "--points", "pts.json"],
                           {"pts.json": [{"J": J, "W": W, "K": zero, "sigma_tot": [1.0, 1.0]}]}),
-        "design_p7": _cli("calib_design.py", ["p7", "--input", "p7.json"],
+        "design_p7": _cli("simcal_design.py", ["p7", "--input", "p7.json"],
                           {"p7.json": {"mode": "none", "k0": 3, "path": "analytic"}}),
-        "design_practices": _cli("calib_design.py", ["practices", "--plan", "plan.json"],
+        "design_practices": _cli("simcal_design.py", ["practices", "--plan", "plan.json"],
                                  {"plan.json": {"toys": {"construction": "philox-only"}}}),
         # P0, weights (phase 1)
-        "kernel_p0_failed": _cli("calib_kernel_check.py", ["p0", "--contract", "c.json", "--plan", "p.json", "--points",
+        "kernel_p0_failed": _cli("simcal_kernel_check.py", ["p0", "--contract", "c.json", "--plan", "p.json", "--points",
                                                            "pts.json", "--seed", 11],
                                  {"c.json": uc, "p.json": up, "pts.json": pts}),
-        "kernel_p0_passed": _cli("calib_kernel_check.py", ["p0", "--contract", "c.json", "--plan", "p.json", "--points",
+        "kernel_p0_passed": _cli("simcal_kernel_check.py", ["p0", "--contract", "c.json", "--plan", "p.json", "--points",
                                                            "pts.json", "--seed", 11],
                                  {"c.json": mc, "p.json": mp, "pts.json": pts}),
-        "reweight_weights": _cli("calib_reweight.py", ["weights", "--contract", "c.json", "--plan", "p.json", "--theta",
+        "reweight_weights": _cli("simcal_reweight.py", ["weights", "--contract", "c.json", "--plan", "p.json", "--theta",
                                                        "t.json"], {"c.json": gc, "p.json": gp, "t.json": {"mu": 0.5}}),
         # P6 on arrays (phase 3)
-        "emulator_p6_failed": _cli("calib_emulator.py", ["p6", "--input", "a.json"],
+        "emulator_p6_failed": _cli("simcal_emulator.py", ["p6", "--input", "a.json"],
                                    {"a.json": {"v_data": [1.0], "points": [{"delta_m": [5.0], "cov_delta": [[1.0]]}]}}),
-        "emulator_p6_passed": _cli("calib_emulator.py", ["p6", "--input", "a.json"],
+        "emulator_p6_passed": _cli("simcal_emulator.py", ["p6", "--input", "a.json"],
                                    {"a.json": {"v_data": [1.0], "points": [{"delta_m": [0.5], "cov_delta": [[1.0]]}]}}),
         # the fit with G1 on the toy detector, G3, G5, G7, k* (phase 2); G2, G4, G6 at engine level below
-        "fit_toy": _cli("calib_fit.py", ["fit", "--contract", "c.json", "--plan", "p.json", "--values", "v.json"],
+        "fit_toy": _cli("simcal_fit.py", ["fit", "--contract", "c.json", "--plan", "p.json", "--values", "v.json"],
                         {"c.json": toy_c, "p.json": toy_p, "v.json": toy_v}),
-        "identify_g5_toy": _cli("calib_identify.py", ["g5", "--contract", "c.json", "--plan", "p.json", "--values",
+        "identify_g5_toy": _cli("simcal_identify.py", ["g5", "--contract", "c.json", "--plan", "p.json", "--values",
                                                       "v.json"], {"c.json": toy_c, "p.json": toy_p, "v.json": toy_v}),
-        "fit_g7": _cli("calib_fit.py", ["g7", "--theta-hats", "th.json", "--sigma-mc", "s.json"],
+        "fit_g7": _cli("simcal_fit.py", ["g7", "--theta-hats", "th.json", "--sigma-mc", "s.json"],
                        {"th.json": [[0.0, 0.0], [0.1, -0.1], [-0.1, 0.05]], "s.json": [[0.01, 0.0], [0.0, 0.01]]}),
-        "fit_g3": _cli("calib_fit.py", ["g3", "--region", "r.json", "--limits", "l.json"],
+        "fit_g3": _cli("simcal_fit.py", ["g3", "--region", "r.json", "--limits", "l.json"],
                        {"r.json": {"t": [0.7, 1.3]}, "l.json": {"feasible": {"t": [0.0, 1.0]}}}),
-        "fit_kstar": _cli("calib_fit.py", ["kstar", "--n", 60], {}),
+        "fit_kstar": _cli("simcal_fit.py", ["kstar", "--n", 60], {}),
         # closure: G8 (phase 2, 3)
-        "closure_nc": _cli("calib_closure.py", ["nc", "--d", 3, "--level", "standard"], {}),
-        "closure_decide_standard": _cli("calib_closure.py", ["decide", "--results", "g.json"],
+        "closure_nc": _cli("simcal_closure.py", ["nc", "--d", 3, "--level", "standard"], {}),
+        "closure_decide_standard": _cli("simcal_closure.py", ["decide", "--results", "g.json"],
                                         {"g.json": {"level": "standard", "names": ["a"], "sigma_design": [1.0],
                                                     "interior": g8, "boundary": g8,
                                                     "pseudo_data_source": {"status": "ok", "sample": "lo"}}}),
-        "closure_not_executed": _cli("calib_closure.py", ["not-executed", "--reason", "costly"], {}),
+        "closure_not_executed": _cli("simcal_closure.py", ["not-executed", "--reason", "costly"], {}),
         # validation (phase 2)
-        "validate_statistic": _cli("calib_validate.py", ["statistic", "--input", "x.json"],
+        "validate_statistic": _cli("simcal_validate.py", ["statistic", "--input", "x.json"],
                                    {"x.json": {"r": [1.0, 0.0], "C_r": [[1.0, 0.0], [0.0, 0.0]], "sigma0": [1.0, 1.0],
                                                "constraints": [[0.0, 1.0]]}}),
-        "validate_required_lambda": _cli("calib_validate.py", ["required-lambda", "--k", 1], {}),
+        "validate_required_lambda": _cli("simcal_validate.py", ["required-lambda", "--k", 1], {}),
         # propagation, likelihood, interval (phase 2)
-        "propagate_export": _cli("calib_propagate.py", ["export", "--input", "e.json"],
+        "propagate_export": _cli("simcal_propagate.py", ["export", "--input", "e.json"],
                                  {"e.json": {"theta_hat": [0.1], "zeta_hat": [0.0], "Sigma": [[1.0, 0.5], [0.5, 1.0]],
                                              "i_theta": [0], "i_zeta": [1]}}),
-        "likelihood_layout": _cli("calib_likelihood.py", ["layout", "--contract", "fx.json"],
+        "likelihood_layout": _cli("simcal_likelihood.py", ["layout", "--contract", "fx.json"],
                                   {"fx.json": fx["toy_detector_design"]}),
-        "likelihood_binomial": _cli("calib_likelihood.py", ["binomial", "--moments", "m.json"],
+        "likelihood_binomial": _cli("simcal_likelihood.py", ["binomial", "--moments", "m.json"],
                                     {"m.json": {"W_P": 30.0, "S_P": 30.0, "W_F": 70.0, "S_F": 70.0}}),
-        "interval_total": _cli("calib_interval.py", ["total", "--sigma-q", 1, "--shift", "0.3", "--sigma-boot", 0.02,
+        "interval_total": _cli("simcal_interval.py", ["total", "--sigma-q", 1, "--shift", "0.3", "--sigma-boot", 0.02,
                                                      "--w", 0.891], {}),
         # use, deps (phase 0, 4)
-        "use_judge": _cli("calib_use.py", ["judge", "--inputs", "a.json"], {"a.json": {"inputs": use_in,
+        "use_judge": _cli("simcal_use.py", ["judge", "--inputs", "a.json"], {"a.json": {"inputs": use_in,
                                                                                          "upstreams": []}}),
-        "use_lookup": _cli("calib_use.py", ["lookup", "--undecided", "mandatory-gate", "--inputs", "c.json"],
+        "use_lookup": _cli("simcal_use.py", ["lookup", "--undecided", "mandatory-gate", "--inputs", "c.json"],
                            {"c.json": {"inputs": dict(use_in, incomplete=True), "upstreams": [
                                {"usages": ["phi-center"], "effective_grade": "failed", "flags": []}]}}),
-        "deps_roles": _cli("calib_deps.py", ["roles", "--contract", "c.json"], {"c.json": {"upstream": [
+        "deps_roles": _cli("simcal_deps.py", ["roles", "--contract", "c.json"], {"c.json": {"upstream": [
             {"result_sha256": F.h("u"), "usages": ["envelope", "xi"], "role": "variation"}]}}),
-        "deps_version": _cli("calib_deps.py", ["version", "--payload", "p.json"], {"p.json": {
+        "deps_version": _cli("simcal_deps.py", ["version", "--payload", "p.json"], {"p.json": {
             "contract_sha256": F.h("c"), "data_sha256": F.h("d"), "plan_sha256": F.h("p"), "engine_version": "0.1.0",
             "parent_versions": [], "values": {}}}),
-        "deps_packages": _cli("calib_deps.py", ["packages", "--input", "x.json"], {"x.json": {"packages": [
+        "deps_packages": _cli("simcal_deps.py", ["packages", "--input", "x.json"], {"x.json": {"packages": [
             {"id": "p1", "upstream": "a" * 64, "zeta": {"eta": "v1"}},
             {"id": "p2", "upstream": "b" * 64, "zeta": {"eta": "v2"}}], "upstreams": {}}}),
         # contrib (phase 4)
-        "contrib_variance": _cli("calib_contrib.py", ["decompose", "--contract", "c.json", "--plan", "p.json", "--theta",
+        "contrib_variance": _cli("simcal_contrib.py", ["decompose", "--contract", "c.json", "--plan", "p.json", "--theta",
                                                       "th.json", "--observable", "res", "--bootstrap", 50, "--object",
                                                       "variance"], {"c.json": cc2, "p.json": cp2, "th.json": {}}),
-        "contrib_resolution_ess": _cli("calib_contrib.py", ["decompose", "--contract", "c.json", "--plan", "p.json",
+        "contrib_resolution_ess": _cli("simcal_contrib.py", ["decompose", "--contract", "c.json", "--plan", "p.json",
                                                             "--theta", "th.json", "--observable", "res", "--object",
                                                             "resolution", "--bootstrap", 50],
                                        {"c.json": rc2, "p.json": rp2, "th.json": {}}),
         # export (phase 4)
-        "propagate_g4sim_snapshot": _cli("calib_propagate.py", ["g4sim", "--template", "s.json", "--result", "r.json",
+        "propagate_g4sim_snapshot": _cli("simcal_propagate.py", ["g4sim", "--template", "s.json", "--result", "r.json",
                                                                 "--contract", "c.json", "--use", "production",
                                                                 "--out", "out.json"],
                                          {"s.json": G4.snapshot(), "r.json": exp_res, "c.json": exp_con},
@@ -745,10 +745,10 @@ def golden_inputs() -> dict:
 
 
 def _toy_fit_inputs():
-    """The small toy-detector problem of tests/skills/test_calib_scripts (holdout decision): 2 theta, 4000 events."""
+    """The small toy-detector problem of tests/skills/test_simcal_scripts (holdout decision): 2 theta, 4000 events."""
     import numpy as np
-    from core.calibration import toy
-    from core.calibration import toy_problem as TP
+    from core.simcal import toy
+    from core.simcal import toy_problem as TP
     cal = ["beam1_e_mean", "beam2_e_mean", "beam4_e_mean", "light_e_mean", "light_e_width", "spe_e_mean"]
     val = ["beam2_e_width", "beam4_e_width"]
     obs = [{"name": n, "role": "calibration", "block": "gaussian", "link": "log"} for n in cal] + \
@@ -770,9 +770,9 @@ def engine_case(name: str) -> dict:
     import numpy as np
     from scipy import stats
 
-    from core.calibration import fit as F
-    from core.calibration import reweight as R
-    from core.calibration import toys_linear as T
+    from core.simcal import fit as F
+    from core.simcal import reweight as R
+    from core.simcal import toys_linear as T
     if name == "linear_fit_g1_g6_g7":
         cfg = T.linear_config(n=20, d=3, mc_ratio=0.1)
         p = T.make(cfg, [0.5, -0.3, 1.0], data_seed=3, mc_seed=4)
@@ -837,7 +837,7 @@ def capture_golden(path: Path = GOLDEN) -> dict:
 
 # the p5base_* cases (A33, review F3): engine code over the phase-5-modified default-off branches, run by their own
 # file against a plugin tree (the gate commit's, or a git archive of the base at the capture)
-TREE_CASES = ROOT / "tests" / "core" / "calibration_phase5_identity_cases.py"
+TREE_CASES = ROOT / "tests" / "core" / "simcal_phase5_identity_cases.py"
 TREE_PREFIX = "p5base_"
 
 
@@ -850,7 +850,7 @@ def run_tree_case(name: str, root: Path, python: str | None = None) -> dict:
 
 def _tree_case_names() -> list:
     sys.path.insert(0, str(TREE_CASES.parent))
-    import calibration_phase5_identity_cases as TC
+    import simcal_phase5_identity_cases as TC
     return list(TC.CASES)
 
 

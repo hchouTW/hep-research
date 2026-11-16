@@ -1,6 +1,6 @@
 """The inference form of V_model (Part B section 5.4 row "Inferred"; phase 5, gap V6 read by A25 (7)): the card's
 tests (a)-(d), each negative with its positive control, the opt-in path of `linear.vmodel_columns`, the
-`calib_likelihood.py vmodel-infer` subcommand, and the S3 recovery driver (tests/core/calibration_phase5_vmodel_s3.py:
+`simcal_likelihood.py vmodel-infer` subcommand, and the S3 recovery driver (tests/core/simcal_phase5_vmodel_s3.py:
 task table, local smoke, merge rule). Synthetic; no Slurm."""
 from __future__ import annotations
 
@@ -24,16 +24,16 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_fixtures as F  # noqa: E402
-import calibration_phase5_vmodel_s3 as X  # noqa: E402
-from core.calibration import contract as cc  # noqa: E402
-from core.calibration import linear  # noqa: E402
-from core.calibration import vmodel_infer as VI  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+import simcal_phase5_vmodel_s3 as X  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
+from core.simcal import linear  # noqa: E402
+from core.simcal import vmodel_infer as VI  # noqa: E402
 
 # slow tier (docs/maintenance.md): about 50 s and 30 s here, several times that on CI runners; neither is a gate-listed test
 SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
 
-SCRIPT = ROOT / "skills" / "hep-statistics" / "scripts" / "calib_likelihood.py"
+SCRIPT = ROOT / "skills" / "hep-statistics" / "scripts" / "simcal_likelihood.py"
 CFG = {"sigma": 0.01, "components": [{"n": 40, "f": 0.05, "length": 0.06, "f_scale": 0.1,
                                       "length_bounds": [0.01, 1.0]}]}
 

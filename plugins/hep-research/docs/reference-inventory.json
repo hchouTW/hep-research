@@ -2777,7 +2777,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2791,7 +2791,7 @@
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/hcal.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2819,7 +2819,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
     "skills/hep-detector/scripts/calorimeter_resolution.py",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2957,7 +2957,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2970,7 +2970,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2983,7 +2983,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2996,7 +2996,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -3009,7 +3009,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -4261,7 +4261,7 @@
     "skills/hep-review/README.md",
     "skills/hep-review/assets/registry.json",
     "skills/hep-review/references/domains/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"

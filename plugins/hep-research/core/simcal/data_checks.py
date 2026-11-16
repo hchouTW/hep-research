@@ -1,5 +1,5 @@
-"""The locking-stage and fit-point checks that `calib_data.py` owns (Part B sections 2.1, 9.2, 14; phase 2, WP4):
-computed here, called by `calib_contract.py check` at the evaluation points and by `calib_fit.py` at the fit point
+"""The locking-stage and fit-point checks that `simcal_data.py` owns (Part B sections 2.1, 9.2, 14; phase 2, WP4):
+computed here, called by `simcal_contract.py check` at the evaluation points and by `simcal_fit.py` at the fit point
 (section 17, "Locking-stage checks that need quantities produced by the model are added in phase 2").
 
 - `resolution`: the representation resolution rho_i of a released value from the declared format, the magnitude taken
@@ -400,7 +400,7 @@ def point_quantities(problem, params: dict) -> dict:
 
 def locking_report(contract: dict, release_declarations: dict, problem, n_scan: int = 64, seed: int = 20261112,
                    points: list | None = None, hashes: dict | None = None) -> dict:
-    """The locking-stage decisions of calib_data for the calibration observables of the problem at the evaluation
+    """The locking-stage decisions of simcal_data for the calibration observables of the problem at the evaluation
     points of section 2.1 (or at the given points, e.g. the fit point): rounding negligibility on N_d,c^perp with the
     release's formats, sigma^(0) > 0, the N_d,c declaration check (a)(b)(c) in standardized coordinates, the value
     conventions against the declared constraints; n_min, block conversion and N_exp where the contract has such blocks

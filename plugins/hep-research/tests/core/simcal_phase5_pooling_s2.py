@@ -4,10 +4,10 @@ replicas with tau_pool_hat = 0, the fraction whose 95% set covers 0 (section 15.
 and the coverage of the pooled theta_s, theta_bar and the common theta by +-sigma_tot of the joint fit, over 1000
 repetitions. Reported, not judged (the card: unless the author makes it the test). Not a unit test module.
 
-  python3 calibration_phase5_pooling_s2.py --list                     the task table (JSON)
-  python3 calibration_phase5_pooling_s2.py --task K --out DIR         one task of the array
-  python3 calibration_phase5_pooling_s2.py --merge DIR --out FILE     merge and report (exit 0 complete, 1 incomplete)
-  python3 calibration_phase5_pooling_s2.py --local --out FILE         the code path at tiny size (`smoke`, not evidence)
+  python3 simcal_phase5_pooling_s2.py --list                     the task table (JSON)
+  python3 simcal_phase5_pooling_s2.py --task K --out DIR         one task of the array
+  python3 simcal_phase5_pooling_s2.py --merge DIR --out FILE     merge and report (exit 0 complete, 1 incomplete)
+  python3 simcal_phase5_pooling_s2.py --local --out FILE         the code path at tiny size (`smoke`, not evidence)
 
 Configuration: toys_linear.linear_config(n=8, d=2, seed=3) per segment (identical J and V), S = 4 segments, t0 pooled
 (identity link), t1 common, truth (0.5, -0.3) in every segment; repetition r draws its data from seeds
@@ -30,17 +30,17 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(HERE))                      # calibration_phase5_taskenv
+sys.path.insert(0, str(HERE))                      # simcal_phase5_taskenv
 
-from core.calibration import io  # noqa: E402
+from core.simcal import io  # noqa: E402
 
-import calibration_phase5_taskenv as TE  # noqa: E402
-from core.calibration import pooling as PL  # noqa: E402
-from core.calibration import toys_linear as TL  # noqa: E402
+import simcal_phase5_taskenv as TE  # noqa: E402
+from core.simcal import pooling as PL  # noqa: E402
+from core.simcal import toys_linear as TL  # noqa: E402
 
 FLAGS = ["synthetic"]
-FILES = ["core/calibration/pooling.py", "core/calibration/fit.py", "core/calibration/likelihood.py",
-         "core/calibration/toys_linear.py", "tests/core/calibration_phase5_pooling_s2.py"]
+FILES = ["core/simcal/pooling.py", "core/simcal/fit.py", "core/simcal/likelihood.py",
+         "core/simcal/toys_linear.py", "tests/core/simcal_phase5_pooling_s2.py"]
 SEED0 = 20261405
 SEGMENTS = 4
 TRUTH = (0.5, -0.3)

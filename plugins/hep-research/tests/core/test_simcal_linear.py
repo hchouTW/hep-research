@@ -11,9 +11,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration import linear  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal import linear  # noqa: E402
 
 rng = np.random.default_rng(1)
 

@@ -8,7 +8,7 @@
  "additionalProperties": false,
  "properties": {
   "mechanism": {
-   "$ref": "calibration_mechanism.json"
+   "$ref": "simcal_mechanism.json"
   },
   "channel_set": {
    "anyOf": [
@@ -33,5 +33,5 @@
    "type": "object"
   }
  },
- "$comment": "calibration-parameter-index/1 (section 3.7): mechanism class x channel set x conditioning structure; with g4sim the channel set is a readout-encoding/1 field dictionary or mask, never a cellID."
+ "$comment": "simcal-parameter-index/1 (section 3.7): mechanism class x channel set x conditioning structure; with g4sim the channel set is a readout-encoding/1 field dictionary or mask, never a cellID."
 }

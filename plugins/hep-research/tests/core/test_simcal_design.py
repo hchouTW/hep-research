@@ -1,4 +1,4 @@
-"""calib_design.py checks of phase 1 (Part B sections 3.6, 6.1, 6.4, 6.7, 8.1, 8.2): Sobol points and the P6
+"""simcal_design.py checks of phase 1 (Part B sections 3.6, 6.1, 6.4, 6.7, 8.1, 8.2): Sobol points and the P6
 held-back set (D80), P2 (D77), the support condition, P5 with feasibility and the final method (D41, D42), and the
 applicability of the mandatory gates (section 15.3.16). The negative tests of P2 and P5 of section 15.3.1."""
 from __future__ import annotations
@@ -12,9 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import design  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import design  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
 
 
 def codes(r):

@@ -42,7 +42,7 @@ import numpy as np
 from scipy import interpolate, linalg, optimize
 
 from core.canonical import canonical_sha256
-from core.calibration import likelihood as L
+from core.simcal import likelihood as L
 
 KIND = "vmodel-version"
 INFERABLE = ("squared-exponential",)
@@ -373,7 +373,7 @@ def infer(contract: dict, names: list[str], residual, V, flat=None, nuisance=Non
     if not (np.isfinite(r).all() and np.isfinite(Vm).all() and np.isfinite(X).all() and np.isfinite(N).all()):
         raise VmodelInferError("vmodel_infer.input", "non-finite input")
     inferred, fixed = _components(contract, names)
-    from core.calibration import linear      # noqa: PLC0415 (linear imports this module lazily)
+    from core.simcal import linear      # noqa: PLC0415 (linear imports this module lazily)
     base = N @ N.T + linear.vmodel_matrix(fixed, names)
     posterior = Objective(r, Vm, inferred, base, X)
     fit = fit_posterior(posterior, inferred)

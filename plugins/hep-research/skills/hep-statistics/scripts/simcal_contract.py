@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """The contract checker (simulator calibration workflow, Part B section 5.2; owner of the contract rules).
 
-  calib_contract.py check     --contract FILE [--release FILE ...] [--series-graph FILE] [--design FILE]
+  simcal_contract.py check     --contract FILE [--release FILE ...] [--series-graph FILE] [--design FILE]
                               [--locking FILE] [--model-documents FILE]
-  calib_contract.py identity  --contract FILE --model-documents FILE
-  calib_contract.py preflight --contract DRAFT --release FILE --ledger FILE [--write-draft OUT]
-FILE is a calibration-contract/1; each --release is a calibration-data-release/1 metadata file (its lineage,
+  simcal_contract.py identity  --contract FILE --model-documents FILE
+  simcal_contract.py preflight --contract DRAFT --release FILE --ledger FILE [--write-draft OUT]
+FILE is a simcal-contract/1; each --release is a simcal-data-release/1 metadata file (its lineage,
 samples, observables and declarations; the release hash is the canonical SHA-256 of its metadata, and a declared
 "release_sha256" must equal it), read for the rules that look at metadata, lineage or totals, never at sealed values;
 --series-graph maps contract series to the series of their upstream results (cycle check). Output: one JSON object
 with the findings and the rules deferred to later phases; status accepted (exit 0) or rejected (exit 2: a contract
-error, no result is produced). --design is the output of `calib_design.py linearize`: with it the D37 rule (approval
+error, no result is produced). --design is the output of `simcal_design.py linearize`: with it the D37 rule (approval
 A7) is applied, a psi whose effect on theta-hat via A exceeds 0.1 sigma_tot^design must be listed as phi. --locking
-is the report of `calib_data.py locking` (phase 2): its failures (rounding, sigma^(0) = 0, the N_d,c declaration
+is the report of `simcal_data.py locking` (phase 2): its failures (rounding, sigma^(0) = 0, the N_d,c declaration
 check, value conventions) reject the contract and the rules it decides leave `deferred`.
 
 With g4sim (phase 3): each model carries the five identity items of section 5.1 and each theta/phi its field bindings
@@ -22,7 +22,7 @@ pde, build_environment: objects}}; with it the five items are recomputed (detect
 the other documents normalized with type tables from their schemas, theta/phi fields masked) and must equal the
 declared ones. `identity` prints the recomputed items (status ok), to be written into the contract.
 
-preflight is A0 (pipeline stage A0, not a gate): the calibration values come from calib_data's provider, which records
+preflight is A0 (pipeline stage A0, not a gate): the calibration values come from simcal_data's provider, which records
 a fit read with the contract draft's series as read channel in the ledger (written under its lock); for each declared
 threshold with a smoothing model it decides whether the data can reach it. Output: the A0 summary (the names of the
 unreachable thresholds only, never a data value) and one decision per threshold; status ok (exit 0). --write-draft
@@ -50,10 +50,10 @@ from pathlib import Path
 
 from contracts.geometry import field_types
 from contracts.schema import load_schema, validate
-from core.calibration import contract as cc
-from core.calibration import model_identity as mi
-from core.calibration import data_release as data
-from core.calibration import io
+from core.simcal import contract as cc
+from core.simcal import model_identity as mi
+from core.simcal import data_release as data
+from core.simcal import io
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -91,7 +91,7 @@ def identities(contract: dict, path: str) -> dict:
             elif key == "efficiency_map":
                 docs[key] = io.load_object(str(base / str(value)))
             elif key == "pde":                      # the PDE(E) part of item 4 (section 6.7, route 3)
-                from core.calibration import pde_split
+                from core.simcal import pde_split
                 try:
                     docs[key] = pde_split.identity_part(value, pde_split.table_masked(contract))
                 except pde_split.SplitError as err:
@@ -115,7 +115,7 @@ def identities(contract: dict, path: str) -> dict:
 def pde_documents(contract: dict, path: str) -> list:
     """The PDE-split rules that need the documents (section 6.7 "Rejected"): per model, the efficiency-1 map's sensor
     surfaces and surfaces_sha256 against the production detector-spec/1, and the EFFICIENCY > 0 condition."""
-    from core.calibration import pde_split
+    from core.simcal import pde_split
     spec = io.load_object(path)
     base = Path(path).resolve().parent
     out = []
@@ -140,7 +140,7 @@ def main(argv=None) -> int:
     p.add_argument("--release", action="append", default=[])
     p.add_argument("--series-graph")
     p.add_argument("--design")
-    p.add_argument("--locking", help="the locking report of calib_data.py locking (phase 2)")
+    p.add_argument("--locking", help="the locking report of simcal_data.py locking (phase 2)")
     p.add_argument("--model-documents", help="the g4sim documents of each model (section 5.1)")
     t = sub.add_parser("identity")
     t.add_argument("--contract", required=True)
@@ -154,7 +154,7 @@ def main(argv=None) -> int:
 
     def preflight():
         try:
-            from core.calibration import preflight as a0
+            from core.simcal import preflight as a0
         except ImportError as exc:                # A0 needs NumPy
             return {"status": "rejected", "error": f"preflight needs NumPy ({exc})"}
         c = io.load(args.contract)
@@ -200,7 +200,7 @@ def main(argv=None) -> int:
             except data.DataError as exc:
                 raise io.InputError(f"{path}: {exc}") from None
         graph = io.load(args.series_graph) if args.series_graph else None
-        shape = [f.as_dict() for f in validate(c, "calibration_contract.json").errors]
+        shape = [f.as_dict() for f in validate(c, "simcal_contract.json").errors]
         if shape:
             return {"status": "rejected", "findings": shape, "stage": "schema"}
         design = io.load(args.design) if args.design else None

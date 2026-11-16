@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Contribution decomposition (simulator calibration workflow, Part B section 10.5; phase 4).
 
-  calib_contrib.py decompose --contract FILE [--plan FILE] --theta FILE --observable NAME
+  simcal_contrib.py decompose --contract FILE [--plan FILE] --theta FILE --observable NAME
                    --object variance|resolution [--effects NAME ...] [--bootstrap B] [--bootstrap-seed S]
                    [--permutations M] [--permutation-seed S]
 One term per effect declared in the contract (`effects`: [{name, removal: {parameter: value after removal}}]),
@@ -10,7 +10,7 @@ with its sampling error for n > 10; the terms sum to the total on every ordering
 the ESS threshold of G4 (N_eff,k >= N_req,k), else no decomposition is output (status failed, finding contrib.ess).
 Bootstrap covariances between the terms; the object (variance or resolution) is required and stated. Output: one JSON
 object; ok (exit 0), failed (exit 1), rejected (exit 2), incomplete (exit 3: the evaluator cannot remove effects or
-gives no per-event influence values). The engine (core/calibration/contrib.py) needs NumPy and SciPy.
+gives no per-event influence values). The engine (core/simcal/contrib.py) needs NumPy and SciPy.
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -33,7 +33,7 @@ import sys
 
 try:
     MISSING = None
-    from core.calibration import contrib, evaluator, io
+    from core.simcal import contrib, evaluator, io
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 

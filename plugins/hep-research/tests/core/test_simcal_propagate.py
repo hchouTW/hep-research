@@ -12,8 +12,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import deps  # noqa: E402
-from core.calibration import propagate as P  # noqa: E402
+from core.simcal import deps  # noqa: E402
+from core.simcal import propagate as P  # noqa: E402
 
 V = 0.09
 

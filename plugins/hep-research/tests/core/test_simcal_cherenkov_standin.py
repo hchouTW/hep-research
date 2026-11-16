@@ -1,8 +1,8 @@
-"""The RICH-replica items of Part B (phase 3, WP-F) on the ANALYTIC CHERENKOV STAND-IN (core/calibration/
+"""The RICH-replica items of Part B (phase 3, WP-F) on the ANALYTIC CHERENKOV STAND-IN (core/simcal/
 cherenkov_standin.py), never Geant4: section 15.2 (P3 with a single beta: refractive index and radiator height not
 identifiable, with the "multiple beta" hint; with a second momentum or particle, P3 passes), section 8.7 note 6 (the
 section 7.4 basin classification on the degeneracy, design stage: a few toys and reseedings), and the Slurm-scale
-Geant4 configuration on the S7 case (tests/core/calibration_rich_fixture.py; not run). Items that need Geant4 are
+Geant4 configuration on the S7 case (tests/core/simcal_rich_fixture.py; not run). Items that need Geant4 are
 skipped and say so."""
 from __future__ import annotations
 
@@ -21,12 +21,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_rich_fixture as R  # noqa: E402
+import simcal_rich_fixture as R  # noqa: E402
 
-from core.calibration import cherenkov_standin as C  # noqa: E402
-from core.calibration import evaluator_problem as EP  # noqa: E402
-from core.calibration import identify  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
+from core.simcal import cherenkov_standin as C  # noqa: E402
+from core.simcal import evaluator_problem as EP  # noqa: E402
+from core.simcal import identify  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
 
 ONE = [{"name": "R_p100", "beta": C.beta_of(100.0)}]
 MOMENTUM = ONE + [{"name": "R_p2.4", "beta": C.beta_of(2.4)}]
@@ -84,7 +84,7 @@ class P3MultipleBeta(unittest.TestCase):
         self.assertEqual(identify.p3(p, nominal_beta(p))["status"], "failed")
 
     @unittest.skip("requires Geant4: P3 from the replica's g4sim_run products at the design points of "
-                   "calibration_rich_fixture.ask (full optical tracking; Slurm), and a ring-radius observable from "
+                   "simcal_rich_fixture.ask (full optical tracking; Slurm), and a ring-radius observable from "
                    "photons.csv, which the g4sim evaluator does not provide")
     def test_with_geant4(self):
         pass

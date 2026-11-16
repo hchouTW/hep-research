@@ -12,19 +12,19 @@ An experiment's adapter implements five functions:
 V_learn (phase 5, a learned density ratio only, section 6.2): observable space, a matrix or v_learn's record; the toy
 evaluator returns a lazy handle (toy.LazyVLearn, computed on first use; `linear.v_learn_of` reads all three forms).
 
-ask/tell (resimulation and surrogate models, phase 3): the engine keeps the state file (calibration-ask-tell/1,
-core/calibration/emulator.py: new_state, ask, tell, drive), one entry per evaluation with its `run_id`, parameter
+ask/tell (resimulation and surrogate models, phase 3): the engine keeps the state file (simcal-ask-tell/1,
+core/simcal/emulator.py: new_state, ask, tell, drive), one entry per evaluation with its `run_id`, parameter
 point and seeds. `ask(requests)` submits [{run_id, theta, seeds, names}] and returns the run_ids accepted; `tell(
 run_ids)` returns {run_id: result} for those done (each once; pending ones are absent), a result being what
 `evaluate` returns ({names, pred, V_MC}, optionally the per-event contributions `influence` for sigma_Delta of P6).
 
-tiers() and domain() are not the adapter's: candidate methods come from calib_chain, feasibility and the final method
-from calib_design (section 7.1). The engine knows the evaluators of this registry by the plan's `evaluator.kind`; the
+tiers() and domain() are not the adapter's: candidate methods come from simcal_chain, feasibility and the final method
+from simcal_design (section 7.1). The engine knows the evaluators of this registry by the plan's `evaluator.kind`; the
 g4sim evaluator (adapters/geant4, phase 3) is not imported by core (layering).
 
 effects_off (section 10.5, phase 4): {effect: {parameter: value after removal}}, the values the contract's `effects`
 declare (`removal_values` merges them); evaluating with it is evaluating at those parameter values, with the plan's
-methods. An evaluator that cannot remove effects raises (calib_contrib reports `incomplete`)."""
+methods. An evaluator that cannot remove effects raises (simcal_contrib reports `incomplete`)."""
 from __future__ import annotations
 
 from typing import Protocol
@@ -83,11 +83,11 @@ def register(kind: str, builder) -> None:
 
 def make(plan: dict, contract: dict | None = None):
     """The evaluator the plan names (plan['evaluator'] = {'kind': ..., ...}); phase 1 knows the toy detector, its
-    variants and the declared small chains (core/calibration/toy.py). With plan['evaluator']['surrogate'] (a trained
+    variants and the declared small chains (core/simcal/toy.py). With plan['evaluator']['surrogate'] (a trained
     surrogate's record, emulator.Surrogate.record) the surrogate-model parameters are evaluated with it (phase 3)."""
     spec = plan.get("evaluator") or {}
     kind = spec.get("kind")
-    from core.calibration import toy                       # the only evaluators in core
+    from core.simcal import toy                       # the only evaluators in core
     builders = {"toy-detector": toy.toy_detector, "toy-detector-subgraph": toy.toy_detector_subgraph,
                 "toy-detector-bimodal": toy.toy_detector_bimodal, "chain": toy.chain_from_spec, **_REGISTERED}
     if kind not in builders:
@@ -96,9 +96,9 @@ def make(plan: dict, contract: dict | None = None):
     if kind in _REGISTERED and contract is not None:     # adapters read the contract's locked bindings
         spec = dict(spec, contract=contract)
     ev = builders[kind](spec, plan)
-    if spec.get("surrogate"):                            # a trained surrogate (calib_emulator.py train --out)
+    if spec.get("surrogate"):                            # a trained surrogate (simcal_emulator.py train --out)
         if not hasattr(ev, "attach_surrogate"):
             raise EvaluatorUnavailable(f"the evaluator of kind {kind!r} cannot carry a surrogate model")
-        from core.calibration import emulator
+        from core.simcal import emulator
         ev.attach_surrogate(emulator.Surrogate.from_record(spec["surrogate"]))
     return ev

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-from core.calibration import likelihood as L  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
 
 
 def mixed_problem(seed=1):
@@ -282,7 +282,7 @@ class LearnedCovariance(unittest.TestCase):
     def setUpClass(cls):
         import warnings
         warnings.filterwarnings("ignore", message="The balance properties of Sobol")
-        import calibration_phase5_tv as X
+        import simcal_phase5_tv as X
         cls.X = X
         cls.pr = X.posthoc_problem(20_000, 4000, mc_seed=31, validation=False, learned=LIGHT)
         cls.tp = np.array([0.17])
@@ -332,9 +332,9 @@ class LearnedCovariance(unittest.TestCase):
         and a declared ratio whose evaluator returns none, are refused (A33, review F8; negatives); no declaration and
         no V_learn (control: every phase-3 evaluator) leaves V_G = V_data + V_MC."""
         import copy
-        from core.calibration import evaluator as E
-        from core.calibration import evaluator_problem as EP
-        from core.calibration import linear, toy
+        from core.simcal import evaluator as E
+        from core.simcal import evaluator_problem as EP
+        from core.simcal import linear, toy
         c, p = toy.posthoc_fixture()
         p = copy.deepcopy(p)
         p["evaluator"]["spec"]["runs"][0]["n"] = 4000

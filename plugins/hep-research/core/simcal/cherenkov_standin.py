@@ -84,7 +84,7 @@ def contract(samples: list, exposure: int = 2000, height=(450.0, 490.0), scale=(
             {"name": "index_scale", "role": "theta", "sampling_bounds": list(scale), "physical_bounds": [0.9, 1.1]}]
     obs = [{"name": s["name"], "role": "calibration", "block": "gaussian", "link": "identity", "functional": "location"}
            for s in samples]
-    return {"schema": "calibration-contract/1", "simulator": LABEL, "parameters": pars, "observables": obs,
+    return {"schema": "simcal-contract/1", "simulator": LABEL, "parameters": pars, "observables": obs,
             "exposure": {s["name"]: exposure for s in samples}, "validation": {"mode": "holdout", "N_dc": []}}
 
 

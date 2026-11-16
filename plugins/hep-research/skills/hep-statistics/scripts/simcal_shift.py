@@ -2,8 +2,8 @@
 """Shift mode of phi (simulator calibration workflow, Part B sections 5.5, 8.2 note 10; owner of P8, G9, the +-1 sigma
 and +-2 sigma refits and d_l; phase 2).
 
-  calib_shift.py p8 --contract FILE --plan FILE [--release FILE]           at theta_ref with Asimov data, c = 0.1
-  calib_shift.py g9 --contract FILE --plan FILE --values FILE [--seed S]   Delta_i <= 0.06 and 1.5c at theta-hat
+  simcal_shift.py p8 --contract FILE --plan FILE [--release FILE]           at theta_ref with Asimov data, c = 0.1
+  simcal_shift.py g9 --contract FILE --plan FILE --values FILE [--seed S]   Delta_i <= 0.06 and 1.5c at theta-hat
 G9 is decided only after P8 passed. Not applicable without a shift-mode phi. Output: one JSON object; passed (exit 0),
 not-applicable (exit 0), failed (exit 1, remedy level contract: profile mode), rejected (exit 2). Phase 2.
 """
@@ -29,7 +29,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, fit as F, problems, shift, toy_problem
+    from core.simcal import io, fit as F, problems, shift, toy_problem
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -61,7 +61,7 @@ def _common(p, values=True):
     p.add_argument("--release")
     if values:
         p.add_argument("--values", required=True, help="calibration values (JSON {observable: value}) provided by "
-                       "calib_data.py provide, which records the fit read")
+                       "simcal_data.py provide, which records the fit read")
     p.add_argument("--sigma-noise", type=float)
     p.add_argument("--seed", type=int, default=20261130)
 

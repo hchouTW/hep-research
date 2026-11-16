@@ -1,8 +1,8 @@
-"""core/calibration/data (simulator calibration phase 0): raw-unit lineage, read events, failure records and the reuse
-and failure-record inputs of Appendix C.1, judged end to end with core/calibration/use.
+"""core/simcal/data (simulator calibration phase 0): raw-unit lineage, read events, failure records and the reuse
+and failure-record inputs of Appendix C.1, judged end to end with core/simcal/use.
 
 Named cases of sections 15.3.11 (opening preconditions, lineage), 15.3.13 (validation reads and holdout eligibility),
-15.3.14 (failure records; the state transitions use hand-written decision-record stubs, section 17: calib_validate.py
+15.3.14 (failure records; the state transitions use hand-written decision-record stubs, section 17: simcal_validate.py
 arrives in phase 2) and 15.3a (lineage and failure records on raw units); ingestion and sealing of section 15.3.3."""
 from __future__ import annotations
 
@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import calibration_fixtures as F  # noqa: E402
-from core.calibration import data_release as observed  # noqa: E402
-from core.calibration import use  # noqa: E402
+import simcal_fixtures as F  # noqa: E402
+from core.simcal import data_release as observed  # noqa: E402
+from core.simcal import use  # noqa: E402
 
 X = frozenset(f"x{i}" for i in range(10))
 Y = frozenset(f"y{i}" for i in range(10))
@@ -98,7 +98,7 @@ class OpeningPreconditions(unittest.TestCase):
             led.open_validation(k("1"), rel("v"), units["validation_units"], units["calibration_units"], channel_of("1"))
         self.assertEqual(cm.exception.code, "open.lineage_unconfirmed")
         self.assertEqual((led.state["events"], led.state["failure_records"]), ([], []))
-        # the result: V incomplete (lineage is part of V not yet decided), aggregated by calib_use
+        # the result: V incomplete (lineage is part of V not yet decided), aggregated by simcal_use
         agg = use.aggregate({g: "passed" for g in use.MANDATORY}, "passed", "incomplete", "holdout")
         self.assertEqual(agg["undecided"], ["v"])
         self.assertEqual(grade(led, k("1"), "holdout", Y, X, opened=False, **agg["inputs"]), "incomplete")

@@ -96,7 +96,7 @@ def plan(batches: dict, bindings=None, **extra) -> dict:
     spec = {"kind": "g4sim", "documents": docs, "readout": "zdc", "map": "light",
             "scorers": {"split": SPLIT, "dedx": DEDX}, "batches": batches, "nominal": next(iter(batches)),
             "observables": copy.deepcopy(OBSERVABLES)}
-    p = {"schema": "calibration-plan/1", "kernels": {}, "evaluator": spec,
+    p = {"schema": "simcal-plan/1", "kernels": {}, "evaluator": spec,
          "node_binding": {"parameters": copy.deepcopy(bindings if bindings is not None else BINDINGS)}}
     p.update(extra)
     return p

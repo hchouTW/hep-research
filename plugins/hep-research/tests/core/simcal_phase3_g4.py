@@ -2,14 +2,14 @@
 15.2 / P0 / P3 / P6 evidence and the section 8.7 note 6 RICH calibration. Not a unit test module; no Slurm here (the main
 session registers the configuration in the card and submits the arrays).
 
-  python3 calibration_phase3_g4.py --cards ROOT                 the run cards, the ask states and the manifest; check-spec
-  python3 calibration_phase3_g4.py --list                       the Geant4 array (one task per g4sim_run)
-  python3 calibration_phase3_g4.py --task K --out ROOT          one Geant4 array task (conda env `geant4` active)
-  python3 calibration_phase3_g4.py --tell ROOT                  products -> G4simEvaluator.tell; the section 6.6 check
-  python3 calibration_phase3_g4.py --evidence-list              the evidence array (after --tell)
-  python3 calibration_phase3_g4.py --evidence K --root ROOT --out DIR    one evidence task
-  python3 calibration_phase3_g4.py --merge DIR --out FILE       merge and decide (exit 0 all passed, 1 a failure/missing)
-  python3 calibration_phase3_g4.py --local --out DIR            the whole path on STAND-IN products at tiny sizes
+  python3 simcal_phase3_g4.py --cards ROOT                 the run cards, the ask states and the manifest; check-spec
+  python3 simcal_phase3_g4.py --list                       the Geant4 array (one task per g4sim_run)
+  python3 simcal_phase3_g4.py --task K --out ROOT          one Geant4 array task (conda env `geant4` active)
+  python3 simcal_phase3_g4.py --tell ROOT                  products -> G4simEvaluator.tell; the section 6.6 check
+  python3 simcal_phase3_g4.py --evidence-list              the evidence array (after --tell)
+  python3 simcal_phase3_g4.py --evidence K --root ROOT --out DIR    one evidence task
+  python3 simcal_phase3_g4.py --merge DIR --out FILE       merge and decide (exit 0 all passed, 1 a failure/missing)
+  python3 simcal_phase3_g4.py --local --out DIR            the whole path on STAND-IN products at tiny sizes
 
 Campaigns under ROOT (default /ceph/sharedfs/work/AMS/hsinyichou/simcal-p3): `zdc-fixture` (section 15.2 synthetic ZDC,
 P0 (k_B), P0 of the response, the Birks rerun) and `rich-replica` (section 15.2 RICH replica, P3, P6, note 6). Layout per
@@ -19,7 +19,7 @@ that run), runs/<run>/ (g4sim_run's work folder and task.json), manifest.json (e
 Seeds (section 6.6, 14.1): the ZDC runs share S_0 = H(simcal-p3, zdc, fit, nominal, 0, t) and the events [0, N) (common
 random numbers: k_B and the scintillation yield draw no random number in transport without optical photons), the
 reference run S_1 = H(simcal-p3, zdc, reference, nominal, 0, t) (independent events); the RICH runs one block per beta
-sample (calibration_rich_fixture.ask: S_b = H(simcal-p3, rich, design, surrogate, b, t)), shared by its 32 design
+sample (simcal_rich_fixture.ask: S_b = H(simcal-p3, rich, design, surrogate, b, t)), shared by its 32 design
 points. Everything is `synthetic` (the ZDC example and the RICH replica are synthetic geometries)."""
 from __future__ import annotations
 
@@ -48,17 +48,17 @@ for _p in (str(ROOT), str(HERE), str(ASSETS)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import calibration_rich_fixture as R  # noqa: E402
-import calibration_zdc_fixture as Z  # noqa: E402
-import g4sim_calib_eval as E  # noqa: E402
+import simcal_rich_fixture as R  # noqa: E402
+import simcal_zdc_fixture as Z  # noqa: E402
+import g4sim_simcal_eval as E  # noqa: E402
 import g4sim_simulate as simulate  # noqa: E402
 
-from core.calibration import cherenkov_standin as C  # noqa: E402
-from core.calibration import design_g4sim as DG  # noqa: E402
-from core.calibration import emulator, identify, io, kernel_check, linear  # noqa: E402
-from core.calibration import evaluator as engine  # noqa: E402
-from core.calibration import evaluator_problem as EP  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
+from core.simcal import cherenkov_standin as C  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
+from core.simcal import emulator, identify, io, kernel_check, linear  # noqa: E402
+from core.simcal import evaluator as engine  # noqa: E402
+from core.simcal import evaluator_problem as EP  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
 
 SERIES = "simcal-p3"
@@ -920,7 +920,7 @@ def _write_csv(path: Path, rows) -> None:
 
 
 def standin_calo_products(work: Path, row: dict, wrong_birks: float | None = None) -> None:
-    """g4sim-layout products of the ZDC fixture's synthetic transport stand-in (calibration_zdc_fixture.products) at the
+    """g4sim-layout products of the ZDC fixture's synthetic transport stand-in (simcal_zdc_fixture.products) at the
     run's k_B and yield, with the edep_visible scorer's rows; `wrong_birks` makes a mislabelled run (a control)."""
     th = row["theta"]
     kb = wrong_birks if wrong_birks is not None else th.get("birks", Z.BIRKS0)

@@ -8,7 +8,7 @@ import json
 import random
 from pathlib import Path
 
-import calibration_fixtures as F
+import simcal_fixtures as F
 
 ROOT = Path(__file__).resolve().parents[2]
 SPECS = ROOT / "examples" / "zdc-synthetic-ecal" / "specs"
@@ -99,7 +99,7 @@ def documents(**over) -> dict:
 def tables() -> dict:
     from contracts.geometry import field_types
     from contracts.schema import load_schema
-    from core.calibration import model_identity as mi
+    from core.simcal import model_identity as mi
     out = {"detector-spec": field_types(), "run-card": mi.type_table(json.loads(RUN_SCHEMA.read_text()))}
     for kind, name in (("alignment-overlay", "alignment_overlay"), ("simulation-request", "simulation_request"),
                        ("response-pipeline", "response_pipeline"), ("condition-snapshot", "condition_snapshot")):
@@ -161,6 +161,6 @@ def plan() -> dict:
     nb["source"]["support_declared"] = True
     nb["quanta"]["stage"] = "scintillation"
     nb["sensor"]["distribution"] = "poisson"
-    return {"schema": "calibration-plan/1", "kernels": {}, "node_binding": {"nodes": nb, "pde_split": False},
+    return {"schema": "simcal-plan/1", "kernels": {}, "node_binding": {"nodes": nb, "pde_split": False},
             "design_points": [{"theta": {}}]}
 

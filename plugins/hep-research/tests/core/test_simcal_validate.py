@@ -14,10 +14,10 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-from core.calibration import data_release as DR  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
-from core.calibration import validate as V  # noqa: E402
+from core.simcal import data_release as DR  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
+from core.simcal import validate as V  # noqa: E402
 
 
 class NullSpace(unittest.TestCase):
@@ -265,7 +265,7 @@ class Records(unittest.TestCase):
 
 
 # ---------------------------------------------------------------- WP4 part 2: toy path, shift mode, cross-validation
-from core.calibration import shift as Sh  # noqa: E402
+from core.simcal import shift as Sh  # noqa: E402
 
 
 def shift_config():
@@ -395,13 +395,13 @@ class LearnedPath(unittest.TestCase):
     def setUpClass(cls):
         import warnings
         warnings.filterwarnings("ignore", message="The balance properties of Sobol")
-        import calibration_phase5_tv as X
+        import simcal_phase5_tv as X
         cls.X = X
         cls.gen = {"strength": 0.15}
         cls.pr = X.posthoc_problem(2000, 4000, mc_seed=51, val_mc_seed=52, generation=cls.gen, learned=LIGHT)
 
     def _fit(self):
-        from core.calibration import likelihood as L
+        from core.simcal import likelihood as L
         pr = self.pr
         truth = np.array([0.15])
         p = pr.with_data(L.Observations(y_gauss=pr.h(truth)))
@@ -515,18 +515,18 @@ class LearnedPath(unittest.TestCase):
 
 
 class S4Driver(unittest.TestCase):
-    """The S4 driver (tests/core/calibration_phase5_tv.py, optional, L9): the task table, the decision rule with a
+    """The S4 driver (tests/core/simcal_phase5_tv.py, optional, L9): the task table, the decision rule with a
     failing configuration reported failed (negative) next to a passing control, and the local smoke."""
 
     def test_task_table_and_rule(self):
-        import calibration_phase5_tv as X
+        import simcal_phase5_tv as X
         ref = [i for t in X.TASKS if t["kind"] == "reference" for i in range(t["i0"], t["i0"] + t["n"])]
         act = [i for t in X.TASKS if t["kind"] == "actual" for i in range(t["i0"], t["i0"] + t["n"])]
         self.assertEqual((ref, act), (list(range(X.N_REF)), list(range(X.REPS))))
         self.assertEqual(len({X._seed(j, i, k) for j in range(3) for i in range(40) for k in range(5)}), 600)
 
     def test_judge(self):
-        import calibration_phase5_tv as X
+        import simcal_phase5_tv as X
         ref = [{"i": i, "learned": float(i), "no-learned-toys": float(i) / 2} for i in range(99)]
 
         def rows(n_rej):            # p = (#{T_ref >= T} + 1) / 100: T = 99 rejects at alpha 0.05, T = 0 does not
@@ -541,7 +541,7 @@ class S4Driver(unittest.TestCase):
         """The A30 pilot's soundness flags, fixed before it runs: chi2_2-like reference and actual T with no
         non-converged toy are sound (control); 3% non-converged reference toys or a heavy reference tail are flagged
         (negatives). Never a pass condition (judged False); the pilot's seeds are disjoint from both registrations."""
-        import calibration_phase5_tv as X
+        import simcal_phase5_tv as X
         from scipy import stats
         q = stats.chi2.ppf((np.arange(200) + 0.5) / 200, 2)
         ref = [{"i": i, "learned": float(t)} for i, t in enumerate(q)]
@@ -562,7 +562,7 @@ class S4Driver(unittest.TestCase):
         import json
         import tempfile
 
-        import calibration_phase5_tv as X
+        import simcal_phase5_tv as X
         smoke = X.SMOKE
         X.SMOKE = [{"kind": "reference", "i0": 900000, "n": 1}, {"kind": "actual", "i0": 900000, "n": 1}]
         try:

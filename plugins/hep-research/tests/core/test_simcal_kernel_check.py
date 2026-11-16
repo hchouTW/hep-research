@@ -13,10 +13,10 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 sys.path.insert(0, str(ROOT / "adapters" / "geant4" / "assets"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import design  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration import kernel_check, linear  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import design  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal import kernel_check, linear  # noqa: E402
 
 POINTS = [{"theta": 0.5}, {"theta": 0.25}, {"theta": 0.4}]
 
@@ -56,7 +56,7 @@ class NormalDensityRecord(unittest.TestCase):
         """A property of P0 on the toy detector (A23, A24): with the photon kernel registered as normal instead of
         Poisson, P0 passes inside the narrow prior box (light yield 97-103, large photon counts). Section 15.3.19's case
         is judged where the density matters, on the Poisson-interval LY reweighting of the g4sim path
-        (test_calibration_evaluator_problem.PoissonIntervalLightYield)."""
+        (test_simcal_evaluator_problem.PoissonIntervalLightYield)."""
         plan = copy.deepcopy(H.toy_design()["plan"])
         plan["evaluator"]["events"] = 20_000
         plan["kernels"]["photon_generation"]["registration"] = {"density": "normal"}
@@ -123,7 +123,7 @@ class ReviewFixes(unittest.TestCase):
         self.assertEqual(r["status"], "passed", r["points"])
 
     def test_f4_rerun_streams_per_point_are_distinct(self):
-        from core.calibration.toy import _streams
+        from core.simcal.toy import _streams
         a = _streams((20261111, 2), 0, 3, 1, 50)
         b = _streams((20261113, 0), 0, 3, 1, 50)
         self.assertFalse(np.allclose(a, b))
@@ -149,9 +149,9 @@ def calorimeter(r=0.5, seed=21, n=300, observables=("pe_std",), thetas=("birks",
                 coupling="g4sim"):
     """The fixture's evaluator over a nominal batch and runs told at k_B points (the same events: a k_B rerun of
     g4sim's transport without optical photons draws no extra random number); `synthetic transport stand-in`."""
-    import calibration_zdc_fixture as Z
-    from core.calibration import evaluator as engine
-    import g4sim_calib_eval  # noqa: F401  (registers the g4sim kind)
+    import simcal_zdc_fixture as Z
+    from core.simcal import evaluator as engine
+    import g4sim_simcal_eval  # noqa: F401  (registers the g4sim kind)
     bs = {"nominal": Z.batch(seed, 0, n, use="fit", set="s")}
     for kb in Z.BIRKS_PRIOR + tuple(told):
         bs[f"kb{kb}"] = Z.batch(seed, 0, n, birks=kb, point={"birks": kb}, use="fit", set="s")
@@ -174,7 +174,7 @@ class BirksSpotChecks(unittest.TestCase):
         cls.req = kernel_check.required_spot_checks(cls.c, cls.p)
 
     def test_required_are_the_two_birks_extremes(self):
-        import calibration_zdc_fixture as Z
+        import simcal_zdc_fixture as Z
         self.assertEqual([(r["parameter"], r["gate"]) for r in self.req], [("birks", "P0")])
         self.assertEqual(self.req[0]["points"], [{"birks": Z.BIRKS_PRIOR[0]}, {"birks": Z.BIRKS_PRIOR[1]}])
 
@@ -243,8 +243,8 @@ class BirksSpotChecks(unittest.TestCase):
         nowhere else. On these products the bias is the rerun's class discretization, not the nominal-split width
         bias, which photon statistics too small to see here hide (A17; the split bias is shown on the synthetic
         fixture). Which extreme is not asserted."""
-        import calibration_phase3_g4 as P3
-        import calibration_zdc_fixture as Z
+        import simcal_phase3_g4 as P3
+        import simcal_zdc_fixture as Z
         r = P3.calo_evidence("zdc-p0-birks")["result"]
         self.assertEqual(r["status"], "failed", r["points"])
         self.assertIn("p0.kernel_inconsistent", [f["code"] for f in r["findings"]])
@@ -264,7 +264,7 @@ class SpotCheckApplicability(unittest.TestCase):
     """Section 15.3.16 (the synthetic ZDC cases) and section 5.4 (r and the light yield)."""
 
     def req(self, thetas, methods=None, priors=None):
-        import calibration_zdc_fixture as Z
+        import simcal_zdc_fixture as Z
         c = Z.contract(thetas=thetas, priors=priors)
         p = Z.plan({"nominal": Z.batch(5, 0, 2)}, **({"methods": methods} if methods else {}))
         return kernel_check.required_spot_checks(c, p)
@@ -284,7 +284,7 @@ class SpotCheckApplicability(unittest.TestCase):
         self.assertEqual([(x["parameter"], x["gate"]) for x in r], [("birks", "P6")])
         self.assertEqual(design.applicability({"birks": "surrogate-model"})["gates"]["P0"], "not-applicable")
         held = design.design_points({"birks": (0.02, 0.4)}, 8, 1, held_back=2, spot_checks=r[0]["points"])
-        from core.calibration import emulator as EM
+        from core.simcal import emulator as EM
         EM.check_spot_checks(held["held_back"], r[0]["points"], ["birks"])          # held back: no exception
         with self.assertRaises(EM.EmulatorError):
             EM.check_spot_checks(held["held_back"][:2], r[0]["points"], ["birks"])

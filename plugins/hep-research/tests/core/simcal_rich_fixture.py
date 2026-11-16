@@ -4,7 +4,7 @@
 whole spectrum: n(E) -> s n(E)), both resimulation. Here only the Slurm-scale configuration is built: the documents at
 each design point and beta sample, and the run cards with one seed block and event interval per beta sample (common
 random numbers across the design points, independent samples), as G4simEvaluator.ask does for a scalar binding. No
-Geant4 run here (each array needs the user's approval). The unit tests use core/calibration/cherenkov_standin.py.
+Geant4 run here (each array needs the user's approval). The unit tests use core/simcal/cherenkov_standin.py.
 
 Everything here is `synthetic`."""
 from __future__ import annotations
@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import design_g4sim as DG  # noqa: E402
+from core.simcal import design_g4sim as DG  # noqa: E402
 from core.canonical import canonical_sha256  # noqa: E402
 
 CASE = ROOT / "profiles" / "reference" / "geometry-cases" / "cases" / "ams02-rich-replica"

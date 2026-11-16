@@ -2,25 +2,25 @@
 """Propagation (simulator calibration workflow, Part B section 10.4; owner of the export of the principal components
 of the joint posterior and of the shared-nuisance versions; phase 2).
 
-  calib_propagate.py export  --input FILE    {theta_hat, zeta_hat, Sigma, i_theta, i_zeta, Sigma_boot?, w?, G_s?,
+  simcal_propagate.py export  --input FILE    {theta_hat, zeta_hat, Sigma, i_theta, i_zeta, Sigma_boot?, w?, G_s?,
                                               zeta_keys?}: G_xi, G_zeta (one joint regression), Sigma_zeta, G_s
-  calib_propagate.py version --payload FILE  update_digest and version id (acyclic)
-Phase 3 (efficiency-map bases, section 6.7, D28, 15.3a; the engine in core/calibration/map_basis.py):
-  calib_propagate.py map-basis --maps FILE --replicas R [--jacobian FILE] [--predictions FILE]
+  simcal_propagate.py version --payload FILE  update_digest and version id (acyclic)
+Phase 3 (efficiency-map bases, section 6.7, D28, 15.3a; the engine in core/simcal/map_basis.py):
+  simcal_propagate.py map-basis --maps FILE --replicas R [--jacobian FILE] [--predictions FILE]
                      the native basis of a fixed map set ({component: map}) from g4sim's replicas 1..R, its
                      registration key; U = J B_map (--jacobian, linear in eps only) or U = M V (--predictions at the
                      R replicas, R x n_obs)
-  calib_propagate.py joint-pattern --input FILE   {bins, detections, maps, logical_run_seed, first_event, N_map,
+  simcal_propagate.py joint-pattern --input FILE   {bins, detections, maps, logical_run_seed, first_event, N_map,
                      component, R?}: the pattern table and its hash, the scan key, the table against the maps, the
                      analytic covariance and, with R, the joint-pattern replicas and their registration key
-  calib_propagate.py map-cross --input FILE   {a, b} two studies on one basis: U_a U_b^T (a per-study PCA joined by
+  simcal_propagate.py map-cross --input FILE   {a, b} two studies on one basis: U_a U_b^T (a per-study PCA joined by
                      index is rejected)
 Phase 4 (section 10.4 "Feeding back to g4sim", A21 19-g6; the engine propagate.export_g4sim):
-  calib_propagate.py g4sim --template FILE --result FILE --contract FILE --use USE [--values FILE] [--out FILE]
+  simcal_propagate.py g4sim --template FILE --result FILE --contract FILE --use USE [--values FILE] [--out FILE]
                      the result's theta-hat written into a condition-snapshot/1 or alignment-overlay/1 at the
                      contract's bindings, source_of_facts carrying the result's hash, effective grade, uses, flags
-                     and the stated use; validated against the contracts schema (check it with calib_use.py export)
-Output: one JSON object; ok (exit 0), rejected (exit 2). The conflict rules over packages are calib_deps.py's. The
+                     and the stated use; validated against the contracts schema (check it with simcal_use.py export)
+Output: one JSON object; ok (exit 0), rejected (exit 2). The conflict rules over packages are simcal_deps.py's. The
 engine needs NumPy and SciPy. Phase 2 (section 17).
 """
 from __future__ import annotations
@@ -45,7 +45,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, deps, map_basis as MB, propagate as P
+    from core.simcal import io, deps, map_basis as MB, propagate as P
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 

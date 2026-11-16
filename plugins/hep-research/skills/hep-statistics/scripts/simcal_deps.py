@@ -2,23 +2,23 @@
 """Dependencies between calibration results (simulator calibration workflow, Part B sections 5.2 clause 5, 10.2,
 10.3, 10.4; owner of hash references, cycle checks, roles derived from usage and version ids).
 
-  calib_deps.py roles   --contract FILE     upstream[] of a contract: hash citations, usages, derived roles
-  calib_deps.py cycles  --graph FILE        {result or series: [upstreams]}: a cycle is rejected (section 10.3)
-  calib_deps.py version --payload FILE      update_digest and version id of a shared-nuisance version (section 10.4)
-  calib_deps.py finalize --result FILE --payload FILE --out FILE
+  simcal_deps.py roles   --contract FILE     upstream[] of a contract: hash citations, usages, derived roles
+  simcal_deps.py cycles  --graph FILE        {result or series: [upstreams]}: a cycle is rejected (section 10.3)
+  simcal_deps.py version --payload FILE      update_digest and version id of a shared-nuisance version (section 10.4)
+  simcal_deps.py finalize --result FILE --payload FILE --out FILE
                                             write the version id into a result, then its result hash (acyclic)
 Output: one JSON object; status ok (exit 0), failed (exit 1: findings or a cycle), rejected (exit 2: unreadable
 input), written (exit 0) for finalize. Standard library only. Phase 0 (section 17); the section 10.4 conflict
 rules (`packages`) phase 2; invalidation (section 10.3, approval A21) phase 4.
-  calib_deps.py packages --input FILE      {packages, upstreams, common_sources?}: the section 10.4 decision
+  simcal_deps.py packages --input FILE      {packages, upstreams, common_sources?}: the section 10.4 decision
                                             (package split, version conflict, source overlap, common source,
                                             theta/nu split, a version of xi); failed (exit 1) with
                                             findings; forced_joint_fits lists each joint fit the conflict
                                             rules force (A21, section 19-g8: xi has no versions)
-  calib_deps.py invalidate --input FILE    {results, changes: [{old, new}], marked?}: downstreams of a revised or
+  simcal_deps.py invalidate --input FILE    {results, changes: [{old, new}], marked?}: downstreams of a revised or
                                             downgraded upstream need a redo, a same-kappa re-judgment does not
                                             (section 10.3); failed (exit 1) when any result needs a redo
-  calib_deps.py identity --input FILE      {result, current, record?, basis?}: a changed masked identity item
+  simcal_deps.py identity --input FILE      {result, current, record?, basis?}: a changed masked identity item
                                             (section 5.1) needs a redo unless a T2 record registered before the new
                                             build passes (the shift propagated through the result's A_theta,
                                             TOST per theta_i at 0.1 sigma_tot,i, power se <= 0.025 sigma_tot,i,
@@ -43,7 +43,7 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
 import argparse
 import sys
 
-from core.calibration import deps, io
+from core.simcal import deps, io
 
 
 def main(argv=None) -> int:

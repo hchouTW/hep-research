@@ -4,7 +4,7 @@ The training side of a classifier-estimated density ratio that reweights stored 
 correction node: the likelihood-ratio trick, cross-fitting, probability calibration with the prior-ratio correction,
 and the effective sample size of the weights. It is written for the simulator calibration workflow (Part B,
 `docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md`: §3.6, §6.2, §6.7, §8.2 P0, G4 and G4-L;
-the engine is hep-statistics, `../../hep-statistics/scripts/calib_reweight.py`), and it applies to any classifier
+the engine is hep-statistics, `../../hep-statistics/scripts/simcal_reweight.py`), and it applies to any classifier
 reweighting of stored events (DCTR-style reweighting, BDT reweighting). Weights in training in general:
 [ml-analysis-weights.md](ml-analysis-weights.md). Calibration in general:
 [uncertainty-and-calibration.md](uncertainty-and-calibration.md). Sources were looked up on INSPIRE-HEP and arXiv on

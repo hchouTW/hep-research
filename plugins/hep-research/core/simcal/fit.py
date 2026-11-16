@@ -1,7 +1,7 @@
 """The inference engine of Part B section 7 (phase 2, WP2): minimization, the section 7.3 reference-point iteration,
 the section 7.4 multi-start and basins, non-convergence classes and the ratio test, and the fit gates G1, G2, G6, G7
-(with locally linear toys and the linearity check, section 8.5). `calib_fit.py` is its CLI; the ensembles of
-`calib_closure.py`, `calib_design.py`, `calib_interval.py` and `calib_validate.py` call `run_estimation_ensemble`,
+(with locally linear toys and the linearity check, section 8.5). `simcal_fit.py` is its CLI; the ensembles of
+`simcal_closure.py`, `simcal_design.py`, `simcal_interval.py` and `simcal_validate.py` call `run_estimation_ensemble`,
 `testing_pvalue`, `k_star` and `w_factor` here (section 14: one implementation).
 
 A `Problem` supplies the model:

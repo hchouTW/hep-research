@@ -1,4 +1,4 @@
-"""The locking report of calib_data and its use by calib_contract check (Part B sections 2.1, 5.2 clause 9, 17)."""
+"""The locking report of simcal_data and its use by simcal_contract check (Part B sections 2.1, 5.2 clause 9, 17)."""
 from __future__ import annotations
 
 import json
@@ -9,13 +9,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import contract as cc  # noqa: E402
-from core.calibration import data_checks as D  # noqa: E402
-from core.calibration import toy  # noqa: E402
-from core.calibration import toy_problem as TP  # noqa: E402
+from core.simcal import contract as cc  # noqa: E402
+from core.simcal import data_checks as D  # noqa: E402
+from core.simcal import toy  # noqa: E402
+from core.simcal import toy_problem as TP  # noqa: E402
 
 NAMES = ["beam2_e_mean", "beam2_e_width", "light_e_mean", "spe_e_mean"]
-HASHES = {"contract": cc.lock_hash({})}         # the report of calib_data is bound to the contract it checked (F18)
+HASHES = {"contract": cc.lock_hash({})}         # the report of simcal_data is bound to the contract it checked (F18)
 
 
 def problem():

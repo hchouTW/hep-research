@@ -1,4 +1,4 @@
-"""The phase-4 gate harness (tests/core/calibration_phase4_gates.py): its judging rule on recorded outcomes."""
+"""The phase-4 gate harness (tests/core/simcal_phase4_gates.py): its judging rule on recorded outcomes."""
 from __future__ import annotations
 
 import sys
@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase4_gates as G  # noqa: E402
+import simcal_phase4_gates as G  # noqa: E402
 
 
 class Judge(unittest.TestCase):

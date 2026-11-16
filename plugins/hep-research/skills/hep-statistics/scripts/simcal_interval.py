@@ -3,8 +3,8 @@
 Feldman-Cousins-style and toy-calibrated constructions, MCMC credible intervals, the interval widening of shift mode
 and the inference flags of section 15.3a; phase 2).
 
-  calib_interval.py profile --contract FILE --plan FILE --values FILE --parameter NAME [--level 0.68]
-  calib_interval.py total   --sigma-q X --level L [--shift D1,D2,...] [--sigma-boot X --w W] [--toy-calibrated]
+  simcal_interval.py profile --contract FILE --plan FILE --values FILE --parameter NAME [--level 0.68]
+  simcal_interval.py total   --sigma-q X --level L [--shift D1,D2,...] [--sigma-boot X --w W] [--toy-calibrated]
 Profile scan points are not iterated (V fixed at the nominal fit's convergence) and a scan point that does not
 converge stays inside the interval. Output: one JSON object; ok (exit 0), rejected (exit 2). Phase 2 (section 17).
 """
@@ -30,7 +30,7 @@ import sys
 try:
     MISSING = None
     import numpy as np
-    from core.calibration import io, fit as F, interval, problems, toy_problem
+    from core.simcal import io, fit as F, interval, problems, toy_problem
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -62,7 +62,7 @@ def _common(p, values=True):
     p.add_argument("--release")
     if values:
         p.add_argument("--values", required=True, help="calibration values (JSON {observable: value}) provided by "
-                       "calib_data.py provide, which records the fit read")
+                       "simcal_data.py provide, which records the fit read")
     p.add_argument("--sigma-noise", type=float)
     p.add_argument("--seed", type=int, default=20261130)
 

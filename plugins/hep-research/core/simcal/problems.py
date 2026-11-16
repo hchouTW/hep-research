@@ -1,7 +1,7 @@
 """The fit problem of a contract, a plan and calibration values (phase 2): the factory the phase-2 CLIs use.
 
 Phase 2 knows the toy-detector evaluators of `evaluator.py` (section 17: phases 0-2 use only the toy detector); the
-g4sim evaluator is phase 3. Calibration values are provided by `calib_data.py` alone (data_release.Ledger
+g4sim evaluator is phase 3. Calibration values are provided by `simcal_data.py` alone (data_release.Ledger
 .provide_values, which records the fit read); this module receives them.
 """
 from __future__ import annotations

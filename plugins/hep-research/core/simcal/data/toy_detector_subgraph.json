@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "toy_detector_subgraph",
  "description": "Subgraph variant of the toy detector (section 15.1): the calorimeter branch only, no merge node.",
  "status": "synthetic",

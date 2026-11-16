@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "tracker",
  "description": "Silicon or gas tracker (section 3.1, derivation basis (2)) with a pair of overlapping layers (comparison node: position difference).",
  "status": "synthetic",

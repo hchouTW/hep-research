@@ -1,4 +1,4 @@
-"""Input and output of the calib_*.py scripts (Part B section 14 conventions): JSON in, one JSON object out with a
+"""Input and output of the simcal_*.py scripts (Part B section 14 conventions): JSON in, one JSON object out with a
 `status` key, exit codes 0 normal, 1 negative decision, 2 input error, 3 incomplete; the ledger written atomically
 under an exclusive lock (the single writer of section 9.5). Standard library only."""
 from __future__ import annotations
@@ -85,7 +85,7 @@ def locked(path: str):
     try:
         fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     except FileExistsError:
-        raise InputError(f"{lock} exists: another calib_data.py is writing this ledger (single writer)") from None
+        raise InputError(f"{lock} exists: another simcal_data.py is writing this ledger (single writer)") from None
     except OSError as exc:
         raise InputError(f"cannot lock {path}: {exc.strerror or exc}") from None
     try:
@@ -104,12 +104,12 @@ def guard_stdout_encoding() -> None:
 
 
 def contract_and_plan(contract_path: str, plan_path: str | None = None) -> tuple[dict, dict | None, dict]:
-    """(contract, plan, extras) from a calibration-contract/1 and a calibration-plan/1, or from a calibration-fixture/1
+    """(contract, plan, extras) from a simcal-contract/1 and a simcal-plan/1, or from a simcal-fixture/1
     holding both (extras: its other keys, e.g. the design fixture's synthetic `systematics`)."""
     doc = load(contract_path)
     if not isinstance(doc, dict):
         raise InputError(f"{contract_path}: a contract or fixture is a JSON object")
-    if doc.get("schema") == "calibration-fixture/1":
+    if doc.get("schema") == "simcal-fixture/1":
         contract, plan = doc.get("contract"), doc.get("plan")
         extras = {k: v for k, v in doc.items() if k not in ("contract", "plan")}
     else:
@@ -141,7 +141,7 @@ def jsonable(x):
 def systematics(release_path: str | None, extras: dict) -> list | None:
     """The eta columns' source: the `systematic` component of a calibration release (readable; the sealed components
     are never provided, section 2.1): the release file given, else a design fixture's synthetic release."""
-    from core.calibration import data_release as data
+    from core.simcal import data_release as data
     r = load(release_path) if release_path else extras.get("release")
     if r is not None:
         try:

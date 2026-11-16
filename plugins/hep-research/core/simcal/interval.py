@@ -1,5 +1,5 @@
 """Intervals (Part B section 7.5, with the section 7.3 rules for scans and interval toys; phase 2, WP3).
-`calib_interval.py` is the CLI and the only owner of intervals and of the inference flags (section 15.3a).
+`simcal_interval.py` is the CLI and the only owner of intervals and of the inference flags (section 15.3a).
 
 - `profile_interval`: q(theta_i) = D_profile(theta_i) - D-hat <= chi2_1 quantile (1 for 68%, 3.84 for 95%), V fixed at
   the nominal fit's convergence (scan points are not iterated); scan points started from the section 7.4 starts and

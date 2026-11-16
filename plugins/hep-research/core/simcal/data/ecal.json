@@ -1,5 +1,5 @@
 {
- "schema": "calibration-fixture/1",
+ "schema": "simcal-fixture/1",
  "fixture": "ecal",
  "description": "Electromagnetic calorimeter (section 3.1, derivation basis (1)) with a pair of overlapping modules (comparison node: energy ratio).",
  "status": "synthetic",

@@ -10,11 +10,11 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import identify as I  # noqa: E402
-from core.calibration import interval as Iv  # noqa: E402
-from core.calibration import shift as Sh  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import identify as I  # noqa: E402
+from core.simcal import interval as Iv  # noqa: E402
+from core.simcal import shift as Sh  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
 
 TRUTH = [0.5, -0.3, 1.0]
 

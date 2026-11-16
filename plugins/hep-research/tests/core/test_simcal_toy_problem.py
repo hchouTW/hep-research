@@ -10,10 +10,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import problems  # noqa: E402
-from core.calibration import toy  # noqa: E402
-from core.calibration import toy_problem as TP  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import problems  # noqa: E402
+from core.simcal import toy  # noqa: E402
+from core.simcal import toy_problem as TP  # noqa: E402
 
 NAMES = [f"beam{e}_e_mean" for e in (1, 2, 3, 4)] + [f"beam{e}_e_width" for e in (1, 2, 3, 4)] + \
     ["light_e_mean", "light_e_width", "spe_e_mean", "spe_e_width"]

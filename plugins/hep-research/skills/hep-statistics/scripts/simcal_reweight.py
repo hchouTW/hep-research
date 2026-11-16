@@ -2,15 +2,15 @@
 """Event weights of the simulator calibration workflow (Part B sections 3.6, 6.1; owner of the weights; G4 is
 phase 2 and G4-L phase 5).
 
-  calib_reweight.py weights --contract FILE [--plan FILE] --theta FILE
+  simcal_reweight.py weights --contract FILE [--plan FILE] --theta FILE
 The weights of the section 3.6 formula at theta' (a JSON object of parameter values; the others at the generation
 point) for the plan's reweighted parameters, with its proposal mixture: per run the Kish effective sample size, per
 observable the N_eff over the events entering it (D41), the largest weight fraction, and the runs with missing support
 (events not recorded at a reweighted node: zero suppression, filtering). With S_q empty and theta' at the generation
 point every weight is 1. Output: one JSON object; ok (exit 0), failed (exit 1: missing support), rejected (exit 2),
-incomplete (exit 3). The engine (core/calibration) needs NumPy and SciPy. Phase 1 (section 17).
+incomplete (exit 3). The engine (core/simcal) needs NumPy and SciPy. Phase 1 (section 17).
 
-  calib_reweight.py g4l --contract FILE [--plan FILE] [--points FILE] [--alpha A]
+  simcal_reweight.py g4l --contract FILE [--plan FILE] [--points FILE] [--alpha A]
 G4-L (phase 5, section 8.2): for a plan with a learned density ratio (one post-hoc correction node, section 6.2),
 the held-out closure of every fold at >= 3 theta' (default P0's points), propagated to theta with A, in the form of P0;
 the structural record (cross-fitting, probability calibration, prior-ratio correction) and the contract's alpha
@@ -39,7 +39,7 @@ import sys
 
 try:
     MISSING = None
-    from core.calibration import design, evaluator, io, reweight
+    from core.simcal import design, evaluator, io, reweight
 except ImportError as _exc:                   # the engine needs NumPy and SciPy: a JSON message, exit 2
     MISSING = str(_exc)
 
@@ -111,7 +111,7 @@ def main(argv=None) -> int:
 def required_points_missing(ev, contract, plan, points) -> list:
     """Section 8.2 note 1 for user-given G4-L points (A33, review F13): the section 5.4 spot checks of the plan (P0's,
     before any evaluation) and the worst-ESS point of P0's scan (kernel_check.default_points) must be among them."""
-    from core.calibration import emulator, kernel_check
+    from core.simcal import emulator, kernel_check
     out = []
     spots = kernel_check.missing_spot_checks(points, kernel_check.required_spot_checks(contract, plan), "P0")
     if spots:
@@ -126,8 +126,8 @@ def required_points_missing(ev, contract, plan, points) -> list:
 
 
 def _g4l(ev, contract, plan, args):
-    from core.calibration import design as design_mod
-    from core.calibration import kernel_check, learned, linear
+    from core.simcal import design as design_mod
+    from core.simcal import kernel_check, learned, linear
     methods = {p: ev.default_method(p) for p in ev.parameters}
     if design_mod.applicability(methods)["gates"]["G4-L"] != "applicable":
         return {"gate": "G4-L", "status": "not-applicable", "reason": "the plan has no learned density ratio "

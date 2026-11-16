@@ -2,10 +2,10 @@
 `docs/dev/simulator-calibration/simcal-tasks/phase-3.md`, "Thresholds and test designs"; wave 3, WP-H). Not a unit test
 module.
 
-  python3 calibration_phase3_gates.py --list                        the task table (JSON: index, family, key, kwargs)
-  python3 calibration_phase3_gates.py --task K --out DIR            one Slurm array task (seeds from the task's own keys)
-  python3 calibration_phase3_gates.py --merge DIR --out FILE        merge, decide each item against its registered rule
-  python3 calibration_phase3_gates.py --local --out FILE            the code path at tiny sizes (`smoke`, not evidence)
+  python3 simcal_phase3_gates.py --list                        the task table (JSON: index, family, key, kwargs)
+  python3 simcal_phase3_gates.py --task K --out DIR            one Slurm array task (seeds from the task's own keys)
+  python3 simcal_phase3_gates.py --merge DIR --out FILE        merge, decide each item against its registered rule
+  python3 simcal_phase3_gates.py --local --out FILE            the code path at tiny sizes (`smoke`, not evidence)
 
 Families (one task each unless stated; every task a few minutes):
 - `units`: the section 17 gate parts carried by existing unit tests, run as gate items (each test's outcome recorded;
@@ -45,30 +45,30 @@ for _p in (str(ROOT), str(HERE), str(ROOT / "adapters" / "geant4" / "assets")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import calibration_phase2_cals as CA  # noqa: E402
-import calibration_phase2_cals_c as CC  # noqa: E402
-import calibration_phase2_gates as G  # noqa: E402
-import calibration_phase3_g4 as P3  # noqa: E402
+import simcal_phase2_cals as CA  # noqa: E402
+import simcal_phase2_cals_c as CC  # noqa: E402
+import simcal_phase2_gates as G  # noqa: E402
+import simcal_phase3_g4 as P3  # noqa: E402
 
-from core.calibration import closure as C  # noqa: E402
-from core.calibration import emulator as EM  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import identify  # noqa: E402
-from core.calibration import interval as IV  # noqa: E402
-from core.calibration import io  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
-from core.calibration import shift as Sh  # noqa: E402
-from core.calibration import toy  # noqa: E402
-from core.calibration import toy_problem as TP  # noqa: E402
+from core.simcal import closure as C  # noqa: E402
+from core.simcal import emulator as EM  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import identify  # noqa: E402
+from core.simcal import interval as IV  # noqa: E402
+from core.simcal import io  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
+from core.simcal import shift as Sh  # noqa: E402
+from core.simcal import toy  # noqa: E402
+from core.simcal import toy_problem as TP  # noqa: E402
 
 warnings.filterwarnings("ignore", message="The balance properties of Sobol")
 LABEL = "synthetic"
 SEED = 20261300
-FILES = ["core/calibration/" + f for f in ("closure.py", "emulator.py", "evaluator_problem.py", "fit.py", "interval.py",
+FILES = ["core/simcal/" + f for f in ("closure.py", "emulator.py", "evaluator_problem.py", "fit.py", "interval.py",
                                             "likelihood.py", "shift.py", "toy.py", "toy_problem.py")] + \
-    ["adapters/geant4/assets/g4sim_calib_eval.py", "tests/core/calibration_zdc_fixture.py",
-     "tests/core/calibration_phase3_g4.py",
-     "tests/core/calibration_phase3_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-3.md"]
+    ["adapters/geant4/assets/g4sim_simcal_eval.py", "tests/core/simcal_zdc_fixture.py",
+     "tests/core/simcal_phase3_g4.py",
+     "tests/core/simcal_phase3_gates.py", "docs/dev/simulator-calibration/simcal-tasks/phase-3.md"]
 
 
 def cal_seed(c: int, r: int) -> int:
@@ -111,13 +111,13 @@ class _Problem(TP.ToyProblem):
 
 # ================================================================== units: gate parts carried by unit tests
 # kind: "negative" (the test asserts the negative's finding and its positive control), "positive"
-EMULATOR_TESTS = "test_calibration_emulator."
-PROBLEM_TESTS = "test_calibration_evaluator_problem."
-EVALUATOR_TESTS = "test_calibration_g4sim_eval."
-COUPLING_TESTS = "test_calibration_g4sim_eval_coupling."
-KERNEL_TESTS = "test_calibration_kernel_check."
-MAP_TESTS = "test_calibration_map."
-PDE_TESTS = "test_calibration_pde_split."
+EMULATOR_TESTS = "test_simcal_emulator."
+PROBLEM_TESTS = "test_simcal_evaluator_problem."
+EVALUATOR_TESTS = "test_simcal_g4sim_eval."
+COUPLING_TESTS = "test_simcal_g4sim_eval_coupling."
+KERNEL_TESTS = "test_simcal_kernel_check."
+MAP_TESTS = "test_simcal_map."
+PDE_TESTS = "test_simcal_pde_split."
 UNIT_ITEMS = {
     "p6_negatives": {
         "part": "P6 negative tests",
@@ -270,11 +270,11 @@ def calo_fit_block(r0: int, reps: int, n_mc: int = CALO_MC, exposure: int = CALO
     """Repetition r: the fixture's nominal batch (n_mc events), a truth batch (n_truth events, the G8 truth of D6),
     five sigma-noise batches; theta = (light yield, RESOLUTIONSCALE) by re-digitization (the evaluator's coupled
     default); pseudo-data of `exposure` events resampled from the truth batch; the fit from the prior centre."""
-    import calibration_zdc_fixture as Z
-    import g4sim_calib_eval  # noqa: F401  (registers the g4sim evaluator)
+    import simcal_zdc_fixture as Z
+    import g4sim_simcal_eval  # noqa: F401  (registers the g4sim evaluator)
 
-    from core.calibration import evaluator
-    from core.calibration import evaluator_problem as EP
+    from core.simcal import evaluator
+    from core.simcal import evaluator_problem as EP
     rows = []
     for r in range(r0, r0 + reps):
         s = cal_seed(40, r) % 2 ** 31
@@ -337,11 +337,11 @@ def calo_fit_g4_block(r0: int, reps: int, exposure: int = CALO_EXPOSURE, root: P
     `exposure` events resampled from the independent `reference` run (20,000 Geant4 events) digitized at the truth;
     theta = `thetas` (the light yield: RESOLUTIONSCALE is not identifiable on these products, whose pe_std is shower-
     dominated; P3 fails for both, recorded); the fit from the prior centre. Blocks are shared across repetitions."""
-    import calibration_zdc_fixture as Z
-    import g4sim_calib_eval  # noqa: F401  (registers the g4sim evaluator)
+    import simcal_zdc_fixture as Z
+    import g4sim_simcal_eval  # noqa: F401  (registers the g4sim evaluator)
 
-    from core.calibration import evaluator
-    from core.calibration import evaluator_problem as EP
+    from core.simcal import evaluator
+    from core.simcal import evaluator_problem as EP
     root = Path(root or os.environ.get(P3.PRODUCTS_ENV) or P3.OUT_ROOT)
     nom = P3.told_batch(root, P3.CALO, "nominal")
     ref = P3.told_batch(root, P3.CALO, "reference")

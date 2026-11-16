@@ -2,10 +2,10 @@
 phase-2.md`): calibration 10 (n_min and B, note 3) and the remaining items of calibration 12 (note 4) that this engine
 can test, as Slurm job array tasks (raw per-repetition records) and local runs. Not a unit test module.
 
-  python3 calibration_phase2_cals_b.py --task N --out DIR          one task of the array
-  python3 calibration_phase2_cals_b.py --merge DIR --out FILE      merge and judge the array (exit 0 passed, 1 failed)
-  python3 calibration_phase2_cals_b.py --local NAME --out FILE     a local item
-  python3 calibration_phase2_cals_b.py --smoke NAME --out FILE     the code path at tiny sizes (not evidence)
+  python3 simcal_phase2_cals_b.py --task N --out DIR          one task of the array
+  python3 simcal_phase2_cals_b.py --merge DIR --out FILE      merge and judge the array (exit 0 passed, 1 failed)
+  python3 simcal_phase2_cals_b.py --local NAME --out FILE     a local item
+  python3 simcal_phase2_cals_b.py --smoke NAME --out FILE     the code path at tiny sizes (not evidence)
 
 Seeds: default_rng([cal_seed(c, r), j, ...]) for calibration c, repetition r and configuration j. The G8 items wait (the
 user's decision of 2026-11-12).
@@ -24,15 +24,15 @@ from scipy import stats
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-import calibration_phase2_gates as G  # noqa: E402
+import simcal_phase2_gates as G  # noqa: E402
 
-from core.calibration import design_noise as DN  # noqa: E402
-from core.calibration import fit as F  # noqa: E402
-from core.calibration import interval as IV  # noqa: E402
-from core.calibration import io  # noqa: E402
-from core.calibration import likelihood as L  # noqa: E402
-from core.calibration import toys_linear as T  # noqa: E402
-from core.calibration import validate as V  # noqa: E402
+from core.simcal import design_noise as DN  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import interval as IV  # noqa: E402
+from core.simcal import io  # noqa: E402
+from core.simcal import likelihood as L  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
+from core.simcal import validate as V  # noqa: E402
 
 cal_seed = G.cal_seed
 ALPHA_TV = 0.05

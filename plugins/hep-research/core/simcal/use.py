@@ -1,5 +1,5 @@
 """Evidence grades, flags and uses of calibration results (Part B section 10.2, governed by Appendix C; owner
-calib_use.py).
+simcal_use.py).
 
 assign() is table C.2 (own grade, rules 1, 0, 2, 3a-3f, 4, first match), defined only for resolved inputs (I25).
 effective() is table C.3: the pending step, the cap by central upstreams and by grade-limiting flags, and the uses.
@@ -10,16 +10,16 @@ check_export() is the offline check of an exported g4sim condition-snapshot/1 or
 "Feeding back to g4sim", 15.3.19, A21 19-g6): the calibration result's hash in source_of_facts and the use matrix.
 
 These must agree input by input with the reference implementation calib_use_decision_table.py (the version attached
-to v7.37.4, SHA-256 c5279adf...); tests/core/test_calibration_use.py checks that over Appendix C's test scope and runs
+to v7.37.4, SHA-256 c5279adf...); tests/core/test_simcal_use.py checks that over Appendix C's test scope and runs
 the reference's invariants on these functions. Input fields keep the reference's names (Appendix C.1, last column).
-Roles come from core.calibration.deps (owner calib_deps.py). Standard library only.
+Roles come from core.simcal.deps (owner simcal_deps.py). Standard library only.
 """
 from __future__ import annotations
 
 import itertools
 from typing import Any
 
-from core.calibration.deps import derive_role, is_hash_reference
+from core.simcal.deps import derive_role, is_hash_reference
 from core.canonical import canonical_sha256
 
 GRADES = ("failed", "projection", "calibrated-unvalidated", "validated-in-scope")

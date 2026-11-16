@@ -1,4 +1,4 @@
-"""The phase-3 Geant4 production and evidence drivers (tests/core/calibration_phase3_g4.py, wave 3 WP-I): the run cards
+"""The phase-3 Geant4 production and evidence drivers (tests/core/simcal_phase3_g4.py, wave 3 WP-I): the run cards
 (seeds and intervals of section 6.6, check-spec and the simulate preflight), the Geant4 task's refusals, tell and the
 section 6.6 check on told products, the plane radius of the RICH photons, and the whole path on STAND-IN products
 (`--local`, never Geant4) with the merge decisions. Each negative test has a positive control."""
@@ -18,11 +18,11 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-import calibration_phase3_g4 as G  # noqa: E402
-import calibration_rich_fixture as R  # noqa: E402
-import calibration_zdc_fixture as Z  # noqa: E402
+import simcal_phase3_g4 as G  # noqa: E402
+import simcal_rich_fixture as R  # noqa: E402
+import simcal_zdc_fixture as Z  # noqa: E402
 
-from core.calibration import io  # noqa: E402
+from core.simcal import io  # noqa: E402
 
 SCRATCH = {"dir": tempfile.TemporaryDirectory()}        # removed at interpreter exit (TemporaryDirectory's finalizer)
 
@@ -209,7 +209,7 @@ class PlaneRadius(unittest.TestCase):
         self.assertTrue(np.isnan(G.plane_radius(b2, self.detector())[0]))
 
     def test_merge_parts_keeps_photons(self):
-        import g4sim_calib_eval as E
+        import g4sim_simcal_eval as E
         parts = [{"logical_run_seed": 1, "first_event": 0, "events": 1, "cells": [], "primaries": [], "photons": [[0]]},
                  {"logical_run_seed": 1, "first_event": 1, "events": 1, "cells": [], "primaries": [], "photons": [[1]]}]
         self.assertEqual(E.merge_parts(parts)["photons"], [[0], [1]])

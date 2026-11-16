@@ -1,4 +1,4 @@
-"""core/calibration/chain (simulator calibration phase 0): the stage graph, candidate methods and P4.
+"""core/simcal/chain (simulator calibration phase 0): the stage graph, candidate methods and P4.
 
 Gate (section 17, phase 0): the three fixtures (ECAL, RICH, tracker; ECAL and tracker each with a pair of overlapping
 modules) can derive candidate methods and reachability; the negative test of P4 (section 15.3.1) passes. Also the
@@ -13,9 +13,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import chain  # noqa: E402
+from core.simcal import chain  # noqa: E402
 
-FIXTURE_DIR = ROOT / "core" / "calibration" / "data"
+FIXTURE_DIR = ROOT / "core" / "simcal" / "data"
 
 
 def load(name):

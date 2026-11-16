@@ -4,10 +4,10 @@ section 7.1 interface for g4sim-backed problems, over the products of g4sim runs
 three g4sim specifications with `response-pipeline/1`. No Geant4 runs here: resimulation is requested (run cards) through
 ask/tell and the products are told back.
 
-  g4sim_calib_eval.py evaluate --plan PLAN.json --theta THETA.json [--batch NAME]
-  g4sim_calib_eval.py ask      --plan PLAN.json --points POINTS.json --state STATE.json --series S --study S
+  g4sim_simcal_eval.py evaluate --plan PLAN.json --theta THETA.json [--batch NAME]
+  g4sim_simcal_eval.py ask      --plan PLAN.json --points POINTS.json --state STATE.json --series S --study S
                                --events N [--use design] [--ensemble surrogate] [--out DIR]
-  g4sim_calib_eval.py tell     --state STATE.json --point ID --run-id RUN_ID --parts BATCH.json [BATCH.json ...]
+  g4sim_simcal_eval.py tell     --state STATE.json --point ID --run-id RUN_ID --parts BATCH.json [BATCH.json ...]
 Output: one JSON object with a status key; exit 0 ok, 2 rejected (bad input), 3 incomplete (a resimulation is needed).
 
 Methods (derived from the binding of each theta, section 11.4 Table 2; outside to inside, section 6.5):
@@ -23,7 +23,7 @@ Methods (derived from the binding of each theta, section 11.4 Table 2; outside t
   efficiencies p eps_c of the efficiency-1 map (route 2_1), or the per-photon thinning nested in p (route 1); route 3
   ({route 3, photons, primaries (the efficiency-1 mapping run's CSV files), centre_mm, table, parameter and pointer
   /pde/table/value/<k> when a table value is theta}): sum_i PDE(E_i)/n_b and the PDE-weighted transit; all by
-  `core/calibration/pde_split.py`;
+  `core/simcal/pde_split.py`;
 - any other detector-spec, run-card or request field: resimulation (`g4sim_run`), requested by ask.
 The detector-spec Birks constant stays nominal (g4sim_run refuses a read-back difference, section 11.4)."""
 from __future__ import annotations
@@ -45,11 +45,11 @@ try:  # NumPy (and the engine, which needs it) is reported by main() as a missin
     import numpy as np
 
     import g4sim_simulate as simulate
-    from core.calibration import design_g4sim as DG
-    from core.calibration import evaluator as engine_evaluator
-    from core.calibration import pde_split
-    from core.calibration import io as calib_io
-    from core.calibration import reweight, toy
+    from core.simcal import design_g4sim as DG
+    from core.simcal import evaluator as engine_evaluator
+    from core.simcal import pde_split
+    from core.simcal import io as calib_io
+    from core.simcal import reweight, toy
     from core.canonical import canonical_sha256
     from core.simulation import conditions, digitize, response, rng, source_density
     from scipy import stats
@@ -58,7 +58,7 @@ except ImportError as _exc:
     MISSING = _exc.name or "numpy"
 
 KIND = "g4sim"
-STATE_SCHEMA = "g4sim-calib-eval-state/1"
+STATE_SCHEMA = "g4sim-simcal-eval-state/1"
 QUANTITIES = ("primary_energy", "edep_visible", "photoelectrons", "charge", "code", "photon_hits", "cherenkov_angle",
               "ring_radius")
 PHOTON_QUANTITIES = ("photon_hits", "cherenkov_angle", "ring_radius")
@@ -334,7 +334,7 @@ class G4simEvaluator:
     # ---- common random numbers and independence (section 6.6)
     def _check_batches(self):
         """Batches are independent sets of Geant4 events: pairwise non-overlapping (logical_run_seed, interval) unless
-        declared the same set; checked by calib_design's implementation of the section 6.6 check."""
+        declared the same set; checked by simcal_design's implementation of the section 6.6 check."""
         evs = [{"run_id": name, "use": b.get("use", "evaluation"), "set": b.get("set", name),
                 "logical_run_seed": b["logical_run_seed"], "first_event": b["first_event"], "events": b["events"],
                 "run_seed": b["logical_run_seed"], "replica": 0} for name, b in self.batches.items()]
@@ -706,7 +706,7 @@ def _load_state(path) -> dict:
 
 
 def build(spec: dict, plan: dict) -> G4simEvaluator:
-    """The builder registered with core/calibration/evaluator.py under the plan's evaluator kind `g4sim`."""
+    """The builder registered with core/simcal/evaluator.py under the plan's evaluator kind `g4sim`."""
     return G4simEvaluator(spec, plan)
 
 

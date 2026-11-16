@@ -123,8 +123,8 @@ def vmodel_columns(contract: dict, names: list[str], version: dict | None = None
     if md.get("form") == "inferred" or version is not None:
         if version is None:
             raise DesignError("linear.incomplete", "the inferred form of V_model needs its separate version "
-                              "(calib_likelihood.py vmodel-infer)")
-        from core.calibration import vmodel_infer   # noqa: PLC0415 (opt-in, phase 5)
+                              "(simcal_likelihood.py vmodel-infer)")
+        from core.simcal import vmodel_infer   # noqa: PLC0415 (opt-in, phase 5)
         try:
             comps = vmodel_infer.version_components(contract, version)
         except vmodel_infer.VmodelInferError as exc:

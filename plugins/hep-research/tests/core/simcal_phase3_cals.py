@@ -3,10 +3,10 @@
 of one configuration; the merge concatenates them and applies the registered rule (failures are reported, never
 retuned). Not a unit test module.
 
-  python3 calibration_phase3_cals.py --list                        the task table (JSON)
-  python3 calibration_phase3_cals.py --task K --out DIR            one task of the array
-  python3 calibration_phase3_cals.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
-  python3 calibration_phase3_cals.py --local --out FILE            every family at tiny sizes (`smoke`, not evidence)
+  python3 simcal_phase3_cals.py --list                        the task table (JSON)
+  python3 simcal_phase3_cals.py --task K --out DIR            one task of the array
+  python3 simcal_phase3_cals.py --merge DIR --out FILE        merge and judge (exit 0 passed, 1 failed/incomplete)
+  python3 simcal_phase3_cals.py --local --out FILE            every family at tiny sizes (`smoke`, not evidence)
 
 Families (calibration index c of the seeds):
   1 `p6`    row 2004, P6 part: the false-alarm rate of P6 with a correct (known-error) surrogate on the toy detector.
@@ -41,27 +41,27 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(HERE))
 
-import calibration_pde_fixtures as PF  # noqa: E402
-import calibration_phase1 as H1  # noqa: E402
+import simcal_pde_fixtures as PF  # noqa: E402
+import simcal_phase1 as H1  # noqa: E402
 
-from core.calibration import closure as C  # noqa: E402
-from core.calibration import design_map as DM  # noqa: E402
-from core.calibration import emulator as EM  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration import io  # noqa: E402
-from core.calibration import map_basis as MB  # noqa: E402
-from core.calibration import map_term as MT  # noqa: E402
-from core.calibration import pde_split as S  # noqa: E402
+from core.simcal import closure as C  # noqa: E402
+from core.simcal import design_map as DM  # noqa: E402
+from core.simcal import emulator as EM  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal import io  # noqa: E402
+from core.simcal import map_basis as MB  # noqa: E402
+from core.simcal import map_term as MT  # noqa: E402
+from core.simcal import pde_split as S  # noqa: E402
 from core.simulation import efficiency_map as em  # noqa: E402
 
 warnings.filterwarnings("ignore", message="The balance properties of Sobol")
 
 FLAGS = ["synthetic", "provisional-thresholds"]
-FILES = ["core/calibration/" + f for f in ("emulator.py", "evaluator.py", "toy.py", "design.py", "design_map.py",
+FILES = ["core/simcal/" + f for f in ("emulator.py", "evaluator.py", "toy.py", "design.py", "design_map.py",
                                             "map_term.py", "map_basis.py", "closure.py", "pde_split.py",
                                             "data/toy_detector_design.json")] + \
-    ["core/simulation/efficiency_map.py", "tests/core/calibration_phase3_cals.py",
-     "tests/core/calibration_pde_fixtures.py", "tests/core/calibration_phase1.py",
+    ["core/simulation/efficiency_map.py", "tests/core/simcal_phase3_cals.py",
+     "tests/core/simcal_pde_fixtures.py", "tests/core/simcal_phase1.py",
      "docs/dev/simulator-calibration/simcal-tasks/phase-3.md"]
 SEED0 = 20261312
 
@@ -116,7 +116,7 @@ _P6_CACHE: dict = {}
 
 def _p6_case(H: int):
     """The toy detector of section 15.1 with the threshold (resimulation level) evaluated by a surrogate, the three
-    single-photoelectron observables (as WP-A's toy_case), and H held-back points from calib_design's Sobol set."""
+    single-photoelectron observables (as WP-A's toy_case), and H held-back points from simcal_design's Sobol set."""
     if H not in _P6_CACHE:
         d = copy.deepcopy(H1.toy_design())
         c, p = d["contract"], d["plan"]

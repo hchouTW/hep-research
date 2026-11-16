@@ -1,13 +1,13 @@
 """The registered gate runs and section 8.7 calibrations of phase 1 of the simulator calibration workflow (task card
 `docs/dev/simulator-calibration/simcal-tasks/phase-1.md`, "Thresholds and test designs"). Not a unit test module.
 
-  python3 calibration_phase1_gates.py --gate agreement --out FILE            gate 2: reweighting and rerun agree
-  python3 calibration_phase1_gates.py --calibration p0-z --reps A:B --out FILE    calibration 1, repetitions A..B-1
-  python3 calibration_phase1_gates.py --summarize-p0-z FILE ... --out FILE   calibration 1 over all its shards
+  python3 simcal_phase1_gates.py --gate agreement --out FILE            gate 2: reweighting and rerun agree
+  python3 simcal_phase1_gates.py --calibration p0-z --reps A:B --out FILE    calibration 1, repetitions A..B-1
+  python3 simcal_phase1_gates.py --summarize-p0-z FILE ... --out FILE   calibration 1 over all its shards
 
 Every output records the commit and the SHA-256 of the files that decide it. Gate 1 (the negative tests of A0, P0, P2,
 P5) is the unit tests listed in the card; calibration 2 (A0 on the ZDC linearity example) is
-tests.core.test_calibration_preflight.A0.test_linearity_example."""
+tests.core.test_simcal_preflight.A0.test_linearity_example."""
 from __future__ import annotations
 
 import argparse
@@ -26,19 +26,19 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "core"))
 
-import calibration_phase1 as H  # noqa: E402
-from core.calibration import design, kernel_check, linear  # noqa: E402
-from core.calibration import evaluator as E  # noqa: E402
-from core.calibration.toy import observe  # noqa: E402
+import simcal_phase1 as H  # noqa: E402
+from core.simcal import design, kernel_check, linear  # noqa: E402
+from core.simcal import evaluator as E  # noqa: E402
+from core.simcal.toy import observe  # noqa: E402
 
 SEED_NOMINAL, SEED_RERUN, SEED_SCAN = 20261110, 20261111, 20261112
 N_MC = 40_000
 N_SCAN = 64
 ALPHA = 0.01
-FILES = ["core/calibration/toy.py", "core/calibration/reweight.py", "core/calibration/linear.py",
-         "core/calibration/design.py", "core/calibration/kernel_check.py", "core/calibration/evaluator.py",
-         "core/calibration/chain.py", "core/calibration/data/toy_detector_design.json",
-         "tests/core/calibration_phase1.py", "tests/core/calibration_phase1_gates.py",
+FILES = ["core/simcal/toy.py", "core/simcal/reweight.py", "core/simcal/linear.py",
+         "core/simcal/design.py", "core/simcal/kernel_check.py", "core/simcal/evaluator.py",
+         "core/simcal/chain.py", "core/simcal/data/toy_detector_design.json",
+         "tests/core/simcal_phase1.py", "tests/core/simcal_phase1_gates.py",
          "docs/dev/simulator-calibration/simcal-tasks/phase-1.md"]
 # gate 2 item 1: one case per non-generator density node, with the parameters acting entirely through its density
 NODE_CASES = [("photon_generation", ["light_yield"]), ("pde", ["pde"]), ("gain", ["gain", "enf"]),

@@ -11,7 +11,7 @@ from scipy import stats
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.calibration import reweight as R  # noqa: E402
+from core.simcal import reweight as R  # noqa: E402
 
 
 class ParetoK(unittest.TestCase):

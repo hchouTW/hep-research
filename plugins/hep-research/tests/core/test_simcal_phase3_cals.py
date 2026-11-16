@@ -1,4 +1,4 @@
-"""The phase-3 section 8.7 calibration drivers (tests/core/calibration_phase3_cals.py: rows 2004 P6, 2008, 2009): the
+"""The phase-3 section 8.7 calibration drivers (tests/core/simcal_phase3_cals.py: rows 2004 P6, 2008, 2009): the
 task table, the local smoke run of every family, the exact map covariance of the theta-noise study against its
 sampler, and the merge and decision logic, where a failing configuration is reported as failed (negative) next to a
 passing control. Synthetic; no Slurm."""
@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
 sys.path.insert(0, str(HERE))
 
-import calibration_phase3_cals as X  # noqa: E402
+import simcal_phase3_cals as X  # noqa: E402
 
 
 class TaskTable(unittest.TestCase):
