@@ -1,0 +1,85 @@
+{
+ "description": "simcal (simulator parameter calibration): the stage graph, a DAG split at every injection point (section 3.1).",
+ "type": "object",
+ "required": [
+  "nodes",
+  "edges"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "nodes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "kernel"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string",
+      "minLength": 1
+     },
+     "kernel": {
+      "enum": [
+       "density",
+       "deterministic",
+       "black-box"
+      ]
+     },
+     "kind": {
+      "enum": [
+       "stage",
+       "observation",
+       "comparison"
+      ]
+     },
+     "stage": {
+      "type": "string",
+      "minLength": 1
+     },
+     "samplable": {
+      "type": "boolean"
+     },
+     "mechanisms": {
+      "type": "array",
+      "items": {
+       "$ref": "simcal_mechanism.json"
+      }
+     },
+     "post_hoc_correction": {
+      "type": "boolean"
+     },
+     "description": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   },
+   "minItems": 1
+  },
+  "edges": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "from",
+     "to"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "from": {
+      "type": "string",
+      "minLength": 1
+     },
+     "to": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  }
+ },
+ "$comment": "simcal-stage-graph/1 (section 3.1): the semantic layer of the stage graph; must be a DAG split at every injection point (simcal_chain.py)."
+}

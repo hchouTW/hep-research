@@ -5,6 +5,41 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Proposed as 0.70.0 (minor); contracts 3.28.0 unchanged, `CORE_VERSION` 1.16.0 (from 1.15.0), `adapters/geant4` 0.18.0
+(from 0.17.1). It renames the simulator parameter calibration workflow to **simcal**: the bare word calibration means
+detector constants (hep-detector) and hep-ml owns the calibration of model outputs. The name map and the names that
+stay are in `docs/dev/simcal-naming-map.md` (approval A34).
+
+**Before you upgrade** (details in the entries below):
+- New names: `core/simcal/` (`core.simcal`), `contracts/schemas/simcal_*.json`, schema ids `simcal-*/1` (and
+  `g4sim-simcal-eval-state/1`), scripts `skills/hep-statistics/scripts/simcal_*.py` and
+  `adapters/geant4/assets/g4sim_simcal_eval.py`. Every writer emits the new ids.
+- Old names still work until 0.72.0: files with the 0.69.0 ids are read (notice `simcal.legacy_schema_id` on stderr)
+  and hashed as written, so their hash citations resolve; `import core.calibration…` warns and gives the same module
+  objects; the old script names run the new scripts, and `import g4sim_calib_eval` (how 0.69.0 code registered the
+  g4sim evaluator) warns and gives the `g4sim_simcal_eval` module. 0.72.0 removes them.
+- The schema files have no alias files: validating against `contracts/schemas/calibration_*.json` by name fails; use
+  `simcal_*.json` (they accept the old ids).
+- A migration tool that rewrites the old ids in existing files follows before 0.72.0. Until then keep old files as
+  they are: rewriting an id by hand changes the file's hash and every hash that cites it.
+
+- **simcal rename** (task card `simcal-rename-task.md`; 156 files moved, 172 files updated). The moves and name
+  substitutions change no behaviour, threshold or number: every earlier simcal gate was rerun at the renamed commit
+  against a base run at 0.69.0 (gate record `docs/dev/simulator-calibration/simcal-gates/rename-0.70.md`). The strings
+  that must not change (random-number keys, the export key and prefix written into g4sim records, the data role of
+  calibration data, hep-ml's rule codes, the frozen reference and its hash; listed in the naming map) are unchanged.
+- **Compatibility layer.** The six schema files accept the new and the old id; `core/simcal/legacy.py` (`is_schema`)
+  is used by the four readers that check an id (fixtures in `io` and `simcal_chain.py`, the T2 record in `deps`, the
+  ask/tell state in `emulator`). `core/calibration/` is a deprecated alias package (`core/OWNERS.json`:
+  `deprecated-alias`). Nineteen stubs keep the old script names; they are not skill scripts and the CLI fuzz skips them.
+  `tests/core/test_simcal_compat.py` reads 0.69.0 files made with the 0.69.0 code (`tests/core/data/legacy-0.69/`).
+- **Names in text.** The 13 simcal schemas carry a description starting "simcal (simulator parameter calibration)";
+  the hep-statistics description and its Owns line name simulator parameter calibration (1020 characters; quick load
+  25,588 bytes); `docs/routing-contract.md` gains the ownership row; new routing cases `st-simcal-*` (direct, per
+  detector type, and the ML-output and detector-calibration neighbors, each also as a natural zh-Hant prompt).
+- `adapters/geant4` 0.18.0: the g4sim evaluator is `g4sim_simcal_eval.py`; its state id is
+  `g4sim-simcal-eval-state/1`.
+
 ## 0.69.0 (2026-11-15)
 
 Minor release; contracts 3.28.0 unchanged, `CORE_VERSION` 1.15.0 (from 1.14.0: `core/calibration/` gains `pooling`, `learned` and `vmodel_infer`). Ships phase 5 of the simulator parameter calibration workflow (PR #416): partial pooling, the learned density ratio with G4-L (`provisional-thresholds`), and the inferred V_model, every result synthetic; `adapters/geant4` 0.17.1; the AMS-optionality CI rerun in two shards (PR #415); and the statistics CLI fuzz split into three modules.

@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 58,
-   "bytes": 844831,
+   "bytes": 844974,
    "uncited": 0
   },
   "hep-measurement": {
@@ -30,17 +30,17 @@
   },
   "hep-ml": {
    "references": 43,
-   "bytes": 207679,
+   "bytes": 207680,
    "uncited": 0
   },
   "hep-review": {
    "references": 10,
-   "bytes": 33805,
+   "bytes": 33811,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 209685,
+   "bytes": 209623,
    "uncited": 0
   },
   "hep-theory": {
@@ -1197,7 +1197,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d3ee1c153 2026-11-01"
+   "last_commit": "7eda91a27 2026-11-13"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -2256,7 +2256,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "9359950e2 2026-11-12"
+   "last_commit": "b5c6735cc 2026-11-14"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2777,7 +2777,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2791,7 +2791,7 @@
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/hcal.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2819,7 +2819,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
     "skills/hep-detector/scripts/calorimeter_resolution.py",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2827,8 +2827,8 @@
   {
    "path": "skills/hep-detector/references/simulation-calibration/index.md",
    "owner": "hep-detector",
-   "bytes": 5765,
-   "lines": 76,
+   "bytes": 5908,
+   "lines": 77,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/fixtures/projects/local_profile/local-profiles/exp-local/profile.json",
@@ -2947,7 +2947,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "9cf8a372f 2026-11-14"
+   "last_commit": "f02eec0a1 2026-11-16"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
@@ -2957,7 +2957,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2970,7 +2970,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2983,7 +2983,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -2996,7 +2996,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -3009,7 +3009,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "e661b3fde 2026-11-13"
@@ -3775,7 +3775,7 @@
   {
    "path": "skills/hep-ml/references/learned-density-ratio-reweighting.md",
    "owner": "hep-ml",
-   "bytes": 11558,
+   "bytes": 11559,
    "lines": 150,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3784,7 +3784,7 @@
     "skills/hep-ml/references/sbi-training.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "24a2150d1 2026-11-14"
+   "last_commit": "1ea77d4ce 2026-11-16"
   },
   {
    "path": "skills/hep-ml/references/mixed-precision.md",
@@ -4253,7 +4253,7 @@
   {
    "path": "skills/hep-review/references/domains/detector.md",
    "owner": "hep-review",
-   "bytes": 4755,
+   "bytes": 4761,
    "lines": 51,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -4261,12 +4261,12 @@
     "skills/hep-review/README.md",
     "skills/hep-review/assets/registry.json",
     "skills/hep-review/references/domains/index.md",
-    "tests/core/test_calibration_specialization.py"
+    "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "1ea77d4ce 2026-11-16"
   },
   {
    "path": "skills/hep-review/references/domains/index.md",
@@ -4588,7 +4588,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14799,
+   "bytes": 14737,
    "lines": 102,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4609,7 +4609,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "3a349fce9 2026-11-13"
+   "last_commit": "1ea77d4ce 2026-11-16"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

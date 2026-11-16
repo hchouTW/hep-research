@@ -4,7 +4,7 @@
   "synthetic"
  ],
  "part_b": "section 11.4 (g4sim binding), section 12 row TOF",
- "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "note": "A contract fragment and plan for the existing generic layer (simcal_contract.py check, simcal_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
  "notes": [
   "The scintillation emission time (decay_ns, rise_ns) is a detector-spec scintillation field other than Birks, LY and r: no Table 2 row, so it is not a theta here.",
   "TTS and the effective light speed enter through the digitization job's timing and the map's transit times, which no Table 2 row binds; the attenuation length is bound through the optical row (resimulation with a new mapping run).",
@@ -278,7 +278,7 @@
   ]
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {},
   "node_binding": {
    "nodes": {

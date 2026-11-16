@@ -4,7 +4,7 @@
   "synthetic"
  ],
  "part_b": "section 11.4 (g4sim binding), section 12 row mu detector",
- "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "note": "A contract fragment and plan for the existing generic layer (simcal_contract.py check, simcal_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
  "notes": [
   "Cluster size (sharing/3) and the r-t relation live in hashed tables (charge_sharing, drift_table): no stage parameter value, no Table 2 row.",
   "The HV-dependent gain is phi on the snapshot's gain_factor (D87); a common gas gain binds to the sensor stage of response-pipeline/1. Dead time is a cross-event effect (section 19-6), not modelled."
@@ -312,7 +312,7 @@
   ]
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {},
   "node_binding": {
    "nodes": {

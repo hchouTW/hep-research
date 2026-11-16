@@ -30,7 +30,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "chain_ecal_p4": {
    "args": [
@@ -48,7 +48,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "chain_rich_candidates": {
    "args": [
@@ -66,7 +66,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "chain_rich_p4": {
    "args": [
@@ -84,7 +84,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "chain_subgraph_p4_failed": {
    "args": [
@@ -102,7 +102,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "chain_tracker_candidates": {
    "args": [
@@ -120,7 +120,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "chain_tracker_p4": {
    "args": [
@@ -138,7 +138,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_chain.py"
+   "script": "simcal_chain.py"
   },
   "closure_decide_standard": {
    "args": [
@@ -156,7 +156,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_closure.py"
+   "script": "simcal_closure.py"
   },
   "closure_nc": {
    "args": [
@@ -174,7 +174,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_closure.py"
+   "script": "simcal_closure.py"
   },
   "closure_not_executed": {
    "args": [
@@ -190,7 +190,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_closure.py"
+   "script": "simcal_closure.py"
   },
   "contract_check_accepted": {
    "args": [
@@ -214,7 +214,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_contract.py"
+   "script": "simcal_contract.py"
   },
   "contract_check_rejected": {
    "args": [
@@ -238,7 +238,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_contract.py"
+   "script": "simcal_contract.py"
   },
   "contrib_resolution_ess": {
    "args": [
@@ -268,7 +268,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_contrib.py"
+   "script": "simcal_contrib.py"
   },
   "contrib_variance": {
    "args": [
@@ -298,7 +298,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_contrib.py"
+   "script": "simcal_contrib.py"
   },
   "deps_packages": {
    "args": [
@@ -316,7 +316,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_deps.py"
+   "script": "simcal_deps.py"
   },
   "deps_roles": {
    "args": [
@@ -334,7 +334,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_deps.py"
+   "script": "simcal_deps.py"
   },
   "deps_version": {
    "args": [
@@ -352,7 +352,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_deps.py"
+   "script": "simcal_deps.py"
   },
   "design_applicability": {
    "args": [
@@ -370,7 +370,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_bj": {
    "args": [
@@ -388,7 +388,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_linearize": {
    "args": [
@@ -409,7 +409,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_methods_poisson": {
    "args": [
@@ -430,7 +430,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_p2": {
    "args": [
@@ -448,7 +448,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_p5_declared_failed": {
    "args": [
@@ -472,7 +472,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_p5_final_method": {
    "args": [
@@ -495,7 +495,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_p7": {
    "args": [
@@ -513,7 +513,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_points": {
    "args": [
@@ -537,7 +537,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_practices": {
    "args": [
@@ -555,7 +555,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "design_support_missing": {
    "args": [
@@ -576,7 +576,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_design.py"
+   "script": "simcal_design.py"
   },
   "emulator_p6_failed": {
    "args": [
@@ -594,7 +594,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_emulator.py"
+   "script": "simcal_emulator.py"
   },
   "emulator_p6_passed": {
    "args": [
@@ -612,7 +612,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_emulator.py"
+   "script": "simcal_emulator.py"
   },
   "engine_g4_weights": {
    "function": "g4_weights",
@@ -654,7 +654,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_fit.py"
+   "script": "simcal_fit.py"
   },
   "fit_g7": {
    "args": [
@@ -675,7 +675,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_fit.py"
+   "script": "simcal_fit.py"
   },
   "fit_kstar": {
    "args": [
@@ -691,7 +691,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_fit.py"
+   "script": "simcal_fit.py"
   },
   "fit_toy": {
    "args": [
@@ -715,7 +715,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_fit.py"
+   "script": "simcal_fit.py"
   },
   "identify_g5_toy": {
    "args": [
@@ -739,7 +739,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_identify.py"
+   "script": "simcal_identify.py"
   },
   "interval_total": {
    "args": [
@@ -761,7 +761,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_interval.py"
+   "script": "simcal_interval.py"
   },
   "kernel_p0_failed": {
    "args": [
@@ -787,7 +787,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_kernel_check.py"
+   "script": "simcal_kernel_check.py"
   },
   "kernel_p0_passed": {
    "args": [
@@ -813,7 +813,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_kernel_check.py"
+   "script": "simcal_kernel_check.py"
   },
   "likelihood_binomial": {
    "args": [
@@ -831,7 +831,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_likelihood.py"
+   "script": "simcal_likelihood.py"
   },
   "likelihood_layout": {
    "args": [
@@ -849,7 +849,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_likelihood.py"
+   "script": "simcal_likelihood.py"
   },
   "p5base_evaluator_problem_standin": {
    "captured_against": "c7e5a610ff4b1f187770167f3d9bb2dc1e630e36",
@@ -917,7 +917,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_propagate.py"
+   "script": "simcal_propagate.py"
   },
   "propagate_g4sim_snapshot": {
    "args": [
@@ -949,7 +949,7 @@
    "outputs": [
     "out.json"
    ],
-   "script": "calib_propagate.py"
+   "script": "simcal_propagate.py"
   },
   "reweight_weights": {
    "args": [
@@ -973,7 +973,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_reweight.py"
+   "script": "simcal_reweight.py"
   },
   "use_judge": {
    "args": [
@@ -991,7 +991,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_use.py"
+   "script": "simcal_use.py"
   },
   "use_lookup": {
    "args": [
@@ -1011,7 +1011,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_use.py"
+   "script": "simcal_use.py"
   },
   "validate_required_lambda": {
    "args": [
@@ -1027,7 +1027,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_validate.py"
+   "script": "simcal_validate.py"
   },
   "validate_statistic": {
    "args": [
@@ -1045,7 +1045,7 @@
    },
    "kind": "cli",
    "outputs": [],
-   "script": "calib_validate.py"
+   "script": "simcal_validate.py"
   }
  },
  "environment": {

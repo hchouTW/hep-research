@@ -369,17 +369,23 @@ def _module_imports(path: Path) -> set[str]:
 
 class DependencyMarkers(unittest.TestCase):
     """STH-T2.8: every skill script that imports NumPy or SciPy at module level carries the matching '(needs ...)'
-    marker in the guide's Skill scripts list, and no marker claims more or less."""
+    marker in the guide's Skill scripts list, and no marker claims more or less. A list may also group the names that
+    need a library after '; with NumPy: ' (the simcal line, 0.70.0). The deprecated calib_*.py stubs (removed in
+    0.72.0) are not skill scripts and are not listed."""
 
     def test_markers_match_imports(self):
         text = GUIDE.read_text(encoding="utf-8")
         section = text[text.index("## Skill scripts"):text.index("## Not implemented")]
-        for path in sorted(SC.glob("*.py")):
+        for path in sorted(p for p in SC.glob("*.py") if not p.name.startswith("calib_")):
             with self.subTest(path.name):
                 need = _module_imports(path)
                 m = re.search(re.escape(f"`{path.name}`") + r"(?: \(needs ([^)]*)\))?", section)
                 self.assertIsNotNone(m, f"{path.name} not listed in the Skill scripts section")
                 marker = m.group(1) or ""
+                before = section[section.rfind("\n", 0, m.start()) + 1:m.start()]
+                group = re.search(r"; with ((?:NumPy|SciPy)(?: and (?:NumPy|SciPy))?): (?:`[^`]+`, )*$", before)
+                if not marker and group:
+                    marker = group.group(1)
                 claimed = {"numpy"} if "NumPy" in marker else set()
                 claimed |= {"scipy"} if "SciPy" in marker else set()
                 self.assertEqual(claimed, need, (path.name, marker))

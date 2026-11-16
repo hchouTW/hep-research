@@ -1,0 +1,432 @@
+"""The inference form of V_model (Part B section 5.4, table row "Inferred"; phase 5, gap V6 read by A25 (7)).
+
+f, ell of the correlation kernel are fitted by the marginal likelihood (integrated over nu) with a weakly informative
+prior, only as a separate version, validated only by `holdout`. The fixed form (declared f, ell) is never changed.
+
+Readings (phase 5, recorded in the card's execution log; decision sheet V1-V5):
+
+- V1 (the separate version): a `vmodel-version` record of its own, hashed (`version_sha256`, canonical JSON) and
+  linked to the fixed-form declaration by `fixed_sha256` = canonical_sha256(contract.model_discrepancy). The contract
+  is not edited; `linear.vmodel_columns(contract, names, version=...)` uses the record only when it is passed and its
+  link matches. A contract with `form: inferred` and no version is refused (`linear.incomplete`).
+- V2 (what is integrated): at the linearization point the caller supplies (theta_ref or the fixed-form theta-hat):
+  link-space residual r, V = V_data + V_MC (+ V_emu), the theta (and free phi) columns `flat` integrated with a flat
+  prior (restricted marginal likelihood, as A25 (6) for tau), the eta and profile-mode phi columns `nuisance` with
+  their N(0, 1) constraints integrated exactly (covariance N N^T). nu is integrated exactly: Gaussian blocks only;
+  Poisson and binomial blocks and N_d,c are refused (`vmodel_infer.incomplete`).
+- V3 (priors; revised by WP-S2 for A26 (2)): per inferred component `infer: {f_scale: s, length_bounds: [lo, hi]}`,
+  both required. The prior is the Jeffreys measure of the restricted likelihood, |I(log f, log ell)|^(1/2), weighted
+  by Half-Normal(s) per f and truncated to the declared physical bounds of ell (line 1028: lengths come from physics;
+  the fit only moves within them). The estimate is the marginal posterior median of each hyperparameter and its
+  uncertainty the marginal posterior quantiles in log x (`marginal_quantiles`: profile + Laplace over the others on
+  a grid). Why (S3 pilot diagnosis, A26 (2)): WP-S's Half-Normal density with log-uniform ell, posterior mode and
+  Laplace sd gave ell pulls biased +0.2 to +0.8 sd and, where ell is weakly determined, too wide (sd 1.3-1.7): the
+  Laplace curvature at the mode misdescribes a skewed posterior in log ell (the width), and the mode is pulled up
+  by the log-f Jacobian term together with the f-ell ridge plus the intrinsic upward skew of the ell likelihood
+  (the bias). The Jeffreys measure (a reference-type prior, close to probability matching) removes most of the
+  bias, the marginal quantiles the width. The joint mode and its Laplace sd stay in the record as diagnostics.
+- V4 (use): empirical Bayes. f-hat, ell-hat (medians) are fixed in the main fit; their intervals are reported, not
+  propagated into sigma_tot. The holdout requirement is the guard (lines 896, 1009).
+- V5 (coverage): only squared-exponential kernel components carrying `infer` are fitted; C stays 0 between components
+  (as in `linear.vmodel_columns`), matrix and model-ensemble components stay fixed and enter the covariance.
+
+The conditional likelihood of nu is refused (`vmodel_infer.conditional`, line 1017: f nu is not identifiable and
+f runs off to infinity).
+"""
+from __future__ import annotations
+
+import copy
+import math
+
+import numpy as np
+from scipy import interpolate, linalg, optimize
+
+from core.canonical import canonical_sha256
+from core.simcal import likelihood as L
+
+KIND = "vmodel-version"
+INFERABLE = ("squared-exponential",)
+OBJECTIVE = ("restricted marginal likelihood: nu integrated exactly (Gaussian blocks), eta and profile-mode phi "
+             "integrated with their N(0, 1) constraints, theta and free phi with a flat prior; prior on (f, ell): "
+             "Jeffreys measure of that likelihood x Half-Normal(f_scale) weight per f, within the declared bounds")
+_BIG = 1e300
+
+
+class VmodelInferError(ValueError):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+
+
+def fixed_sha256(contract: dict) -> str:
+    """The hash of the fixed-form declaration the inferred version is linked to."""
+    return canonical_sha256(contract.get("model_discrepancy") or {})
+
+
+def _refuse_unsupported(contract: dict, names: list[str], likelihood: str) -> None:
+    if likelihood == "conditional":
+        raise VmodelInferError("vmodel_infer.conditional", "f is not fitted by the conditional likelihood of nu: f nu "
+                               "is not identifiable and f runs off to infinity (section 5.4); use the marginal "
+                               "likelihood")
+    if likelihood != "marginal":
+        raise VmodelInferError("vmodel_infer.input", f"likelihood {likelihood!r}: only 'marginal'")
+    md = contract.get("model_discrepancy") or {}
+    if md.get("form") != "inferred":
+        raise VmodelInferError("vmodel_infer.not_inferred", "the contract declares the fixed form of V_model; the "
+                               "inferred form is opt-in (model_discrepancy.form: inferred)")
+    mode = (contract.get("validation") or {}).get("mode")
+    if mode != "holdout":
+        raise VmodelInferError("vmodel_infer.not_holdout", f"validation mode {mode!r}: the inferred form of V_model "
+                               "is validated only by holdout (section 5.4)")
+    if (contract.get("validation") or {}).get("N_dc"):
+        raise VmodelInferError("vmodel_infer.incomplete", "N_d,c declared: the projected marginal likelihood is not "
+                               "implemented for the inferred form")
+    by = {o["name"]: o for o in contract.get("observables", [])}
+    for nm in names:
+        o = by.get(nm)
+        if o is None:
+            raise VmodelInferError("vmodel_infer.input", f"observable {nm} is not in the contract")
+        if o.get("block") != "gaussian":
+            raise VmodelInferError("vmodel_infer.incomplete", f"observable {nm}: {o.get('block')} block; nu is "
+                                   "integrated exactly only for Gaussian blocks")
+
+
+def _components(contract: dict, names: list[str]) -> tuple[list[dict], list[dict]]:
+    """(inferred, fixed) components; each inferred one with its indices, control values and prior."""
+    comps = (contract.get("model_discrepancy") or {}).get("components") or []
+    idx = {nm: i for i, nm in enumerate(names)}
+    inferred, fixed = [], []
+    for k, c in enumerate(comps):
+        if "infer" not in c:
+            fixed.append(c)
+            continue
+        if c.get("kind") not in INFERABLE:
+            raise VmodelInferError("vmodel_infer.kind", f"component {k} ({c.get('kind')!r}): only the correlation "
+                                   f"kernel's f and ell are inferred ({INFERABLE})")
+        pr = c["infer"] or {}
+        s, b = pr.get("f_scale"), pr.get("length_bounds")
+        if not (isinstance(s, (int, float)) and s > 0 and isinstance(b, list) and len(b) == 2
+                and 0 < float(b[0]) < float(b[1])):
+            raise VmodelInferError("vmodel_infer.prior", f"component {k}: infer needs f_scale > 0 (the Half-Normal "
+                                   "scale of f) and length_bounds [lo, hi] with 0 < lo < hi (declared from physics)")
+        obs = [o for o in c.get("observables", []) if o in idx]
+        if not obs:
+            raise VmodelInferError("vmodel_infer.input", f"component {k}: none of its observables is fitted")
+        inferred.append({"index": k, "observables": obs, "rows": np.array([idx[o] for o in obs]),
+                         "z": np.array([float(c["control"][o]) for o in obs]), "f_scale": float(s),
+                         "bounds": (float(b[0]), float(b[1])), "f0": float(c["f"]), "l0": float(c["length"])})
+    if not inferred:
+        raise VmodelInferError("vmodel_infer.no_component", "form inferred, but no component carries `infer`")
+    return inferred, fixed
+
+
+def kernel_block(z: np.ndarray, f: float, ell: float) -> np.ndarray:
+    """One group's correlation kernel via `likelihood.kernel_component` (squared-exponential, one group)."""
+    return L.kernel_component(z, np.zeros(len(z), dtype=int), {0: f}, {0: ell}, None)
+
+
+class Objective:
+    """-ln p(f, ell | r) up to a constant, in x = (log f_1, log ell_1, log f_2, ...). The prior (V3, revised by WP-S2
+    for A26 (2)): the Jeffreys measure of the restricted likelihood, |I(x)|^(1/2) dx (I the expected Fisher
+    information, 0.5 tr(P S_i P S_j)), weighted by the Half-Normal(f_scale) of each f and truncated to the declared
+    bounds. `jeffreys=False` gives WP-S's prior (Half-Normal density of f, log-uniform ell); kept only as the
+    control of the tests, never used by `infer`."""
+
+    def __init__(self, residual, V, inferred, base, flat, jeffreys: bool = True):
+        self.r, self.V, self.inferred, self.flat = residual, V, inferred, flat
+        self.base = V + base
+        self.jeffreys = jeffreys
+        n = len(residual)
+        self.n = n
+        self._dz2 = [(c["z"][:, None] - c["z"][None, :]) ** 2 for c in inferred]
+        self._ix = [np.ix_(c["rows"], c["rows"]) for c in inferred]
+        self._cache: tuple = (None, None, None)
+
+    def _kernels(self, x) -> list:
+        """The squared-exponential blocks f^2 exp(-dz^2 / 2 ell^2) (= `kernel_block`, one group), cached on x."""
+        key = tuple(float(v) for v in x)
+        if self._cache[0] != key:
+            K = [math.exp(2 * x[2 * k]) * np.exp(-0.5 * d / math.exp(2 * x[2 * k + 1]))
+                 for k, d in enumerate(self._dz2)]
+            S = self.base.copy()
+            for ix, Kk in zip(self._ix, K):
+                S[ix] += Kk
+            self._cache = (key, K, S)
+        return self._cache[1]
+
+    def covariance(self, x) -> np.ndarray:
+        self._kernels(x)
+        return self._cache[2].copy()
+
+    def nll(self, x) -> float:
+        """-ln of the restricted marginal likelihood (theta integrated with a flat prior)."""
+        try:
+            cf = linalg.cho_factor(self.covariance(x), lower=True)
+        except (linalg.LinAlgError, ValueError):
+            return _BIG
+        a = linalg.cho_solve(cf, self.r)
+        logdet = 2.0 * float(np.log(np.diag(cf[0])).sum())
+        quad = float(self.r @ a)
+        X = self.flat
+        if X.shape[1]:
+            B = linalg.cho_solve(cf, X)
+            M = X.T @ B
+            try:
+                cm = linalg.cho_factor(M, lower=True)
+            except (linalg.LinAlgError, ValueError):
+                return _BIG
+            xa = X.T @ a
+            quad -= float(xa @ linalg.cho_solve(cm, xa))
+            logdet += 2.0 * float(np.log(np.diag(cm[0])).sum())
+        return 0.5 * (logdet + quad)
+
+    def fisher(self, x) -> np.ndarray:
+        """The expected Fisher information of the restricted likelihood in x: I_ij = 0.5 tr(P S_i P S_j), with
+        P = S^-1 - S^-1 X (X^T S^-1 X)^-1 X^T S^-1 and S_i = dS/dx_i (2 K for log f, K dz^2 / ell^2 for log ell)."""
+        cf = linalg.cho_factor(self.covariance(x), lower=True)
+        P = linalg.cho_solve(cf, np.eye(self.n))
+        X = self.flat
+        if X.shape[1]:
+            B = P @ X
+            P = P - B @ np.linalg.solve(X.T @ B, B.T)
+        d_s = [(2.0 * K, K * self._dz2[k] / math.exp(2 * x[2 * k + 1]))      # S_i is nonzero on its block only
+              for k, K in enumerate(self._kernels(x))]
+        m = 2 * len(d_s)
+        info = np.empty((m, m))
+        for k, ck in enumerate(self.inferred):
+            for l_ in range(k, len(d_s)):                            # tr(S_i P_kl S_j P_lk) on the blocks k, l
+                Pkl = P[np.ix_(ck["rows"], self.inferred[l_]["rows"])]
+                A = [d @ Pkl for d in d_s[k]]
+                B = [d @ Pkl.T for d in d_s[l_]]
+                for a in range(2):
+                    for b in range(2):
+                        info[2 * k + a, 2 * l_ + b] = info[2 * l_ + b, 2 * k + a] = 0.5 * float(np.sum(A[a] * B[b].T))
+        return info
+
+    def __call__(self, x) -> float:
+        v = self.nll(x)
+        if v >= _BIG:
+            return v
+        if self.jeffreys:
+            try:
+                sign, ld = np.linalg.slogdet(self.fisher(x))
+            except (linalg.LinAlgError, ValueError, np.linalg.LinAlgError):
+                return _BIG
+            if sign <= 0 or not math.isfinite(ld):
+                return _BIG
+            v -= 0.5 * ld
+            for k, c in enumerate(self.inferred):       # Half-Normal(f; s) weight on the Jeffreys measure
+                v += 0.5 * (math.exp(x[2 * k]) / c["f_scale"]) ** 2
+            return v
+        for k, c in enumerate(self.inferred):           # WP-S: Half-Normal(f; s) density in log f, ell log-uniform
+            f = math.exp(x[2 * k])
+            v += 0.5 * (f / c["f_scale"]) ** 2 - x[2 * k]
+        return v
+
+    def bounds(self) -> list:
+        out = []
+        for c in self.inferred:
+            out += [(math.log(c["f_scale"] * 1e-6), math.log(c["f_scale"] * 1e2)),
+                    (math.log(c["bounds"][0]), math.log(c["bounds"][1]))]
+        return out
+
+
+def _hessian(fun, x, h=1e-3) -> np.ndarray:
+    n = len(x)
+    H = np.zeros((n, n))
+    f0 = fun(x)
+    for i in range(n):
+        for j in range(i, n):
+            if i == j:
+                e = np.zeros(n)
+                e[i] = h
+                H[i, i] = (fun(x + e) - 2 * f0 + fun(x - e)) / h ** 2
+            else:
+                ei, ej = np.zeros(n), np.zeros(n)
+                ei[i], ej[j] = h, h
+                H[i, j] = H[j, i] = (fun(x + ei + ej) - fun(x + ei - ej) - fun(x - ei + ej)
+                                     + fun(x - ei - ej)) / (4 * h * h)
+    return H
+
+
+QUANTILES = (0.025, 0.158655, 0.5, 0.841345, 0.975)     # 2.5 %, -1 sd, median, +1 sd, 97.5 %
+INTERVAL = ("marginal posterior quantiles in log x: on a grid of log x_i the other hyperparameters are maximized "
+            "and integrated by Laplace (profile + 0.5 log det of their Hessian), log density interpolated (PCHIP) "
+            "and integrated within the declared bounds")
+_GRID, _FINE, _TAIL, _WIDEN = 25, 801, 1e-4, 8
+
+
+def _conditional(fun, x, i, v, bounds, start):
+    """(min over the others of fun at x_i = v, log det of their Hessian there, their argmin)."""
+    others = [j for j in range(len(x)) if j != i]
+
+    def g(y):
+        z = np.array(x, float)
+        z[i] = v
+        z[others] = y
+        return fun(z)
+    if not others:
+        return g(np.zeros(0)), 0.0, start
+    res = optimize.minimize(g, start, method="L-BFGS-B", bounds=[bounds[j] for j in others])
+    Hs = _hessian(g, np.asarray(res.x, float))
+    sign, ld = np.linalg.slogdet(0.5 * (Hs + Hs.T))
+    return float(res.fun), (float(ld) if sign > 0 else math.nan), np.asarray(res.x, float)
+
+
+def marginal_quantiles(fun, x, i, bounds, sd=None, levels=QUANTILES) -> dict:
+    """Quantiles of the marginal posterior of x_i (fun = -ln posterior density in the log coordinates x): the
+    nested-Laplace marginal on a grid (INTERVAL). The window is the mode +- 6 Laplace sd (the whole bound range
+    without a usable sd), doubled (up to 7 times; `truncated` if still short) while an edge that is not a bound
+    still carries density > _TAIL of the peak; grid spacing <= 0.5 Laplace sd (_GRID to 4 _GRID points).
+    Returns the quantiles, whether the Laplace term was usable on the whole grid (else the profile alone), and
+    `cdf(t)`, the marginal posterior CDF at t."""
+    lo, hi = bounds[i]
+    usable = sd is not None and math.isfinite(sd) and sd > 0
+    half = 6.0 * sd if usable else hi - lo
+    others = [j for j in range(len(x)) if j != i]
+    truncated = True
+    for _ in range(_WIDEN):
+        a, b = max(lo, x[i] - half), min(hi, x[i] + half)
+        ng = _GRID if not usable else int(min(4 * _GRID, max(_GRID, math.ceil((b - a) / (0.5 * sd) - 1e-9) + 1)))
+        grid = np.linspace(a, b, ng)
+        prof, ld = np.empty(ng), np.empty(ng)
+        k0 = int(np.argmin(np.abs(grid - x[i])))
+        for side in (range(k0, ng), range(k0 - 1, -1, -1)):     # outward from the mode, warm-started
+            start = np.asarray(x, float)[others]
+            for k in side:
+                prof[k], ld[k], start = _conditional(fun, x, i, grid[k], bounds, start)
+        laplace = bool(np.isfinite(ld).all())
+        logp = -(prof + 0.5 * ld) if laplace else -prof
+        logp = np.where(np.isfinite(logp) & (prof < _BIG), logp, -np.inf)
+        logp = logp - logp.max()
+        w = np.exp(logp)
+        if not ((w[0] > _TAIL and a > lo) or (w[-1] > _TAIL and b < hi)):
+            truncated = False
+            break
+        half *= 2.0
+    fine = np.linspace(a, b, _FINE)
+    ok = np.isfinite(logp)
+    dens = np.exp(np.clip(interpolate.PchipInterpolator(grid[ok], logp[ok])(fine), -700.0, 0.0))
+    cdf = np.concatenate([[0.0], np.cumsum(0.5 * (dens[1:] + dens[:-1]) * np.diff(fine))])
+    cdf /= cdf[-1]
+    q = np.interp(levels, cdf, fine)
+    return {"levels": list(levels), "quantiles": [float(v) for v in q], "laplace_marginal": laplace,
+            "window": [float(a), float(b)], "truncated": truncated, "edge_density": [float(w[0]), float(w[-1])],
+            "cdf": lambda t: float(np.interp(t, fine, cdf))}
+
+
+def _starts(inferred, bounds) -> list:
+    x0 = []
+    for k, c in enumerate(inferred):
+        x0 += [float(np.clip(math.log(c["f0"]) if c["f0"] > 0 else math.log(c["f_scale"]), *bounds[2 * k])),
+               float(np.clip(math.log(c["l0"]) if c["l0"] > 0 else 0.0, *bounds[2 * k + 1]))]
+    out = [np.array(x0)]
+    for q in (0.25, 0.5, 0.75):
+        x = np.array(x0)
+        for k in range(len(inferred)):
+            lo, hi = bounds[2 * k + 1]
+            x[2 * k + 1] = lo + q * (hi - lo)
+        out.append(x)
+    return out
+
+
+def fit_posterior(posterior: Objective, inferred: list) -> dict:
+    """The posterior mode (L-BFGS-B in x from `_starts`, best of all), the Laplace covariance there (kept as a
+    diagnostic), and the marginal posterior quantiles of every x_i (`marginal_quantiles`), the reported intervals."""
+    bnds = posterior.bounds()
+    best = None
+    for x0 in _starts(inferred, bnds):
+        res = optimize.minimize(posterior, x0, method="L-BFGS-B", bounds=bnds)
+        if best is None or res.fun < best.fun:
+            best = res
+    assert best is not None
+    if best.fun >= _BIG:
+        raise VmodelInferError("vmodel_infer.singular", "the marginal covariance is not positive definite at any start")
+    x = np.asarray(best.x, float)
+    H = _hessian(posterior, x)
+    try:
+        cov = np.linalg.inv(H)
+        laplace_ok = bool(np.all(np.linalg.eigvalsh(0.5 * (H + H.T)) > 0))
+    except np.linalg.LinAlgError:
+        cov, laplace_ok = np.full_like(H, np.nan), False
+    sd = [math.sqrt(cov[i, i]) if laplace_ok and cov[i, i] > 0 else None for i in range(len(x))]
+    marg = [marginal_quantiles(posterior, x, i, bnds, sd[i]) for i in range(len(x))]
+    return {"x": x, "best": best, "bounds": bnds, "sd": sd, "laplace_ok": laplace_ok, "marginals": marg}
+
+
+def infer(contract: dict, names: list[str], residual, V, flat=None, nuisance=None, likelihood: str = "marginal",
+          calibration_rows=None) -> dict:
+    """The inferred V_model version: for every component carrying `infer`, the marginal posterior median of f and ell
+    (the estimate, used in the fitted components; contract order, f and length replaced) with marginal posterior
+    quantiles in (log f, log ell) as its uncertainty (`INTERVAL`); the joint mode and its Laplace sd are kept as
+    diagnostics (`mode`, `sd_log_f`, `sd_log_length`). Inputs in link space at the caller's linearization point
+    (V2): residual r (n), V (n x n), `flat` (n x p) columns integrated with a flat prior, `nuisance` (n x q) columns
+    with N(0, 1) constraints."""
+    _refuse_unsupported(contract, names, likelihood)
+    r = np.asarray(residual, float)
+    n = len(names)
+    Vm = np.asarray(V, float)
+    if r.shape != (n,) or Vm.shape != (n, n):
+        raise VmodelInferError("vmodel_infer.input", f"residual must have {n} entries and V must be {n} x {n}")
+    X = np.zeros((n, 0)) if flat is None else np.asarray(flat, float).reshape(n, -1)
+    N = np.zeros((n, 0)) if nuisance is None else np.asarray(nuisance, float).reshape(n, -1)
+    if not (np.isfinite(r).all() and np.isfinite(Vm).all() and np.isfinite(X).all() and np.isfinite(N).all()):
+        raise VmodelInferError("vmodel_infer.input", "non-finite input")
+    inferred, fixed = _components(contract, names)
+    from core.simcal import linear      # noqa: PLC0415 (linear imports this module lazily)
+    base = N @ N.T + linear.vmodel_matrix(fixed, names)
+    posterior = Objective(r, Vm, inferred, base, X)
+    fit = fit_posterior(posterior, inferred)
+    x, bnds, best = fit["x"], fit["bounds"], fit["best"]
+    md = contract.get("model_discrepancy") or {}
+    fitted = copy.deepcopy(md.get("components") or [])
+    est = []
+    x_med = x.copy()
+    for k, c in enumerate(inferred):
+        u, w = float(x[2 * k]), float(x[2 * k + 1])
+        at = [name for name, val, (lo, hi) in (("f", u, bnds[2 * k]), ("length", w, bnds[2 * k + 1]))
+              if min(val - lo, hi - val) < 1e-6]
+        qf, ql = fit["marginals"][2 * k]["quantiles"], fit["marginals"][2 * k + 1]["quantiles"]
+        x_med[2 * k], x_med[2 * k + 1] = qf[2], ql[2]
+        f_hat, l_hat = math.exp(qf[2]), math.exp(ql[2])
+        fitted[c["index"]]["f"], fitted[c["index"]]["length"] = f_hat, l_hat
+        est.append({"component": c["index"], "observables": c["observables"], "f": f_hat, "length": l_hat,
+                    "log_quantiles": {"f": qf, "length": ql},
+                    "laplace_marginal": [fit["marginals"][2 * k]["laplace_marginal"],
+                                         fit["marginals"][2 * k + 1]["laplace_marginal"]],
+                    "mode": {"f": math.exp(u), "length": math.exp(w)},
+                    "sd_log_f": fit["sd"][2 * k], "sd_log_length": fit["sd"][2 * k + 1],
+                    "f_declared": c["f0"], "length_declared": c["l0"], "at_bound": at,
+                    "prior": {"f": f"half-normal(scale={c['f_scale']}) weight", "length": f"bounds {list(c['bounds'])}",
+                              "measure": "Jeffreys (restricted-likelihood Fisher information)"}})
+    R_hat = posterior.covariance(x_med) - posterior.base
+    rows = np.arange(n) if calibration_rows is None else np.asarray(calibration_rows, int)
+    pc = L.principal_components(R_hat + linear.vmodel_matrix(fixed, names), rows, np.linalg.inv(Vm))
+    body = {"kind": KIND, "form": "inferred", "fixed_sha256": fixed_sha256(contract), "names": list(names),
+            "validation": "holdout", "objective": OBJECTIVE, "use": "empirical Bayes: the marginal posterior medians "
+            "fixed in the main fit, quantile intervals reported, not propagated", "estimates": est,
+            "components": fitted, "interval": INTERVAL, "quantile_levels": list(QUANTILES),
+            "neg_log_posterior": float(best.fun), "converged": bool(best.success), "laplace_ok": fit["laplace_ok"],
+            "principal_components": {"K": pc["K"], "trace_fraction": pc["trace_fraction"],
+                                     "tr_VGinv_Vperp": pc["tr_VGinv_Vperp"]},
+            "inputs_sha256": canonical_sha256({"residual": r.tolist(), "V": Vm.tolist(), "flat": X.tolist(),
+                                               "nuisance": N.tolist()})}
+    return {**body, "version_sha256": canonical_sha256(body)}
+
+
+def version_components(contract: dict, version: dict) -> list[dict]:
+    """The fitted components of an inferred version, after checking that it is a version of this contract's
+    declaration, that its hash holds, and that the contract validates by holdout."""
+    if not isinstance(version, dict) or version.get("kind") != KIND or version.get("form") != "inferred":
+        raise VmodelInferError("vmodel_infer.version", "not an inferred V_model version record")
+    body = {k: v for k, v in version.items() if k != "version_sha256"}
+    if canonical_sha256(body) != version.get("version_sha256"):
+        raise VmodelInferError("vmodel_infer.version", "the version's hash does not match its content")
+    if version.get("fixed_sha256") != fixed_sha256(contract):
+        raise VmodelInferError("vmodel_infer.version_mismatch", "the version was inferred for another V_model "
+                               "declaration (fixed_sha256 differs)")
+    if (contract.get("model_discrepancy") or {}).get("form") != "inferred":
+        raise VmodelInferError("vmodel_infer.not_inferred", "the contract declares the fixed form of V_model")
+    if (contract.get("validation") or {}).get("mode") != "holdout" or version.get("validation") != "holdout":
+        raise VmodelInferError("vmodel_infer.not_holdout", "the inferred form of V_model is validated only by holdout")
+    return version["components"]

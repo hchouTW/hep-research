@@ -4,7 +4,7 @@
   "synthetic"
  ],
  "part_b": "section 11.4 (g4sim binding), section 12 row Tracker",
- "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "note": "A contract fragment and plan for the existing generic layer (simcal_contract.py check, simcal_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
  "notes": [
   "The simulation-side Lorentz angle, diffusion and charge sharing live in the hashed table of the charge_sharing stage, which has no stage parameter value: no Table 2 row, a different table is a different model. The theta here is the Lorentz shift assumed by reconstruction (rerun).",
   "Residual smearing (noise/5) is used only when the microscopic mechanism is not modeled (section 12)."
@@ -308,7 +308,7 @@
   ]
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {},
   "node_binding": {
    "nodes": {

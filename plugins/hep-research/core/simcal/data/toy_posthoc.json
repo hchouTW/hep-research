@@ -1,0 +1,264 @@
+{
+ "schema": "simcal-fixture/1",
+ "fixture": "toy_posthoc",
+ "description": "A declared chain with one post-hoc correction node (phase 5, section 6.2; the toy detector of section 15.1 has none): x ~ N(0, 1) stored, y = x + c x^2 + 0.5 eps by a samplable black box without a registered density, c = strength (generation point 0.1, prior [0, 0.2]). The learned density ratio is the candidate method of strength, so P0 and G4-L apply; the plan declares a cross-fitted (5 folds), Platt-calibrated, prior-ratio-corrected logistic ratio with 5 repeated trainings.",
+ "status": "synthetic",
+ "contract": {
+  "schema": "simcal-contract/1",
+  "series": "toy-posthoc",
+  "simulator": "toy-chain",
+  "stage_graph": {
+   "nodes": [
+    {
+     "id": "x",
+     "kind": "stage",
+     "kernel": "density",
+     "stage": "0",
+     "mechanisms": [
+      "yield"
+     ],
+     "samplable": true
+    },
+    {
+     "id": "correction",
+     "kind": "stage",
+     "kernel": "black-box",
+     "stage": "1",
+     "mechanisms": [
+      "yield"
+     ],
+     "samplable": true,
+     "post_hoc_correction": true,
+     "description": "post-hoc correction y = x + c x^2 + 0.5 eps applied to the stored x; no registered density"
+    }
+   ],
+   "edges": [
+    {
+     "from": "x",
+     "to": "correction"
+    }
+   ]
+  },
+  "parameters": [
+   {
+    "name": "strength",
+    "role": "theta",
+    "nodes": [
+     "correction"
+    ],
+    "sampling_bounds": [
+     0.0,
+     0.2
+    ],
+    "physical_bounds": [
+     -10.0,
+     10.2
+    ]
+   }
+  ],
+  "references": [],
+  "observables": [
+   {
+    "name": "y_mean",
+    "role": "calibration",
+    "functional": "location",
+    "link": "identity",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "run"
+   },
+   {
+    "name": "y_width",
+    "role": "calibration",
+    "functional": "core-width",
+    "link": "log",
+    "block": "gaussian",
+    "estimator": "toy-shared",
+    "binning": {
+     "kind": "none"
+    },
+    "sample": "run"
+   }
+  ],
+  "exposure": {
+   "run": 2000
+  },
+  "validation": {
+   "mode": "none",
+   "N_dc": [],
+   "N_d": [],
+   "unused": []
+  },
+  "acceptance": {
+   "strength": "standard",
+   "gates": {
+    "G4-L": {
+     "alpha": 0.01,
+     "multiple_comparison": "bonferroni"
+    }
+   }
+  },
+  "models": {
+   "enumerated": [
+    {
+     "id": "nominal"
+    }
+   ],
+   "absorbed": []
+  },
+  "estimators": {
+   "shared_implementation": true,
+   "uses_truth": false
+  },
+  "model_discrepancy": {
+   "form": "fixed",
+   "components": []
+  },
+  "upstream": [],
+  "numerics": {
+   "precision": "double"
+  },
+  "intended_use": [
+   "design-study"
+  ],
+  "scope": {
+   "strength": [
+    0.0,
+    0.2
+   ]
+  },
+  "event_samples": [],
+  "data": {
+   "calibration_releases": [
+    "c412dedee6ae48ed9c14c1327c814b8e074c40e863b046daa93e1a3bc3a7628d"
+   ]
+  }
+ },
+ "plan": {
+  "schema": "simcal-plan/1",
+  "kernels": {
+   "x": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   },
+   "correction": {
+    "stored": {
+     "inputs": true,
+     "outputs": true,
+     "steps": false
+    },
+    "support_declared": true
+   }
+  },
+  "evaluator": {
+   "kind": "chain",
+   "spec": {
+    "nodes": [
+     {
+      "id": "x",
+      "kernel": "normal",
+      "args": {
+       "out": "x",
+       "loc": "x_loc",
+       "scale": "x_sd"
+      },
+      "parents": []
+     },
+     {
+      "id": "correction",
+      "kernel": "post-hoc-correction",
+      "args": {
+       "out": "y",
+       "parent": "x",
+       "strength": "strength",
+       "noise": 0.5
+      },
+      "parents": [
+       "x"
+      ]
+     }
+    ],
+    "runs": [
+     {
+      "id": "run",
+      "n": 20000
+     }
+    ],
+    "observables": [
+     {
+      "name": "y_mean",
+      "run": "run",
+      "node": "correction",
+      "var": "y",
+      "functional": "mean",
+      "tail": false
+     },
+     {
+      "name": "y_width",
+      "run": "run",
+      "node": "correction",
+      "var": "y",
+      "functional": "std",
+      "tail": false
+     }
+    ],
+    "nominal": {
+     "x_loc": 0.0,
+     "x_sd": 1.0,
+     "strength": 0.1
+    },
+    "param_nodes": {
+     "strength": [
+      "correction"
+     ]
+    }
+   },
+   "learned": {
+    "node": "correction",
+    "parameters": [
+     "strength"
+    ],
+    "features": {
+     "inputs": [
+      "x"
+     ],
+     "outputs": [
+      "y"
+     ],
+     "degree": 4
+    },
+    "support": {
+     "strength": [
+      0.0,
+      0.2
+     ]
+    },
+    "folds": 5,
+    "repeats": 5,
+    "training_points": 8,
+    "calibration": "platt"
+   }
+  },
+  "seeds": {
+   "nominal": 7,
+   "resample": 8,
+   "learned": 20261501,
+   "closure": 9
+  },
+  "methods": {
+   "strength": "learned-density-ratio"
+  },
+  "design": {
+   "fd_fraction": 0.05,
+   "n_scan": 32,
+   "scan_seed": 3
+  }
+ }
+}

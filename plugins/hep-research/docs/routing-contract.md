@@ -44,6 +44,7 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Validity and coverage of an inference built on an ML model | hep-statistics | `coverage` | — |
 | Correlation evidence and a proposed correlation scheme for systematics | hep-measurement | `correlation evidence` | — |
 | Detector calibration (energy scale, alignment constants, conditions) | hep-detector | `detector calibration` | — |
+| Simulator parameter calibration (simcal): tuning simulator parameters to data, its gates and the propagation of the result | hep-statistics | `simulator parameter calibration` | — |
 | Validation of a fast or learned simulation against full detector simulation | hep-detector | `detector simulation` | — |
 | Instrument design: requirements flow-down, trade-offs, figures of merit, layout optimization | hep-detector | `detector design principles` | Detector design principles and tracker resolution |
 | Sourced facts on named experiments' detectors (design, achieved, operating values with claim ids) | hep-detector | `sourced detector atlas` | Sourced detector atlas |
@@ -164,6 +165,6 @@ removed. Skills may add their rows.
 <!-- description-topics: read by tools/check_routing_static.py -->
 | Skill | Topics the description must name |
 |---|---|
-| hep-statistics | likelihoods; binned and unbinned fits; template fits; published data points; intervals and limits; Feldman-Cousins; CLs; profile likelihood; Bayesian posteriors; significance and look-elsewhere effects; low or zero counts; nuisance parameters; covariance assembly; unfolding; folded prediction; toys and Asimov datasets; goodness of fit; model comparison; combinations |
+| hep-statistics | likelihoods; binned and unbinned fits; template fits; published data points; intervals and limits; Feldman-Cousins; CLs; profile likelihood; Bayesian posteriors; significance and look-elsewhere effects; low or zero counts; nuisance parameters; covariance assembly; unfolding; folded prediction; toys and Asimov datasets; goodness of fit; model comparison; combinations; simulator parameter calibration |
 | hep-citations | what a named experiment published; whether a paper exists; which result is the latest; what a paper states; whether a result supports a claim; finding and verifying literature and citations; source and claim ledgers; planned claims to recheck; literature matrices and reviews |
 | hep-authoring | drafting or revising paper sections; abstracts and captions; figures and tables; diagrams as editable sources; talks and posters; referee reports; theses; proposals; handover notes; claim-to-result links; never cites from memory |

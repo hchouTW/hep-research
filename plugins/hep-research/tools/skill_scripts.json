@@ -1065,137 +1065,6 @@
    ]
   },
   {
-   "path": "skills/hep-statistics/scripts/calib_chain.py",
-   "depth": 3,
-   "skills": [
-    "hep-detector",
-    "hep-review",
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_closure.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_contract.py",
-   "depth": 3,
-   "skills": [
-    "hep-detector",
-    "hep-review",
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_contrib.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_data.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_deps.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_design.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_emulator.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_fit.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_identify.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_interval.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_kernel_check.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_likelihood.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_propagate.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_reweight.py",
-   "depth": 3,
-   "skills": [
-    "hep-ml",
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_shift.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_use.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
-   "path": "skills/hep-statistics/scripts/calib_validate.py",
-   "depth": 3,
-   "skills": [
-    "hep-statistics"
-   ]
-  },
-  {
    "path": "skills/hep-statistics/scripts/combine_asymmetric.py",
    "depth": 3,
    "skills": [
@@ -1334,6 +1203,137 @@
   },
   {
    "path": "skills/hep-statistics/scripts/sensitivity_and_gof.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_chain.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector",
+    "hep-review",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_closure.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_contract.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector",
+    "hep-review",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_contrib.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_data.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_deps.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_design.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_emulator.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_identify.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_interval.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_kernel_check.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_likelihood.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_propagate.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_reweight.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_shift.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_use.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/simcal_validate.py",
    "depth": 3,
    "skills": [
     "hep-statistics"

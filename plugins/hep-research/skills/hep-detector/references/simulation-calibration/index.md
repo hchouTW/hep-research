@@ -1,9 +1,10 @@
 # Simulator calibration: detector-type specializations
 
-The specialization interface of the simulator calibration workflow (Part B,
-`docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md`, §11.1, §12, §13) for eight detector
-types. Each page gives the eight items a detector type must provide (§11.1) and a node-binding example (§11.4) that
-the existing generic layer accepts unchanged. The engine, gates and scripts are hep-statistics' (`calib_*.py`); this
+The specialization interface of simcal (simulator parameter calibration), the workflow of Part B
+(`docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md`, §11.1, §12, §13), for eight detector
+types. simcal differs from detector calibration and alignment (hep-detector) and from the calibration of ML model
+outputs (hep-ml). Each page gives the eight items a detector type must provide (§11.1) and a node-binding example (§11.4) that
+the existing generic layer accepts unchanged. The engine, gates and scripts are hep-statistics' (`simcal_*.py`); this
 folder only describes detector types. Experiment-specific content (control samples, conditions, thresholds, model
 identities) belongs to an experiment instance (§11.2), never here.
 
@@ -25,7 +26,7 @@ identities) belongs to an experiment instance (§11.2), never here.
 - Source of each mapping: Part B §3.1 (derivation basis), §3.2 (mechanisms), §3.5 (degeneracy modes), §11.4 (g4sim
   binding) and the type's §12 row. A physics statement without such a source is marked *Inferred*.
 - Item 7 is advisory (approval A21, §19-1): the table lists f, C, ℓ with a verified citation per value, or "no
-  literature value". A contract still declares f, C, ℓ (§5.4), and `hep-statistics/scripts/calib_contract.py check` never reads the table.
+  literature value". A contract still declares f, C, ℓ (§5.4), and `hep-statistics/scripts/simcal_contract.py check` never reads the table.
   Correlation lengths come from physics and are never chosen to make G6 pass (§5.4).
 - Item 8 is advisory (A21, §19-4): alternative hypotheses are simulation settings, never parameter shifts (§9.4), each
   with the observable expected to see it. A contract still declares at least one when validation is not `none`
@@ -39,9 +40,9 @@ g4sim field bindings, references, models, `validation_alternatives`) and a plan 
 Table 1. The experiment instance completes the contract: observables, event samples, data releases, the five model
 identity items of §5.1 and the V_model kernel. Bounds in the examples are placeholders, not detector facts.
 
-`tests/core/test_calibration_specialization.py` completes each fragment with the synthetic fixture of
-`tests/core/calibration_fixtures.py` and runs `hep-statistics/scripts/calib_contract.py check`, `hep-statistics/scripts/calib_chain.py p4` and
-`hep-statistics/scripts/calib_chain.py candidates` unchanged (the §12 acceptance criterion: a new type must not need a change of the
+`tests/core/test_simcal_specialization.py` completes each fragment with the synthetic fixture of
+`tests/core/simcal_fixtures.py` and runs `hep-statistics/scripts/simcal_contract.py check`, `hep-statistics/scripts/simcal_chain.py p4` and
+`hep-statistics/scripts/simcal_chain.py candidates` unchanged (the §12 acceptance criterion: a new type must not need a change of the
 generic layer). The candidate methods each page lists are the ones that test asserts.
 
 ## Item 7: literature search record

@@ -1,0 +1,582 @@
+"""Validation of Part B section 9 (phase 2, WP4): C_r^+ on N_d, declaration checks, the holdout statistic, power,
+cross-validation bookkeeping and the decision records with the real ledger. Phase 5 (WP-R2): V_learn in the residual
+covariance (section 9.2) and the toys of the learned path (section 6.6), with the S4 driver."""
+from __future__ import annotations
+
+import sys
+import unittest
+from pathlib import Path
+
+import numpy as np
+from scipy import stats
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests" / "core"))
+
+from core.simcal import data_release as DR  # noqa: E402
+from core.simcal import fit as F  # noqa: E402
+from core.simcal import toys_linear as T  # noqa: E402
+from core.simcal import validate as V  # noqa: E402
+
+
+class NullSpace(unittest.TestCase):
+    def test_diag_one_zero(self):
+        """C_r = diag(1, 0), N_d the second direction: k = 1 and the rejection rate of T_v under H0 is alpha (section
+        15.2)."""
+        C = np.diag([1.0, 0.0])
+        Cp, k = V.c_r_plus(C, np.array([1.0, 1.0]), [np.array([0.0, 1.0])])
+        self.assertEqual(k, 1)
+        rng = np.random.default_rng(1)
+        r = np.c_[rng.normal(size=20000), np.zeros(20000)]
+        rate = np.mean(np.einsum("ni,ij,nj->n", r, Cp, r) > stats.chi2.ppf(0.95, 1))
+        self.assertAlmostEqual(rate, 0.05, delta=0.006)
+
+    def test_scale_invariance(self):
+        """diag(100, 1e-6) and its correlation matrix give the same decision (section 8.7 note 1, 15.2)."""
+        C = np.diag([100.0, 1e-6])
+        s = np.sqrt(np.diag(C))
+        r = np.array([12.0, 2e-3])
+        Cp1, _ = V.c_r_plus(C, s, [])
+        Cp2, _ = V.c_r_plus(np.eye(2), np.ones(2), [])
+        self.assertAlmostEqual(V.t_v(r, Cp1), V.t_v(r / s, Cp2), places=9)
+        d1 = V.declaration_check(C, s, [])
+        d2 = V.declaration_check(np.eye(2), np.ones(2), [])
+        self.assertEqual(d1["status"], d2["status"])
+
+    def test_tau_num_confirmations(self):
+        """The four confirmations of section 8.7 note 1 on a definitional sum t = p1 + p2."""
+        rng = np.random.default_rng(2)
+        A = rng.normal(size=(2, 2))
+        Cp = A @ A.T + np.eye(2)
+        Tm = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+        C = Tm @ Cp @ Tm.T
+        s = np.sqrt(np.diag(C))
+        n = np.array([1.0, 1.0, -1.0])
+        ok = V.declaration_check(C, s, [n], expectations=[Tm @ np.array([0.3, -0.2]) * 0])
+        self.assertEqual(ok["status"], "passed")
+        self.assertLess(ok["block_norm"], 1e-14)
+        # a wrongly declared direction with standardized sd 1e-3 is caught
+        C2 = np.diag([1.0, 1.0, 1e-6])
+        bad = V.declaration_check(C2, np.ones(3), [np.array([0.0, 0.0, 1.0])])
+        self.assertIn("validate.declared_direction_has_variance", bad["failures"])
+        # correlation 1 - 1e-7 undeclared: the rank condition passes
+        c = 1 - 1e-7
+        self.assertEqual(V.declaration_check(np.array([[1, c], [c, 1]]), np.ones(2), [])["status"], "passed")
+        # an undeclared exact constraint fails (c)
+        self.assertIn("validate.undeclared_exact_constraint", V.declaration_check(C, s, [])["failures"])
+
+    def test_expectation_violating_a_constraint(self):
+        """An alternative hypothesis whose prediction violates an exact constraint: contract error, not power."""
+        Tm = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+        C = Tm @ np.eye(2) @ Tm.T
+        s = np.sqrt(np.diag(C))
+        bad_alt = np.array([0.1, 0.1, 0.25])
+        r = V.declaration_check(C, s, [np.array([1.0, 1.0, -1.0])], expectations=[bad_alt])
+        self.assertIn("validate.expectation_violates_constraint", r["failures"])
+
+    def test_nearly_collinear_wrong_declarations(self):
+        """Two nearly collinear wrong declarations, each with small variance, together spanning a direction of
+        variance 1: caught by the block norm (a) (section 15.2)."""
+        C = np.diag([1.0, 1.0, 1.0])
+        n1 = np.array([1.0, 1e-4, 0.0])
+        n2 = np.array([1.0, -1e-4, 0.0])
+        with self.assertRaises(Exception):
+            V.declaration_check(C, np.ones(3), [n1, n1 * (1 + 1e-12)])     # nearly duplicate: SVD check
+        res = V.declaration_check(np.diag([1e-12, 1.0, 1.0]), np.ones(3), [n1, n2])
+        self.assertIn("validate.declared_direction_has_variance", res["failures"])
+
+    def test_eigenvalue_perturbation_does_not_change_tv(self):
+        rng = np.random.default_rng(3)
+        A = rng.normal(size=(5, 5))
+        C = A @ A.T + np.eye(5)
+        w, U = np.linalg.eigh(C)
+        C2 = (U * (w * (1 + 1e-12))) @ U.T
+        r = rng.normal(size=5)
+        s = np.sqrt(np.diag(C))
+        a = V.t_v(r, V.c_r_plus(C, s, [])[0])
+        b = V.t_v(r, V.c_r_plus(C2, s, [])[0])
+        self.assertAlmostEqual(a, b, places=9)
+
+    def test_removed_direction_reduces_k(self):
+        s = np.ones(3)
+        cons = V.remove_directions(s, [], [np.array([1.0, 0.0, 0.0])])
+        self.assertEqual(V.c_r_plus(np.eye(3), s, cons)[1], 2)
+
+
+def holdout_config(seed=0, nv=8):
+    rng = np.random.default_rng(seed)
+    cfg = T.linear_config(n=12, d=3, n_nu=1, n_eta=1)
+    cfg.val = {"J": rng.normal(size=(nv, 3)), "m0": np.full(nv, 5.0), "V_data": np.eye(nv) * 0.5,
+               "V_MC": np.zeros((nv, nv)), "U": rng.normal(size=(nv, 1)) * 0.3,
+               "S": rng.normal(size=(nv, 1)) * 0.3}
+    return cfg
+
+
+class Holdout(unittest.TestCase):
+    def run_null(self, reps, omit=()):
+        cfg = holdout_config()
+        crit = stats.chi2.ppf(0.95, 8)
+        out = []
+        for s in range(reps):
+            p = T.make(cfg, [0.5, -0.3, 1.0], data_seed=10 + s, mc_seed=1)
+            yv = p.simulate_val(p.truth, np.random.default_rng([s, 5]), nominal=False)
+            f = F.iterate(p, T.initial_beta(p), lndet=False)
+            pc = V.holdout_pieces(p, f, yv, omit=omit)
+            out.append(V.t_v(pc["r"], V.c_r_plus(pc["C_r"], pc["s"], pc["constraints"])[0]))
+        return np.array(out), crit
+
+    def test_statistic_with_cross_terms_has_mean_k_and_size_alpha(self):
+        """Section 15.2: mean k = dim N_d^perp, rejection rate alpha (the propagation term J_v Sigma_beta J_v^T with
+        the nu, eta columns of the validation rows)."""
+        Tv, crit = self.run_null(600)
+        self.assertAlmostEqual(Tv.mean(), 8.0, delta=0.5)
+        self.assertAlmostEqual(np.mean(Tv > crit), 0.05, delta=0.03)
+
+    def test_omitting_the_terms_over_rejects(self):
+        """The formula without the terms coupling validation to the calibration fit over-rejects (section 15.3.1)."""
+        Tv, crit = self.run_null(300, omit=("propagation",))
+        self.assertGreater(np.mean(Tv > crit), 0.15)
+
+    def test_toy_path_reasons(self):
+        self.assertEqual(V.toy_path_reasons({"bootstrap": True, "low_counts": False}), ["bootstrap"])
+        self.assertEqual(V.toy_path_reasons({}), [])
+
+
+class Power(unittest.TestCase):
+    def test_required_lambda_table(self):
+        self.assertEqual([round(V.required_lambda(k), 3) for k in (1, 2, 3, 5, 10)],
+                         [7.849, 9.635, 10.903, 12.828, 16.241])
+
+    def test_cross_product_unbiased_single_set_biased(self):
+        """lambda = 12.8: the cross product's mean within 12.8 +- 2%, the single-set estimate biased high by
+        tr(C^+ V_Delta) (section 15.3.10)."""
+        rng = np.random.default_rng(4)
+        k = 5
+        e = np.zeros(k)
+        e[0] = np.sqrt(12.8)
+        Cp = np.eye(k)
+        VD = np.eye(k) * 0.3
+        cr, sg, sc = [], [], []
+        for _ in range(20000):
+            e1 = e + rng.multivariate_normal(np.zeros(k), VD)
+            e2 = e + rng.multivariate_normal(np.zeros(k), VD)
+            cr.append(V.cross_lambda(e1, e2, Cp))
+            sg.append(V.single_lambda(e1, Cp))
+            sc.append(V.single_lambda(e1, Cp, VD))
+        self.assertAlmostEqual(np.mean(cr), 12.8, delta=0.256)
+        self.assertAlmostEqual(np.mean(sg) - 12.8, 1.5, delta=0.2)
+        self.assertAlmostEqual(np.mean(sc), 12.8, delta=0.256)
+
+    def test_decision_rules(self):
+        """One bound < 0.8 with another not computable: insufficient power (D2); all >= 0.8 sufficient; a missing
+        bound otherwise incomplete."""
+        self.assertEqual(V.power_decision({"a": 0.6, "b": None})["status"], "failed")
+        self.assertEqual(V.power_decision({"a": 0.9, "b": None})["status"], "incomplete")
+        self.assertEqual(V.power_decision({"a": 0.9, "b": 0.85})["status"], "passed")
+        self.assertEqual(V.s_a(-1.0, 3.0), 0.0)
+        self.assertAlmostEqual(V.s_a(9.0, 16.0, 1.0), 0.75)
+        self.assertEqual(V.bonferroni_levels(2, "toy"), {"lambda": 1 - 0.0125, "rate": 1 - 0.0125})
+        self.assertLess(V.clopper_pearson_lower(85, 100, 0.975), 0.85)
+
+    def test_analytic_path_lower_bound(self):
+        rng = np.random.default_rng(5)
+        reps = 30.0 + rng.normal(size=50)
+        r = V.power_analytic({"a": reps}, k=5)
+        self.assertEqual(r["status"], "passed")
+        r = V.power_analytic({"a": 8.0 + rng.normal(size=50)}, k=5)
+        self.assertEqual(r["status"], "failed")
+
+
+class CrossValidationBookkeeping(unittest.TestCase):
+    def test_g5_proportion_and_stop(self):
+        """D68 (A8): denominator = toys with G5 decided; stop at F_G5 > 0.25 sum n_req."""
+        self.assertAlmostEqual(V.g5_proportion(25, 100), 0.25)
+        self.assertTrue(V.g5_stop(126, 500))
+        self.assertFalse(V.g5_stop(125, 500))
+
+    def test_toy_status_order(self):
+        """A toy with one fold not converged and another failing G5 is not converged (section 15.3.8)."""
+        self.assertEqual(V.cv_toy_status([True, False], [False, True]), "not-converged")
+        self.assertEqual(V.cv_toy_status([True, True], [False, True]), "g5-failed")
+        self.assertAlmostEqual(F.eps_max_cv(20), 0.02)
+
+
+class Records(unittest.TestCase):
+    def setUp(self):
+        self.ledger = DR.Ledger()
+        self.book = V.DecisionBook()
+        self.k1 = V.kappa_record("c" * 64, {"plan": 1}, "0.1")
+        self.book.register(self.k1)
+        self.ledger.open_validation(self.k1["kappa"], "v" * 64, ["v1"], ["c1", "c2"], {"contract_sha256": "c" * 64})
+
+    def status(self):
+        return {r["status"] for r in self.ledger.state["failure_records"] if r["kappa"] == self.k1["kappa"]}
+
+    def test_abandon_then_decision_rejected(self):
+        """Section 15.3.14: abandonment makes the record final; a later passing decision is rejected; V failed."""
+        self.book.abandon(self.k1["kappa"], self.ledger)
+        self.assertEqual(self.status(), {"final"})
+        with self.assertRaises(V.ValidationError) as c:
+            self.book.decide(self.k1["kappa"], "pass", self.ledger)
+        self.assertEqual(c.exception.code, "validate.after_abandonment")
+        self.assertEqual(self.status(), {"final"})
+        self.assertEqual(self.book.v_status(self.k1["kappa"]), "failed")
+
+    def test_abandon_after_pass_rejected(self):
+        self.book.decide(self.k1["kappa"], "pass", self.ledger)
+        self.assertEqual(self.status(), {"withdrawn"})
+        with self.assertRaises(V.ValidationError) as c:
+            self.book.abandon(self.k1["kappa"], self.ledger)
+        self.assertEqual(c.exception.code, "validate.abandon_after_decision")
+        self.assertEqual(self.status(), {"withdrawn"})
+
+    def test_fail_and_k0(self):
+        self.book.decide(self.k1["kappa"], "fail", self.ledger)
+        self.assertEqual(self.status(), {"final"})
+        k2 = V.kappa_record("d" * 64, {}, "0.1")
+        self.book.register(k2)
+        self.ledger.open_validation(k2["kappa"], "w" * 64, ["w1"], ["c9"], {"contract_sha256": "d" * 64})
+        self.book.decide(k2["kappa"], "no-testable-direction", self.ledger)
+        self.assertEqual(self.book.v_status(k2["kappa"]), "no-testable-direction")
+
+    def test_k0_with_triggered_check_is_final(self):
+        self.book.decide(self.k1["kappa"], "no-testable-direction", self.ledger, data_side_check_triggered=True)
+        self.assertEqual(self.status(), {"final"})
+
+    def test_power_abandonment(self):
+        """T_v passes, power not computable: incomplete; abandon-power gives insufficient power, the record stays
+        withdrawn, later power records are rejected (section 15.3.10)."""
+        k = self.k1["kappa"]
+        self.book.decide(k, "pass", self.ledger)
+        self.book.record_power(k, {"status": "incomplete"})
+        self.assertEqual(self.book.v_status(k), "incomplete")
+        self.book.abandon_power(k)
+        self.assertEqual(self.book.v_status(k), "failed")
+        self.assertEqual(self.status(), {"withdrawn"})
+        with self.assertRaises(V.ValidationError):
+            self.book.record_power(k, {"status": "passed"})
+
+    def test_kappa_must_be_written_first(self):
+        with self.assertRaises(V.ValidationError):
+            self.book.decide("x" * 64, "pass")
+
+
+
+
+# ---------------------------------------------------------------- WP4 part 2: toy path, shift mode, cross-validation
+from core.simcal import shift as Sh  # noqa: E402
+
+
+def shift_config():
+    rng = np.random.default_rng(0)
+    cfg = T.linear_config(n=12, d=2)
+    cfg.phi_cols = (cfg.J[:, 0] * 0.8)[:, None]
+    Jv = rng.normal(size=(6, 2))
+    cfg.val = {"J": Jv, "m0": np.full(6, 5.0), "V_data": np.eye(6) * 0.5, "V_MC": np.zeros((6, 6)),
+               "phi_cols": (-0.8 * Jv[:, 0])[:, None]}
+    return cfg
+
+
+class ShiftModeResidual(unittest.TestCase):
+    def test_d_l_size_and_negative_controls(self):
+        """With the true phi drawn from its prior, C_r with sum d_l d_l^T gives size alpha; only the indirect
+        effect, or the refit derivative with a minus sign, gives a null rejection rate outside alpha +- 25%
+        (sections 9.2, 15.3.1)."""
+        cfg = shift_config()
+        crit = stats.chi2.ppf(0.95, 6)
+        res = {"ok": [], "minus": [], "indirect": []}
+        for s in range(400):
+            p = T.make(cfg, [0.5, -0.3], data_seed=10 + s, mc_seed=1)
+            rng = np.random.default_rng([s, 9])
+            phi = rng.normal(size=1)
+            p.observed = p.simulate(p.truth, rng, phi, nominal=False)
+            yv = p.simulate_val(p.truth, rng, phi, nominal=False)
+            f = F.iterate(p, T.initial_beta(p), lndet=False)
+            rf = Sh.refits(p, f, multistart=False)
+
+            def mu_v(beta, phis, p=p):
+                return p.h_val(beta[:2], phis)
+            for lab, kw in (("ok", {}), ("minus", {"sign": -1.0}), ("indirect", {"direct": False})):
+                pc = V.holdout_pieces(p, f, yv, d_cols=Sh.d_columns(p, f, rf, mu_v, **kw))
+                Cp, _ = V.c_r_plus(pc["C_r"], pc["s"], [])
+                res[lab].append(V.t_v(pc["r"], Cp) > crit)
+        rate = {k: float(np.mean(v)) for k, v in res.items()}
+        self.assertAlmostEqual(rate["ok"], 0.05, delta=0.025)
+        self.assertGreater(rate["minus"], 0.0625 + 0.05)
+        self.assertGreater(rate["indirect"], 0.0625 + 0.03)
+
+
+def small_holdout():
+    rng = np.random.default_rng(0)
+    cfg = T.linear_config(n=12, d=2, mc_ratio=0.1)
+    cfg.val = {"J": rng.normal(size=(5, 2)), "m0": np.full(5, 5.0), "V_data": np.eye(5) * 0.5,
+               "V_MC": np.eye(5) * 0.05}
+    return cfg
+
+
+class ToyPath(unittest.TestCase):
+    def test_reference_distribution_and_ratio_gate(self):
+        p = T.make(small_holdout(), [0.5, -0.3], 3, 4)
+        yv = p.simulate_val(p.truth, np.random.default_rng(1), nominal=False)
+        f = F.iterate(p, T.initial_beta(p))
+        pc = V.holdout_pieces(p, f, yv)
+        Cp, k = V.c_r_plus(pc["C_r"], pc["s"], [])
+        ref = V.reference_distribution(p, f, Cp, 500, 7, n_start=0)
+        self.assertEqual(ref["X"], 0)
+        self.assertAlmostEqual(np.mean(ref["T"]), k, delta=1.0)
+        self.assertEqual(V.toy_pvalue(V.t_v(pc["r"], Cp), ref)["status"], "ok")
+        self.assertEqual(V.toy_pvalue(1.0, {**ref, "ratio_failed": True})["status"], "incomplete")
+
+    def test_chat_minimum_and_factor(self):
+        self.assertEqual(V.chat_min_toys(5), 500)
+        self.assertEqual(V.chat_min_toys(60), 600)
+        self.assertAlmostEqual(V.chat_factor(500, 5), 493 / 499)
+        with self.assertRaises(V.ValidationError):
+            V.estimate_c_r(np.zeros((100, 3)), np.ones(3), [])
+
+
+class CrossValidation(unittest.TestCase):
+    def setUp(self):
+        self.p = T.make(T.linear_config(n=16, d=2, mc_ratio=0.1), [0.5, -0.3], 3, 4)
+        self.folds = [np.arange(0, 4), np.arange(4, 8), np.arange(8, 12), np.arange(12, 16)]
+        self.f = F.iterate(self.p, T.initial_beta(self.p))
+
+    def test_fold_failure_makes_v_incomplete(self):
+        """A fold that fails G5 on the actual data: T_cv not computed, V incomplete, remedy plan (section 15.3.8)."""
+        r = V.cv_statistic(self.p, self.folds, 5, {}, {}, n_start=0,
+                           g5=lambda sub, f: {"status": "failed"})
+        self.assertEqual((r["status"], r["finding"], r["remedy"]), ("incomplete", "validate.fold_g5", "plan"))
+
+    def test_g5_proportion_rule(self):
+        """G5 failing in 25% of toys: V incomplete, no redo; 10%: renewal, the decision proceeds; not counted in the
+        ratio test (sections 9.3, 15.3.8; D68)."""
+        def g5_rate(rate):
+            state = {"i": 0}
+
+            def g5(sub, f):
+                state["i"] += 1
+                fail = (state["i"] % 4 == 0) if rate == 0.25 else (state["i"] % 10 == 0)
+                return {"status": "failed" if fail else "passed"}
+            return g5
+        bad = V.cv_ensemble(self.p, self.folds[:1], self.f.beta, 60, 11, n_start=0, g5=g5_rate(0.25))
+        self.assertEqual(bad["finding"], "validate.cv_g5_proportion")
+        self.assertFalse(bad["redo"])
+        ok = V.cv_ensemble(self.p, self.folds[:1], self.f.beta, 60, 11, n_start=0, g5=g5_rate(0.10))
+        self.assertEqual(ok["status"], "ok")
+        self.assertEqual(ok["X"], 0)
+        self.assertGreater(ok["g5_failed"], 0)
+
+    def test_cv_statistic_runs(self):
+        ens = V.cv_ensemble(self.p, self.folds, self.f.beta, 500, 11, n_start=0)
+        self.assertEqual(ens["status"], "ok")
+        C, fac = {}, {}
+        for fi, rows in enumerate(self.folds):
+            R = np.array([v[fi] for v in ens["values"]])
+            e = V.estimate_c_r(R, np.sqrt(np.diag(self.p.cfg.V_data[np.ix_(rows, rows)])), [])
+            C[fi], fac[fi] = e["C_plus"], e["factor"]
+        st = V.cv_statistic(self.p, self.folds, 5, C, fac, n_start=0)
+        self.assertEqual(st["status"], "ok")
+        self.assertEqual(len(st["parts"]), 4)
+        self.assertEqual(ens["eps_max"], 0.02)
+
+
+# ------------------------------------------------------------------ the learned path (phase 5, WP-R2)
+LIGHT = {"folds": 2, "repeats": 3, "training_points": 4, "degree": 2}   # a fast, deliberately inexact classifier
+
+
+class LearnedPath(unittest.TestCase):
+    """Sections 9.2 and 6.6 on the learned path (post-hoc fixture, synthetic): V_learn in V_vv of C_r; the toy truth
+    is the nominal MC with the learned weights; each replica retrains its classifier (line 1192; no training shared
+    between toys, A25 (4)); each toy draws N(0, V_learn^bias) once (line 1209; only its scale is tested, A25 (2)).
+    Each negative has its positive control."""
+
+    @classmethod
+    def setUpClass(cls):
+        import warnings
+        warnings.filterwarnings("ignore", message="The balance properties of Sobol")
+        import simcal_phase5_tv as X
+        cls.X = X
+        cls.gen = {"strength": 0.15}
+        cls.pr = X.posthoc_problem(2000, 4000, mc_seed=51, val_mc_seed=52, generation=cls.gen, learned=LIGHT)
+
+    def _fit(self):
+        from core.simcal import likelihood as L
+        pr = self.pr
+        truth = np.array([0.15])
+        p = pr.with_data(L.Observations(y_gauss=pr.h(truth)))
+        f = F.iterate(p, truth, lndet=False)
+        self.assertTrue(f.converged, f.reason)
+        p.set_val_point(f.beta[:1])
+        return p, f
+
+    def test_v_learn_in_the_residual_covariance(self):
+        p, f = self._fit()
+        yv = p.h_val(f.beta[:1])
+        self.assertIn("V_learn", p.val)
+        pc = V.holdout_pieces(p, f, yv)
+        p0 = V.holdout_pieces(p, f, yv, omit=("learn",))          # negative control: V_learn left out
+        np.testing.assert_allclose(pc["C_r"] - p0["C_r"], p.val["V_learn"], atol=1e-18)
+        np.testing.assert_allclose(p.val["V_learn"], p.v_learn_link({"strength": float(f.beta[0])}, True)["V_learn"])
+        self.assertTrue(np.all(np.diag(p.val["V_learn"]) > 0))
+        q = self.X.posthoc_problem(2000, 4000, mc_seed=51, val_mc_seed=52, learned={"learned": None})
+        self.assertNotIn("V_learn", q.val)                        # default off: no learned ratio, no key
+
+    def test_toy_truth_carries_the_learned_weights(self):
+        """The toys' true value is m_nom(truth) (section 6.6): the events the toy data are drawn from carry the learned
+        weights, so their weighted mean is the evaluator's prediction (positive); the reweighting weights alone (the
+        construction before phase 5) leave the generation sample's mean (negative)."""
+        pr = self.pr
+        t = {"strength": 0.19}
+        ev_, w = pr._weighted_events(t)
+        y = ev_["run"]["correction"]["y"]
+        pred = pr.ev.evaluate(t, names=["y_mean"])["pred"][0]
+        self.assertAlmostEqual(float(np.sum(w["run"] * y) / np.sum(w["run"])), float(pred), places=12)
+        nom = pr.ev.nominal
+        full = {**pr.model.nominal, **t}
+        w0 = pr.ev.weights(full, nom, nodes=pr.ev.reweighted_nodes(full, nom))
+        m0 = float(np.sum(w0["run"] * y) / np.sum(w0["run"]))
+        self.assertGreater(abs(m0 - float(pred)), 0.05)
+        self.assertLess(abs(m0 - float(np.mean(nom["runs"]["run"]["events"]["correction"]["y"]))), 1e-12)
+
+    def _trainings(self, omit=()):
+        """The trainings used by the replicas of three toys (calibration side): {toy: [training seeds]}."""
+        pr = self.pr
+        ev = pr.ev
+        nominal_seed = ev.learned_ratio().seed
+        seen: list = []
+        orig = ev.learned_ratio
+
+        def recording(sample=None, repeat=0):
+            tr = orig(sample, repeat)
+            if sample is not None and sample["seed"] != ev.nominal["seed"]:      # a replica's sample
+                seen.append(tuple(tr.seed))
+            return tr
+        ev.learned_ratio = recording
+        pr.learned_omit = omit
+        out = {}
+        try:
+            for i in range(3):
+                seen.clear()
+                pr.replica_pert(np.random.default_rng([7, i]))
+                out[i] = list(seen)
+        finally:
+            ev.learned_ratio = orig
+            pr.learned_omit = ()
+        return out, tuple(nominal_seed)
+
+    @staticmethod
+    def shared(trainings: dict, nominal) -> list:
+        """The check: each toy's two replicas each train their own classifier, never the nominal's and never one
+        another toy used (section 6.6 line 1192, A25 (4)); returns the violations."""
+        bad = []
+        used: dict = {}
+        for i, seeds in trainings.items():
+            if len(set(seeds)) != 2:
+                bad.append((i, "not two own trainings", seeds))
+            for s in set(seeds):
+                if s == nominal:
+                    bad.append((i, "nominal training reused", s))
+                if s in used and used[s] != i:
+                    bad.append((i, f"training shared with toy {used[s]}", s))
+                used.setdefault(s, i)
+        return bad
+
+    def test_replicas_retrain_their_classifiers(self):
+        tr, nominal = self._trainings()
+        self.assertEqual(self.shared(tr, nominal), [])                       # positive
+        self.assertFalse(any(k[0] not in (repr(self.pr.ev.nominal["seed"]),) for k in self.pr.ev._learned),
+                         "replica trainings are dropped after their toy (never reused)")
+        tr0, _ = self._trainings(omit=("retrain",))                         # negative: replicas share the nominal's
+        self.assertTrue(any("nominal training reused" in b[1] for b in self.shared(tr0, nominal)))
+
+    def test_each_toy_draws_the_bias_once(self):
+        """The toy perturbation = replica difference + one N(0, V_learn^bias) draw at the generation point: the
+        difference to the construction without the draw is exactly that draw (calibration and validation rows); the
+        draws' covariance has V_learn^bias's scale (positive), and the construction without draws has none
+        (negative)."""
+        pr = self.pr
+        for val in (False, True):
+            f = pr.replica_pert_val if val else pr.replica_pert
+            a = f(np.random.default_rng(3))
+            pr.learned_omit = ("bias_draw",)
+            try:
+                rng = np.random.default_rng(3)
+                b = f(rng)
+            finally:
+                pr.learned_omit = ()
+            np.testing.assert_allclose(a - b, pr.learned_bias_draw(rng, validation=val), atol=1e-14)
+            Vb = pr.v_learn_link(self.gen, val)["V_learn_bias"]
+            rng = np.random.default_rng(4)
+            D = np.array([pr.learned_bias_draw(rng, validation=val) for _ in range(4000)])
+            ratio = np.trace(np.cov(D, rowvar=False)) / np.trace(Vb)
+            self.assertLess(abs(ratio - 1.0), 0.1, (val, ratio))
+            self.assertGreater(np.trace(Vb), 0.0)
+
+
+class S4Driver(unittest.TestCase):
+    """The S4 driver (tests/core/simcal_phase5_tv.py, optional, L9): the task table, the decision rule with a
+    failing configuration reported failed (negative) next to a passing control, and the local smoke."""
+
+    def test_task_table_and_rule(self):
+        import simcal_phase5_tv as X
+        ref = [i for t in X.TASKS if t["kind"] == "reference" for i in range(t["i0"], t["i0"] + t["n"])]
+        act = [i for t in X.TASKS if t["kind"] == "actual" for i in range(t["i0"], t["i0"] + t["n"])]
+        self.assertEqual((ref, act), (list(range(X.N_REF)), list(range(X.REPS))))
+        self.assertEqual(len({X._seed(j, i, k) for j in range(3) for i in range(40) for k in range(5)}), 600)
+
+    def test_judge(self):
+        import simcal_phase5_tv as X
+        ref = [{"i": i, "learned": float(i), "no-learned-toys": float(i) / 2} for i in range(99)]
+
+        def rows(n_rej):            # p = (#{T_ref >= T} + 1) / 100: T = 99 rejects at alpha 0.05, T = 0 does not
+            return [{"i": i, "status": "ok", "T": 99.0 if i < n_rej else 0.0, "T_without_V_learn": 0.0,
+                     "p_chi2": 0.5} for i in range(200)]
+        self.assertTrue(X.judge(ref, rows(10), reps=200, n_ref=99)["passed"])             # control: 0.05
+        self.assertFalse(X.judge(ref, rows(14), reps=200, n_ref=99)["passed"])            # negative: 0.07
+        self.assertFalse(X.judge(ref, rows(10)[:199], reps=200, n_ref=99)["passed"])      # a missing repetition
+        self.assertEqual(X.pvalue(5.0, [None, 1.0, 6.0]), 0.75)          # a non-converged toy counts as T >= T_obs
+
+    def test_pilot_summary(self):
+        """The A30 pilot's soundness flags, fixed before it runs: chi2_2-like reference and actual T with no
+        non-converged toy are sound (control); 3% non-converged reference toys or a heavy reference tail are flagged
+        (negatives). Never a pass condition (judged False); the pilot's seeds are disjoint from both registrations."""
+        import simcal_phase5_tv as X
+        from scipy import stats
+        q = stats.chi2.ppf((np.arange(200) + 0.5) / 200, 2)
+        ref = [{"i": i, "learned": float(t)} for i, t in enumerate(q)]
+        act = [{"i": i, "status": "ok", "T": float(t)} for i, t in enumerate(q)]
+        good = X.pilot_summary(ref, act)
+        self.assertTrue(good["all_sound"], good)
+        self.assertFalse(good["judged"])
+        bad = X.pilot_summary([{**r, "learned": None} if r["i"] < 6 else r for r in ref], act)
+        self.assertFalse(bad["sound"]["reference_nonconverged_share"])
+        heavy = X.pilot_summary([{**r, "learned": r["learned"] * 3} for r in ref], act)
+        self.assertFalse(heavy["sound"]["reference_q95"])
+        self.assertEqual(len({X.PILOT_SEED0, X.SEED0, 20261540, 20261591, 20261593}), 5)
+        self.assertEqual(sum(t["n"] for t in X.PILOT_TASKS), 400)
+
+    def test_local_smoke(self):
+        import contextlib
+        import io as _io
+        import json
+        import tempfile
+
+        import simcal_phase5_tv as X
+        smoke = X.SMOKE
+        X.SMOKE = [{"kind": "reference", "i0": 900000, "n": 1}, {"kind": "actual", "i0": 900000, "n": 1}]
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                out = Path(d) / "local.json"
+                with contextlib.redirect_stdout(_io.StringIO()):
+                    self.assertEqual(X.main(["--local", "--out", str(out)]), 0)
+                rep = json.loads(out.read_text())
+        finally:
+            X.SMOKE = smoke
+        self.assertEqual((rep["label"], rep["error_tasks"], rep["missing_tasks"]), ("smoke", [], []))
+        self.assertEqual(rep["result"]["repetitions"] + rep["result"]["reference_toys"], 2)
+        self.assertIn("provisional-thresholds", rep["flags"])
+
+
+if __name__ == "__main__":
+    unittest.main()

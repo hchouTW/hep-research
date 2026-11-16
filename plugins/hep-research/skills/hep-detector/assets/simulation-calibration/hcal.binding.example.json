@@ -4,7 +4,7 @@
   "synthetic"
  ],
  "part_b": "section 11.4 (g4sim binding), section 12 row HCAL",
- "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "note": "A contract fragment and plan for the existing generic layer (simcal_contract.py check, simcal_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
  "notes": [
   "Cross-section scaling and model-internal parameters have no field in the g4sim run card; the hadronic model enters as a discrete model M (two enumerated lists here) and the production cut as the physics-process theta.",
   "SiPM saturation (nonlinearity/4b) is not implemented as a g4sim response stage (section 11.4 Table 1)."
@@ -306,7 +306,7 @@
   ]
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {},
   "node_binding": {
    "nodes": {

@@ -5,8 +5,8 @@ with fields is expected, NaN inside the input, negative counts, a confidence lev
 bins and empty arrays. Each must be refused with exit 2 (the validators may also answer 1, their 'errors' verdict)
 and a JSON message on stdout, never a traceback. A second test runs `--help` with NumPy and SciPy hidden: every
 script must still print its help. Kept separate from tests/skills/test_cli_robustness.py (missing files, owned by the
-hep-computing plan). The simulator-calibration scripts (`calib_*.py`) are fuzzed by the same tests in
-`test_cli_input_fuzz_calib_a.py` and `test_cli_input_fuzz_calib_b.py` (each half of them), so that each module stays
+hep-computing plan). The simulator-calibration scripts (`simcal_*.py`) are fuzzed by the same tests in
+`test_cli_input_fuzz_simcal_a.py` and `test_cli_input_fuzz_simcal_b.py` (each half of them), so that each module stays
 within the 600 s module limit on CI runners. All inputs SYNTHETIC."""
 import json
 import re
@@ -18,8 +18,9 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
 CORE = sorted(p for p in (PLUGIN / "core" / "stats").glob("*.py") if not p.name.startswith("_") and p.name != "__init__.py")
-SCRIPTS = sorted((PLUGIN / "skills" / "hep-statistics" / "scripts").glob("*.py"))
-CALIB = [p for p in SCRIPTS if p.name.startswith("calib_")]  # fuzzed in test_cli_input_fuzz_calib_a.py and _b.py
+SCRIPTS = sorted(p for p in (PLUGIN / "skills" / "hep-statistics" / "scripts").glob("*.py")
+                 if not p.name.startswith("calib_"))    # not the deprecated stubs (removed in 0.72.0)
+CALIB = [p for p in SCRIPTS if p.name.startswith("simcal_")]  # fuzzed in test_cli_input_fuzz_simcal_a.py and _b.py
 CALIB_A, CALIB_B = CALIB[: len(CALIB) // 2], CALIB[len(CALIB) // 2:]
 HIDE = ("import runpy, sys; sys.modules['numpy'] = None; sys.modules['scipy'] = None; "
         "sys.argv = sys.argv[1:]; runpy.run_path(sys.argv[0], run_name='__main__')")
@@ -84,7 +85,7 @@ def base_args(script, sub, required, methods, input_path):
 
 
 class FuzzCases:
-    """The fuzz tests over `TARGETS`; mixed into a TestCase by this module and by test_cli_input_fuzz_calib.py."""
+    """The fuzz tests over `TARGETS`; mixed into a TestCase by this module and by test_cli_input_fuzz_simcal.py."""
     TARGETS: list = []
 
     def check(self, cp, label, allow_one=False):
@@ -173,8 +174,8 @@ class CliInputFuzz(FuzzCases, unittest.TestCase):
 
     def test_targets_cover_every_script_with_the_calib_modules(self):
         """The three modules together fuzz every core/stats module and every hep-statistics script, each once."""
-        from tests.skills.hep_statistics.test_cli_input_fuzz_calib_a import CalibCliInputFuzzA
-        from tests.skills.hep_statistics.test_cli_input_fuzz_calib_b import CalibCliInputFuzzB
+        from tests.skills.hep_statistics.test_cli_input_fuzz_simcal_a import CalibCliInputFuzzA
+        from tests.skills.hep_statistics.test_cli_input_fuzz_simcal_b import CalibCliInputFuzzB
         every = self.TARGETS + CalibCliInputFuzzA.TARGETS + CalibCliInputFuzzB.TARGETS
         self.assertEqual(sorted(every), sorted(CORE + SCRIPTS))
         self.assertEqual(len(every), len(set(every)))

@@ -5695,6 +5695,94 @@
    "not": "hep-computing",
    "set": "EVD",
    "note": "a static paper figure is writing, not an event display"
+  },
+  {
+   "id": "st-simcal-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run a simulator parameter calibration: tune the Geant4 Birks constant to test-beam data.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "simulator parameter calibration"
+   ],
+   "set": "SIMCAL"
+  },
+  {
+   "id": "st-simcal-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which RICH parameters can a simulator parameter calibration fix?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "simulator parameter calibration"
+   ],
+   "set": "SIMCAL"
+  },
+  {
+   "id": "st-simcal-ml-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "I need calibration of model outputs for my BDT classifier.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "calibration of model outputs"
+   ],
+   "not": "hep-detector",
+   "set": "SIMCAL"
+  },
+  {
+   "id": "st-simcal-dr-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Plan the calibration and alignment of the ECAL with π0 intercalibration.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment"
+   ],
+   "not": "hep-statistics",
+   "set": "SIMCAL"
+  },
+  {
+   "id": "st-simcal-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用測試束資料調整 Geant4 模擬裡的 Birks 常數，讓模擬和資料一致。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "SIMCAL",
+   "natural": true
+  },
+  {
+   "id": "st-simcal-nat-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "RICH 偵測器的哪些模擬參數可以用資料來調校？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "SIMCAL",
+   "natural": true
+  },
+  {
+   "id": "st-simcal-ml-nat-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "我的 BDT 分類器輸出的機率偏高，要怎麼校正成可信的機率？",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [],
+   "not": "hep-detector",
+   "set": "SIMCAL",
+   "natural": true
+  },
+  {
+   "id": "st-simcal-dr-nat-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請規劃 ECAL 的能量刻度與對準，用 π0 做晶體間的相互校正。",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [],
+   "not": "hep-statistics",
+   "set": "SIMCAL",
+   "natural": true
   }
  ]
 }

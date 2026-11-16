@@ -4,7 +4,7 @@
   "synthetic"
  ],
  "part_b": "section 11.4 (g4sim binding), section 12 row DIRC",
- "note": "A contract fragment and plan for the existing generic layer (calib_contract.py check, calib_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
+ "note": "A contract fragment and plan for the existing generic layer (simcal_contract.py check, simcal_chain.py candidates and p4). The experiment instance (section 11.2) supplies observables, event samples, data releases, model identities (section 5.1) and the V_model kernel values f, C, l. Bounds are illustrative placeholders, not detector facts.",
  "notes": [
   "quartz_rindex acts on two nodes (bar and tir); both bind to g4sim_run, so its only methods are resimulation and the surrogate model.",
   "TTS has no field in response-pipeline/1 (the transit time is a digitization-job input), so it has no Table 2 row and is not bound here."
@@ -244,7 +244,7 @@
   ]
  },
  "plan": {
-  "schema": "calibration-plan/1",
+  "schema": "simcal-plan/1",
   "kernels": {},
   "node_binding": {
    "nodes": {
