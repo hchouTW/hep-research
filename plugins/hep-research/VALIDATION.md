@@ -9943,3 +9943,34 @@ release branch, the bundle `release_manifest.py check-published` compares with e
 on that export (`verify`: identical). The bundle holds about 4,030 files (`tests/` is `export-ignore`).
 
 Passing checks show software consistency, not physical validity.
+
+## 0.70.0 release check (2026-11-16, CI and NSTCCore Slurm, partition edr1/edr2-al9_short_serial)
+
+Release commit `08f124f8` on `release/0.70.0`, based on main `0cb3aa39` (PR #418 merged). Minor release:
+- the simcal rename (PR #418): the simulator parameter calibration workflow's names become simcal (`core/simcal/`,
+  `contracts/schemas/simcal_*.json`, ids `simcal-*/1`, scripts `simcal_*.py`, `adapters/geant4/assets/g4sim_simcal_eval.py`),
+  with read aliases for the 0.69.0 ids, a `core.calibration` alias package and stubs under the old script names until
+  0.72.0; every earlier simcal gate rerun against a base run at 0.69.0 with the same numbers (gate record
+  `docs/dev/simulator-calibration/simcal-gates/rename-0.70.md`; phase-2 gate 1's units item held a then-expected failure,
+  accepted as A36 and fixed before the merge, A38);
+- `adapters/geant4` 0.17.1 -> 0.18.0 (the evaluator's new name and state id).
+
+What changed on the release branch:
+- version 0.70.0 in the same 14 files as 0.69.0;
+- `CORE_VERSION` 1.16.0 (from 1.15.0, already on main with PR #418); contracts 3.28.0 unchanged;
+- a CHANGELOG `0.70.0` section, made from the former `Unreleased` entries.
+
+No regeneration: committed outputs keep the versions that wrote them, and the release changes no committed result.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` and `platforms.yml` on PR #418 at `f28c460e` | success (38 pass, 3 skipped) |
+| CI on the release PR | recorded in the PR |
+| Slurm job 7668613 at `08f124f8`, hpa-wn24 (AMD EPYC 9654, 24 CPUs; env/py313: Python 3.13.18, NumPy 2.4.6, SciPy 1.17.1; cmake 3.28.6 from the site module), from a local clone checked out at the commit (6121 tracked files, full history): `run_all_checks.py --jobs 12` | 34 pass, 0 fail; units 10,729 run, 0 failures, 0 errors, 570 skipped, 658 modules, none unfinished (883 s) |
+| the same job, `check_relocation.py --jobs 12` alongside (copy in a path with spaces, outside the repository) | 33 pass, 0 fail, 1 skipped (`codex-plugin-load`: host CLI check, unverified, not passed) |
+
+Passing checks show software consistency, not physical validity.
+
+Release manifest: `release-manifests/0.70.0.json` is generated from a `git archive HEAD:plugins/hep-research` export of the
+release branch, the bundle `release_manifest.py check-published` compares with each tag, after this section, and verified
+on that export (`verify`: identical).
