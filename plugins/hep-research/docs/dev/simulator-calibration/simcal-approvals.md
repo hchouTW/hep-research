@@ -122,3 +122,12 @@ These are implemented as Part B writes them (computation results, and, by front 
 | D12 | 4096 | computation: implemented as written; author confirms | no phase |  |  |  |  |
 
 13 items.
+
+## Decisions after phase 5: the simcal rename (0.70.0)
+
+Recorded by the rename task (task card `simcal-rename-task.md`, step 0.3 and step 5.2); the names are in
+[`../simcal-naming-map.md`](../simcal-naming-map.md).
+
+| Record | Date | Items | Person | Words (translation) | Where applied |
+|---|---|---|---|---|---|
+| A34 | 2026-11-16 | The name map of the simcal rename, a C3 rename of public names: `core/calibration/` → `core/simcal/`, schema files `calibration_*.json` → `simcal_*.json`, ids `calibration-*/1` → `simcal-*/1` (and `g4sim-calib-eval-state/1` → `g4sim-simcal-eval-state/1`), scripts `calib_*.py` → `simcal_*.py`, the test modules; the old names stay readable through aliases and shims for two minor releases (removed in 0.72.0); the folder names `references/simulation-calibration/` and `assets/simulation-calibration/` are kept; Slurm submission without asking for the rename task's base and rename campaigns only (synthetic fixtures and toy detectors, `edr1-al9_short_serial`, account `ams`, at most 400 tasks at once); pushing `simcal/rename` and opening a draft pull request (no merge, tag or release) | the author (the user, in the Claude session of 2026-11-16 that produced the task card) | the task card's step 0.3, written in that session; for Stage B: “do your recommendation” (the Stage A report's three changes: misc task 4 at 40000M, units at 1 h 30 min, reconcile copies named `check-run-*`) | branch `simcal/rename`, hep-research 0.70.0 |

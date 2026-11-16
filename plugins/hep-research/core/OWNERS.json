@@ -354,7 +354,7 @@
   "calibration": {
    "steward": "hep-statistics",
    "status": "deprecated-alias",
-   "purpose": "Deprecated alias package of core.simcal (simcal rename, hep-research 0.70.0): importing it warns once (DeprecationWarning) and makes core.calibration.<m> the same module object as core.simcal.<m>; removed in 0.72.0 (docs/dev/simcal-naming-map.md).",
+   "purpose": "Deprecated alias package of core.simcal under its 0.69.0 name (simcal rename, hep-research 0.70.0): importing it warns once (DeprecationWarning) and each of its submodules is the same module object as the core.simcal one; removed in 0.72.0 (docs/dev/simcal-naming-map.md).",
    "files": [
     "__init__"
    ],
