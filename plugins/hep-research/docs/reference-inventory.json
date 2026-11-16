@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 58,
-   "bytes": 844831,
+   "bytes": 844826,
    "uncited": 0
   },
   "hep-measurement": {
@@ -30,17 +30,17 @@
   },
   "hep-ml": {
    "references": 43,
-   "bytes": 207679,
+   "bytes": 207680,
    "uncited": 0
   },
   "hep-review": {
    "references": 10,
-   "bytes": 33805,
+   "bytes": 33811,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 209685,
+   "bytes": 209703,
    "uncited": 0
   },
   "hep-theory": {
@@ -1197,7 +1197,7 @@
     "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d3ee1c153 2026-11-01"
+   "last_commit": "7eda91a27 2026-11-13"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -2256,7 +2256,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "9359950e2 2026-11-12"
+   "last_commit": "b5c6735cc 2026-11-14"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2827,7 +2827,7 @@
   {
    "path": "skills/hep-detector/references/simulation-calibration/index.md",
    "owner": "hep-detector",
-   "bytes": 5765,
+   "bytes": 5760,
    "lines": 76,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2947,7 +2947,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "9cf8a372f 2026-11-14"
+   "last_commit": "f02eec0a1 2026-11-16"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
@@ -3775,7 +3775,7 @@
   {
    "path": "skills/hep-ml/references/learned-density-ratio-reweighting.md",
    "owner": "hep-ml",
-   "bytes": 11558,
+   "bytes": 11559,
    "lines": 150,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3784,7 +3784,7 @@
     "skills/hep-ml/references/sbi-training.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "24a2150d1 2026-11-14"
+   "last_commit": "1ea77d4ce 2026-11-16"
   },
   {
    "path": "skills/hep-ml/references/mixed-precision.md",
@@ -4253,7 +4253,7 @@
   {
    "path": "skills/hep-review/references/domains/detector.md",
    "owner": "hep-review",
-   "bytes": 4755,
+   "bytes": 4761,
    "lines": 51,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -4266,7 +4266,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "1ea77d4ce 2026-11-16"
   },
   {
    "path": "skills/hep-review/references/domains/index.md",
@@ -4588,7 +4588,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14799,
+   "bytes": 14817,
    "lines": 102,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4609,7 +4609,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "3a349fce9 2026-11-13"
+   "last_commit": "1ea77d4ce 2026-11-16"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

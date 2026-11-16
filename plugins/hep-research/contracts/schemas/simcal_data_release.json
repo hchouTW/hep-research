@@ -10,7 +10,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "simcal-data-release/1"
+   "enum": ["simcal-data-release/1", "calibration-data-release/1"]
   },
   "status": {
    "type": "array",

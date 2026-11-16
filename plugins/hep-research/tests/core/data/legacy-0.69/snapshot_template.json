@@ -1,0 +1,1 @@
+{"schema": "condition-snapshot/1", "readout": "ecal", "version": "v1", "description": "conditions v1", "source_of_facts": {"/iovs": "synthetic"}, "time_unit": "ns", "defaults": {"gain_factor": 1.0}, "iovs": [{"start_ns": 0, "end_ns": 1000000000, "rows": [{"cell": {"volume": 0, "channel": 0}, "gain_factor": 1.02, "threshold": 2.0, "dead": false}]}]}

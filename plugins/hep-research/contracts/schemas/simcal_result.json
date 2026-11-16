@@ -19,7 +19,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "simcal-result/1"
+   "enum": ["simcal-result/1", "calibration-result/1"]
   },
   "contract_sha256": {
    "type": "string",

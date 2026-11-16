@@ -37,6 +37,8 @@ from typing import Any, Protocol
 import numpy as np
 from scipy import linalg, optimize, stats
 
+from core.simcal.legacy import is_schema
+
 PHASE = 3
 ALPHA_P6 = 0.01                 # section 8.7 row 2004 (design value)
 DATA_FACTOR = 0.3               # |Delta m| <= 0.3 sqrt(V^unc_data) + z sigma_Delta (section 8.2, suggested default)
@@ -307,8 +309,7 @@ def new_state(points: list, purpose: str, base_theta: dict | None = None, seeds:
 
 
 def _check_state(state):
-    if not isinstance(state, dict) or state.get("schema") != STATE_SCHEMA or not isinstance(state.get("entries"),
-                                                                                             list):
+    if not is_schema(state, STATE_SCHEMA) or not isinstance(state.get("entries"), list):
         raise EmulatorError("emulator.state", f"not a {STATE_SCHEMA} state")
     ids = [e.get("run_id") for e in state["entries"]]
     if len(set(ids)) != len(ids):

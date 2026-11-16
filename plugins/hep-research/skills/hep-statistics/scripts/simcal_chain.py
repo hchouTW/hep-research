@@ -32,13 +32,14 @@ import argparse
 import sys
 
 from core.simcal import chain, io
+from core.simcal.legacy import is_schema
 
 
 def _contract_and_plan(path, plan_path=None):
     doc = io.load(path)
     if not isinstance(doc, dict):
         raise io.InputError("a contract or fixture is a JSON object")
-    contract, plan = (doc["contract"], doc.get("plan")) if doc.get("schema") == "simcal-fixture/1" else (doc, None)
+    contract, plan = (doc["contract"], doc.get("plan")) if is_schema(doc, "simcal-fixture/1") else (doc, None)
     if plan_path:
         plan = io.load(plan_path)
     if not isinstance(contract.get("stage_graph"), dict):

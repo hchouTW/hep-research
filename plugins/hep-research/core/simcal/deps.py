@@ -17,6 +17,7 @@ from statistics import NormalDist
 
 from core.simcal import model_identity
 from core.simcal.data_release import kappa_id
+from core.simcal.legacy import is_schema
 from core.canonical import canonical_sha256
 
 # Section 5.2 clause 5: the usages an upstream reference can declare, and the role each implies (section 10.2).
@@ -429,7 +430,7 @@ def tost(before: float, after: float, se_old: float, se_new: float, margin: floa
 
 
 def _record_shape(record) -> None:
-    if not isinstance(record, dict) or record.get("schema") != T2_SCHEMA or not isinstance(
+    if not is_schema(record, T2_SCHEMA) or not isinstance(
             record.get("registration"), dict) or not isinstance(record.get("outcome"), dict):
         raise DependencyError("t2.shape", f"a T2 record is {{schema: {T2_SCHEMA}, registration, outcome}}", "$.record")
     reg = record["registration"]

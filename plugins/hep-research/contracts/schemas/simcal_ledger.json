@@ -10,7 +10,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "simcal-ledger/1"
+   "enum": ["simcal-ledger/1", "calibration-ledger/1"]
   },
   "seq": {
    "type": "integer",

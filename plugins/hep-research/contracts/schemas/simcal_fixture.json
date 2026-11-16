@@ -11,7 +11,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "simcal-fixture/1"
+   "enum": ["simcal-fixture/1", "calibration-fixture/1"]
   },
   "fixture": {
    "type": "string",

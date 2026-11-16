@@ -1,0 +1,162 @@
+{
+ "design": {
+  "bootstrap": 0,
+  "bootstrap_seed": 20261113,
+  "fd_fraction": 0.05,
+  "n_scan": 64,
+  "scan_seed": 20261112
+ },
+ "evaluator": {
+  "events": 40000,
+  "kind": "toy-detector"
+ },
+ "kernels": {
+  "deposition": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "e_over_p": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "electronics": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "energy_ratio": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "gain": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "input": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "layer_a": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "layer_b": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "module_a": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "module_b": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "momentum": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "momentum_measurement": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "pde": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "photon_generation": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "position_difference": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  },
+  "track_input": {
+   "stored": {
+    "inputs": true,
+    "outputs": true,
+    "steps": false
+   },
+   "support_declared": true
+  }
+ },
+ "methods": {
+  "enf": "analytic-reweighting",
+  "gain": "analytic-reweighting",
+  "layer_b_offset": "rerun",
+  "light_yield": "analytic-reweighting",
+  "material_thickness": "resimulation",
+  "momentum_scale": "resimulation",
+  "noise_width": "resimulation",
+  "pde": "analytic-reweighting",
+  "relative_gain_b": "rerun",
+  "sum_term_a": "resimulation",
+  "sum_term_b": "rerun",
+  "threshold": "resimulation"
+ },
+ "schema": "calibration-plan/1",
+ "seeds": {
+  "nominal": 20261110,
+  "resample": 20261111
+ }
+}

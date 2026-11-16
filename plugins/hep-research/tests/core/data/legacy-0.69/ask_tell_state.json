@@ -1,0 +1,195 @@
+{
+ "schema": "calibration-ask-tell/1",
+ "purpose": "training",
+ "names": [
+  "spe_e_mean",
+  "spe_e_width",
+  "spe_efficiency"
+ ],
+ "entries": [
+  {
+   "run_id": "training-0000",
+   "point": {
+    "threshold": 10.687194461002946
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 10.687194461002946,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0001",
+   "point": {
+    "threshold": 6.370363425463438
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 6.370363425463438,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0002",
+   "point": {
+    "threshold": 3.162942346185446
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 3.162942346185446,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0003",
+   "point": {
+    "threshold": 13.780429432168603
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 13.780429432168603,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0004",
+   "point": {
+    "threshold": 15.619284556247294
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 15.619284556247294,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0005",
+   "point": {
+    "threshold": 1.4367411462590098
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 1.4367411462590098,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0006",
+   "point": {
+    "threshold": 8.044372665695846
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 8.044372665695846,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  },
+  {
+   "run_id": "training-0007",
+   "point": {
+    "threshold": 8.898672134615481
+   },
+   "theta": {
+    "light_yield": 100.0,
+    "pde": 0.25,
+    "gain": 10.0,
+    "enf": 1.2,
+    "noise_width": 2.0,
+    "threshold": 8.898672134615481,
+    "relative_gain_b": 1.0,
+    "momentum_scale": 1.0,
+    "sum_term_a": 1.0,
+    "sum_term_b": 0.5,
+    "layer_b_offset": 0.0
+   },
+   "seeds": {
+    "nominal": 20261110
+   },
+   "status": "pending"
+  }
+ ]
+}

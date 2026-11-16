@@ -12,6 +12,7 @@ from typing import Any
 from pathlib import Path
 
 from core.canonical import load_json_strict
+from core.simcal.legacy import is_schema
 
 EXIT = {"ok": 0, "accepted": 0, "passed": 0, "written": 0, "not-applicable": 0, "synthetic": 0,
         "no-testable-direction": 0,                     # a decision: no direction to test (section 9.4)
@@ -109,7 +110,7 @@ def contract_and_plan(contract_path: str, plan_path: str | None = None) -> tuple
     doc = load(contract_path)
     if not isinstance(doc, dict):
         raise InputError(f"{contract_path}: a contract or fixture is a JSON object")
-    if doc.get("schema") == "simcal-fixture/1":
+    if is_schema(doc, "simcal-fixture/1"):
         contract, plan = doc.get("contract"), doc.get("plan")
         extras = {k: v for k, v in doc.items() if k not in ("contract", "plan")}
     else:

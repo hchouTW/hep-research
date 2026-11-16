@@ -22,7 +22,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "simcal-contract/1"
+   "enum": ["simcal-contract/1", "calibration-contract/1"]
   },
   "series": {
    "type": "string",

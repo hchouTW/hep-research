@@ -7,7 +7,7 @@
  "additionalProperties": false,
  "properties": {
   "schema": {
-   "const": "simcal-plan/1"
+   "enum": ["simcal-plan/1", "calibration-plan/1"]
   },
   "kernels": {
    "type": "object"

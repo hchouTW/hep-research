@@ -276,6 +276,9 @@ MISSING_FILE_ARGS = {
     "adapters/root-uproot/assets/root_to_parquet.py": ["--input", M, "--out", OUT],
     "adapters/unbinned-fit/assets/unbinned_fit.py": ["fit", "--data", M, "--config", M],
 }
+# the deprecated aliases of hep-research 0.70.0 (removed in 0.72.0) forward to their targets: the same arguments
+MISSING_FILE_ARGS.update({k.replace("/simcal_", "/calib_").replace("/g4sim_simcal_eval", "/g4sim_calib_eval"): v
+                          for k, v in list(MISSING_FILE_ARGS.items()) if "/simcal_" in k or "/g4sim_simcal_eval" in k})
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "adapters/geant4/assets/g4sim_physics_check.py": "a library of g4sim_run.py; only --help",
     "adapters/geant4/assets/g4sim_simulate.py": "a library of g4sim_run.py; only --help",
