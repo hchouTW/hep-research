@@ -16,7 +16,10 @@ stay are in `docs/dev/simcal-naming-map.md` (approval A34).
   `adapters/geant4/assets/g4sim_simcal_eval.py`. Every writer emits the new ids.
 - Old names still work until 0.72.0: files with the 0.69.0 ids are read (notice `simcal.legacy_schema_id` on stderr)
   and hashed as written, so their hash citations resolve; `import core.calibration…` warns and gives the same module
-  objects; the old script names run the new scripts. 0.72.0 removes them.
+  objects; the old script names run the new scripts, and `import g4sim_calib_eval` (how 0.69.0 code registered the
+  g4sim evaluator) warns and gives the `g4sim_simcal_eval` module. 0.72.0 removes them.
+- The schema files have no alias files: validating against `contracts/schemas/calibration_*.json` by name fails; use
+  `simcal_*.json` (they accept the old ids).
 - A migration tool that rewrites the old ids in existing files follows before 0.72.0. Until then keep old files as
   they are: rewriting an id by hand changes the file's hash and every hash that cites it.
 

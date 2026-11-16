@@ -56,7 +56,12 @@ The existing files of the frozen package `docs/dev/simulator-calibration/` and t
   module object as `core.simcal.<m>`; `core/OWNERS.json` lists it as `deprecated-alias`.
 - **Scripts.** `skills/hep-statistics/scripts/calib_<x>.py` and `adapters/geant4/assets/g4sim_calib_eval.py` print one
   notice (`simcal.deprecated_script`) and run the new script with the same arguments, so output and exit code are the
-  new script's. They are not skill scripts (`tools/skill_scripts.json` lists none of them) and the CLI fuzz skips them.
+  new script's. They are not skill scripts (`tools/skill_scripts.json` lists none of them); the CLI fuzz and the guide's
+  dependency-marker test (`tests/skills/hep_statistics/test_core_stats_guide.py`, approval A35) skip them, so those two
+  tests keep the old prefix in their filters. Imported, `g4sim_calib_eval` (how 0.69.0 code registered the g4sim
+  evaluator kind) warns once and is replaced by the `g4sim_simcal_eval` module (approval A37).
+- **Schema files.** There are no alias files for `contracts/schemas/calibration_*.json`: code that validates against a
+  schema file by its old name fails; use the `simcal_*.json` names, which accept the old ids.
 - **Removal.** 0.72.0 (`CORE_VERSION` 2.0.0) removes the aliases, the shim and the stubs. A migration tool that
   rewrites old ids in users' files is a separate task due before 0.72.0: rewriting an id changes a file's hash and every
   hash that cites it, so it needs engine changes in gate-protected code.

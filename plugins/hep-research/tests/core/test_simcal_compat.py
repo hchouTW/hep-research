@@ -170,6 +170,20 @@ class Shims(unittest.TestCase):
                                 and script.name in lines[0], (stub.name, err0[:200]))
                 self.assertEqual((rc0, out0, "\n".join(lines[1:])), (rc1, out1, err1.rstrip("\n")), (stub.name, args))
 
+    def test_old_evaluator_import_registers_the_g4sim_kind(self):
+        """0.69.0 code registered the g4sim evaluator by importing it under its old name (review F4)."""
+        assets = ROOT / "adapters" / "geant4" / "assets"
+        code = ("import sys, warnings\n"
+                f"sys.path[:0] = [{str(assets)!r}, {str(ROOT)!r}]\n"
+                "with warnings.catch_warnings(record=True) as w:\n"
+                "    warnings.simplefilter('always')\n"
+                "    import g4sim_calib_eval as old\n"
+                "import g4sim_simcal_eval as renamed\n"
+                "from core.simcal import evaluator\n"
+                "print(old is renamed, 'g4sim' in evaluator._REGISTERED, [x.category.__name__ for x in w])")
+        res = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True, timeout=120)
+        self.assertEqual(res.stdout.strip(), "True True ['DeprecationWarning']", res.stderr)
+
     def test_old_package_is_the_new_one(self):
         code = ("import warnings; warnings.simplefilter('always')\n"
                 "import core.simcal.use as new\n"
