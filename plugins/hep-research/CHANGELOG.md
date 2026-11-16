@@ -5,7 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-Proposed as 0.70.0 (minor); contracts 3.28.0 unchanged, `CORE_VERSION` 1.16.0 (from 1.15.0), `adapters/geant4` 0.18.0
+## 0.70.0 (2026-11-16)
+
+Minor release (PR #418); contracts 3.28.0 unchanged, `CORE_VERSION` 1.16.0 (from 1.15.0), `adapters/geant4` 0.18.0
 (from 0.17.1). It renames the simulator parameter calibration workflow to **simcal**: the bare word calibration means
 detector constants (hep-detector) and hep-ml owns the calibration of model outputs. The name map and the names that
 stay are in `docs/dev/simcal-naming-map.md` (approval A34).
@@ -39,6 +41,8 @@ stay are in `docs/dev/simcal-naming-map.md` (approval A34).
   detector type, and the ML-output and detector-calibration neighbors, each also as a natural zh-Hant prompt).
 - `adapters/geant4` 0.18.0: the g4sim evaluator is `g4sim_simcal_eval.py`; its state id is
   `g4sim-simcal-eval-state/1`.
+- Tests: the phase-5 gate tests `test_static_item_at_this_commit` and `test_base_tree_cases` judge the rename (each
+  renamed harness file is its phase-5 original with names substituted only) instead of failing on it (approval A38).
 
 ## 0.69.0 (2026-11-15)
 
