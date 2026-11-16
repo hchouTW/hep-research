@@ -22,6 +22,35 @@ REPO = ROOT.parents[1]
 IN_REPO = (REPO / ".git").exists() and ROOT == (REPO / "plugins" / "hep-research").resolve()
 
 
+# The simcal rename (0.70.0, docs/dev/simcal-naming-map.md) moved the protected harness files and the identity-case file
+# and substituted names in them, by design. Since then the two tests below check that each such file is its phase-5
+# original with names substituted only: `old_names` reverses the name map of those files exactly.
+RENAMED_PROTECTED = {"plugins/hep-research/tests/core/simcal_exhaustive.py": "tests/core/calibration_exhaustive.py",
+                     **{f"plugins/hep-research/tests/core/simcal_phase{k}_gates.py":
+                        f"tests/core/calibration_phase{k}_gates.py" for k in (1, 2, 3, 4)}}
+_STEMS = ("chain|closure|contract|contrib|data|deps|design|emulator|fit|identify|interval|kernel_check|likelihood|"
+          "propagate|reweight|shift|use|validate")
+_IDS = ("contract|data-release|fixture|ledger|plan|result|identity-equivalence|decisions|ask-tell|control-variable|"
+        "degeneracy-mode|functional|mechanism|parameter-index|reference|stage-graph")
+_OLD_NAMES = [(r"\bcore\.simcal\b", "core.calibration"), (r"\bcore/simcal\b", "core/calibration"),
+              (rf"\bsimcal-({_IDS})/1", r"calibration-\1/1"), (r"\bg4sim-simcal-eval-state/1", "g4sim-calib-eval-state/1"),
+              (r"\bg4sim_simcal_eval\b", "g4sim_calib_eval"), (r"\btest_simcal_scripts\b", "test_calib_scripts"),
+              (r"fuzz_simcal", "fuzz_calib"), (r'"test_simcal_"', '"test_calibration_"'),
+              (r"\btest_simcal_(?=[a-z])", "test_calibration_"),
+              (r"\bsimcal_(exhaustive|fixtures|phase|g4sim|map_fixtures|pde_fixtures|rich_fixture|zdc_fixture)",
+               r"calibration_\1"),
+              (rf"\bsimcal_({_STEMS})\b", r"calib_\1"),
+              (r"\btest_simcal_\*", "test_calibration_*"), (r"simcal_\*", "calib_*")]
+
+
+def old_names(text: str) -> str:
+    """The text with the simcal rename's names of these harness files reversed (simcal -> the 0.69.0 names)."""
+    import re
+    for pattern, replacement in _OLD_NAMES:
+        text = re.sub(pattern, replacement, text)
+    return text
+
+
 def _base_reachable() -> bool:
     if not IN_REPO:
         return False
@@ -98,9 +127,19 @@ class Static(unittest.TestCase):
 
     @unittest.skipUnless(_base_reachable(), "needs a repository checkout with the phase-5 base commit")
     def test_static_item_at_this_commit(self):
-        """This branch (base plus the phase-5 work) leaves every protected file and registry entry unchanged."""
+        """Since the phase-5 base, no protected file and no phase-0..4 registry entry changed, except the simcal rename
+        (0.70.0): it moved the 5 protected harness files of RENAMED_PROTECTED, and each is its phase-5 original with
+        names substituted only. The item itself then reports exactly those 5 files (gate record rename-0.70)."""
         r = G.static_item()
-        self.assertTrue(r["passed"], r)
+        self.assertEqual(r["registry_entries_differing"], [], r)
+        self.assertEqual(r["registry_entries_base"], r["registry_entries_head"])
+        changed = set(r["protected_files_changed"])
+        self.assertLessEqual(changed, set(RENAMED_PROTECTED), r)
+        self.assertEqual(changed == set(RENAMED_PROTECTED), not r["passed"], r)
+        for renamed_path, old_path in RENAMED_PROTECTED.items():
+            if renamed_path in changed:
+                original = G._git("show", f"{G.PHASE_BASE}:plugins/hep-research/{old_path}")
+                self.assertEqual(old_names((REPO / renamed_path).read_text(encoding="utf-8")), original, renamed_path)
 
 
 class Rerun(unittest.TestCase):
@@ -242,7 +281,18 @@ class Identity(unittest.TestCase):
         if G.environment() != doc["environment"]:
             self.skipTest("interpreter differs from the capture (the comparison is then incomplete, not judged)")
         fast = [G.TREE_PREFIX + "evaluator_problem_standin"]
-        self.assertTrue(G.identity_item(cases=fast)["passed"])
+        # the simcal rename (0.70.0) changed the case file's names only: reversed, it is the captured file; the cases
+        # are then judged against a copy of the golden that records the renamed file's SHA-256
+        import hashlib
+        text = G.TREE_CASES.read_text(encoding="utf-8")
+        self.assertEqual(hashlib.sha256(old_names(text).encode()).hexdigest(), doc["cases"][fast[0]]["case_code_sha256"])
+        doc = json.loads(json.dumps(doc))
+        for n in names:
+            doc["cases"][n]["case_code_sha256"] = hashlib.sha256(G.TREE_CASES.read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory() as work_dir:
+            renamed = Path(work_dir) / "g.json"
+            renamed.write_text(json.dumps(doc))
+            self.assertTrue(G.identity_item(path=renamed, cases=fast)["passed"])
         for change in ("golden", "code"):
             bad = json.loads(json.dumps(doc))
             case = bad["cases"][fast[0]]

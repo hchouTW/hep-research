@@ -65,3 +65,12 @@ of the task card's step 6.3; its other 17 items and all their values equal the b
 State **done**. Branch `simcal/rename` (10 commits over `$BASE`: moves, names, specializations, compatibility layer,
 text and routing, specialization text, records and versions, repair 1, repair 2, this record), pushed with a draft pull
 request. Next action for the maintainer: review the draft PR (and the A36 exception), merge it, then release 0.70.0.
+
+## After the hand-over (A38)
+
+The two expected failures of step 6.3, `test_static_item_at_this_commit` and `test_base_tree_cases`, would have failed
+on main after the merge wherever they run. They now judge the rename instead (approval A38): the 5 changed protected
+files and the identity-case file are their phase-5 originals with names substituted only (an exact reverse of the name
+map), and the registry is unchanged. The gate harness and its rules are unchanged. On the login host (capture
+environment, full history) both run and pass; with a planted extra line in a protected file the static test fails.
+The verdicts above stay as recorded at `$RENAME`; phase-2 gate 1's `units` item would no longer hold a failing test.
