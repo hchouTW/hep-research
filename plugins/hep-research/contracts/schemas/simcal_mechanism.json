@@ -1,4 +1,5 @@
 {
+ "description": "simcal (simulator parameter calibration): a mechanism class of the vocabulary (section 3.2).",
  "$comment": "simcal-mechanism/1 (Part B section 3.2): a mechanism class of the vocabulary; an extension is namespaced x-<name> and needs review. Correctness decisions never depend on the class.",
  "anyOf": [
   {

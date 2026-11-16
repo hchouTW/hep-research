@@ -657,6 +657,7 @@
   "tests.tools.test_skill_scripts": 7.3,
   "tests.tools.test_statistics_evidence": 0.1,
   "tests.tools.test_subprocess_timeouts": 6.4,
-  "tests.tools.test_validate_skill_bundle": 0.2
+  "tests.tools.test_validate_skill_bundle": 0.2,
+  "tests.core.test_simcal_compat": 60.0
  }
 }

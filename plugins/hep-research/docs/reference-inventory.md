@@ -243,7 +243,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `simulation-calibration/dirc.md` | hep-detector | 4.0 | no | 2 | - | e661b3fde 2026-11-13 |
 | `simulation-calibration/ecal.md` | hep-detector | 5.7 | no | 3 | - | e661b3fde 2026-11-13 |
 | `simulation-calibration/hcal.md` | hep-detector | 4.5 | no | 17 | - | e661b3fde 2026-11-13 |
-| `simulation-calibration/index.md` | hep-detector | 5.8 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-measurement, hep-ml, hep-review, hep-statistics, hep-theory | f02eec0a1 2026-11-16 |
+| `simulation-calibration/index.md` | hep-detector | 5.9 | yes | 105 | hep-authoring, hep-citations, hep-computing, hep-measurement, hep-ml, hep-review, hep-statistics, hep-theory | f02eec0a1 2026-11-16 |
 | `simulation-calibration/muon-detector.md` | hep-detector | 4.6 | no | 2 | - | e661b3fde 2026-11-13 |
 | `simulation-calibration/rich.md` | hep-detector | 4.2 | no | 2 | - | e661b3fde 2026-11-13 |
 | `simulation-calibration/tof.md` | hep-detector | 4.3 | no | 2 | - | e661b3fde 2026-11-13 |
@@ -324,7 +324,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c03967 2026-10-22 |
 | `combinations.md` | hep-statistics | 6.0 | yes | 7 | - | 6a70f37eb 2026-10-29 |
 | `core-stats-commands.md` | hep-statistics | 52.3 | yes | 8 | hep-detector, hep-measurement | f453828b2 2026-10-29 |
-| `core-stats-guide.md` | hep-statistics | 14.8 | yes | 13 | hep-measurement | 1ea77d4ce 2026-11-16 |
+| `core-stats-guide.md` | hep-statistics | 14.7 | yes | 13 | hep-measurement | 1ea77d4ce 2026-11-16 |
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 15 | hep-detector, hep-measurement | 2b221f928 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 12 | hep-computing, hep-detector | 09237aeef 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5d 2026-10-15 |

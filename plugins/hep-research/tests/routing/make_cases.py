@@ -612,6 +612,15 @@ C = [
  ("evd-negative-1", "en", "negative", "Looking at our Phoenix event display, which tracking and vertexing algorithms should we use for displaced vertices in this silicon tracker?", "hep-detector", ["tracking", "vertexing"], "hep-computing", None, {"set": "EVD"}),
  ("evd-adv-1", "en", "negative", "Using JSROOT and our Phoenix event display, compute the goodness of fit of the unfolded spectrum to the model.", "hep-statistics", ["goodness of fit"], "hep-computing", None, {"set": "EVD", "variant": "adversarial"}),
  ("evd-negative-2", "en", "negative", "Turn the already-computed unfolded cross section into the final paper figure, with caption, in the journal's style; no web page or event display.", "hep-authoring", ["figures"], "hep-computing", None, {"set": "EVD", "note": "a static paper figure is writing, not an event display"}),
+ # simcal rename (0.70.0): simulator parameter calibration and its neighbors (detector calibration, ML output calibration)
+ ('st-simcal-1', 'en', 'direct', 'Run a simulator parameter calibration: tune the Geant4 Birks constant to test-beam data.', 'hep-statistics', ['simulator parameter calibration'], None, None, {"set": "SIMCAL"}),
+ ('st-simcal-2', 'en', 'direct', 'Which RICH parameters can a simulator parameter calibration fix?', 'hep-statistics', ['simulator parameter calibration'], None, None, {"set": "SIMCAL"}),
+ ('st-simcal-ml-1', 'en', 'neighboring', 'I need calibration of model outputs for my BDT classifier.', 'hep-ml', ['calibration of model outputs'], 'hep-detector', None, {"set": "SIMCAL"}),
+ ('st-simcal-dr-1', 'en', 'neighboring', 'Plan the calibration and alignment of the ECAL with π0 intercalibration.', 'hep-detector', ['calibration and alignment'], 'hep-statistics', None, {"set": "SIMCAL"}),
+ ('st-simcal-nat-1', 'zh-Hant', 'direct', '請用測試束資料調整 Geant4 模擬裡的 Birks 常數，讓模擬和資料一致。', 'hep-statistics', [], None, None, {"set": "SIMCAL", "natural": True}),
+ ('st-simcal-nat-2', 'zh-Hant', 'direct', 'RICH 偵測器的哪些模擬參數可以用資料來調校？', 'hep-statistics', [], None, None, {"set": "SIMCAL", "natural": True}),
+ ('st-simcal-ml-nat-1', 'zh-Hant', 'neighboring', '我的 BDT 分類器輸出的機率偏高，要怎麼校正成可信的機率？', 'hep-ml', [], 'hep-detector', None, {"set": "SIMCAL", "natural": True}),
+ ('st-simcal-dr-nat-1', 'zh-Hant', 'neighboring', '請規劃 ECAL 的能量刻度與對準，用 π0 做晶體間的相互校正。', 'hep-detector', [], 'hep-statistics', None, {"set": "SIMCAL", "natural": True}),
 ]
 
 cases = []

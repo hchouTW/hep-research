@@ -1,4 +1,5 @@
 {
+ "description": "simcal (simulator parameter calibration): a reference: a known quantity on an edge of the stage graph (section 3.4).",
  "type": "object",
  "required": [
   "id",

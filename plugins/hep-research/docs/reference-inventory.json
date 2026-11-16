@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 58,
-   "bytes": 844826,
+   "bytes": 844974,
    "uncited": 0
   },
   "hep-measurement": {
@@ -40,7 +40,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 209703,
+   "bytes": 209623,
    "uncited": 0
   },
   "hep-theory": {
@@ -2827,8 +2827,8 @@
   {
    "path": "skills/hep-detector/references/simulation-calibration/index.md",
    "owner": "hep-detector",
-   "bytes": 5760,
-   "lines": 76,
+   "bytes": 5908,
+   "lines": 77,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/fixtures/projects/local_profile/local-profiles/exp-local/profile.json",
@@ -4588,7 +4588,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14817,
+   "bytes": 14737,
    "lines": 102,
    "linked_from_skill_md": true,
    "cited_by": [
