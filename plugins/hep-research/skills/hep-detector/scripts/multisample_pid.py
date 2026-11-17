@@ -17,7 +17,9 @@ Subcommands:
     weighted-mean   weights 1/sigma^2 (--layer-sigma, one value or one per layer); --correlation rho (a common
                     correlation between layers) uses the generalized least-squares weights C^-1 1;
     likelihood      the |Z| that maximizes the product of per-layer Moyal densities (a Landau approximation) located
-                    at the response R(Z^2) with relative width --moyal-rel-width, scanned over --z-range.
+                    at the response R(Z^2) with relative width --moyal-rel-width, scanned over --z-range. An
+                    estimate on the first or last scanned point is not a maximum (it lies outside --z-range): such
+                    events are counted (at_z_range_edge) and reported in a warning, not returned.
   With --true-z-column: per true Z the peak (median), mean, core width sigma68 (half the central 68.27% range) and tail
   fraction (beyond 3 sigma68 from the median), and the leakage matrix P(reco | true) between neighbouring charges
   (reco = nearest integer, a stated convention) with Clopper-Pearson central 68.27% intervals, as a species-migration
@@ -191,17 +193,19 @@ def moyal_sample(rng, loc, scale):
 
 
 def likelihood_z(signals, response, rel, zmin, zmax, step=0.002):
-    best, best_ll = None, -math.inf
+    """(|Z| of the largest likelihood on the scan, whether it is on the first or last scanned point)."""
+    best, best_ll, best_k, scanned = None, -math.inf, None, []
     n = int(round((zmax - zmin) / step))
     for k in range(n + 1):
         z = zmin + k * step
         mu = response.signal(z * z)
         if mu <= 0:
             continue
+        scanned.append(k)
         ll = sum(moyal_logpdf(s, mu, rel * mu) for s in signals)
         if ll > best_ll:
-            best, best_ll = z, ll
-    return best
+            best, best_ll, best_k = z, ll, k
+    return best, best is not None and best_k in (scanned[0], scanned[-1])
 
 
 def summarize(values):
@@ -256,7 +260,7 @@ def run_charge(args, warnings, defaults):
     weights = gls_weights(sigmas, args.correlation or 0.0) if sigmas else None
     cols = layers + ([args.path_column] if args.path_column else []) + ([args.true_z_column] if args.true_z_column else [])
     rows = read_rows(args.events, cols)
-    estimates, out_of_range = [], 0
+    estimates, out_of_range, at_edge = [], 0, 0
     for r in rows:
         cosine = 1.0
         if args.path_column:
@@ -265,7 +269,10 @@ def run_charge(args, warnings, defaults):
                 raise InputError(f"{args.path_column} must be in (0, 1], got {cosine}")
         signals = [_num(r[c], c) * cosine for c in layers]
         if method == "likelihood":
-            z = likelihood_z(signals, response, args.moyal_rel_width, *args.z_range)
+            z, edge = likelihood_z(signals, response, args.moyal_rel_width, *args.z_range)
+            if edge:
+                at_edge += 1
+                continue
         else:
             per = [response.z(s) for s in signals]
             if any(p is None for p in per):
@@ -276,12 +283,17 @@ def run_charge(args, warnings, defaults):
         true_z = int(round(_num(r[args.true_z_column], args.true_z_column))) if args.true_z_column else None
         estimates.append((true_z, z))
     if not estimates:
-        raise InputError("no event could be estimated (every event has a signal outside the response table)")
+        raise InputError("no event could be estimated (every event has a signal outside the response table or its "
+                         "likelihood maximum at the edge of --z-range)")
     if out_of_range:
         warnings.append(f"{out_of_range} events had a signal outside the response table and were left out")
+    if at_edge:
+        warnings.append(f"{at_edge} events had their likelihood maximum at the edge of --z-range and were left out "
+                        "(an estimate at the edge is not a maximum; widen --z-range)")
     corr = (f"common layer correlation rho = {args.correlation} declared (generalized least-squares weights)"
             if args.correlation is not None else "independence assumed (no layer correlations declared)")
     result = {"method": method, "layers": layers, "events_used": len(estimates), "out_of_range": out_of_range,
+              **({"at_z_range_edge": at_edge} if method == "likelihood" else {}),
               "correlations": corr, "summary": summarize([z for _, z in estimates]),
               "path_correction": "signal x cos(theta) from " + args.path_column if args.path_column else "none (waived)"}
     if weights:
@@ -310,11 +322,15 @@ def run_charge(args, warnings, defaults):
             raise InputError("--toys needs --toy-z, --toy-moyal-rel-width and --seed")
         rng = random.Random(args.seed)
         mu = response.signal(args.toy_z ** 2)
-        toy, toy_out_of_range = [], 0
+        toy, toy_out_of_range, toy_at_edge = [], 0, 0
         for _ in range(args.toys):
             sig = [moyal_sample(rng, mu, args.toy_moyal_rel_width * mu) for _ in layers]
             if method == "likelihood":
-                toy.append(likelihood_z(sig, response, args.moyal_rel_width, *args.z_range))
+                z, edge = likelihood_z(sig, response, args.moyal_rel_width, *args.z_range)
+                if edge:
+                    toy_at_edge += 1
+                else:
+                    toy.append(z)
                 continue
             per = [response.z(s) for s in sig]
             if any(p is None for p in per):
@@ -326,9 +342,13 @@ def run_charge(args, warnings, defaults):
             warnings.append(f"{toy_out_of_range} of {args.toys} toy events had a sample outside the response table "
                             "and were left out; the predicted width is biased low when the table ends inside the "
                             "per-layer tail at --toy-z")
+        if toy_at_edge:
+            warnings.append(f"{toy_at_edge} of {args.toys} toy events had their likelihood maximum at the edge of "
+                            "--z-range and were left out; the predicted width is biased low unless --z-range holds "
+                            "the toys' maxima")
         if not toy:
             raise InputError("no toy event could be estimated (every toy event has a sample outside the response "
-                             "table)")
+                             "table or its likelihood maximum at the edge of --z-range)")
         result["toy_prediction"] = dict(summarize(toy), z=args.toy_z,
                                         model=f"per-layer Moyal at R(Z^2), relative width {args.toy_moyal_rel_width}",
                                         seed=args.seed, toys_requested=args.toys, toys_used=len(toy))
