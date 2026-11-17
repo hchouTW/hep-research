@@ -30,8 +30,9 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
   thin-layer-width  (sanity) FWHM of the deposit distribution against 4 xi (thin-layer widths are wider: RPP 2024).
   multiple-scattering (sanity) core width of the projected exit angle (both projections, RMS of the central 98 %
                     divided by the Gaussian truncation factor 0.9346, the RMS of a unit Gaussian truncated to its
-                    central 98 %) against Highland from multiple_scattering.py, run as a subprocess (RPP 2024 gives
-                    no numerical accuracy for it).
+                    central 98 %) against Highland from multiple_scattering.py, run as a subprocess at the
+                    benchmark's particle and energy (rigidity p / |z|, mass and charge number; RPP 2024 gives no
+                    numerical accuracy for it).
   em-shower-shape   (sanity) depth of the longitudinal maximum from per-copy deposits against t_max = ln(E/E_c) + C_j
                     (config keys layer_x0 and critical_energy_MeV); not applicable when the stack does not contain t_max.
   shower-containment (sanity) rear leakage fraction of an e+-/gamma shower against the PDG gamma-function profile
@@ -562,7 +563,11 @@ def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
     stack = b.get("highland_stack")
     if not stack:
         raise BenchmarkError("multiple-scattering: highland_stack (a multiple_scattering.py input) is required")
-    p = subprocess.run([sys.executable, "-B", str(MS_SCRIPT), str(cfg_dir / stack)], capture_output=True, text=True,
+    mass, z = particle_props(b["particle"])
+    ekin = float(b["energy_MeV"])
+    rigidity = math.sqrt(ekin * (ekin + 2 * mass)) / 1000 / abs(z)  # GV: Highland at the benchmark's p, beta and z
+    p = subprocess.run([sys.executable, "-B", str(MS_SCRIPT), str(cfg_dir / stack), "--rigidity", repr(rigidity),
+                        "--mass", repr(mass / 1000), "--charge", str(abs(z))], capture_output=True, text=True,
                        timeout=600)
     try:
         ms = json.loads(p.stdout)
@@ -571,9 +576,14 @@ def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
     ref = ms.get("scattering_angle_rad")  # Highland theta0 of the stack (multiple_scattering.py)
     if not isinstance(ref, (int, float)):
         raise BenchmarkError(f"multiple_scattering.py output has no theta0: {sorted(ms)}")
+    got = ms.get("rigidity_gv")
+    if not isinstance(got, (int, float)) or abs(got - rigidity) > 1e-12 * rigidity or ms.get("charge_number") != abs(z):
+        raise BenchmarkError(f"multiple_scattering.py evaluated Highland at rigidity {got} GV, charge "
+                             f"{ms.get('charge_number')}, not at the benchmark's {rigidity:.10g} GV, charge {abs(z)}")
     return {"statistic": "core width of the projected exit angle (rad)", "geant4": g4, "reference_value": ref,
             "relative_difference": (g4 - ref) / ref, "verdict": "plausible" if abs(g4 / ref - 1) <= 0.2 else
             "implausible", "plausibility_window": "within 20 % of Highland", "selection": sel,
+            "highland_kinematics": {"rigidity_GV": rigidity, "beta": ms.get("beta"), "charge_number": abs(z)},
             "reference": {"source": f"Highland (Lynch and Dahl) via multiple_scattering.py; {RPP}, eq. 34.16",
                           "version": "RPP 2024", "validity": "sanity only: RPP 2024 gives no numerical accuracy; "
                                                               "the beta dependence is poor for large Z, small x"}}
