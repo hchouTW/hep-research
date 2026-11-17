@@ -930,9 +930,10 @@ def bench_field_g4sim(b: dict, cfg_dir: Path) -> dict:
         energy, x0, y0, z0, ux, uy, uz = starts[int(row["event_id"])]
         transverse = math.hypot(ux, uy)
         radius = energy * transverse / (0.299792458 * abs(field))  # mm: a massless charged geantino, p = E
-        turned = (float(row["z_mm"]) - z0) / uz * transverse / radius * (1 if field > 0 else -1)  # a positive charge turns clockwise about +z
+        turned = (float(row["z_mm"]) - z0) / uz * transverse / radius  # the angle turned, never negative
         cosine, sine = ux / transverse, uy / transverse
-        along, across = radius * math.sin(turned), -radius * (1 - math.cos(turned))
+        # a positive charge turns clockwise about +z for B > 0 and anticlockwise for B < 0: only the bend's side flips
+        along, across = radius * math.sin(turned), -math.copysign(1.0, field) * radius * (1 - math.cos(turned))
         x = x0 + along * cosine - across * sine
         y = y0 + along * sine + across * cosine
         worst = max(worst, math.hypot(float(row["x_mm"]) - x, float(row["y_mm"]) - y) * 1000)
