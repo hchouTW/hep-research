@@ -27,8 +27,10 @@ Usage:
   charge_confusion_rate.py control --data CTRL.csv [--mc CTRL_MC.csv] --edges E ... --bin-column C
       --true-sign-column C --reco-sign-column C [--weight-column W] [--cl 0.6827] [--status LABEL]
   charge_confusion_rate.py gaussian-core --edges E ... --sigma-inv-r S ... [--status LABEL]
-Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, warnings, bins, sign_rates.
-Exit codes: 0 ok; 1 a template fit failed; 2 bad input. Standard library only.
+Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, warnings, bins, sign_rates. Template
+  status per bin: fit_outcome not-converged or infeasible gives failed and a warning naming the bin;
+  converged-at-boundary or covariance-warning alone gives ok and a warning naming the bin.
+Exit codes: 0 ok; 1 a template bin failed (see the status rule); 2 bad input. Standard library only.
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -226,24 +228,30 @@ def _bisect_down(excess, r_hat: float) -> float:
     return 0.5 * (a + b)
 
 
-def run_template(doc: dict) -> tuple[dict, str]:
+def run_template(doc: dict) -> tuple[dict, str, list]:
     edges = _edges(doc.get("edges", []))
     sign = doc.get("true_sign")
     other = _other(sign)
     bins = doc.get("bins")
     if not isinstance(bins, list) or len(bins) != len(edges) - 1:
         raise InputError(f"bins must list {len(edges) - 1} entries (one per pair of edges)")
-    rows, status = [], "ok"
+    rows, status, warnings = [], "ok", []
     for k, b in enumerate(bins):
         row = template_rate(b, {"right": "right", "wrong": "wrong"})
         row["bin"] = [edges[k], edges[k + 1]]
-        if row["fit_outcome"] in template_fit.FAILED_OUTCOMES or row["rate_error"] is None:
+        outcome = row["fit_outcome"]
+        if outcome in template_fit.FAILED_OUTCOMES:
             status = "failed"
+            warnings.append(f"bin {k + 1}: the fit is {outcome}; its rate is not a result")
+        elif outcome != "converged":  # converged-at-boundary or covariance-warning, as template_fit._overall
+            warnings.append(f"bin {k + 1}: the fit is {outcome}; rate_error_hessian is unreliable there, use the "
+                            "profile interval")
         rows.append(row)
     rates = {"edges": edges, "variable": doc.get("variable"),
              "rates": [{"true": sign, "reco": other, "rate": [r["rate"] for r in rows],
                         "rate_error": [r["rate_error"] for r in rows]}]}
-    return {"bins": rows, "sign_rates": rates, "method": "Barlow-Beeston template fit (core/stats/template_fit.py)"}, status
+    return ({"bins": rows, "sign_rates": rates, "method": "Barlow-Beeston template fit (core/stats/template_fit.py)"},
+            status, warnings)
 
 
 def _read_counts(path: Path, args, edges) -> tuple[list[float], list[float], set]:
@@ -359,7 +367,7 @@ def main(argv=None) -> int:
                 raise InputError(f"cannot read {args.input}: {exc}") from None
             if not isinstance(doc, dict):
                 raise InputError("the template input must be a JSON object")
-            result, status = run_template(doc)
+            result, status, warnings = run_template(doc)
         elif args.command == "control":
             if not 0 < args.cl < 1:
                 raise InputError("--cl must be in (0, 1)")
