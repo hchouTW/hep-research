@@ -16,7 +16,10 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
   stopping-power    (reference) mean energy loss of transmitted primaries (E_in - E_exit), as linear dE/dx, against
                     the Bethe mean rate (PDG RPP 2024 eq. 34.5, valid 0.1 <~ beta gamma <~ 1000 to a few percent)
                     at the mean energy in the slab; non-transmitted primaries and primaries that ended in a process
-                    other than Transportation are excluded and counted. Deposit is not energy loss.
+                    other than Transportation are excluded and counted. Deposit is not energy loss. Heavy charged
+                    particles only (mu+-, pi+-, proton, deuteron, alpha): e- and e+ are refused here and in
+                    thin-layer-mpv, thin-layer-width and the reference command (their collision stopping power is
+                    RPP eqs. 34.23-34.24, and their mean loss includes bremsstrahlung).
   range             (reference) mean projected stopping depth of primaries in a thick block against a user-supplied
                     PSTAR/ASTAR projected range (dataset-record, interpolated in log-log); primaries that ended in a
                     hadronic process are excluded and counted (PSTAR excludes nuclear interactions).
@@ -231,6 +234,19 @@ def particle_props(name: str) -> tuple[float, int]:
     raise BenchmarkError(f"no mass for particle {name!r} (known: {sorted(table) + ['pi+', 'pi-']})")
 
 
+LEPTONS = ("e-", "e+")
+
+
+def heavy_particle_props(name: str, what: str) -> tuple[float, int]:
+    """particle_props for a reference stated for heavy charged particles (Bethe, RPP eq. 34.5; Landau-Vavilov,
+    eq. 34.12, both in RPP sec. 34.2): electrons and positrons are refused (BenchmarkError)."""
+    if name in LEPTONS:
+        raise BenchmarkError(f"{what}: the reference (RPP 2024 sec. 34.2, eqs. 34.5 and 34.12) is stated for heavy "
+                             f"charged particles; {name} is refused (e+- collision stopping power is eqs. 34.23-34.24, "
+                             "and their energy loss includes bremsstrahlung)")
+    return particle_props(name)
+
+
 def check_inputs(energy_mev, thickness_mm=None) -> None:
     """Refuse a kinetic energy or thickness outside what the references can be evaluated for."""
     if not isinstance(energy_mev, (int, float)) or not math.isfinite(energy_mev) or not 0 < energy_mev <= 1e9:
@@ -437,7 +453,7 @@ class Summary:
 
 def bench_stopping_power(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], "stopping-power")
     o = summ.obs(b["observable"], "primary.energy_loss", TRANSMITTED, "the energy loss of transmitted primaries")
     e = summ.estimate(o, "mean")
     t_cm = b["thickness_mm"] / 10
@@ -496,7 +512,7 @@ def bench_range(b: dict, summ: Summary, study: dict, cfg_dir: Path) -> dict:
 
 def bench_mpv(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], "thin-layer-mpv")
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
     width = b.get("binning", {}).get("bin_width_MeV")
     if not isinstance(width, (int, float)) or width <= 0:
@@ -535,7 +551,7 @@ def bench_mpv(b: dict, summ: Summary, study: dict) -> dict:
 
 def bench_width(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], "thin-layer-width")
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
     o = summ.obs(b["observable"], f"energy_deposit.{b['slab']}", TRANSMITTED, "the deposit of transmitted primaries")
     hist, w = S.merged_accumulators(o)["hist"], o["bins"]["width"]
@@ -1371,7 +1387,7 @@ def slab_expected_shift(b: dict, study: dict, injected_relative: float) -> float
     if not -1.0 < d:
         raise BenchmarkError("injected_relative must be above -1")
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], b["benchmark"])
     e, t = float(b["energy_MeV"]), float(b["thickness_mm"])
     if b["benchmark"] == "stopping-power":
         loss = bethe(e, mass, z, mat) * mat["density_g_cm3"] * t / 10
@@ -1706,7 +1722,7 @@ def cmd_plan_controls(args) -> tuple[str, dict]:
 def cmd_reference(args) -> tuple[str, dict]:
     study = json.loads(Path(args.study_spec).read_text(encoding="utf-8"))
     mat = material(study, args.material)
-    mass, z = particle_props(args.particle)
+    mass, z = heavy_particle_props(args.particle, "reference")
     check_inputs(args.energy_mev, args.thickness_mm)
     out = {"bethe_MeV_cm2_g": bethe(args.energy_mev, mass, z, mat), "w_max_MeV": w_max(args.energy_mev, mass),
            "beta_gamma": kinematics(args.energy_mev, mass)[2],
