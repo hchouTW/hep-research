@@ -29,7 +29,10 @@ Usage:
   charge_confusion_rate.py gaussian-core --edges E ... --sigma-inv-r S ... [--status LABEL]
 Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, warnings, bins, sign_rates. Template
   status per bin: fit_outcome not-converged or infeasible gives failed and a warning naming the bin;
-  converged-at-boundary or covariance-warning alone gives ok and a warning naming the bin.
+  converged-at-boundary or covariance-warning alone gives ok and a warning naming the bin; a rate that is not
+  identified (its profile interval reaches r = 1, or a background template is compatible in shape with the right-sign
+  template within the template statistics, chi2 p >= 0.01) gives failed and a warning naming the bin, and its
+  sign_rates entries are null.
 Exit codes: 0 ok; 1 a template bin failed (see the status rule); 2 bad input. Standard library only.
 """
 from __future__ import annotations
@@ -58,6 +61,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from core.stats import template_fit  # noqa: E402
+from core.stats.statistical_toys import chi2_sf  # noqa: E402
 from core.stats.tail_estimation import clopper_pearson  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
@@ -92,6 +96,7 @@ def _edges(values) -> list[float]:
 
 SCAN_R = [0.0] + [10.0 ** (-6 + 0.25 * t) for t in range(25)]  # rate grid: 0, then 1e-6 to 1 in quarter decades
 START_AGREE = 0.5  # ln L by which another fit may beat the rate scan before the maximum is not-converged (2 Delta ln L 1)
+DEGENERATE_P = 0.01  # a background template whose shape is compatible with the right-sign one at p >= this is degenerate
 
 
 def _profile_at(observed, m, mc, i: int, j: int, r: float, start) -> tuple[float, list]:
@@ -158,8 +163,29 @@ def _bb_maximum(observed, m, mc, i: int, j: int):
     return y, cov, template_fit._diagnostics([info], -nll, cov, y, [])
 
 
+def _degenerate_backgrounds(tnames, m, i: int, j: int) -> list[str]:
+    """Background templates whose shape is compatible with the right-sign template within the template statistics:
+    Pearson chi2 of the two-sample (2 x bins) homogeneity table, p >= DEGENERATE_P. With such a template the data
+    cannot separate it from the right-sign yield, so the rate is not identified."""
+    out = []
+    for t in range(len(m)):
+        if t in (i, j):
+            continue
+        cols = [(a, b) for a, b in zip(m[i], m[t]) if a + b > 0]
+        sa, sb = sum(a for a, _ in cols), sum(b for _, b in cols)
+        if len(cols) < 2 or sa <= 0 or sb <= 0:
+            continue
+        chi2 = sum((sb * a - sa * b) ** 2 / (a + b) for a, b in cols) / (sa * sb)
+        p = chi2_sf(chi2, len(cols) - 1)
+        if p >= DEGENERATE_P:
+            out.append(f"the background template '{tnames[t]}' is compatible in shape with the right-sign template "
+                       f"(chi2 = {chi2:.3g} for {len(cols) - 1} degrees of freedom, p = {p:.3g} >= {DEGENERATE_P})")
+    return out
+
+
 def template_rate(bin_doc: dict, names: dict) -> dict:
-    """Fit one bin; names maps 'right'/'wrong' to template names."""
+    """Fit one bin; names maps 'right'/'wrong' to template names. not_identified gives the reasons the rate is not
+    identified (its profile interval reaches r = 1, or a background template is degenerate with the right-sign one)."""
     try:
         tnames, data, m, mc = template_fit._load(bin_doc)
     except template_fit.ToyError as exc:
@@ -181,10 +207,12 @@ def template_rate(bin_doc: dict, names: dict) -> dict:
         var = sum(g[a] * g[b] * cov[a][b] for a in g for b in g)
         err = math.sqrt(var) if var > 0 else None
     lo, hi = profile_interval(data, m, mc, y, i, j)
+    why = (["its 68% profile interval reaches r = 1"] if hi >= 1.0 else []) + _degenerate_backgrounds(tnames, m, i, j)
     return {"rate": rate, "rate_error_hessian": err, "interval_68": [lo, hi], "rate_error": (hi - lo) / 2.0,
             "interval_method": "profile likelihood in the rate, -2 Delta ln L = 1 (Barlow-Beeston), lower end at 0 "
                                "when the boundary is inside",
-            "yields": {n: y[k] for k, n in enumerate(tnames)}, "fit_outcome": diag["outcome"]}
+            "yields": {n: y[k] for k, n in enumerate(tnames)}, "fit_outcome": diag["outcome"],
+            "not_identified": "; ".join(why) or None}
 
 
 def profile_interval(data, m, mc, y, i: int, j: int) -> tuple[float, float]:
@@ -212,7 +240,10 @@ def profile_interval(data, m, mc, y, i: int, j: int) -> tuple[float, float]:
                 b = c
         return 0.5 * (a + b)
     lo = 0.0 if excess(0.0) < 0 else _bisect_down(excess, r_hat)
-    hi = 1.0 if excess(1.0) < 0 else root(r_hat, 1.0)
+    # the upper end is tested just below r = 1: at r = 1 the right-sign yield is exactly 0 and template_fit._ll_bb
+    # drops that template's terms, so ln L there is not the limit r -> 1
+    top = 1.0 - 1e-12
+    hi = 1.0 if excess(top) < 0 else root(r_hat, top)
     return lo, hi
 
 
@@ -246,10 +277,15 @@ def run_template(doc: dict) -> tuple[dict, str, list]:
         elif outcome != "converged":  # converged-at-boundary or covariance-warning, as template_fit._overall
             warnings.append(f"bin {k + 1}: the fit is {outcome}; rate_error_hessian is unreliable there, use the "
                             "profile interval")
+        if row.get("not_identified"):
+            status = "failed"
+            warnings.append(f"bin {k + 1}: rate not identified: {row['not_identified']}; it is not passed on in "
+                            "sign_rates")
         rows.append(row)
     rates = {"edges": edges, "variable": doc.get("variable"),
-             "rates": [{"true": sign, "reco": other, "rate": [r["rate"] for r in rows],
-                        "rate_error": [r["rate_error"] for r in rows]}]}
+             "rates": [{"true": sign, "reco": other,
+                        "rate": [None if r.get("not_identified") else r["rate"] for r in rows],
+                        "rate_error": [None if r.get("not_identified") else r["rate_error"] for r in rows]}]}
     return ({"bins": rows, "sign_rates": rates, "method": "Barlow-Beeston template fit (core/stats/template_fit.py)"},
             status, warnings)
 
