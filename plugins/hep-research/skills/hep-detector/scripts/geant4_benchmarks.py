@@ -29,8 +29,9 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
                     than tol/5 + 2 SE from the merged histogram's mode, is not applicable (incomplete).
   thin-layer-width  (sanity) FWHM of the deposit distribution against 4 xi (thin-layer widths are wider: RPP 2024).
   multiple-scattering (sanity) core width of the projected exit angle (both projections, RMS of the central 98 %
-                    divided by the Gaussian truncation factor 0.8673) against Highland from multiple_scattering.py,
-                    run as a subprocess (RPP 2024 gives no numerical accuracy for it).
+                    divided by the Gaussian truncation factor 0.9346, the RMS of a unit Gaussian truncated to its
+                    central 98 %) against Highland from multiple_scattering.py, run as a subprocess (RPP 2024 gives
+                    no numerical accuracy for it).
   em-shower-shape   (sanity) depth of the longitudinal maximum from per-copy deposits against t_max = ln(E/E_c) + C_j
                     (config keys layer_x0 and critical_energy_MeV); not applicable when the stack does not contain t_max.
   shower-containment (sanity) rear leakage fraction of an e+-/gamma shower against the PDG gamma-function profile
@@ -184,7 +185,10 @@ N_A = K.constant("avogadro_constant").value
 K_BETHE = 4 * math.pi * N_A * R_E_CM ** 2 * ME  # MeV mol^-1 cm^2 (PDG Table 34.1: 0.307075)
 J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
 PATH_LENGTH = "primary_path_length"  # element_sim's semantic name (column map) of the per-element primary path
-TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
+# RMS of a unit Gaussian truncated to its central 98 %: sqrt(1 - 2 z phi(z) / (2 Phi(z) - 1)), z = Phi^-1(0.99),
+# 0.93459 (its square, the truncated variance, is 0.87346)
+_Z99 = statistics.NormalDist().inv_cdf(0.99)
+TRUNC_98 = math.sqrt(1 - 2 * _Z99 * statistics.NormalDist().pdf(_Z99) / (2 * 0.99 - 1))
 GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
           "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
           "shower-containment": "sanity", "longitudinal-profile": "setup-matched",
@@ -1169,8 +1173,8 @@ def _exit_angles(rows: list[dict], plane_id: int) -> dict[int, list[float]]:
 
 def _core98(angles: list[float], fraction: float = 0.98) -> float:
     """Lynch and Dahl's core width: the sigma of a zero-mean Gaussian fitted (maximum likelihood, truncated normal) to
-    the angles inside the symmetric window |x| <= c that holds the central fraction F. Not RMS / 0.8673: that assumes
-    the inner 98 % is itself Gaussian, and the single-scattering tail inside the window widens it by about 10 %."""
+    the angles inside the symmetric window |x| <= c that holds the central fraction F. Not RMS / TRUNC_98: that
+    assumes the inner 98 % is itself Gaussian, and the single-scattering tail inside the window widens it."""
     mags = sorted(abs(x) for x in angles)
     c = mags[min(len(mags) - 1, int(fraction * len(mags)))]
     inside = [x * x for x in angles if abs(x) <= c]
