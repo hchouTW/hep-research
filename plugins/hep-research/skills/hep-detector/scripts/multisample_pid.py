@@ -205,7 +205,10 @@ def likelihood_z(signals, response, rel, zmin, zmax, step=0.002):
         ll = sum(moyal_logpdf(s, mu, rel * mu) for s in signals)
         if ll > best_ll:
             best, best_ll, best_k = z, ll, k
-    return best, best is not None and best_k in (scanned[0], scanned[-1])
+    if not scanned:
+        raise InputError("the response R(Z^2) is not positive anywhere in --z-range; the Moyal likelihood needs a "
+                         "positive signal")
+    return best, best_k in (scanned[0], scanned[-1])
 
 
 def summarize(values):
