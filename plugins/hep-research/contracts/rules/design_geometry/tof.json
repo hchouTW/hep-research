@@ -107,7 +107,7 @@
     "species": "string",
     "position_mm": "number"
    },
-   "tail_sensitive": false
+   "tail_sensitive": true
   }
  }
 }
