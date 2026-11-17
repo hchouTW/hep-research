@@ -22,7 +22,9 @@ Subcommands:
   fraction (beyond 3 sigma68 from the median), and the leakage matrix P(reco | true) between neighbouring charges
   (reco = nearest integer, a stated convention) with Clopper-Pearson central 68.27% intervals, as a species-migration
   block. --toys N --toy-z Z --toy-moyal-rel-width w --seed S predicts the core width at Z from the per-layer Moyal
-  model, for comparison with the data.
+  model, for comparison with the data. Toy events with a sample outside the response table are left out, counted
+  (toys_requested, toys_used) and reported in a warning: the table must cover the per-layer tail at --toy-z for the
+  prediction to hold, else the predicted width is biased low.
 - likelihood EVENTS.csv: LLR = sum over layers of log(p_sig/p_bkg) from binned per-layer PDFs (--pdfs JSON
   {"edges", "signal", "background"} for every layer, or {"layers": {name: {...}}}); empty bins get a floor of 1e-12
   of the PDF and are counted. With --label-column (1 signal, 0 background): the efficiency - mis-identification curve
@@ -308,7 +310,7 @@ def run_charge(args, warnings, defaults):
             raise InputError("--toys needs --toy-z, --toy-moyal-rel-width and --seed")
         rng = random.Random(args.seed)
         mu = response.signal(args.toy_z ** 2)
-        toy = []
+        toy, toy_out_of_range = [], 0
         for _ in range(args.toys):
             sig = [moyal_sample(rng, mu, args.toy_moyal_rel_width * mu) for _ in layers]
             if method == "likelihood":
@@ -316,12 +318,20 @@ def run_charge(args, warnings, defaults):
                 continue
             per = [response.z(s) for s in sig]
             if any(p is None for p in per):
+                toy_out_of_range += 1
                 continue
             toy.append(truncated_mean(per, args.truncate_low, args.truncate_high) if method == "truncated-mean"
                        else sum(w * p for w, p in zip(weights, per)))
+        if toy_out_of_range:
+            warnings.append(f"{toy_out_of_range} of {args.toys} toy events had a sample outside the response table "
+                            "and were left out; the predicted width is biased low when the table ends inside the "
+                            "per-layer tail at --toy-z")
+        if not toy:
+            raise InputError("no toy event could be estimated (every toy event has a sample outside the response "
+                             "table)")
         result["toy_prediction"] = dict(summarize(toy), z=args.toy_z,
                                         model=f"per-layer Moyal at R(Z^2), relative width {args.toy_moyal_rel_width}",
-                                        seed=args.seed)
+                                        seed=args.seed, toys_requested=args.toys, toys_used=len(toy))
     return result
 
 
