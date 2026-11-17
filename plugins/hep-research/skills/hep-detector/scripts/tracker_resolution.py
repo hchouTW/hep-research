@@ -130,10 +130,13 @@ def _need_beta(args):
 
 def momentum(args, defaults):
     _need_beta(args)
-    z = sorted(args.positions_m)
-    if len(args.point_resolution_um) not in (1, len(z)):
+    n_in = len(args.positions_m)
+    if len(args.point_resolution_um) not in (1, n_in):
         raise InputError("--point-resolution-um takes one value or one per position")
-    sig = [_pos(s, "--point-resolution-um") * 1e-6 for s in args.point_resolution_um] * (len(z) if len(args.point_resolution_um) == 1 else 1)
+    sig_in = [_pos(s, "--point-resolution-um") * 1e-6 for s in args.point_resolution_um] * (n_in if len(args.point_resolution_um) == 1 else 1)
+    pairs = sorted(zip(args.positions_m, sig_in))  # each resolution stays with its own position (PDG eq. 35.69)
+    z = [p for p, _ in pairs]
+    sig = [s for _, s in pairs]
     b, x0, q = _pos(args.field_tesla, "--field-tesla"), args.x_over_x0, abs(args.charge)
     if x0 < 0 or q == 0:
         raise InputError("--x-over-x0 must be >= 0 and --charge nonzero")
