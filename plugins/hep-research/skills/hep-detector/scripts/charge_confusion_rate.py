@@ -9,7 +9,8 @@ Modes:
 - template: per bin, the data histogram of a sign discriminant is fitted with right-sign and wrong-sign templates
   (and an optional background template) by the extended Poisson likelihood with the full Barlow-Beeston treatment of
   the template statistics (core/stats/template_fit.py; at most 6 templates and 60 discriminant bins). Rate
-  r = Y_wrong / (Y_right + Y_wrong), its error from the fit covariance (delta method; a symmetric 68% interval);
+  r = Y_wrong / (Y_right + Y_wrong) at the maximum of the profile likelihood in r (a scan over r, then a polishing fit),
+  its 68% interval from the profile likelihood (rate_error its half-width; rate_error_hessian from the fit covariance);
 - control: a sample of known true sign (CSV); per bin k wrong-sign of n events, the Clopper-Pearson interval
   (core/stats/tail_estimation.py), and with --mc a second sample, the data/MC scale factor r_data / r_mc with an
   approximate (delta-method) error. Weights must be integer frequency weights: non-integer weights are refused
@@ -87,6 +88,74 @@ def _edges(values) -> list[float]:
     return e
 
 
+SCAN_R = [0.0] + [10.0 ** (-6 + 0.25 * t) for t in range(25)]  # rate grid: 0, then 1e-6 to 1 in quarter decades
+START_AGREE = 0.5  # ln L by which another fit may beat the rate scan before the maximum is not-converged (2 Delta ln L 1)
+
+
+def _profile_at(observed, m, mc, i: int, j: int, r: float, start) -> tuple[float, list]:
+    """-ln L profiled at fixed r = y_j / (y_i + y_j): the total N = y_i + y_j and the other yields by Nelder-Mead
+    (restarted once from its end); returns (-ln L, yields). `start` is [N, other yields...]."""
+    others = [k for k in range(len(m)) if k not in (i, j)]
+
+    def yields(x):
+        yy = [0.0] * len(m)
+        yy[i], yy[j] = x[0] * (1 - r), x[0] * r
+        for k, v in zip(others, x[1:]):
+            yy[k] = v
+        return yy
+
+    def f(x):
+        if x[0] <= 0 or any(v < 0 for v in x[1:]):
+            return 1e300
+        return -template_fit._ll_bb(observed, m, mc, yields(x))
+    x, val = template_fit._nelder_mead(f, list(start), [max(0.05 * v, 1.0) for v in start])
+    x, val = template_fit._nelder_mead(f, x, [max(0.01 * v, 1.0) for v in x])
+    return val, yields(x)
+
+
+def _bb_maximum(observed, m, mc, i: int, j: int):
+    """Barlow-Beeston maximum found through the profile likelihood in the rate (PDG eqs. 40.9 and 40.41).
+
+    A Nelder-Mead fit of all yields stops on a relative tolerance (1e-10 (1 + |ln L|), about 1e-3 at ln L ~ 1e7 for
+    1e6 events), so one started from the naive fit, which often ends with the wrong-sign yield at 0, can stop at that
+    boundary far below the maximum. Instead the profile -ln L is evaluated on the grid SCAN_R, refined by golden-section
+    search between the neighbours of the best grid point, and the yields there are polished by a full fit. The deepest
+    of the scan, the polished fit and the fit from the naive start is kept; if a fit beats the scan by more than
+    START_AGREE, the scan missed the maximum and the outcome is not-converged. Returns (yields, covariance, diagnostics).
+    """
+    k = len(m)
+    total = max(sum(observed), 1.0)
+    y0 = template_fit._fit_yields_full(observed, m, mc, "naive", [max(total / k, 1.0)] * k)[0]
+    y_old, _, ll_old, _ = template_fit._fit_yields_full(observed, m, mc, "bb", [max(v, 1.0) for v in y0])
+    start = [max(y_old[i] + y_old[j], 1.0)] + [max(y_old[t], 1.0) for t in range(k) if t not in (i, j)]
+    grid = [_profile_at(observed, m, mc, i, j, r, start) for r in SCAN_R]
+    b = min(range(len(SCAN_R)), key=lambda t: grid[t][0])
+    lo, hi = SCAN_R[max(b - 1, 0)], SCAN_R[min(b + 1, len(SCAN_R) - 1)]
+    yb = grid[b][1]
+    start = [yb[i] + yb[j]] + [yb[t] for t in range(k) if t not in (i, j)]
+    g = (math.sqrt(5.0) - 1.0) / 2.0
+    c, d = hi - g * (hi - lo), lo + g * (hi - lo)
+    fc, fd = _profile_at(observed, m, mc, i, j, c, start), _profile_at(observed, m, mc, i, j, d, start)
+    for _ in range(40):
+        if fc[0] < fd[0]:
+            hi, d, fd = d, c, fc
+            c = hi - g * (hi - lo)
+            fc = _profile_at(observed, m, mc, i, j, c, start)
+        else:
+            lo, c, fc = c, d, fd
+            d = lo + g * (hi - lo)
+            fd = _profile_at(observed, m, mc, i, j, d, start)
+    nll_scan, y_scan = min([grid[b], fc, fd], key=lambda t: t[0])
+    y_pol, _, ll_pol, d_pol = template_fit._fit_yields_full(observed, m, mc, "bb", [max(v, 1e-6) for v in y_scan])
+    cands = [(nll_scan, y_scan), (-ll_pol, y_pol), (-ll_old, y_old)]
+    nll, y = min(cands, key=lambda t: t[0])
+    found = nll_scan - nll <= START_AGREE
+    cov = template_fit._hessian_cov(lambda z: template_fit._ll_bb(observed, m, mc, [max(v, 1e-9) for v in z]), y)
+    info = {"converged": bool(d_pol["converged"]) and found,
+            "termination": "rate-scan" if found else "rate-scan-missed-maximum"}
+    return y, cov, template_fit._diagnostics([info], -nll, cov, y, [])
+
+
 def template_rate(bin_doc: dict, names: dict) -> dict:
     """Fit one bin; names maps 'right'/'wrong' to template names."""
     try:
@@ -96,13 +165,8 @@ def template_rate(bin_doc: dict, names: dict) -> dict:
     for role in ("right", "wrong"):
         if names[role] not in tnames:
             raise InputError(f"template '{names[role]}' missing")
-    # start from a positive split of the data (a start at a boundary can leave the simplex there), then the naive fit,
-    # as template_fit.bb_fit does
-    total = sum(data)
-    start = [max(total / len(tnames), 1.0)] * len(tnames)
-    y0 = template_fit._fit_yields_full(data, m, mc, "naive", start)[0]
-    y, cov, _, diag = template_fit._fit_yields_full(data, m, mc, "bb", [max(v, 1.0) for v in y0])
     i, j = tnames.index(names["right"]), tnames.index(names["wrong"])
+    y, cov, diag = _bb_maximum(data, m, mc, i, j)
     yr, yw = y[i], y[j]
     tot = yr + yw
     if tot <= 0:
@@ -122,23 +186,12 @@ def template_rate(bin_doc: dict, names: dict) -> dict:
 
 
 def profile_interval(data, m, mc, y, i: int, j: int) -> tuple[float, float]:
-    """68% profile-likelihood interval of r = y_j / (y_i + y_j): for fixed r the total N = y_i + y_j and the other
-    yields are profiled (Nelder-Mead on the Barlow-Beeston log-likelihood)."""
+    """68% profile-likelihood interval of r = y_j / (y_i + y_j) about the maximum y: for fixed r the total
+    N = y_i + y_j and the other yields are profiled (_profile_at)."""
     others = [k for k in range(len(y)) if k not in (i, j)]
 
     def nll_at(r: float, start):
-        def f(x):
-            n = x[0]
-            if n <= 0 or any(v < 0 for v in x[1:]):
-                return 1e300
-            yy = [0.0] * len(y)
-            yy[i], yy[j] = n * (1 - r), n * r
-            for k, v in zip(others, x[1:]):
-                yy[k] = v
-            return -template_fit._ll_bb(data, m, mc, yy)
-        steps = [max(0.05 * v, 1.0) for v in start]
-        x, val = template_fit._nelder_mead(f, start, steps)
-        return val, x
+        return _profile_at(data, m, mc, i, j, r, start)
 
     n0 = y[i] + y[j]
     start = [n0] + [y[k] for k in others]
