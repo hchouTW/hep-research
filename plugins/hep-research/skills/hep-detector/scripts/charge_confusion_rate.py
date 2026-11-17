@@ -12,9 +12,9 @@ Modes:
   r = Y_wrong / (Y_right + Y_wrong) at the maximum of the profile likelihood in r (a scan over r, then a polishing fit),
   its 68% interval from the profile likelihood (rate_error its half-width; rate_error_hessian from the fit covariance);
 - control: a sample of known true sign (CSV); per bin k wrong-sign of n events, the Clopper-Pearson interval
-  (core/stats/tail_estimation.py), and with --mc a second sample, the data/MC scale factor r_data / r_mc with an
-  approximate (delta-method) error. Weights must be integer frequency weights: non-integer weights are refused
-  (hep-statistics owns weighted binomial intervals);
+  (core/stats/tail_estimation.py), and with --mc a second sample of the same one true sign (else refused), the data/MC
+  scale factor r_data / r_mc with an approximate (delta-method) error. Weights must be integer frequency weights:
+  non-integer weights are refused (hep-statistics owns weighted binomial intervals);
 - gaussian-core: Phi(-|1/R| / sigma(1/R)) at the bin edges from a Gaussian curvature core. It ignores the non-Gaussian
   tails that dominate real confusion, so it is a lower-bound reference labelled "not an estimate"; no estimate and no
   sign rates are output from it.
@@ -95,8 +95,8 @@ def _edges(values) -> list[float]:
 
 
 SCAN_R = [0.0] + [10.0 ** (-6 + 0.25 * t) for t in range(25)]  # rate grid: 0, then 1e-6 to 1 in quarter decades
-START_AGREE = 0.5  # ln L by which another fit may beat the rate scan before the maximum is not-converged (2 Delta ln L 1)
-DEGENERATE_P = 0.01  # a background template whose shape is compatible with the right-sign one at p >= this is degenerate
+START_AGREE = 0.5  # ln L by which another fit may beat the rate scan before the outcome is not-converged
+DEGENERATE_P = 0.01  # a background shape compatible with the right-sign one at p >= this is degenerate
 
 
 def _profile_at(observed, m, mc, i: int, j: int, r: float, start) -> tuple[float, list]:
@@ -128,7 +128,8 @@ def _bb_maximum(observed, m, mc, i: int, j: int):
     boundary far below the maximum. Instead the profile -ln L is evaluated on the grid SCAN_R, refined by golden-section
     search between the neighbours of the best grid point, and the yields there are polished by a full fit. The deepest
     of the scan, the polished fit and the fit from the naive start is kept; if a fit beats the scan by more than
-    START_AGREE, the scan missed the maximum and the outcome is not-converged. Returns (yields, covariance, diagnostics).
+    START_AGREE, the scan missed the maximum and the outcome is not-converged.
+    Returns (yields, covariance, diagnostics).
     """
     k = len(m)
     total = max(sum(observed), 1.0)
@@ -327,6 +328,10 @@ def run_control(args) -> tuple[dict, str, list]:
         raise InputError(f"a control sample has one known true sign; found {sorted(signs) or 'none'}")
     sign = signs.pop()
     mc = _read_counts(args.mc, args, edges) if args.mc else None
+    if mc is not None and mc[2] != {sign}:
+        # the scale factor r_data / r_mc compares one species: c+ and c- differ
+        raise InputError(f"the MC control sample must have the data's one true sign ({sign}); "
+                         f"found {sorted(mc[2]) or 'none'}")
     rows = []
     for b in range(len(edges) - 1):
         nb, kb = int(n[b]), int(k[b])
