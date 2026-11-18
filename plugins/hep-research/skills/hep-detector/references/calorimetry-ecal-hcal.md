@@ -109,7 +109,10 @@ the constant term forbids. `<plugin root>/skills/hep-detector/scripts/calorimete
 from measured points and reports which one dominates at a given energy and where the
 crossovers lie; note that the parameterization is *linear* in `(a^2, b^2, c^2)` over
 the basis `{1/E, 1/E^2, 1}`, so the fit is an exact linear least squares with no minimizer and no
-starting values required. A squared coefficient can come out negative on noisy or narrow-range data;
+starting values required. The script fits the quadrature form only: a linear sum of the
+stochastic and constant terms sometimes describes the energy dependence better, and its
+coefficients lose this interpretation and are not comparable with these (PDG RPP 2025,
+sec. 35.10.1.1). A squared coefficient can come out negative on noisy or narrow-range data;
 the script reports it as a failure. Do not clip it to zero.
 
 Fitting fewer than three distinct energies cannot separate three terms, and fitting
