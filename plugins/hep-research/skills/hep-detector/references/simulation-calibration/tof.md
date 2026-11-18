@@ -26,7 +26,7 @@ laser into the counter would sit on the 2/3 or 3/4a edge and needs a conversion 
 |---|---|---|---|
 | emission time | time / 2 | decay and rise time | detector-spec scintillation component field: no Table 2 row |
 | effective light speed, path dispersion | transport / 3 | velocity, spread | map transit times: no Table 2 row (resimulate the map with another rindex) |
-| attenuation | transport / 3 | absorption length | detector-spec `optical/absorption_length_mm` (optical row) |
+| attenuation | transport / 3 | absorption and scattering lengths; surface reflectivity | detector-spec `optical/absorption_length_mm` and, where scattering matters, `optical/rayleigh_length_mm` (optical row); the wrapping reflectivity is a separate optical-row parameter |
 | TTS | time / 4a | width | digitization-job timing: no Table 2 row |
 | T0, slewing | time / 5 | offset, coefficient | reconstruction (rerun) |
 | light yield | yield / 2 | photons per MeV | LY row |
@@ -77,4 +77,5 @@ the time resolution and the spread of hit positions in the sample; use it only w
 
 `assets/simulation-calibration/tof.binding.example.json`: light yield rerun; attenuation length resimulation or
 surrogate model; T0 and slewing rerun; P4 met by the known input and by the tracker's internal constraint.
-Degeneracies (§12): T0 plus x/v_eff; addition in quadrature.
+Degeneracies (§12): T0 plus x/v_eff; addition in quadrature. Also: the attenuation measured along a counter combines
+absorption, scattering and surface and wrapping losses, so a fitted absorption length alone absorbs the other two.
