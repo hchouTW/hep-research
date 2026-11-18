@@ -94,7 +94,10 @@ def _edges(values) -> list[float]:
     return e
 
 
-SCAN_R = [0.0] + [10.0 ** (-6 + 0.25 * t) for t in range(25)]  # rate grid: 0, then 1e-6 to 1 in quarter decades
+# rates are never evaluated at exactly 0 or 1: there a yield is 0 and template_fit._ll_bb drops that template's MC
+# terms, so ln L there is not the limit r -> 0+ (or r -> 1-); R_FLOOR stands in for both ends
+R_FLOOR = 1e-12
+SCAN_R = [R_FLOOR] + [10.0 ** (-6 + 0.25 * t) for t in range(24)] + [1.0 - R_FLOOR]  # 1e-6 to 1 in quarter decades
 START_AGREE = 0.5  # ln L by which another fit may beat the rate scan before the outcome is not-converged
 DEGENERATE_P = 0.01  # a background shape compatible with the right-sign one at p >= this is degenerate
 
@@ -155,7 +158,9 @@ def _bb_maximum(observed, m, mc, i: int, j: int):
             fd = _profile_at(observed, m, mc, i, j, d, start)
     nll_scan, y_scan = min([grid[b], fc, fd], key=lambda t: t[0])
     y_pol, _, ll_pol, d_pol = template_fit._fit_yields_full(observed, m, mc, "bb", [max(v, 1e-6) for v in y_scan])
-    cands = [(nll_scan, y_scan), (-ll_pol, y_pol), (-ll_old, y_old)]
+    # a fit that ends with the right- or wrong-sign yield at the boundary has the ln L of dropped terms: not compared
+    cands = [(nll_scan, y_scan)] + [(v, z) for v, z in ((-ll_pol, y_pol), (-ll_old, y_old))
+                                    if z[i] + z[j] > 0 and R_FLOOR <= z[j] / (z[i] + z[j]) <= 1.0 - R_FLOOR]
     nll, y = min(cands, key=lambda t: t[0])
     found = nll_scan - nll <= START_AGREE
     cov = template_fit._hessian_cov(lambda z: template_fit._ll_bb(observed, m, mc, [max(v, 1e-9) for v in z]), y)
@@ -240,10 +245,9 @@ def profile_interval(data, m, mc, y, i: int, j: int) -> tuple[float, float]:
             else:
                 b = c
         return 0.5 * (a + b)
-    lo = 0.0 if excess(0.0) < 0 else _bisect_down(excess, r_hat)
-    # the upper end is tested just below r = 1: at r = 1 the right-sign yield is exactly 0 and template_fit._ll_bb
-    # drops that template's terms, so ln L there is not the limit r -> 1
-    top = 1.0 - 1e-12
+    # the ends are tested at R_FLOOR and 1 - R_FLOOR, never at exactly 0 or 1 (see R_FLOOR)
+    lo = 0.0 if excess(R_FLOOR) < 0 else _bisect_down(excess, r_hat)
+    top = 1.0 - R_FLOOR
     hi = 1.0 if excess(top) < 0 else root(r_hat, top)
     return lo, hi
 
