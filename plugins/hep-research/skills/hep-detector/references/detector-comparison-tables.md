@@ -128,8 +128,8 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 | Threshold Cherenkov | — | turn-on curve vs momentum | near-threshold Poisson | known-species samples |
 | `dE/dx` | — | band position vs `beta gamma` | band crossings, saturation | tag samples |
 | TRD | layer likelihood | pion rejection vs electron efficiency (`e/pi`) | gas/gain drift | rejection at fixed efficiency |
-| ECAL | `E/p`, `Z->ee` mass | scale vs `eta`, `E` | material/nonlinearity | resolution from `Z` line shape |
-| HCAL/jets | response vs `pT`, flavor | JES closure | non-compensation | response and `sigma_68` |
+| ECAL | `E/p`; `Z->ee` mass (COL) | scale vs `E` and incidence direction (`eta` at COL) | material/nonlinearity | resolution from electron test-beam energies (FXT); MIP-calibrated scale checked against the geomagnetic cutoff (SPC); resolution from the `Z` line shape (COL) |
+| HCAL/jets | response vs beam energy (FXT); vs `pT`, flavor (COL) | single-hadron response vs energy (FXT); JES closure (COL) | non-compensation | response and `sigma_68` |
 | Muon | mass/`q/p` vs `q*eta` | dimuon mass maps | weak modes | tag-and-probe; charge misID |
 | Noble liquid | charge/light vs `z`, time | lifetime | purity drift | threshold efficiency |
 | Rare-event | line scale, leakage vs `E` | leakage plot | wall events | threshold and fiducial efficiency |
