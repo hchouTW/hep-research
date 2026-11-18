@@ -42,9 +42,18 @@ Each enumerated physics list is its own run with its own identity (§5.1); event
 
 ## 5. Reference catalog
 
-Beam energy at several energies and for e and π (known input, into `source`); MIP peak of muons (population
-feature); E/p with tracker momentum (internal constraint). §3.5 "scale and response shape" needs at least three
-control points spanning the range and e and π samples together.
+Beam energy at several energies, for electrons and for the hadron species the instance measures (known input, into
+`source`); MIP peak of muons (population feature); E/p with tracker momentum (internal constraint). §3.5 "scale and
+response shape" needs at least three control points spanning the range and e and hadron samples together, the hadrons
+of the species the instance measures (π, p or nuclei): when h/e ≠ 1 the π response does not stand in for the p
+response (PDG RPP 2025 sec. 35.10.3, p. 99; Groom, arXiv:physics/0605164v4, sec. 4, pp. 13-14). A space instance measures
+protons and nuclei ([space based direct detection](../space-based-direct-detection.md)); its proton points come from a
+beam test.
+
+<!-- example: source citation -->
+DAMPE validated its electron/proton discrimination with 400 GeV beam-test protons on its engineering qualification
+model (arXiv:1711.10981v1, Methods, p. 11).
+<!-- /example -->
 
 ## 6. Special functionals and link functions
 
