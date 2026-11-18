@@ -79,7 +79,9 @@ quadrature:
     (sigma_E / E)^2 = a^2 / E + b^2 / E^2 + c^2
 
 - **`a`, the stochastic (sampling) term** - Poisson fluctuations in the number of
-  detected shower constituents. Dominates at low energy.
+  detected shower constituents. Dominates at intermediate energies: below `E = (b/a)^2`
+  the noise term dominates, and above `E = (a/c)^2` the constant term
+  (`calorimeter_resolution.py` reports both crossovers).
 - **`b`, the noise term** - electronic noise and, at a collider, pileup energy inside
   the reconstruction cone. It enters as a fixed energy uncertainty, so its *relative*
   contribution falls as `1/E`. It is the term that grows when pileup increases, and
