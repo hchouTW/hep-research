@@ -74,7 +74,7 @@ multiplicity, log. Drift-time spectrum: normalized shape, alr/ilr.
 |---|---|
 | drift table from another gas-mixture computation | drift-time spectrum edges, r–t residual versus distance |
 | multiple-scattering model of another EM option | matching residual width versus momentum |
-| neutron and photon background added to the event (overlay of cavern background) | hit multiplicity and efficiency versus rate (*Inferred*) |
+| neutron and photon background added to the event (an overlay of the site's measured or simulated background; collider example: cavern background) | hit multiplicity and efficiency versus rate (*Inferred*) |
 
 ## Node-binding example
 
