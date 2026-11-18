@@ -78,10 +78,15 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   absorber thickness, rises with hadron energy.
 - **Decay in flight**: `pi/K -> mu nu` inside the tracker: a kinked track whose
   combined-fit `chi^2` is bad and whose tracker-muon momentum mismatch is large.
-- **Accidental matches**: an unrelated segment (cavern background, noise) matched to a
-  tracker track; grows with rate.
-- **Cosmic rays and beam halo**: out-of-time or off-vertex muons; suppress with timing,
-  vertex/impact parameter, and back-to-back topology.
+- **Accidental matches**: an unrelated segment (cavern background at a collider (COL),
+  noise) matched to a tracker track; grows with rate.
+- **Cosmic rays and beam halo** (COL): out-of-time or off-vertex muons; suppress with timing,
+  vertex/impact parameter, and back-to-back topology. Outside a collider the same muons
+  are the background to reject with a veto or an up-going selection (neutrino telescopes,
+  PDG RPP 2025, sec. 36.3.2; [neutrino astronomy](neutrino-astronomy.md#backgrounds)), the
+  source of cosmogenic backgrounds removed by a veto on the time correlation with the
+  crossing muon (UGD; sec. 36.6.5), or the calibration source of a surface array
+  ([ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
 - **Hadron mis-identification vs reconstruction fake**: a pion identified as a muon
   (mis-ID, real object with wrong identity) is a different failure from a fake track
   ([performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md)).
