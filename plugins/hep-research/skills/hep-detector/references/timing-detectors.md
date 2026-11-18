@@ -102,8 +102,12 @@ mis-assigned windows, so quote core width and tail fraction separately.
 ## Calibration and diagnostics
 
 Per-channel `t0` and walk from a common reference (laser, pulser, minimum-ionizing
-particle), then global offset (start time) and clock-transfer from the accelerator
-clock; validated with **time residuals** `t_meas - t_pred(p, m, L)` per species, using a
+particle), then the global offset (start time) and the distribution of the experiment's
+reference clock: the accelerator clock at an accelerator; synchronisation signals sent
+to the optical modules, checked with in-situ LED or laser flashers (UGD neutrino
+telescopes; PDG RPP 2025, sec. 36.3.2); the synchronisation of fluorescence and surface
+detectors of a hybrid air-shower array (GND; sec. 36.2.1); or the instrument's own
+trigger and clock (SPC; arXiv:hep-ex/0305074, sec. 3); validated with **time residuals** `t_meas - t_pred(p, m, L)` per species, using a
 sample of known particle type (muons, identified pions, electrons at `beta = 1`).
 Residual versus amplitude reveals walk; versus position along the bar reveals
 propagation; versus run/fill reveals clock drift.
