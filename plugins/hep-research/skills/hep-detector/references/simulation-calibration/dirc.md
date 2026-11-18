@@ -11,7 +11,7 @@ Folder rules: [index](index.md).
 | `source` | 0 | tracks of known momentum, species and polar angle | `simulation-request/1` source |
 | `bar` | 1 | quartz-bar traversal, Cherenkov emission | `g4sim_run` |
 | `tir` | 3 | total internal reflection, path ambiguity | `g4sim_run` (full optical tracking) |
-| `pde` | 4a | MCP-PMT PDE, TTS | sensor surface `efficiency` (applied in Geant4) |
+| `pde` | 4a | photodetector PDE and TTS (PMT, MaPMT or MCP-PMT; §3.1 names the MCP-PMT) | sensor surface `efficiency` (applied in Geant4) |
 | `sensor` | 4b | gain | response stage 3 |
 | `tdc` | 5 | TDC, threshold | response stage 4 |
 | `reco` | 6–7 | pixels and time; likelihood of angle and time | reconstruction |
