@@ -34,9 +34,19 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   (collider calorimeters at 40 MHz). What is required is an anti-alias filter on the
   noise and a stable phase. Nyquist sampling matters when the waveform itself is
   unknown (pulse-shape discrimination, multiple pulses, unknown timing).
-- **Out-of-time pileup**: fit several pulses with templates at neighbouring bunch
-  crossings (multi-pulse fit), or deconvolve (for example the deconvolution readout
-  mode of silicon strip front ends); both trade noise for pileup rejection.
+- **Out-of-time pileup**: fit several pulses with templates at the times where other pulses
+  can arrive (multi-pulse fit): where arrivals are locked to a bunch clock, the neighbouring
+  bunch crossings (at a collider); where they are not, each pulse time is free, found by
+  scanning the template along the trace, and each fitted pulse is subtracted before the next
+  is fitted. Or deconvolve (for example the deconvolution readout mode of silicon strip front
+  ends); both trade noise for pileup rejection. Pileup of slow pulses at random separations,
+  and how its rejection is measured, is in
+  [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#pileup-and-position-in-cryogenic-and-germanium-detectors).
+  <!-- example: source citation -->
+  Free-time template scan with subtraction of each fitted pulse, at a neutron time-of-flight
+  facility: P. Žugec et al., Nucl. Instrum. Methods A 812 (2016) 134, arXiv:1601.04512v1,
+  secs. 4.1 and 4.3 (read 2026-11-18).
+  <!-- /example -->
 - **Constrained filters** (*exact* for the linear model; Lagrange multipliers): minimizing
   `w^T R w` subject to `w · g = 1` and `w · c_k = 0` gives `w = R^-1 C (C^T R^-1 C)^-1 e_1`
   with `C = [g, c_1, ...]` and variance `((C^T R^-1 C)^-1)_11`. With `c = g'` (Cleland and
