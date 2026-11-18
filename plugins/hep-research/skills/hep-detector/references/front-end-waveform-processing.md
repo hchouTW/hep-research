@@ -96,9 +96,10 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   the offset is `nu <a> ∫_0^t g dt'`, which rises and then returns to zero over several
   shaping times for bipolar shaping, or several coupling time constants for AC coupling
   alone (longer when that constant exceeds the shaping time). For a bipolar pulse `g = tau d/dt[(t/tau) e^(1 - t/tau)]` it equals
-  `nu <a> tau (t/tau) e^(1 - t/tau)`: maximal (`nu <a> tau`) one `tau` after the start of
-  a bunch train, still 9 % of that after `5 tau`. The result is an energy offset that
-  depends on position in the train and on pileup.
+  `nu <a> tau (t/tau) e^(1 - t/tau)`: maximal (`nu <a> tau`) one `tau` after the rate step
+  (the start of a bunch train at a collider; of a spill or a burst), still 9 % of that
+  after `5 tau`. The result is an energy offset that depends on the time since the rate
+  changed (the position in the train at a collider) and on the rate.
 - **Dead time** (*exact* for Poisson arrivals): non-paralyzable `m = n / (1 + n tau_d)`;
   paralyzable `m = n exp(-n tau_d)`, which has a maximum at `n = 1/tau_d` and turns over.
   Bunched beams, spills, and trigger rules (minimum spacing between accepts, limits per
