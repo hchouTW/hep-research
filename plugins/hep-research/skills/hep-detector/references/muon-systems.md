@@ -101,20 +101,26 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   charge-antisymmetrically, while a radial expansion is charge-symmetric (a momentum-scale
   error constant in `p`; [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)).
 - **Objects**: segment, standalone, combined, tagged muon. **Informative
-  residual/closure**: `Z -> mu mu` mass versus `eta`, `phi`, `pT`, and charge
-  (`m` and `q/p` residual versus `q * eta`), plus cosmic-ray track splitting
-  (upper/lower half fits) to expose sagitta bias.
+  residual/closure**: at a collider (COL), `Z -> mu mu` mass versus `eta`, `phi`, `pT`,
+  and charge (`m` and `q/p` residual versus `q * eta`); in any spectrometer, cosmic-ray
+  track splitting (upper/lower half fits) to expose sagitta bias.
 - **Scaling**: `sigma_pT/pT ∝ pT` at high `p` (measurement-dominated), constant at low
   `p` (scattering); charge misID rises steeply with `pT`.
-- **Conventions**: efficiency measured with tag-and-probe at fixed working point and
+- **Conventions** (COL): efficiency measured with tag-and-probe at fixed working point and
   isolation; resolution from `Z` line-shape width or MC truth for the momentum range,
   charge misID from same-sign fraction in `Z -> mu mu`.
 - **Tails**: wrong-segment link, decay-in-flight, delta-ray overlap, charge flip.
 - **Dependence**: rate/occupancy (background hits), magnetic field map stability,
   chamber temperature/gas, alignment time-dependence.
-- **Strongest data sample**: `Z -> mu mu` and `J/psi -> mu mu` (mass scale and
-  resolution in bins), cosmic muons (split tracks), and collision tracks for
-  alignment with external constraints.
+- **Strongest data sample**: at a collider (COL), `Z -> mu mu` and `J/psi -> mu mu` (mass
+  scale and resolution in bins) and collision tracks for alignment with external
+  constraints; in any spectrometer, cosmic muons (split tracks; arXiv:1206.4071, sec. 6.2.1).
+  For other muon detectors (the muon vetoes of underground detectors, the muon counters of
+  air-shower arrays, muon rings in imaging Cherenkov telescopes; PDG RPP 2025, secs. 36.3.1
+  and 36.2.2) the closure sample is a parameter: see
+  [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
+  [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays)
+  and [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md).
 - **Transfers**: sagitta-weak-mode and charge-dependent-bias reasoning to any
   spectrometer ([tracking and vertexing](tracking-and-vertexing.md)); **does not transfer**: the
   specific punch-through/absorber background model.
