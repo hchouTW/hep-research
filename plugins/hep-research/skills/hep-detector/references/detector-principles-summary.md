@@ -158,13 +158,13 @@ mode.
 
 | Symptom | First suspects |
 |---|---|
-| Dimuon mass shifts with `q*eta` | Alignment weak mode, field map |
+| Mass peak vs `q` and direction | Alignment weak mode, field map |
 | Residual left/right structure vs drift distance | `t0`, `r(t)`, wire position (sign pattern depends on the residual convention, [glossary](detector-glossary.md)) |
 | Coherent residual trend with rate or radius | Space-charge distortion |
-| Energy scale wrong vs `eta` | Upstream material, intercalibration |
+| Energy scale wrong vs angle | Upstream material, intercalibration |
 | PID efficiency drifting with run | Refractive index, gain, clock |
 | Charge shrinks with drift time | Electron lifetime / purity |
-| Jet response depends on flavor | `e/h` non-compensation |
+| Hadron response vs species | `e/h` non-compensation |
 | Resolution improves after a reco-level cut | Selection bias, not detector improvement |
 | Pulls wider than 1 with narrow residuals | Underestimated errors or missing correlations |
 

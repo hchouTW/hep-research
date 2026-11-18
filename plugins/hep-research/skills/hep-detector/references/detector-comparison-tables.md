@@ -12,7 +12,10 @@ without one.
 **Column conventions.** *Ambiguity* is the characteristic degeneracy of the
 inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanisms;
 *validation* names a data-accessible sample (never simulation truth);
-*systematics* lists the dominant nuisance parameters.
+*systematics* lists the dominant nuisance parameters. An entry that holds in one
+environment only carries its code: `COL` collider, `FXT` fixed-target and test beam,
+`SPC` space and high-altitude balloon, `UGD` underground, neutrino and rare-event, `GND`
+ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physics.
 
 ## Table 1: Master detector table
 
@@ -28,15 +31,16 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | GEM/Micromegas | micropattern gas | pad/strip charge | position, angle | gain map | alignment | cluster | angle | pitch, diffusion | discharges | test beam, cosmics | gain, rate |
 | Scintillating fiber | scintillation | amplitude | position | gain, attenuation | mapping | hit | stereo ghosts | pitch, sharing | crosstalk, dark counts | MIPs | attenuation, dose |
 | Emulsion | grains | grain positions | track/vertex | scanning | layer alignment | base-track | no timing | grain size | overlap | through tracks | fading, distortion |
-| TOF / timing layers | scintillation, gas gap, Si gain | time | `beta`, `m^2`, time | `t0`, walk | clock, path | hit, track time | multi-hit | jitter, photostat, clock | wrong bunch | muons | offsets |
-| LGAD / MCP | gain in Si / channels | time | time | gain, walk | fluence | hit time | multi-hit | Landau, jitter | fill factor | MIPs | dose |
+| TOF / timing layers | scintillation, gas gap, Si gain | time | `beta`, `m^2`, time | `t0`, walk | clock, path | hit, track time | multi-hit | jitter, photostat, clock | wrong `t_0` association (COL: wrong bunch crossing); wrong direction of travel (SPC: upward vs downward) | muons | offsets |
+| LGAD | gain in thin Si | time | time | gain, walk | fluence | hit time | multi-hit | Landau, jitter | fill factor | MIPs | dose |
+| MCP | channel gain | time | time | gain, walk | integrated anode charge (aging) | hit time | multi-hit | transit-time spread, jitter | rate droop | — | aging |
 | RICH / DIRC / TOP | Cherenkov light | photon hits (+ time) | `beta`, species | index, mirror, gain | alignment, `T/P` | ring / arc | photon-path | emission, chromatic | low `N_pe`, background | kinematic PID | index, aging |
 | Threshold / differential Cherenkov | Cherenkov light | photon counts | species (thresholds) | index, gain | `T/P` | counter response | near threshold | photostat | dark counts | known-species | index stability |
 | TRD | transition radiation | X-ray + `dE/dx` in gas | `e/pi` | gain, pressure | alignment | layer likelihood | overlap of `dE/dx` and TR | absorption stat | high `p` | `e`/`pi` samples | gas, gain |
 | `dE/dx` | ionization | charge samples | species | gain, path | field | truncated mean | band overlap | Landau, samples | saturation | tag samples | gain drift |
-| ECAL (crystal/sampling) | EM shower | charge/light | `E`, position | intercalibration, scale | geometry, material | cell, cluster | overlap | stoch., noise, const. | leakage, conversions | `Z->ee`, `pi^0`, `E/p` | scale, material |
-| HCAL | hadron shower | charge/light | `E`, position | EM scale, response | geometry | cluster | `e/h` | stoch., leakage | leakage | single hadron, jets | JES |
-| Muon system | ionization in gas | hits | `p`, `q`, ID | `t0`, gain | alignment, field | segment | left-right | MS, spatial | punch-through | `Z`, `J/psi`, cosmics | alignment, charge misID |
+| ECAL (crystal/sampling) | EM shower | charge/light | `E`, position | intercalibration, scale | geometry, material | cell, cluster | overlap | stoch., noise, const. | leakage, conversions | `pi^0`, `E/p`; MIP peak of non-interacting cosmic-ray protons or helium (SPC); electron test beam (FXT); `Z->ee` (COL) | scale, material |
+| HCAL | hadron shower | charge/light | `E`, position | EM scale, response | geometry | cluster | `e/h` | stoch., leakage | leakage | single hadron in a test beam, muon MIP for cell calibration (FXT); jets (COL) | hadronic energy scale (JES at COL) |
+| Muon system | ionization in gas | hits | `p`, `q`, ID | `t0`, gain | alignment, field | segment | left-right | MS, spatial | punch-through | cosmics; `Z`, `J/psi` (COL) | alignment, charge misID |
 | Noble-liquid TPC | scintillation + charge | `S1`, `S2` | `E`, position, ID | lifetime, light map | field | pulse, vertex | pairing | recomb., stats | pileup, wall | sources | lifetime, threshold |
 | Water / scintillator | Cherenkov / scintillation | charge, time | vertex, `E`, ID | PMT gain, optics | medium | ring / hit | ring counting | optics | containment | Michel, `pi^0` | optics, nuclear model |
 | Bolometer / semiconductor | phonons / ionization | pulse | `E`, recoil type | energy scale | thermal | pulse | noise | statistics, noise | threshold, surface | lines | threshold |
@@ -66,7 +70,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | MRPC | gas gap avalanche | gap, jitter | limited | moderate | multi-hit |
 | LGAD | gain in thin Si | Landau + jitter | high | gain loss | fill factor |
 | MCP | channel gain | transit spread | moderate | aging | rate droop |
-| Tracker time | drift/pulse | sensor + `t0` | as tracker | as tracker | bunch assignment |
+| Tracker time | drift/pulse | sensor + `t0` | as tracker | as tracker | event-time (`t_0`) assignment (COL: bunch assignment) |
 | Calorimeter time | shower pulse | pulse shape | as calo | as calo | shower depth, walk |
 
 ## Table 4: PID comparison
@@ -114,7 +118,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 |---|---|---|---|---|
 | Pixels/strips | unbiased hit residual | residual vs angle, cluster size | offset, ghosts | hit efficiency from overlaps/tracks |
 | Drift | residual vs drift distance | `r(t)` residual | left/right offset | per-layer efficiency vs distance |
-| TPC | cluster-track residual | residual vs `(r, z, rate)` | distortion | tracking efficiency vs `p`, `eta` |
+| TPC | cluster-track residual | residual vs `(r, z, rate)` | distortion | tracking efficiency vs `p` and direction (`eta` at COL) |
 | MPGD | residual vs angle | gain map | discharges, angle bias | plateau scan |
 | RPC/MRPC | — | efficiency vs voltage (plateau) and rate | rate-dependent inefficiency, multi-hit | cosmics |
 | Fibers | residual vs position along fiber | amplitude vs position | attenuation | per-channel efficiency |
@@ -124,13 +128,15 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Threshold Cherenkov | — | turn-on curve vs momentum | near-threshold Poisson | known-species samples |
 | `dE/dx` | — | band position vs `beta gamma` | band crossings, saturation | tag samples |
 | TRD | layer likelihood | pion rejection vs electron efficiency (`e/pi`) | gas/gain drift | rejection at fixed efficiency |
-| ECAL | `E/p`, `Z->ee` mass | scale vs `eta`, `E` | material/nonlinearity | resolution from `Z` line shape |
-| HCAL/jets | response vs `pT`, flavor | JES closure | non-compensation | response and `sigma_68` |
-| Muon | mass/`q/p` vs `q*eta` | dimuon mass maps | weak modes | tag-and-probe; charge misID |
+| ECAL | `E/p`; `Z->ee` mass (COL) | scale vs `E` and incidence direction (`eta` at COL) | material/nonlinearity | resolution from electron test-beam energies (FXT); MIP-calibrated scale checked against the geomagnetic cutoff (SPC); resolution from the `Z` line shape (COL) |
+| HCAL/jets | response vs beam energy (FXT); vs `pT`, flavor (COL) | single-hadron response vs energy (FXT); JES closure (COL) | non-compensation | response and `sigma_68` |
+| Muon | mass/`q/p` vs `q*eta` (COL) | dimuon mass maps (COL) | weak modes | tag-and-probe on dimuon resonances (COL); cosmic-ray muons; charge misID |
 | Noble liquid | charge/light vs `z`, time | lifetime | purity drift | threshold efficiency |
 | Rare-event | line scale, leakage vs `E` | leakage plot | wall events | threshold and fiducial efficiency |
 | Water / scintillator | — | Michel electron, `pi^0` closure | ring counting, optics | containment |
 | Air-shower / IACT / neutrino telescope | — | hybrid or independent cross-check | topology, atmosphere/medium optics | — |
+
+Muon detectors in ground arrays, where no dimuon resonance exists: [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays).
 
 ## Table 8: Systematics mapping
 
