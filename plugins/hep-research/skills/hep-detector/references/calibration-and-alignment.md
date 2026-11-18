@@ -23,24 +23,24 @@ calibration was applied" is not a single answer.
 ## Test-beam versus in-situ calibration
 
 **Test-beam** calibration measures the response of detector modules to particles of
-known type and energy before installation. It gives an absolute, well-controlled
-reference, but it applies to a small sample of modules, under conditions - no magnetic
-field, no surrounding material, no pileup, pre-irradiation - that differ from the final
-environment. Test-beam constants are a starting point, not a final answer.
+known type and energy before installation: an absolute reference, but for a small sample
+of modules, under conditions - no magnetic field, no surrounding material, no pileup
+(COL: collider), pre-irradiation - that differ from the final environment. Test-beam
+constants are a starting point, not a final answer. An imaging air-Cherenkov telescope
+has none; muon rings calibrate it (PDG RPP 2025, sec. 36.2.2).
 
-**In-situ** calibration derives constants from the data itself, using physics that is
-known independently: a resonance of known mass, momentum-energy consistency (`E/p`),
-back-to-back balance in transverse momentum, or the uniformity of an isotropic flux.
-It captures the real environment and its time evolution (LED, laser and
-single-photoelectron monitoring also track gain drift without physics events, but not the
-absolute scale), and it is what sets the achievable constant term of a calorimeter (see
-[calorimetry](calorimetry-ecal-hcal.md)).
+**In-situ** calibration derives constants from data, using independently known physics:
+a resonance of known mass, a mono-energetic source or activation line (sec. 36.4),
+momentum-energy consistency (`E/p`), back-to-back balance in transverse momentum (COL),
+or the uniformity of an isotropic flux. It captures the real environment and its time
+evolution (LED, laser and single-photoelectron monitoring track gain drift, not the
+absolute scale) and sets the achievable constant term of a calorimeter
+([calorimetry](calorimetry-ecal-hcal.md)).
 
-The limitation of in-situ calibration is circularity: the reference physics is measured
-with the same detector being calibrated. A resonance mass calibration constrains the
-energy scale at the resonance's energy and must be extrapolated elsewhere, and the
-extrapolation - not the calibration point - is usually the dominant uncertainty. State
-where the calibration is anchored and how far it is extrapolated.
+Its limitation is circularity: the reference physics is measured with the detector being
+calibrated. A resonance mass or a line constrains the scale at its own energy and is
+extrapolated elsewhere; the extrapolation - not the calibration point - is usually the
+dominant uncertainty. State where it is anchored and how far it is extrapolated.
 
 ## Alignment and weak modes
 
