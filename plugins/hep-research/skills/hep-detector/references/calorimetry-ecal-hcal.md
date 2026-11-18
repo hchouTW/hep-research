@@ -11,10 +11,14 @@ and the calibration machinery itself in
 
 ## The measurement, and why it complements tracking
 
-A calorimeter absorbs a particle and measures the energy deposited. Its defining
+A shower calorimeter absorbs a particle and measures the energy deposited. Its defining
 property is that relative resolution *improves* with energy, roughly as `1/sqrt(E)`,
 because the measurement is a count of shower constituents subject to Poisson
-fluctuations. This is exactly opposite to a magnetic spectrometer, whose relative
+fluctuations. (Thermal, low-temperature calorimeters measure a deposit through heat or
+phonons, without a shower; their resolution limit is set by the heat capacity and the
+temperature, independent of the deposit, and does not follow this scaling: see the
+cryogenic bolometers of
+[noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md).) This is exactly opposite to a magnetic spectrometer, whose relative
 resolution degrades with rigidity. The two are therefore complementary: tracking wins
 at low momentum, calorimetry wins at high energy, and the crossover is a basic design
 parameter of any experiment that has both. A calorimeter also measures neutral
