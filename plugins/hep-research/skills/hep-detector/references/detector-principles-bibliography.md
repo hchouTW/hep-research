@@ -125,6 +125,10 @@ criteria as above.
   (matched against Crossref, 2026-10-25). The integral representation used for the Landau
   density and distribution function in `frontend_response.py` (Landau = stable law
   `alpha = 1`, `beta = 1`, scale `pi/2`).
+- P. Žugec et al., "Pulse processing routines for neutron time-of-flight data", Nucl. Instrum. Methods A 812 (2016)
+  134-144, DOI 10.1016/j.nima.2015.12.054, arXiv:1601.04512v1 (read 2026-11-18). Template fit with the pulse time
+  free (the template shifted along the trace) and subtraction of each fitted pulse before the next, for pileup at
+  random separations (secs. 4.1 and 4.3); baseline distortion locked to the beam pulse (sec. 3.4).
 
 ## Timing detectors ([timing detectors](timing-detectors.md))
 
@@ -163,6 +167,10 @@ criteria as above.
   University Press, 2017), DOI 10.1093/oso/9780198786351.001.0001. Non-compensation, dual readout, hadronic shower physics.
 - M. A. Thomson, "Particle flow calorimetry and the PandoraPFA algorithm", Nucl.
   Instrum. Methods A611 (2009) 25-40, DOI 10.1016/j.nima.2009.09.009. Particle flow, confusion term.
+- D. E. Groom, "Energy flow in a hadronic cascade: Application to hadron calorimetry", Nucl. Instrum. Methods A 572
+  (2007) 633-653, DOI 10.1016/j.nima.2006.11.070, arXiv:physics/0605164v4 (read 2026-11-18). Power law in the mean
+  hadronic fraction and pi/e = 1 - (1 - h/e)(E/E0)^(m-1) (eqs. 1 and 7); fits fix only m and (1 - h/e)E0^(1-m); pi
+  and proton responses differ for the same h/e (sec. 4).
 
 ## Noble-liquid, neutrino, rare-event detectors ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md))
 

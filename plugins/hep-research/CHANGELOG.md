@@ -41,6 +41,79 @@ Software checks establish contract consistency only, not physical validity.
 - `tracker_resolution.py momentum` keeps each `--point-resolution-um` value with its own layer position when it sorts
   the positions; unsorted positions with unequal resolutions gave the curvature error of a different layout (a factor
   2.2 too small on a four-layer example) (sci-fix CHK-AT-02-01, S1).
+- **hep-detector: guidance corrections in calorimetry, nuclear interactions and particle identification** (S3,
+  documentation fixes F-S3-1-*, issues CHK-AT-01-04/05, CHK-AT-03-01, CHK-AT-04-01/04/05/06, CHK-AT-06-05,
+  CHK-AU-01-01 to -06, CHK-AU-02-01/03/04, CHK-AU-05-01/02/04/06/07/09/10/12; VALIDATION DC-F-S3-1).
+  `cherenkov_angle.py` warns when its first-order mass resolution `gamma^2 dbeta/beta` exceeds 0.1;
+  `calorimeter_resolution.py --evaluate` refuses all three terms zero (exit 2) and warns on a zero noise or constant
+  term (three-term outputs unchanged); `multiple_scattering.py --help` says the PDG 0.016 GeV/c coefficient is 2/sqrt(3)
+  times the Highland term it uses, PDG's value being for many uniformly spaced measurements. Calorimetry: the stochastic term dominates between the two crossovers, the letter
+  conventions of the three terms, quadrature-only fits, granularity and software compensation, the X0 fit attributed
+  to Dahl (RPP 2010) and Rossi's critical energy, `<h/e>` below unity for many but not all hadronic calorimeters, and
+  thermal calorimeters outside the `1/sqrt(E)` scaling. Nuclear interactions: A is the molar mass, survival covers
+  nuclear losses only, and material outside the instrument counts. PID: start-time source as a parameter, time walk
+  from the measured amplitude, the TOF up/down decision for space-borne spectrometers, truncation 30-50%, the TRD
+  estimators, the RICH per-photon term and the `n beta` factor in `dbeta/beta`, muon identification without an
+  absorber, the charge response curve as the most probable signal, and which events and toys `multisample_pid.py`
+  leaves out and counts (out_of_range only for the truncated and weighted means). No number changes.
+- **hep-detector: collider recipes stated as general guidance are now parameters or marked collider** (documentation
+  fixes F-S3-2-CHK-AU-03-01 to F-S3-2-CHK-AU-09-02, S3; 18 issues). `tracking-and-vertexing.md`: vertex seeds come
+  from the expected interaction region (a beam line only where there is one). `muon-systems.md`: a radial expansion
+  is a charge-symmetric scale error, unlike curl, sagitta and twist; charge misID per muon is fitted from the
+  same-sign pair probability `c_i (1 - c_j) + (1 - c_i) c_j` (about twice the per-muon rate), not read as the
+  same-sign fraction; a background-subtracted tag-and-probe needs the pass/fail fit, not a binomial interval; the
+  `eta`, `phi`, `pT` binning, the `J/psi` and `Z` samples and the cosmic-ray and halo suppression are marked collider,
+  with the other roles of cosmic muons named. `cherenkov-imaging-variants-and-photosensors.md`: threshold-counter
+  rejection is limited by light from below-threshold particles and by excess noise; photon time is an imaging
+  dimension of every DIRC; data samples per environment. `timing-detectors.md`: the transit-time spread enters a
+  many-photon hit about as `TTS/sqrt(N_pe)`; the start-time source, the time window and the reference clock are
+  parameters. `calibration-and-alignment.md`: pileup, pT balance, the `J/psi`-and-`Z` momentum scale and `pi0`/`eta`
+  intercalibration are marked collider, source and activation lines are added, and instruments without a test beam
+  are named. `performance-metrics-and-residual-diagnostics.md`: in-data resolution methods per environment, and the
+  shared variables of the efficiency chain rule are parameters. Pages that use environment codes now define them.
+- **hep-detector: sixteen guidance corrections in six references** (sci-fix S3 documentation fixes F-S3-3-AU10-01 to
+  F-S3-3-AU16-03; issues CHK-AU-10-01 to -04, CHK-AU-12-01 to -03, CHK-AU-13-01, -02, -04, -05, CHK-AU-14-02, -03,
+  CHK-AU-15-01, CHK-AU-16-01, -03). `gaseous-and-specialized-tracking-technologies.md`: silicon carbide charge
+  collection degrades faster with fluence than in silicon and diamond; RPC rate capability scales as
+  `1/(rho d <Q>)`; silicon data samples, pileup and the TPC start time `t_0` are stated as environment parameters.
+  `front-end-waveform-processing.md`: the multi-pulse fit takes the pulse times as its parameter (bunch crossings at
+  a collider, a free-time scan otherwise), and the baseline bias and the bipolar transient follow the pulse rate and
+  a rate step, with luminosity and the bunch train as the collider case. `event-reconstruction.md`: the chain, the
+  period weighting of channel masks (luminosity or live time and exposure), timing association (start-time source,
+  direction hypothesis; albedo separated by the sign of the time difference) and pileup are stated generally, with
+  the collider case named. `signal-formation-and-readout.md`: in liquid argon `N = E/W_el` counts pairs before
+  recombination, and `W_el` differs from the `W` per detectable quantum; `kappa` grows as `z^2`, so nuclei can leave
+  the Landau regime in thin layers. `simulation-calibration/ecal.md`: crystal transparency monitoring is an
+  injection into `collection`, not on the 3/4a edge. `simulation-calibration/hcal.md`: the non-compensation power
+  law is in the hadronic fraction, and the hadron beam points are of the species the instance measures.
+- **hep-detector simcal specializations, tracker, μ detector, RICH, DIRC, TOF and TRD** (documentation fixes
+  F-S3-4-*, S3; issues CHK-AU-17-01 to -04, CHK-AU-18-01, -06, -07, CHK-AU-19-03, -04, CHK-AU-20-01, -02,
+  CHK-AU-21-04, -06, -07, -09, CHK-AU-22-01, -02). Guidance that held for one detector environment or configuration is
+  now general. Tracker: cosmic-ray tracks are a known input only with a measured or declared momentum (field-off
+  tracks are a population feature); a field polarity flip needs a reversible magnet; gas trackers list the drift-time
+  origin t₀ and the r–t relation, with the t₀ source as a parameter of the instance; a silicon preamplifier without
+  intrinsic gain is deterministic. μ detector: the absorber node includes energy loss and its fluctuations; the
+  tag-and-probe sample and the neutron and photon background belong to the experiment instance and the site, with
+  collider examples. RICH: the angle residual versus ring azimuth sees mirror misalignment; photon count and
+  per-photon resolution are degenerate only in the per-ring width. DIRC: any PMT type; the control variable is the
+  incidence angle on the bar. TOF: the three-counter method uses three comparison nodes; v_eff is the slope of the
+  end-time difference versus position; attenuation combines absorption, scattering and surface losses; neutral
+  particles take their flight path from the counter and the source geometry. TRD: hadron samples fix the gas gain
+  only below the TR onset; the identification functional is the hadron efficiency at fixed electron efficiency.
+- **hep-detector: core equations, comparison tables and failure signatures no longer state collider or
+  singly-charged cases as general** (documentation fixes F-S3-5-CHK-AU-23-01 to -05, -24-05 to -07, -25-01 and
+  -25-03 to -07, S3). `core-detector-equations.md`: E2 relates the momentum component perpendicular to `B`
+  (`p cos(lambda) = 0.299792458 |q| B rho`, exact only with that coefficient), which is `pT` only for a field along
+  the beam axis, and spectrometers for nuclei report rigidity `pc/(Ze)`; E4 locates the "11% or better" Highland
+  accuracy in RPP 2010 eq. (27.14), stated for `z = 1`, `beta = 1`; E5 says that straggling in very thick absorbers
+  is less skewed but never Gaussian, and that with `z^2` alone it is for singly charged or light projectiles (ions
+  need higher-order and finite-size terms, up to a factor of two or more); E11 says that for an isotropic flux the
+  acceptance is a geometric factor or aperture in m^2 sr. `detector-comparison-tables.md` defines the environment
+  codes and tags collider entries: the start time `t_0` is a parameter (bunch crossing at COL), LGAD and MCP get
+  separate rows, ECAL, HCAL and muon validation samples and conventions are given per environment, and TPC
+  efficiency is binned in direction (`eta` at COL). `detector-principles-summary.md` failure signatures: mass peak
+  vs charge and direction, energy scale vs angle, hadron response vs species (no size growth of the entry
+  reference).
 
 ## 0.70.0 (2026-11-16)
 

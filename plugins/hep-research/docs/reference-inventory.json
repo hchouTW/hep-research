@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 58,
-   "bytes": 845192,
+   "bytes": 874291,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1864,8 +1864,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 24569,
-   "lines": 335,
+   "bytes": 24573,
+   "lines": 336,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/timing-pid/assets/timing-method-card.json",
@@ -1891,6 +1891,7 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/simulation-calibration/tracker.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/propagate_scale_distortion.py",
     "skills/hep-detector/scripts/stability_monitor.py",
@@ -1901,13 +1902,13 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "5e3b104ef 2026-10-29"
+   "last_commit": "ad6d9dc1d 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
    "owner": "hep-detector",
-   "bytes": 16252,
-   "lines": 253,
+   "bytes": 18346,
+   "lines": 277,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-calorimetry.md",
@@ -1924,10 +1925,11 @@
     "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
-    "skills/hep-detector/scripts/calorimeter_resolution.py"
+    "skills/hep-detector/scripts/calorimeter_resolution.py",
+    "tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7cfaea3d8 2026-11-06"
+   "last_commit": "8402d5dcc 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/charge-confusion.md",
@@ -1949,8 +1951,8 @@
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "hep-detector",
-   "bytes": 11302,
-   "lines": 162,
+   "bytes": 12647,
+   "lines": 176,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-pid.md",
@@ -1961,6 +1963,7 @@
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md"
@@ -1968,12 +1971,12 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "a1267715b 2026-10-25"
+   "last_commit": "1a8191060 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
    "owner": "hep-detector",
-   "bytes": 9848,
+   "bytes": 11308,
    "lines": 44,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1984,7 +1987,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c03967 2026-10-22"
+   "last_commit": "fa8b8b18d 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2051,8 +2054,8 @@
   {
    "path": "skills/hep-detector/references/detector-comparison-tables.md",
    "owner": "hep-detector",
-   "bytes": 15372,
-   "lines": 163,
+   "bytes": 16647,
+   "lines": 169,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-glossary.md",
@@ -2061,7 +2064,7 @@
     "tests/skills/hep_detector/test_detector_atlas.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb581365 2026-10-19"
+   "last_commit": "2ee8a19b0 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
@@ -2128,8 +2131,8 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 24526,
-   "lines": 301,
+   "bytes": 25373,
+   "lines": 309,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2142,7 +2145,7 @@
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
    "owner": "hep-detector",
-   "bytes": 15090,
+   "bytes": 15085,
    "lines": 201,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2153,7 +2156,7 @@
     "tests/skills/hep_detector/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "485e96cb0 2026-10-17"
+   "last_commit": "6b59b8d80 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
@@ -2233,8 +2236,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 25450,
-   "lines": 342,
+   "bytes": 27551,
+   "lines": 363,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2256,7 +2259,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "b5c6735cc 2026-11-14"
+   "last_commit": "a76c947c5 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2340,8 +2343,8 @@
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
    "owner": "hep-detector",
-   "bytes": 16533,
-   "lines": 213,
+   "bytes": 17479,
+   "lines": 225,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2355,7 +2358,7 @@
     "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "81c8d4f67 2026-11-13"
+   "last_commit": "b530a973c 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
@@ -2372,8 +2375,8 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 23837,
-   "lines": 361,
+   "bytes": 24572,
+   "lines": 368,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-tracking.md",
@@ -2390,7 +2393,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "81c8d4f67 2026-11-13"
+   "last_commit": "285b65270 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2426,13 +2429,18 @@
    "lines": 338,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
+    "skills/hep-detector/references/detector-comparison-tables.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/extensive-air-showers.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
-    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
+    "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "da7df3d16 2026-11-12"
@@ -2445,12 +2453,16 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/extensive-air-showers.md",
+    "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-ml/references/space-and-astroparticle-ml.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
@@ -2479,8 +2491,8 @@
   {
    "path": "skills/hep-detector/references/muon-systems.md",
    "owner": "hep-detector",
-   "bytes": 8416,
-   "lines": 130,
+   "bytes": 11108,
+   "lines": 158,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2495,7 +2507,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9257d7b5d 2026-10-15"
+   "last_commit": "64a63cdad 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/neutrino-astronomy.md",
@@ -2509,8 +2521,12 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/multimessenger-analysis.md",
+    "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/particle-identification.md",
+    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
+    "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-statistics/references/astroparticle-statistics.md"
    ],
    "cited_by_other_skills": [
@@ -2525,14 +2541,22 @@
    "lines": 342,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/calorimetry-ecal-hcal.md",
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-glossary.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/particle-identification.md",
+    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
-    "skills/hep-detector/references/signal-formation-and-readout.md"
+    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/simulation-calibration/tracker.md",
+    "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "81c8d4f67 2026-11-13"
@@ -2540,8 +2564,8 @@
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
    "owner": "hep-detector",
-   "bytes": 4163,
-   "lines": 57,
+   "bytes": 5467,
+   "lines": 69,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2552,13 +2576,13 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "c398d5e0c 2026-10-29"
+   "last_commit": "40e199f06 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 19518,
-   "lines": 297,
+   "bytes": 22860,
+   "lines": 334,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/timing-pid/assets/timing-method-card.json",
@@ -2583,6 +2607,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/simulation-calibration/trd.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
@@ -2594,13 +2619,13 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "81c8d4f67 2026-11-13"
+   "last_commit": "080e2dd8f 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "owner": "hep-detector",
-   "bytes": 19836,
-   "lines": 260,
+   "bytes": 21238,
+   "lines": 273,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2616,7 +2641,7 @@
     "skills/hep-detector/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c03967 2026-10-22"
+   "last_commit": "664819121 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
@@ -2748,8 +2773,8 @@
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
    "owner": "hep-detector",
-   "bytes": 19273,
-   "lines": 258,
+   "bytes": 20188,
+   "lines": 261,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2768,26 +2793,26 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "a1267715b 2026-10-25"
+   "last_commit": "5365141e8 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/dirc.md",
    "owner": "hep-detector",
-   "bytes": 4045,
-   "lines": 76,
+   "bytes": 4384,
+   "lines": 78,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "5feb05e08 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/ecal.md",
    "owner": "hep-detector",
-   "bytes": 5711,
-   "lines": 91,
+   "bytes": 6654,
+   "lines": 102,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/hcal.md",
@@ -2795,13 +2820,13 @@
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "bfc197855 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/hcal.md",
    "owner": "hep-detector",
-   "bytes": 4521,
-   "lines": 80,
+   "bytes": 5713,
+   "lines": 93,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-calorimetry.md",
@@ -2820,10 +2845,11 @@
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
     "skills/hep-detector/scripts/calorimeter_resolution.py",
-    "tests/core/test_simcal_specialization.py"
+    "tests/core/test_simcal_specialization.py",
+    "tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "8dc700325 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/index.md",
@@ -2953,67 +2979,67 @@
   {
    "path": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
    "owner": "hep-detector",
-   "bytes": 4559,
-   "lines": 83,
+   "bytes": 5009,
+   "lines": 84,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "0a0f0f4e8 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/rich.md",
    "owner": "hep-detector",
-   "bytes": 4183,
-   "lines": 76,
+   "bytes": 4795,
+   "lines": 81,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "d052c91a3 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/tof.md",
    "owner": "hep-detector",
-   "bytes": 4308,
-   "lines": 80,
+   "bytes": 5417,
+   "lines": 85,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "57016366c 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/tracker.md",
    "owner": "hep-detector",
-   "bytes": 4770,
-   "lines": 82,
+   "bytes": 6222,
+   "lines": 93,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "d59086ae2 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/trd.md",
    "owner": "hep-detector",
-   "bytes": 3922,
-   "lines": 74,
+   "bytes": 4242,
+   "lines": 77,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e661b3fde 2026-11-13"
+   "last_commit": "fa6069d21 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
@@ -3026,12 +3052,17 @@
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/charge-confusion.md",
+    "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
+    "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/simulation-calibration/hcal.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/scripts/geomagnetic_cutoff.py",
     "skills/hep-measurement/scripts/orbit_averaged_geomagnetic_cutoff.py",
@@ -3091,8 +3122,8 @@
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
    "owner": "hep-detector",
-   "bytes": 9075,
-   "lines": 140,
+   "bytes": 10820,
+   "lines": 151,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-pid.md",
@@ -3102,16 +3133,17 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5d 2026-10-15"
+   "last_commit": "ab6c0dc4d 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 23745,
-   "lines": 352,
+   "bytes": 24225,
+   "lines": 356,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -3143,7 +3175,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "7cfaea3d8 2026-11-06"
+   "last_commit": "ac34a1d32 2026-11-18"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",

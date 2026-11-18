@@ -723,5 +723,2191 @@
   "verification_strength": "page",
   "numeric_quotation_allowed": true,
   "last_reviewed": "2026-11-17"
+ },
+ {
+  "id": "scifix:C2101",
+  "claim": "The linear (first-order) error propagation U ~= A V A^T is exact for linear functions and can break down when the function is significantly nonlinear within a region comparable to the standard deviations.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2102"
+  ],
+  "location": "RPP 2025 sec. 39.2.1, eqs. (39.18)-(39.19), p. 4",
+  "scope": {
+   "text": "cherenkov_angle.py mass-resolution warning (CHK-AT-01-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2102",
+  "claim": "In a simple model of an imaging Cherenkov counter, dbeta/beta = tan(theta_c) sigma(theta_c), with sigma(theta_c) = <sigma(theta_i)>/sqrt(N_pe) (+) C, where C combines correlated terms (tracking, alignment, multiple scattering) and others; N_pe ~= L N_0 <sin^2 theta_c>.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.5, eqs. (35.8), (35.11), (35.12), pp. 19 and 21",
+  "scope": {
+   "text": "particle-identification.md RICH bullets and cherenkov_angle.py (CHK-AT-01-04, CHK-AT-01-05, CHK-AU-05-01, CHK-AU-05-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2103",
+  "claim": "The Cherenkov photon yield is about 370 sin^2 theta_c(E) eV^-1 cm^-1 for z = 1.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2101"
+  ],
+  "location": "RPP 2025 sec. 34.7.1, eq. (34.43), p. 34",
+  "scope": {
+   "text": "particle-identification.md RICH (CHK-AT-01-05, CHK-AU-05-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2104",
+  "claim": "sigma/E = A/sqrt(E) (+) B/E (+) C, with the noise sigma_N = B not energy-dependent and the constant term C limiting the resolution at high energies; a linear rather than quadratic addition of the stochastic and constant terms may describe the energy dependence better, and the terms then lose their simplified interpretation.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.1.1, eq. (35.50), pp. 92-93",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md resolution decomposition and calorimeter_resolution.py (CHK-AT-04-01, -04, -05, -06, CHK-AU-01-01, -02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2105",
+  "claim": "sigma_E/E = a/sqrt(E) (+) b (+) c/E with b the constant (systematic) term and c mainly electronic noise; the position resolution depends on the effective Moliere radius and the transverse granularity.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.2, p. 97",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md (CHK-AT-04-05, CHK-AU-01-02, CHK-AU-01-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2106",
+  "claim": "Calorimeter resolution written as stochastic, noise and constant terms; the constant term dominates the resolution for high-energy electron and photon showers.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2105"
+  ],
+  "location": "arXiv:1306.2016v2 sec. 2, eq. (1), p. 6",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md and calorimeter_resolution.py (CHK-AT-04-01, CHK-AT-04-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2107",
+  "claim": "sigma/E = a/sqrt(E) (+) b (+) c/E with a, b, c the stochastic, constant and noise contributions; software compensation in a highly granular hadron calorimeter improves the single-hadron resolution from about 58%/sqrt(E) to about 45%/sqrt(E); invisible energy typically reduces the response to the hadronic component.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2106"
+  ],
+  "location": "arXiv:1207.4210v2 abstract (PDF p. 3), sec. 2 eq. (2.2) (PDF pp. 10-11), sec. 3 (PDF p. 12)",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md (CHK-AT-04-05, CHK-AU-01-01, -02, -03, -05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2108",
+  "claim": "The p.d.f. resulting from the cascade model has a variance somewhat different from the usual sigma/E = sigma'/sqrt(E) (+) sigma_const.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2107"
+  ],
+  "location": "arXiv:physics/0605164v4 Appendix A, PDF p. 38",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md (CHK-AT-04-06)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2109",
+  "claim": "Granularity comparable to or smaller than X0 and rho_M offers ideal conditions for software compensation, which improves the intrinsic resolution.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.1.3, p. 94",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md (CHK-AU-01-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2110",
+  "claim": "Dahl's compact fit X0 = 716.4 g cm^-2 A / (Z(Z+1) ln(287/sqrt Z)) agrees with Tsai's values to better than 2.5% for all elements except helium (about 5% low).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2104"
+  ],
+  "location": "RPP 2010 sec. 27.4.1, eq. (27.24), PDF p. 18",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md approximate scales (CHK-AU-01-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2111",
+  "claim": "The critical energy is sometimes defined by equal ionization and bremsstrahlung loss rates; Rossi defines it as the energy at which the ionization loss per radiation length equals the electron energy; the fits 610 MeV/(Z+1.24) (solids, liquids) and 710 MeV/(Z+0.92) (gases) use Rossi's definition, and so does R_M = X0 Es/Ec (Es ~= 21 MeV).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2101"
+  ],
+  "location": "RPP 2025 sec. 34.4.4, p. 20; Fig. 34.14 caption, p. 22; sec. 34.5, eq. (34.37), p. 28",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md (CHK-AU-01-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2112",
+  "claim": "<h/e> is a calorimeter-dependent quantity smaller than unity for many, but not all, hadronic calorimeters.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.3, p. 100",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md (CHK-AU-01-05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2113",
+  "claim": "The ideal intrinsic resolution of a low-temperature thermal detector is Delta E^2 = k_B T^2 C, independent of the energy deposition.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2103"
+  ],
+  "location": "RPP 2025 sec. 36.5.1, p. 39",
+  "scope": {
+   "text": "calorimetry-ecal-hcal.md opening (CHK-AU-01-06)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2114",
+  "claim": "A, the atomic mass of the absorber, is in g mol^-1; xenon has mean atomic mass 131.29 g/mol.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2101",
+   "scifix:S2103"
+  ],
+  "location": "RPP 2025 sec. 34.1, Table 34.1, p. 2; Table 36.5, p. 32",
+  "scope": {
+   "text": "nuclear-interactions-in-detector-material.md (CHK-AU-02-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2115",
+  "claim": "Elastic scattering removes primaries from the acceptance or slows them down; the correction (15% for carbon, 14% for boron, increasing at low energy because of energy loss) is a geometrical-factor correction; secondaries from fragmentation in the dome above the detector contaminate the samples.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2108"
+  ],
+  "location": "arXiv:1407.1657v1 sec. 3.4, pp. 14-15",
+  "scope": {
+   "text": "nuclear-interactions-in-detector-material.md (CHK-AU-02-03, CHK-AU-02-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2116",
+  "claim": "Fragmented events in the instrument can be removed with charge cuts whose efficiency must be accounted for; charge-changing interactions in the atmosphere above a balloon (average overburden 3.9 g/cm2) cannot be identified and are corrected with nuclear interaction models.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2109"
+  ],
+  "location": "arXiv:0808.1718v1 sec. 2, p. 4; sec. 5, pp. 17-18",
+  "scope": {
+   "text": "nuclear-interactions-in-detector-material.md (CHK-AU-02-03, CHK-AU-02-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2117",
+  "claim": "A multi-plane TOF (four planes, two above and two below the magnet) measures beta and distinguishes upward from downward going particles, fundamental to separate particles from antiparticles; a second-order Birks law in Z^2 is fitted to the TOF charge.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2111"
+  ],
+  "location": "arXiv:hep-ex/0305074v1 sec. 2, pp. 1-3; sec. 3 and Fig. 4, p. 4",
+  "scope": {
+   "text": "particle-identification.md TOF (CHK-AU-05-07, -10, -12)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2118",
+  "claim": "Organic scintillators emit less light than expected at large dE/dx (Birks' formula).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.3.1, eq. (35.2), p. 11",
+  "scope": {
+   "text": "particle-identification.md TOF time-walk (CHK-AU-05-07)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2119",
+  "claim": "The most probable energy loss is considerably smaller than the mean; the truncated mean of the 50%-70% smallest samples approximates it and is the usual estimator.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2101",
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 34.2.3, p. 5; sec. 35.6.4, p. 42",
+  "scope": {
+   "text": "particle-identification.md dE/dx and charge (CHK-AU-05-06, CHK-AT-06-05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2120",
+  "claim": "TRD electron-pion discrimination uses the total energy per module, the cluster count above an optimal threshold, likelihood methods (most experiments) or neural networks (the most powerful; more likelihood parameters approach them).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2110"
+  ],
+  "location": "RPP 2025 sec. 35.6.5, p. 47; arXiv:1709.02743v2 sec. 11.2, pp. 50-51",
+  "scope": {
+   "text": "particle-identification.md TRD (CHK-AU-05-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2121",
+  "claim": "In water Cherenkov detectors electrons give fuzzy rings and muons sharp rings; in neutrino telescopes a nu_mu CC reaction gives a muon track and a cascade.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2103"
+  ],
+  "location": "RPP 2025 sec. 36.3.1.2, p. 15; sec. 36.3.2, p. 17",
+  "scope": {
+   "text": "particle-identification.md muon systems (CHK-AU-05-09)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2122",
+  "claim": "For a large number of uniformly spaced measurements, the scattering contribution to the curvature error is about 8 s_rms_plane/L^2 (0.016 GeV/c coefficient), with s_rms_plane = x theta0/(4 sqrt 3).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2101"
+  ],
+  "location": "RPP 2025 sec. 35.12, eqs. (35.67) and (35.70), pp. 112-113; sec. 34.3, eq. (34.21), p. 17",
+  "scope": {
+   "text": "multiple_scattering.py docstring (CHK-AT-03-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2201",
+  "claim": "In large homogeneous detectors read out by photosensors the event vertex is determined from the relative timing and/or charge distribution of the photosensors.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2201"
+  ],
+  "location": "RPP 2025 sec. 36.3.1, p. 12",
+  "scope": {
+   "text": "skills/hep-detector/references/tracking-and-vertexing.md (CHK-AU-03-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2202",
+  "claim": "Weak modes that alter the azimuthal angle of the modules modify the track curvature in opposite ways for positively and negatively charged tracks.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2202"
+  ],
+  "location": "arXiv:1403.2286v2 sec. 9.2, PDF p. 30",
+  "scope": {
+   "text": "skills/hep-detector/references/muon-systems.md (CHK-AU-04-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2203",
+  "claim": "The expected number of same-charge pairs in bin ij is (eps_i (1 - eps_j) + (1 - eps_i) eps_j) N_ij plus background, with eps the per-object charge-misidentification probability.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2203"
+  ],
+  "location": "arXiv:1908.00005v2 sec. 9.2, PDF p. 47",
+  "scope": {
+   "text": "skills/hep-detector/references/muon-systems.md (CHK-AU-04-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2204",
+  "claim": "With background in the probe sample, the efficiency is taken from a simultaneous fit to the passing and failing probe mass spectra, and its uncertainty from the likelihood.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2204"
+  ],
+  "location": "arXiv:1206.4071v2 sec. 5.1.1, PDF p. 20",
+  "scope": {
+   "text": "skills/hep-detector/references/muon-systems.md (CHK-AU-04-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2205",
+  "claim": "Muon systems are found in collider detectors and in ground and underground cosmic-ray and neutrino arrays, and deep liquid detectors are equipped with outer muon veto detectors.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2201"
+  ],
+  "location": "RPP 2025 sec. 35.6.6.1, p. 51; sec. 36.3.1, p. 12",
+  "scope": {
+   "text": "skills/hep-detector/references/muon-systems.md (CHK-AU-04-05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2206",
+  "claim": "Down-going atmospheric muons are a background of neutrino telescopes reduced by upward-going selection or self-veto, and short-lived cosmogenic radioisotopes are removed by an active veto on the time correlation with a crossing muon.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2201"
+  ],
+  "location": "RPP 2025 sec. 36.3.2, p. 16; sec. 36.6.5, pp. 54-55",
+  "scope": {
+   "text": "skills/hep-detector/references/muon-systems.md (CHK-AU-04-06)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2207",
+  "claim": "Cosmic-ray muons that cross the whole detector are reconstructed in the upper and lower halves separately to evaluate the momentum resolution.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2204"
+  ],
+  "location": "arXiv:1206.4071v2 sec. 6.2.1, PDF p. 36",
+  "scope": {
+   "text": "skills/hep-detector/references/muon-systems.md (CHK-AU-04-07)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2208",
+  "claim": "The energy scale of large water Cherenkov detectors is set with cosmic-ray muon energy deposition, Michel electrons and pi0, and muon-ring intensity is one means of calibrating an imaging atmospheric Cherenkov telescope.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2201",
+   "scifix:S2205"
+  ],
+  "location": "RPP 2025 sec. 36.3.1.2, p. 14; sec. 36.2.2, p. 9",
+  "scope": {
+   "text": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md (CHK-AU-06-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2209",
+  "claim": "Light produced by the below-threshold particle (decay to an above-threshold particle, scintillation, delta rays) often limits the separation of a threshold counter, and the photodetector's excess noise lowers the effective number of photoelectrons.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2206"
+  ],
+  "location": "RPP 2025 sec. 35.5, p. 20; arXiv:hep-ex/9805001v1 p. 10",
+  "scope": {
+   "text": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md (CHK-AU-06-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2210",
+  "claim": "DIRC photons are imaged in up to three dimensions, two in space and, because of the long photon paths, one in time.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2207"
+  ],
+  "location": "RPP 2025 sec. 35.5, p. 23; arXiv:hep-ex/0010068v1 p. 3",
+  "scope": {
+   "text": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md (CHK-AU-06-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2211",
+  "claim": "A space instrument's time-of-flight planes form its fast trigger and distinguish upward from downward going particles.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2208"
+  ],
+  "location": "arXiv:hep-ex/0305074v1 sec. 2, p. 3",
+  "scope": {
+   "text": "skills/hep-detector/references/timing-detectors.md (CHK-AU-07-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2212",
+  "claim": "Without an external start, the time of flight is measured between two scintillator planes of the same instrument; a pulsed neutron source takes its start from the prompt gamma flash corrected for its travel time.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2208",
+   "scifix:S2209"
+  ],
+  "location": "arXiv:hep-ex/0305074v1 secs. 2-3; arXiv:2505.00042v2 sec. 4.1",
+  "scope": {
+   "text": "skills/hep-detector/references/timing-detectors.md (CHK-AU-07-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2213",
+  "claim": "Neutrino-telescope time calibration sends synchronisation signals to the optical-module electronics and uses LED or laser flashers emitting at known times in situ.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2201"
+  ],
+  "location": "RPP 2025 sec. 36.3.2, p. 20",
+  "scope": {
+   "text": "skills/hep-detector/references/timing-detectors.md (CHK-AU-07-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2214",
+  "claim": "The timing resolution depends on the single-photon time response and jitter of the photodetector and on the number of photons, and for imaging detectors scales approximately as 1/sqrt(N_pe).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.4, p. 16; sec. 35.5, p. 20",
+  "scope": {
+   "text": "skills/hep-detector/references/timing-detectors.md (CHK-AU-07-09)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2215",
+  "claim": "Imaging atmospheric Cherenkov telescopes lack a test beam and calibrate their response with muon-ring intensity; low-background TPCs take energy scale and resolution from mono-energetic source and activation lines.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2201"
+  ],
+  "location": "RPP 2025 sec. 36.2.2, p. 9; sec. 36.4, p. 33",
+  "scope": {
+   "text": "skills/hep-detector/references/calibration-and-alignment.md (CHK-AU-08-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2216",
+  "claim": "At low and intermediate pT the J/psi and Z dimuon mass constraints calibrate the momentum scale and measure the momentum resolution.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2204"
+  ],
+  "location": "arXiv:1206.4071v2 sec. 6",
+  "scope": {
+   "text": "skills/hep-detector/references/calibration-and-alignment.md (CHK-AU-08-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2217",
+  "claim": "A neutron time-of-flight resolution function can only be determined by simulation, validated with measured resonances of precisely known parameters.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2209"
+  ],
+  "location": "arXiv:2505.00042v2 sec. 6",
+  "scope": {
+   "text": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md (CHK-AU-09-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2218",
+  "claim": "Effective detection areas depend on the zenith angle and energy (for atmospheric Cherenkov telescopes and neutrino telescopes).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2201"
+  ],
+  "location": "RPP 2025 sec. 36.2.2, p. 9; sec. 36.3.2, p. 16, Fig. 36.6",
+  "scope": {
+   "text": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md (CHK-AU-09-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2301",
+  "claim": "Synthetic CVD diamond is strong against radiation damage (large bandgap, displacement threshold about twice that of silicon); for SiC and GaN charge collection so far degrades faster with fluence than for Si and diamond.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.8.5, p. 78",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, diamond and wide-bandgap sensors (CHK-AU-10-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2302",
+  "claim": "Leakage currents of 4H-SiC diodes stay extremely small after neutron irradiation to very high fluence, and the reverse-bias CCE follows a power law in the 1 MeV neutron-equivalent fluence.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2303"
+  ],
+  "location": "arXiv:2310.02047v1 abstract and sec. 3.2.3, p. 6",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, wide-bandgap sensors (CHK-AU-10-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2303",
+  "claim": "RPC rate capability is limited by the voltage drop on the resistive electrodes: Delta V / phi = rho d <Q>; streamer operation limits the rate, avalanche operation at lower gas gain with more sensitive front ends extends it.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.6.6.3, pp. 52-53",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, RPC scaling (CHK-AU-10-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2304",
+  "claim": "RPC rate capability is 1/(rho t <Q>) and can be increased by decreasing each of the three parameters; lowering the resistivity alone raises the operating current and pollutants.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2304"
+  ],
+  "location": "arXiv:1606.03448v1 sec. 1, pp. 2-3",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, RPC scaling (CHK-AU-10-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2305",
+  "claim": "Cosmic-ray data recorded before collisions were used to align and calibrate the subdetectors of a collider tracker.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2305"
+  ],
+  "location": "arXiv:1403.2286v2 sec. 1, p. 4",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, silicon data samples (CHK-AU-10-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2306",
+  "claim": "Flight-model silicon ladders of a space spectrometer are characterized in a test beam, including the dependence on incidence angle, since cosmic rays arrive from all directions.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2306"
+  ],
+  "location": "arXiv:2603.25085v1 abstract, p. 1, and sec. 4.3, p. 4",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, silicon data samples (CHK-AU-10-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2307",
+  "claim": "In a TPC the start of the drift-time measurement is usually derived from an external detector, e.g. a fast interaction trigger detector.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.6.4, p. 41",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, TPC crossing-time ambiguity (CHK-AU-10-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2308",
+  "claim": "In rare-event TPCs the position along the drift field is inferred from the time difference between the prompt S1 and the S2 light signals.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2301"
+  ],
+  "location": "RPP 2025 sec. 36.4, p. 31, Fig. 36.10",
+  "scope": {
+   "text": "gaseous-and-specialized-tracking-technologies.md, TPC crossing-time ambiguity (CHK-AU-10-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2309",
+  "claim": "Calorimeters contribute to the rejection of pile-up from multiple interactions within the same bunch crossings at colliders.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.1, p. 90",
+  "scope": {
+   "text": "front-end-waveform-processing.md and event-reconstruction.md, collider pileup (CHK-AU-12-01 to -03, CHK-AU-13-05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2310",
+  "claim": "Pulse-shape fitting shifts the template along the pulse and finds the best alignment, and subtracts each fitted pulse from the signal before the next, which accounts for pileup.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2307"
+  ],
+  "location": "arXiv:1601.04512v1 secs. 4.1 and 4.3, pp. 8-10",
+  "scope": {
+   "text": "front-end-waveform-processing.md, out-of-time pileup (CHK-AU-12-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2311",
+  "claim": "At neutron time-of-flight facilities the most common baseline distortion is a strong pulse induced by the gamma flash released each time the proton beam hits the spallation target.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2307"
+  ],
+  "location": "arXiv:1601.04512v1 sec. 3.4, p. 7",
+  "scope": {
+   "text": "front-end-waveform-processing.md, baseline gain and rate step (CHK-AU-12-02, -03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2312",
+  "claim": "LAr TPC reconstruction generally proceeds through signal processing, pattern recognition, and calorimetry and particle identification.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.7.6, p. 61",
+  "scope": {
+   "text": "event-reconstruction.md, the chain (CHK-AU-13-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2313",
+  "claim": "The simplest image reconstruction of imaging atmospheric Cherenkov telescopes parametrizes images by an ellipse (Hillas parameters) and reconstructs the direction from the intersection of image ellipses; Cherenkov image exposure should not exceed a few ns to avoid pile-up of night-sky background.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2301"
+  ],
+  "location": "RPP 2025 sec. 36.2.2, p. 8",
+  "scope": {
+   "text": "event-reconstruction.md, the chain and pileup (CHK-AU-13-01, -05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2314",
+  "claim": "A space instrument measures its live time with on-board clocks as a function of the vertical cutoff and divides counts by live time, effective geometrical factor, selection efficiency and bin width.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2308"
+  ],
+  "location": "arXiv:1407.1657v1 secs. 3.5 and 3.7, pp. 16-17",
+  "scope": {
+   "text": "event-reconstruction.md, period weighting of channel masks (CHK-AU-13-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2315",
+  "claim": "Fluorescence-detector operation requires (nearly) moonless nights and clear atmospheric conditions, typically a duty cycle of about 10%.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2301"
+  ],
+  "location": "RPP 2025 sec. 36.2.1, p. 4",
+  "scope": {
+   "text": "event-reconstruction.md, period weighting of channel masks (CHK-AU-13-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2316",
+  "claim": "A space instrument's time of flight measures beta and distinguishes upward- from downward-going particles; it rejects albedo particles.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2309",
+   "scifix:S2308"
+  ],
+  "location": "arXiv:hep-ex/0305074v1 sec. 2, p. 3; arXiv:1407.1657v1 sec. 2, p. 6",
+  "scope": {
+   "text": "event-reconstruction.md, timing association (CHK-AU-13-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2317",
+  "claim": "Most large LAr TPCs detect primary scintillation light, which provides timing information for 3D reconstruction.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.7.4, pp. 59-60",
+  "scope": {
+   "text": "event-reconstruction.md, timing association start time (CHK-AU-13-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2318",
+  "claim": "Low-temperature calorimeters need a low rate per device to avoid pileup, hence very many small devices.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2301"
+  ],
+  "location": "RPP 2025 sec. 36.5.3, p. 46",
+  "scope": {
+   "text": "event-reconstruction.md, reconstruction under pileup (CHK-AU-13-05)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2319",
+  "claim": "In liquid argon W_el = 23.6 eV per electron-ion pair; the fraction R escaping recombination is about 0.70 for m.i.p.s at 500 V/cm, about 30,000 electrons/MeV.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.7.3, p. 57",
+  "scope": {
+   "text": "signal-formation-and-readout.md, charge yield (CHK-AU-14-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2320",
+  "claim": "The recombination-independent W-value per detectable quantum (photon or electron) is (19.5 +- 1.0) eV in liquid argon.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2301"
+  ],
+  "location": "RPP 2025 sec. 36.4, p. 32",
+  "scope": {
+   "text": "signal-formation-and-readout.md, charge yield (CHK-AU-14-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2321",
+  "claim": "xi = (K/2)<Z/A> z^2 (x/beta^2) carries z^2 and W_max (eq. 34.4) does not depend on z; 'moderate thickness' means G (Vavilov's kappa) <~ 0.05-0.1, the case for most detectors; for very thick absorbers the distribution is less skewed but never approaches a Gaussian.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2302"
+  ],
+  "location": "RPP 2025 sec. 34.2.2 eq. (34.4), p. 3; sec. 34.2.9 footnote 3, p. 11, eq. (34.12), p. 12, and p. 14",
+  "scope": {
+   "text": "signal-formation-and-readout.md, fluctuation regimes (CHK-AU-14-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2322",
+  "claim": "Thin scintillator counters of a space instrument measure ion charge, with the counter response fitted in powers of Z^2.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2309"
+  ],
+  "location": "arXiv:hep-ex/0305074v1 sec. 3, Fig. 4, p. 4",
+  "scope": {
+   "text": "signal-formation-and-readout.md, nuclei in thin layers (CHK-AU-14-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2323",
+  "claim": "Laser light injected into each crystal through optical fibres has a spectrum and path to the photodetector different from scintillation light; the response change is converted by a power law S/S0 = (R/R0)^alpha, with alpha = 1 for the same path length and for photodetector response losses.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2310"
+  ],
+  "location": "arXiv:1306.2016v2 sec. 4.1, pp. 10-13",
+  "scope": {
+   "text": "simulation-calibration/ecal.md, monitoring references (CHK-AU-15-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2324",
+  "claim": "Radiation-induced absorption reduces the light attenuation length in a crystal, and hence its light output.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.4, p. 18",
+  "scope": {
+   "text": "simulation-calibration/ecal.md, monitoring references (CHK-AU-15-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2325",
+  "claim": "The mean hadronic fraction follows f_h = (E/E0)^(m-1), so pi/e = 1 - (1 - h/e)(E/E0)^(m-1); the form is not dependable below 5-10 GeV, and fits give only m and a = (1 - h/e)E0^(1-m).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2311"
+  ],
+  "location": "arXiv:physics/0605164v4 eq. 1, p. 2; eq. 7 and the text after it, p. 10",
+  "scope": {
+   "text": "simulation-calibration/hcal.md, response ratio versus energy (CHK-AU-16-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2326",
+  "claim": "Non-compensation is often expressed by the <h/e> ratio, a calorimeter-dependent quantity smaller than unity.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.3, p. 100",
+  "scope": {
+   "text": "simulation-calibration/hcal.md, response ratio versus energy (CHK-AU-16-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2327",
+  "claim": "Incident protons have a larger mean hadronic fraction than charged pions (leading-particle effect).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.3, p. 99",
+  "scope": {
+   "text": "simulation-calibration/hcal.md, reference catalog (CHK-AU-16-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2328",
+  "claim": "h/e is the same for pions and protons but their mean hadronic fractions differ, so their responses differ when h/e != 1.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2311"
+  ],
+  "location": "arXiv:physics/0605164v4 sec. 4, pp. 13-14",
+  "scope": {
+   "text": "simulation-calibration/hcal.md, reference catalog (CHK-AU-16-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2329",
+  "claim": "A space calorimeter's electron/proton discrimination was validated with 400 GeV beam-test protons on its engineering qualification model.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2312"
+  ],
+  "location": "arXiv:1711.10981v1 Methods, p. 11",
+  "scope": {
+   "text": "simulation-calibration/hcal.md, reference catalog example (CHK-AU-16-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2401",
+  "claim": "Cosmic-ray tracks recorded with the magnetic field off are straight and carry no momentum measurement, and the cosmic-ray spectrum falls steeply as a power law; such tracks serve alignment with a momentum selection only when the field is on.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2401",
+   "scifix:S2402"
+  ],
+  "location": "scifix:S2401 sec. 5, pp. 17-18; scifix:S2402 sec. 30.1, p. 1",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tracker.md (CHK-AU-17-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2402",
+  "claim": "Some space spectrometers place their silicon tracking layers in the bore of a permanent magnet; cosmic rays arrive from all directions; a Lorentz-drift miscalibration is compensated by the alignment corrections.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2401",
+   "scifix:S2403",
+   "scifix:S2404"
+  ],
+  "location": "scifix:S2404 sec. 2, pp. 5-6; scifix:S2403 sec. 1, p. 1; sec. 4.3, p. 4; scifix:S2401 sec. 5, p. 16",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tracker.md (CHK-AU-17-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2403",
+  "claim": "In a drift detector the start of the drift-time measurement usually comes from an external detector such as a fast interaction trigger; time offset, drift velocity and gain are calibrated per chamber.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2405"
+  ],
+  "location": "scifix:S03 sec. 35.6.4, p. 41; sec. 35.6.2.2, p. 31; scifix:S2405 sec. 10.3, p. 44",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tracker.md (CHK-AU-17-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2404",
+  "claim": "Semiconductor detectors usually operate without intrinsic amplification, and their signal fluctuations are usually dominated by electronic noise; LGADs have an implanted gain layer with gain 10-50.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2403"
+  ],
+  "location": "scifix:S03 sec. 35.8, p. 63; sec. 35.8.1.1, p. 65; sec. 35.8.4, pp. 72-73; scifix:S2403 sec. 2, p. 2",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tracker.md (CHK-AU-17-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2405",
+  "claim": "At high energy the energy loss of muons is not a uniform continuous process: radiative losses with large fluctuations alter the momentum after an absorber.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2406",
+   "scifix:S2407",
+   "scifix:S2408"
+  ],
+  "location": "scifix:S2406 sec. 34.6, pp. 29-31; scifix:S2407 sec. 3, PDF p. 9; scifix:S2408 sec. 8.1, eq. (6), PDF p. 19",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/muon-detector.md (CHK-AU-18-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2406",
+  "claim": "Collider muon efficiencies are measured by tag and probe on muons from J/psi and Z decays.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2407",
+   "scifix:S2408"
+  ],
+  "location": "scifix:S2407 sec. 5.1.1, PDF p. 20; scifix:S2408 sec. 6.1, PDF p. 8",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/muon-detector.md (CHK-AU-18-06)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2407",
+  "claim": "Underground neutron backgrounds come from natural fission, (alpha,n) reactions and cosmic-ray muon interactions; collider muon chambers face heavy irradiation environments.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2409",
+   "scifix:S2410"
+  ],
+  "location": "scifix:S2410 sec. 36.6.1, p. 49; scifix:S2409 abstract, p. 1",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/muon-detector.md (CHK-AU-18-07)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2408",
+  "claim": "theta_C is independent of the photon azimuth phi for an aligned RICH and sinusoidal in phi for a misaligned one, Delta theta_C = theta_x cos(phi) + theta_y sin(phi).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2411"
+  ],
+  "location": "scifix:S2411 sec. 3.3, PDF pp. 10-11; scifix:S03 sec. 35.5, p. 21, eq. (35.12)",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/rich.md (CHK-AU-19-03)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2409",
+  "claim": "The Cherenkov-angle resolution per track is the average single-photoelectron resolution divided by sqrt(N_pe), combined with a term C of correlated contributions (tracking, alignment, background, hits of other tracks).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2411"
+  ],
+  "location": "scifix:S03 sec. 35.5, p. 21, eq. (35.12); scifix:S2411 sec. 4.2, PDF p. 14; sec. 4.3, PDF p. 15",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/rich.md (CHK-AU-19-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2410",
+  "claim": "DIRC photodetectors have been conventional PMT arrays, multi-anode PMTs and MCP-PMTs.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2412",
+   "scifix:S2413"
+  ],
+  "location": "scifix:S03 sec. 35.5, p. 23; scifix:S2412 p. 3; scifix:S2413 sec. 2, p. 3",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/dirc.md (CHK-AU-20-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2411",
+  "claim": "In a DIRC the photons are transported to one or both bar ends depending on the particle incident angle, and the photon count varies with it; a DIRC with bars perpendicular to the beamline has been used in an endcap.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2412",
+   "scifix:S2413"
+  ],
+  "location": "scifix:S2412 p. 3; scifix:S03 sec. 35.5, p. 23; scifix:S2413 sec. 3, p. 6",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/dirc.md (CHK-AU-20-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2412",
+  "claim": "The time-of-flight resolution between each pair of counters measures the quadrature sum of the two counters' resolutions; three pairs determine the three resolutions.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S1201",
+   "scifix:S2414"
+  ],
+  "location": "scifix:S2414 sec. 3, pp. 3-4; scifix:S1201 sec. 40.2.3, eq. (40.22), p. 8",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tof.md (CHK-AU-21-04)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2413",
+  "claim": "The position along a bar read at both ends is calculated from the time difference of the two signals; in a linear model the slope is the fitted parameter.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S1201",
+   "scifix:S2415"
+  ],
+  "location": "scifix:S2415 sec. 6.1, feature 'Position X,Y,Z'; scifix:S1201 sec. 40.2.3, eqs. (40.22)-(40.23), p. 8",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tof.md (CHK-AU-21-06)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2414",
+  "claim": "The total attenuation length of an optical medium is caused by scattering and absorption; in liquid scintillator Rayleigh scattering contributes significantly to the attenuation length, which is much shorter than the absorption length.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2410",
+   "scifix:S2416"
+  ],
+  "location": "scifix:S2416 sec. 3.2.1, eq. (13), p. 31; scifix:S2410 sec. 36.3.1, p. 13",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tof.md (CHK-AU-21-07)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2415",
+  "claim": "Neutron time-of-flight energy comes from the flight path and the time of flight; the flight path is taken from the detector's own hit position or determined as an effective flight path by an iterative process.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2415",
+   "scifix:S2417"
+  ],
+  "location": "scifix:S2415 sec. 6.1, features 'Position X,Y,Z' and 'Energy from Time-of-Flight'; scifix:S2417 sec. 4.1, eqs. (6)-(7)",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/tof.md (CHK-AU-21-09)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2416",
+  "claim": "Transition radiation is produced when a particle with Lorentz factor gamma >~ 10^3 crosses an interface, and its intensity is proportional to gamma.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2406"
+  ],
+  "location": "scifix:S03 sec. 35.6.5, pp. 45-46; scifix:S2406 sec. 34.7.3, eq. (34.45), p. 35",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/trd.md (CHK-AU-22-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2417",
+  "claim": "TRD electron identification is quoted as the pion efficiency at a fixed electron efficiency.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2405"
+  ],
+  "location": "scifix:S03 sec. 35.6.5, p. 47; scifix:S2405 sec. 11.2, p. 50",
+  "scope": {
+   "text": "skills/hep-detector/references/simulation-calibration/trd.md (CHK-AU-22-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2501",
+  "claim": "For very thick absorbers the energy-loss distribution is less skewed but never approaches a Gaussian.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2501",
+   "scifix:S2502"
+  ],
+  "location": "RPP 2025 sec. 34.2.9, p. 14; RPP 2010 sec. 27.2.7, p. 12",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-01, documentation fix F-S3-5-CHK-AU-23-01)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2502",
+  "claim": "The radius of curvature of a helix in a uniform field and the momentum component perpendicular to B are related by p cos(lambda) = 0.3 z B R (B in T, R in m, p in GeV/c).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.12, eq. (35.66), p. 112",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-02, documentation fix F-S3-5-CHK-AU-23-02)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2503",
+  "claim": "Rigidity R = pc/(Ze) is the natural variable for a spectrometric cosmic-ray measurement.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2503",
+   "scifix:S2505"
+  ],
+  "location": "RPP 2025 sec. 30.1, p. 1; arXiv:1407.1657 p. 6",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-02, documentation fix F-S3-5-CHK-AU-23-02)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2504",
+  "claim": "The validity limits of the Bethe equation are Z dependent; for heavy projectiles such as ions, additional terms for higher-order photon coupling to the target and the finite target radius can change dE/dx by a factor of two or more for the heaviest nuclei in certain kinematic regimes.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2501"
+  ],
+  "location": "RPP 2025 sec. 34.2.3, pp. 4-5",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-03, documentation fix F-S3-5-CHK-AU-23-03)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2505",
+  "claim": "Higher-order corrections to the Bethe equation are included by adding the Bloch correction z^2 L2(beta) and the Barkas correction z L1(beta) inside the bracket.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2502"
+  ],
+  "location": "RPP 2010 sec. 27.2.3, p. 9",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-03, documentation fix F-S3-5-CHK-AU-23-03)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2506",
+  "claim": "For a flux measurement the acceptance is a geometric factor (area times solid angle, e.g. cm^2 sr) including selection criteria, or an aperture (km^2 sr) for fluorescence telescopes.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2505",
+   "scifix:S2506",
+   "scifix:S2504"
+  ],
+  "location": "arXiv:1407.1657 pp. 6-7, Fig. 4 p. 15; arXiv:1712.01711 p. 5; RPP 2025 sec. 36.2.1, p. 4",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-04, documentation fix F-S3-5-CHK-AU-23-04)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2507",
+  "claim": "The Highland theta_0 is from a fit to the Moliere distribution for singly charged particles with beta = 1 for all Z, and is accurate to 11% or better for 1e-3 < x/X0 < 100.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2502"
+  ],
+  "location": "RPP 2010 sec. 27.3, eq. (27.14), p. 16",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-05, documentation fix F-S3-5-CHK-AU-23-05)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2508",
+  "claim": "RPP 2025 states no numerical accuracy for the Highland formula: it takes the p and z dependence into account well at small Z, but for large Z and small x the beta dependence is not well represented.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2501"
+  ],
+  "location": "RPP 2025 sec. 34.3, eq. (34.16), p. 16",
+  "scope": {
+   "text": "skills/hep-detector/references/core-detector-equations.md (CHK-AU-23-05, documentation fix F-S3-5-CHK-AU-23-05)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2509",
+  "claim": "A twist deformation of a tracker biases the track curvature kappa ~ q pT (a charge-antisymmetric bias).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2507"
+  ],
+  "location": "arXiv:1403.2286 sec. 4.4, eq. (8)",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-principles-summary.md (CHK-AU-24-05, documentation fix F-S3-5-CHK-AU-24-05)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2510",
+  "claim": "In a space spectrometer a residual coherent misalignment produces a systematic shift in the measured rigidity.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2505"
+  ],
+  "location": "arXiv:1407.1657 Appendix A, pp. 25-26",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-principles-summary.md (CHK-AU-24-05, documentation fix F-S3-5-CHK-AU-24-05)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2511",
+  "claim": "Pseudorapidity is defined as eta = -ln tan(theta/2), with theta the angle relative to the beam axis.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.3, p. 101",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-principles-summary.md (CHK-AU-24-06, documentation fix F-S3-5-CHK-AU-24-06)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2512",
+  "claim": "At zenith angles of 60 degrees and beyond, the distance to the shower maximum is increased by factors of a few.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2504"
+  ],
+  "location": "RPP 2025 sec. 36.2.2, p. 9",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-principles-summary.md (CHK-AU-24-06, documentation fix F-S3-5-CHK-AU-24-06)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2513",
+  "claim": "In non-compensating hadronic calorimeters, fluctuations of the EM fraction from shower to shower, together with the energy dependence of its average, can lead to a significant constant term.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.10.1.1, p. 92",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-principles-summary.md (CHK-AU-24-07, documentation fix F-S3-5-CHK-AU-24-07)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2514",
+  "claim": "The pi/e and p/e response ratios follow the power law 1 - (1 - h/e)(E/E0)^(m-1) with different scale energies for protons and pions.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2508"
+  ],
+  "location": "arXiv:physics/0605164 abstract p. 1; Fig. 7, p. 14",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-principles-summary.md (CHK-AU-24-07, documentation fix F-S3-5-CHK-AU-24-07)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2515",
+  "claim": "In silicon timing detectors with gain, the time-walk term comes from Landau fluctuations.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.8.4, eq. (35.25), p. 73",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-01, documentation fix F-S3-5-CHK-AU-25-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2516",
+  "claim": "MCP-PMT lifetime is limited by the extracted charge (ALD coatings raise it above 20 C/cm^2), and the transit time spread is a resolution term.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03",
+   "scifix:S2509"
+  ],
+  "location": "RPP 2025 sec. 35.2.1.2, pp. 5-6; arXiv:2311.16676 sec. 1, p. 1",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-01, documentation fix F-S3-5-CHK-AU-25-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2517",
+  "claim": "A space TOF system provides the trigger and distinguishes between upward and downward going particles.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2510"
+  ],
+  "location": "arXiv:hep-ex/0305074 sec. 2, p. 3",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-03, documentation fix F-S3-5-CHK-AU-25-03)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2518",
+  "claim": "At a pulsed spallation neutron source the time reference is the gamma-flash from the spallation process.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2511"
+  ],
+  "location": "arXiv:2505.00042 sec. 4.1, eq. (6)",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-03, documentation fix F-S3-5-CHK-AU-25-03)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2519",
+  "claim": "A collider ECAL sets its absolute energy scale from Z -> e+e- decays.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2512"
+  ],
+  "location": "arXiv:1306.2016 abstract, p. 1",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-04, documentation fix F-S3-5-CHK-AU-25-04)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2520",
+  "claim": "Space calorimeters calibrate each component with the MIP peak of non-interacting cosmic-ray protons or helium recorded with a dedicated trigger.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2506",
+   "scifix:S2513"
+  ],
+  "location": "arXiv:1712.01711 p. 3; arXiv:1703.02821 sec. II, p. 2",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-04, documentation fix F-S3-5-CHK-AU-25-04)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2521",
+  "claim": "Electron test beams and, for hadron calorimeters, muon MIP cell calibration and charged-pion beams validate calorimeters at a fixed-target beam line.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2513",
+   "scifix:S2514"
+  ],
+  "location": "arXiv:1703.02821 sec. IV, p. 6; arXiv:1207.4210 sec. 2.2, printed p. 3",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-04, documentation fix F-S3-5-CHK-AU-25-04)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2522",
+  "claim": "In space experiments an energy scale calibrated with MIPs is checked against the geomagnetic cut-off energy.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2506"
+  ],
+  "location": "arXiv:1712.01711 'Absolute energy scale calibration', p. 4",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-05, documentation fix F-S3-5-CHK-AU-25-05)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2523",
+  "claim": "Electron test beams over a range of energies give the energy resolution and bias of an electromagnetic calorimeter versus incident energy; charged-pion test beams give the hadronic response versus energy.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2513",
+   "scifix:S2514"
+  ],
+  "location": "arXiv:1703.02821 sec. IV, p. 6; arXiv:1207.4210 p. 2",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-05, documentation fix F-S3-5-CHK-AU-25-05)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2524",
+  "claim": "Collider muon performance is measured with muons from J/psi and Z decays, and muon-system methods are developed and studied with cosmic rays.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2515"
+  ],
+  "location": "arXiv:1206.4071 sec. 5.1.1, PDF p. 20; sec. 3, PDF p. 9",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-06, documentation fix F-S3-5-CHK-AU-25-06)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2525",
+  "claim": "Air-shower arrays use ground or underground muon detectors.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2503"
+  ],
+  "location": "RPP 2025 sec. 30.2.2, p. 12",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-06, documentation fix F-S3-5-CHK-AU-25-06)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2526",
+  "claim": "In a liquid-argon TPC the hit width and charge depend on the track angle with respect to the electric field.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2516"
+  ],
+  "location": "arXiv:1912.08739 sec. 13, printed p. 23",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-07, documentation fix F-S3-5-CHK-AU-25-07)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
+ },
+ {
+  "id": "scifix:C2527",
+  "claim": "In a gas TPC the spatial resolution depends strongly on the track angle to the pad boundaries.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S2517"
+  ],
+  "location": "arXiv:1012.0865 sec. 7.2, Fig. 26, PDF pp. 31-32",
+  "scope": {
+   "text": "skills/hep-detector/references/detector-comparison-tables.md (CHK-AU-25-07, documentation fix F-S3-5-CHK-AU-25-07)"
+  },
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-18"
  }
 ]

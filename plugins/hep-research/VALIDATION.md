@@ -10100,3 +10100,30 @@ fix `575f2a82`). Oracle: PDG RPP 2025 eq. (35.69), p. 112, transcribed in the te
 | `test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs` | analytic (locator: RPP 2025 eq. 35.69, transcribed) | fail (assertion) | pass | no | E6 |
 | `test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error` | exhaustive (all 24 orders) | fail (assertion) | pass | no | E6 |
 | `test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_negative_control_the_pre_fix_pairing_is_a_different_layout` | negative control (pre-fix pairing emulated) | pass | pass | no | E6 |
+
+## DC-F-S3-1 (2026-11-18, detector content Stage B, fix unit F-S3-1)
+
+Twenty-two S3 fixes (25 issues; three pairs of duplicate issues share one commit) in `calorimetry-ecal-hcal.md`,
+`nuclear-interactions-in-detector-material.md`, `particle-identification.md`, and the docstrings or warnings of
+`cherenkov_angle.py`, `calorimeter_resolution.py` and `multiple_scattering.py`, plus two `docs:` alignments of
+`particle-identification.md` with `multisample_pid.py`. CHK-AT-03-01 has a follow-up `sci-fix:` commit (`30619493`)
+that keeps the docstring to what PDG sec. 35.12 states. Each fix is one `sci-fix:` commit with its located source and
+second source (ledger `documentation_fixes` F-S3-1-*, sources scifix:S2101 to S2111, claims scifix:C2101 to C2122). No
+number changes. The two tool changes add warnings or refuse an all-zero input and carry regression tests; the outcome
+columns are filled by the lead from the reruns at the parent and fix commits.
+
+**F-S3-1-CHK-AT-01-04** (S3; fix `3cddb1d7`): `cherenkov_angle.py` warns when `relative_mass_resolution` exceeds 0.1.
+
+| Test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_s3_1_cherenkov_mass_warning.py::MassResolutionWarning::test_above_threshold_is_warned` | published (locator) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s3_1_cherenkov_mass_warning.py::MassResolutionWarning::test_negative_control_below_threshold` | behavioral (negative control) | pass | pass | no | E6 |
+
+**F-S3-1-CHK-AT-04-04** (S3; fix `ae87e95b`): `calorimeter_resolution.py --evaluate` refuses all-zero terms (exit 2) and
+warns on a zero noise or constant term; three-term outputs are unchanged.
+
+| Test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py::ZeroTerms::test_all_terms_zero_is_refused` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py::ZeroTerms::test_zero_constant_and_noise_are_warned` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py::ZeroTerms::test_negative_control_three_terms_have_no_warnings_key` | behavioral (negative control) | pass | pass | no | E6 |

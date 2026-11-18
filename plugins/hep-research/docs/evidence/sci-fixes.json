@@ -8308,6 +8308,2204 @@
    ],
    "gaps": [],
    "note": "yes; Hyland 1995 read in the full text (ERIC scan, pp. 33-40) and Bongelli et al. 2019 read in the full text (PLoS ONE HTML, the quoted phrase checked) on 2026-10-29; both state that hedges convey real uncertainty and that claims should be neither overstated nor over-hedged, which the section already said and the old Done when contradicted; regression test tests/skills/hep_authoring/test_handoff_text.py::HedgingDoneWhen fails on the parent e7c6568a045a3967218efe9c0ba776639451ca39 and passes on the fix"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-01-04",
+   "title": "cherenkov_angle.py warns when its first-order relative mass resolution gamma^2 dbeta/beta exceeds 0.1, where the beta error is not small against 1 - beta and the mass is not Gaussian (it printed 2.08 for pions at 10 GeV/c in n = 1.05 without a warning) (CHK-AT-01-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 39. Probability (scifix:S2102)",
+     "locator": "sec. 39.2.1, eqs. 39.18-39.19, p. 4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.5, eqs. 35.8, 35.11, 35.12, pp. 19 and 21",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 3cddb1d794dd5448839a15b9662158cc8f14df9a (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; regression test tests/skills/hep_detector/test_f_s3_1_cherenkov_mass_warning.py (the warned species decided from the closed forms of eqs. 35.8, 35.11, 35.12, not from the tool; negative control at 2 GeV/c) fails on the parent and passes on the fix (author run 2026-11-18, the lead reruns); no number changes; no committed example output uses this tool"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-04-04",
+   "title": "calorimeter_resolution.py --evaluate refuses all three terms zero (exit 2) and warns on a zero noise or constant term; it had returned resolution 0, or a stochastic-only resolution without a high-energy floor, silently (CHK-AT-04-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1.1, pp. 92-93 (constant term limits the high-energy resolution; noise sigma_N = B not energy-dependent)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 8 (2013) P09009, arXiv:1306.2016v2 (scifix:S2105)",
+     "locator": "sec. 2, eq. 1, p. 6 (the constant term dominates for high-energy showers)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit ae87e95b78f9128f462b5d1fc8134e3936bb902f (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; regression test tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py fails on the parent and passes on the fix (author run 2026-11-18, the lead reruns); the warnings key appears only with a zero term, so the committed --evaluate outputs of design-collider-tracker and design-search-j16 (CALC-ECAL-A, -B, -P, three nonzero terms) are unchanged: tests.examples.test_design_collider_tracker and tests.examples.test_design_search_j16 pass at the fix"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-03-01",
+   "title": "multiple_scattering.py docstring: the PDG 0.016 GeV/c scattering coefficient, given for a large number of uniformly spaced measurements, is 2/sqrt(3) times the Highland leading term the tool uses (8 s_rms_plane/L^2 with s_rms_plane = x theta0/(4 sqrt 3)); the coefficient depends on the number and placement of the measurements and on the fit, so 0.0136 gives a scattering term about 15% smaller than PDG's and a crossover rigidity placed correspondingly low; not \"a convention difference\" (CHK-AT-03-01)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.12, eqs. 35.67 and 35.70, pp. 112-113",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2101)",
+     "locator": "sec. 34.3, eq. 34.21, p. 17",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commits cd77bdbc0506bbf83f9b3dbb018af8314b6a5719 and follow-up 3061949388c6b0e9516dc379c8612caf209d18e0 (session 2: the unsourced 'many-point, optimal-fit end' and 'unweighted fit can lose more' wording replaced by what PDG sec. 35.12 states) (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; docstring only; the coefficient and every output are unchanged (changing it would change the E2-recorded outputs of design-minimal-spectrometer and design-search-j16, so it was not done)"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-04-01-CHK-AU-01-01",
+   "title": "Calorimetry: the stochastic term dominates between the crossovers (b/a)^2 and (a/c)^2, not \"at low energy\", where the noise term dominates (CHK-AT-04-01, CHK-AU-01-01)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1.1, eq. 35.50, p. 92; sec. 35.10.2, p. 97",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 8 (2013) P09009, arXiv:1306.2016v2 (scifix:S2105)",
+     "locator": "sec. 2, eq. 1, p. 6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Adloff et al. (CALICE), JINST 7 (2012) P09017, arXiv:1207.4210v2 (scifix:S2106)",
+     "locator": "sec. 2, eq. 2.2, PDF pp. 10-11",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit e0c7eaf0a4e2032b7063f25fb2ac10387e4e7f2a (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; merges the duplicate issues CHK-AT-04-01 and CHK-AU-01-01 (one commit); agrees with the page's misconceptions line and calorimeter_resolution.py dominant_term and crossovers"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-04-05-CHK-AU-01-02",
+   "title": "Calorimetry: the letters of the resolution terms are not standard (PDG uses both orders); map published terms to --noise and --constant by their energy dependence (CHK-AT-04-05, CHK-AU-01-02)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1.1, eq. 35.50, p. 92; sec. 35.10.2, p. 97",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Adloff et al. (CALICE), JINST 7 (2012) P09017, arXiv:1207.4210v2 (scifix:S2106)",
+     "locator": "sec. 2, eq. 2.2, PDF p. 10",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit aa5f3c0f7b66deb502ede684f03262ec5d951945 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; merges the duplicate issues CHK-AT-04-05 and CHK-AU-01-02 (one commit)"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-04-06",
+   "title": "Calorimetry: the script fits the quadrature form only; coefficients of a linear stochastic-plus-constant sum are not comparable (CHK-AT-04-06)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1.1, p. 92",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D. E. Groom, Nucl. Instrum. Methods A 572 (2007) 633, arXiv:physics/0605164v4 (scifix:S2107)",
+     "locator": "Appendix A (Resolution), PDF p. 38",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 0d214a2a6e44ddc3e3a7e125e1e67ea08a7029b9 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-01-03",
+   "title": "Calorimetry: granularity finer than the Moliere radius does not improve electromagnetic energy resolution, but for hadronic showers it enables software compensation, which does (CHK-AU-01-03)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1.3, p. 94; sec. 35.10.2, p. 97",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Adloff et al. (CALICE), JINST 7 (2012) P09017, arXiv:1207.4210v2 (scifix:S2106)",
+     "locator": "abstract, PDF p. 3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit bfc4d1709191b9671cf1996100e2a2933b5a3260 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; no experiment named in the page"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-01-04",
+   "title": "Calorimetry: the X0 ~= 716.4 A/(Z(Z+1) ln(287/sqrt Z)) fit is Dahl's (printed in RPP 2010, not in the 2025 review), and the E_c fits and R_M use Rossi's critical-energy definition (CHK-AU-01-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (K. Nakamura et al.), Review of Particle Physics 2010, 27. Passage of Particles Through Matter, J. Phys. G 37 (2010) 075021 (scifix:S2104)",
+     "locator": "sec. 27.4.1, eq. 27.24, PDF p. 18",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2101)",
+     "locator": "sec. 34.4.2, eq. 34.25, p. 18; sec. 34.4.4, p. 20; Fig. 34.14 caption, p. 22; sec. 34.5, eq. 34.37, p. 28",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit bd08b740fda0af40a65426d9879548f890315db0 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; the formulas are unchanged; the absence of the Dahl form in the 2025 review is from a full-text search of the cached text (no \"287\"); extensive-air-showers.md keeps its equal-rates wording for the Heitler model (outside this unit)"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-01-05",
+   "title": "Calorimetry: <h/e> is smaller than unity for many, but not all, hadronic calorimeters; the citation is PDG sec. 35.10.3, not 35.10 (CHK-AU-01-05)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.3, p. 100",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Adloff et al. (CALICE), JINST 7 (2012) P09017, arXiv:1207.4210v2 (scifix:S2106)",
+     "locator": "sec. 3, PDF p. 12",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 59627cd65c7859802062ee3096a97f33926ff106 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-01-06",
+   "title": "Calorimetry: the 1/sqrt(E) resolution scaling is that of shower calorimeters; thermal (low-temperature) calorimeters are limited by heat capacity and temperature, independent of the deposit (CHK-AU-01-06)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2103)",
+     "locator": "sec. 36.5.1, p. 39",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1.1, p. 92",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 8402d5dcca4e01df39b424726f07140951d387a0 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; links noble-liquid-neutrino-and-rare-event-detectors.md (cryogenic bolometers), which owns that content"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-02-01",
+   "title": "Nuclear interactions: A in lambda = A/(N_A sigma) is the molar mass in g/mol, not the integer mass number (CHK-AU-02-01)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2101)",
+     "locator": "sec. 34.1, Table 34.1, p. 2",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2103)",
+     "locator": "Table 36.5, p. 32",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit f42dca840a6972ce54974b76b6b2d84a36b5969a (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; the same wording remains, outside this unit's files, in skills/hep-detector/scripts/survival_feeddown.py (docstring), skills/hep-detector/assets/survival-layers.example.json (note) and skills/hep-theory/references/nuclear-cross-sections.md"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-02-03",
+   "title": "Nuclear interactions: survival exp(-sum x/lambda) covers nuclear losses only; acceptance losses from scattering or energy loss and the charge-cut efficiency are separate factors, each counted once (CHK-AU-02-03)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), ApJ 791 (2014) 93, arXiv:1407.1657v1 (scifix:S2108)",
+     "locator": "sec. 3.4, pp. 14-15",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "H. S. Ahn et al. (CREAM), Astropart. Phys. 30 (2008) 133, arXiv:0808.1718v1 (scifix:S2109)",
+     "locator": "sec. 5, pp. 17-18",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit df28052be5a9d4b6239513861bab4767f4fdfd5a (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; both sources are SPC instruments, the losses named are general (any instrument with material in front of its charge selection)"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-02-04",
+   "title": "Nuclear interactions: material outside the instrument (balloon overburden, pressure vessel or dome) counts in survival and feed-down and cannot be tagged by the charge layers (CHK-AU-02-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "H. S. Ahn et al. (CREAM), Astropart. Phys. 30 (2008) 133, arXiv:0808.1718v1 (scifix:S2109)",
+     "locator": "sec. 2, p. 4; sec. 5, p. 18",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), ApJ 791 (2014) 93, arXiv:1407.1657v1 (scifix:S2108)",
+     "locator": "sec. 3.4, p. 14",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 40e199f06cef0d631fd98db79346f816a10759d5 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; links space-based-direct-detection.md (Instrument response functions), which owns the environment content"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-12",
+   "title": "PID: the TOF start-time source is a design parameter (bunch crossing or start detector, an event time from the tracks, or the first plane of a multi-plane system), not a collider/non-collider rule (CHK-AU-05-12)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., The AMS-02 Time of Flight System. Final Design, arXiv:hep-ex/0305074v1 (scifix:S2111)",
+     "locator": "sec. 2, pp. 1-3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/timing-detectors.md",
+     "locator": "reference/start time row (event-start time from tracks improves as 1/sqrt(N_tracks))",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "second source internal: no cached external source names an event time from the tracks; none is cited for FXT, UGD, GND or NUC start sources"
+   ],
+   "note": "yes; fix commit 838219e8eea8abd64641c9def2cddf81c6c3eecc (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; the page now defines the environment labels it uses (card R1)"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-07",
+   "title": "PID: the TOF time-walk correction is a function of the measured amplitude, which saturates (Birks), not of Z^2 (CHK-AU-05-07)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.3.1, eq. 35.2, p. 11",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., The AMS-02 Time of Flight System. Final Design, arXiv:hep-ex/0305074v1 (scifix:S2111)",
+     "locator": "sec. 3 and Fig. 4 (left), p. 4",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 92f7380223b633b890452f1a326366c271b675d7 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-10",
+   "title": "PID: the TOF up/down decision is stated for space-borne spectrometers (charge-sign separation, splash albedo), not as the primary rejection in all non-collider geometries (CHK-AU-05-10)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., The AMS-02 Time of Flight System. Final Design, arXiv:hep-ex/0305074v1 (scifix:S2111)",
+     "locator": "sec. 2 (end), p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/space-based-direct-detection.md",
+     "locator": "below-cutoff albedo paragraph (splash albedo moving upward)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "second source internal"
+   ],
+   "note": "yes; fix commit d93a9c593cf99bd4845ffc1f28712c5c1015f069 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-06",
+   "title": "PID: the usual dE/dx truncation keeps the 50-70% smallest samples (drops the top 30-50%), not the top 30-40% (CHK-AU-05-06)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2101)",
+     "locator": "sec. 34.2.3, p. 5",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.6.4, p. 42",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit d3f497de8371b60c712ddd11394a1b9fe6c4b8a5 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-04",
+   "title": "PID: TRD estimators include total energy, cluster count, likelihood and neural networks (most experiments use a likelihood; a neural network or more likelihood dimensions give more rejection) (CHK-AU-05-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.6.5, p. 47",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "ALICE Collaboration, Nucl. Instrum. Methods A 881 (2018) 88, arXiv:1709.02743v2 (scifix:S2110)",
+     "locator": "sec. 11.2, pp. 50-51",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 182a3e3abb3839ac3ce88b730c098e5ed948d9f6 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; the bullet and the Deliverables line; no experiment named in the page"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-01",
+   "title": "PID: only the per-photon part of the RICH angle resolution falls as 1/sqrt(N_pe); terms common to all photons do not average down (CHK-AU-05-01)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.5, eqs. 35.11-35.12, p. 21",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+     "locator": "per-track angle resolution (sigma_trk does not average down with N_pe)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "second source internal"
+   ],
+   "note": "yes; fix commit b44ac376137906c0e8e8a78879c8d5c5cab37158 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; agrees with cherenkov_angle.py track_angular_resolution"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-01-05-CHK-AU-05-02",
+   "title": "PID: with a fixed single-photon resolution the sin(theta_c) factors cancel in dbeta/beta, leaving n beta sigma_photon/sqrt(N_0 L), which grows by n beta from threshold to saturation; not an exact cancellation (CHK-AT-01-05, CHK-AU-05-02)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.5, eqs. 35.8, 35.11, 35.12, pp. 19 and 21",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2101)",
+     "locator": "sec. 34.7.1, eq. 34.43, p. 34",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 14ba042e42377f2032923077d6588f0ce96aca49 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; merges the duplicate issues CHK-AT-01-05 and CHK-AU-05-02 (one commit); cherenkov_angle.py already computes the exact form"
+  },
+  {
+   "id": "F-S3-1-CHK-AU-05-09",
+   "title": "PID: muon identification by survival needs an absorber; without one muons are identified by pattern (sharp Cherenkov ring, track against cascade, dE/dx versus residual range) (CHK-AU-05-09)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2103)",
+     "locator": "sec. 36.3.1.2, p. 15; sec. 36.3.2, p. 17",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+     "locator": "Identification (dE/dx versus residual range)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "second source internal: the liquid-argon dE/dx versus residual-range method rests on an internal page (noble-liquid-neutrino-and-rare-event-detectors.md) only; no cached external source is cited for it"
+   ],
+   "note": "yes; fix commit 7ae8073a611add720b828e2302ac1b8225d825f5 (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; links noble-liquid-neutrino-and-rare-event-detectors.md and neutrino-astronomy.md"
+  },
+  {
+   "id": "F-S3-1-CHK-AT-06-05",
+   "title": "PID: the charge response curve of multisample_pid.py gives the most probable (peak) per-layer signal, used as the Moyal location, not the mean signal (CHK-AT-06-05)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2101)",
+     "locator": "sec. 34.2.3, p. 5",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.6.4, p. 42",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; fix commit 1a329d6a7ce08cf8f3a48c15c81b8d8911104d8d (unit F-S3-1, Stage B of the hep-detector content task); sources read in the cached text on 2026-11-18; text only; the same statement belongs in the multisample_pid.py docstring, outside this unit's files"
+  },
+  {
+   "id": "F-S3-1-PID-MULTISAMPLE-DOC",
+   "title": "PID: Combining many samples says which events and toys multisample_pid.py leaves out and counts (out_of_range, at_z_range_edge, toys_requested and toys_used), after the F-S12-pid fixes CHK-AT-06-01 and CHK-AT-06-02; out_of_range counts events only for the truncated and weighted means (the likelihood scans Z, so its out_of_range stays 0)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/multisample_pid.py",
+     "locator": "module docstring (charge subcommand) and run_charge() (event loop: the likelihood branch never increments out_of_range)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commits 2fa4f69e60a617e43d893fc5960d09793ed5db7c and follow-up 080e2dd8fb9a4bbdc5793a5a5cacec279f7ca754 (session 2, docs:); lead note from F-S12-pid, confirmed against the merged script on 2026-11-18"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-03-01",
+   "title": "Vertex seeds come from the expected interaction region: a beam line where there is one, otherwise compatible track pairs; photosensor-timing vertex fits and LArTPC pattern recognition named (tracking-and-vertexing.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.1, p. 12; sec. 36.3.1.2, p. 14",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.7.6, p. 61",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-03-01 (Stage B unit F-S3-2); fix ac34a1d32f3ca0115b6e44b3c9ee1714a7d6ab01 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2201); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-04-01",
+   "title": "Muon-system weak modes: curl, sagitta and twist shift q/p charge-antisymmetrically; a radial expansion is a charge-symmetric scale error (muon-systems.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 9 (2014) P06009, arXiv:1403.2286v2",
+     "locator": "sec. 9.2, PDF p. 30; sec. 4.4, PDF p. 14",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.11.1, eq. (35.57), p. 108",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/calibration-and-alignment.md",
+     "locator": "Alignment and weak modes",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-04-01 (Stage B unit F-S3-2); fix a3c131394e98d3c376ff4624203f152e4f205e8d on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2202); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-04-02",
+   "title": "Muon charge misID per muon from the same-sign pair probability c_i(1-c_j)+(1-c_i)c_j, not the same-sign fraction (muon-systems.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "ATLAS Collaboration, JINST 14 (2019) P12006, arXiv:1908.00005v2",
+     "locator": "sec. 9.2, PDF p. 47",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Statistics",
+     "locator": "sec. 40.4.2.4, p. 30",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-04-02 (Stage B unit F-S3-2); fix 4aecf525ce6cf15f4e3378fff8ad7cfd4e4f61db on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2203); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-04-03",
+   "title": "Tag-and-probe deliverable: binomial (Clopper-Pearson) only for background-free probes; a background-subtracted sample needs the simultaneous pass/fail fit (muon-systems.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 7 (2012) P10002, arXiv:1206.4071v2",
+     "locator": "sec. 5.1.1, PDF p. 20",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Statistics",
+     "locator": "sec. 40.4.2.4, pp. 30-31",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/triggers-luminosity-pileup.md",
+     "locator": "Tag-and-probe efficiency measurement",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-04-03 (Stage B unit F-S3-2); fix 64a63cdad4f5a0e96ef60feeadb5641e1610627d on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2204); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-04-05",
+   "title": "Muon efficiency binning and reference sample are parameters; eta, phi, pT with a J/psi and Z tag-and-probe marked collider; non-collider muon counters a stated gap (muon-systems.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 7 (2012) P10002, arXiv:1206.4071v2",
+     "locator": "sec. 5.1.1, PDF p. 20",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.6.6.1, p. 51",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.1, p. 12",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-04-05 (Stage B unit F-S3-2); fix e2965cebb15040e2c8810f3831fef2e898d6d83a on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2205); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-04-06",
+   "title": "Cosmic-ray and beam-halo suppression marked collider; cosmic muons as background to veto, as the tag of cosmogenic backgrounds, or as a calibration source elsewhere (muon-systems.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.2, p. 16; sec. 36.6.5, pp. 54-55",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 7 (2012) P10002, arXiv:1206.4071v2",
+     "locator": "sec. 7, PDF p. 39",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/ground-based-detection-arrays.md",
+     "locator": "Surface-array event reconstruction",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-04-06 (Stage B unit F-S3-2); fix ef9c6cbdf5c36d5f37c8960813a7e27645963d86 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2206); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-04-07",
+   "title": "Muon-system closure, conventions and data samples: Z and J/psi items marked collider; cosmic split tracks transfer; the closure sample is a parameter for other muon detectors (muon-systems.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 7 (2012) P10002, arXiv:1206.4071v2",
+     "locator": "sec. 6.2.1, PDF p. 36",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.2.2, p. 9; sec. 36.3.1, p. 12",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-04-07 (Stage B unit F-S3-2); fix b745f17cd86daac2a181e3b304f2ad9b00ecac01 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2207); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-06-01",
+   "title": "Cherenkov PID data samples per environment: the decay list labelled accelerator; water-Cherenkov muons, Michel electrons and pi0; muon rings for imaging air-Cherenkov cameras (cherenkov-imaging-variants-and-photosensors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.1.2, p. 14; sec. 36.2.2, p. 9",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "K. Abe et al., Nucl. Instrum. Methods A 737 (2014) 253, arXiv:1307.0162v2",
+     "locator": "sec. 1, p. 3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-06-01 (Stage B unit F-S3-2); fix 1a81910602de33daffd32401b9b826956101184a on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2208); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-06-03",
+   "title": "Threshold-counter rejection is set by light from below-threshold particles and reduced by photodetector excess noise, not by 1 - exp(-N_pe) alone (cherenkov-imaging-variants-and-photosensors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.5, p. 20",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Y. Asaoka et al., Nucl. Instrum. Methods A 416 (1998) 236, arXiv:hep-ex/9805001v1",
+     "locator": "p. 10",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-06-03 (Stage B unit F-S3-2); fix 054e49b302d40a95258821f5aaee8af466c91630 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2209); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-06-04",
+   "title": "Photon arrival time is an imaging dimension of every DIRC, emphasized in TOP detectors (cherenkov-imaging-variants-and-photosensors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.5, p. 23",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "J. Schwiening, arXiv:hep-ex/0010068v1",
+     "locator": "p. 3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-06-04 (Stage B unit F-S3-2); fix 8c9336e4f28e8854e7965967c4e34eeabf45a3bc on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2210); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-07-01",
+   "title": "Timing association: bunch assignment generalized to the time window of the start-time source; self-triggered instruments resolve the direction of travel (timing-detectors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., Proc. 28th ICRC (2003), arXiv:hep-ex/0305074v1",
+     "locator": "sec. 2, p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.2, Calibration, p. 20",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/particle-identification.md",
+     "locator": "Time of flight (TOF), direction of travel",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-07-01 (Stage B unit F-S3-2); fix de7e9d5675a0c1457045024a88c8565dd53f0aed and locator follow-up ab6c0dc4ded0beff99d30cdc6ca36058c4c649cb on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2211); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-07-02",
+   "title": "Timing budget: the start-time source is a parameter (collision time, gamma flash of a pulsed neutron source, a timing plane of the same instrument, a fitted event time) (timing-detectors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., Proc. 28th ICRC (2003), arXiv:hep-ex/0305074v1",
+     "locator": "secs. 2-3, pp. 1-4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.2, p. 16; sec. 36.3.3.3, p. 25",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "J. A. Pavon-Rodriguez et al., Eur. Phys. J. A 61 (2025) 277, arXiv:2505.00042v2",
+     "locator": "sec. 4.1",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-07-02 (Stage B unit F-S3-2); fix c38544e3cf0dfce8b2e66b487a20f0b27067e8e9 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2212); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-07-03",
+   "title": "Timing calibration: the reference clock is a parameter (accelerator clock, synchronisation signals with in-situ flashers, hybrid-array synchronisation, the instrument's own trigger) (timing-detectors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.3.2, Calibration, p. 20; sec. 36.2.1, p. 6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., Proc. 28th ICRC (2003), arXiv:hep-ex/0305074v1",
+     "locator": "sec. 2, p. 3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-07-03 (Stage B unit F-S3-2); fix c875bc5820668296bb7b04c8bfbd5b7337ddb9ab and locator follow-up ab6c0dc4ded0beff99d30cdc6ca36058c4c649cb on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2213); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-07-09",
+   "title": "Timing budget: the transit-time spread is a single-photoelectron term that enters a many-photon hit about as TTS/sqrt(N_pe) (timing-detectors.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.4, p. 16; sec. 35.5, p. 20",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., Proc. 28th ICRC (2003), arXiv:hep-ex/0305074v1",
+     "locator": "sec. 3 and Fig. 4, p. 4",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-07-09 (Stage B unit F-S3-2); fix 35091fc8161769b047e4dd33dd9cd7a64894e2b3 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2214); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-08-01",
+   "title": "Test-beam and in-situ calibration: pileup and pT balance marked collider; mono-energetic source and activation lines added; instruments without a test beam named (calibration-and-alignment.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.2.2, p. 9; sec. 36.4, p. 33",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.10.2, p. 97",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-08-01 (Stage B unit F-S3-2); fix dd41d9783df98e158edd96d716bdb932693ba7db on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2215); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-08-02",
+   "title": "Calibration standards: the J/psi-and-Z momentum-scale recipe and pi0/eta intercalibration marked collider; external anchors without a resonance; source lines as a standard (calibration-and-alignment.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 7 (2012) P10002, arXiv:1206.4071v2",
+     "locator": "sec. 6, p. 27 of the cached text",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 9 (2014) P06009, arXiv:1403.2286v2",
+     "locator": "sec. 4.4, p. 15 of the cached text",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.4, p. 33",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-08-02 (Stage B unit F-S3-2); fix ad6d9dc1df9961b85778202c2dab2a9b76d08bf7 on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2216); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-09-01",
+   "title": "Resolution in data per environment: jet and MET balance marked collider; source-line widths, test beams, simulated resolution functions validated on resonances, muon rings without a test beam (performance-metrics-and-residual-diagnostics.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.4, p. 33; sec. 36.2.2, p. 9",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.10.2, p. 97",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "J. A. Pavon-Rodriguez et al., Eur. Phys. J. A 61 (2025) 277, arXiv:2505.00042v2",
+     "locator": "sec. 6",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-09-01 (Stage B unit F-S3-2); fix 6648191217418a331e1e363aa06d3a430bcd54ce on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2217); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-2-CHK-AU-09-02",
+   "title": "Efficiency chain rule: the shared variables are occupancy, energy and direction; pT and eta their collider case, zenith or offset angle in astroparticle instruments (performance-metrics-and-residual-diagnostics.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors for Non-Accelerator Physics",
+     "locator": "sec. 36.2.2, p. 9; sec. 36.3.2, p. 16, Fig. 36.6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators",
+     "locator": "sec. 35.10.3, p. 101",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/neutrino-astronomy.md",
+     "locator": "Instrument response functions (checklist)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; issue CHK-AU-09-02 (Stage B unit F-S3-2); fix b75d7c61b48ecc804b2241c8c8105940179d507f on detector-content/fixes-unit/F-S3-2; every external locator read in the cached full text on 2026-11-18 (claim scifix:C2218); no regression test (S3 guidance fix)"
+  },
+  {
+   "id": "F-S3-3-AU10-01",
+   "title": "Diamond and silicon carbide were grouped as equally fluence-tolerant: SiC charge collection degrades faster with fluence than in Si and diamond (skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.8.5, p. 78",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "A. Gsponer et al., JINST 18 (2023) C11027, arXiv:2310.02047v1 (scifix:S2303)",
+     "locator": "abstract; sec. 3.2.3, p. 6",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; PDG states that SiC/GaN charge collection so far degrades faster with fluence than for Si and diamond; Gsponer et al. measure extremely small leakage after irradiation and a power-law CCE loss. Claims scifix:C2301, scifix:C2302; issue CHK-AU-10-01, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU10-02",
+   "title": "RPC rate capability scales as 1/(rho d <Q>), not as the inverse of resistivity alone (skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.6.6.3, pp. 52-53",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "G. Aielli et al., JINST 11 (2016) P07014, arXiv:1606.03448v1 (scifix:S2304)",
+     "locator": "sec. 1, pp. 2-3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; the state equation Delta V/phi = rho d <Q> (PDG) and the three parameters that raise the rate capability (Aielli et al.). Claims scifix:C2303, scifix:C2304; issue CHK-AU-10-02, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU10-03",
+   "title": "Silicon tracker dependence and data samples stated as environment parameters: pileup only at a collider; collision, cosmic-ray or test-beam tracks over the operating incidence-angle range (skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 9 (2014) P06009, arXiv:1403.2286v2 (scifix:S2305)",
+     "locator": "sec. 1, p. 4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D. Miao et al., arXiv:2603.25085v1 (scifix:S2306)",
+     "locator": "abstract, p. 1; sec. 4.3, p. 4",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; cosmic-ray alignment before collisions (collider) and test-beam characterization of flight ladders versus incidence angle (space); both cited by arXiv number only, so no experiment is named in the page. Claims scifix:C2305, scifix:C2306; issue CHK-AU-10-03, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU10-04",
+   "title": "The TPC start time t_0 is a parameter: external trigger, collider bunch crossing, or S1 light in rare-event TPCs (skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.6.4, p. 41",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2301)",
+     "locator": "sec. 36.4, p. 31, Fig. 36.10",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; the drift start from an external fast trigger (PDG 35.6.4) and the drift coordinate from the S1-S2 time difference in rare-event TPCs (PDG 36.4). Claims scifix:C2307, scifix:C2308; issue CHK-AU-10-04, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU12-01",
+   "title": "The multi-pulse fit takes the pulse times as its parameter: bunch crossings where arrivals are clock-locked, a free-time template scan otherwise (skills/hep-detector/references/front-end-waveform-processing.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "P. Žugec et al., Nucl. Instrum. Meth. A 812 (2016) 134, arXiv:1601.04512v1 (scifix:S2307)",
+     "locator": "secs. 4.1 and 4.3, pp. 8-10",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1, p. 90",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+     "locator": "Pileup and position in cryogenic and germanium detectors",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; Žugec et al. shift the template along the trace and subtract each fitted pulse; PDG places bunch-crossing pileup at colliders. The method source is cited inside an example block and gets a bibliography fragment. Claims scifix:C2310, scifix:C2309; issue CHK-AU-12-01, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU12-02",
+   "title": "The baseline bias from the Campbell mean changes with the pulse rate, with luminosity only at a collider (skills/hep-detector/references/front-end-waveform-processing.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1, p. 90",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "P. Žugec et al., arXiv:1601.04512v1 (scifix:S2307)",
+     "locator": "sec. 3.4, p. 7",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/front-end-waveform-processing.md",
+     "locator": "Pileup of pulses, baseline, and rate: Campbell's theorem",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; luminosity is a collider quantity (PDG); a beam-pulse-locked baseline distortion arises at a neutron time-of-flight facility (Žugec et al.); the Campbell mean depends on the rate nu (same page). Claims scifix:C2309, scifix:C2311; issue CHK-AU-12-02, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU12-03",
+   "title": "The bipolar baseline transient follows a rate step, of which the start of a bunch train is the collider case (skills/hep-detector/references/front-end-waveform-processing.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1, p. 90",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "P. Žugec et al., arXiv:1601.04512v1 (scifix:S2307)",
+     "locator": "sec. 3.4, p. 7",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+     "locator": "line 102: 'after a change in rate (start of a bunch train, a spill, a burst)'",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; the step model and the 9 % value (5 e^-4 = 0.092) are unchanged; only the general case is named as the rate step. Claims scifix:C2309, scifix:C2311; issue CHK-AU-12-03, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU13-01",
+   "title": "The reconstruction chain stated generally, with jets and missing transverse momentum as the collider case (skills/hep-detector/references/event-reconstruction.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.7.6, p. 61",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2301)",
+     "locator": "sec. 36.2.2, p. 8",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; the LAr TPC stages (PDG 35.7.6) and the Hillas-ellipse image reconstruction of imaging Cherenkov telescopes (PDG 36.2.2). Claims scifix:C2312, scifix:C2313; issue CHK-AU-13-01, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU13-02",
+   "title": "Time-dependent channel masks are weighted by luminosity at a collider, by live time and exposure elsewhere (skills/hep-detector/references/event-reconstruction.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), Astrophys. J. 791 (2014) 93, arXiv:1407.1657v1 (scifix:S2308)",
+     "locator": "secs. 3.5 and 3.7, pp. 16-17",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2301)",
+     "locator": "sec. 36.2.1, p. 4",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; a space instrument's live time evaluated versus the vertical cutoff and the flux divided by live time and geometrical factor; the duty cycle of a fluorescence detector. The page cites the arXiv number only. Claims scifix:C2314, scifix:C2315; issue CHK-AU-13-02, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU13-04",
+   "title": "Timing association names its start-time source and direction hypothesis; albedo is separated by the sign of the time difference, not by an out-of-time window (skills/hep-detector/references/event-reconstruction.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., Proc. 28th ICRC (2003), arXiv:hep-ex/0305074v1 (scifix:S2309)",
+     "locator": "sec. 2, p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al., arXiv:1407.1657v1 (scifix:S2308)",
+     "locator": "sec. 2, p. 6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.7.4, pp. 59-60",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; time of flight separates upward- from downward-going particles and rejects albedo; LAr TPCs take timing from primary scintillation. Claims scifix:C2316, scifix:C2317; issue CHK-AU-13-04, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU13-05",
+   "title": "Pileup defined by the readout's resolving time, with vertex-based mitigation and pileup reweighting as the collider case (skills/hep-detector/references/event-reconstruction.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.1, p. 90",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2301)",
+     "locator": "sec. 36.5.3, p. 46; sec. 36.2.2, p. 8",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+     "locator": "Pileup and position in cryogenic and germanium detectors; Imaging reconstruction in single-phase LArTPCs",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/ground-based-detection-arrays.md",
+     "locator": "Surface-array event reconstruction",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; bunch-crossing pileup at colliders (PDG 35.10.1), low rate per device in low-temperature calorimeters and few-ns exposure against night-sky background (PDG 36.5.3, 36.2.2). The misconception 'Pileup modeled as extra noise only' is general and was left unchanged. Claims scifix:C2309, scifix:C2318, scifix:C2313; issue CHK-AU-13-05, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU14-02",
+   "title": "In liquid argon N = E/W_el counts electron-ion pairs before recombination; W_el = 23.6 eV differs from the W = 19.5 eV per detectable quantum (skills/hep-detector/references/signal-formation-and-readout.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.7.3, p. 57",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics (scifix:S2301)",
+     "locator": "sec. 36.4, p. 32",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; W_el and the recombination fraction R (PDG 35.7.3; 0.70/23.6 eV = 29,700 electrons per MeV, consistent with the quoted 30,000) and the recombination-independent W (PDG 36.4). Claims scifix:C2319, scifix:C2320; issue CHK-AU-14-02, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU14-03",
+   "title": "kappa grows as z^2, so nuclei can leave the Landau regime in thin layers; PDG does not map kappa >> 1 to very thick absorbers (skills/hep-detector/references/signal-formation-and-readout.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter (scifix:S2302)",
+     "locator": "sec. 34.2.2 eq. (34.4), p. 3; sec. 34.2.9 footnote 3, p. 11, eq. (34.12), p. 12, p. 14",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., arXiv:hep-ex/0305074v1 (scifix:S2309)",
+     "locator": "sec. 3, Fig. 4, p. 4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/space-based-direct-detection.md",
+     "locator": "direct measurement of nuclei",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; xi carries z^2 and W_max does not depend on z (PDG); iron at beta gamma = 3.5 in 300 um of silicon gives kappa of about 0.3 (recomputed, not quoted in the page); thin counters measure ion charge (Bindi et al.). Claims scifix:C2321, scifix:C2322; issue CHK-AU-14-03, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU15-01",
+   "title": "Crystal transparency monitoring by laser is an injection into collection (quanta -> collection), not a reference on the 3/4a edge (skills/hep-detector/references/simulation-calibration/ecal.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, JINST 8 (2013) P09009, arXiv:1306.2016v2 (scifix:S2310)",
+     "locator": "sec. 4.1, pp. 10-13",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.4, p. 18",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md",
+     "locator": "sec. 3.4 (reachability: only parameters downstream of the injection edge), sec. 11.4 (no hand-off before response stage 3)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; laser injected through each crystal with a conversion power law and alpha = 1 for photodetector losses (CMS, inside an example block); radiation-induced absorption shortens the attenuation length (PDG). Claims scifix:C2323, scifix:C2324; issue CHK-AU-15-01, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU16-01",
+   "title": "The non-compensation power law is in the mean hadronic fraction: r = pi/e = 1 - (1 - h/e)(E/E0)^(m-1), not a power law in r (skills/hep-detector/references/simulation-calibration/hcal.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "D. E. Groom, Nucl. Instrum. Meth. A 572 (2007) 633, arXiv:physics/0605164v4 (scifix:S2311)",
+     "locator": "eq. 1, p. 2; eq. 7 and text, p. 10",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.3, p. 100",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; Groom's power law and its validity and degeneracy statements; PDG's h/e below unity. Part B (frozen) keeps its shorthand. The source gets a bibliography fragment. Claims scifix:C2325, scifix:C2326; issue CHK-AU-16-01, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-3-AU16-03",
+   "title": "The hadron beam points are of the species the instance measures (pi, p or nuclei): when h/e != 1 the pi response does not stand in for the p response (skills/hep-detector/references/simulation-calibration/hcal.md)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators (scifix:S03)",
+     "locator": "sec. 35.10.3, p. 99",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D. E. Groom, arXiv:physics/0605164v4 (scifix:S2311)",
+     "locator": "sec. 4, pp. 13-14",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "G. Ambrosi et al. (DAMPE), Nature 552 (2017) 63, arXiv:1711.10981v1 (scifix:S2312)",
+     "locator": "Methods, p. 11",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; the larger mean hadronic fraction of protons (PDG), equal h/e but different responses (Groom), and a space calorimeter's proton beam test (inside an example block). Claims scifix:C2327, scifix:C2328, scifix:C2329; issue CHK-AU-16-03, fix unit F-S3-3, read 2026-11-18."
+  },
+  {
+   "id": "F-S3-4-TRACKER-COSMIC-KNOWN-INPUT",
+   "title": "Tracker specialization: cosmic-ray tracks are a known input only with a measured momentum or a declared momentum distribution; without one (field off) they are a population feature",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Alignment of the CMS tracker with LHC and cosmic ray data, arXiv:1403.2286v2",
+     "locator": "sec. 5, pp. 17-18",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics, 30. Cosmic Rays (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-cosmic-rays.pdf",
+     "locator": "sec. 30.1, p. 1",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tracker.md",
+     "locator": "5. Reference catalog",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-17-01; fix commit 08d6d8a7a7b7ab02ae55e04fbe4179c7f050795a; located source CMS Collaboration, Alignment of the CMS tracker with LHC and cosmic ray data, arXiv:1403.2286v2 sec. 5, pp. 17-18, second source Review of Particle Physics, 30. Cosmic Rays (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-cosmic-rays.pdf sec. 30.1, p. 1, read in the cached text 2026-11-18; ledger claim scifix:C2401"
+  },
+  {
+   "id": "F-S3-4-TRACKER-POLARITY-FLIP",
+   "title": "Tracker specialization: a magnetic-field polarity flip is a control variable only where the magnet can be reversed (not with a permanent magnet); an isotropic cosmic-ray flux spans incidence angles",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment, arXiv:1407.1657v1",
+     "locator": "sec. 2, pp. 5-6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D. Miao et al., Beam Test Characterization of Silicon Microstrip Detector Flight-Model Ladders for the AMS-02 Upgrade, arXiv:2603.25085v1",
+     "locator": "sec. 1, p. 1; sec. 4.3, p. 4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Alignment of the CMS tracker with LHC and cosmic ray data, arXiv:1403.2286v2",
+     "locator": "sec. 5, p. 16",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tracker.md",
+     "locator": "5. Reference catalog",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "the statement that a permanent magnet cannot be reversed is Inferred from 'permanent magnet'; no cached source states it"
+   ],
+   "note": "issue CHK-AU-17-02; fix commit 330c6ee381ff2cd36be82ff674a072f8593b1048; located source O. Adriani et al. (PAMELA), Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment, arXiv:1407.1657v1 sec. 2, pp. 5-6, second source D. Miao et al., Beam Test Characterization of Silicon Microstrip Detector Flight-Model Ladders for the AMS-02 Upgrade, arXiv:2603.25085v1 sec. 1, p. 1; sec. 4.3, p. 4, read in the cached text 2026-11-18; ledger claim scifix:C2402"
+  },
+  {
+   "id": "F-S3-4-TRACKER-GAS-T0-RT",
+   "title": "Tracker specialization: a gas tracker needs the drift-time origin t0 and the r-t relation; the t0 source is a parameter of the instance; t0 plus the r-t relation is a degeneracy",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.6.4, p. 41; sec. 35.6.2.2, p. 31",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "ALICE Collaboration, The ALICE Transition Radiation Detector: construction, operation, and performance, arXiv:1709.02743v2",
+     "locator": "sec. 10.3, p. 44",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tracker.md",
+     "locator": "2. Mechanisms and parameterization; Node-binding example (degeneracies)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-17-03; fix commit 7eef0ff27acc1a4d66c579563a50d9691910f92c; located source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.6.4, p. 41; sec. 35.6.2.2, p. 31, second source ALICE Collaboration, The ALICE Transition Radiation Detector: construction, operation, and performance, arXiv:1709.02743v2 sec. 10.3, p. 44, read in the cached text 2026-11-18; ledger claim scifix:C2403"
+  },
+  {
+   "id": "F-S3-4-TRACKER-PREAMP-KERNEL",
+   "title": "Tracker specialization: a silicon preamplifier without intrinsic amplification is a deterministic conversion gain (its noise is the additive electronics noise); gas gain and an LGAD gain layer stay densities",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.8, p. 63; sec. 35.8.1.1, p. 65; sec. 35.8.4, pp. 72-73",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D. Miao et al., Beam Test Characterization of Silicon Microstrip Detector Flight-Model Ladders for the AMS-02 Upgrade, arXiv:2603.25085v1",
+     "locator": "sec. 2, p. 2",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tracker.md",
+     "locator": "1. Stage mapping (node preamp); 3. Kernel properties",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "the binding example tracker.binding.example.json (node preamp, mechanism 'fluctuation') was outside the unit's files and is unchanged"
+   ],
+   "note": "issue CHK-AU-17-04; fix commit d59086ae2aaba711c23500685c857505e69ffb8d; located source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.8, p. 63; sec. 35.8.1.1, p. 65; sec. 35.8.4, pp. 72-73, second source D. Miao et al., Beam Test Characterization of Silicon Microstrip Detector Flight-Model Ladders for the AMS-02 Upgrade, arXiv:2603.25085v1 sec. 2, p. 2, read in the cached text 2026-11-18; ledger claim scifix:C2404"
+  },
+  {
+   "id": "F-S3-4-MUON-ABSORBER-ENERGY-LOSS",
+   "title": "Muon-detector specialization: the absorber node includes ionization and radiative energy loss with its fluctuations, not only multiple scattering",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics, 34. Passage of Particles Through Matter (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf",
+     "locator": "sec. 34.6, pp. 29-31",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Performance of CMS muon reconstruction in pp collision events at sqrt(s) = 7 TeV, arXiv:1206.4071v2",
+     "locator": "sec. 3, PDF p. 9",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "ATLAS Collaboration, Muon reconstruction performance of the ATLAS detector in proton-proton collision data at sqrt(s) = 13 TeV, arXiv:1603.05598v2",
+     "locator": "sec. 8.1, eq. (6), PDF p. 19",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
+     "locator": "1. Stage mapping (node absorber); 2. Mechanisms and parameterization",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "the node description of muon.binding.example.json was outside the unit's files and is unchanged"
+   ],
+   "note": "issue CHK-AU-18-01; fix commit 547ad29833b4579799c58daf1abcdd470bcb5509; located source Review of Particle Physics, 34. Passage of Particles Through Matter (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf sec. 34.6, pp. 29-31, second source CMS Collaboration, Performance of CMS muon reconstruction in pp collision events at sqrt(s) = 7 TeV, arXiv:1206.4071v2 sec. 3, PDF p. 9, read in the cached text 2026-11-18; ledger claim scifix:C2405"
+  },
+  {
+   "id": "F-S3-4-MUON-TAG-PROBE-SAMPLE",
+   "title": "Muon-detector specialization: the tag-and-probe control sample is chosen by the experiment instance; J/psi or Z to mumu is a collider example",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Performance of CMS muon reconstruction in pp collision events at sqrt(s) = 7 TeV, arXiv:1206.4071v2",
+     "locator": "sec. 5.1.1, PDF p. 20",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "ATLAS Collaboration, Muon reconstruction performance of the ATLAS detector in proton-proton collision data at sqrt(s) = 13 TeV, arXiv:1603.05598v2",
+     "locator": "sec. 6.1, PDF p. 8",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
+     "locator": "5. Reference catalog",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "both sources are collider sources: they support the collider example, the general type comes from Part B sec. 3.4"
+   ],
+   "note": "issue CHK-AU-18-06; fix commit f7c2bf8c0280c397ee72ada95a9031e6ee533afd; located source CMS Collaboration, Performance of CMS muon reconstruction in pp collision events at sqrt(s) = 7 TeV, arXiv:1206.4071v2 sec. 5.1.1, PDF p. 20, second source ATLAS Collaboration, Muon reconstruction performance of the ATLAS detector in proton-proton collision data at sqrt(s) = 13 TeV, arXiv:1603.05598v2 sec. 6.1, PDF p. 8, read in the cached text 2026-11-18; ledger claim scifix:C2406"
+  },
+  {
+   "id": "F-S3-4-MUON-SITE-BACKGROUND",
+   "title": "Muon-detector specialization: the neutron and photon background overlay is the site's measured or simulated background; cavern background is a collider example",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics, 36. Particle Detectors for Non-Accelerator Physics (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf",
+     "locator": "sec. 36.6.1, p. 49",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "G. Aielli et al., Improving the RPC rate capability, arXiv:1606.03448v1",
+     "locator": "abstract, p. 1",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
+     "locator": "8. Alternative hypotheses",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-18-07; fix commit 0a0f0f4e8192bfc72a75f0018e198b983f5a1364; located source Review of Particle Physics, 36. Particle Detectors for Non-Accelerator Physics (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf sec. 36.6.1, p. 49, second source G. Aielli et al., Improving the RPC rate capability, arXiv:1606.03448v1 abstract, p. 1, read in the cached text 2026-11-18; ledger claim scifix:C2407"
+  },
+  {
+   "id": "F-S3-4-RICH-RESIDUAL-VS-AZIMUTH",
+   "title": "RICH specialization: the Cherenkov-angle residual versus the photon azimuth around the ring sees mirror misalignment (theta_x cos phi + theta_y sin phi), which the ring-averaged location does not",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "M. Adinolfi et al. (LHCb RICH), Performance of the LHCb RICH detector at the LHC, arXiv:1211.6759v2",
+     "locator": "sec. 3.3, PDF pp. 10-11",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.5, p. 21, eq. (35.12)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/rich.md",
+     "locator": "6. Special functionals; Node-binding example (degeneracies)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-19-03; fix commit 13079c8cf65654e4cc4b7b7233ec4ac23fe9d9aa; located source M. Adinolfi et al. (LHCb RICH), Performance of the LHCb RICH detector at the LHC, arXiv:1211.6759v2 sec. 3.3, PDF pp. 10-11, second source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.5, p. 21, eq. (35.12), read in the cached text 2026-11-18; ledger claim scifix:C2408"
+  },
+  {
+   "id": "F-S3-4-RICH-COUNT-RESOLUTION-DEGENERACY",
+   "title": "RICH specialization: photon count and per-photon resolution are degenerate only in the per-ring width (sigma_photon/sqrt(N_pe) (+) C); the per-photon width and the photon count break it",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.5, p. 21, eq. (35.12)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "M. Adinolfi et al. (LHCb RICH), Performance of the LHCb RICH detector at the LHC, arXiv:1211.6759v2",
+     "locator": "sec. 4.2, PDF p. 14; sec. 4.3, PDF p. 15",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/rich.md",
+     "locator": "Node-binding example (degeneracies)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-19-04; fix commit d052c91a353a752080c1a32f4cf8bfc1bc690759; located source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.5, p. 21, eq. (35.12), second source M. Adinolfi et al. (LHCb RICH), Performance of the LHCb RICH detector at the LHC, arXiv:1211.6759v2 sec. 4.2, PDF p. 14; sec. 4.3, PDF p. 15, read in the cached text 2026-11-18; ledger claim scifix:C2409"
+  },
+  {
+   "id": "F-S3-4-DIRC-PHOTODETECTOR-TYPE",
+   "title": "DIRC specialization: the photodetector is a PMT, MaPMT or MCP-PMT, not only an MCP-PMT",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.5, p. 23",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "J. Schwiening, DIRC, the Particle Identification System for BABAR, arXiv:hep-ex/0010068v1",
+     "locator": "p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "A. Ali et al. (GlueX), The GlueX DIRC Program, arXiv:2002.07990v1",
+     "locator": "sec. 2, p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/dirc.md",
+     "locator": "1. Stage mapping (node pde)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-20-01; fix commit 349ba1261392e51f8ded717e21adc31180f2b028; located source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.5, p. 23, second source J. Schwiening, DIRC, the Particle Identification System for BABAR, arXiv:hep-ex/0010068v1 p. 3, read in the cached text 2026-11-18; ledger claim scifix:C2410"
+  },
+  {
+   "id": "F-S3-4-DIRC-INCIDENCE-ANGLE",
+   "title": "DIRC specialization: the control variable is the incidence angle on the bar, which equals the polar angle only for bars parallel to the beam axis (barrel)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "J. Schwiening, DIRC, the Particle Identification System for BABAR, arXiv:hep-ex/0010068v1",
+     "locator": "p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.5, p. 23",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "A. Ali et al. (GlueX), The GlueX DIRC Program, arXiv:2002.07990v1",
+     "locator": "sec. 3, p. 6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/dirc.md",
+     "locator": "1. Stage mapping (source); 5. Reference catalog; 6. Special functionals; 8. Alternative hypotheses; Node-binding example",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-20-02; fix commit 5feb05e08540bda97fb20dabc167c951acb95cf9; located source J. Schwiening, DIRC, the Particle Identification System for BABAR, arXiv:hep-ex/0010068v1 p. 3, second source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.5, p. 23, read in the cached text 2026-11-18; ledger claim scifix:C2411"
+  },
+  {
+   "id": "F-S3-4-TOF-THREE-COUNTER",
+   "title": "TOF specialization: the three-counter method needs three comparison nodes, one per pair; one pair gives only sigma_1^2 + sigma_2^2, three give each counter's sigma_i^2 = (s_ij^2 + s_ik^2 - s_jk^2)/2",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., The AMS-02 Time of Flight System. Final Design, arXiv:hep-ex/0305074v1",
+     "locator": "sec. 3, pp. 3-4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 40. Statistics, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-statistics.pdf",
+     "locator": "sec. 40.2.3, eq. (40.22), p. 8",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tof.md",
+     "locator": "5. Reference catalog",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "no second cached source names the three-counter method itself; the inversion is exhaustive algebra"
+   ],
+   "note": "issue CHK-AU-21-04; fix commit d7de4a4951fffbd3ed93ef5cd85cf95782f19d61; located source V. Bindi et al., The AMS-02 Time of Flight System. Final Design, arXiv:hep-ex/0305074v1 sec. 3, pp. 3-4, second source Review of Particle Physics 2025, 40. Statistics, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-statistics.pdf sec. 40.2.3, eq. (40.22), p. 8, read in the cached text 2026-11-18; ledger claim scifix:C2412"
+  },
+  {
+   "id": "F-S3-4-TOF-VEFF-SLOPE",
+   "title": "TOF specialization: v_eff is the slope of the end-time difference versus hit position (location functional, identity link); a Pearson correlation mixes v_eff with the time resolution and the hit-position spread",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "J. Mayer et al., Classical and Machine Learning Methods for Event Reconstruction in NeuLAND, arXiv:2108.01384v1",
+     "locator": "sec. 6.1, feature 'Position X,Y,Z'",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 40. Statistics, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-statistics.pdf",
+     "locator": "sec. 40.2.3, eqs. (40.22)-(40.23), p. 8",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tof.md",
+     "locator": "6. Special functionals",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-21-06; fix commit 79b03aca1c206264f852c17a2a8bf6c84e8f9a6d; located source J. Mayer et al., Classical and Machine Learning Methods for Event Reconstruction in NeuLAND, arXiv:2108.01384v1 sec. 6.1, feature 'Position X,Y,Z', second source Review of Particle Physics 2025, 40. Statistics, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-statistics.pdf sec. 40.2.3, eqs. (40.22)-(40.23), p. 8, read in the cached text 2026-11-18; ledger claim scifix:C2413"
+  },
+  {
+   "id": "F-S3-4-TOF-ATTENUATION-COMPONENTS",
+   "title": "TOF specialization: the attenuation along a counter combines absorption, scattering and surface losses; the scattering length and the wrapping reflectivity are separate optical parameters",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "K. Abe et al. (Super-Kamiokande), Calibration of the Super-Kamiokande Detector, arXiv:1307.0162v2",
+     "locator": "sec. 3.2.1, eq. (13), p. 31",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics, 36. Particle Detectors for Non-Accelerator Physics (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf",
+     "locator": "sec. 36.3.1, p. 13",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tof.md",
+     "locator": "2. Mechanisms and parameterization; Node-binding example (degeneracies)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "both sources are water and liquid-scintillator media; whether scattering matters in a plastic counter is not stated by a cached source"
+   ],
+   "note": "issue CHK-AU-21-07; fix commit 0889929c07b87c230657240859a4d60ce2968ed6; located source K. Abe et al. (Super-Kamiokande), Calibration of the Super-Kamiokande Detector, arXiv:1307.0162v2 sec. 3.2.1, eq. (13), p. 31, second source Review of Particle Physics, 36. Particle Detectors for Non-Accelerator Physics (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf sec. 36.3.1, p. 13, read in the cached text 2026-11-18; ledger claim scifix:C2414"
+  },
+  {
+   "id": "F-S3-4-TOF-NEUTRAL-FLIGHT-PATH",
+   "title": "TOF specialization: the flight path comes from the tracker only for charged particles; for neutral particles it comes from the counter and the source geometry, or a calibrated effective flight path",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "J. Mayer et al., Classical and Machine Learning Methods for Event Reconstruction in NeuLAND, arXiv:2108.01384v1",
+     "locator": "sec. 6.1, features 'Position X,Y,Z' and 'Energy from Time-of-Flight'",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "J. A. Pavon-Rodriguez et al. (n_TOF), Characterisation of the neutron beam in the n_TOF-EAR2 experimental area at CERN following the spallation target upgrade, arXiv:2505.00042v2",
+     "locator": "sec. 4.1, eqs. (6)-(7)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tof.md",
+     "locator": "1. Stage mapping (tracker_path) and the paragraph below it",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-21-09; fix commit 57016366c9f41320236a6e02f0e383b3a9df8f10; located source J. Mayer et al., Classical and Machine Learning Methods for Event Reconstruction in NeuLAND, arXiv:2108.01384v1 sec. 6.1, features 'Position X,Y,Z' and 'Energy from Time-of-Flight', second source J. A. Pavon-Rodriguez et al. (n_TOF), Characterisation of the neutron beam in the n_TOF-EAR2 experimental area at CERN following the spallation target upgrade, arXiv:2505.00042v2 sec. 4.1, eqs. (6)-(7), read in the cached text 2026-11-18; ledger claim scifix:C2415"
+  },
+  {
+   "id": "F-S3-4-TRD-HADRON-BELOW-ONSET",
+   "title": "TRD specialization: hadron samples fix the gas gain only below the TR onset (gamma ~ 10^3: about 140 GeV/c for pions, 940 GeV/c for protons)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.6.5, pp. 45-46",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics, 34. Passage of Particles Through Matter (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf",
+     "locator": "sec. 34.7.3, eq. (34.45), p. 35",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/trd.md",
+     "locator": "5. Reference catalog",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-22-01; fix commit 346c6142b939e2faba72fe681d49b7e4a2c4883e; located source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.6.5, pp. 45-46, second source Review of Particle Physics, 34. Passage of Particles Through Matter (2025 update), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf sec. 34.7.3, eq. (34.45), p. 35, read in the cached text 2026-11-18; ledger claim scifix:C2416"
+  },
+  {
+   "id": "F-S3-4-TRD-REJECTION-CONVENTION",
+   "title": "TRD specialization: the identification functional is the hadron efficiency at fixed electron efficiency (the inverse rejection factor), not the electron efficiency at fixed pion efficiency",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf",
+     "locator": "sec. 35.6.5, p. 47",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "ALICE Collaboration, The ALICE Transition Radiation Detector: construction, operation, and performance, arXiv:1709.02743v2",
+     "locator": "sec. 11.2, p. 50",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/trd.md",
+     "locator": "6. Special functionals",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "issue CHK-AU-22-02; fix commit fa6069d216cfcf742f8234631cc5135fc709441c; located source Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf sec. 35.6.5, p. 47, second source ALICE Collaboration, The ALICE Transition Radiation Detector: construction, operation, and performance, arXiv:1709.02743v2 sec. 11.2, p. 50, read in the cached text 2026-11-18; ledger claim scifix:C2417"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-23-01",
+   "title": "Energy-loss straggling in very thick absorbers is less skewed but never Gaussian; the E5 row said Gaussian for thick absorbers (skills/hep-detector/references/core-detector-equations.md, CHK-AU-23-01)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf (ledger scifix:S2501)",
+     "locator": "sec. 34.2.9, p. 14",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "H. Bichsel, D.E. Groom, S.R. Klein (Particle Data Group, K. Nakamura et al.), Review of Particle Physics 2010, 27. Passage of particles through matter (rev. January 2010), J. Phys. G 37 (2010) 075021, https://pdg.lbl.gov/2010/reviews/rpp2010-rev-passage-particles-matter.pdf (ledger scifix:S2502)",
+     "locator": "sec. 27.2.7, p. 12 (the same sentence)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/signal-formation-and-readout.md",
+     "locator": "Energy-loss fluctuations, kappa >> 1 line (agrees after the fix)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "No independent second source: the two external sources are two PDG editions of the same sentence (lead decision for this issue; card G1, R2), and the internal page restates PDG. An arXiv and INSPIRE search on 2026-11-18 (straggling, Vavilov) found no open primary source with this statement."
+   ],
+   "note": "yes; RPP 2025 sec. 34.2.9 p. 14 and RPP 2010 sec. 27.2.7 p. 12 read in the cached full text 2026-11-18; the E5 row now agrees with signal-formation-and-readout.md; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-23-02",
+   "title": "E2 relates the momentum component perpendicular to B to the bending radius; it equals pT only for a field along the beam axis, and is exact only with the coefficient 0.299792458 (skills/hep-detector/references/core-detector-equations.md, CHK-AU-23-02)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.12, eq. (35.66), p. 112; sec. 35.11.3, p. 111",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 30. Cosmic Rays (rev. October 2025), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-cosmic-rays.pdf (ledger scifix:S2503)",
+     "locator": "sec. 30.1, p. 1 (rigidity R = pc/(Ze))",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment, Astrophys. J. 791 (2014) 93, https://arxiv.org/abs/1407.1657v1 (ledger scifix:S2505)",
+     "locator": "p. 6 (instrument description: bending view, rigidity)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; RPP 2025 eq. (35.66) and sec. 35.11.3 read in the cached full text 2026-11-18; 0.299792458 = c/1e9 in GeV/(c T m e) (AU-23 recomputation); documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-23-03",
+   "title": "E5 with z^2 alone is for singly charged or light projectiles: for ions, higher-order and finite-target-radius terms can change dE/dx by a factor of two or more (skills/hep-detector/references/core-detector-equations.md, CHK-AU-23-03)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf (ledger scifix:S2501)",
+     "locator": "sec. 34.2.3, pp. 4-5",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "H. Bichsel, D.E. Groom, S.R. Klein (Particle Data Group, K. Nakamura et al.), Review of Particle Physics 2010, 27. Passage of particles through matter (rev. January 2010), J. Phys. G 37 (2010) 075021, https://pdg.lbl.gov/2010/reviews/rpp2010-rev-passage-particles-matter.pdf (ledger scifix:S2502)",
+     "locator": "sec. 27.2.3, p. 9 (Bloch z^2 L2 and Barkas z L1 corrections)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/signal-formation-and-readout.md",
+     "locator": "Mean ionization loss (shell, Barkas and Bloch terms)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "The second source is an earlier edition of the same PDG review (a different text, not an independent group)."
+   ],
+   "note": "yes; read in the cached full texts 2026-11-18; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-23-04",
+   "title": "For an isotropic or diffuse flux the acceptance is a geometric factor or aperture (area times solid angle) or an effective area, not the dimensionless N_fid/N_gen of E11 (skills/hep-detector/references/core-detector-equations.md, CHK-AU-23-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment, Astrophys. J. 791 (2014) 93, https://arxiv.org/abs/1407.1657v1 (ledger scifix:S2505)",
+     "locator": "pp. 6-7; Fig. 4, p. 15",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (CALET), Energy Spectrum of Cosmic-ray Electron and Positron from 10 GeV to 3 TeV Observed with the Calorimetric Electron Telescope on the International Space Station, Phys. Rev. Lett. 119 (2017) 181101, https://arxiv.org/abs/1712.01711v1 (ledger scifix:S2506)",
+     "locator": "p. 5",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf (ledger scifix:S2504)",
+     "locator": "sec. 36.2.1, p. 4",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; read in the cached full texts 2026-11-18; the space and ground pages already state the units (instrument response checklists) and are linked; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-23-05",
+   "title": "The 11% Highland accuracy for 1e-3 < x/X0 < 100 is located in RPP 2010 eq. (27.14), stated for singly charged particles with beta = 1; RPP 2024 and 2025 drop it (skills/hep-detector/references/core-detector-equations.md, CHK-AU-23-05)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "H. Bichsel, D.E. Groom, S.R. Klein (Particle Data Group, K. Nakamura et al.), Review of Particle Physics 2010, 27. Passage of particles through matter (rev. January 2010), J. Phys. G 37 (2010) 075021, https://pdg.lbl.gov/2010/reviews/rpp2010-rev-passage-particles-matter.pdf (ledger scifix:S2502)",
+     "locator": "sec. 27.3, eq. (27.14), p. 16",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf (ledger scifix:S2501)",
+     "locator": "sec. 34.3, eq. (34.16), p. 16",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; RPP 2010 p. 16 read in the cached full text 2026-11-18; a full-text search of the cached RPP 2024 and 2025 texts finds no 11% statement (absence claim, full text); the same 'not in RPP 2024' wording in multiple_scattering.py is outside this unit's files; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-24-05",
+   "title": "The alignment-weak-mode symptom is a known-mass peak or momentum scale that depends on charge sign and direction; the dimuon mass vs q*eta is its collider case (skills/hep-detector/references/detector-principles-summary.md, CHK-AU-24-05)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Alignment of the CMS tracker with LHC and cosmic ray data, JINST 9 (2014) P06009, https://arxiv.org/abs/1403.2286v2 (ledger scifix:S2507)",
+     "locator": "sec. 4.4, printed pp. 12-13 (PDF pp. 14-15), eq. (8)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (PAMELA), Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment, Astrophys. J. 791 (2014) 93, https://arxiv.org/abs/1407.1657v1 (ledger scifix:S2505)",
+     "locator": "Appendix A, pp. 25-26",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/calibration-and-alignment.md",
+     "locator": "known-mass resonance independent of charge, direction, momentum; charge-antisymmetric rigidity bias",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; read in the cached full texts 2026-11-18; the collider instance stays in detector-case-studies-and-checklists.md Case 1; entry reference shrinks by 1 B (frozen page, no addition); documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-24-06",
+   "title": "An energy scale that varies is checked against the incidence or zenith angle; pseudorapidity eta is the collider case (skills/hep-detector/references/detector-principles-summary.md, CHK-AU-24-06)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.10.3, p. 101 (eta relative to the beam axis)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 36. Particle Detectors for Non-Accelerator Physics, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf (ledger scifix:S2504)",
+     "locator": "sec. 36.2.2, p. 9",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; read in the cached full texts 2026-11-18; size-neutral on the frozen entry reference; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-24-07",
+   "title": "Non-compensation shows as a hadron response that depends on the hadron species and energy; jet flavour dependence is its collider case (skills/hep-detector/references/detector-principles-summary.md, CHK-AU-24-07)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.10.1.1, p. 92",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D.E. Groom, Energy flow in a hadronic cascade: Application to hadron calorimetry, Nucl. Instrum. Meth. A 572 (2007) 633, https://arxiv.org/abs/physics/0605164v4 (ledger scifix:S2508)",
+     "locator": "abstract, p. 1; Fig. 7 and text, p. 14",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; read in the cached full texts 2026-11-18; entry reference shrinks by 4 B; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-25-01",
+   "title": "The LGAD / MCP row of the master table mixed silicon properties (Landau, fluence, dose, fill factor) into the MCP; MCP now has its own row (transit-time spread, integrated anode charge, rate droop, aging) (skills/hep-detector/references/detector-comparison-tables.md, CHK-AU-25-01)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.8.4, eq. (35.25), p. 73; sec. 35.2.1.2, pp. 5-6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D. Miehling et al., Lifetime and performance of the very latest microchannel-plate photomultipliers, Nucl. Instrum. Meth. A 1049 (2023) 168047, https://arxiv.org/abs/2311.16676v1 (ledger scifix:S2509)",
+     "locator": "sec. 1, p. 1",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/detector-comparison-tables.md",
+     "locator": "Table 3, MCP row (transit spread, aging, rate droop)",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "'rate droop' for MCPs rests on the page's own Table 3 and timing-detectors.md (internal); no cached external source was read for it. The MCP Validation cell is left empty: no cached source gives a sample."
+   ],
+   "note": "yes; read in the cached full texts 2026-11-18; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-25-03",
+   "title": "The TOF and tracker-time association risk is the start-time (t_0) source, a parameter; the bunch crossing is its collider case. The environment codes are defined on the page (skills/hep-detector/references/detector-comparison-tables.md, CHK-AU-25-03)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "V. Bindi et al., The AMS-02 Time of Flight System. Final Design, Proc. 28th ICRC (Tsukuba, 2003), https://arxiv.org/abs/hep-ex/0305074v1 (ledger scifix:S2510)",
+     "locator": "sec. 2, p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "J.A. Pavon-Rodriguez et al., Characterisation of the neutron beam in the n_TOF-EAR2 experimental area at CERN following the spallation target upgrade, https://arxiv.org/abs/2505.00042v2 (ledger scifix:S2511)",
+     "locator": "sec. 4.1, eq. (6)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.6.2.2, p. 31",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "The environment-code definitions are copied from the run card (R1), not from an external source."
+   ],
+   "note": "yes; read in the cached full texts 2026-11-18; Table 4 of the same page already treats t_0 as a parameter; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-25-04",
+   "title": "Master-table ECAL and HCAL validation samples were collider samples (Z->ee, jets, JES) given as general; now per environment (MIP of non-interacting cosmic-ray nuclei SPC, test beam FXT, Z->ee and jets COL) (skills/hep-detector/references/detector-comparison-tables.md, CHK-AU-25-04)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Energy calibration and resolution of the CMS electromagnetic calorimeter in pp collisions at sqrt(s) = 7 TeV, JINST 8 (2013) P09009, https://arxiv.org/abs/1306.2016v2 (ledger scifix:S2512)",
+     "locator": "abstract, p. 1",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (CALET), Energy Spectrum of Cosmic-ray Electron and Positron from 10 GeV to 3 TeV Observed with the Calorimetric Electron Telescope on the International Space Station, Phys. Rev. Lett. 119 (2017) 181101, https://arxiv.org/abs/1712.01711v1 (ledger scifix:S2506)",
+     "locator": "'Energy measurement', p. 3",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Yue et al., A Parameterized Energy Correction Method for Electromagnetic Showers in BGO-ECAL of DAMPE, Nucl. Instrum. Meth. A 856 (2017) 11, https://arxiv.org/abs/1703.02821v2 (ledger scifix:S2513)",
+     "locator": "sec. II, p. 2; sec. IV, p. 6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Adloff et al. (CALICE), Hadronic energy resolution of a highly granular scintillator-steel hadron calorimeter using software compensation techniques, JINST 7 (2012) P09017, https://arxiv.org/abs/1207.4210v2 (ledger scifix:S2514)",
+     "locator": "sec. 2.2, printed p. 3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; read in the cached full texts 2026-11-18; named apparatus stay out of the table; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-25-05",
+   "title": "Table 7 ECAL and HCAL conventions (Z line shape, scale vs eta, JES closure vs pT and flavour) were collider conventions given as general; now per environment (skills/hep-detector/references/detector-comparison-tables.md, CHK-AU-25-05)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Energy calibration and resolution of the CMS electromagnetic calorimeter in pp collisions at sqrt(s) = 7 TeV, JINST 8 (2013) P09009, https://arxiv.org/abs/1306.2016v2 (ledger scifix:S2512)",
+     "locator": "abstract, p. 1",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "O. Adriani et al. (CALET), Energy Spectrum of Cosmic-ray Electron and Positron from 10 GeV to 3 TeV Observed with the Calorimetric Electron Telescope on the International Space Station, Phys. Rev. Lett. 119 (2017) 181101, https://arxiv.org/abs/1712.01711v1 (ledger scifix:S2506)",
+     "locator": "'Absolute energy scale calibration', p. 4",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Yue et al., A Parameterized Energy Correction Method for Electromagnetic Showers in BGO-ECAL of DAMPE, Nucl. Instrum. Meth. A 856 (2017) 11, https://arxiv.org/abs/1703.02821v2 (ledger scifix:S2513)",
+     "locator": "sec. IV, p. 6",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "C. Adloff et al. (CALICE), Hadronic energy resolution of a highly granular scintillator-steel hadron calorimeter using software compensation techniques, JINST 7 (2012) P09017, https://arxiv.org/abs/1207.4210v2 (ledger scifix:S2514)",
+     "locator": "p. 2 and sec. 2.2, printed p. 3",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; read in the cached full texts 2026-11-18; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-25-06",
+   "title": "Muon-system validation and conventions on dimuon resonances (Z, J/psi, q*eta, tag-and-probe) tagged COL; cosmic-ray muons kept as the general sample; ground-array muon detectors linked (skills/hep-detector/references/detector-comparison-tables.md, CHK-AU-25-06)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Performance of CMS muon reconstruction in pp collision events at sqrt(s) = 7 TeV, JINST 7 (2012) P10002, https://arxiv.org/abs/1206.4071v2 (ledger scifix:S2515)",
+     "locator": "sec. 5.1.1, PDF p. 20; sec. 3, PDF p. 9",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 30. Cosmic Rays (rev. October 2025), https://pdg.lbl.gov/2025/reviews/rpp2025-rev-cosmic-rays.pdf (ledger scifix:S2503)",
+     "locator": "sec. 30.2.2, p. 12",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/ground-based-detection-arrays.md",
+     "locator": "Muon detectors, radio detection and wide-field gamma-ray arrays",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "The issue's proposed 'cosmic-ray track splitting' residual was not added: no cached source read here states it."
+   ],
+   "note": "yes; read in the cached full texts 2026-11-18; documentation only, no regression test"
+  },
+  {
+   "id": "F-S3-5-CHK-AU-25-07",
+   "title": "TPC tracking efficiency is binned in momentum and direction; eta is the collider case (skills/hep-detector/references/detector-comparison-tables.md, CHK-AU-25-07)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.10.3, p. 101 (eta relative to the beam axis)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "D.L. Adams et al., Design and performance of a 35-ton liquid argon time projection chamber as a prototype for future very large detectors, JINST 15 (2020) P03035, https://arxiv.org/abs/1912.08739v2 (ledger scifix:S2516)",
+     "locator": "sec. 13, printed p. 23; sec. 9.2, printed p. 16",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "external",
+     "citation": "N. Abgrall et al. (T2K ND280 TPC), Time Projection Chambers for the T2K Near Detectors, Nucl. Instrum. Meth. A 637 (2011) 25, https://arxiv.org/abs/1012.0865v1 (ledger scifix:S2517)",
+     "locator": "sec. 7.2, Fig. 26, PDF pp. 31-32",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+     "locator": "Noble-liquid TPCs",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "The issue record cited no source; the sources were located for this fix. They show direction-dependent TPC response and resolution; no cached source was read that bins TPC tracking efficiency itself in direction."
+   ],
+   "note": "yes; read in the cached full texts 2026-11-18; documentation only, no regression test"
   }
  ],
  "superseded": [
