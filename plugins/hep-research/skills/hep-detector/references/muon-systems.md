@@ -5,7 +5,8 @@ Micromegas-based chambers; standalone, combined, segment-tagged, calorimeter-tag
 trigger-level muons. The PID summary is in [particle identification](particle-identification.md);
 technology physics is in [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md);
 alignment weak modes in [calibration and alignment](calibration-and-alignment.md) and
-[tracking and vertexing](tracking-and-vertexing.md).
+[tracking and vertexing](tracking-and-vertexing.md). Environment codes used here: COL collider;
+UGD underground, neutrino and rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
 
 ## Why muons are special
 
@@ -52,8 +53,13 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   (see below).
 - **Efficiency**: geometric gaps (cracks, support structures, feet), chamber
   inefficiency, matching and reconstruction inefficiency, quoted **per type and versus
-  `eta`, `phi`, `pT`**, with a tag-and-probe from `J/psi` and `Z -> mu mu`
-  ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
+  the detector's coordinates and momentum**; the binning variables and the reference
+  sample are parameters to state. At a collider (COL): versus `eta`, `phi`, `pT`, with a
+  tag-and-probe from `J/psi` and `Z -> mu mu`
+  ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Muon counters of
+  ground-based and underground arrays and the outer muon vetoes of underground detectors
+  (GND, UGD; PDG RPP 2025, secs. 35.6.6.1 and 36.3.1) need a reference sample of their
+  own; no hep-detector page gives a method for it yet.
 - **Rate capability**: drift tubes (long drift, space-charge and occupancy limits),
   cathode-strip chambers (high granularity, good for high rate), RPCs (fast, rate
   limited by resistivity), GEM/Micromegas (high rate, discharge risk)
