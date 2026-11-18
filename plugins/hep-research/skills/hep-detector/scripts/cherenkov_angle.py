@@ -36,7 +36,8 @@ resolution; quadrature by sqrt(sigma_A^2 + sigma_B^2), symmetric in the species.
 <plugin root>/skills/hep-detector/references/particle-identification.md.
 Defaults (F-06): the output lists the values used ("inputs") and those taken by default ("defaults_used"); a
 defaulted detector parameter (radiator length 2 cm, N0 100 /cm, single-photon resolution 5 mrad, track term 0) is
-also a warning, because the default describes no particular detector.
+also a warning, because the default describes no particular detector. A relative beta resolution above 0.1, or a
+relative mass resolution gamma^2 dbeta/beta above 0.1, is a warning: the first-order propagation is not reliable there.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
@@ -307,6 +308,14 @@ def main(argv=None):
                 'small-error propagation dbeta/beta = tan(theta_c) sigma_theta is not reliable there'
                 for label, rec in (('a', record_a), ('b', record_b))
                 if rec.get('relative_beta_resolution') is not None and rec['relative_beta_resolution'] > 0.1]
+    # CHK-AT-01-04: gamma^2 dbeta/beta is the first-order propagation of m = p sqrt(1/beta^2 - 1); once it exceeds
+    # 0.1 the beta error is no longer small against 1 - beta, m is nonlinear (undefined for beta >= 1) within the error, and the
+    # value is not a Gaussian resolution (PDG RPP 2025, Probability, sec. 39.2.1).
+    warnings += [f'species {label}: relative mass resolution {rec["relative_mass_resolution"]:.3g} exceeds 0.1; the '
+                 'first-order propagation dm/m = gamma^2 dbeta/beta is not reliable there: the beta error is not small '
+                 'against 1 - beta, so the mass is not Gaussian'
+                 for label, rec in (('a', record_a), ('b', record_b))
+                 if rec.get('relative_mass_resolution') is not None and rec['relative_mass_resolution'] > 0.1]
     payload = {
         'status': args.status,
         'inputs': {'index': index, 'species': list(args.species),

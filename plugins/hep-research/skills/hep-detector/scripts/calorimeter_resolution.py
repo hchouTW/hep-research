@@ -28,7 +28,9 @@ three distinct energies to separate three terms; with exactly three points there
 zero degrees of freedom and the output warns. A fitted squared coefficient can come
 out negative on noisy or narrow-range input - that is a failed separation: all three
 roots are null, ok is false, the reason is in warnings and the exit code is 1. An evaluation energy outside the
-fitted range (or outside --valid-range in --evaluate mode) is marked extrapolated. See
+fitted range (or outside --valid-range in --evaluate mode) is marked extrapolated. In --evaluate mode every term
+defaults to 0: all three zero is refused (exit 2), and a zero noise or constant term is a warning (a zero constant
+term leaves the resolution without its high-energy floor). See
 <plugin root>/skills/hep-detector/references/calorimetry-ecal-hcal.md.
 Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
 echoed as status.
@@ -322,11 +324,22 @@ def main(argv=None):
                 if low > high:
                     raise ValueError('valid-range LOW must not exceed HIGH')
                 valid_range = (low, high)
+            if args.stochastic == 0 and args.noise == 0 and args.constant == 0:
+                raise ValueError('--evaluate needs at least one nonzero term (--stochastic, --noise, --constant '
+                                 'all default to 0)')
             result = evaluate(args.stochastic, args.noise, args.constant, args.energy, valid_range)
             result['crossovers'] = crossover_energies(
                 args.stochastic, args.noise, args.constant)
         except ValueError as exc:
             parser.error(str(exc))
+        # CHK-AT-04-04: a zero (or omitted) term is a warning; the key appears only then, so three-term
+        # evaluations print what they printed before.
+        zero_terms = [name for name, value in (('noise', args.noise), ('constant', args.constant)) if value == 0]
+        if zero_terms:
+            floors = {'noise': 'no fixed energy uncertainty (electronic noise, pileup), which dominates at low energy',
+                      'constant': 'the resolution has no high-energy floor'}
+            result['warnings'] = [f'{name} term 0: {floors[name]}; see calorimetry-ecal-hcal.md, The resolution '
+                                  'decomposition' for name in zero_terms]
         method = 'direct evaluation of a^2/E + b^2/E^2 + c^2'
     else:
         try:

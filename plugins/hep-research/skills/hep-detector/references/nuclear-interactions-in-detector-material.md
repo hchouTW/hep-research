@@ -9,15 +9,27 @@ conventions (inelastic or charge-changing, targets, straight-ahead approximation
 
 ## Survival
 
-- The interaction length of a nucleus in a pure material of mass number A is `lambda = A / (N_A sigma)` (g/cm2), with
-  sigma the inelastic cross section per target nucleus. In a mixture with mass fractions w_i,
-  `1/lambda = sum_i w_i N_A sigma_i / A_i`, which is the same as crossing the components one after the other.
+- The interaction length of a nucleus in a pure material of molar mass A (the atomic mass in g/mol, not the integer
+  mass number) is `lambda = A / (N_A sigma)` (g/cm2), with sigma the inelastic cross section per target nucleus. In a
+  mixture with mass fractions w_i and molar masses A_i (g/mol), `1/lambda = sum_i w_i N_A sigma_i / A_i`, which is
+  the same as crossing the components one after the other.
 - Over layers of grammage x_k, `P = exp(-sum_k x_k / lambda_k)`; the flux above the material divides the counted
-  flux by P. Only the material between the point where the flux is defined (top of instrument, or a layer) and the
-  layers whose charge selects the species counts; state which.
+  flux by P. Only the material between the point where the flux is defined (top of atmosphere for a balloon-borne
+  instrument, top of instrument, or a layer) and the layers whose charge selects the species counts; state which.
+- Material outside the instrument (residual atmosphere above a balloon, a pressure vessel or dome) counts in both
+  survival and feed-down. Fragments made there cannot be tagged by the instrument's charge layers, so their
+  feed-down comes from cross-section models or simulation, and its cross-section uncertainty can dominate a
+  secondary-to-primary ratio at high energy. The overburden and the secondaries made in it belong in the instrument
+  response ([space-based direct detection](space-based-direct-detection.md), "Instrument response functions").
 - Which cross section: a selection that requires the same charge in every layer measures charge-changing survival;
   one that requires the same isotope measures inelastic survival. The cross section and the selection agree.
 - Survival depends on energy through sigma(E): the correction is per bin, from cross sections at that energy.
+- `P = exp(-sum x/lambda)` covers only the nuclear (inelastic or charge-changing) losses. Other losses in the same
+  material are separate factors with their own source, never folded into lambda: scattering or energy loss that takes
+  a nucleus out of the acceptance or below a selection threshold (at low energy the energy also changes across the
+  stack, so sigma is not constant along it), and the efficiency of the charge-consistency cuts for nuclei that did
+  not interact. Take them from a simulation of the instrument or from data, and count each once (in the acceptance
+  or in the survival, not both).
 
 ## Feed-down
 
