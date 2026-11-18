@@ -1,0 +1,52 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-907",
+  "published": "2026-11-17T14:38:52Z",
+  "modified": "2026-11-17T14:38:52Z",
+  "severity": "S2",
+  "ledger": [
+    "CHARGECONF-TEMPLATE-STATUS"
+  ],
+  "summary": "charge_confusion_rate.py template mode reported status ok with no warning for bins whose fit had a covariance warning or a yield at the boundary; its failed test on a missing rate_error could never fire.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "4c1cb8713932d802d8dcd6664f43bd68e773835c",
+        "fixed_commit": "c4607f627e438125d508646231f4ea1b46bf8230"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "template-mode status and warnings"
+    ],
+    "bias": "no number changes; bins with fit_outcome covariance-warning or converged-at-boundary carried no warning (rate_error_hessian unreliable there), seen in 10 runs at 5e5 to 1e6 events per bin",
+    "trigger": "template-mode output whose bins show fit_outcome covariance-warning or converged-at-boundary with an empty warnings list"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "how_to_recognize": "JSON on stdout of charge_confusion_rate.py template: status ok, warnings [], and a bin with fit_outcome other than converged; no artifact records the run"
+    }
+  },
+  "remedy": "check fit_outcome of every bin in existing outputs; rerun on a version with the fix to get the warnings",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/c4607f627e438125d508646231f4ea1b46bf8230"
+  ]
+}

@@ -6270,6 +6270,1634 @@
     "reason": "removes false alarms only: a digit run inside a 16+ character hexadecimal word, a rendering OUT_OF_SCOPE_RENDERINGS already excluded, no longer fails a scan; no released number changes and no sealed value printed as a decimal is missed",
     "decided": "2026-11-11, VALIDATION SCIFIX-HEX-WORDS"
    }
+  },
+  {
+   "id": "CHARGECONF-TEMPLATE-MAXIMUM",
+   "title": "charge_confusion_rate.py template mode returns the Barlow-Beeston maximum, not a point where the minimizer stopped at the wrong-sign boundary",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "independent-implementation",
+    "analytic",
+    "invariant",
+    "behavioral"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "expected_from: the profile-scan oracle is a transcribed formula (PDG eqs. 40.40, 40.41, 40.9, 40.78 coded in the test); the scipy oracle uses scipy's Poisson pmf and L-BFGS-B, but the product of Poisson terms is coded in the test, so it is recorded as third-party-definition with that caveat; the dominance check is a general result",
+    "only the two-template (no background) case is checked against oracles at 5e5 and 1e6 events; the three-template maximum is checked only through CHK-AT-08-03's cases",
+    "the same naive-then-Barlow-Beeston start sequence is in core/stats/template_fit.py bb_fit (owner hep-statistics), not changed here",
+    "the follow-up's evidence (test_f_s12_chargeconf_sparse_template.py) covers one sparse two-template case (the fix verifier's); a background template whose yield reaches exactly 0 inside _profile_at still has its MC terms dropped by core template_fit._ll_bb (owner hep-statistics), not seen in any case here"
+   ],
+   "note": "template_rate started the Barlow-Beeston fit from the naive fit, which often ends with the wrong-sign yield at 0; at 5e5 to 1e6 events per bin Nelder-Mead's relative tolerance (about 1e-3 at ln L ~ 1e7) stopped it there: rates of ~7e-7 with status ok, exit 0 and an interval profiled against that point (e.g. 1e6 events, injected 1e-2: 7.4e-7 against the oracle's 0.01162, 2 Delta ln L = 45). The fix finds the maximum through the profile likelihood in r (grid 0 and 1e-6 to 1 in quarter decades, golden-section refinement, a polishing fit), keeps the deepest of scan, polish and the old start, and makes the outcome not-converged when a fit beats the scan by more than 2 Delta ln L = 1. Cases (events, rate, seed): (5e5, 1e-2, 0), (5e5, 5e-2, 1), (1e6, 1e-2, 0), (1e6, 5e-2, 0); tolerances 0.1 sigma for rate and interval ends, 0.05 in 2 Delta ln L, justified in the test file. Property: bin-permutation invariance. Negative control: the pre-fix start sequence emulated with core.stats.template_fit is rejected by the oracle. Follow-up (rework 2): the fix's rate grid started at exactly r = 0, where the wrong-sign yield is 0 and core template_fit._ll_bb drops that template's MC terms, so ln L there is not the limit r -> 0+; with a sparse wrong-sign MC template (1-2 counts per bin) r = 0 won and the bin got rate 0, interval [0, 4.5e-13], status ok (e.g. the oracle's 4.15e-3, [6.5e-4, 1.17e-2]). The follow-up evaluates the profile at R_FLOOR = 1e-12 and 1 - R_FLOOR instead of 0 and 1 (grid ends and the interval end tests), and leaves out of the comparison a fit that ends with the right- or wrong-sign yield at the boundary. Commits: tests-only 8e00e6b69924836d09ed371ff921b8d3cc6563e7, fix dbbaadceedaf12fcc60d89f26bcf4113225ff766 (follow_up); the parent records of test_f_s12_chargeconf_sparse_template.py are to be run at 8e00e6b69924836d09ed371ff921b8d3cc6563e7 (its parent) and dbbaadceedaf12fcc60d89f26bcf4113225ff766.",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_and_interval_match_profile_scan",
+     "basis": "locator",
+     "detail": "profile scan of the joint Poisson likelihood of data and MC template counts with one nuisance per bin and template (PDG 2025 Statistics eq. 40.40), nuisances profiled per bin by exact cyclic coordinate descent (eq. 40.41), total yield by golden section, rate on 1e-5..1 in eighth decades then golden section; MLE by eq. 40.9, 68.27% interval at 2 Delta ln L = 1 (eq. 40.78, Table 40.1); rate and both ends within 0.1 sigma",
+     "source_id": "scifix:S1201",
+     "locator_id": [
+      "scifix:C1201",
+      "scifix:C1202",
+      "scifix:C1203"
+     ],
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_matches_scipy_explicit_nuisance_fit",
+     "basis": "third-party",
+     "detail": "scipy.stats.poisson.logpmf over data and MC counts with all yields and nuisances free (log parameters), minimized by scipy.optimize.minimize L-BFGS-B from three interior starts; rate within 0.1 sigma; the product of Poisson terms is coded in the test",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_reported_yields_are_the_maximum",
+     "basis": "locator",
+     "detail": "the MLE maximizes L (PDG 2025 Statistics sec. 40.2.2, eq. 40.9): the tool's reported yields, put into the oracle likelihood, must be within 2 Delta ln L = 0.05 of the oracle's maximum",
+     "source_id": "scifix:S1201",
+     "locator_id": "scifix:C1201",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "general-result"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_and_interval_match_profile_scan",
+     "basis": "locator",
+     "detail": "sparse wrong-sign MC template (1-2 counts per bin), four bins of ~5000 right-sign plus 3, 6, 10, 20 wrong-sign events: profile scan of the joint Poisson likelihood of data and MC template counts (PDG 2025 Statistics eq. 40.40) with every MC factor kept at a zero yield, so continuous at r = 0; nuisances by exact cyclic coordinate descent (eq. 40.41), total yield by golden section, rate on 0 and 1e-6..1 in eighth decades then golden section; MLE by eq. 40.9, 68.27% interval at 2 Delta ln L = 1 (eq. 40.78, Table 40.1), lower end 0 when inside; rate and both ends within 0.1 sigma",
+     "source_id": "scifix:S1201",
+     "locator_id": [
+      "scifix:C1201",
+      "scifix:C1202",
+      "scifix:C1203"
+     ],
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_matches_scipy_explicit_nuisance_fit",
+     "basis": "third-party",
+     "detail": "the same sparse-template bins: scipy.stats.poisson.logpmf over data and MC counts with all yields and nuisances free (log parameters bounded below so a yield may approach 0), minimized by scipy.optimize.minimize L-BFGS-B from five starts (rates 0.2 to 2e-5); rate within 0.1 sigma; the product of Poisson terms is coded in the test",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_reported_yields_are_the_maximum",
+     "basis": "locator",
+     "detail": "the MLE maximizes L (PDG 2025 Statistics sec. 40.2.2, eq. 40.9): for the sparse-template bins the tool's reported yields, put into the oracle likelihood, must be within 2 Delta ln L = 0.05 of the oracle's maximum",
+     "source_id": "scifix:S1201",
+     "locator_id": "scifix:C1201",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "general-result"
+    }
+   ],
+   "commits": {
+    "parent": "269d03284ebb18d9c0162b8f94570416b04056d1",
+    "fix": "9c93aeed1464b13fa7a697fca2a6d28a9709a967",
+    "follow_up": [
+     "8e00e6b69924836d09ed371ff921b8d3cc6563e7",
+     "dbbaadceedaf12fcc60d89f26bcf4113225ff766"
+    ]
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_and_interval_match_profile_scan",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_matches_scipy_explicit_nuisance_fit",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_reported_yields_are_the_maximum",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_and_interval_match_profile_scan",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_matches_scipy_explicit_nuisance_fit",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_reported_yields_are_the_maximum",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::_bb_maximum",
+     "mutation": "other",
+     "detail": "keeps the old fit from the naive start as the maximum",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::_bb_maximum",
+     "mutation": "other",
+     "detail": "drops the golden-section refinement of the rate scan",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::_bb_maximum",
+     "mutation": "other",
+     "detail": "starts the rate scan at exactly r = 0 again (patch against the follow-up commit)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_and_interval_match_profile_scan",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_matches_scipy_explicit_nuisance_fit",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_reported_yields_are_the_maximum",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_and_interval_match_profile_scan",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_matches_scipy_explicit_nuisance_fit",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_reported_yields_are_the_maximum"
+   ]
+  },
+  {
+   "id": "CHARGECONF-TEMPLATE-STATUS",
+   "title": "charge_confusion_rate.py template status and warnings follow one per-bin rule; covariance-warning and boundary bins are warned",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "the exhaustive test replaces the per-bin fit by a fixed row, so it tests the status rule only; a real covariance-warning bin is not constructed (the real-fit test covers converged-at-boundary)"
+   ],
+   "note": "run_template marked a bin failed on fit_outcome in FAILED_OUTCOMES or rate_error None; rate_error is the profile half-width and is never None, so the second test was dead and a covariance-warning or boundary bin gave status ok with an empty warnings list. Rule now (lead decision, as core/stats/template_fit._overall): not-converged or infeasible gives failed and a warning naming the bin; converged-at-boundary or covariance-warning alone gives ok and a warning naming the bin. The dead test is dropped; the docstring states the rule and exit codes.",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_exhaustive_outcome_rule",
+     "basis": "exhaustive",
+     "detail": "all five fit outcomes of core/stats/template_fit.py in bin 2 of two bins (bin 1 converged), the per-bin fit replaced by a fixed row; status, exit code and warnings against the rule; expected from the rule, not the tool",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "74b030ef69f11090ea663016edba7dfb99f1d607",
+    "fix": "c4607f627e438125d508646231f4ea1b46bf8230",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_exhaustive_outcome_rule",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_real_boundary_fit_is_warned",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_template",
+     "mutation": "other",
+     "detail": "drops the warning for converged-at-boundary and covariance-warning bins",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_template",
+     "mutation": "other",
+     "detail": "drops the failed status for not-converged and infeasible bins",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_exhaustive_outcome_rule",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_real_boundary_fit_is_warned"
+   ]
+  },
+  {
+   "id": "CHARGECONF-TEMPLATE-IDENTIFICATION",
+   "title": "charge_confusion_rate.py fails a template bin whose rate is not identified and passes no rate for it in sign_rates",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "independent-implementation",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "both oracles are scipy (third-party); in the test cases the two not-identified clauses overlap (every case caught by the interval reaching r = 1 is also caught by the homogeneity test), so a mutant dropping the interval clause survives",
+    "the 68% interval of a partly degenerate background (shape different at p < 0.01) still comes from a local Nelder-Mead profile and can be too narrow; not changed here",
+    "mutant CHK-AT-08-03-2.patch (drops the interval-reaches-r=1 test) survived the lead's rerun of the evidence tests"
+   ],
+   "note": "with a background template degenerate with the right-sign one, Y_right and so r are not identified: the tool reported an arbitrary point of a flat direction with status ok and passed it on in sign_rates (species_response.py from-rates reads it). Now a bin whose 68% profile interval reaches r = 1, or whose background template is compatible in shape with the right-sign template within the template statistics (Pearson chi2 of the 2 x bins table, p >= 0.01), gives status failed, a warning naming the bin, and null sign_rates entries (species_response.py from-rates refuses null rates). The upper interval end is tested at 1 - 1e-12, because template_fit._ll_bb drops a template whose yield is exactly 0, so ln L at r = 1 is not the limit r -> 1.",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_bins_fail_and_are_named",
+     "basis": "third-party",
+     "detail": "scipy.stats.poisson.logpmf joint likelihood of data and MC counts (all nuisances), minimized by L-BFGS-B from four starts, free and with Y_right = 0; 2 Delta ln L(r = 1) < 1 means the 68% interval reaches r = 1 (PDG 2025 Statistics eq. 40.78); scipy.stats.chi2_contingency p >= 0.01 means the shapes are compatible; expected not identified for bins 2 to 4, identified for the background-free control",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_rates_are_not_passed_on",
+     "basis": "third-party",
+     "detail": "same oracles; sign_rates rate and rate_error are null exactly for the bins they classify as not identified, and the control's rate is passed on and within 4 sigma of the injected 0.02",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    }
+   ],
+   "commits": {
+    "parent": "ae022b2331e2c4aaf595d37507370665ad0e6b77",
+    "fix": "1df18e5c3483710ae774daa0fa5b60399d08afba",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_bins_fail_and_are_named",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_rates_are_not_passed_on",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::template_rate",
+     "mutation": "other",
+     "detail": "drops the background-shape homogeneity test",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_template",
+     "mutation": "other",
+     "detail": "passes not-identified rates on in sign_rates",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_bins_fail_and_are_named",
+    "tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_rates_are_not_passed_on"
+   ]
+  },
+  {
+   "id": "CHARGECONF-CONTROL-MC-SIGN",
+   "title": "charge_confusion_rate.py control mode refuses an MC sample that is not of the data sample's one true sign",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "exhaustive",
+    "invariant",
+    "behavioral"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "the --mc sample's true signs were read and discarded, so an MC sample of the other true sign, or of both pooled, gave a silently wrong scale factor r_data / r_mc (c+ and c- differ; e.g. data negative with MC of both signs: MC rate 0.0166 pooled against 0.0010 for its negative tracks). The MC sample must now have exactly the data's one true sign, else exit 2 (rejected). Exhaustive over the data sign and the MC true-sign set {positive}, {negative}, both, none; the same-species scale factor equals the ratio of the binomial rates counted in the test (PDG 2025 Statistics sec. 40.4.2.4); property: sign swap; negative control: the pooled MC rate differs from the species rate by more than a factor 5.",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_exhaustive_sign_combinations",
+     "basis": "exhaustive",
+     "detail": "2 data signs x 4 MC true-sign sets ({positive}, {negative}, both, none): accepted (exit 0) exactly when the MC set is the data's sign alone, else rejected (exit 2); expected from the domain's rule",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "53ad035eb49c13e23f198e78663dbfce47d90758",
+    "fix": "eb9005e2621711abd47c4d6951134bc00edc64e6",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_exhaustive_sign_combinations",
+     "adapted_parent": false,
+     "validation": "SCIFIX-CHARGECONF",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_control",
+     "mutation": "other",
+     "detail": "removes the MC true-sign check",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_control",
+     "mutation": "other",
+     "detail": "checks only that the MC sample has one true sign, not the data's",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_exhaustive_sign_combinations"
+   ]
+  },
+  {
+   "id": "G4BENCH-TRUNC98",
+   "title": "The multiple-scattering sanity benchmark divides the RMS of the central 98 % by the truncated Gaussian's RMS 0.9346, not 0.8673",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "symbolic",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "mutants: this run records every local mutant as mutation other (the card's rule), the revert of TRUNC_98 included (CHK-AT-09-01-1.patch), so D3 is not claimed"
+   ],
+   "note": "audit CHK-AT-09-01 (AT-09, check C2); TRUNC_98 = 0.8673 is close to the truncated variance 0.87346, not to the RMS 0.93459 of a unit Gaussian truncated to its central 98 %, so RMS(central 98 %) / TRUNC_98 was 7.8 % high for exactly Gaussian angles; TRUNC_98 is now computed, sqrt(1 - 2 z phi(z) / (2 Phi(z) - 1)), z = Phi^-1(0.99); C4 over the closed form at F = 0.98 (SymPy), plus the estimator on exact normal quantiles, a scale invariant and the pre-fix factor as an emulated negative control; follow-up 33422113 corrects geant4-study-protocol.md (multiple-scattering core estimator: divides by 0.9346, and the tail inside the window adds about 3 %, not about 10 %; +11.5 % / 1.0776 = +3.5 %, +10.6 % / 1.0776 = +2.6 %); follow-up c5abecd6 corrects the CoreWidth docstring of tests/skills/hep_detector/test_geant4_b2_benchmarks.py the same way (no assertion changed) (VALIDATION SCIFIX-F-S12-G4BENCH)",
+   "independence": [
+    {
+     "kind": "symbolic",
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor::test_factor_is_the_rms_of_the_central_98_percent_of_a_unit_gaussian",
+     "basis": "third-party",
+     "detail": "SymPy 1.14 integrates x^2 exp(-x^2/2) and exp(-x^2/2) over [-z, z], z = sqrt(2) erfinv(49/50), from the definition of the conditional second moment, and evaluates the square root of their ratio to 30 digits; |TRUNC_98 - expected| < 1e-9",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     },
+     "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth::test_bench_ms_recovers_the_width_of_gaussian_quantile_angles",
+     "basis": "third-party",
+     "detail": "20000 events whose two projected angles sit at sigma Phi^-1((i + 1/2)/N) from Python's statistics.NormalDist.inv_cdf (its own algorithm), so the central 98 % of the sample is the distribution's by construction; bench_ms must return sigma to 1e-4 relative",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "general-result"
+    }
+   ],
+   "commits": {
+    "parent": "d43d7b7da95dcd2d20831e195b15bf2050589980",
+    "fix": "17ff42e54dec2d3a9701b70757655b4477e272b6",
+    "follow_up": [
+     "334221135702f8bfbd71c4223894cff6408dca23",
+     "c5abecd67f87700235ce94f32f1a18160b1f6fab"
+    ]
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor::test_factor_is_the_rms_of_the_central_98_percent_of_a_unit_gaussian",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [
+       "mpmath",
+       "sympy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth::test_bench_ms_recovers_the_width_of_gaussian_quantile_angles",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::TRUNC_98",
+     "mutation": "other",
+     "detail": "restores the constant 0.8673",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth",
+      "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::TRUNC_98",
+     "mutation": "other",
+     "detail": "uses the truncated variance (no square root) as the factor",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth",
+      "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::TRUNC_98",
+     "mutation": "other",
+     "detail": "takes z at Phi^-1(0.98) instead of Phi^-1(0.99)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth",
+      "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth::test_bench_ms_recovers_the_width_of_gaussian_quantile_angles",
+    "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor::test_factor_is_the_rms_of_the_central_98_percent_of_a_unit_gaussian"
+   ]
+  },
+  {
+   "id": "G4BENCH-HIGHLAND-KINEMATICS",
+   "title": "The multiple-scattering sanity benchmark evaluates Highland at its particle and energy, not at multiple_scattering.py's 100 GV default",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "analytic",
+    "exhaustive",
+    "invariant"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "transcription rule (reported, not enforced): both independence records compute their expected value from RPP eq. (34.16) transcribed into the test; no located source prints a Highland value for a stated particle, energy and material, and no third-party implementation was run",
+    "mutants: this run records every local mutant as mutation other (the card's rule), the revert included (CHK-AT-09-02-1.patch), so D3 is not claimed"
+   ],
+   "note": "audit CHK-AT-09-02 (AT-09, check C2); bench_ms ran multiple_scattering.py with the stack path only, so Highland was evaluated at 100 GV, beta 1, z 1 whatever the benchmark's particle and energy_MeV (a 1 GeV kinetic-energy proton through 0.3 mm of silicon: 0.0147 x the correct reference); it now passes --rigidity p/(1000 |z|), --mass m/1000 and --charge |z| and refuses an output evaluated elsewhere; analytic and exhaustive (9 particle names x 3 energies) records against eq. (34.16), a charge-sign invariant and the pre-fix 100 GV evaluation as an emulated negative control (VALIDATION SCIFIX-F-S12-G4BENCH)",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_proton_of_1_gev_kinetic_energy",
+     "basis": "locator",
+     "detail": "RPP 2024 eq. (34.16), p. 16, with p = sqrt(T (T + 2 m)), beta = p / (T + m), z the charge number (\"p, beta c, and z are the momentum, speed, and charge number of the incident particle\"), CODATA 2022 proton mass, read 2026-11-17; relative tolerance 1e-9",
+     "source_id": "scifix:S01",
+     "locator_id": "scifix:C04",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_every_known_particle_and_energy",
+     "basis": "exhaustive",
+     "detail": "every particle name particle_props accepts (e-, e+, mu-, mu+, pi+, pi-, proton, deuteron, alpha) at T = 10, 1000 and 100000 MeV (27 cases), expected at each case from the located eq. (34.16) with CODATA 2022 and PDG masses; relative tolerance 1e-9",
+     "source_id": "scifix:S01",
+     "locator_id": "scifix:C04",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "b757993102409ff9cc33db41eb8ea9a0f79a364a",
+    "fix": "0de60bfb7938f40da4a960fa47e93318e531f0e3",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_proton_of_1_gev_kinetic_energy",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_every_known_particle_and_energy",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_ms",
+     "mutation": "other",
+     "detail": "calls multiple_scattering.py with the stack only and drops the rigidity guard",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_ms",
+     "mutation": "other",
+     "detail": "uses the kinetic energy as the momentum",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_ms",
+     "mutation": "other",
+     "detail": "drops the --mass argument (beta 1)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_ms",
+     "mutation": "other",
+     "detail": "neither divides the rigidity by the charge nor passes the charge number",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_every_known_particle_and_energy",
+    "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_proton_of_1_gev_kinetic_energy"
+   ]
+  },
+  {
+   "id": "G4BENCH-HELIX-SIGN",
+   "title": "The g4sim field-propagation benchmark's helix bends to the other side in a negative field instead of running backwards",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "the Runge-Kutta integration of the Lorentz force (test_runge_kutta_lorentz_force_for_both_signs) is not counted as an independent kind: no located source for the Lorentz force is recorded in the ledger",
+    "mutants: this run records every local mutant as mutation other (the card's rule), the revert included (CHK-AT-09-03-1.patch), so D3 is not claimed"
+   ],
+   "note": "audit CHK-AT-09-03 (AT-09, check C2); bench_field_g4sim negated the turned angle for B < 0, which ran the helix backwards along its initial direction with the bend on the same side: a correct propagation in a negative field failed by about 1.8 m; the turned angle is never negated and the bend's side is -sign(B) R (1 - cos turned); B > 0 is unchanged; the optional refusal of a field_tesla that differs from the IR's dipole b_tesla was not added (VALIDATION SCIFIX-F-S12-G4BENCH)",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_every_field_azimuth_and_turn",
+     "basis": "exhaustive",
+     "detail": "the finite domain B in {+1, -1, +2, -0.5} T x 8 initial azimuths x turns {pi/2, pi, 3 pi/2} (96 crossings); expected positions from the circle of a positive charge derived by hand from q v x B (phi = phi0 - sign(B) theta); largest in-plane distance below 1e-3 um",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "63de22d7570911cca15ef31c61679264c65aba85",
+    "fix": "c21b2ac52e62cbba356bfa27281e279599bcc442",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_every_field_azimuth_and_turn",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_runge_kutta_lorentz_force_for_both_signs",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_field_g4sim",
+     "mutation": "other",
+     "detail": "restores the negated turn angle with a fixed across sign",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_field_g4sim",
+     "mutation": "other",
+     "detail": "signs the along coordinate with the field too",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::bench_field_g4sim",
+     "mutation": "other",
+     "detail": "fixes the across sign whatever the field",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_every_field_azimuth_and_turn",
+    "tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_runge_kutta_lorentz_force_for_both_signs"
+   ]
+  },
+  {
+   "id": "G4BENCH-HEAVY-ONLY",
+   "title": "stopping-power, thin-layer-mpv, thin-layer-width and the reference command refuse electrons and positrons (heavy-particle references)",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "published",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [
+    "the refusal of thin-layer-mpv and thin-layer-width for e+- rests on eq. (34.12) sitting in RPP sec. 34.2 (electronic energy loss by heavy particles), not on a statement that it fails for electrons (the issue marked this needs-judgement; the fix refuses conservatively)",
+    "mutants: this run records every local mutant as mutation other (the card's rule), the revert included (CHK-AT-09-04-1.patch), so D3 is not claimed"
+   ],
+   "note": "audit CHK-AT-09-04 (AT-09, check C2); the heavy-particle Bethe mean rate (eq. 34.5) and Landau-Vavilov Delta_p (eq. 34.12) were applied to e- and e+ (1.4865 MeV cm2/g at gamma 3.3 for both, where RPP prints 1.50 for e- and 1.46 for e+ in silicon), and a 100 MeV electron's mean loss in 0.3 mm of silicon includes about 0.32 MeV of bremsstrahlung against a 0.130 MeV reference, so a correct Geant4 run failed; heavy_particle_props refuses e+- (exit 2) in those benchmarks, in slab_expected_shift and in the reference command; em-shower-shape, shower-containment and the multiple-scattering benchmarks keep them (VALIDATION SCIFIX-F-S12-G4BENCH)",
+   "independence": [
+    {
+     "kind": "published",
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences::test_electrons_and_positrons_are_refused_by_the_heavy_particle_references",
+     "basis": "locator",
+     "detail": "RPP 2024 sec. 34.2.3, p. 4: eq. (34.5) describes \"moderately relativistic charged heavy particles\", inside sec. 34.2 \"Electronic energy loss by heavy particles\" (which holds eq. (34.12), sec. 34.2.9); sec. 34.4.1, pp. 17-18: e- and e+ stopping powers differ from each other and from heavy particles (eqs. 34.23-34.24; silicon minima 1.50, 1.46 and, for muons, 1.66 MeV cm2/g); read 2026-11-17; expected: refusal (exit 2) for e+- in the three benchmarks and the reference command",
+     "source_id": "scifix:S01",
+     "locator_id": "scifix:C01",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "printed"
+    }
+   ],
+   "commits": {
+    "parent": "3b479ce2c6dfa50e27b20ec1a7e8101e032d3f60",
+    "fix": "4926e18b7309072a69c6c5a5ddd5f5b6c64a70c5",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences::test_electrons_and_positrons_are_refused_by_the_heavy_particle_references",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-G4BENCH",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::heavy_particle_props",
+     "mutation": "other",
+     "detail": "disables the electron and positron refusal",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::heavy_particle_props",
+     "mutation": "other",
+     "detail": "refuses only e-, not e+",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/geant4_benchmarks.py::cmd_reference",
+     "mutation": "other",
+     "detail": "lets the reference command use the unguarded particle_props",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences::test_electrons_and_positrons_are_refused_by_the_heavy_particle_references"
+   ]
+  },
+  {
+   "id": "CHK-AT-12-01",
+   "title": "g4kit.py uses a geometric default given in the design geometry file instead of dropping it",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "exhaustive",
+    "invariant",
+    "behavioral"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "one counted independent kind (exhaustive, over the stated finite domain: the nine geometric defaults of the five shipped kits that have them, each omitted and each given at three values, 32 derivations); the expanded-geometry check (neighbouring tof bars separated by the design gap) is an invariant through contracts/geometry.py, in-repository code, so it is not counted as an independent kind",
+    "no external source: the defect is a consistency defect (the docstring of input_values() against detector_spec()), so no locator oracle applies; the expected values are the design file's own numbers",
+    "the expanded-geometry invariant covers the tof kit only; the other four kits are covered at the detector-spec params level by the exhaustive oracle",
+    "D grade claimed D2 pending the lead's parent records at the tests-only commit and the fix commit; mutants are of kind other (no revert mutant is recorded in this run), so D3 is not claimed"
+   ],
+   "note": "issue CHK-AT-12-01 (audit AT-12, check C2): input_values() accepted a design-geometry/1 field named after a kit's geometric default and merged it into the values, but detector_spec() filled params from kit['geometric_defaults'], so the design's value was dropped without a message; params now read the merged value. Reached only by a hand-written design-geometry/1 file: the shipped mappings (contracts/rules/design_geometry/*.json) map kit inputs only. Kits affected: calorimeter, endcap_disks, shell_veto, tof, trd. detector_spec() has one caller, derive() in the same script; its input range is unchanged (no normalisation change). No committed example output uses g4kit.py. Evidence tests: tolerance zero (exact decimal arithmetic), fixed in the tests-only commit 6f235878.",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults::test_every_geometric_default_takes_the_design_value",
+     "basis": "exhaustive",
+     "detail": "every geometric default of every shipped kit with one (calorimeter wrap_mm, tower_gap_mm, guide_mm, guide_side_mm, guide_gap_mm; endcap-disks disk_margin_mm; shell-veto readout_gap_mm; tof bar_gap_mm; trd straw_gap_mm), omitted and given at the kit default, twice and half it: 32 derivations through the g4kit.py program; the expected value is the design file's number, or the kit file's default when omitted, compared as decimal.Decimal with tolerance zero",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "6f2358786237e364836a2d18f01813af9a7c7037",
+    "fix": "d5afb4dfb3a4ed35fc8952bc9f7230894575c69e",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults::test_every_geometric_default_takes_the_design_value",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "CHK-AT-12-01",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry::test_neighbouring_bars_are_separated_by_the_design_gap",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "CHK-AT-12-01",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry::test_a_geometric_default_in_the_design_changes_the_geometry",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "CHK-AT-12-01",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/g4kit.py::detector_spec",
+     "mutation": "other",
+     "detail": "fills every geometric default in params from the kit file again, ignoring the merged design value",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults",
+      "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/g4kit.py::detector_spec",
+     "mutation": "other",
+     "detail": "honours the design value only for the kit's first geometric default and takes the kit's value for the others",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/g4kit.py::input_values",
+     "mutation": "other",
+     "detail": "merges the kit's geometric defaults over the design fields, so the kit's value wins",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults",
+      "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults::test_every_geometric_default_takes_the_design_value",
+    "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry::test_a_geometric_default_in_the_design_changes_the_geometry",
+    "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry::test_neighbouring_bars_are_separated_by_the_design_gap"
+   ]
+  },
+  {
+   "id": "DC-CHERENKOV-NONFINITE-YIELD",
+   "title": "cherenkov_angle.py refuses a non-finite expected photon number and reports a zero per-track resolution as a failure, instead of a ZeroDivisionError traceback",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S4",
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "robust-fix (detector content audit CHK-AT-01-01): with --radiator-length 1e200 --figure-of-merit 1e200, N0*L = 1e400 overflowed to inf, the per-track resolution was 0 and main() divided by it (traceback, exit 1, empty stdout, against the docstring's exit codes). describe_species now raises ValueError for a non-finite expected photon number (exit 2, error_kind invalid-input), and main() fails with JSON ok false (exit 1) when the per-track resolution underflows to zero (finite N about 1e299 with a 1e-300 mrad single-photon term). No result of a finite, in-range input changes; the negative control (pi/K, 10 GeV/c, n = 1.05) passes on parent and fix (VALIDATION DC-F-S12-MISC)",
+   "independence": [],
+   "commits": {
+    "parent": "b020178597296be318f28c0fbc9eb7b636ec946f",
+    "fix": "faa7e3c0d5bcf1846d03dc762f0176174099e2f9",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_overflowing_photon_number_is_invalid_input",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-S12-MISC",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_resolution_underflowing_to_zero_fails_with_json",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-S12-MISC",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/cherenkov_angle.py::describe_species",
+     "mutation": "other",
+     "detail": "the non-finite photon number check removed",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/cherenkov_angle.py::main",
+     "mutation": "other",
+     "detail": "the zero per-track resolution guard removed",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/cherenkov_angle.py::describe_species",
+     "mutation": "other",
+     "detail": "a non-finite photon number returns the record early instead of raising",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_overflowing_photon_number_is_invalid_input",
+    "tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_resolution_underflowing_to_zero_fails_with_json"
+   ]
+  },
+  {
+   "id": "DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE",
+   "title": "The tof kit's F4 time resolution is optimistic unless every tail source is simulated (tof.json time-resolution tail_sensitive true)",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "published",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "the oracle's rule (estimate only with all four tail sources simulated) is the repository's own protocol text (geant4-study-protocol.md, FID-03); the external locator (PDG RPP 2025 sec. 35.4 and eq. (35.25)) supports only that a time resolution has terms the kit does not simulate, not the label itself"
+   ],
+   "note": "sci-fix (detector content audit CHK-AT-12-02): contracts/rules/design_geometry/tof.json declared time-resolution tail_sensitive false, the only resolution, confusion or rejection figure of merit of the ten kit mappings to do so, so contracts/design.py check_f4 and evaluate_design.py f4 labelled every F4 time resolution of the tof kit an estimate whatever tail sources the study simulated, against geant4-study-protocol.md ('An F4 resolution is an estimate only with all four tail sources simulated, else optimistic') and the FID-03 schema rule. The kit's time is simreco's truth crossing time plus one Gaussian smear sigma_t_ps, without the scintillator, photodetector and electronics terms of PDG RPP 2025 sec. 35.4 (p. 16) and eq. (35.25) (p. 73). mapping_version stays 1.2.0 (it selects the schema form, not the content). The evidence drives check_f4 on a copy of the design-minimal-spectrometer artifacts with the candidate set to geometry kind tof; the negative control patches the mapping back to false and shows the oracle rejects the result (VALIDATION DC-F-S12-MISC)",
+   "independence": [
+    {
+     "kind": "published",
+     "test": "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_f4_bound_follows_the_protocol_rule",
+     "basis": "locator",
+     "detail": "expected bound from the protocol rule (geant4-study-protocol.md F4 paragraph, FID-03) applied to a time resolution, which PDG RPP 2025 sec. 35.4, p. 16 and sec. 35.8.4 eq. (35.25), p. 73 show has contributions a truth-plus-one-Gaussian study does not simulate: tails {} and partial sets optimistic, all four estimate",
+     "source_id": "scifix:S03",
+     "locator_id": [
+      "scifix:C915",
+      "scifix:C916"
+     ],
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "transcribed-formula"
+    }
+   ],
+   "commits": {
+    "parent": "18d225d919bca6c5bce7072ee4484c0ca0cb6d95",
+    "fix": "7fb6494ce29a9a634c05a8ee90ab7ffdf5eee9ac",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_f4_bound_follows_the_protocol_rule",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-S12-MISC",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_mapping_marks_time_resolution_tail_sensitive",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-S12-MISC",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "contracts/rules/design_geometry/tof.json::figures_of_merit.time-resolution",
+     "mutation": "other",
+     "detail": "tail_sensitive set back to false",
+     "killed_by": [
+      "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound"
+     ]
+    },
+    {
+     "function": "contracts/rules/design_geometry/tof.json::figures_of_merit.time-resolution",
+     "mutation": "other",
+     "detail": "the tail_sensitive key removed",
+     "killed_by": [
+      "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_f4_bound_follows_the_protocol_rule",
+    "tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_mapping_marks_time_resolution_tail_sensitive"
+   ]
+  },
+  {
+   "id": "MULTISAMPLE-TOYS-TABLE-EDGE",
+   "title": "multisample_pid.py charge --toys counts and reports toy events left out by the response table",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "analytic",
+    "independent-implementation",
+    "invariant",
+    "behavioral"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "no exhaustive or symbolic oracle (C4): the left-out fraction 1 - (F(hi) - F(lo))^L has a closed form, checked against scipy's Moyal CDF at one configuration (toy Z 2, relative width 0.12, 4 layers, table to signal 5.5) only",
+    "the fix reports the bias, it does not remove it: the predicted width still comes from the toys inside the table"
+   ],
+   "note": "CHK-AT-06-01 (audit AT-06): in run_charge's toy loop a toy event with a per-layer sample outside the response table was skipped silently, so toy_prediction's sigma68 came from the surviving toys only (the audit's case: 7.5% of toys kept, sigma68 0.051 against 0.097 for all toys; the Landau tail is highly skewed, PDG RPP 2025 Passage of particles through matter, sec. 34.2.9). The toy loop now counts them, toy_prediction gives toys_requested and toys_used, a warning names the count, and no surviving toy is an input error instead of a statistics traceback",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_the_moyal_cdf",
+     "basis": "third-party",
+     "detail": "the reported left-out fraction against 1 - (F(5.5) - F(0))^4 with F = scipy.stats.moyal.cdf (loc 4, scale 0.48), within 5 binomial standard deviations of N = 20000 toys",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_scipy_sampling",
+     "basis": "third-party",
+     "detail": "the reported left-out fraction against the fraction of toys drawn with scipy.stats.moyal.rvs (scipy's sampler) with a sample outside [0, 5.5], within 5 standard deviations of the difference",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    }
+   ],
+   "commits": {
+    "parent": "0aa054d18f76e7a3173dc9e51eb5f4db2641b6e8",
+    "fix": "5defabaa62a9a7d6bfe6549efc2ab0fcc5c3bcee",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_the_moyal_cdf",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-PID",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_scipy_sampling",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-PID",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_charge",
+     "mutation": "other",
+     "detail": "the toy warning is never appended",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_charge",
+     "mutation": "other",
+     "detail": "the left-out count adds the samples outside the table instead of the events",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_charge",
+     "mutation": "other",
+     "detail": "toys_used reports the requested count",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_scipy_sampling",
+    "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_the_moyal_cdf"
+   ]
+  },
+  {
+   "id": "MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE",
+   "title": "multisample_pid.py charge --method likelihood counts maxima at the edge of --z-range instead of returning the edge",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "independent-implementation",
+    "exhaustive",
+    "invariant",
+    "behavioral"
+   ],
+   "correctness": "C3",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "the exhaustive domain is 200 constant-signal events at one relative width (0.1) and one --z-range (0.5 to 3.5); cases within two scan steps of an edge are excluded as ambiguous",
+    "edge detection relies on a unimodal likelihood on the scan; a local maximum inside the range with the global one outside is not detected"
+   ],
+   "note": "CHK-AT-06-02 (audit AT-06): likelihood_z returned the first or last scanned Z when the maximum lies outside --z-range, so events of a charge above ZMAX were reported at ZMAX (the audit's case: 50 events of Z = 5 with --z-range 0.5 3 all at 3.0, sigma68 0, no warning); an estimate on the boundary is not a maximum of L (PDG RPP 2025 Statistics, sec. 40.2.2). likelihood_z now says whether its maximum is on the first or last scanned point; run_charge leaves such events and toys out, counts them (at_z_range_edge) and warns",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_maxima_outside_the_range_are_counted_not_returned",
+     "basis": "third-party",
+     "detail": "per event the continuous maximum-likelihood Z from scipy.optimize.minimize_scalar over scipy.stats.moyal.logpdf (80 sampled events, true Z 2 and 5, 6 layers); the edge count equals the events with a maximum outside [0.5, 3.5] and the kept median equals the scipy median within one scan step",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_exhaustive_constant_signals",
+     "basis": "exhaustive",
+     "detail": "every event of the stated domain s = 0.1 .. 20.0 (step 0.1) on 4 layers, each expected at the edge exactly when its scipy maximum lies outside [0.5, 3.5]; both edges occur",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "ab441ca207be7d2797e9877ea93ff5882da38692",
+    "fix": "ff5ef6faf0b8821598f2ba656a4d7ff7c6a213ef",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_maxima_outside_the_range_are_counted_not_returned",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-PID",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_exhaustive_constant_signals",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-PID",
+     "requires": {
+      "core": [
+       "numpy",
+       "scipy"
+      ],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::likelihood_z",
+     "mutation": "other",
+     "detail": "only the upper edge is detected",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_charge",
+     "mutation": "other",
+     "detail": "events at the edge are counted but still returned",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::likelihood_z",
+     "mutation": "other",
+     "detail": "the edge is looked for one step outside the scanned points (never found)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_charge",
+     "mutation": "other",
+     "detail": "toy events at the edge are counted but still used",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_exhaustive_constant_signals",
+    "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_maxima_outside_the_range_are_counted_not_returned"
+   ]
+  },
+  {
+   "id": "MULTISAMPLE-NONPOSITIVE-RESPONSE",
+   "title": "multisample_pid.py charge --method likelihood rejects a response that is not positive anywhere in --z-range",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S4",
+   "oracle_kinds": [
+    "behavioral"
+   ],
+   "correctness": "C1",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "CHK-AT-06-03 (audit AT-06): with R(Z^2) <= 0 on every scanned point likelihood_z returned None and summarize() raised a TypeError (traceback, exit 1), not the documented exit 2 with status rejected; likelihood_z now raises the input error",
+   "independence": [],
+   "commits": {
+    "parent": "ce3f4ed4e7dc853a13774af1b8c5e0a5f067e033",
+    "fix": "78dfc401a735a366deafbd3bf52e80ec1ab04811",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_pid_nonpositive_response.py::NonPositiveResponse::test_response_not_positive_in_the_range_is_rejected",
+     "adapted_parent": false,
+     "validation": "SCIFIX-F-S12-PID",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::likelihood_z",
+     "mutation": "other",
+     "detail": "returns no estimate instead of raising (the pre-fix crash path)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_nonpositive_response.py::NonPositiveResponse"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::likelihood_z",
+     "mutation": "other",
+     "detail": "raises a bare ValueError without the message",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_pid_nonpositive_response.py::NonPositiveResponse"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_pid_nonpositive_response.py::NonPositiveResponse::test_response_not_positive_in_the_range_is_rejected"
+   ]
+  },
+  {
+   "id": "CHK-AT-02-01",
+   "title": "tracker_resolution.py momentum keeps each point resolution with its own layer position when it sorts the positions",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "analytic",
+    "exhaustive",
+    "invariant"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [
+    "the oracle formula is transcribed by the same assistant from RPP 2025 eq. (35.69); no third-party implementation is run"
+   ],
+   "note": "detector-content Stage B (unit F-S12-tracker); defect since 0.14.0 (6721da68): the positions were sorted, the per-layer resolutions kept in input order; --positions-m 0.3 0.6 0.0 0.9 --point-resolution-um 100 100 2 2 gave sigma_k 3.526e-4 /m instead of 7.858e-4 /m (factor 2.2 too small, status ok). One shared resolution (every committed example) is unchanged: the design-collider-tracker and design-space-spectrometer replays reproduce results.json byte for byte, and contracts/fixtures/design/spectrometer regenerated at the parent and at the fix differs only in the hashes that follow from the script sha256; the tracker_resolution.py sha256 that those run records name is left stale (examples: E2, not regenerated; fixture: see result notes). Callers of the changed function momentum(): the CLI only (evaluate_design.py runs it as a subprocess through the tracker-resolution tool contract); the input range does not change",
+   "independence": [
+    {
+     "kind": "analytic",
+     "test": "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs",
+     "basis": "locator",
+     "detail": "PDG RPP 2025, 35. Particle Detectors at Accelerators, sec. 35.12, eq. (35.69), p. 112 (read 2026-11-17): (delta k_res)^2 = (4/w) V_ss / (V_ss V_s2s2 - V_ss2^2) with weighted covariances, transcribed in the test and evaluated on the given (position, resolution) pairs; relative tolerance 1e-9",
+     "source_id": "scifix:S03",
+     "locator_id": "scifix:C1301",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "transcribed-formula"
+    },
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error",
+     "basis": "exhaustive",
+     "detail": "all 24 input orders of the same four (position, resolution) pairs give one curvature error within 1e-12 relative: eq. (35.69) is a sum over points, so the fit depends on the set of pairs only",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "7650a2294570b16a74f39867dc18a98293aa7199",
+    "fix": "575f2a82a184fcf3b6b253acbdd3a383b91e8909",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs",
+     "adapted_parent": false,
+     "validation": "CHK-AT-02-01",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error",
+     "adapted_parent": false,
+     "validation": "CHK-AT-02-01",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "parent": "fail",
+     "fix": "pass",
+     "env": "E6",
+     "failure": "assertion"
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/tracker_resolution.py::momentum",
+     "mutation": "other",
+     "detail": "M1 sorts the positions alone and keeps the resolutions in input order (the pre-fix pairing)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/tracker_resolution.py::momentum",
+     "mutation": "other",
+     "detail": "M2 sorts the resolutions on their own after pairing, so each goes to the wrong layer",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error",
+    "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs"
+   ]
   }
  ],
  "documentation_fixes": [

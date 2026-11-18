@@ -1,0 +1,53 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-901",
+  "published": "2026-11-17T23:30:00Z",
+  "modified": "2026-11-17T23:30:00Z",
+  "severity": "S1",
+  "ledger": [
+    "CHK-AT-02-01"
+  ],
+  "summary": "tracker_resolution.py momentum sorted the layer positions but kept the per-layer point resolutions in input order, so unsorted positions with unequal resolutions got the curvature error of another layout.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/tracker_resolution.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "6721da689b2b7065c3904134e52669eeed96f9d0",
+        "fixed_commit": "575f2a82a184fcf3b6b253acbdd3a383b91e8909",
+        "introduced_basis": "the defective code is in the script as first released (hep-research 0.14.0, commit 6721da68)"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "sigma_curvature_per_m, the momentum-resolution terms and the MDR of tracker_resolution.py momentum"
+    ],
+    "bias": "--positions-m 0.3 0.6 0.0 0.9 --point-resolution-um 100 100 2 2 gave sigma_k = 3.526e-4 /m instead of 7.858e-4 /m (resolution a factor 2.2 too small, MDR 2.2 too high); either sign is possible",
+    "trigger": "momentum with more than one --point-resolution-um value and --positions-m not in increasing order"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/tracker_resolution.py"
+      ],
+      "how_to_recognize": "JSON on stdout with intrinsic.sigma_curvature_per_m whose inputs list point_resolution_um with more than one value and positions_m not sorted"
+    }
+  },
+  "remedy": "rerun tracker_resolution.py momentum on a release that has the fix, or give the positions in increasing order",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/575f2a82a184fcf3b6b253acbdd3a383b91e8909"
+  ]
+}

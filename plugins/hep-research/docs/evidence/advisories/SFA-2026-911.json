@@ -1,0 +1,67 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-911",
+  "published": "2026-11-17T14:40:00Z",
+  "modified": "2026-11-17T14:40:00Z",
+  "severity": "S1",
+  "ledger": [
+    "G4BENCH-HIGHLAND-KINEMATICS"
+  ],
+  "summary": "The multiple-scattering sanity benchmark of geant4_benchmarks.py evaluated its Highland reference at multiple_scattering.py's defaults (100 GV, beta 1, charge 1) whatever the benchmark's particle and energy_MeV.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.19.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "3f4f9985388cf9c39131cd8819bc90050fd54314",
+        "fixed_commit": "0de60bfb7938f40da4a960fa47e93318e531f0e3"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "reference_value, relative_difference and the plausibility verdict of the multiple-scattering sanity benchmark"
+    ],
+    "bias": "the reference scales as 1 / (beta p): for a 1 GeV kinetic-energy proton (p = 1.696 GeV/c, beta = 0.875) through 0.3 mm of silicon it was 0.0147 x the correct value, so correctly distributed angles were implausible; singly charged particles near 100 GeV/c were right by coincidence (about 0.1 %)",
+    "trigger": "a geant4_benchmarks.py run with a multiple-scattering benchmark whose particle and energy are not a singly charged particle of about 100 GeV/c"
+  },
+  "applies_to": {
+    "artifact_types": [
+      "computational-run"
+    ],
+    "match": [
+      [
+        {
+          "path": "extension.study.benchmarks[*].benchmark",
+          "op": "in",
+          "values": [
+            "multiple-scattering"
+          ]
+        }
+      ]
+    ],
+    "match_basis": "a Geant4 study record (check_geant4_study.py) embeds the benchmark results of geant4_benchmarks.py in extension.study.benchmarks; a record that lists one of these benchmarks was evaluated by the affected code",
+    "no_trace": "possibly-affected",
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "how_to_recognize": "geant4_benchmarks.py run output (JSON) whose benchmarks list holds benchmark multiple-scattering without highland_kinematics"
+    }
+  },
+  "remedy": "rerun geant4_benchmarks.py with this version; the output now records highland_kinematics (rigidity_GV, beta, charge_number)",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/0de60bfb7938f40da4a960fa47e93318e531f0e3"
+  ]
+}

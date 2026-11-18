@@ -1,0 +1,68 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-912",
+  "published": "2026-11-17T14:40:00Z",
+  "modified": "2026-11-17T14:40:00Z",
+  "severity": "S2",
+  "ledger": [
+    "G4BENCH-HELIX-SIGN"
+  ],
+  "summary": "The g4sim field-propagation benchmark of geant4_benchmarks.py ran the analytic helix backwards in a negative field (field_tesla < 0), so a correct propagation failed and its verdict was wrong.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.60.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "df01e78e3be2a4bed4863651bb755095289fd19e",
+        "fixed_commit": "c21b2ac52e62cbba356bfa27281e279599bcc442",
+        "introduced_basis": "0.60.0 is the first release with the g4sim path of field-propagation (bench_field_g4sim, commit df01e78e); geant4_benchmarks.py existed since 0.19.0 without it"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "the verdict and largest in-plane distance (geant4) of field-propagation benchmarks on the g4sim path"
+    ],
+    "bias": "for B < 0 the reference crossings were mirrored back along the initial direction with the bend on the wrong side: a correct propagation failed by about 1.8e6 um at 1 T (audit run), and a propagation bending the wrong way could pass; B > 0 was right",
+    "trigger": "a field-propagation benchmark with ir and primaries (the g4sim path) and field_tesla < 0"
+  },
+  "applies_to": {
+    "artifact_types": [
+      "computational-run"
+    ],
+    "match": [
+      [
+        {
+          "path": "extension.study.benchmarks[*].benchmark",
+          "op": "in",
+          "values": [
+            "field-propagation"
+          ]
+        }
+      ]
+    ],
+    "match_basis": "a Geant4 study record (check_geant4_study.py) embeds the benchmark results of geant4_benchmarks.py in extension.study.benchmarks; a record that lists one of these benchmarks was evaluated by the affected code",
+    "no_trace": "possibly-affected",
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "how_to_recognize": "geant4_benchmarks.py run output (JSON) with a field-propagation benchmark whose config gives field_tesla < 0 and ir/primaries"
+    }
+  },
+  "remedy": "rerun geant4_benchmarks.py with this version on negative-field g4sim studies; positive-field studies are unchanged",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/c21b2ac52e62cbba356bfa27281e279599bcc442"
+  ]
+}

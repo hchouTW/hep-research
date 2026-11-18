@@ -609,5 +609,119 @@
   "verification_strength": "page",
   "numeric_quotation_allowed": true,
   "last_reviewed": "2026-10-22"
+ },
+ {
+  "id": "scifix:C1201",
+  "claim": "The maximum likelihood estimators are the parameter values that give the maximum of L; they solve the likelihood equations d ln L / d theta_i = 0, often numerically.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S1201"
+  ],
+  "location": "RPP 2025 Statistics sec. 40.2.2, eq. (40.9), p. 4",
+  "scope": {
+   "text": "charge_confusion_rate.py template-mode maximum (CHARGECONF-TEMPLATE-MAXIMUM)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-17"
+ },
+ {
+  "id": "scifix:C1202",
+  "claim": "With control measurements y of the nuisance parameters, independent of the primary data x, the likelihood is L(theta, nu) = P(x | theta, nu) P(y | nu); the profile likelihood is L(theta) at the nuisance values that maximize L for that theta.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S1201"
+  ],
+  "location": "RPP 2025 Statistics sec. 40.2.6.1, eqs. (40.40)-(40.41), pp. 12-13",
+  "scope": {
+   "text": "joint likelihood of data and MC template counts in the charge_confusion_rate.py oracles (CHARGECONF-TEMPLATE-MAXIMUM)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-17"
+ },
+ {
+  "id": "scifix:C1203",
+  "claim": "In the large-sample limit the confidence region at level 1 - alpha is ln L(theta) = ln L(theta_hat) - F^-1_chi2_M(1 - alpha) / 2; for one parameter of interest at 68.27% this is 2 Delta ln L = 1.00 (Table 40.1).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S1201"
+  ],
+  "location": "RPP 2025 Statistics sec. 40.4.2.3, eq. (40.78) and Table 40.1, pp. 29-30",
+  "scope": {
+   "text": "68% profile interval of the charge-confusion rate (CHARGECONF-TEMPLATE-MAXIMUM, CHARGECONF-TEMPLATE-IDENTIFICATION)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-17"
+ },
+ {
+  "id": "scifix:C915",
+  "claim": "The timing precision of a scintillation detector generally depends on five parameters: the rise and decay times of the scintillator, the time dispersion of optical photons in the scintillator, the time response and jitter of the photodetector signal for single photons, and the number of photons that produce the photodetector signal.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.4, p. 16",
+  "scope": {
+   "text": "contracts/rules/design_geometry/tof.json time-resolution tail_sensitive (DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-17"
+ },
+ {
+  "id": "scifix:C916",
+  "claim": "The achievable time resolution has several contributions, added in quadrature: time walk from signal-height variations at threshold, noise jitter, fluctuations of the arrival time, signal distortion, and TDC digitisation.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.8.4, eq. (35.25), p. 73",
+  "scope": {
+   "text": "contracts/rules/design_geometry/tof.json time-resolution tail_sensitive (DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-17"
+ },
+ {
+  "id": "scifix:C1301",
+  "claim": "For arbitrary spacing of coordinates s_i and variable measurement errors eps_i, the curvature error is (delta k_res)^2 = (4/w) V_ss / (V_ss V_s2s2 - V_ss2^2), with V_{s^m s^n} = <s^m s^n> - <s^m><s^n>, <s^m> = w^-1 sum(s_i^m / eps_i^2) and w = sum(eps_i^-2).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "scifix:S03"
+  ],
+  "location": "RPP 2025 sec. 35.12, eq. (35.69), p. 112",
+  "scope": {
+   "text": "tracker_resolution.py curvature error (CHK-AT-02-01)"
+  },
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-17"
  }
 ]

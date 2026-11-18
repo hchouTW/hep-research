@@ -1,0 +1,53 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-908",
+  "published": "2026-11-17T14:38:52Z",
+  "modified": "2026-11-17T14:38:52Z",
+  "severity": "S2",
+  "ledger": [
+    "CHARGECONF-TEMPLATE-IDENTIFICATION"
+  ],
+  "summary": "charge_confusion_rate.py template mode reported status ok, and passed on in sign_rates, a charge-confusion rate that the fit does not identify, when the background template is degenerate with the right-sign template.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "4c1cb8713932d802d8dcd6664f43bd68e773835c",
+        "fixed_commit": "1df18e5c3483710ae774daa0fa5b60399d08afba"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "template-mode status and sign_rates of bins with a background template",
+      "species_response.py from-rates manifests built from those sign_rates"
+    ],
+    "bias": "the rate is an arbitrary point of a flat likelihood direction (e.g. injected 0.02: 0.021 or 0.023 with interval [0.019, 1.0], or 1.0 with interval [0.12, 1.0]) labelled ok",
+    "trigger": "template mode with a background template whose shape is close to the right-sign template's; an interval_68 reaching 1 is the signature"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "how_to_recognize": "JSON on stdout of charge_confusion_rate.py template with a background template in a bin: interval_68 upper end 1.0 or a background shape compatible with the right-sign one, with status ok; no artifact records the run"
+    }
+  },
+  "remedy": "rerun on a version with the fix; drop sign_rates entries of bins it marks not identified, and any species_response.py manifest built from them",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/1df18e5c3483710ae774daa0fa5b60399d08afba"
+  ]
+}

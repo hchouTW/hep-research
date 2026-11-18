@@ -1,0 +1,65 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-914",
+  "published": "2026-11-17T15:45:00Z",
+  "modified": "2026-11-17T15:45:00Z",
+  "severity": "S1",
+  "ledger": [
+    "CHK-AT-12-01"
+  ],
+  "summary": "g4kit.py derive dropped a geometric default (a gap or margin of the calorimeter, endcap_disks, shell_veto, tof or trd kit) that the design geometry file gave, and built the detector-spec with the kit's own default, without a message; its geometry-derivation record still hashed the design file as if the value had been used.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/g4kit.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.60.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "fixed_commit": "d5afb4dfb3a4ed35fc8952bc9f7230894575c69e",
+        "introduced_commit": "5fd0534f2499bd1c2d75d162be33869096287a0b"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "the dimensions of detector-spec/1 files that g4kit.py derived: bar, tower, straw and readout pitches, plane and module widths, guide sizes, disk margins, the world size, and every placement that depends on them",
+      "the geometry_id of such specifications and of the computational-runs, study specs and design candidates bound to them"
+    ],
+    "bias": "each affected dimension took the kit's default in place of the design's value: for the tof kit with eight 100 mm bars and a design gap of 0 mm, a bar pitch of 100.5 mm instead of 100.0 mm, a plane 804 mm wide instead of 800 mm and a world of 7896 mm instead of 7880 mm; a design that gave the kit's own default value is unaffected",
+    "trigger": "a design-geometry/1 file whose fields name one of the kit's geometric_defaults (bar_gap_mm, tower_gap_mm, wrap_mm, guide_mm, guide_side_mm, guide_gap_mm, disk_margin_mm, readout_gap_mm, straw_gap_mm) with a value other than the kit's default; the shipped mappings (contracts/rules/design_geometry/*.json) map kit inputs only, so only a hand-written or edited design geometry file triggers it"
+  },
+  "applies_to": {
+    "artifact_types": [
+      "design-candidate"
+    ],
+    "match": [
+      [
+        {
+          "path": "extension.geometry_derivation_ref",
+          "op": "exists"
+        }
+      ]
+    ],
+    "match_basis": "a design candidate bound to a g4kit.py derivation names its geometry-derivation/1 record in extension.geometry_derivation_ref; it is affected only when its design geometry file names a geometric default (check the file's fields)",
+    "no_trace": "possibly-affected",
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/g4kit.py"
+      ],
+      "how_to_recognize": "a detector-spec/1 file and a geometry-derivation/1 record (kit name calorimeter, endcap_disks, shell_veto, tof or trd) written by g4kit.py derive from a design-geometry/1 file whose fields name one of that kit's geometric_defaults"
+    }
+  },
+  "remedy": "rerun g4kit.py derive on the design geometry file with this version and use the new detector-spec; rerun the computational-runs and studies made from the old specification (its geometry_id changes), and redo design evaluations whose candidates bind it",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/d5afb4dfb3a4ed35fc8952bc9f7230894575c69e"
+  ]
+}

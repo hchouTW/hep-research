@@ -1,0 +1,53 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-904",
+  "published": "2026-11-17T12:00:00Z",
+  "modified": "2026-11-17T12:00:00Z",
+  "severity": "S1",
+  "ledger": [
+    "MULTISAMPLE-TOYS-TABLE-EDGE"
+  ],
+  "summary": "multisample_pid.py charge --toys left out, without saying so, every toy event with a per-layer sample outside the response table, so the predicted core width came from the surviving toys only and was too narrow when the table ends inside the per-layer Landau tail at --toy-z.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/multisample_pid.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "f7d5722df19d1bdf93472d86721c50c4c0b53ac7",
+        "fixed_commit": "5defabaa62a9a7d6bfe6549efc2ab0fcc5c3bcee",
+        "introduced_basis": "the defective code is in the script as first released (hep-research 0.14.0, commit f7d5722d); the 0.14.0 release already held the file"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "toy_prediction.sigma68, median, mean and tail_fraction of multisample_pid.py charge"
+    ],
+    "bias": "the predicted width is biased low: in the audit's case (table ending at signal 4, toy Z 1.9, relative width 0.12, 4 layers, truncated mean 0.25) 7.5% of the toys were kept and sigma68 was 0.051 against 0.097 for all toys; a data width compared with it looked too wide",
+    "trigger": "--toys with truncated-mean or weighted-mean and a response table that does not cover the per-layer tail at --toy-z; toy_prediction.n below inputs.toys shows it"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/multisample_pid.py"
+      ],
+      "how_to_recognize": "JSON on stdout of multisample_pid.py charge with a toy_prediction block (inputs.toys set) and a method other than likelihood; affected when the response table's highest signal lies inside the per-layer tail at --toy-z (toy_prediction.n below inputs.toys); outputs of the fixed version carry toy_prediction.toys_used"
+    }
+  },
+  "remedy": "rerun multisample_pid.py charge with this version and read the warning and toy_prediction.toys_used; extend the response table past the per-layer tail at --toy-z so that no toy is left out",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/5defabaa62a9a7d6bfe6549efc2ab0fcc5c3bcee"
+  ]
+}

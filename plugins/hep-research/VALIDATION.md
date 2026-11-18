@@ -9974,3 +9974,129 @@ Passing checks show software consistency, not physical validity.
 Release manifest: `release-manifests/0.70.0.json` is generated from a `git archive HEAD:plugins/hep-research` export of the
 release branch, the bundle `release_manifest.py check-published` compares with each tag, after this section, and verified
 on that export (`verify`: identical).
+
+## SCIFIX-CHARGECONF (2026-11-17, Stage B unit F-S12-chargeconf; issues CHK-AT-08-01 to CHK-AT-08-04)
+
+sci-fixes CHARGECONF-TEMPLATE-MAXIMUM (S1), CHARGECONF-TEMPLATE-STATUS (S2), CHARGECONF-TEMPLATE-IDENTIFICATION (S2)
+and CHARGECONF-CONTROL-MC-SIGN (S1) in `skills/hep-detector/scripts/charge_confusion_rate.py`; each has a tests-only
+commit and the fix directly on top (commits in the ledger entries). Oracles, cases and tolerances are in the module
+docstrings of the five `tests/skills/hep_detector/test_f_s12_chargeconf_*.py` files (the fifth, `_sparse_template`, is the CHK-AT-08-01 follow-up's evidence: tests-only and follow-up fix commits in the ledger's `commits.follow_up`). Mutant patches (all `other`):
+CHK-AT-08-01-1 keeps the old naive-start fit, -01-2 drops the golden-section refinement of the rate scan, -01-3 (against the CHK-AT-08-01 follow-up commit) starts the rate scan at exactly r = 0 again; -02-1 drops
+the warning for boundary and covariance-warning bins, -02-2 drops the failed status for not-converged and infeasible;
+-03-1 drops the background-shape test, -03-2 drops the interval-reaches-1 test (expected to survive: in the cases the
+two clauses overlap), -03-3 passes not-identified rates on in sign_rates; -04-1 removes the MC sign check, -04-2 checks
+only that the MC has one sign.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_and_interval_match_profile_scan` | independent implementation (locator, PDG 2025 Statistics) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_matches_scipy_explicit_nuisance_fit` | independent implementation (third-party, scipy) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_reported_yields_are_the_maximum` | analytic (general result: the MLE maximizes L) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_property_bin_permutation_invariance` | invariant | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_negative_control_pre_fix_start_is_rejected` | behavioral (negative control, emulates pre-fix) | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_and_interval_match_profile_scan` | independent implementation (locator, PDG 2025 Statistics) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_rate_matches_scipy_explicit_nuisance_fit` | independent implementation (third-party, scipy) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_reported_yields_are_the_maximum` | analytic (general result: the MLE maximizes L) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_sparse_template.py::SparseTemplate::test_negative_control_profile_at_exactly_zero_is_rejected` | behavioral (negative control, emulates pre-fix) | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_exhaustive_outcome_rule` | exhaustive | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_status.py::TemplateStatusRule::test_real_boundary_fit_is_warned` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_bins_fail_and_are_named` | independent implementation (third-party, scipy) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_not_identified_rates_are_not_passed_on` | independent implementation (third-party, scipy) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_template_identification.py::TemplateIdentification::test_oracle_cases` | behavioral (oracle classification check) | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_exhaustive_sign_combinations` | exhaustive | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_same_species_scale_factor_is_the_rate_ratio` | behavioral (binomial rates counted in the test, PDG 2025 Statistics sec. 40.4.2.4) | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_property_sign_swap` | invariant | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_negative_control_pooled_mc_rate_is_wrong` | behavioral (negative control, emulates pre-fix) | pass | pass | no | E6 |
+
+## SCIFIX-F-S12-G4BENCH (2026-11-17, detector-content Stage B, unit F-S12-g4bench)
+
+Sci-fixes G4BENCH-TRUNC98 (S1), G4BENCH-HIGHLAND-KINEMATICS (S1), G4BENCH-HELIX-SIGN (S2) and G4BENCH-HEAVY-ONLY (S2)
+in `skills/hep-detector/scripts/geant4_benchmarks.py`, from the audit issues CHK-AT-09-01 to -04 (AT-09, check C2).
+Each has a tests-only commit (the evidence tests, their tolerances and justification in the test file) and the fix
+directly on top. Sources: PDG RPP 2024, Passage of particles through matter (scifix:S01; claims scifix:C04, eq.
+(34.16), p. 16, and scifix:C01, eq. (34.5), p. 4; secs. 34.2.9 and 34.4.1, pp. 11-13 and 17-18), read 2026-11-17.
+Negative controls emulating the pre-fix behaviour are in the test files (correctness evidence, not parent records).
+Mutant patches: `CHK-AT-09-0n-k.patch` of the unit's fragments (all recorded as mutation other; k = 1 is the revert).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor::test_factor_is_the_rms_of_the_central_98_percent_of_a_unit_gaussian` | symbolic | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth::test_bench_ms_recovers_the_width_of_gaussian_quantile_angles` | independent-implementation | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_proton_of_1_gev_kinetic_energy` | analytic | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_every_known_particle_and_energy` | exhaustive | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_every_field_azimuth_and_turn` | exhaustive | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_g4bench_helix_sign.py::HelixOfEitherFieldSign::test_runge_kutta_lorentz_force_for_both_signs` | independent-implementation (not counted) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_g4bench_heavy_particles.py::HeavyParticleReferences::test_electrons_and_positrons_are_refused_by_the_heavy_particle_references` | published | fail (assertion) | pass | no | E6 |
+
+## CHK-AT-12-01 (2026-11-17, Stage B of the hep-detector content task; branch `detector-content/fixes-unit/F-S12-g4kit`)
+
+Sci-fix CHK-AT-12-01 (S1, advisory SFA-2026-914): `skills/hep-detector/scripts/g4kit.py` builds the detector-spec
+params of a kit's geometric defaults from the design geometry file's values instead of the kit's defaults. Evidence
+tests in `tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py`, added in the tests-only commit `6f235878`
+before the fix `d5afb4df`; tolerance zero (exact decimal arithmetic), justified in the module docstring. Software
+checks: they show the specification carries the design's dimensions, not that a design is physically right.
+
+| Test | Oracle | Parent (`6f235878`) | Fix (`d5afb4df`) |
+|---|---|---|---|
+| `ExhaustiveGeometricDefaults::test_every_geometric_default_takes_the_design_value` | exhaustive: 9 defaults of 5 kits, omitted and at 3 values, 32 derivations | fail (assertion) | pass |
+| `ExpandedTofGeometry::test_neighbouring_bars_are_separated_by_the_design_gap` | invariant: bar gaps and plane width of the expanded tof geometry, 3 gaps | fail (assertion) | pass |
+| `ExpandedTofGeometry::test_a_geometric_default_in_the_design_changes_the_geometry` | invariant: a different bar_gap_mm gives a different geometry_id | fail (assertion) | pass |
+| `PreFixEmulation::test_kit_defaults_in_place_of_the_design_value_are_rejected` | negative control: pre-fix params fail the exhaustive comparison | pass | pass |
+
+## DC-F-S12-MISC (2026-11-17, detector content Stage B, fix unit F-S12-misc)
+
+Two fixes from the detector content audit. Each has a tests-only commit followed directly by its fix commit. The
+outcome columns are filled by the lead from the evidence reruns at the tests-only and the fix commits.
+
+**DC-CHERENKOV-NONFINITE-YIELD** (S4, CHK-AT-01-01; tests `b0201785`, fix `faa7e3c0`): `cherenkov_angle.py` refuses
+an expected photon number that is not finite (exit 2, invalid-input) and fails with JSON ok false (exit 1) when the
+per-track angular resolution underflows to zero. Before the fix both cases ended in a `ZeroDivisionError` traceback.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_overflowing_photon_number_is_invalid_input` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_resolution_underflowing_to_zero_fails_with_json` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_negative_control_ordinary_case_is_unchanged` | behavioral (negative control) | pass | pass | no | E6 |
+
+**DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE** (S2, CHK-AT-12-02, advisory SFA-2026-915; tests `18d225d9`, fix `7fb6494c`):
+`contracts/rules/design_geometry/tof.json` marks `time-resolution` `tail_sensitive: true`. The rule comes from
+`geant4-study-protocol.md` (an F4 resolution is an `estimate` only with all four tail sources simulated, else
+`optimistic`) and FID-03. PDG RPP 2025 sec. 35.4, p. 16 and eq. (35.25), p. 73 (scifix:S03; claims scifix:C915 and
+scifix:C916) list the scintillator, photodetector and electronics terms of a time resolution, and the kit's truth time
+plus one Gaussian smear does not simulate them. The evidence drives `contracts/design.py` `check_f4` on a copy of the
+design-minimal-spectrometer artifacts with the candidate set to geometry kind tof. The negative control patches the
+mapping back to false.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_f4_bound_follows_the_protocol_rule` | published (locator) | fail (assertion) | pass | no | E6 |
+| `tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_mapping_marks_time_resolution_tail_sensitive` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/contracts/test_f_s12_misc_tof_tail_sensitive.py::TofTimeResolutionBound::test_negative_control_pre_fix_mapping_is_rejected_by_the_oracle` | behavioral (negative control, emulates pre-fix) | pass | pass | no | E6 |
+
+## SCIFIX-F-S12-PID (2026-11-17; hep-detector content task, Stage B unit F-S12-pid)
+
+Sci-fixes MULTISAMPLE-TOYS-TABLE-EDGE (S1, CHK-AT-06-01), MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE (S1, CHK-AT-06-02) and MULTISAMPLE-NONPOSITIVE-RESPONSE (S4, CHK-AT-06-03) in `skills/hep-detector/scripts/multisample_pid.py`, found by audit AT-06. Each has a tests-only commit directly below its fix commit; tolerances and their justification are in the test files. All inputs are SYNTHETIC.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_the_moyal_cdf` | analytic | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_scipy_sampling` | independent-implementation | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_maxima_outside_the_range_are_counted_not_returned` | independent-implementation | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_exhaustive_constant_signals` | exhaustive | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_nonpositive_response.py::NonPositiveResponse::test_response_not_positive_in_the_range_is_rejected` | behavioral | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_counts_add_up_and_a_wide_table_leaves_none_out` | invariant | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_negative_control_kept_toys_only_are_too_narrow` | behavioral (negative control) | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_counts_add_up_for_events_and_toys` | invariant | error (error) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_negative_control_returning_the_edge_is_far_from_the_maximum` | behavioral (negative control) | pass | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_s12_pid_nonpositive_response.py::NonPositiveResponse::test_response_positive_on_part_of_the_range_still_works` | behavioral (control) | pass | pass | no | E6 |
+
+## CHK-AT-02-01 (2026-11-17, detector-content Stage B, unit F-S12-tracker): tracker_resolution.py keeps each point resolution with its layer (sci-fix, S1)
+
+Evidence tests in `tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py` (tests-only commit `7650a229`,
+fix `575f2a82`). Oracle: PDG RPP 2025 eq. (35.69), p. 112, transcribed in the test; tolerances in the test file.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs` | analytic (locator: RPP 2025 eq. 35.69, transcribed) | fail (assertion) | pass | no | E6 |
+| `test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error` | exhaustive (all 24 orders) | fail (assertion) | pass | no | E6 |
+| `test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_negative_control_the_pre_fix_pairing_is_a_different_layout` | negative control (pre-fix pairing emulated) | pass | pass | no | E6 |

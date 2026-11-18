@@ -225,5 +225,21 @@
   "superseded_by": [],
   "attribution": "Particle Data Group",
   "notes": "Read 2026-10-22 at page level for the DR-WP2-06-CALO general-result oracle (VALIDATION SCIFIX-TRANSCRIPTION-ORACLES): sec. 40.2, p. 2 (consistency and bias of an estimator) and sec. 40.2.3 (least squares, linear model, eqs. (40.21)-(40.23))."
+ },
+ {
+  "id": "scifix:S1201",
+  "title": "Review of Particle Physics, 40. Statistics (2025 update)",
+  "authors": "Particle Data Group (S. Navas et al.)",
+  "year": 2025,
+  "url": "https://pdg.lbl.gov/2025/reviews/rpp2025-rev-statistics.pdf",
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-11-17",
+  "publication_date": "2025",
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read 2026-11-17 at page level for the charge_confusion_rate.py fixes (cached as pdg_2025_statistics, DOI 10.1103/PhysRevD.110.030001, INSPIRE 2817040): sec. 40.2.2 eq. (40.9), p. 4; sec. 40.2.6.1 eqs. (40.40)-(40.41), pp. 12-13; sec. 40.4.2.3 eq. (40.78) and Table 40.1, pp. 29-30; sec. 40.4.2.4, p. 31."
  }
 ]

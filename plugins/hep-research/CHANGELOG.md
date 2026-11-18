@@ -5,6 +5,43 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **charge_confusion_rate.py, template and control modes** (sci-fixes CHARGECONF-TEMPLATE-MAXIMUM S1,
+  CHARGECONF-TEMPLATE-STATUS S2, CHARGECONF-TEMPLATE-IDENTIFICATION S2, CHARGECONF-CONTROL-MC-SIGN S1; advisories
+  SFA-2026-906 to SFA-2026-909; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
+  profile likelihood in the rate: at about 5e5 events or more per bin the fit started from the naive fit could stop at
+  the wrong-sign boundary and return a rate near 1e-6 with status ok. Template status follows one per-bin rule:
+  not-converged or infeasible fails; converged-at-boundary or covariance-warning is ok with a warning naming the bin. A
+  bin whose rate is not identified (its 68% profile interval reaches r = 1, or a background template is compatible in
+  shape with the right-sign template, chi2 p >= 0.01) fails with a warning, and its sign_rates entries are null.
+  Control mode refuses (exit 2) an `--mc` sample that does not have exactly the data sample's true sign. Template mode
+  now takes about 1 s per bin (was about 0.3 s). A rate is never evaluated at exactly r = 0 or 1, where a zero
+  yield drops that template's MC terms from the likelihood: with a sparse wrong-sign MC template this had given rate 0
+  with a ~1e-12-wide interval and status ok.
+- **hep-detector: four corrections in `geant4_benchmarks.py`** (sci-fixes G4BENCH-TRUNC98 and
+  G4BENCH-HIGHLAND-KINEMATICS, S1; G4BENCH-HELIX-SIGN and G4BENCH-HEAVY-ONLY, S2; advisories SFA-2026-910 to -913;
+  VALIDATION SCIFIX-F-S12-G4BENCH). The `multiple-scattering` sanity benchmark divides the RMS of the central 98 % by
+  0.9346, the RMS of a unit Gaussian truncated to its central 98 % (was 0.8673, 7.8 % high), and evaluates Highland at
+  the benchmark's particle and energy (it used `multiple_scattering.py`'s 100 GV default; the output records
+  `highland_kinematics`). The g4sim `field-propagation` helix bends to the other side in a negative field instead of
+  running backwards (a correct propagation in B < 0 failed). `stopping-power`, `thin-layer-mpv`, `thin-layer-width`
+  and the `reference` command refuse e- and e+ (exit 2): their references (RPP eqs. 34.5 and 34.12) are stated for
+  heavy charged particles. `geant4-study-protocol.md` now says the tail inside the window widens the RMS estimator by
+  about 3 % (the recorded +11 % was mostly the old factor). The
+  committed `geant4-thin-silicon` outputs are regenerated (the script hash).
+- **g4kit.py: a geometric default given in the design geometry file is used** (sci-fix, S1, CHK-AT-12-01, advisory
+  SFA-2026-914). `g4kit.py derive` accepted a design-geometry/1 field named after a kit's geometric default (a gap or
+  margin of the calorimeter, endcap_disks, shell_veto, tof or trd kit) but built the detector-spec with the kit's own
+  default, without a message, while the derivation record hashed the design file as if its value had been used: a tof
+  design with eight 100 mm bars and `bar_gap_mm` 0 got a 100.5 mm pitch and an 804 mm plane instead of 100.0 mm and
+  800 mm. The specification now takes the design's value. Only hand-written design geometry files are affected: the
+  shipped mappings map kit inputs only. Derive affected specifications again; their geometry_id changes.
+- sci-fix (S2, DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE, advisory SFA-2026-915): the tof kit's design geometry mapping (`contracts/rules/design_geometry/tof.json`) now marks `time-resolution` tail-sensitive, so an F4 time resolution of the tof kit is labelled `optimistic` unless the study simulated all four tail sources, as `geant4-study-protocol.md` and the FID-03 rule state; it was always `estimate`.
+- robust-fix (S4, DC-CHERENKOV-NONFINITE-YIELD): `cherenkov_angle.py` refuses an expected photon number that is not finite (exit 2, `error_kind` invalid-input) and reports a per-track angular resolution that underflows to zero as a failure with JSON `ok` false (exit 1), instead of a `ZeroDivisionError` traceback with an empty stdout.
+- **hep-detector: `multisample_pid.py charge` reports what it leaves out** (sci-fixes MULTISAMPLE-TOYS-TABLE-EDGE, S1, advisory SFA-2026-904; MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE, S1, advisory SFA-2026-905; MULTISAMPLE-NONPOSITIVE-RESPONSE, S4). `--toys` counts the toy events with a sample outside the response table (`toy_prediction.toys_requested`, `toys_used`, and a warning): before, they were dropped silently and the predicted width came out too narrow when the table ends inside the per-layer tail. `--method likelihood` no longer returns the first or last point of `--z-range` when the maximum lies outside it: such events and toys are left out, counted (`at_z_range_edge`) and named in a warning; before, they were reported at the edge. A response that is not positive anywhere in `--z-range` is rejected (exit 2) instead of a traceback (exit 1). Evidence in VALIDATION `SCIFIX-F-S12-PID`.
+- `tracker_resolution.py momentum` keeps each `--point-resolution-um` value with its own layer position when it sorts
+  the positions; unsorted positions with unequal resolutions gave the curvature error of a different layout (a factor
+  2.2 too small on a four-layer example) (sci-fix CHK-AT-02-01, S1).
+
 ## 0.70.0 (2026-11-16)
 
 Minor release (PR #418); contracts 3.28.0 unchanged, `CORE_VERSION` 1.16.0 (from 1.15.0), `adapters/geant4` 0.18.0
