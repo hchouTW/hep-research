@@ -25,13 +25,18 @@ particles, which leave no track at all.
 A high-energy electron or photon initiates a cascade: bremsstrahlung and pair
 production alternate, roughly doubling the number of particles every radiation length
 `X0`, while the average energy per particle halves. The cascade stops multiplying at
-the **critical energy**, below which ionization loss overtakes radiative loss, and the
-remaining particles are absorbed.
+the **critical energy** `E_c`, where ionization loss takes over from radiation, and the
+remaining particles are absorbed. Two definitions are in use: the energy at which the two
+loss rates are equal, and Rossi's, at which the ionization loss per radiation length
+equals the electron energy (PDG RPP 2025, "Passage of particles through matter",
+sec. 34.4.4). The fits below and the Molière radius use Rossi's.
 
-Approximate scales, with `Z`, `A` the absorber's atomic number and atomic mass (g/mol)
-(empirical fits from the PDG Review of Particle Physics, "Passage of particles through
-matter", radiation length and electromagnetic cascades; use the PDG tabulated material
-values when they exist):
+Approximate scales, with `Z`, `A` the absorber's atomic number and atomic mass (g/mol);
+use the PDG tabulated material values when they exist. `X0` is Dahl's compact fit
+(PDG RPP 2010, "Passage of particles through matter", sec. 27.4.1, eq. 27.24), within
+2.5% of Tsai's computed values (RPP 2025 sec. 34.4.2, eq. 34.25) except for helium (about
+5% low); `E_c` is the fit to Rossi's definition (RPP 2025 Fig. 34.14); `R_M` is
+eq. 34.37:
 
     X0    ~= 716.4 * A / (Z * (Z + 1) * ln(287 / sqrt(Z)))   g/cm^2
     E_c   ~= 610 MeV / (Z + 1.24)    (solids and liquids; 710 MeV / (Z + 0.92) for gases)
