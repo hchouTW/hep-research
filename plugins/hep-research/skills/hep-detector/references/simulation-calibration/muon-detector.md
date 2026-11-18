@@ -8,7 +8,7 @@ Part B §11.1 items 1–8 for a muon system of gaseous chambers behind an absorb
 | Node | Abstract node | Content (§3.1) | g4sim object |
 |---|---|---|---|
 | `source` | 0 | muons of known momentum | `simulation-request/1` source |
-| `absorber` | 1 | absorber traversal (multiple scattering), gas ionisation | `g4sim_run` |
+| `absorber` | 1 | absorber traversal (multiple scattering; ionization and radiative energy loss with its fluctuations, PDG RPP 2025 sec. 34.6), gas ionisation | `g4sim_run` |
 | `gas` | 2 | primary electron clusters | response stage `ionisation` |
 | `drift` | 3 | drift, diffusion | `drift_table` stage (hashed table) |
 | `avalanche` | 4b | avalanche gain | `sensor` stage gain (*Inferred* mapping) |
@@ -30,6 +30,7 @@ stage 4; on g4sim only the 3→4 and 4→5 hand-offs exist.
 | threshold | 5 | level | `electronics` stage `threshold` (or a snapshot row per cell and IOV) |
 | cluster size | sharing / 3 | table | hashed table: no Table 2 row |
 | multiple scattering in the absorber | physics process / 1 | absorber thickness, cut | detector-spec `params`, run card cuts (geometry row) |
+| energy loss in the absorber | physics process / 1 | absorber thickness and material; physics list or EM option | detector-spec `params` (geometry row); physics list or EM option as a discrete model M (Table 2) |
 | t₀ | time / 5 | offset | reconstruction (rerun) |
 
 Dead time is a cross-event effect: only approximated by conditioning variables such as rate (§3.1, §19-6).
