@@ -384,13 +384,13 @@ class SciFixLedger(unittest.TestCase):
 
     def test_scifix_source_and_claim_ledger_is_valid_and_indexed(self):
         sources, claims = json.loads(SOURCES.read_text(encoding="utf-8")), json.loads(CLAIMS.read_text(encoding="utf-8"))
-        res = check_ledger(sources, claims, date(2026, 11, 17), 365, namespace="scifix")
+        res = check_ledger(sources, claims, date(2026, 11, 18), 365, namespace="scifix")
         self.assertEqual((res["errors"], res["warnings"]), ([], []))
         ok, diff = check_index(INDEX.read_text(encoding="utf-8"), sources, claims)
         self.assertTrue(ok, diff)
         bad = copy.deepcopy(claims)
         bad[0]["verification_strength"] = "full-text"
-        self.assertTrue(check_ledger(sources, bad, date(2026, 11, 17), 365, namespace="scifix")["errors"])
+        self.assertTrue(check_ledger(sources, bad, date(2026, 11, 18), 365, namespace="scifix")["errors"])
         self.assertFalse(check_index(INDEX.read_text(encoding="utf-8"), sources, bad[1:])[0])
 
     def test_locator_records_name_a_source_read_at_page_level_and_a_located_claim(self):
