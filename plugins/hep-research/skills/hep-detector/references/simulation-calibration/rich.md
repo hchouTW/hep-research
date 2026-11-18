@@ -51,6 +51,8 @@ constraint, by hash).
 
 Cherenkov angle: location, identity link (signed residual) or log. Angle resolution per photon and per ring: core
 width, log. Photon count per ring: multiplicity, log. Ring-hit background: tail or efficiency, logit.
+Cherenkov-angle residual versus the photon's azimuth φ around the ring: location per φ bin, identity link (signed); a
+misalignment appears as Δθ_C = θ_x cos φ + θ_y sin φ, which the ring-averaged location does not see.
 
 ## 7. V_model correlation kernel (advisory)
 
@@ -72,4 +74,7 @@ width, log. Photon count per ring: multiplicity, log. Ring-hit background: tail 
 
 `assets/simulation-calibration/rich.binding.example.json`: refractive index, mirror tilt and surface efficiency
 resimulation or surrogate model; gain rerun. Degeneracies (§12): refractive index and geometric scale; photon count ×
-per-photon resolution.
+per-photon resolution in the per-ring width (σ_ring = σ_photon/√N_pe ⊕ C, PDG RPP 2025 eq. 35.12), broken by the
+per-photon residual width and the photon count per ring of item 6; C (tracking, alignment, background, hits of
+other tracks) does not fall with N_pe. Not in the §12 row: mirror alignment and per-photon resolution (offset mixed into width,
+§3.5), broken by the signed residual versus φ.

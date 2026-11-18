@@ -8,10 +8,10 @@ Folder rules: [index](index.md).
 
 | Node | Abstract node | Content (§3.1) | g4sim object |
 |---|---|---|---|
-| `source` | 0 | tracks of known momentum, species and polar angle | `simulation-request/1` source |
+| `source` | 0 | tracks of known momentum, species and incidence angle on the bar | `simulation-request/1` source |
 | `bar` | 1 | quartz-bar traversal, Cherenkov emission | `g4sim_run` |
 | `tir` | 3 | total internal reflection, path ambiguity | `g4sim_run` (full optical tracking) |
-| `pde` | 4a | MCP-PMT PDE, TTS | sensor surface `efficiency` (applied in Geant4) |
+| `pde` | 4a | photodetector PDE and TTS (PMT, MaPMT or MCP-PMT; §3.1 names the MCP-PMT) | sensor surface `efficiency` (applied in Geant4) |
 | `sensor` | 4b | gain | response stage 3 |
 | `tdc` | 5 | TDC, threshold | response stage 4 |
 | `reco` | 6–7 | pixels and time; likelihood of angle and time | reconstruction |
@@ -41,14 +41,16 @@ sensor and TDC; simreco columns for the likelihood.
 
 ## 5. Reference catalog
 
-Tracks of known momentum at several polar angles (known input: the number of reflections changes with polar angle,
-which breaks PDE × reflectivity, §12); momentum from the tracker (internal constraint); a laser pulse into the
+Tracks of known momentum at several incidence angles on the bar (known input: the number of reflections changes with
+the incidence angle, which breaks PDE × reflectivity, §12). The angle is taken in the bar frame; it equals the polar
+angle, the word §12 uses, only when the bars run parallel to the beam axis (a barrel layout), not for bars
+perpendicular to the beam in an endcap. Momentum from the tracker (internal constraint); a laser pulse into the
 photodetector plane would be a mid-chain injection after node 1 and needs a conversion relation (*Inferred*; not
 declarable on g4sim's optical path).
 
 ## 6. Special functionals and link functions
 
-Hit pattern in (pixel, time) per polar-angle bin: normalized two-dimensional shape, alr/ilr on the prediction side
+Hit pattern in (pixel, time) per incidence-angle bin: normalized two-dimensional shape, alr/ilr on the prediction side
 (§3.3). Photon yield per track: multiplicity, log. Single-photon time resolution: core width, log. Time offset:
 location, identity.
 
@@ -64,7 +66,7 @@ location, identity.
 
 | Simulation setting | Observable expected to see it |
 |---|---|
-| rough bar surface (unified model, `sigma_alpha_deg`) instead of polished | photon yield versus polar angle |
+| rough bar surface (unified model, `sigma_alpha_deg`) instead of polished | photon yield versus incidence angle on the bar |
 | absorption in the glue joints added | photon yield versus path length |
 | chromatic dispersion removed (constant index) | single-photon time width versus path length (*Inferred*) |
 
@@ -72,4 +74,4 @@ location, identity.
 
 `assets/simulation-calibration/dirc.binding.example.json`: refractive index (on `bar` and `tir`), reflectivity and
 surface efficiency resimulation or surrogate model; time offset rerun. Degeneracies (§12): PDE × reflectivity
-(broken by polar angle); time offset and group velocity.
+(broken by the incidence angle on the bar); time offset and group velocity.

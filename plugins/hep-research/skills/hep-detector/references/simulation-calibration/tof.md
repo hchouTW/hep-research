@@ -14,11 +14,14 @@ basis (2), the TOF row of §12 and §11.4. Folder rules: [index](index.md).
 | `pde` | 4a | photoelectric conversion, TTS | surface `efficiency`; TTS as a digitization-job timing input |
 | `sensor` | 4b | gain | response stage 3 |
 | `tdc` | 5 | TDC, slewing | response stage 4 |
-| `tracker_path` | control variable | track length and momentum from the tracker | another subsystem (upstream result) |
+| `tracker_path` | control variable | flight path (and momentum, for a charged track): from the tracker, or for neutral particles from the counter's own hit position and the source geometry | another subsystem (upstream result), or the counter itself |
 | `reco` | 6–7 | time points, β; T0 and slewing corrections | reconstruction |
 
-Control variables come from another subsystem, so the graph is a DAG with a merging branch, not a chain (§12). A
-laser into the counter would sit on the 2/3 or 3/4a edge and needs a conversion relation (§3.4).
+Control variables usually come from another subsystem, so the graph is a DAG with a merging branch, not a chain
+(§12). For neutral particles (neutron time of flight) the flight path comes from the counter itself and the source
+position, or from a calibrated effective flight path; the time of flight then gives the energy of a particle of
+known mass instead of β at known momentum, and the graph may stay a chain. A laser into the counter would sit on the
+2/3 or 3/4a edge and needs a conversion relation (§3.4).
 
 ## 2. Mechanisms and parameterization
 
@@ -26,7 +29,7 @@ laser into the counter would sit on the 2/3 or 3/4a edge and needs a conversion 
 |---|---|---|---|
 | emission time | time / 2 | decay and rise time | detector-spec scintillation component field: no Table 2 row |
 | effective light speed, path dispersion | transport / 3 | velocity, spread | map transit times: no Table 2 row (resimulate the map with another rindex) |
-| attenuation | transport / 3 | absorption length | detector-spec `optical/absorption_length_mm` (optical row) |
+| attenuation | transport / 3 | absorption and scattering lengths; surface reflectivity | detector-spec `optical/absorption_length_mm` and, where scattering matters, `optical/rayleigh_length_mm` (optical row); the wrapping reflectivity is a separate optical-row parameter |
 | TTS | time / 4a | width | digitization-job timing: no Table 2 row |
 | T0, slewing | time / 5 | offset, coefficient | reconstruction (rerun) |
 | light yield | yield / 2 | photons per MeV | LY row |
@@ -48,14 +51,15 @@ columns for the T0 and slewing rerun; the event time per global event number for
 |---|---|---|
 | momentum and species | known input | into `source` |
 | track length from the tracker | internal constraint | `tracker_path` → `reco` |
-| three-counter method | redundant measurement | out of a comparison node of two counter times |
+| three-counter method | redundant measurement | out of three comparison nodes, one per pair of the three counters: one pair gives only σ₁² + σ₂²; the three pair widths s give each counter's σ_i² = (s_ij² + s_ik² − s_jk²)/2 |
 | hit position along the counter | control variable | breaks T0 versus x/v_eff (§3.5) |
 
 ## 6. Special functionals and link functions
 
 Time residual mean: location, identity. Time resolution: core width, log. β: location, log or identity. Non-Gaussian
-time tails: tail, logit (D41 open). Time difference of the two ends versus position: correlation, Fisher z with
-endpoints checked (§3.3).
+time tails: tail, logit (D41 open). Time difference of the two ends in bins of hit position: location, identity; its
+slope gives 2/v_eff (Δt = 2x/v_eff + const). A Pearson correlation of Δt and x with Fisher z (§3.3) mixes v_eff with
+the time resolution and the spread of hit positions in the sample; use it only with both declared.
 
 ## 7. V_model correlation kernel (advisory)
 
@@ -76,4 +80,5 @@ endpoints checked (§3.3).
 
 `assets/simulation-calibration/tof.binding.example.json`: light yield rerun; attenuation length resimulation or
 surrogate model; T0 and slewing rerun; P4 met by the known input and by the tracker's internal constraint.
-Degeneracies (§12): T0 plus x/v_eff; addition in quadrature.
+Degeneracies (§12): T0 plus x/v_eff; addition in quadrature. Also: the attenuation measured along a counter combines
+absorption, scattering and surface and wrapping losses, so a fitted absorption length alone absorbs the other two.
