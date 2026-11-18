@@ -54,8 +54,9 @@ columns for the T0 and slewing rerun; the event time per global event number for
 ## 6. Special functionals and link functions
 
 Time residual mean: location, identity. Time resolution: core width, log. β: location, log or identity. Non-Gaussian
-time tails: tail, logit (D41 open). Time difference of the two ends versus position: correlation, Fisher z with
-endpoints checked (§3.3).
+time tails: tail, logit (D41 open). Time difference of the two ends in bins of hit position: location, identity; its
+slope gives 2/v_eff (Δt = 2x/v_eff + const). A Pearson correlation of Δt and x with Fisher z (§3.3) mixes v_eff with
+the time resolution and the spread of hit positions in the sample; use it only with both declared.
 
 ## 7. V_model correlation kernel (advisory)
 
