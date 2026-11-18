@@ -41,8 +41,11 @@ tail (the tail functional needs local ESS, §3.3).
 
 ## 5. Reference catalog
 
-Pions and electrons of known momentum (known input). §12: the width alone cannot separate TR yield and gas gain; π
-samples (no TR) and known momentum are needed. Electron samples from photon conversions (tag and probe, *Inferred*).
+Pions and electrons of known momentum (known input). §12: the width alone cannot separate TR yield and gas gain;
+samples of the heavier species below the TR onset (γ ≲ 10³: about 140 GeV/c for pions and 940 GeV/c for protons,
+[particle identification](../particle-identification.md); PDG RPP 2025 sec. 35.6.5) and known momentum are needed;
+above the onset the hadron sample carries TR itself and no longer fixes the gain. Electron samples from photon
+conversions (tag and probe, *Inferred*).
 
 ## 6. Special functionals and link functions
 
