@@ -148,7 +148,10 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 
 - The muon-type definitions, with efficiency, purity, resolution, and charge misID per type
   (a per-muon rate, not the same-sign pair fraction).
-- Tag-and-probe (or equivalent) efficiency with binomial uncertainties, and the trigger
-  matching definition.
+- Tag-and-probe (or equivalent) efficiency with its uncertainty: binomial (Clopper-Pearson)
+  only for unweighted, background-free, independent probes; a background-subtracted
+  resonance sample needs the simultaneous pass/fail fit of
+  [triggers luminosity pileup](triggers-luminosity-pileup.md#tag-and-probe-efficiency-measurement),
+  with the tag-probe correlations handled; and the trigger matching definition.
 - The high-`pT` alignment/field validation (mass and `q/p` versus `q*eta`, cosmic split).
 - The background model for punch-through, decay-in-flight, accidental, cosmic.
