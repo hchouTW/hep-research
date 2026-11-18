@@ -239,7 +239,10 @@ choice stated:
 
 - **Charge from many dE/dx samples** (`charge`). Each sample is corrected for the path length (signal x cos(theta);
   skipping the correction must be said), then inverted through the measured response curve Z^2 -> signal, which may
-  saturate at high Z (the inversion uses the curve, never a pure Z^2 law). The per-layer estimates are combined by a
+  saturate at high Z (the inversion uses the curve, never a pure Z^2 law). The curve gives the most probable (peak)
+  per-layer signal at each Z^2, which the likelihood and `--toys` use as the Moyal location, not the mean signal,
+  which is larger (PDG RPP 2025 sec. 34.2.3; the most probable value is the best estimator of the deposit, sec.
+  35.6.4). The per-layer estimates are combined by a
   truncated mean (drop the highest fraction against the Landau tail), a weighted mean (weights 1/sigma^2, or the
   generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
   Landau-like Moyal densities at the response). The output gives, per true charge in simulation, the peak, the core
