@@ -104,7 +104,8 @@ a thin layer is not Gaussian but **Landau-distributed**, with a long high-side t
 from rare large energy transfers. Consequently the *mean* of a few samples is a poor
 estimator - it is dominated by the tail and has large variance. The standard remedy is
 a **truncated mean**: discard the highest-loss fraction of samples (commonly the top
-30-40%) and average the rest. This is why detectors with many samples (a TPC with
+30-50%: the mean of the 50-70% smallest values, PDG RPP 2025 secs. 34.2.3 and 35.6.4)
+and average the rest. This is why detectors with many samples (a TPC with
 hundreds of measurements) achieve far better dE/dx resolution than a few silicon
 layers, and why quoting "dE/dx resolution" without stating the number of samples and the truncation
 fraction is meaningless. Empirically `sigma_dE/dx ≈ 0.41 N^-0.43 (t P)^-0.32` for `N` samples of
