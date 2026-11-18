@@ -136,8 +136,11 @@ high-energy deposits in some layers on top of ordinary ionization - not a distin
 signature in any single layer. That has two direct consequences:
 
 - **Identification is inherently a likelihood problem across layers**, not a cut on one
-  measurement. The standard estimators are a likelihood ratio built from per-layer
-  amplitude distributions, or a count of layers exceeding a threshold. Either way the
+  measurement. Estimators include the total energy per module, the number of clusters
+  above an optimal threshold, a likelihood ratio from per-layer amplitude (or
+  amplitude-versus-drift-time) distributions, and neural networks; most experiments use a
+  likelihood, and a neural network or a higher-dimensional likelihood gives more
+  rejection (PDG RPP 2025, sec. 35.6.5). Whatever the estimator, the
   per-layer response distributions are the calibration, and they must be measured from
   data control samples, not taken from simulation alone.
 - **Performance is quoted as a rejection factor at a fixed efficiency**, and it is
@@ -296,7 +299,7 @@ easy to violate:
   any charge-dependent time-walk correction.
 - For dE/dx: number of samples, truncation fraction, and whether it is used for charge,
   for velocity, or both.
-- For TRD: estimator (likelihood or threshold count), working-point efficiency, the
+- For TRD: estimator (total energy, cluster count, likelihood, or neural network), working-point efficiency, the
   rejection factor at that point, the momentum band, and how the per-layer response
   templates were calibrated.
 - For RICH: radiator(s) and index, per-track angular resolution and photon yield,
