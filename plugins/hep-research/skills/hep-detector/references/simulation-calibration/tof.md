@@ -42,8 +42,9 @@ reduces variance reduction.
 
 ## 4. Storage recommendations
 
-`edep_visible_ly_split` and hits (LY re-digitization); per-photon times when time observables are calibrated; simreco
-columns for the T0 and slewing rerun; the event time per global event number for conditions IOVs (§11.4).
+`edep_visible_ly_split` and hits (LY re-digitization); per-photon times when time observables are calibrated; the
+reconstruction's columns for the T0 and slewing rerun (the user's reconstruction: simreco's TOF time is the true
+crossing time smeared by one Gaussian of width `sigma_t_ps`, with no amplitude, T0 or slewing); the event time per global event number for conditions IOVs (§11.4).
 
 ## 5. Reference catalog
 
