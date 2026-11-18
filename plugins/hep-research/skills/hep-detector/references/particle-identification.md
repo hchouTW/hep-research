@@ -6,7 +6,9 @@ or charge (muon systems use penetration instead), and converts that - combined w
 [tracking and vertexing](tracking-and-vertexing.md) - into a mass or species
 hypothesis. Organized by technology and independent of experiment; calorimeter-based
 identification (`E/p`, shower shape) is in
-[calorimetry](calorimetry-ecal-hcal.md).
+[calorimetry](calorimetry-ecal-hcal.md). Environment labels: `COL` collider, `FXT` fixed
+target and test beam, `SPC` space and high-altitude balloon, `UGD` underground, neutrino
+and rare-event, `GND` ground-based arrays, `NUC` nuclear and low-energy physics.
 
 ## The common principle
 
@@ -60,9 +62,12 @@ the momentum reach grows only as `sqrt(L/sigma_t)`.
 
 Practical points that dominate real TOF performance:
 
-- **The start time must be known.** At a collider it comes from the bunch crossing or
-  from a dedicated start detector; in a non-collider experiment one plane defines the
-  start. An error in start time is common to all particles in the event and biases
+- **The start time must be known.** Its source is a design parameter: the bunch crossing
+  or a dedicated start detector (`COL`); an event time estimated from the tracks
+  themselves, which improves as `1/sqrt(N_tracks)` (see [timing detectors](timing-detectors.md));
+  or, in a multi-plane system that measures time differences between its own planes
+  (`SPC`, for example two planes above and two below the magnet, arXiv:hep-ex/0305074,
+  sec. 2), the first plane crossed. An error in start time is common to all particles in the event and biases
   every `beta` in the same direction - so it does not average out and shows up as a
   species-dependent mass shift.
 - **Path length is a track-fit output**, not a constant. For curved tracks it depends
