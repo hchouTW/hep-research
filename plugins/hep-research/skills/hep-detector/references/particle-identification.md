@@ -80,8 +80,11 @@ Practical points that dominate real TOF performance:
   measured amplitude, calibrated over the charges in use. A TOF calibrated on singly-charged particles is not
   automatically valid for heavier ones.
 - **TOF also measures direction of travel.** The sign of the time difference between
-  planes distinguishes downward- from upward-going particles, which is the primary
-  rejection against albedo and backward-going background in non-collider geometries.
+  planes distinguishes downward- from upward-going particles. In a space-borne
+  spectrometer (`SPC`) the up/down decision is what lets the curvature sign separate
+  particles from antiparticles (arXiv:hep-ex/0305074, sec. 2), and it identifies
+  upward-going particles such as splash albedo; see
+  [space-based direct detection](space-based-direct-detection.md).
 
 ## Ionization energy loss (dE/dx)
 
