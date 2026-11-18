@@ -7,7 +7,8 @@ efficiency, fake rate) and [detector systems overview](detector-systems-overview
 and supplies the statistics of [histograms efficiencies](../../hep-measurement/references/histograms-efficiencies.md). Every metric below
 requires: an equation, numerator, denominator, conditioning, matching rule, phase space,
 object or event level, estimator, and uncertainty. If one is missing, the number is not
-comparable.
+comparable. Environment codes used here: COL collider; SPC space and balloon; UGD
+underground, neutrino and rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
 
 ## Metric definitions
 
@@ -90,8 +91,12 @@ without a denominator (dark counts, backgrounds) are Poisson.
   if each factor is independent of the earlier steps (conditional independence).
   It fails when (i) denominators differ (e.g. `eps_S` measured on probes that are
   already isolated and reconstructed), (ii) factors depend on common variables
-  (pileup, `pT`, `eta`) so the population-averaged product differs from the product of
-  averages (`<a b> != <a><b>`), or (iii) an efficiency was measured in a control
+  (occupancy or rate such as pileup, energy or momentum, and direction: `pT` and `eta` at
+  a collider (COL), zenith or offset angle in an astroparticle instrument (SPC, GND, UGD;
+  PDG RPP 2025, secs. 36.2.2 and 36.3.2; the instrument-response checklists of
+  [neutrino astronomy](neutrino-astronomy.md) and
+  [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md))) so the
+  population-averaged product differs from the product of averages (`<a b> != <a><b>`), or (iii) an efficiency was measured in a control
   sample with different kinematics. Fix: factorize *differentially* in the shared
   variables (and multiply per bin), or measure the total directly.
 
@@ -176,7 +181,7 @@ measurement's units); `V_r` the covariance of `r`, **not** of the measurement al
 geometry deformation, field, time offset; *discontinuities*: module boundary, calibration
 region edge, a step in conditions (interval of validity); *tails*: outliers, wrong
 association, delta rays; *multimodality*: two populations (left-right ambiguity, wrong
-bunch, two clusters). Cover, in each detector: hit-to-track (position), drift-time,
+bunch at an accelerator, two clusters). Cover, in each detector: hit-to-track (position), drift-time,
 Cherenkov-angle, cluster-energy, shower-position, segment-match, waveform (fit
 residual), optical (charge/time vs model), and timing residuals. The technology
 files ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md),
