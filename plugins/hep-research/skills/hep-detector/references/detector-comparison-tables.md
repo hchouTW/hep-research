@@ -118,7 +118,7 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 |---|---|---|---|---|
 | Pixels/strips | unbiased hit residual | residual vs angle, cluster size | offset, ghosts | hit efficiency from overlaps/tracks |
 | Drift | residual vs drift distance | `r(t)` residual | left/right offset | per-layer efficiency vs distance |
-| TPC | cluster-track residual | residual vs `(r, z, rate)` | distortion | tracking efficiency vs `p`, `eta` |
+| TPC | cluster-track residual | residual vs `(r, z, rate)` | distortion | tracking efficiency vs `p` and direction (`eta` at COL) |
 | MPGD | residual vs angle | gain map | discharges, angle bias | plateau scan |
 | RPC/MRPC | — | efficiency vs voltage (plateau) and rate | rate-dependent inefficiency, multi-hit | cosmics |
 | Fibers | residual vs position along fiber | amplitude vs position | attenuation | per-channel efficiency |
