@@ -159,14 +159,18 @@ consistent with each other, and that the ordering of removal steps changes the r
 ## Timing and event association
 
 Where the detector has adequate timing, associating deposits and tracks by arrival time
-suppresses out-of-time contributions - pileup from adjacent bunch crossings, cavern or
-albedo background, and cosmic-ray tracks. Timing association is an efficiency-versus-
+suppresses out-of-time contributions - cosmic-ray tracks and, at a collider, pileup from
+adjacent bunch crossings and cavern background. Timing association is an efficiency-versus-
 purity trade like any other, with the added subtlety that a timing window is only as
-good as the time calibration and the assumed time-of-flight to the measurement point
-- which depends on the assumed particle velocity, and therefore on the species
-hypothesis.
+good as the time calibration, the start-time source (an accelerator clock, the scintillation
+light of the interaction in a LArTPC, PDG RPP 2025 sec. 35.7.4, pp. 59-60, or the instrument's
+own timing layers) and the assumed time of flight to the measurement point - which depends on
+the assumed velocity, and therefore on the species hypothesis, and on the assumed direction.
+In a space instrument albedo (upward-going) particles are separated by the sign of the
+measured time difference, not by an out-of-time window (arXiv:hep-ex/0305074v1, sec. 2;
+arXiv:1407.1657v1, sec. 2).
 
-**Check:** Timing windows are stated with the time calibration and the time-of-flight (species) hypothesis they assume.
+**Check:** Timing windows are stated with the time calibration, the start-time source and the time-of-flight (species and direction) hypothesis they assume.
 
 ## Reconstruction under pileup
 
@@ -339,7 +343,8 @@ delivered quantity; the routing rows used are named; redoability is classified a
   that tracking and calorimeter systematics are treated as correlated.
 - Ambiguity and overlap-removal steps in the order applied, consistent between
   reconstruction and analysis levels.
-- Timing association windows, if used, with the assumed time-of-flight hypothesis.
+- Timing association windows, if used, with the start-time source and the assumed
+  time-of-flight (species and direction) hypothesis.
 - Pileup mitigation method, its residual uncertainty, and its consistency with the
   pileup reweighting applied to simulation.
 - Confirmation that a rerun reproduces the same output (no ordering or threading
