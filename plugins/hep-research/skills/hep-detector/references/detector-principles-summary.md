@@ -161,7 +161,7 @@ mode.
 | Mass peak vs `q` and direction | Alignment weak mode, field map |
 | Residual left/right structure vs drift distance | `t0`, `r(t)`, wire position (sign pattern depends on the residual convention, [glossary](detector-glossary.md)) |
 | Coherent residual trend with rate or radius | Space-charge distortion |
-| Energy scale wrong vs `eta` | Upstream material, intercalibration |
+| Energy scale wrong vs angle | Upstream material, intercalibration |
 | PID efficiency drifting with run | Refractive index, gain, clock |
 | Charge shrinks with drift time | Electron lifetime / purity |
 | Jet response depends on flavor | `e/h` non-compensation |
