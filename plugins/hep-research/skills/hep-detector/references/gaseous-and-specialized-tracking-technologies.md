@@ -38,9 +38,11 @@ smaller depleted region (less charge, more diffusion-driven sharing).
   sharing; momentum and impact-parameter floors from multiple scattering and lever
   arm ([tracking and vertexing](tracking-and-vertexing.md)).
 - **Tails**: delta rays, merged clusters, noise hits, dead/noisy channels.
-- **Dependence**: occupancy, pileup, dose (leakage, `CCE`, threshold, Lorentz angle
-  drift), temperature. **Data sample**: `Z -> ll`/cosmic tracks for hit efficiency
-  and alignment, overlaps and tag-and-probe for module efficiency.
+- **Dependence**: occupancy (at a collider, pileup), dose (leakage, `CCE`, threshold, Lorentz angle
+  drift), temperature. **Data sample**: the tracks the environment provides, over its incidence-angle
+  range: collision (`Z -> ll`) or cosmic-ray tracks, or a test beam before installation or flight
+  (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit efficiency and alignment;
+  overlaps and tag-and-probe for module efficiency.
 - **Transfers**: charge-sharing interpolation and template methods to any segmented
   readout (TPC pads, fibers); does not transfer: time-of-arrival coordinates.
 
