@@ -17,7 +17,13 @@ that separate species by which counter fires. The **turn-on curve** `epsilon(p)`
 over a range set by photon statistics (few photoelectrons) rather than a step; the
 efficiency near threshold is `1 - exp(-N_pe(p))` (Poisson; approximate for a smooth
 `N_pe`). Systematics: pressure/temperature/index stability (`n` shifts move the
-threshold), mirror/window aging, noise (dark counts) versus low `N_pe`.
+threshold), mirror/window aging, noise (dark counts) versus low `N_pe`, and the
+photodetector's excess noise, which lowers the effective `N_pe` (PDG RPP 2025, sec. 35.5).
+The rejection of the below-threshold species is set by the light it produces anyway, not
+by `1 - exp(-N_pe)` alone: delta rays and scintillation in the radiator, decay to an
+above-threshold particle, Cherenkov light in the radiator wrapping, interactions in
+upstream material, and overlapping or accidental tracks (sec. 35.5;
+arXiv:hep-ex/9805001, p. 10).
 
 **Differential counters.** Select a Cherenkov angle (`cos theta_C = 1/(n beta)`) with
 an optical system so that only a narrow velocity band gives light; excellent for a
