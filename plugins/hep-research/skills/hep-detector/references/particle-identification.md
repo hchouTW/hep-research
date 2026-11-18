@@ -37,8 +37,10 @@ particle identification),
 
 - the `gamma^2` factor is why velocity-based identification degrades so quickly with
 momentum, and why different technologies are needed in different momentum bands.
-`<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` evaluates this for time-of-flight and ionization
-measurements, and `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` for ring-imaging detectors.
+`<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` gives the separation for time-of-flight,
+ionization (mean dE/dx) and velocity measurements, and the velocity term `gamma^2 * dbeta/beta` of species A in its
+tof and velocity modes; it has no momentum, path-length or start-time error (its tool contract), so add `dp/p` in
+quadrature yourself. `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` covers ring-imaging detectors.
 
 ## Time of flight (TOF)
 
