@@ -85,8 +85,10 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 - **Topology**: sparse hits grouped into segments over a large lever arm; almost no
   other particles (clean but low redundancy).
 - **Inverse problem**: momentum and charge from sagitta in a field with material
-  between stations; degeneracy: alignment weak modes (curl, sagitta, twist, radial)
-  that leave `chi^2` nearly unchanged but shift `q/p` charge-dependently.
+  between stations; degeneracy: alignment weak modes that leave `chi^2` nearly
+  unchanged; curl, sagitta and twist modes add a curvature offset that shifts `q/p`
+  charge-antisymmetrically, while a radial expansion is charge-symmetric (a momentum-scale
+  error constant in `p`; [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)).
 - **Objects**: segment, standalone, combined, tagged muon. **Informative
   residual/closure**: `Z -> mu mu` mass versus `eta`, `phi`, `pT`, and charge
   (`m` and `q/p` residual versus `q * eta`), plus cosmic-ray track splitting
