@@ -50,8 +50,8 @@ conversions (tag and probe, *Inferred*).
 ## 6. Special functionals and link functions
 
 Mean cluster charge: location, log. Cluster-charge tail above a threshold: tail, logit (D41 open: P5/G4 decisions on
-tail functionals are rejected until the determining region is defined). Electron efficiency at fixed pion
-efficiency: efficiency, logit. Cluster-charge spectrum: normalized shape, alr/ilr.
+tail functionals are rejected until the determining region is defined). Hadron (pion or proton) efficiency at
+fixed electron efficiency, the inverse of the rejection factor: efficiency, logit. Cluster-charge spectrum: normalized shape, alr/ilr.
 
 ## 7. V_model correlation kernel (advisory)
 
