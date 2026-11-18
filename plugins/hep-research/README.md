@@ -384,7 +384,7 @@ detector data, and no reconstruction quality is claimed for any real detector. O
 | `contracts/candidate_selection.py` | judges a finite candidate index on one input signature and writes a replayable selection record | rules on artificial fixtures; the one two-candidate selection on simulated events found no qualified candidate |
 | `adapters/acts-tracking` | tracking and vertexing on ACTS 48.2.0, planar telescope | evaluation attempt 1 **failed** (final) |
 | `adapters/calo-cluster` | calorimeter cell chain and clustering, development binding in Python | passed attempt 1 with a narrowed claim; no native backend |
-| `adapters/photon-likelihood` | all-channel photon likelihood, development binding in Python | passed attempt 1 with a narrowed claim (shared-model closure); no native backend |
+| `adapters/photon-likelihood` | all-channel photon likelihood for one point source (two for the topology step) with the smooth emission density of `t04-values-v4.md` section 4.3 (no Cherenkov cone), in a 5 m sphere of 1,000 sensors on a Fibonacci lattice, one uniform medium; no tracks, no ring-imaging or species-hypothesis PID; development binding in Python | passed attempt 1 with a narrowed claim (shared-model closure); no native backend |
 | `adapters/timing-pid` | time chain, TOF, PID and dE/dx; native counter channels as a counts product | demonstrated on synthetic data; no cross-system example |
 | `adapters/destriper` | the scan/global reference replay, development binding in Python | passes the comparator the user froze; no native solver |
 | `evals/reconstruction-holdout/` | frozen scorer and sandboxed harness for the AI evaluation | built; no holdout exists and no model session has run |
