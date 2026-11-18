@@ -44,15 +44,18 @@ energetic delta rays escape, so the measured rise is *smaller than the mean sugg
 loss (PDG): `Delta_p = xi [ln(2 m_e c^2 beta^2 gamma^2/I) + ln(xi/I) + 0.200 - beta^2 - delta]`.
 
 **Fluctuations (regime by `kappa = xi/W_max`, `xi = (K/2)(Z/A) z^2 (x rho)/beta^2`)**:
-`kappa <~ 0.05-0.1` (PDG "moderate thickness", most detectors; thin absorber, gases, silicon of
-~100 um): the Landau (Landau-Vavilov) distribution - asymmetric with a long high tail from
+`kappa <~ 0.05-0.1` (PDG "moderate thickness"; most detectors for unit-charge particles: gases,
+scintillators, silicon of ~100 um): the Landau (Landau-Vavilov) distribution - asymmetric with a long high tail from
 delta rays, most-probable value
 (MPV) below the mean, no finite mean or variance in the pure Landau limit; for thin silicon
 Bichsel's straggling functions (atomic binding included) describe the width better than
-Landau-Vavilov (PDG); larger `kappa`: Vavilov's distribution, less skewed as `kappa` grows;
-`kappa >> 1` (very thick absorbers): less skewed still but, per PDG, never Gaussian - a
-Gaussian approximates only the core. Consequences: use the truncated mean, MPV fit, or
-likelihood, not the raw mean, for thin-layer `dE/dx` ([particle identification](particle-identification.md));
+Landau-Vavilov (PDG); larger `kappa` (thicker absorbers, or nuclei: `xi` carries `z^2` while
+`W_max`, PDG Eq. 34.4, does not depend on `z`, so a thin layer can leave the Landau regime for
+the nuclei a direct cosmic-ray instrument measures, [space based direct detection](space-based-direct-detection.md)):
+Vavilov's distribution, less skewed as `kappa` grows; for very thick absorbers PDG states the
+distribution is less skewed but never approaches a Gaussian (sec. 34.2.9, p. 14) - a
+Gaussian approximates only the core. Consequences, for thin layers at small `kappa`: use the
+truncated mean, MPV fit, or likelihood, not the raw mean, for thin-layer `dE/dx` ([particle identification](particle-identification.md));
 the fluctuation is a *physical, irreducible* per-layer term, reduced only by more layers
 or cluster counting.
 
