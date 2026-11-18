@@ -4,7 +4,7 @@
  "version": "1.1.0",
  "geometry_kind": "tof",
  "role": "timing",
- "purpose": "Planes of parallel scintillator bars, read at their ends.",
+ "purpose": "Planes of parallel scintillator bars (active volumes only: no light guide, photodetector or optical surface, so read-out at the bar ends, light propagation along the bar and the hit position from the two ends' times are not modelled).",
  "inputs": {
   "planes": {
    "kind": "integer"
