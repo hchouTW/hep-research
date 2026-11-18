@@ -29,7 +29,8 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Scintillating fiber | scintillation | amplitude | position | gain, attenuation | mapping | hit | stereo ghosts | pitch, sharing | crosstalk, dark counts | MIPs | attenuation, dose |
 | Emulsion | grains | grain positions | track/vertex | scanning | layer alignment | base-track | no timing | grain size | overlap | through tracks | fading, distortion |
 | TOF / timing layers | scintillation, gas gap, Si gain | time | `beta`, `m^2`, time | `t0`, walk | clock, path | hit, track time | multi-hit | jitter, photostat, clock | wrong bunch | muons | offsets |
-| LGAD / MCP | gain in Si / channels | time | time | gain, walk | fluence | hit time | multi-hit | Landau, jitter | fill factor | MIPs | dose |
+| LGAD | gain in thin Si | time | time | gain, walk | fluence | hit time | multi-hit | Landau, jitter | fill factor | MIPs | dose |
+| MCP | channel gain | time | time | gain, walk | integrated anode charge (aging) | hit time | multi-hit | transit-time spread, jitter | rate droop | — | aging |
 | RICH / DIRC / TOP | Cherenkov light | photon hits (+ time) | `beta`, species | index, mirror, gain | alignment, `T/P` | ring / arc | photon-path | emission, chromatic | low `N_pe`, background | kinematic PID | index, aging |
 | Threshold / differential Cherenkov | Cherenkov light | photon counts | species (thresholds) | index, gain | `T/P` | counter response | near threshold | photostat | dark counts | known-species | index stability |
 | TRD | transition radiation | X-ray + `dE/dx` in gas | `e/pi` | gain, pressure | alignment | layer likelihood | overlap of `dE/dx` and TR | absorption stat | high `p` | `e`/`pi` samples | gas, gain |
