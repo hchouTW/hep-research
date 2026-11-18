@@ -199,6 +199,8 @@ def describe_species(momentum_gev, mass_gev, index, radiator_length_cm,
         return record
 
     photons = photon_yield(angle, radiator_length_cm, figure_of_merit_per_cm, charge)
+    if not math.isfinite(photons):
+        raise ValueError('expected photon number is not finite; radiator_length or figure_of_merit is out of range')
     regime = photon_regime(photons)
     record.update({
         'cherenkov_angle_rad': angle,
@@ -329,6 +331,8 @@ def main(argv=None):
         sigma_a = record_a['track_angular_resolution_mrad'] / 1000.0
         sigma_b = record_b['track_angular_resolution_mrad'] / 1000.0
         sigma = sigma_a if args.convention == 'single' else math.hypot(sigma_a, sigma_b)
+        if not sigma > 0.0:
+            return _fail('per-track angular resolution underflows to zero; the inputs are out of range')
         payload['angle_difference_mrad'] = difference * 1000.0
         payload['n_sigma'] = difference / sigma
     else:
