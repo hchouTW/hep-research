@@ -327,9 +327,12 @@ with the fake-link rate measured on the exposed background.
 
 ## Diamond and other radiation-hard sensors
 
-Diamond and other wide-bandgap sensors (e.g. silicon carbide) offer low leakage current and
-tolerance to very high fluence at the cost of smaller signal and lower charge
-collection in poly-crystalline material. Reconstruction is the same as for silicon
+Diamond offers low leakage current and tolerance to very high fluence (large bandgap, about
+twice silicon's displacement threshold) at the cost of smaller signal and lower charge
+collection in poly-crystalline material. Other wide-bandgap sensors (e.g. silicon carbide) keep
+a very low leakage current after high fluence, but their charge collection so far degrades
+faster with fluence than in silicon and diamond (PDG RPP 2025 sec. 35.8.5, p. 78; Gsponer et
+al., JINST 18 (2023) C11027, arXiv:2310.02047v1, abstract). Reconstruction is the same as for silicon
 (cluster/charge or timing), with the focus on **response versus dose** (pumping,
 priming, polarization), efficiency loss with fluence, and beam/luminosity monitor
 use. Quote fluence-dependent signal loss only with its source and conditions
