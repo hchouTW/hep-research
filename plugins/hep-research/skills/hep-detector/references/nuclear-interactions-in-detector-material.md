@@ -19,6 +19,12 @@ conventions (inelastic or charge-changing, targets, straight-ahead approximation
 - Which cross section: a selection that requires the same charge in every layer measures charge-changing survival;
   one that requires the same isotope measures inelastic survival. The cross section and the selection agree.
 - Survival depends on energy through sigma(E): the correction is per bin, from cross sections at that energy.
+- `P = exp(-sum x/lambda)` covers only the nuclear (inelastic or charge-changing) losses. Other losses in the same
+  material are separate factors with their own source, never folded into lambda: scattering or energy loss that takes
+  a nucleus out of the acceptance or below a selection threshold (at low energy the energy also changes across the
+  stack, so sigma is not constant along it), and the efficiency of the charge-consistency cuts for nuclei that did
+  not interact. Take them from a simulation of the instrument or from data, and count each once (in the acceptance
+  or in the survival, not both).
 
 ## Feed-down
 
