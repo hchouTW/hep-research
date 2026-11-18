@@ -190,9 +190,13 @@ Key behaviors:
   [Cherenkov imaging variants](cherenkov-imaging-variants-and-photosensors.md). Photon
   yield is itself proportional to `sin^2(theta_c)`, so rings are dimmest exactly at
   threshold, where the angle is most sensitive to velocity. For a fixed single-photon
-  resolution the two cancel exactly in `dbeta`, but the chromatic term
-  (`dtheta = dn/(n tan theta_c)`) and few-photon effects (ring finding, background) do
-  not, so they must be evaluated together, not separately.
+  resolution the `sin theta_c` factors cancel in `dbeta/beta = tan(theta_c) sigma_theta`,
+  which becomes `n beta sigma_photon / sqrt(N_0 L)` (no track term; PDG RPP 2025, eqs.
+  35.8, 35.11, 35.12): it still grows by the factor `n beta = 1/cos(theta_c)`, from 1 at
+  threshold to `n` at saturation (nearly constant for a gas, up to a factor `n` for a
+  solid radiator). The chromatic term (`dtheta = dn/(n tan theta_c)`) and few-photon
+  effects (ring finding, background) do not cancel, so they must be evaluated together,
+  not separately.
 - **Velocity precision translates to mass precision with the `gamma^2` amplification**
   above. A RICH achieving a `dbeta/beta` of order `1e-3` still loses isotope separation
   at high `gamma`, which is the limiting factor in isotope measurements.
