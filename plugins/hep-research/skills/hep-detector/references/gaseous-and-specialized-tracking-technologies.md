@@ -164,8 +164,9 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Topology**: sparse points/segments. **Ambiguity**: left-right (straws), ghosts
   (wire crossing), efficiency dead zones at wire/cell edges and spacer positions.
 - **Informative residual**: layer-by-layer (unbiased) residual versus position in the
-  cell. **Scaling**: RPC rate capability inverse to resistivity; timing set by gap
-  width and gas.
+  cell. **Scaling**: RPC rate capability `phi/Delta V = 1/(rho d <Q>)` (electrode resistivity
+  and thickness, mean avalanche charge; PDG RPP 2025 sec. 35.6.6.3, p. 53; arXiv:1606.03448v1,
+  sec. 1); timing set by gap width and gas.
 - **Tails**: streamers, afterpulses, cluster-size multiplicity growth with high
   voltage. **Data sample**: cosmic/collision muons for efficiency versus voltage
   (efficiency-plateau scan).
