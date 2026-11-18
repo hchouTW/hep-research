@@ -214,10 +214,17 @@ validation problem: the mass difference is `Delta m/m ≈ 1/A` (about 25% for 3H
 
 ## Muon systems
 
-Muons are identified largely by *survival*: they penetrate the calorimeters and any
+In a detector with absorbers (calorimeters, iron, or an overburden), muons are identified
+largely by *survival*: they penetrate the calorimeters and any
 additional absorber, so a track segment found beyond that material, matched to an
 inner track, identifies a muon. This is not a velocity measurement and the
 identification quality is set by the amount of absorber and by the matching criterion.
+Without such an absorber the muon is identified by its pattern: a sharp Cherenkov ring
+against the fuzzy ring of an electron shower in a water Cherenkov detector (`UGD`; PDG
+RPP 2025, sec. 36.3.1.2), a track against a cascade in a neutrino telescope (`UGD`;
+sec. 36.3.2), or `dE/dx` versus residual range for stopping particles in a liquid-argon
+TPC; see [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+and [neutrino astronomy](neutrino-astronomy.md).
 
 The dominant background is **punch-through** - hadrons, or their shower remnants, that
 survive the absorber - plus **decay in flight** of pions and kaons producing genuine
