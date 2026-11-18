@@ -296,8 +296,12 @@ that map is both a background to reject and a useful tool for validating the mat
 model against data.
 
 **Vertex finding** comes before the vertex fit: it decides which tracks belong to which
-vertex. Seeds come from clustering the tracks' longitudinal positions (and times, where
-measured) near the beam line or from pairs of compatible tracks. Iterative finding fits
+vertex. Seeds come from the expected interaction region: where tracks come from a beam line, from
+clustering the tracks' longitudinal positions (and times, where measured) along it; otherwise from
+pairs of compatible tracks. In a large homogeneous volume read out by photosensors the vertex is
+fitted from the relative timing and charge of the photosensors (PDG RPP 2025, sec. 36.3.1), and in
+liquid-argon TPC images vertices are found in pattern recognition together with tracks and showers
+(sec. 35.7.6; [noble-liquid TPC imaging](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs)). Iterative finding fits
 all candidate tracks, removes the least compatible, refits, and repeats for the next
 vertex. Adaptive fitting gives each track a weight from its compatibility, recomputed
 with a decreasing annealing temperature, which makes the fit robust against mis-assigned
