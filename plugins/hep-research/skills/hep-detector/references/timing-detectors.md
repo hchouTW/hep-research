@@ -41,7 +41,7 @@ sigma_calib^2 + sigma_geom^2 + sigma_ref^2`
 
 | Term | Origin | Scaling / handle |
 |---|---|---|
-| Sensor / intrinsic | transit-time spread (PMT), Landau (silicon), drift (gas) | detector design; irreducible per hit |
+| Sensor / intrinsic | single-photoelectron transit-time spread (PMT, MCP, SiPM), entering a many-photon hit about as `TTS/sqrt(N_pe)`; Landau (silicon), drift (gas) | detector design; the silicon and gas terms are irreducible per hit |
 | Photostatistics | first-photon time `tau_d/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_d/N_pe`; with rise time `~ sqrt(tau_r tau_d/N_pe)` (approximate) | more photons, faster rise and decay |
 | Electronics | jitter (`noise/slope`), TDC bin `/sqrt(12)` (rms over random phases; at a fixed phase it averages out only with >= 0.5 bin of noise), time walk | design, calibration ([front-end electronics](front-end-electronics-and-signal-processing.md)) |
 | Clock | distribution jitter and offsets | global part: common to all channels, not averaged, but cancels in time differences within one event; local part (per board/PLL): averages over independent boards |
