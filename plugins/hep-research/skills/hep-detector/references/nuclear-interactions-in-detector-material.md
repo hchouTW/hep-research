@@ -14,8 +14,13 @@ conventions (inelastic or charge-changing, targets, straight-ahead approximation
   mixture with mass fractions w_i and molar masses A_i (g/mol), `1/lambda = sum_i w_i N_A sigma_i / A_i`, which is
   the same as crossing the components one after the other.
 - Over layers of grammage x_k, `P = exp(-sum_k x_k / lambda_k)`; the flux above the material divides the counted
-  flux by P. Only the material between the point where the flux is defined (top of instrument, or a layer) and the
-  layers whose charge selects the species counts; state which.
+  flux by P. Only the material between the point where the flux is defined (top of atmosphere for a balloon-borne
+  instrument, top of instrument, or a layer) and the layers whose charge selects the species counts; state which.
+- Material outside the instrument (residual atmosphere above a balloon, a pressure vessel or dome) counts in both
+  survival and feed-down. Fragments made there cannot be tagged by the instrument's charge layers, so their
+  feed-down comes from cross-section models or simulation, and its cross-section uncertainty can dominate a
+  secondary-to-primary ratio at high energy. The overburden and the secondaries made in it belong in the instrument
+  response ([space-based direct detection](space-based-direct-detection.md), "Instrument response functions").
 - Which cross section: a selection that requires the same charge in every layer measures charge-changing survival;
   one that requires the same isotope measures inelastic survival. The cross section and the selection agree.
 - Survival depends on energy through sigma(E): the correction is per bin, from cross sections at that energy.
