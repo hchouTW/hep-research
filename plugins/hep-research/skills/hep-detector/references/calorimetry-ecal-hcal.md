@@ -44,8 +44,11 @@ logarithmically with energy - measured in `X0`, the depth of shower maximum scal
 range, and depth requirements are modest. Shower *width* is set by the Molière radius,
 which is a material property largely independent of energy, so lateral containment is
 essentially an energy-independent geometric requirement. Because the Molière radius
-sets the transverse scale, granularity finer than it buys shower-shape discrimination,
-not better energy resolution.
+sets the transverse scale, for an electromagnetic shower granularity finer than it buys
+position resolution, shower-shape discrimination and two-shower separation, not better
+energy resolution. For hadronic showers, segmentation fine enough to resolve the
+electromagnetic sub-showers (scales `X0` and `R_M`) enables software compensation, which
+does improve the energy resolution (see Routes to compensation below).
 
 Longitudinal and lateral shower shape are the basis of calorimeter-level particle
 identification. Electromagnetic showers are compact, start early, and deposit a
