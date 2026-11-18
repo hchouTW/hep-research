@@ -145,9 +145,9 @@ If the calorimeter's response to the electromagnetic component differs from its
 response to the hadronic component (the ratio conventionally written `e/h` differs from
 1, the **non-compensating** case, which is the usual case), then the measured energy
 depends on the fluctuating electromagnetic fraction `f_em`. The pion-to-electron
-response ratio is approximately as follows. PDG RPP 2025, sec. 35.10, states the non-linearity
-and `h/e < 1` but does not print this ratio; its eqs. 35.51-35.52 give the same form per
-channel for dual readout.
+response ratio is approximately as follows. PDG RPP 2025, sec. 35.10.3, states the non-linearity
+and that `<h/e>` is smaller than unity for many, but not all, hadronic calorimeters, but does
+not print this ratio; its eqs. 35.51-35.52 give the same form per channel for dual readout.
 
     pi/e = f_em + (1 - f_em) * h/e
 
