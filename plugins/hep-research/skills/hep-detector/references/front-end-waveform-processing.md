@@ -65,7 +65,8 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
 - **Baseline gain.** A constant offset `b` on every sample biases any linear estimate by
   `b sum w`. For unipolar pulses `sum w` is of order one unless a baseline constraint or
   pre-samples are used, so a pedestal error or the Campbell mean of pileup (`nu <a> ∫ g dt`)
-  appears directly as an amplitude bias that changes with luminosity.
+  appears directly as an amplitude bias that changes with the pulse rate `nu` (with luminosity
+  at a collider).
 - **Time from samples.** A joint fit of amplitude and time (model `A g(t + d)`) has, to
   first order, the inverse Fisher matrix of the columns `g` and `A g'` as covariance
   (*approximate*, linearized at the true phase). Example: CR-RC^4, `t_p = 45 ns`, 5 samples
