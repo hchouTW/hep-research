@@ -40,7 +40,7 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 | `dE/dx` | ionization | charge samples | species | gain, path | field | truncated mean | band overlap | Landau, samples | saturation | tag samples | gain drift |
 | ECAL (crystal/sampling) | EM shower | charge/light | `E`, position | intercalibration, scale | geometry, material | cell, cluster | overlap | stoch., noise, const. | leakage, conversions | `pi^0`, `E/p`; MIP peak of non-interacting cosmic-ray protons or helium (SPC); electron test beam (FXT); `Z->ee` (COL) | scale, material |
 | HCAL | hadron shower | charge/light | `E`, position | EM scale, response | geometry | cluster | `e/h` | stoch., leakage | leakage | single hadron in a test beam, muon MIP for cell calibration (FXT); jets (COL) | hadronic energy scale (JES at COL) |
-| Muon system | ionization in gas | hits | `p`, `q`, ID | `t0`, gain | alignment, field | segment | left-right | MS, spatial | punch-through | `Z`, `J/psi`, cosmics | alignment, charge misID |
+| Muon system | ionization in gas | hits | `p`, `q`, ID | `t0`, gain | alignment, field | segment | left-right | MS, spatial | punch-through | cosmics; `Z`, `J/psi` (COL) | alignment, charge misID |
 | Noble-liquid TPC | scintillation + charge | `S1`, `S2` | `E`, position, ID | lifetime, light map | field | pulse, vertex | pairing | recomb., stats | pileup, wall | sources | lifetime, threshold |
 | Water / scintillator | Cherenkov / scintillation | charge, time | vertex, `E`, ID | PMT gain, optics | medium | ring / hit | ring counting | optics | containment | Michel, `pi^0` | optics, nuclear model |
 | Bolometer / semiconductor | phonons / ionization | pulse | `E`, recoil type | energy scale | thermal | pulse | noise | statistics, noise | threshold, surface | lines | threshold |
@@ -130,11 +130,13 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 | TRD | layer likelihood | pion rejection vs electron efficiency (`e/pi`) | gas/gain drift | rejection at fixed efficiency |
 | ECAL | `E/p`; `Z->ee` mass (COL) | scale vs `E` and incidence direction (`eta` at COL) | material/nonlinearity | resolution from electron test-beam energies (FXT); MIP-calibrated scale checked against the geomagnetic cutoff (SPC); resolution from the `Z` line shape (COL) |
 | HCAL/jets | response vs beam energy (FXT); vs `pT`, flavor (COL) | single-hadron response vs energy (FXT); JES closure (COL) | non-compensation | response and `sigma_68` |
-| Muon | mass/`q/p` vs `q*eta` | dimuon mass maps | weak modes | tag-and-probe; charge misID |
+| Muon | mass/`q/p` vs `q*eta` (COL) | dimuon mass maps (COL) | weak modes | tag-and-probe on dimuon resonances (COL); cosmic-ray muons; charge misID |
 | Noble liquid | charge/light vs `z`, time | lifetime | purity drift | threshold efficiency |
 | Rare-event | line scale, leakage vs `E` | leakage plot | wall events | threshold and fiducial efficiency |
 | Water / scintillator | — | Michel electron, `pi^0` closure | ring counting, optics | containment |
 | Air-shower / IACT / neutrino telescope | — | hybrid or independent cross-check | topology, atmosphere/medium optics | — |
+
+Muon detectors in ground arrays, where no dimuon resonance exists: [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays).
 
 ## Table 8: Systematics mapping
 
