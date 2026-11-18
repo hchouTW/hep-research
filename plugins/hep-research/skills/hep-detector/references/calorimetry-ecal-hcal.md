@@ -78,6 +78,13 @@ quadrature:
 
     (sigma_E / E)^2 = a^2 / E + b^2 / E^2 + c^2
 
+The letters are not standard. PDG RPP 2025 writes `A/sqrt(E) (+) B/E (+) C` (this page's
+order) in sec. 35.10.1.1, but `a/sqrt(E) (+) b (+) c/E`, with `b` the constant and `c` the
+noise term, in sec. 35.10.2, as many test-beam papers do. Identify each published term by
+its energy dependence (`1/sqrt(E)`, `1/E`, constant), not by its letter, before comparing
+values or passing them to `calorimeter_resolution.py` (`--noise` is the `1/E` term in GeV,
+`--constant` the energy-independent one).
+
 - **`a`, the stochastic (sampling) term** - Poisson fluctuations in the number of
   detected shower constituents. Dominates at intermediate energies: below `E = (b/a)^2`
   the noise term dominates, and above `E = (a/c)^2` the constant term
