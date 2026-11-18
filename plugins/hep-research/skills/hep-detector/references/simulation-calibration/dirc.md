@@ -37,7 +37,8 @@ response is a two-dimensional shape functional in (pixel, time) (§12).
 ## 4. Storage recommendations
 
 `photons.csv` with photon energy and time for any post-transport PDE(E) thinning; hits for re-digitization of the
-sensor and TDC; simreco columns for the likelihood.
+sensor and TDC; the reconstruction's output columns for the likelihood (the user's reconstruction: simreco has no
+DIRC reconstruction).
 
 ## 5. Reference catalog
 
