@@ -29,9 +29,12 @@ scanning radiometers in [timestream to map reconstruction](timestream-to-map-rec
 ## The chain, and why its order matters
 
 Reconstruction proceeds roughly as: raw readout -> calibrated digits -> hits ->
-clusters and track candidates -> fitted tracks -> vertices -> identified particles ->
-composite objects (jets, missing transverse momentum) -> event-level selection
-quantities.
+clusters, track or image candidates -> fitted objects (tracks, showers, vertices, shower
+axes) -> identified particles -> event-level quantities. At a collider the composite stage
+adds jets and missing transverse momentum; a LArTPC goes from signal processing to pattern
+recognition to calorimetry and PID (PDG RPP 2025 sec. 35.7.6, p. 61); an imaging Cherenkov
+telescope parametrizes images by ellipses and intersects their axes (sec. 36.2.2, p. 8;
+[imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md)).
 
 Each stage consumes the previous stage's output *and its uncertainty*, and each stage
 makes decisions that later stages cannot undo. A hit dropped by a threshold cut is not
