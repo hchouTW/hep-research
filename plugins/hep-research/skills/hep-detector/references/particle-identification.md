@@ -245,12 +245,17 @@ choice stated:
   35.6.4). The per-layer estimates are combined by a
   truncated mean (drop the highest fraction against the Landau tail), a weighted mean (weights 1/sigma^2, or the
   generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
-  Landau-like Moyal densities at the response). The output gives, per true charge in simulation, the peak, the core
+  Landau-like Moyal densities at the response; a maximum on the first or last scanned Z point is not a maximum, so
+  such events are left out and counted, at_z_range_edge). Events with a signal outside the response table are left
+  out and counted (out_of_range), with a warning. The output gives, per true charge in simulation, the peak, the core
   width sigma68 and the tail fraction, and the **leakage matrix** P(reco | true) between neighbouring charges with
   Clopper-Pearson intervals. That matrix is a species-migration block for the correction chain (hep-measurement) and
   for unfolding (hep-statistics); it is measured on simulation validated against data, and it depends on the
   selection and the momentum range, which travel with it. `--toys` predicts the core width from the per-layer model,
-  so a data width far from it signals a wrong model (an extra tail, a miscalibrated layer).
+  so a data width far from it signals a wrong model (an extra tail, a miscalibrated layer). Toys with a sample outside
+  the response table, or with the likelihood maximum at the edge of the Z scan, are left out with a warning and
+  counted (toys_requested, toys_used): the table and the scan must cover the per-layer tail, else the predicted
+  width is biased low.
 - **Log-likelihood ratio from per-layer PDFs** (`likelihood`). LLR = sum over layers of log(p_signal / p_background)
   from binned per-layer PDFs (measured on control samples, as above), with the efficiency - mis-identification curve
   and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum.
