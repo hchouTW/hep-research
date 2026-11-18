@@ -29,9 +29,16 @@ conversion relation and g4sim has no hand-off before stage 3, so it is not decla
 | Lorentz shift assumed by reconstruction | transport / 7 | offset | reconstruction (rerun) |
 | gas gain | 4b | multiplicative | `sensor` stage `gain` |
 | noise, threshold | 5 | width, level | `electronics` stage `noise_sigma`, `threshold` |
+| drift-time origin t₀ (gas) | time / 5 | offset | reconstruction (rerun) |
+| drift velocity, r–t relation (gas) | transport / 3 | table | inside the `drift_table` hash: not bindable |
 | residual smearing | noise / 5 | width | only when the microscopic mechanism is not modeled (§12) |
 | alignment | geometry / 7 | offsets and rotations per module | reconstruction (rerun); simulation misalignment via overlay waits for D83 (7) |
 | material thickness | geometry / 1 | length | detector-spec `params` (geometry row) |
+
+In a gas tracker the drift coordinate is undetermined without t₀ and the r–t relation. The t₀ source is a parameter
+of the instance: an external fast interaction trigger (PDG RPP 2025 sec. 35.6.4) or, in a noble-liquid TPC,
+scintillation light, a beam spill or an external trigger
+([noble-liquid detectors](../noble-liquid-neutrino-and-rare-event-detectors.md), 3D position).
 
 ## 3. Kernel properties
 
@@ -79,4 +86,5 @@ size: multiplicity, log; its distribution: normalized shape, alr/ilr. Hit effici
 
 `assets/simulation-calibration/tracker.binding.example.json`: material thickness (φ) resimulation or surrogate
 model; noise, threshold, Lorentz shift and module offset rerun; P4 is met by the known input and by the overlap
-comparison node. Degeneracies (§12): addition in quadrature; Lorentz angle plus alignment; offset mixed into width.
+comparison node. Degeneracies (§12): addition in quadrature; Lorentz angle plus alignment; offset mixed into width;
+in gas, t₀ plus the r–t relation (sum of two terms, §3.5).
