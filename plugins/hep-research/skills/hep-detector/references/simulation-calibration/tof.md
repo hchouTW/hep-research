@@ -48,7 +48,7 @@ columns for the T0 and slewing rerun; the event time per global event number for
 |---|---|---|
 | momentum and species | known input | into `source` |
 | track length from the tracker | internal constraint | `tracker_path` → `reco` |
-| three-counter method | redundant measurement | out of a comparison node of two counter times |
+| three-counter method | redundant measurement | out of three comparison nodes, one per pair of the three counters: one pair gives only σ₁² + σ₂²; the three pair widths s give each counter's σ_i² = (s_ij² + s_ik² − s_jk²)/2 |
 | hit position along the counter | control variable | breaks T0 versus x/v_eff (§3.5) |
 
 ## 6. Special functionals and link functions
