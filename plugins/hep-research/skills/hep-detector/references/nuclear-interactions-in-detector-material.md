@@ -48,8 +48,9 @@ conventions (inelastic or charge-changing, targets, straight-ahead approximation
 
 - The cross sections are the dominant input: vary them as model alternatives and with a scale nuisance s
   (sigma -> (1 + s) sigma). At s = 0, `dP/ds = P ln P`, and `dN_feed/ds = -N_heavy f P_heavy ln P_heavy` for the heavy
-  species' scale. The same cross sections may also enter the interpretation (production in the interstellar
-  medium); declare that correlation together with the correction (see the hep-theory reference).
+  species' scale. In a cosmic-ray measurement, the same cross sections may also enter the interpretation
+  (production in the interstellar medium); declare that correlation together with the correction (see the
+  hep-theory reference and [cosmic-ray propagation](cosmic-ray-spectrum-and-composition.md#propagation)).
 - The material description (grammage, composition) is a second input, with its own uncertainty from the detector
   model or a beam test; a grammage scale enters exactly like a cross-section scale.
 
