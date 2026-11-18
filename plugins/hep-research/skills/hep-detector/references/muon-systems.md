@@ -5,7 +5,8 @@ Micromegas-based chambers; standalone, combined, segment-tagged, calorimeter-tag
 trigger-level muons. The PID summary is in [particle identification](particle-identification.md);
 technology physics is in [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md);
 alignment weak modes in [calibration and alignment](calibration-and-alignment.md) and
-[tracking and vertexing](tracking-and-vertexing.md).
+[tracking and vertexing](tracking-and-vertexing.md). Environment codes used here: COL collider;
+UGD underground, neutrino and rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
 
 ## Why muons are special
 
@@ -52,8 +53,13 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   (see below).
 - **Efficiency**: geometric gaps (cracks, support structures, feet), chamber
   inefficiency, matching and reconstruction inefficiency, quoted **per type and versus
-  `eta`, `phi`, `pT`**, with a tag-and-probe from `J/psi` and `Z -> mu mu`
-  ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
+  the detector's coordinates and momentum**; the binning variables and the reference
+  sample are parameters to state. At a collider (COL): versus `eta`, `phi`, `pT`, with a
+  tag-and-probe from `J/psi` and `Z -> mu mu`
+  ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Muon counters of
+  ground-based and underground arrays and the outer muon vetoes of underground detectors
+  (GND, UGD; PDG RPP 2025, secs. 35.6.6.1 and 36.3.1) need a reference sample of their
+  own; no hep-detector page gives a method for it yet.
 - **Rate capability**: drift tubes (long drift, space-charge and occupancy limits),
   cathode-strip chambers (high granularity, good for high rate), RPCs (fast, rate
   limited by resistivity), GEM/Micromegas (high rate, discharge risk)
@@ -72,10 +78,15 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   absorber thickness, rises with hadron energy.
 - **Decay in flight**: `pi/K -> mu nu` inside the tracker: a kinked track whose
   combined-fit `chi^2` is bad and whose tracker-muon momentum mismatch is large.
-- **Accidental matches**: an unrelated segment (cavern background, noise) matched to a
-  tracker track; grows with rate.
-- **Cosmic rays and beam halo**: out-of-time or off-vertex muons; suppress with timing,
-  vertex/impact parameter, and back-to-back topology.
+- **Accidental matches**: an unrelated segment (cavern background at a collider (COL),
+  noise) matched to a tracker track; grows with rate.
+- **Cosmic rays and beam halo** (COL): out-of-time or off-vertex muons; suppress with timing,
+  vertex/impact parameter, and back-to-back topology. Outside a collider the same muons
+  are the background to reject with a veto or an up-going selection (neutrino telescopes,
+  PDG RPP 2025, sec. 36.3.2; [neutrino astronomy](neutrino-astronomy.md#backgrounds)), the
+  source of cosmogenic backgrounds removed by a veto on the time correlation with the
+  crossing muon (UGD; sec. 36.6.5), or the calibration source of a surface array
+  ([ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
 - **Hadron mis-identification vs reconstruction fake**: a pion identified as a muon
   (mis-ID, real object with wrong identity) is a different failure from a fake track
   ([performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md)).
@@ -85,23 +96,36 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 - **Topology**: sparse hits grouped into segments over a large lever arm; almost no
   other particles (clean but low redundancy).
 - **Inverse problem**: momentum and charge from sagitta in a field with material
-  between stations; degeneracy: alignment weak modes (curl, sagitta, twist, radial)
-  that leave `chi^2` nearly unchanged but shift `q/p` charge-dependently.
+  between stations; degeneracy: alignment weak modes that leave `chi^2` nearly
+  unchanged; curl, sagitta and twist modes add a curvature offset that shifts `q/p`
+  charge-antisymmetrically, while a radial expansion is charge-symmetric (a momentum-scale
+  error constant in `p`; [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)).
 - **Objects**: segment, standalone, combined, tagged muon. **Informative
-  residual/closure**: `Z -> mu mu` mass versus `eta`, `phi`, `pT`, and charge
-  (`m` and `q/p` residual versus `q * eta`), plus cosmic-ray track splitting
-  (upper/lower half fits) to expose sagitta bias.
+  residual/closure**: at a collider (COL), `Z -> mu mu` mass versus `eta`, `phi`, `pT`,
+  and charge (`m` and `q/p` residual versus `q * eta`); in any spectrometer, cosmic-ray
+  track splitting (upper/lower half fits) to expose sagitta bias.
 - **Scaling**: `sigma_pT/pT ∝ pT` at high `p` (measurement-dominated), constant at low
   `p` (scattering); charge misID rises steeply with `pT`.
-- **Conventions**: efficiency measured with tag-and-probe at fixed working point and
-  isolation; resolution from `Z` line-shape width or MC truth for the momentum range,
-  charge misID from same-sign fraction in `Z -> mu mu`.
+- **Conventions** (COL): efficiency measured with tag-and-probe at fixed working point and
+  isolation; resolution from `Z` line-shape width or MC truth for the momentum range.
+  Charge misID per muon comes from same-sign pairs of a resonance that decays to an
+  opposite-sign pair (`Z -> mu mu` at a collider): with per-muon rates `c_i`, `c_j` a pair
+  is same-sign with probability `c_i (1 - c_j) + (1 - c_i) c_j` (about `2c` for equal small
+  rates), so fit `c` per bin to the background-corrected same-sign counts rather than
+  quoting the same-sign fraction as the per-muon rate (the same pair model is fitted for
+  `Z -> ee` in arXiv:1908.00005, sec. 9.2).
 - **Tails**: wrong-segment link, decay-in-flight, delta-ray overlap, charge flip.
 - **Dependence**: rate/occupancy (background hits), magnetic field map stability,
   chamber temperature/gas, alignment time-dependence.
-- **Strongest data sample**: `Z -> mu mu` and `J/psi -> mu mu` (mass scale and
-  resolution in bins), cosmic muons (split tracks), and collision tracks for
-  alignment with external constraints.
+- **Strongest data sample**: at a collider (COL), `Z -> mu mu` and `J/psi -> mu mu` (mass
+  scale and resolution in bins) and collision tracks for alignment with external
+  constraints; in any spectrometer, cosmic muons (split tracks; arXiv:1206.4071, sec. 6.2.1).
+  For other muon detectors (the muon vetoes of underground detectors, the muon counters of
+  air-shower arrays, muon rings in imaging Cherenkov telescopes; PDG RPP 2025, secs. 36.3.1
+  and 36.2.2) the closure sample is a parameter: see
+  [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
+  [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays)
+  and [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md).
 - **Transfers**: sagitta-weak-mode and charge-dependent-bias reasoning to any
   spectrometer ([tracking and vertexing](tracking-and-vertexing.md)); **does not transfer**: the
   specific punch-through/absorber background model.
@@ -122,8 +146,12 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 
 ## Deliverables
 
-- The muon-type definitions, with efficiency, purity, resolution, and charge misID per type.
-- Tag-and-probe (or equivalent) efficiency with binomial uncertainties, and the trigger
-  matching definition.
+- The muon-type definitions, with efficiency, purity, resolution, and charge misID per type
+  (a per-muon rate, not the same-sign pair fraction).
+- Tag-and-probe (or equivalent) efficiency with its uncertainty: binomial (Clopper-Pearson)
+  only for unweighted, background-free, independent probes; a background-subtracted
+  resonance sample needs the simultaneous pass/fail fit of
+  [triggers luminosity pileup](triggers-luminosity-pileup.md#tag-and-probe-efficiency-measurement),
+  with the tag-probe correlations handled; and the trigger matching definition.
 - The high-`pT` alignment/field validation (mass and `q/p` versus `q*eta`, cosmic split).
 - The background model for punch-through, decay-in-flight, accidental, cosmic.

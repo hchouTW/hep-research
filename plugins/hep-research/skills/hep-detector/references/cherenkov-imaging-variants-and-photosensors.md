@@ -7,7 +7,8 @@ optical and radiation sensors and light-transport elements shared by most detect
 (PMT, SiPM, APD, hybrid photodetectors, microchannel plates, gaseous photon detectors,
 wavelength shifters, fibers, light guides). Physics of emission and yield is in
 [signal formation and readout](signal-formation-and-readout.md); `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` evaluates the
-RICH design relations.
+RICH design relations. Environment codes used here: UGD underground, neutrino and
+rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
 
 ## Cherenkov PID variants
 
@@ -17,7 +18,13 @@ that separate species by which counter fires. The **turn-on curve** `epsilon(p)`
 over a range set by photon statistics (few photoelectrons) rather than a step; the
 efficiency near threshold is `1 - exp(-N_pe(p))` (Poisson; approximate for a smooth
 `N_pe`). Systematics: pressure/temperature/index stability (`n` shifts move the
-threshold), mirror/window aging, noise (dark counts) versus low `N_pe`.
+threshold), mirror/window aging, noise (dark counts) versus low `N_pe`, and the
+photodetector's excess noise, which lowers the effective `N_pe` (PDG RPP 2025, sec. 35.5).
+The rejection of the below-threshold species is set by the light it produces anyway, not
+by `1 - exp(-N_pe)` alone: delta rays and scintillation in the radiator, decay to an
+above-threshold particle, Cherenkov light in the radiator wrapping, interactions in
+upstream material, and overlapping or accidental tracks (sec. 35.5;
+arXiv:hep-ex/9805001, p. 10).
 
 **Differential counters.** Select a Cherenkov angle (`cos theta_C = 1/(n beta)`) with
 an optical system so that only a narrow velocity band gives light; excellent for a
@@ -27,9 +34,10 @@ dominating the systematic.
 **DIRC (detection of internally reflected Cherenkov light).** Light is trapped by
 total internal reflection in a solid radiator bar and carried to a photosensor array
 at the end: the ring is imaged after propagation as a pattern of hit positions,
-requiring a reconstruction of the angle from position and, in **time-of-propagation (TOP)**
-detectors, the photon arrival time, which breaks degeneracies
-in the path. Distinctive features: **multiple photon paths** with the same detected
+requiring a reconstruction of the angle from position and photon arrival time: the long
+photon paths make time a third imaging dimension in a DIRC (PDG RPP 2025, sec. 35.5;
+arXiv:hep-ex/0010068, p. 3), and **time-of-propagation (TOP)** detectors emphasize
+precision timing for the imaging itself; the time breaks degeneracies in the path. Distinctive features: **multiple photon paths** with the same detected
 position (left/right bounces, mirror-image "ambiguities") that overlap in the
 image, correction for **chromatic dispersion** through timing, and the need to calibrate
 the bar's optical quality, surface reflectivity, and the photosensor's timing. PID by a
@@ -74,8 +82,14 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
 - **Tails**: wrong-ring association, low-`N_pe` tracks, background-dominated events.
 - **Dependence**: refractive index (temperature/pressure/composition/dose), aerogel
   transparency, mirror alignment, photosensor gain/timing/aging, occupancy.
-- **Data sample**: decays with kinematic PID (`D^* -> D pi`, `K_s -> pi pi`,
-  `Lambda -> p pi`, `phi -> K K`), and `mu` from `Z`/`J/psi`.
+- **Data sample**: at accelerators, decays with kinematic PID (`D^* -> D pi`,
+  `K_s -> pi pi`, `Lambda -> p pi`, `phi -> K K`), and `mu` from `Z`/`J/psi`. In a large
+  water-Cherenkov volume (UGD): cosmic-ray muons, muon-decay (Michel) electrons and `pi^0`
+  produced in the detector (PDG RPP 2025, sec. 36.3.1.2; arXiv:1307.0162, sec. 1;
+  [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#water-cherenkov-and-liquid-scintillator-detectors)).
+  In an imaging air-Cherenkov camera (GND): muon rings, which calibrate the telescope
+  response (sec. 36.2.2; [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md)).
+  A sample for space-borne counters is not given here (a gap).
 - **Transfers**: photon-counting likelihood to any counting/imaging device; index/pressure
   monitoring to threshold counters; **does not transfer**: the specific dispersion terms.
 

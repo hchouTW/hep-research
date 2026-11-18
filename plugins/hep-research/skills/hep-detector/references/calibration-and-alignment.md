@@ -23,24 +23,24 @@ calibration was applied" is not a single answer.
 ## Test-beam versus in-situ calibration
 
 **Test-beam** calibration measures the response of detector modules to particles of
-known type and energy before installation. It gives an absolute, well-controlled
-reference, but it applies to a small sample of modules, under conditions - no magnetic
-field, no surrounding material, no pileup, pre-irradiation - that differ from the final
-environment. Test-beam constants are a starting point, not a final answer.
+known type and energy before installation: an absolute reference, but for a small sample
+of modules, under conditions - no magnetic field, no surrounding material, no pileup
+(COL: collider), pre-irradiation - that differ from the final environment. Test-beam
+constants are a starting point, not a final answer. An imaging air-Cherenkov telescope
+has none; muon rings calibrate it (PDG RPP 2025, sec. 36.2.2).
 
-**In-situ** calibration derives constants from the data itself, using physics that is
-known independently: a resonance of known mass, momentum-energy consistency (`E/p`),
-back-to-back balance in transverse momentum, or the uniformity of an isotropic flux.
-It captures the real environment and its time evolution (LED, laser and
-single-photoelectron monitoring also track gain drift without physics events, but not the
-absolute scale), and it is what sets the achievable constant term of a calorimeter (see
-[calorimetry](calorimetry-ecal-hcal.md)).
+**In-situ** calibration derives constants from data, using independently known physics:
+a resonance of known mass, a mono-energetic source or activation line (sec. 36.4),
+momentum-energy consistency (`E/p`), back-to-back balance in transverse momentum (COL),
+or the uniformity of an isotropic flux. It captures the real environment and its time
+evolution (LED, laser and single-photoelectron monitoring track gain drift, not the
+absolute scale) and sets the achievable constant term of a calorimeter
+([calorimetry](calorimetry-ecal-hcal.md)).
 
-The limitation of in-situ calibration is circularity: the reference physics is measured
-with the same detector being calibrated. A resonance mass calibration constrains the
-energy scale at the resonance's energy and must be extrapolated elsewhere, and the
-extrapolation - not the calibration point - is usually the dominant uncertainty. State
-where the calibration is anchored and how far it is extrapolated.
+Its limitation is circularity: the reference physics is measured with the detector being
+calibrated. A resonance mass or a line constrains the scale at its own energy and is
+extrapolated elsewhere; the extrapolation - not the calibration point - is usually the
+dominant uncertainty. State where it is anchored and how far it is extrapolated.
 
 ## Alignment and weak modes
 
@@ -99,25 +99,26 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
 
 ### Calibration standards and their pitfalls
 
-- **`E/p` with electrons**: bremsstrahlung lowers the track momentum and the track momentum scale enters directly;
-  use it with a bremsstrahlung-aware track fit, in bins where both are controlled.
-- **A resonance mass**: fit the line shape (natural width convolved with the resolution, with a final-state-radiation
-  tail), not the peak position; a peak position moves with the resolution and the radiation.
-- **Low-momentum scale**: a low-mass resonance anchors the scale at low transverse momentum and the Z at higher;
-  the extrapolation between the anchors in pT is part of the uncertainty.
+- **`E/p` with electrons**: bremsstrahlung lowers the track momentum, whose scale enters directly; use a
+  bremsstrahlung-aware track fit, in bins where both are controlled.
+- **A resonance mass or a source line** (also the resolution; PDG RPP 2025, sec. 36.4): fit the line shape
+  (natural width convolved with the resolution, with a final-state-radiation tail), not the peak position, which
+  moves with the resolution and the radiation.
+- **Momentum scale** (COL): a low-mass resonance anchors the scale at low pT and the Z at higher; the
+  extrapolation between them is part of the uncertainty. Without a resonance, use the anchors under "Adding a
+  tracking layer".
   <!-- example: source citation -->
-  In CMS muon performance (JINST 7 (2012) P10002, arXiv:1206.4071, section 6; read 2026-10-22) the J/psi and Z
-  dimuon masses calibrate the scale below about 100 GeV/c and cosmic-ray muons above it, and the bias found with
-  the Z is larger than with the J/psi (pT dependent).
+  In CMS muon performance (arXiv:1206.4071, sec. 6; read 2026-10-22) the J/psi and Z masses calibrate the
+  scale below about 100 GeV/c and cosmic-ray muons above it; the Z finds the larger, pT-dependent bias.
   <!-- /example -->
 - **MIP calibration**: use the most probable value of the Landau-like deposit, not the mean, which is pulled by the
   tail (PDG RPP 2024, Passage of particles through matter, secs. 34.2.3 and 34.2.9). The most probable loss is not
   proportional to path length (per unit length it grows as `a ln x + b`, PDG Eq. 34.12), so a pure `1/cos theta`
   correction leaves an angle-dependent bias (in 300 um silicon about 1% at 30 deg and 5% at 60 deg): compare MPVs
   at fixed path length (angle bins) or correct with the Landau-Vavilov-Bichsel thickness dependence.
-- **Intercalibration**: pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
+- **Intercalibration** (COL): pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
   absolute scale still needs a reference.
-- **Hadronic calorimeters**: `E/p` of isolated single hadrons, with its own selection bias from the isolation cut.
+- **Hadronic calorimeters**: `E/p` of isolated single hadrons, biased by the isolation cut itself.
 
 ## Adding a tracking layer to a running detector
 
