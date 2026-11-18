@@ -6,7 +6,9 @@ detectors, precision timing in trackers and calorimeters, and beam/start-time,
 bunch-timing, and luminosity monitors. The TOF physics (`beta`, `m^2`, separation
 ceiling) is in [particle identification](particle-identification.md); event-level timing/association is in
 [event reconstruction](event-reconstruction.md); `<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` evaluates
-TOF separation. This file adds the timing-error budget and the objects.
+TOF separation. This file adds the timing-error budget and the objects. Environment codes
+used here: COL collider; SPC space and balloon; UGD underground, neutrino and rare-event;
+GND ground-based cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy.
 
 ## Relations (definition, exact unless noted)
 
@@ -47,7 +49,7 @@ sigma_calib^2 + sigma_geom^2 + sigma_ref^2`
 | Clock | distribution jitter and offsets | global part: common to all channels, not averaged, but cancels in time differences within one event; local part (per board/PLL): averages over independent boards |
 | Calibration | `t0` per channel, walk curve, cable/fiber delay | in-situ residual method |
 | Geometry | path length, position along the bar, `L` error | tracking quality |
-| Reference/start time | collision time, event-start time | improves as `1/sqrt(N_tracks)` when estimated from tracks; dominates in low-multiplicity events or when only the bunch-crossing spread is known |
+| Reference/start time | the experiment's start-time source: collision or bunch-crossing time (COL); the prompt gamma flash of a pulsed neutron source, corrected for its flight time (NUC; arXiv:2505.00042, sec. 4.1); a timing plane of the same instrument, so `t` is a difference of two measured times and both planes' terms enter (SPC; [particle identification](particle-identification.md)); or an event time fitted with the direction or vertex from the hit times (GND, UGD; [ground-based detection arrays](ground-based-detection-arrays.md), [neutrino astronomy](neutrino-astronomy.md)) | improves as `1/sqrt(N_tracks)` when estimated from tracks; dominates in low-multiplicity events or when only the bunch-crossing spread is known (COL) |
 
 Keep four resolutions apart: **single-hit** (one channel), **per-track** (all hits on
 one track, after averaging the uncorrelated part), **event-time** (start time
