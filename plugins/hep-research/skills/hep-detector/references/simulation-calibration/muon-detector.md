@@ -44,7 +44,8 @@ readout and reconstruction deterministic. Re-digitization at two condition value
 ## 4. Storage recommendations
 
 Hits (re-digitization in Python: `g4sim_digi` ignores conditions, C24); the event time per global event number for
-the snapshot IOVs; simreco columns for t₀ and segment fits.
+the snapshot IOVs; the reconstruction's output columns for t₀ and segment fits (the user's reconstruction: simreco
+has no muon-chamber reconstruction).
 
 ## 5. Reference catalog
 
