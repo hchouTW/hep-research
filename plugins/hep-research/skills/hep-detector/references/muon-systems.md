@@ -107,8 +107,13 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 - **Scaling**: `sigma_pT/pT ∝ pT` at high `p` (measurement-dominated), constant at low
   `p` (scattering); charge misID rises steeply with `pT`.
 - **Conventions** (COL): efficiency measured with tag-and-probe at fixed working point and
-  isolation; resolution from `Z` line-shape width or MC truth for the momentum range,
-  charge misID from same-sign fraction in `Z -> mu mu`.
+  isolation; resolution from `Z` line-shape width or MC truth for the momentum range.
+  Charge misID per muon comes from same-sign pairs of a resonance that decays to an
+  opposite-sign pair (`Z -> mu mu` at a collider): with per-muon rates `c_i`, `c_j` a pair
+  is same-sign with probability `c_i (1 - c_j) + (1 - c_i) c_j` (about `2c` for equal small
+  rates), so fit `c` per bin to the background-corrected same-sign counts rather than
+  quoting the same-sign fraction as the per-muon rate (the same pair model is fitted for
+  `Z -> ee` in arXiv:1908.00005, sec. 9.2).
 - **Tails**: wrong-segment link, decay-in-flight, delta-ray overlap, charge flip.
 - **Dependence**: rate/occupancy (background hits), magnetic field map stability,
   chamber temperature/gas, alignment time-dependence.
@@ -141,7 +146,8 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 
 ## Deliverables
 
-- The muon-type definitions, with efficiency, purity, resolution, and charge misID per type.
+- The muon-type definitions, with efficiency, purity, resolution, and charge misID per type
+  (a per-muon rate, not the same-sign pair fraction).
 - Tag-and-probe (or equivalent) efficiency with binomial uncertainties, and the trigger
   matching definition.
 - The high-`pT` alignment/field validation (mass and `q/p` versus `q*eta`, cosmic split).
