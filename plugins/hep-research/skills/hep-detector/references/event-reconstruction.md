@@ -64,8 +64,10 @@ is part of the analysis's reproducibility record - see
 Two failure modes recur. **Dead and noisy channel maps must match between data and
 simulation**, or simulated events see a detector that does not exist; when the masks
 are time-dependent, simulated events must be assigned to runs or periods in
-proportion to the luminosity actually collected, each with that period's mask (or
-per-period simulation combined with exposure weights); an averaged mask is not a
+proportion to the luminosity (at a collider) or the live time and exposure actually
+collected, each with that period's mask (or per-period simulation combined with exposure
+weights); in a space or balloon instrument the exposure can depend on the measured quantity
+(on rigidity through the geomagnetic cutoff, arXiv:1407.1657v1, secs. 3.5 and 3.7); an averaged mask is not a
 substitute, since `sum_t w_t R(theta_t) != R(sum_t w_t theta_t)` in general. And **zero suppression and thresholds discard
 information irreversibly** at the readout, so a signal below threshold is not merely
 noisy, it is absent - which produces an efficiency turn-on that must be modeled rather
@@ -79,7 +81,7 @@ threshold-level operating window (efficiency against noise occupancy for the cha
 channel) are in [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms)
 and [front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression).
 
-**Check:** Dead and noisy channel maps match between data and simulation period by period (luminosity-weighted), and threshold turn-ons are modeled.
+**Check:** Dead and noisy channel maps match between data and simulation period by period (weighted by luminosity or exposure), and threshold turn-ons are modeled.
 
 ## Clustering
 
