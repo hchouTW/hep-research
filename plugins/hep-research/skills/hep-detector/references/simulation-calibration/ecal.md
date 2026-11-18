@@ -56,8 +56,19 @@ Record as `column` or `event_file` (moments forbid reweighting and rerun, §6.1)
 | beam energy | known input | into `source` | yes; its uncertainty is φ |
 | MIP peak, cosmic rays | population feature | out of the observation | yes |
 | E/p with tracker momentum | internal constraint | merging branch (§3.4) | yes, upstream result by hash |
-| laser or LED monitoring | mid-chain injection | 3/4a, with conversion S/S₀ = (R/R₀)^α, α as φ | only under the §6.7 split |
+| laser monitoring of crystal transparency | mid-chain injection | `quanta` → `collection` (the injected light crosses the crystal), with conversion S/S₀ = (R/R₀)^α, α as φ | not declarable: no g4sim hand-off before response stage 3 (§11.4) |
+| LED or light source at the photosensor | mid-chain injection | 3/4a, with a declared conversion (α = 1 when only the photosensor response changes) | only under the §6.7 split |
 | single photoelectron | mid-chain injection | `pde` → `sensor` | refused (`binding.injection_single_pe`) |
+
+A reference on the 3/4a edge constrains only nodes downstream of it (§3.4), so it cannot track the transparency loss in
+`collection`: radiation-induced absorption shortens the attenuation length and so the light output (PDG RPP 2025
+sec. 35.4, p. 18).
+
+<!-- example: source citation -->
+In the CMS ECAL light monitoring the laser light is injected into each crystal through optical fibres, with a spectrum
+and path to the photodetector different from scintillation light, and the power-law conversion has α = 1 for the same
+path length and for photodetector (VPT) response losses (arXiv:1306.2016v2, sec. 4.1, pp. 10-13).
+<!-- /example -->
 
 ## 6. Special functionals and link functions
 
