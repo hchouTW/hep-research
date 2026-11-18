@@ -105,8 +105,9 @@ image and many `dE/dx` samples per track.
 (wires, GEM, Micromegas), **ion backflow** (positive ions drifting back distort `E`),
 **space-charge distortions** (a radially and `z`-dependent position shift), field-cage
 and `E x B` distortions, gating, and **crossing-time ambiguity**: the absolute drift
-coordinate needs the interaction time `t_0`, unknown for particles not associated with
-a bunch crossing or trigger (pileup/out-of-time tracks are displaced along `z`).
+coordinate needs the start time `t_0`: an external trigger (PDG RPP 2025 sec. 35.6.4, p. 41),
+a collider's bunch crossing, or `S1` light in rare-event TPCs (sec. 36.4, p. 31); tracks
+not associated with it (pileup, cosmics) are displaced along `z`.
 
 **`dE/dx`.** Truncated mean or cluster counting over `~10^2` samples, corrected for
 path length, saturation, gain, and attachment ([particle identification](particle-identification.md)).
