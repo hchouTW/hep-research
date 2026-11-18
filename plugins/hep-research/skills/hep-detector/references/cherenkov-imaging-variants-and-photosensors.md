@@ -7,7 +7,8 @@ optical and radiation sensors and light-transport elements shared by most detect
 (PMT, SiPM, APD, hybrid photodetectors, microchannel plates, gaseous photon detectors,
 wavelength shifters, fibers, light guides). Physics of emission and yield is in
 [signal formation and readout](signal-formation-and-readout.md); `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` evaluates the
-RICH design relations.
+RICH design relations. Environment codes used here: UGD underground, neutrino and
+rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
 
 ## Cherenkov PID variants
 
@@ -81,8 +82,14 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
 - **Tails**: wrong-ring association, low-`N_pe` tracks, background-dominated events.
 - **Dependence**: refractive index (temperature/pressure/composition/dose), aerogel
   transparency, mirror alignment, photosensor gain/timing/aging, occupancy.
-- **Data sample**: decays with kinematic PID (`D^* -> D pi`, `K_s -> pi pi`,
-  `Lambda -> p pi`, `phi -> K K`), and `mu` from `Z`/`J/psi`.
+- **Data sample**: at accelerators, decays with kinematic PID (`D^* -> D pi`,
+  `K_s -> pi pi`, `Lambda -> p pi`, `phi -> K K`), and `mu` from `Z`/`J/psi`. In a large
+  water-Cherenkov volume (UGD): cosmic-ray muons, muon-decay (Michel) electrons and `pi^0`
+  produced in the detector (PDG RPP 2025, sec. 36.3.1.2; arXiv:1307.0162, sec. 1;
+  [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#water-cherenkov-and-liquid-scintillator-detectors)).
+  In an imaging air-Cherenkov camera (GND): muon rings, which calibrate the telescope
+  response (sec. 36.2.2; [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md)).
+  A sample for space-borne counters is not given here (a gap).
 - **Transfers**: photon-counting likelihood to any counting/imaging device; index/pressure
   monitoring to threshold counters; **does not transfer**: the specific dispersion terms.
 
