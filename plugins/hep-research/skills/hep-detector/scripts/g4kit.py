@@ -102,7 +102,7 @@ def filled(node, values: dict, kit: dict):
 def detector_spec(kit: dict, values: dict) -> dict:
     spec = filled(kit["detector"], values, kit)
     numbers = {name: as_quantity(values[name]) for name, item in kit["inputs"].items() if item["kind"] in NUMERIC}
-    spec["params"] = {**numbers, **{name: as_quantity(value) for name, value in kit["geometric_defaults"].items() if name not in numbers}, **spec["params"]}
+    spec["params"] = {**numbers, **{name: as_quantity(values[name]) for name in kit["geometric_defaults"] if name not in numbers}, **spec["params"]}
     return without_zero_field(spec, kit, values)
 
 
