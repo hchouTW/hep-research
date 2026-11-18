@@ -74,8 +74,10 @@ Practical points that dominate real TOF performance:
   on the fitted trajectory, and using a straight-line approximation at low momentum
   introduces a bias that grows exactly where TOF is most useful.
 - **Time-walk and charge dependence.** Signal amplitude affects the measured time in
-  most discriminator schemes; the correction depends on deposited charge, which for
-  nuclei scales as `Z^2`. A TOF calibrated on singly-charged particles is not
+  most discriminator schemes; the correction depends on the signal amplitude. The energy
+  deposit scales as `Z^2`, but a scintillator's light output saturates at large `dE/dx`
+  (Birks' law, PDG RPP 2025 eq. 35.2), so the walk correction is a function of the
+  measured amplitude, calibrated over the charges in use. A TOF calibrated on singly-charged particles is not
   automatically valid for heavier ones.
 - **TOF also measures direction of travel.** The sign of the time difference between
   planes distinguishes downward- from upward-going particles, which is the primary
