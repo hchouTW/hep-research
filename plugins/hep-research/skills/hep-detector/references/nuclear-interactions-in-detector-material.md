@@ -9,9 +9,10 @@ conventions (inelastic or charge-changing, targets, straight-ahead approximation
 
 ## Survival
 
-- The interaction length of a nucleus in a pure material of mass number A is `lambda = A / (N_A sigma)` (g/cm2), with
-  sigma the inelastic cross section per target nucleus. In a mixture with mass fractions w_i,
-  `1/lambda = sum_i w_i N_A sigma_i / A_i`, which is the same as crossing the components one after the other.
+- The interaction length of a nucleus in a pure material of molar mass A (the atomic mass in g/mol, not the integer
+  mass number) is `lambda = A / (N_A sigma)` (g/cm2), with sigma the inelastic cross section per target nucleus. In a
+  mixture with mass fractions w_i and molar masses A_i (g/mol), `1/lambda = sum_i w_i N_A sigma_i / A_i`, which is
+  the same as crossing the components one after the other.
 - Over layers of grammage x_k, `P = exp(-sum_k x_k / lambda_k)`; the flux above the material divides the counted
   flux by P. Only the material between the point where the flux is defined (top of instrument, or a layer) and the
   layers whose charge selects the species counts; state which.
