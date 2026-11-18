@@ -48,7 +48,8 @@ rerun; keep the incidence angle per hit so that "sum of two terms" can be broken
 
 | Reference | Type | Edge |
 |---|---|---|
-| beam or cosmic tracks of known momentum | known input | into `source` |
+| beam tracks of known momentum; cosmic-ray tracks with a measured momentum or a declared momentum distribution (its uncertainty as φ, §3.4) | known input | into `source` |
+| cosmic-ray tracks without a momentum measurement (field off: straight tracks, steeply falling spectrum) | population feature | out of the observation |
 | overlapping modules | redundant measurement | out of the comparison node |
 | known resonance mass | internal constraint | out of the observation |
 | magnetic-field polarity flip, incidence-angle scan | control variables | conditioning (§3.5) |
