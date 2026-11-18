@@ -174,22 +174,33 @@ arXiv:1407.1657v1, sec. 2).
 
 ## Reconstruction under pileup
 
-When multiple interactions overlap, reconstruction must assign objects to a primary
+Pileup is unrelated activity inside the resolving time of the readout; its form and
+mitigation depend on the environment. At a collider, where several interactions overlap in a
+bunch crossing, reconstruction must assign objects to a primary
 vertex and estimate the diffuse energy from the rest. Standard components are vertex
 selection (which vertex is the interesting one - a choice with its own efficiency and
 its own mis-assignment rate), charged-hadron subtraction using track-to-vertex
 association, and an event-by-event estimate of the pileup energy density used to
-correct object energies.
+correct object energies. Elsewhere: in slow cryogenic and germanium detectors two pulses
+merge within the resolving time and are rejected by pulse-shape tests
+([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#pileup-and-position-in-cryogenic-and-germanium-detectors);
+low-temperature calorimeters keep a low rate per device, PDG RPP 2025 sec. 36.5.3, p. 46); in a
+surface LArTPC cosmic tracks share the drift window
+([single-phase LArTPCs](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs));
+in surface arrays random muons enter station traces
+([ground based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction));
+in imaging Cherenkov cameras night-sky background piles up unless the exposure is a few ns
+(sec. 36.2.2, p. 8).
 
 Two points are easy to get wrong. Pileup mitigation is a *correction with an
-uncertainty*, not a clean removal, and its residual must appear as a systematic. And
-because the pileup distribution differs between data and simulation, the reweighting of
+uncertainty*, not a clean removal, and its residual must appear as a systematic. And,
+at a collider, because the pileup distribution differs between data and simulation, the reweighting of
 [triggers-luminosity-pileup.md](triggers-luminosity-pileup.md) must be
 applied consistently with the mitigation - reweighting to a data pileup profile while
 reconstructing with a mitigation tuned for a different profile leaves a residual that
 neither step catches.
 
-**Check:** Pileup mitigation carries a residual systematic, and it is consistent with the pileup profile used for reweighting.
+**Check:** Pileup mitigation carries a residual systematic and, at a collider, is consistent with the pileup profile used for reweighting.
 
 ## Validating a learned reconstruction
 
@@ -345,7 +356,7 @@ delivered quantity; the routing rows used are named; redoability is classified a
   reconstruction and analysis levels.
 - Timing association windows, if used, with the start-time source and the assumed
   time-of-flight (species and direction) hypothesis.
-- Pileup mitigation method, its residual uncertainty, and its consistency with the
-  pileup reweighting applied to simulation.
+- Pileup mitigation method, its residual uncertainty, and (at a collider) its consistency
+  with the pileup reweighting applied to simulation.
 - Confirmation that a rerun reproduces the same output (no ordering or threading
   dependence).
