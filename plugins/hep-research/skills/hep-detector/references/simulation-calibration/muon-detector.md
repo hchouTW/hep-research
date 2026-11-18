@@ -52,7 +52,7 @@ the snapshot IOVs; simreco columns for t₀ and segment fits.
 |---|---|---|
 | muons of known momentum (beam or cosmic) | known input | into `source` |
 | inner-tracker match | redundant measurement | out of the `matching` comparison node |
-| Z → μμ tag and probe | tag and probe | out of the observation (tag-probe correlation biases, §3.4) |
+| tag and probe (control sample chosen by the experiment instance, §11.2; collider example: J/ψ or Z → μμ) | tag and probe | out of the observation (tag-probe correlation biases, §3.4) |
 | threshold scan, multiplicity | control variables | break efficiency, threshold and noise (§3.5) |
 
 ## 6. Special functionals and link functions
