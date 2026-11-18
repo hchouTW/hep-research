@@ -39,7 +39,8 @@ association is an association mechanism, §3.2).
 ## 4. Storage recommendations
 
 Keep `photons.csv` (photon energy per detected photon) when a PDE(E) is to be applied after transport; record the hit
-file for re-digitization of stages 3–5 and simreco columns for the ring fit.
+file for re-digitization of stages 3–5 and the reconstruction's output columns for the ring fit (the user's
+reconstruction: simreco has no RICH reconstruction).
 
 ## 5. Reference catalog
 
