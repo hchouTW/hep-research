@@ -11,7 +11,7 @@ Part B §11.1 items 1–8 for a silicon or gas tracker, from §3.1 derivation ba
 | `material` | 1 | ionisation, multiple scattering in material | `g4sim_run` |
 | `pairs` | 2 | electron-hole pairs, or primary electrons in gas | response stage `ionisation` |
 | `sharing` | 3 | drift, Lorentz angle, diffusion, attachment, charge sharing | `charge_sharing` or `drift_table` stage (hashed table) |
-| `preamp` | 4b | preamplifier (silicon) / gas gain (drift chamber, TPC) | `sensor` stage (gas gain: *Inferred* mapping) |
+| `preamp` | 4b | preamplifier conversion gain (silicon without intrinsic amplification: deterministic; a sensor with an implanted gain layer, LGAD: avalanche gain, a density) / gas gain (drift chamber, TPC): a density | `sensor` stage (gas gain: *Inferred* mapping) |
 | `electronics` | 5 | noise, threshold, shaping | response stage 4 |
 | `hits` | 5 | zero suppression, clustering | response stage 5 |
 | `reco` | 6–7 | clusters or hits, tracks; alignment assumed by reconstruction | reconstruction |
@@ -42,9 +42,11 @@ scintillation light, a beam spill or an external trigger
 
 ## 3. Kernel properties
 
-Node 1 samplable black box; `pairs`, `preamp`, `electronics` densities; `sharing` deterministic given its table;
-readout and reconstruction deterministic. Redundant measurements use a comparison node with exactly two upstream
-observation nodes (§3.4); common modes of the two modules are decided by P3/G5, not by the graph.
+Node 1 samplable black box; `pairs`, `electronics` densities; `preamp` a density for gas gain or an internal sensor
+gain, deterministic for a silicon preamplifier without intrinsic amplification (its noise is the additive
+`electronics` noise); `sharing` deterministic given its table; readout and reconstruction deterministic. Redundant
+measurements use a comparison node with exactly two upstream observation nodes (§3.4); common modes of the two
+modules are decided by P3/G5, not by the graph.
 
 ## 4. Storage recommendations
 
