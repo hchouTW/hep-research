@@ -12,7 +12,10 @@ without one.
 **Column conventions.** *Ambiguity* is the characteristic degeneracy of the
 inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanisms;
 *validation* names a data-accessible sample (never simulation truth);
-*systematics* lists the dominant nuisance parameters.
+*systematics* lists the dominant nuisance parameters. An entry that holds in one
+environment only carries its code: `COL` collider, `FXT` fixed-target and test beam,
+`SPC` space and high-altitude balloon, `UGD` underground, neutrino and rare-event, `GND`
+ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physics.
 
 ## Table 1: Master detector table
 
@@ -28,7 +31,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | GEM/Micromegas | micropattern gas | pad/strip charge | position, angle | gain map | alignment | cluster | angle | pitch, diffusion | discharges | test beam, cosmics | gain, rate |
 | Scintillating fiber | scintillation | amplitude | position | gain, attenuation | mapping | hit | stereo ghosts | pitch, sharing | crosstalk, dark counts | MIPs | attenuation, dose |
 | Emulsion | grains | grain positions | track/vertex | scanning | layer alignment | base-track | no timing | grain size | overlap | through tracks | fading, distortion |
-| TOF / timing layers | scintillation, gas gap, Si gain | time | `beta`, `m^2`, time | `t0`, walk | clock, path | hit, track time | multi-hit | jitter, photostat, clock | wrong bunch | muons | offsets |
+| TOF / timing layers | scintillation, gas gap, Si gain | time | `beta`, `m^2`, time | `t0`, walk | clock, path | hit, track time | multi-hit | jitter, photostat, clock | wrong `t_0` association (COL: wrong bunch crossing); wrong direction of travel (SPC: upward vs downward) | muons | offsets |
 | LGAD | gain in thin Si | time | time | gain, walk | fluence | hit time | multi-hit | Landau, jitter | fill factor | MIPs | dose |
 | MCP | channel gain | time | time | gain, walk | integrated anode charge (aging) | hit time | multi-hit | transit-time spread, jitter | rate droop | — | aging |
 | RICH / DIRC / TOP | Cherenkov light | photon hits (+ time) | `beta`, species | index, mirror, gain | alignment, `T/P` | ring / arc | photon-path | emission, chromatic | low `N_pe`, background | kinematic PID | index, aging |
@@ -67,7 +70,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | MRPC | gas gap avalanche | gap, jitter | limited | moderate | multi-hit |
 | LGAD | gain in thin Si | Landau + jitter | high | gain loss | fill factor |
 | MCP | channel gain | transit spread | moderate | aging | rate droop |
-| Tracker time | drift/pulse | sensor + `t0` | as tracker | as tracker | bunch assignment |
+| Tracker time | drift/pulse | sensor + `t0` | as tracker | as tracker | event-time (`t_0`) assignment (COL: bunch assignment) |
 | Calorimeter time | shower pulse | pulse shape | as calo | as calo | shower depth, walk |
 
 ## Table 4: PID comparison
