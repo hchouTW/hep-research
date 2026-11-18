@@ -74,5 +74,7 @@ misalignment appears as Δθ_C = θ_x cos φ + θ_y sin φ, which the ring-avera
 
 `assets/simulation-calibration/rich.binding.example.json`: refractive index, mirror tilt and surface efficiency
 resimulation or surrogate model; gain rerun. Degeneracies (§12): refractive index and geometric scale; photon count ×
-per-photon resolution. Not in the §12 row: mirror alignment and per-photon resolution (offset mixed into width,
+per-photon resolution in the per-ring width (σ_ring = σ_photon/√N_pe ⊕ C, PDG RPP 2025 eq. 35.12), broken by the
+per-photon residual width and the photon count per ring of item 6; C (tracking, alignment, background, hits of
+other tracks) does not fall with N_pe. Not in the §12 row: mirror alignment and per-photon resolution (offset mixed into width,
 §3.5), broken by the signed residual versus φ.
