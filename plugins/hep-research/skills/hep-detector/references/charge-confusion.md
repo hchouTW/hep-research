@@ -94,13 +94,24 @@ simulated tails are right.
 `<plugin root>/skills/hep-detector/scripts/charge_confusion_rate.py` implements routes 2 and 3 per bin:
 - `template`: right-sign, wrong-sign and optional background templates fitted to the discriminant histogram with the
   full Barlow-Beeston treatment of the template statistics (`core/stats/template_fit.py`, at most 6 templates and 60
-  bins); the rate's 68% interval is the profile-likelihood interval in the rate, which stays calibrated near zero
-  (200 toys per rate from 1e-3 to 1e-1 cover within 0.05 of 68% in its tests, with the MC templates redrawn);
-- `control`: a sample of known sign, the Clopper-Pearson interval per bin, and the data/MC scale factor against a
-  simulated control sample; integer frequency weights only (with them it equals counting duplicated events);
+  bins); the rate's 68% interval is the profile-likelihood interval in the rate (200 toys at rates 1e-3, 1e-2 and
+  1e-1 with 50,000 events per bin, so at least 50 expected wrong-sign events, cover within 0.05 of 68% in its
+  slow-tier tests, with the MC templates redrawn; coverage with only a few wrong-sign events is not tested). Its rate
+  is `Y_wrong / (Y_right + Y_wrong)` over the histogram it is given: give it the tracks of one true sign (`true_sign`)
+  in both reconstructed signs (right = correctly signed, wrong = confused), with the other species as a background
+  template. Fitted on the opposite-sign sample alone it returns the confused fraction of that sample, not `c`; `c`
+  is then the confused yield over the abundant-species yield, as in route 2, and is not what `sign_rates` carries.
+  The run fails with a warning naming the bin when a fit does not converge or is infeasible, and when a rate is not
+  identified (its profile interval reaches 1, or a background template has the right-sign shape), whose
+  `sign_rates` entry is then null; a fit at a boundary or with a covariance warning alone stays ok with a warning;
+- `control`: a sample of known sign, the Clopper-Pearson interval per bin (at `--cl` as `interval`; the 68% one,
+  whose half-width is `rate_error`, as `interval_68`), and the data/MC scale factor against a simulated control
+  sample; integer frequency weights only (with them it equals counting duplicated events);
 - `gaussian-core`: Phi(-|1/R| / sigma(1/R)) from a Gaussian curvature core, a lower-bound reference labelled "not an
   estimate". It ignores the tails that dominate real confusion and never yields an estimate.
 `template` and `control` write `sign_rates`, which `species_response.py from-rates` turns into sign-migration blocks.
+These blocks are diagonal in rigidity (confused tracks keep their bin) and carry no rate uncertainty: for a steep
+spectrum, supply the confused tracks' rigidity response separately, and hand over the covariance of `c` alongside.
 
 ## Handoff: hep-measurement subtracts it as a background
 

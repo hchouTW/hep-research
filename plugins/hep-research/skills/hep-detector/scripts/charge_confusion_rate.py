@@ -23,6 +23,9 @@ Output: per-bin rates and, for template and control, "sign_rates" in the format 
 {"edges": [...], "variable": ..., "rates": [{"true": SIGN, "reco": OTHER SIGN, "rate": [...], "rate_error": [...]}]}.
 Input: template JSON {"edges": [...], "true_sign": "negative"|"positive", "variable"?: TEXT,
   "bins": [{"data": [...], "templates": {"right": [...], "wrong": [...], "background"?: [...]}, "mc_events"?: {...}}]}.
+  Each bin's data histogram holds the tracks of the one true sign true_sign in both reconstructed signs, so that
+  Y_wrong / (Y_right + Y_wrong) is the confusion rate; fitted on the opposite-sign sample alone, r is the confused
+  fraction of that sample, not the rate (charge-confusion.md, route 2).
 Usage:
   charge_confusion_rate.py template --input T.json [--status LABEL]
   charge_confusion_rate.py control --data CTRL.csv [--mc CTRL_MC.csv] --edges E ... --bin-column C
