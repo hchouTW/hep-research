@@ -33,9 +33,10 @@ dominating the systematic.
 **DIRC (detection of internally reflected Cherenkov light).** Light is trapped by
 total internal reflection in a solid radiator bar and carried to a photosensor array
 at the end: the ring is imaged after propagation as a pattern of hit positions,
-requiring a reconstruction of the angle from position and, in **time-of-propagation (TOP)**
-detectors, the photon arrival time, which breaks degeneracies
-in the path. Distinctive features: **multiple photon paths** with the same detected
+requiring a reconstruction of the angle from position and photon arrival time: the long
+photon paths make time a third imaging dimension in a DIRC (PDG RPP 2025, sec. 35.5;
+arXiv:hep-ex/0010068, p. 3), and **time-of-propagation (TOP)** detectors emphasize
+precision timing for the imaging itself; the time breaks degeneracies in the path. Distinctive features: **multiple photon paths** with the same detected
 position (left/right bounces, mirror-image "ambiguities") that overlap in the
 image, correction for **chromatic dispersion** through timing, and the need to calibrate
 the bar's optical quality, surface reflectivity, and the photosensor's timing. PID by a
