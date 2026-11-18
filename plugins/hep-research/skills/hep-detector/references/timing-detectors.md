@@ -60,10 +60,15 @@ uncorrelated terms as `1/sqrt(N)`; correlated ones (clock, `t_ref`) remain.
 **Track-to-hit association and multi-hit ambiguity.** A time is meaningless without the
 right track: extrapolate the track to the layer, match by position (and time), and
 resolve multiple candidate hits/tracks per cell. Wrong association creates a late/early
-tail. **Bunch assignment**: the measured time must be assigned to the right bunch
-crossing; out-of-time pileup and late tails (afterpulses, delayed light, slow
-components) produce non-Gaussian tails and mis-assigned bunches, so quote core width
-and tail fraction separately.
+tail. **Time-window assignment**: the measured time must be assigned to the right time
+window of the experiment's start-time source, the bunch crossing at a collider (COL). A
+self-triggered instrument has no external window: its own timing planes or a fitted
+event time set the reference, and the ambiguity is instead the direction of travel, the
+sign of the time difference between planes (SPC; arXiv:hep-ex/0305074, sec. 3;
+[particle identification](particle-identification.md)), or the synchronisation of many
+stations or optical modules (GND, UGD; PDG RPP 2025, sec. 36.3.2). Out-of-time pileup and
+late tails (afterpulses, delayed light, slow components) produce non-Gaussian tails and
+mis-assigned windows, so quote core width and tail fraction separately.
 
 ## Technologies
 
@@ -114,7 +119,7 @@ propagation; versus run/fill reveals clock drift.
 - **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2`.
 - **Conventions**: quote resolution with the reference, core Gaussian sigma and tail
   fraction; state whether clock jitter is included.
-- **Tails**: wrong-bunch, afterpulses, late light, mis-association.
+- **Tails**: wrong-bunch (COL) or wrong-window, afterpulses, late light, mis-association.
 - **Dependence**: rate (baseline shifts), dose (LGAD gain, SiPM dark counts), temperature,
   clock distribution. **Data sample**: `Z`/`J/psi -> mu mu` or cosmic muons, identified
   species in overlapping momentum ranges.
@@ -137,5 +142,5 @@ propagation; versus run/fill reveals clock drift.
 
 - A time-resolution budget with each term's origin and whether it averages.
 - Single-hit, per-track, event-time, and system resolutions, with tail fractions.
-- The association rule (track-to-hit, bunch assignment) and its failure rate.
+- The association rule (track-to-hit, time-window assignment) and its failure rate.
 - Calibration chain (`t0`, walk, clock) and the residual used to validate it.
