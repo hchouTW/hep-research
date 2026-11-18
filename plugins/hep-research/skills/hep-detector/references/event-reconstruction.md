@@ -29,9 +29,12 @@ scanning radiometers in [timestream to map reconstruction](timestream-to-map-rec
 ## The chain, and why its order matters
 
 Reconstruction proceeds roughly as: raw readout -> calibrated digits -> hits ->
-clusters and track candidates -> fitted tracks -> vertices -> identified particles ->
-composite objects (jets, missing transverse momentum) -> event-level selection
-quantities.
+clusters, track or image candidates -> fitted objects (tracks, showers, vertices, shower
+axes) -> identified particles -> event-level quantities. At a collider the composite stage
+adds jets and missing transverse momentum; a LArTPC goes from signal processing to pattern
+recognition to calorimetry and PID (PDG RPP 2025 sec. 35.7.6, p. 61); an imaging Cherenkov
+telescope parametrizes images by ellipses and intersects their axes (sec. 36.2.2, p. 8;
+[imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md)).
 
 Each stage consumes the previous stage's output *and its uncertainty*, and each stage
 makes decisions that later stages cannot undo. A hit dropped by a threshold cut is not
@@ -61,8 +64,10 @@ is part of the analysis's reproducibility record - see
 Two failure modes recur. **Dead and noisy channel maps must match between data and
 simulation**, or simulated events see a detector that does not exist; when the masks
 are time-dependent, simulated events must be assigned to runs or periods in
-proportion to the luminosity actually collected, each with that period's mask (or
-per-period simulation combined with exposure weights); an averaged mask is not a
+proportion to the luminosity (at a collider) or the live time and exposure actually
+collected, each with that period's mask (or per-period simulation combined with exposure
+weights); in a space or balloon instrument the exposure can depend on the measured quantity
+(on rigidity through the geomagnetic cutoff, arXiv:1407.1657v1, secs. 3.5 and 3.7); an averaged mask is not a
 substitute, since `sum_t w_t R(theta_t) != R(sum_t w_t theta_t)` in general. And **zero suppression and thresholds discard
 information irreversibly** at the readout, so a signal below threshold is not merely
 noisy, it is absent - which produces an efficiency turn-on that must be modeled rather
@@ -76,7 +81,7 @@ threshold-level operating window (efficiency against noise occupancy for the cha
 channel) are in [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms)
 and [front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression).
 
-**Check:** Dead and noisy channel maps match between data and simulation period by period (luminosity-weighted), and threshold turn-ons are modeled.
+**Check:** Dead and noisy channel maps match between data and simulation period by period (weighted by luminosity or exposure), and threshold turn-ons are modeled.
 
 ## Clustering
 
@@ -154,33 +159,48 @@ consistent with each other, and that the ordering of removal steps changes the r
 ## Timing and event association
 
 Where the detector has adequate timing, associating deposits and tracks by arrival time
-suppresses out-of-time contributions - pileup from adjacent bunch crossings, cavern or
-albedo background, and cosmic-ray tracks. Timing association is an efficiency-versus-
+suppresses out-of-time contributions - cosmic-ray tracks and, at a collider, pileup from
+adjacent bunch crossings and cavern background. Timing association is an efficiency-versus-
 purity trade like any other, with the added subtlety that a timing window is only as
-good as the time calibration and the assumed time-of-flight to the measurement point
-- which depends on the assumed particle velocity, and therefore on the species
-hypothesis.
+good as the time calibration, the start-time source (an accelerator clock, the scintillation
+light of the interaction in a LArTPC, PDG RPP 2025 sec. 35.7.4, pp. 59-60, or the instrument's
+own timing layers) and the assumed time of flight to the measurement point - which depends on
+the assumed velocity, and therefore on the species hypothesis, and on the assumed direction.
+In a space instrument albedo (upward-going) particles are separated by the sign of the
+measured time difference, not by an out-of-time window (arXiv:hep-ex/0305074v1, sec. 2;
+arXiv:1407.1657v1, sec. 2).
 
-**Check:** Timing windows are stated with the time calibration and the time-of-flight (species) hypothesis they assume.
+**Check:** Timing windows are stated with the time calibration, the start-time source and the time-of-flight (species and direction) hypothesis they assume.
 
 ## Reconstruction under pileup
 
-When multiple interactions overlap, reconstruction must assign objects to a primary
+Pileup is unrelated activity inside the resolving time of the readout; its form and
+mitigation depend on the environment. At a collider, where several interactions overlap in a
+bunch crossing, reconstruction must assign objects to a primary
 vertex and estimate the diffuse energy from the rest. Standard components are vertex
 selection (which vertex is the interesting one - a choice with its own efficiency and
 its own mis-assignment rate), charged-hadron subtraction using track-to-vertex
 association, and an event-by-event estimate of the pileup energy density used to
-correct object energies.
+correct object energies. Elsewhere: in slow cryogenic and germanium detectors two pulses
+merge within the resolving time and are rejected by pulse-shape tests
+([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#pileup-and-position-in-cryogenic-and-germanium-detectors);
+low-temperature calorimeters keep a low rate per device, PDG RPP 2025 sec. 36.5.3, p. 46); in a
+surface LArTPC cosmic tracks share the drift window
+([single-phase LArTPCs](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs));
+in surface arrays random muons enter station traces
+([ground based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction));
+in imaging Cherenkov cameras night-sky background piles up unless the exposure is a few ns
+(sec. 36.2.2, p. 8).
 
 Two points are easy to get wrong. Pileup mitigation is a *correction with an
-uncertainty*, not a clean removal, and its residual must appear as a systematic. And
-because the pileup distribution differs between data and simulation, the reweighting of
+uncertainty*, not a clean removal, and its residual must appear as a systematic. And,
+at a collider, because the pileup distribution differs between data and simulation, the reweighting of
 [triggers-luminosity-pileup.md](triggers-luminosity-pileup.md) must be
 applied consistently with the mitigation - reweighting to a data pileup profile while
 reconstructing with a mitigation tuned for a different profile leaves a residual that
 neither step catches.
 
-**Check:** Pileup mitigation carries a residual systematic, and it is consistent with the pileup profile used for reweighting.
+**Check:** Pileup mitigation carries a residual systematic and, at a collider, is consistent with the pileup profile used for reweighting.
 
 ## Validating a learned reconstruction
 
@@ -334,8 +354,9 @@ delivered quantity; the routing rows used are named; redoability is classified a
   that tracking and calorimeter systematics are treated as correlated.
 - Ambiguity and overlap-removal steps in the order applied, consistent between
   reconstruction and analysis levels.
-- Timing association windows, if used, with the assumed time-of-flight hypothesis.
-- Pileup mitigation method, its residual uncertainty, and its consistency with the
-  pileup reweighting applied to simulation.
+- Timing association windows, if used, with the start-time source and the assumed
+  time-of-flight (species and direction) hypothesis.
+- Pileup mitigation method, its residual uncertainty, and (at a collider) its consistency
+  with the pileup reweighting applied to simulation.
 - Confirmation that a rerun reproduces the same output (no ordering or threading
   dependence).

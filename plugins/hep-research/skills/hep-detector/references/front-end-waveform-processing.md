@@ -34,9 +34,19 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   (collider calorimeters at 40 MHz). What is required is an anti-alias filter on the
   noise and a stable phase. Nyquist sampling matters when the waveform itself is
   unknown (pulse-shape discrimination, multiple pulses, unknown timing).
-- **Out-of-time pileup**: fit several pulses with templates at neighbouring bunch
-  crossings (multi-pulse fit), or deconvolve (for example the deconvolution readout
-  mode of silicon strip front ends); both trade noise for pileup rejection.
+- **Out-of-time pileup**: fit several pulses with templates at the times where other pulses
+  can arrive (multi-pulse fit): where arrivals are locked to a bunch clock, the neighbouring
+  bunch crossings (at a collider); where they are not, each pulse time is free, found by
+  scanning the template along the trace, and each fitted pulse is subtracted before the next
+  is fitted. Or deconvolve (for example the deconvolution readout mode of silicon strip front
+  ends); both trade noise for pileup rejection. Pileup of slow pulses at random separations,
+  and how its rejection is measured, is in
+  [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#pileup-and-position-in-cryogenic-and-germanium-detectors).
+  <!-- example: source citation -->
+  Free-time template scan with subtraction of each fitted pulse, at a neutron time-of-flight
+  facility: P. Žugec et al., Nucl. Instrum. Methods A 812 (2016) 134, arXiv:1601.04512v1,
+  secs. 4.1 and 4.3 (read 2026-11-18).
+  <!-- /example -->
 - **Constrained filters** (*exact* for the linear model; Lagrange multipliers): minimizing
   `w^T R w` subject to `w · g = 1` and `w · c_k = 0` gives `w = R^-1 C (C^T R^-1 C)^-1 e_1`
   with `C = [g, c_1, ...]` and variance `((C^T R^-1 C)^-1)_11`. With `c = g'` (Cleland and
@@ -55,7 +65,8 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
 - **Baseline gain.** A constant offset `b` on every sample biases any linear estimate by
   `b sum w`. For unipolar pulses `sum w` is of order one unless a baseline constraint or
   pre-samples are used, so a pedestal error or the Campbell mean of pileup (`nu <a> ∫ g dt`)
-  appears directly as an amplitude bias that changes with luminosity.
+  appears directly as an amplitude bias that changes with the pulse rate `nu` (with luminosity
+  at a collider).
 - **Time from samples.** A joint fit of amplitude and time (model `A g(t + d)`) has, to
   first order, the inverse Fisher matrix of the columns `g` and `A g'` as covariance
   (*approximate*, linearized at the true phase). Example: CR-RC^4, `t_p = 45 ns`, 5 samples
@@ -85,9 +96,10 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   the offset is `nu <a> ∫_0^t g dt'`, which rises and then returns to zero over several
   shaping times for bipolar shaping, or several coupling time constants for AC coupling
   alone (longer when that constant exceeds the shaping time). For a bipolar pulse `g = tau d/dt[(t/tau) e^(1 - t/tau)]` it equals
-  `nu <a> tau (t/tau) e^(1 - t/tau)`: maximal (`nu <a> tau`) one `tau` after the start of
-  a bunch train, still 9 % of that after `5 tau`. The result is an energy offset that
-  depends on position in the train and on pileup.
+  `nu <a> tau (t/tau) e^(1 - t/tau)`: maximal (`nu <a> tau`) one `tau` after the rate step
+  (the start of a bunch train at a collider; of a spill or a burst), still 9 % of that
+  after `5 tau`. The result is an energy offset that depends on the time since the rate
+  changed (the position in the train at a collider) and on the rate.
 - **Dead time** (*exact* for Poisson arrivals): non-paralyzable `m = n / (1 + n tau_d)`;
   paralyzable `m = n exp(-n tau_d)`, which has a maximum at `n = 1/tau_d` and turns over.
   Bunched beams, spills, and trigger rules (minimum spacing between accepts, limits per

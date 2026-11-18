@@ -38,9 +38,11 @@ smaller depleted region (less charge, more diffusion-driven sharing).
   sharing; momentum and impact-parameter floors from multiple scattering and lever
   arm ([tracking and vertexing](tracking-and-vertexing.md)).
 - **Tails**: delta rays, merged clusters, noise hits, dead/noisy channels.
-- **Dependence**: occupancy, pileup, dose (leakage, `CCE`, threshold, Lorentz angle
-  drift), temperature. **Data sample**: `Z -> ll`/cosmic tracks for hit efficiency
-  and alignment, overlaps and tag-and-probe for module efficiency.
+- **Dependence**: occupancy (at a collider, pileup), dose (leakage, `CCE`, threshold, Lorentz angle
+  drift), temperature. **Data sample**: the tracks the environment provides, over its incidence-angle
+  range: collision (`Z -> ll`) or cosmic-ray tracks, or a test beam before installation or flight
+  (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit efficiency and alignment;
+  overlaps and tag-and-probe for module efficiency.
 - **Transfers**: charge-sharing interpolation and template methods to any segmented
   readout (TPC pads, fibers); does not transfer: time-of-arrival coordinates.
 
@@ -103,8 +105,9 @@ image and many `dE/dx` samples per track.
 (wires, GEM, Micromegas), **ion backflow** (positive ions drifting back distort `E`),
 **space-charge distortions** (a radially and `z`-dependent position shift), field-cage
 and `E x B` distortions, gating, and **crossing-time ambiguity**: the absolute drift
-coordinate needs the interaction time `t_0`, unknown for particles not associated with
-a bunch crossing or trigger (pileup/out-of-time tracks are displaced along `z`).
+coordinate needs the start time `t_0`: an external trigger (PDG RPP 2025 sec. 35.6.4, p. 41),
+a collider's bunch crossing, or `S1` light in rare-event TPCs (sec. 36.4, p. 31); tracks
+not associated with it (pileup, cosmics) are displaced along `z`.
 
 **`dE/dx`.** Truncated mean or cluster counting over `~10^2` samples, corrected for
 path length, saturation, gain, and attachment ([particle identification](particle-identification.md)).
@@ -164,8 +167,9 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Topology**: sparse points/segments. **Ambiguity**: left-right (straws), ghosts
   (wire crossing), efficiency dead zones at wire/cell edges and spacer positions.
 - **Informative residual**: layer-by-layer (unbiased) residual versus position in the
-  cell. **Scaling**: RPC rate capability inverse to resistivity; timing set by gap
-  width and gas.
+  cell. **Scaling**: RPC rate capability `phi/Delta V = 1/(rho d <Q>)` (electrode resistivity
+  and thickness, mean avalanche charge; PDG RPP 2025 sec. 35.6.6.3, p. 53; arXiv:1606.03448v1,
+  sec. 1); timing set by gap width and gas.
 - **Tails**: streamers, afterpulses, cluster-size multiplicity growth with high
   voltage. **Data sample**: cosmic/collision muons for efficiency versus voltage
   (efficiency-plateau scan).
@@ -327,9 +331,12 @@ with the fake-link rate measured on the exposed background.
 
 ## Diamond and other radiation-hard sensors
 
-Diamond and other wide-bandgap sensors (e.g. silicon carbide) offer low leakage current and
-tolerance to very high fluence at the cost of smaller signal and lower charge
-collection in poly-crystalline material. Reconstruction is the same as for silicon
+Diamond offers low leakage current and tolerance to very high fluence (large bandgap, about
+twice silicon's displacement threshold) at the cost of smaller signal and lower charge
+collection in poly-crystalline material. Other wide-bandgap sensors (e.g. silicon carbide) keep
+a very low leakage current after high fluence, but their charge collection so far degrades
+faster with fluence than in silicon and diamond (PDG RPP 2025 sec. 35.8.5, p. 78; Gsponer et
+al., JINST 18 (2023) C11027, arXiv:2310.02047v1, abstract). Reconstruction is the same as for silicon
 (cluster/charge or timing), with the focus on **response versus dose** (pumping,
 priming, polarization), efficiency loss with fluence, and beam/luminosity monitor
 use. Quote fluence-dependent signal loss only with its source and conditions
