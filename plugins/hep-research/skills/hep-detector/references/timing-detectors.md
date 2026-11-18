@@ -64,7 +64,7 @@ tail. **Time-window assignment**: the measured time must be assigned to the righ
 window of the experiment's start-time source, the bunch crossing at a collider (COL). A
 self-triggered instrument has no external window: its own timing planes or a fitted
 event time set the reference, and the ambiguity is instead the direction of travel, the
-sign of the time difference between planes (SPC; arXiv:hep-ex/0305074, sec. 3;
+sign of the time difference between planes (SPC; arXiv:hep-ex/0305074, sec. 2;
 [particle identification](particle-identification.md)), or the synchronisation of many
 stations or optical modules (GND, UGD; PDG RPP 2025, sec. 36.3.2). Out-of-time pileup and
 late tails (afterpulses, delayed light, slow components) produce non-Gaussian tails and
@@ -107,7 +107,7 @@ reference clock: the accelerator clock at an accelerator; synchronisation signal
 to the optical modules, checked with in-situ LED or laser flashers (UGD neutrino
 telescopes; PDG RPP 2025, sec. 36.3.2); the synchronisation of fluorescence and surface
 detectors of a hybrid air-shower array (GND; sec. 36.2.1); or the instrument's own
-trigger and clock (SPC; arXiv:hep-ex/0305074, sec. 3); validated with **time residuals** `t_meas - t_pred(p, m, L)` per species, using a
+trigger and clock (SPC; arXiv:hep-ex/0305074, sec. 2); validated with **time residuals** `t_meas - t_pred(p, m, L)` per species, using a
 sample of known particle type (muons, identified pions, electrons at `beta = 1`).
 Residual versus amplitude reveals walk; versus position along the bar reveals
 propagation; versus run/fill reveals clock drift.
