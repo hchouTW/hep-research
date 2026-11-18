@@ -52,7 +52,7 @@ rerun; keep the incidence angle per hit so that "sum of two terms" can be broken
 | cosmic-ray tracks without a momentum measurement (field off: straight tracks, steeply falling spectrum) | population feature | out of the observation |
 | overlapping modules | redundant measurement | out of the comparison node |
 | known resonance mass | internal constraint | out of the observation |
-| magnetic-field polarity flip, incidence-angle scan | control variables | conditioning (§3.5) |
+| magnetic-field polarity flip where the magnet can be reversed ([field-reversal running, where available](../calibration-and-alignment.md#alignment-and-weak-modes); not with a permanent magnet, *Inferred*); incidence-angle scan, or the spread of incidence angles of an isotropic cosmic-ray flux | control variables | conditioning (§3.5) |
 
 ## 6. Special functionals and link functions
 
