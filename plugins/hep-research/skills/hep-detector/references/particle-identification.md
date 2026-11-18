@@ -183,8 +183,11 @@ Key behaviors:
   different indices, and each has its own calibration and its own window.
 - **Angular resolution improves with photon count.** The single-photon angular
   resolution is set by chromatic dispersion (index varies with photon energy), by pixel
-  granularity, and by the emission-point uncertainty along the track; the per-track
-  resolution improves as the square root of the number of detected photons. Photon
+  granularity, and by the emission-point uncertainty along the track. The per-photon part
+  of the per-track resolution falls as `1/sqrt(N_pe)`; terms common to all photons of the
+  track (track direction, alignment, multiple scattering) do not average down, so
+  `sigma(theta_c) = sigma_photon/sqrt(N_pe) (+) C` (PDG RPP 2025, sec. 35.5, eq. 35.12), as in
+  [Cherenkov imaging variants](cherenkov-imaging-variants-and-photosensors.md). Photon
   yield is itself proportional to `sin^2(theta_c)`, so rings are dimmest exactly at
   threshold, where the angle is most sensitive to velocity. For a fixed single-photon
   resolution the two cancel exactly in `dbeta`, but the chromatic term
