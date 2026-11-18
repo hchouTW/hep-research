@@ -14,11 +14,14 @@ basis (2), the TOF row of §12 and §11.4. Folder rules: [index](index.md).
 | `pde` | 4a | photoelectric conversion, TTS | surface `efficiency`; TTS as a digitization-job timing input |
 | `sensor` | 4b | gain | response stage 3 |
 | `tdc` | 5 | TDC, slewing | response stage 4 |
-| `tracker_path` | control variable | track length and momentum from the tracker | another subsystem (upstream result) |
+| `tracker_path` | control variable | flight path (and momentum, for a charged track): from the tracker, or for neutral particles from the counter's own hit position and the source geometry | another subsystem (upstream result), or the counter itself |
 | `reco` | 6–7 | time points, β; T0 and slewing corrections | reconstruction |
 
-Control variables come from another subsystem, so the graph is a DAG with a merging branch, not a chain (§12). A
-laser into the counter would sit on the 2/3 or 3/4a edge and needs a conversion relation (§3.4).
+Control variables usually come from another subsystem, so the graph is a DAG with a merging branch, not a chain
+(§12). For neutral particles (neutron time of flight) the flight path comes from the counter itself and the source
+position, or from a calibrated effective flight path; the time of flight then gives the energy of a particle of
+known mass instead of β at known momentum, and the graph may stay a chain. A laser into the counter would sit on the
+2/3 or 3/4a edge and needs a conversion relation (§3.4).
 
 ## 2. Mechanisms and parameterization
 
