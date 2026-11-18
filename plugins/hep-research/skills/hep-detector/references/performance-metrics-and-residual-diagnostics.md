@@ -7,8 +7,9 @@ efficiency, fake rate) and [detector systems overview](detector-systems-overview
 and supplies the statistics of [histograms efficiencies](../../hep-measurement/references/histograms-efficiencies.md). Every metric below
 requires: an equation, numerator, denominator, conditioning, matching rule, phase space,
 object or event level, estimator, and uncertainty. If one is missing, the number is not
-comparable. Environment codes used here: COL collider; SPC space and balloon; UGD
-underground, neutrino and rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
+comparable. Environment codes used here: COL collider; FXT fixed-target and test beam;
+SPC space and balloon; UGD underground, neutrino and rare-event; GND ground-based
+cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy.
 
 ## Metric definitions
 
@@ -236,9 +237,16 @@ with its natural width and final-state radiation in the line shape
 arXiv:1206.4071, section 6; read 2026-10-14);
 <!-- /example -->
 split a track (or a cosmic crossing the detector) into two halves and compare them; compare overlapping modules;
-for jets and missing transverse momentum, balance against a well-measured reference (dijet asymmetry, Z or photon
-plus jet) and extrapolate away the soft radiation. The data/simulation ratio of these widths is the resolution scale
-factor.
+at a collider (COL), for jets and missing transverse momentum, balance against a well-measured reference (dijet
+asymmetry, Z or photon plus jet) and extrapolate away the soft radiation. Without a narrow resonance or a balance
+reference: the width of a mono-energetic line from an external or internal calibration source (UGD; PDG RPP 2025,
+sec. 36.4; [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md));
+a test beam of known energy on prototypes, with the in-situ performance compared with it (FXT; sec. 35.10.2); a
+resolution function that only simulation gives, validated against measured resonances with precisely known
+parameters (NUC; arXiv:2505.00042, sec. 6); and, with no test beam at all, muon-ring intensity to calibrate the
+response of an imaging air-Cherenkov telescope, whose performance is otherwise determined by simulation (GND;
+sec. 36.2.2; [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md)). The data/simulation ratio of these
+widths is the resolution scale factor.
 
 ## Common misconceptions and failure modes
 
