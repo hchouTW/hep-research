@@ -141,7 +141,7 @@ def derive(args) -> tuple:
 
 def listing() -> tuple:
     kits = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(KITS.glob("*.json"))]
-    return 0, {"status": "ok", "kits": [{"name": kit["name"], "version": kit["version"], "geometry_kind": kit["geometry_kind"], "inputs": sorted(kit["inputs"])} for kit in kits]}
+    return 0, {"status": "ok", "kits": [{"name": kit["name"], "version": kit["version"], "geometry_kind": kit["geometry_kind"], "role": kit["role"], "purpose": kit["purpose"], "inputs": sorted(kit["inputs"])} for kit in kits]}
 
 
 @protected_main("hep-detector.g4kit", capabilities=KNOWN_CAPABILITIES)
