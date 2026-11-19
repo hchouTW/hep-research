@@ -8,7 +8,7 @@ SiPMs, from §3.1 derivation basis (1), the HCAL row of §12 and §11.4. Folder 
 | Node | Abstract node | Content (§3.1) | g4sim object |
 |---|---|---|---|
 | `source` | 0 | beam | `simulation-request/1` source |
-| `shower` | 1 | hadronic shower; sampling | `g4sim_run` (physics list, cuts, absorber geometry) |
+| `shower` | 1 | hadronic shower; sampling | `g4sim_run` (physics list, cuts, absorber geometry); Birks applied per step |
 | `quanta` | 2 | scintillation photons (Birks) | response stage 1 |
 | `wls` | 3 | WLS collection, attenuation | response stage 2 (efficiency map) |
 | `pde` | 4a | SiPM PDE | surface `efficiency`, folded into ε_c |
@@ -26,14 +26,14 @@ Splits as for the [ECAL](ecal.md): 3/4a only under the §6.7 PDE split; no singl
 | hadronic model | discrete model / 1 | enumeration (physics list) | run card `reference_list`, with the §5.2 confirmation record |
 | production cut | physics process / 1 | length | run card `cuts_mm` (geometry row) |
 | sampling fraction | geometry / 1 | absorber and active thickness | detector-spec `params` |
-| light yield, Birks | yield, nonlinearity / 2 | as for the ECAL | LY row, Birks row |
-| SiPM saturation | nonlinearity / 4b | pixel count | not implemented in g4sim (Table 1 row 4b) |
+| light yield, Birks | yield / 2; Birks: nonlinearity, applied per step at the output of node 1 (§11.4 Table 1) | as for the ECAL | LY row, Birks row |
+| SiPM saturation | nonlinearity / 4b | pixel count | not implemented in g4sim (Table 1 row 4b); a binding to a stage parameter the stage does not read is not refused by the checker and has no effect |
 | gain | 4b | multiplicative, ENF | `sensor` stage `gain` |
 
 ## 3. Kernel properties
 
 Node 1 is a samplable black box (resimulation or surrogate model only); nodes 2–5 as for the ECAL. Fluctuations at
-the deposition level (§12 "abstraction it motivates") sit in node 1 and are reached only through resimulation.
+the deposition level (§12 "abstraction it motivates") sit in node 1 and are reached only through resimulation or a surrogate model (§6.3, §6.4).
 
 ## 4. Storage recommendations
 
@@ -62,8 +62,9 @@ power law is in the mean hadronic fraction, f_h = (E/E₀)^(m−1), so r = π/e 
 Instrum. Meth. A 572 (2007) 633, arXiv:physics/0605164v4, eqs. 1 and 7), not r = c·E^b, which has no limit r → 1 at high
 energy; h/e < 1 is calorimeter-dependent (PDG RPP 2025 sec. 35.10.3, p. 100). The form is not dependable below 5–10 GeV,
 and π/e versus energy alone fixes only m and a = (1 − h/e)E₀^(1−m), not h/e and E₀ separately (ibid., p. 10): an
-instance of the §3.5 scale-and-response-shape degeneracy. Resolution: core width, log. Longitudinal profile: normalized shape, alr/ilr. e/π ratio: location of a ratio,
-log link.
+instance of the §3.5 scale-and-response-shape degeneracy. Resolution: core width, log. Longitudinal profile: normalized shape, alr/ilr. e/π ratio, the inverse of the π/e response ratio of
+[calorimetry](../calorimetry-ecal-hcal.md#hadronic-showers-and-non-compensation) (π/e = f_em + (1 − f_em)·h/e): location
+of a ratio, log link.
 
 ## 7. V_model correlation kernel (advisory)
 
