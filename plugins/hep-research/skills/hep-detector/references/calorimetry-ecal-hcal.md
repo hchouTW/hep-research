@@ -138,8 +138,10 @@ sec. 35.10.1.1). A squared coefficient can come out negative on noisy or narrow-
 the script reports it as a failure. Do not clip it to zero.
 
 Fitting fewer than three distinct energies cannot separate three terms, and fitting
-over a narrow energy range gives strongly correlated parameters even when it converges:
-quote the covariance, or at least the range fitted, alongside the values.
+over a narrow energy range gives strongly correlated parameters even though the linear fit
+always returns a solution: quote the covariance, or at least the range fitted, alongside the
+values. The script's covariance (`covariance_squared_terms`) is that of `(a^2, b^2, c^2)`,
+not of `(a, b, c)`.
 
 ## Hadronic showers and non-compensation
 
