@@ -57,7 +57,7 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   baseline offset (pedestal drift, the mean of unipolar pileup) does not bias the amplitude.
   Each constraint costs noise. Example (`optimal-filter`: CR-RC^4, `t_p = 45 ns`, 7 samples
   every 25 ns from three before the peak, `rho = 0.6`, pileup 2 MHz of rms amplitude
-  4 sigma): unconstrained sigma 1.38 with phase bias +1.9 % / −3.0 % at ∓2 ns and
+  4 sigma): unconstrained sigma 1.38 with phase bias +1.9 % / −2.9 % at ∓2 ns and
   `sum w = 0.56`; with the phase constraint sigma 1.40 and −0.5 % at either sign (second
   order); with the baseline constraint sigma 1.49 and `sum w = 0`.
   <!-- example: source citation -->
