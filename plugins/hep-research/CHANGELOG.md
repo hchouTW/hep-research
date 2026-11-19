@@ -213,6 +213,40 @@ Software checks establish contract consistency only, not physical validity.
   `event-reconstruction.md` depends on the noise level and, where interactions overlap, the pileup level;
   `signal-formation-and-readout.md` writes the Fano factor `F_Fano` and cites PDG RPP 2025 sections and pages. No
   number changes.
+- **hep-detector: tool texts, contracts and pages agree with each other** (F-XREF-1; documentation fixes
+  F-XREF-1-*; issues CHK-AC-06-06, CHK-AT-01-02, -03, CHK-AT-02-03, CHK-AT-03-03,
+  CHK-AT-04-02, -03, CHK-AT-05-02, -03, CHK-AT-06-04, -06, -07, -08, -11, CHK-AT-07-02 to -05, CHK-AU-03-02, -03,
+  CHK-AU-05-05, -11, -13,
+  CHK-AU-12-05, -06, CHK-AU-15-02, -03). The `cherenkov_angle` and `multiple_scattering` tool contracts say that
+  `--status` is echoed as `status` (not `status_label`); the `--help` of `cherenkov_angle.py` and
+  `pid_separation_power.py` no longer names an input file for exit 1, and `pid_separation_power.py` says that the
+  ceiling ends the separated range that starts at the lowest evaluable momentum (null when separation starts below
+  threshold). `calorimeter_resolution.py` says that a failed separation still echoes the input status label (read
+  `ok` and the exit code); `calorimetry-ecal-hcal.md` says that its covariance is that of `(a^2, b^2, c^2)`.
+  `multisample_pid.py`: the truncated mean drops `floor(f N)` samples and now reports `samples_dropped_high` and
+  `samples_dropped_low`, with a warning when a nonzero fraction drops none; the
+  docstring and `particle-identification.md` state the out-of-range rule per method, the empty-bin floor, that a value
+  outside the PDF edges adds no LLR term, and that only `charge --method weighted-mean` takes a layer correlation.
+  `frontend_response.py`: `timing` says that `jitter_ps` is the leading-edge jitter, not a CFD's; the `sipm`
+  nonlinearity message names its test (N_pe above 20 % of the cells, about 18 % fired) and its assumptions say that
+  `fired_cells` excludes crosstalk and dark counts. `front-end-waveform-processing.md` names `deadtime` and `sipm`,
+  quotes the unconstrained phase bias at +2 ns as −2.9 % (was −3.0 %) and states the phase-error sign convention
+  (−5.8 % is at +5 ns; +0.5 % at −5 ns). `tracking-and-vertexing.md` points to PDG eq. (35.69) and
+  `tracker_resolution.py momentum` for arbitrary layer spacing, links wire-readout TPC imaging and photon-pattern
+  fits, and quotes `alpha_I` at 20 °C after 80 min at 60 °C. `particle-identification.md`: TRD rejection is that of
+  the heavier species at a fixed electron efficiency, the TOF resolution is the system time resolution (linked to timing
+  detectors), and the environment references are linked. the eight `simulation-calibration/` pages are titled as
+  simcal pages with a link to hep-statistics; `ecal.md` binds Birks at the output of node 1 on g4sim, and names the P0
+  full-simulation points of §5.4 (extreme k_B and LY, r outside 0.15 to 1). `core/status.py` says where the scripts that
+  echo the label under `status` are recorded. No other number and no status changes.
+- **multisample_pid.py likelihood refuses a `--layers` list that names no column** (sci-fix
+  MULTISAMPLE-LLR-NO-LAYERS S2; advisory SFA-2026-918; issue CHK-AT-06-09). `--layers ,` (empty, or only commas)
+  gave status ok with every LLR 0 and a one-point curve at efficiency 1 and misid 1. Now exit 2, status rejected,
+  "--layers names no column", as `charge` does.
+- **multisample_pid.py likelihood refuses a label other than 0 or 1** (sci-fix MULTISAMPLE-LLR-LABEL-01 S2; advisory
+  SFA-2026-919; issue CHK-AT-06-10). The label was truncated with `int()` before the check, so 0.7 was counted as
+  background (and 1.5 as signal) with status ok. Now exit 2, status rejected, naming the value; labels 0 and 1 (also
+  written 0.0 and 1.0) give the same output as before.
 
 ## 0.70.0 (2026-11-16)
 

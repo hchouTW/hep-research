@@ -10157,3 +10157,23 @@ F-XREF-3 issues are `docs:` commits (ledger `documentation_fixes` F-XREF-3-*).
 | `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same` | exhaustive (every ordered pair of {B, C, N}) | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_a_species_feeding_into_itself_is_refused` | behavioral (refusal of C -> C) | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_negative_control_a_lighter_species_is_still_computed` | negative control (C -> B computed) | pass | pass | no | E6 |
+
+## DC-F-XREF-1 (2026-11-19, detector content Stage B, fix unit F-XREF-1; issues CHK-AT-06-09, CHK-AT-06-10)
+
+Two S2 sci-fixes in `skills/hep-detector/scripts/multisample_pid.py` likelihood, each a tests-only commit followed
+directly by its fix. MULTISAMPLE-LLR-NO-LAYERS (S2, advisory SFA-2026-918, CHK-AT-06-09; tests `167eb176`, fix
+`efb40a04`): a `--layers` value naming no column is refused (exit 2) as in charge. MULTISAMPLE-LLR-LABEL-01 (S2,
+advisory SFA-2026-919, CHK-AT-06-10; tests `6b1adc7d`, fix `2a631306`): a label other than 0 or 1 is refused instead
+of truncated by `int()`. Oracles, domains and tolerances are in the module docstrings of
+`tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py` and `test_f_xref_1_likelihood_labels.py`. Mutant
+patches (all `other`): CHK-AT-06-09-1 removes the refusal, -2 refuses only the empty string, -3 refuses fewer than
+two columns; CHK-AT-06-10-1 truncates with `int()` again, -2 accepts any label in [0, 1], -3 rounds the label, -4
+checks the label text against "0" and "1". The other F-XREF-1 issues are `docs:` commits (ledger
+`documentation_fixes` F-XREF-1-*). The outcome columns are filled by the lead.
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_exhaustive_verdict_over_every_layers_value_of_up_to_three_pieces` | exhaustive (39 --layers values of 1 to 3 pieces from {"", "a", "b"}) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_negative_control_empty_sum_curve_is_not_reported` | behavioral (negative control, emulates pre-fix) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_exhaustive_verdict_over_quarter_steps_from_minus_one_to_two` | exhaustive (labels k/4, k = -4..8, two spellings, 26 cases) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_negative_control_truncated_label_is_not_counted_as_background` | behavioral (negative control, emulates pre-fix) | fail (assertion) | pass | no | E6 |

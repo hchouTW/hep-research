@@ -8147,6 +8147,200 @@
     "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same",
     "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_negative_control_a_lighter_species_is_still_computed"
    ]
+  },
+  {
+   "id": "MULTISAMPLE-LLR-NO-LAYERS",
+   "title": "multisample_pid.py likelihood refuses a --layers list that names no column (exit 2, status rejected), as charge does",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "likelihood --layers ',' (or '', or only commas) gave status ok and exit 0 with layers [], every LLR the empty sum 0 and, with --label-column, a one-point curve at efficiency 1 and misid 1 (SYNTHETIC inputs). Now exit 2, status rejected, '--layers names no column', the rule charge already had. Outputs for a --layers value naming a column are unchanged. Oracle: exhaustive over every --layers value of 1 to 3 pieces from {'', 'a', 'b'} (39 values), verdict written from the script's exit-code contract and charge's rule, LLR of the accepted values from the synthetic PDF (tolerance 1e-12, justified in the test file); negative control: the pre-fix empty-sum curve (1, 1) is not reported. Input normalisation is unchanged (the split and the dropping of empty pieces are as before); the new check is local to run_likelihood, which has no other caller than main(). No committed example runs likelihood.",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_exhaustive_verdict_over_every_layers_value_of_up_to_three_pieces",
+     "basis": "exhaustive",
+     "detail": "every --layers value of 1 to 3 pieces from {'', 'a', 'b'} joined by commas (39 values): refused (exit 2, status rejected, '--layers names no column') exactly when every piece is empty ('', ',', ',,'), else accepted with layers equal to the non-empty pieces and the one event's LLR the sum of log(p_sig/p_bkg) of the listed layers within 1e-12",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "167eb176d9d3381fec6e65360d711f123f845515",
+    "fix": "efb40a0423d3e3bf185252739b500c2785aad783",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_exhaustive_verdict_over_every_layers_value_of_up_to_three_pieces",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-1",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_negative_control_empty_sum_curve_is_not_reported",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-1",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "removes the refusal of a --layers list naming no column (the pre-fix behaviour)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "refuses only an empty --layers string, not one made only of commas",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "refuses a --layers list naming fewer than two columns",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_exhaustive_verdict_over_every_layers_value_of_up_to_three_pieces",
+    "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_negative_control_empty_sum_curve_is_not_reported"
+   ]
+  },
+  {
+   "id": "MULTISAMPLE-LLR-LABEL-01",
+   "title": "multisample_pid.py likelihood refuses a --label-column value other than 0 or 1 (exit 2) instead of truncating it with int()",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "exhaustive",
+    "behavioral"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "the label was truncated with int() before the 0/1 check, so a label in (-1, 2) other than 0 or 1 (0.7, 0.25, -0.75, 1.5) was counted as background or signal with status ok and exit 0: one event labelled 0.7 next to one signal and one background event (SYNTHETIC) gave misid 1/2 instead of a rejection. Now exit 2, status rejected, '<column> must be 0 or 1, got <v>'. Labels equal to 0 or 1 in any spelling float() reads (1, 1.0) give the same output as before. Oracle: exhaustive over the labels k/4, k = -4..8, in two spellings each (26 cases), verdict and curve written from the docstring's definition (1 signal, 0 background) and the exit-code contract; exact comparisons (no tolerance, justified in the test file); negative control: the pre-fix truncation's curve (1, 1/2) is not reported. This changes input normalisation of the label column: the check is local to run_likelihood (no other caller than main()); _num, which it calls, is unchanged, so its other callers' input range does not change. No committed example runs likelihood.",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_exhaustive_verdict_over_quarter_steps_from_minus_one_to_two",
+     "basis": "exhaustive",
+     "detail": "every label k/4 for k = -4..8 (13 values) written as format(v, 'g') and repr(v) (26 cases) as the label of a third event: accepted exactly for 0 and 1, with the event counted in its class (curve efficiency 1 and misid 0 for 1, misid 1/2 for 0, exact), else exit 2, status rejected, 'must be 0 or 1'",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "6b1adc7db47284656419d11200f02c43713af309",
+    "fix": "2a6313062e6e07aa3337475fabff458ac6d9e828",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_exhaustive_verdict_over_quarter_steps_from_minus_one_to_two",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-1",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_negative_control_truncated_label_is_not_counted_as_background",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-1",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "truncates the label with int() before the 0/1 check again (the pre-fix behaviour)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "accepts any label in [0, 1] instead of exactly 0 or 1",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "rounds the label to the nearest integer before the check and the count",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/multisample_pid.py::run_likelihood",
+     "mutation": "other",
+     "detail": "checks the label text against '0' and '1', refusing 1.0 and 0.0",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_exhaustive_verdict_over_quarter_steps_from_minus_one_to_two",
+    "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_negative_control_truncated_label_is_not_counted_as_background"
+   ]
   }
  ],
  "documentation_fixes": [
@@ -11285,6 +11479,262 @@
    ],
    "gaps": [],
    "note": "fix commit 41b98d0e5133c4f2122146c8187d43a90b90951e (docs:)"
+  },
+  {
+   "id": "F-XREF-1-STATUS-ECHO",
+   "title": "cherenkov_angle and multiple_scattering tool contracts: --status is echoed as status, not status_label; multiple_scattering's default is the input file's status (CHK-AT-01-03, CHK-AT-03-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/cherenkov_angle.py",
+     "locator": "module docstring 'Status:'; main() output dict",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/multiple_scattering.py",
+     "locator": "module docstring 'Status:'; _resolve_status()",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "contracts/tool_contracts/charge_confusion_rate.json and design_estimates.json still say 'echoed as status_label' (not this unit's files; not checked against their tools); tracker_resolution.json is right (that tool writes status_label)"
+   ],
+   "note": "fix commits 3ecaeb09e19e773100c087b2f671287d4db9c2ce, 93e4e5c54858385a69c90ba52db8667ea55883a1 (docs:); contract text only; the output keys are unchanged"
+  },
+  {
+   "id": "F-XREF-1-EXIT1-NO-INPUT-FILE",
+   "title": "cherenkov_angle.py and pid_separation_power.py --help: exit 1 names no input file, since neither tool reads one (CHK-AT-01-02, CHK-AT-05-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/cherenkov_angle.py",
+     "locator": "argparse options; no open() call",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "contracts/tool_contracts/pid_separation_power.json",
+     "locator": "failure_states, exit 1",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commits 7845a995b81fb630fe243a5c2b880545ced85901, 102ba4176781c7803714e51344c4d13a133cd094 (docs:); docstring (the --help text) only"
+  },
+  {
+   "id": "F-XREF-1-PID-CEILING",
+   "title": "pid_separation_power.py --help and output note: the ceiling is the end of the separated range that starts at the lowest evaluable momentum, null when separation is already below threshold there (CHK-AT-05-02)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/pid_separation_power.py",
+     "locator": "separation_scan() docstring and ceiling code",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commits 3f8dd460d112b1d951d4a754b77ebf2e8ea06258 (docs:); the note string in every JSON output changes; no committed example output contains it; no number changes"
+  },
+  {
+   "id": "F-XREF-1-CALO-FIT-TEXT",
+   "title": "calorimetry-ecal-hcal.md: the linear three-term fit always returns a solution and covariance_squared_terms is that of (a^2, b^2, c^2); calorimeter_resolution.py docstring: a failed separation echoes the input status label, ok and exit 1 carry the failure (CHK-AT-04-02, CHK-AT-04-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/calorimeter_resolution.py",
+     "locator": "module docstring; fit_resolution() covariance_squared_terms; main() negative_squared_terms branch",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "contracts/tool_contracts/calorimeter_resolution.json",
+     "locator": "failure_states (status is the failure category, as for exit 2, whose stdout says 'failed')",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "CHK-AT-04-03 fixed by documentation (the issue's second option), not by printing status failed: the output is unchanged; the contract's failure_states already names the category, not the stdout key"
+   ],
+   "note": "fix commits dae07f4885347ccde5119ece71c9716cc43335ff, 1b98dfb3efadeeb6b63851a5bf51ba11b2573057 (docs:); text only"
+  },
+  {
+   "id": "F-XREF-1-TRACKING-XREF",
+   "title": "tracking-and-vertexing.md: arbitrary layer spacing and per-layer errors point to PDG eq. (35.69) and tracker_resolution.py momentum; the four finding families are those of hit-based trackers, with links for wire-readout TPC imaging and photon-pattern fits; alpha_I is quoted at 20 C after 80 min at 60 C (CHK-AT-02-03, CHK-AU-03-02, CHK-AU-03-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators (Phys. Rev. D 110, 030001; 2025 update), source pdg_2025_particle-detectors-at-accelerators",
+     "locator": "sec. 35.12, eq. (35.69), p. 112",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators (Phys. Rev. D 110, 030001; 2025 update), source pdg_2025_particle-detectors-at-accelerators",
+     "locator": "sec. 35.7.6, p. 61",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators (Phys. Rev. D 110, 030001; 2025 update), source pdg_2025_particle-detectors-at-accelerators",
+     "locator": "sec. 35.8.5, p. 74",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/tracker_resolution.py",
+     "locator": "module docstring, momentum (exact weighted least-squares curvature)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+     "locator": "### Imaging reconstruction in single-phase LArTPCs",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "the page is 24,775 B, 199 B over the 24 KB soft limit (was 24,225 B)"
+   ],
+   "note": "fix commits 43ac00407bc0d25be286ebb3075ed5e035022b0b, f16c9c8db32b94e440544508f1c7c052b61d5fc1, 2485a84dce90bca23fe7c9031601df3ecb08bd9e (docs:); text only; no number changes"
+  },
+  {
+   "id": "F-XREF-1-MULTISAMPLE-TEXT",
+   "title": "multisample_pid.py and particle-identification.md: out-of-range handling per method, the empty-bin floor, out-of-edge LLR values, which method takes a correlation, and the truncated mean drops floor(f N) samples (now reported, with a warning when none is dropped) (CHK-AT-06-04, CHK-AT-06-06, CHK-AT-06-07, CHK-AT-06-08, CHK-AT-06-11)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/multisample_pid.py",
+     "locator": "truncated_mean(); Response.signal() and Response.z(); run_charge(); run_likelihood()",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "tests/skills/hep_detector/test_f_xref_1_multisample_pid.py",
+     "locator": "TruncatedMeanCounts",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commits 8b0b1bc2c10c2dac2f63d9f917239b7a59e4c179, e57ee708df633ea3264be589d0749fe0e8a3ffe2, ff876bf2e021aef219008209e420a1c04d0c649b, 16195b4d105c00fb6351b00f4c7693845bf12d28, 868f4ae8bd2cc1e78337ec6a1ab5041cb2444189 (docs:); charge --method truncated-mean adds samples_dropped_high and samples_dropped_low (and a warning when a nonzero fraction drops none); no other value changes; the evidence test file's temporary-directory attribute was renamed for check_naming in 167eb176d9d3381fec6e65360d711f123f845515 (the CHK-AT-06-09 tests-only commit), which also moved the likelihood input checks to the S2 entries MULTISAMPLE-LLR-NO-LAYERS and MULTISAMPLE-LLR-LABEL-01"
+  },
+  {
+   "id": "F-XREF-1-FRONTEND-TEXT",
+   "title": "frontend_response.py timing and sipm say what jitter_ps, the 20 % test and fired_cells mean; front-end-waveform-processing.md names deadtime and sipm, quotes the unconstrained bias at +2 ns as -2.9 %, and states the phase-error sign convention (CHK-AT-07-02 to CHK-AT-07-05, CHK-AU-12-05 with CHK-AT-07-01, CHK-AU-12-06)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators (Phys. Rev. D 110, 030001; 2025 update), source pdg_2025_particle-detectors-at-accelerators",
+     "locator": "sec. 35.9.4, eq. 35.45, p. 86; p. 89",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/frontend_response.py",
+     "locator": "timing(); sipm(); optimal-filter phase_convention",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/timing-detectors.md",
+     "locator": "Pulse-time extraction (CFD at the cost of jitter)",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "no CFD jitter formula added: no cached source states one"
+   ],
+   "note": "fix commits 400a82b412ac36da6f50f2aa84a3368ab6993f03, 426d5500fda5142ed64fc30e8ffa8618170d4a41, bfadfcedc5f6f4e4dd7a0a9eb650a85b255c18e6, a9971186303d5a9e674d8e8b5314c3edaa694a3d, db4c61546eea3ca45d5f37d8e23abc26a3dcda1b, 891f97e2f2fab440239f8c1b4c9047501656e25d (docs:); page values rechecked with optimal-filter (unconstrained, 7 samples, 2 MHz pileup rms 4: -2.947 % at +2 ns; 5 samples rho 0.6: +0.476 % at -5 ns, -5.813 % at +5 ns); timing's cfd block gains jitter_note, sipm's assumptions a second item and its validity message new wording; no number changes"
+  },
+  {
+   "id": "F-XREF-1-ECAL-SIMCAL",
+   "title": "simulation-calibration pages (all eight: ecal, hcal, tracker, rich, dirc, trd, tof, muon-detector): titled and worded as simcal with a link to hep-statistics; on ecal.md Birks bound at the output of node 1 on g4sim, and P0's full-simulation points are the extreme k_B and LY points and r outside 0.15-1 (CHK-AC-06-06, CHK-AU-15-02, CHK-AU-15-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md",
+     "locator": "§11.4 Table 1 row 2 (D75); §5.4 'Known g4sim approximations' (r, E^L/E^S split and k_B rows)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/assets/simulation-calibration/ecal.binding.example.json",
+     "locator": "parameter birks, nodes [shower]",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "hcal.md's Birks node has the same mismatch (its audit unit's)"
+   ],
+   "note": "fix commits 1171ba4d256e396739c941725f4a229eb2303ebc, 9e857f223826bfa37f6ec1e0c0e0adf35727d95d, 3cdcb639772bbc3d559d26e5a3ab1f4752283729, c5ccf1ae01e9f02dcb88c61449d5bcc9aa0c6cdb, 3867755f74ec128602d8073971f53830ef0c2898 (docs:); text only"
+  },
+  {
+   "id": "F-XREF-1-PID-PAGE-XREF",
+   "title": "particle-identification.md: TRD rejection is that of the heavier species at a fixed electron efficiency; TOF resolution is the system time resolution with a link to timing-detectors; the environment references are linked (CHK-AU-05-05, CHK-AU-05-11, CHK-AU-05-13)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, Particle Detectors at Accelerators (Phys. Rev. D 110, 030001; 2025 update), source pdg_2025_particle-detectors-at-accelerators",
+     "locator": "sec. 35.6.5 and Fig. 35.18, p. 47",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "external",
+     "citation": "ALICE Collaboration, The ALICE Transition Radiation Detector: construction, operation, and performance, arXiv:1709.02743, source arxiv_1709.02743",
+     "locator": "sec. 11.2, p. 50",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/timing-detectors.md",
+     "locator": "lines 5-7 and the four resolutions",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/trd.md",
+     "locator": "hadron efficiency at fixed electron efficiency (fixed by F-S3-4)",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commits 5cf62425806d29aad1f1c9eba9ac33ad3dc1c23a, aa6ba1dfe1cd6a224018389f666fc2f557275ba8, f42cdb32c61293e0d2aa36196cd68f92b37d123b (docs:); text only"
+  },
+  {
+   "id": "F-XREF-1-STATUS-POINTER",
+   "title": "core/status.py: the scripts that echo the artifact label under \"status\" are marked 'json' in CASES of tests/skills/hep_measurement/test_cli_contract.py and recorded in VALIDATION.md (T17 decisions), not listed in tests/skills/test_cli_contract.py (lead note, CHK-AT-01-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "tests/skills/hep_measurement/test_cli_contract.py",
+     "locator": "comment above CASES ('json' reports the status label under status) and the CASES entries marked 'json'",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "VALIDATION.md",
+     "locator": "plugin triage batch A, Decisions, T17 ('the hep-detector scripts echo the artifact label under \"status\"')",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "tests/skills/test_cli_contract.py",
+     "locator": "whole file: JSON_STATUS_FOLLOW_UP, STATUS_FLAG_EXEMPT and the 'status'-key check; no list of label-under-status scripts",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 31fff271aaabcb36f4ebe00a5f6185f5a5522de8 (docs:); docstring only; ruff 0.16.10 and mypy 2.4.0 on core and contracts pass"
   }
  ],
  "superseded": [
