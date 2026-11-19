@@ -6,7 +6,10 @@ detectors, precision timing in trackers and calorimeters, and beam/start-time,
 bunch-timing, and luminosity monitors. The TOF physics (`beta`, `m^2`, separation
 ceiling) is in [particle identification](particle-identification.md); event-level timing/association is in
 [event reconstruction](event-reconstruction.md); `<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` evaluates
-TOF separation. This file adds the timing-error budget and the objects. Environment codes
+TOF separation. This file adds the timing-error budget and the objects. An optional development binding of a
+counter time chain (offset, walk and propagation steps), event-time estimators, TOF and beta, and TOF species
+likelihoods is `<plugin root>/adapters/timing-pid/` (status demonstrated-on-synthetic-data; synthetic constants
+only, no timing, TOF, PID, dE/dx, calibration or counting quality claim). Environment codes
 used here: COL collider; SPC space and balloon; UGD underground, neutrino and rare-event;
 GND ground-based cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy.
 
