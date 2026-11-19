@@ -26,7 +26,7 @@
      "id": "absorber",
      "kernel": "black-box",
      "kind": "stage",
-     "description": "1 traversal of the absorber (multiple scattering) and gas ionisation (g4sim_run)",
+     "description": "1 traversal of the absorber (multiple scattering; ionization and radiative energy loss with its fluctuations) and gas ionisation (g4sim_run)",
      "samplable": true,
      "mechanisms": [
       "physics-process",
