@@ -389,6 +389,8 @@ def _pdf(doc, what):
 
 def run_likelihood(args, warnings, defaults):
     layers = [c for c in args.layers.split(",") if c]
+    if not layers:
+        raise InputError("--layers names no column")
     doc = load_json(args.pdfs, "PDF file")
     per_layer = {}
     for c in layers:
