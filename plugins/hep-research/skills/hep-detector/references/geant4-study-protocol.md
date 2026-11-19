@@ -261,9 +261,18 @@ that rule and its outcome (J15 at 100 GV and J16 at 1 TV stay refused).
 98 % of the angles, which is what `multiple-scattering-reference` computes (truncated-normal maximum likelihood in the
 symmetric window holding 98 %). RMS(central 98 %) / 0.9346, the estimator of the `multiple-scattering` sanity
 benchmark (0.9346 is the RMS of a unit Gaussian truncated to its central 98 %), assumes the inner 98 % is itself
-Gaussian; the single-scattering tail inside the window widens it by about 3 % (0.3 mm of silicon, protons at 1 and
-10 GeV/c, option 4: about +3 % against -1.5 % with the fit). VALIDATION GEANT4-F4 records +11 % for the earlier
-factor 0.8673, which alone made the estimate 7.8 % high (1.115 / 1.0776 and 1.106 / 1.0776 give +3.5 % and +2.6 %). Point resolution is a declared input that no benchmark validates; at high rigidity it dominates the core.
+Gaussian; the single-scattering tail inside the window widens it, so this estimate reads above the fit.
+
+<!-- example: the package's synthetic Geant4 multiple-scattering benchmark -->
+The package's synthetic Geant4 multiple-scattering benchmark (0.3 mm G4_Si, protons at 1 and 10 GeV/c, physics
+option 4, 8000 events, Geant4 11.4.3; `VALIDATION.md` section GEANT4-F4, row "Multiple-scattering core estimator")
+records +11 % for RMS(central 98 %) divided by the earlier factor 0.8673. Dividing by 0.9346 instead divides those
+values by 1.0776 (= 0.9346 / 0.8673), so the factor 0.8673 alone made the estimate 7.8 % high: 1.115 / 1.0776 and
+1.106 / 1.0776 give +3.5 % and +2.6 %. The single-scattering tail inside the window thus widens the core by about
+3 %, against -1.5 % with the fit.
+<!-- /example -->
+
+Point resolution is a declared input that no benchmark validates; at high rigidity it dominates the core.
 
 **Detector-level studies: the F4 qualification path** (CV-B2, decided D0 2026-10-24). A study of kind
 `tracking-resolution` is upgradable only when all four conditions hold, each matched to the study by its own key in
