@@ -6,8 +6,9 @@ trackers, RPCs, micro-pattern gaseous detectors (GEM, Micromegas), scintillating
 fibers, nuclear emulsions, monolithic and other silicon variants, and radiation-hard
 sensors. Physics of signal formation is in
 [signal formation and readout](signal-formation-and-readout.md); alignment and drift calibration in
-[calibration and alignment](calibration-and-alignment.md). Each family ends with the required
-**Distinctive but generalizable reconstruction and performance features** block.
+[calibration and alignment](calibration-and-alignment.md). Each family except diamond has a
+**Distinctive but generalizable reconstruction and performance features** block (headed *Features* for fibers and
+emulsions, before their reconstruction subsections); an item a block does not list is not stated for that family.
 
 ## Silicon pixels and strips (recap of what is distinctive)
 
