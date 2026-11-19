@@ -8191,7 +8191,12 @@
     "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_a_species_feeding_into_itself_is_refused",
     "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same",
     "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_negative_control_a_lighter_species_is_still_computed"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "MULTISAMPLE-LLR-NO-LAYERS",
@@ -8284,7 +8289,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_exhaustive_verdict_over_every_layers_value_of_up_to_three_pieces",
     "tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py::LikelihoodLayersNamingNoColumn::test_negative_control_empty_sum_curve_is_not_reported"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "MULTISAMPLE-LLR-LABEL-01",
@@ -8385,7 +8395,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_exhaustive_verdict_over_quarter_steps_from_minus_one_to_two",
     "tests/skills/hep_detector/test_f_xref_1_likelihood_labels.py::LikelihoodLabelIsZeroOrOne::test_negative_control_truncated_label_is_not_counted_as_background"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   }
  ],
  "documentation_fixes": [
