@@ -6,7 +6,12 @@ or charge (muon systems use penetration instead), and converts that - combined w
 [tracking and vertexing](tracking-and-vertexing.md) - into a mass or species
 hypothesis. Organized by technology and independent of experiment; calorimeter-based
 identification (`E/p`, shower shape) is in
-[calorimetry](calorimetry-ecal-hcal.md). Environment labels: `COL` collider, `FXT` fixed
+[calorimetry](calorimetry-ecal-hcal.md). Identification methods specific to one environment are in the
+environment references: [space-based direct detection](space-based-direct-detection.md) (which uses this page for
+TOF, TRD and RICH), [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+(ring sharpness, `dE/dx` versus residual range, recoil discrimination), [neutrino astronomy](neutrino-astronomy.md)
+(tracks and cascades), [ground-based detection arrays](ground-based-detection-arrays.md) and
+[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) (gamma/hadron separation). Environment labels: `COL` collider, `FXT` fixed
 target and test beam, `SPC` space and high-altitude balloon, `UGD` underground, neutrino
 and rare-event, `GND` ground-based arrays, `NUC` nuclear and low-energy physics.
 
