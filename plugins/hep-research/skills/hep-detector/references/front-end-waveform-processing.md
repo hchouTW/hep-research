@@ -32,7 +32,7 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
     scale that drifts with the timing calibration.
 - **Sampling.** With a known pulse shape and a phase locked to the clock, a few
   samples per pulse below the Nyquist rate of the signal give unbiased amplitudes
-  (at a collider, calorimeters sampled at the 40 MHz bunch clock). What is required is
+  (at a collider, calorimeters sampled at the bunch-crossing clock). What is required is
   an anti-alias filter on the noise and a stable phase. Where arrivals are not locked to
   the sampling clock, the phase is estimated per pulse (the joint amplitude-time fit of
   *Time from samples* below), so the few-sample argument then also needs that time
