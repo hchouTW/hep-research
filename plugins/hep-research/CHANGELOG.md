@@ -247,6 +247,15 @@ Software checks establish contract consistency only, not physical validity.
   SFA-2026-919; issue CHK-AT-06-10). The label was truncated with `int()` before the check, so 0.7 was counted as
   background (and 1.5 as signal) with status ok. Now exit 2, status rejected, naming the value; labels 0 and 1 (also
   written 0.0 and 1.0) give the same output as before.
+- **hep-detector: routing links** (issues CHK-AC-05-02 to -10). The calorimetry, tracking and timing references and
+  the skill README name the optional reconstruction development bindings `adapters/calo-cluster`,
+  `adapters/acts-tracking`, `adapters/timing-pid` and `adapters/photon-likelihood` (each demonstrated-on-synthetic-data,
+  no quality claim, required by no script). The photon-likelihood reference sends DIRC and TOP to the Cherenkov PID
+  variants section instead of the RICH section, which does not cover them; the particle-identification opening links the
+  Cherenkov variants, timing and muon pages; the muon-systems page links the atmospheric-muon rejection of neutrino
+  telescopes; the simcal specialization index links hep-statistics' simcal scripts. Ten routing cases (five English,
+  five natural zh-Hant) cover DIRC, LGAD and MRPC timing with time walk, software compensation and punch-through,
+  Millepede alignment with the muon momentum scale, and the muon veto efficiency.
 
 ## 0.70.0 (2026-11-16)
 

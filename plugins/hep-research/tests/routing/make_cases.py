@@ -621,6 +621,16 @@ C = [
  ('st-simcal-nat-2', 'zh-Hant', 'direct', 'RICH 偵測器的哪些模擬參數可以用資料來調校？', 'hep-statistics', [], None, None, {"set": "SIMCAL", "natural": True}),
  ('st-simcal-ml-nat-1', 'zh-Hant', 'neighboring', '我的 BDT 分類器輸出的機率偏高，要怎麼校正成可信的機率？', 'hep-ml', [], 'hep-detector', None, {"set": "SIMCAL", "natural": True}),
  ('st-simcal-dr-nat-1', 'zh-Hant', 'neighboring', '請規劃 ECAL 的能量刻度與對準，用 π0 做晶體間的相互校正。', 'hep-detector', [], 'hep-statistics', None, {"set": "SIMCAL", "natural": True}),
+ ("dr-route-dirc-1", "en", "direct", "How do I identify kaons with our DIRC bars from the Cherenkov angle and photon times?", "hep-detector", ["Cherenkov/RICH", "particle identification"], None, None, {"set": "C5"}),
+ ("dr-route-dirc-nat-1", "zh-Hant", "direct", "我們的 DIRC 石英棒要怎麼用切倫可夫角與光子到達時間分辨 K 介子和 π 介子？", "hep-detector", [], None, None, {"set": "C5", "natural": True}),
+ ("dr-route-timing-1", "en", "direct", "What limits the time resolution of an LGAD or MRPC timing layer, and how do I correct time walk?", "hep-detector", ["timing"], None, None, {"set": "C5"}),
+ ("dr-route-timing-nat-1", "zh-Hant", "direct", "LGAD 或 MRPC 計時層的時間解析度受什麼限制？訊號幅度造成的時間偏移要怎麼修正？", "hep-detector", [], None, None, {"set": "C5", "natural": True}),
+ ("dr-route-hcal-1", "en", "direct", "How do I apply software compensation and estimate punch-through in our hadronic calorimeter?", "hep-detector", ["calorimetry"], None, None, {"set": "C5"}),
+ ("dr-route-hcal-nat-1", "zh-Hant", "direct", "我們的強子量能器要怎麼做軟體補償，又要怎麼估計穿出量能器後方的粒子？", "hep-detector", [], None, None, {"set": "C5", "natural": True}),
+ ("dr-route-align-1", "en", "direct", "How do I align the tracker with Millepede and check the muon momentum scale?", "hep-detector", ["calibration and alignment", "muon systems"], None, None, {"set": "C5"}),
+ ("dr-route-align-nat-1", "zh-Hant", "direct", "要怎麼用 Millepede 對準徑跡偵測器，並檢查 μ 子的動量刻度？", "hep-detector", [], None, None, {"set": "C5", "natural": True}),
+ ("dr-route-veto-1", "en", "direct", "How do I measure the efficiency of the muon veto of our detector?", "hep-detector", ["muon systems", "efficiency and resolution"], None, None, {"set": "C5"}),
+ ("dr-route-veto-nat-1", "zh-Hant", "direct", "我們偵測器的 μ 子否決系統效率要怎麼量測？", "hep-detector", [], None, None, {"set": "C5", "natural": True}),
 ]
 
 cases = []
