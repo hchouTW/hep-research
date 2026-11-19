@@ -191,6 +191,28 @@ Software checks establish contract consistency only, not physical validity.
 - **hep-detector relation labels** (docs, F-XREF-4). `detector-glossary.md` and `detector-measurement-framework.md`
   use the four labels of `core-detector-equations.md` (exact, approximate, asymptotic, empirical) and no longer add
   *detector-specific*, which no relation carries.
+- **survival_feeddown.py refuses a feed-down into the same species** (sci-fix SURVIVAL-FEEDDOWN-SAME-SPECIES S2;
+  advisory SFA-2026-917; issue CHK-AU-02-06). A fragmentation fraction from a species into itself (`{"C": {"C": f}}`)
+  was accepted with status ok and reported as `N (1 - P) f` feed-down events from that species into itself, with a
+  `subtract_background` recipe step for it. It now exits 2 (status rejected); the tool has no charges, so it checks
+  only that the two species differ. Survival probabilities and feed-down between different species are unchanged
+  (the bc-fragmentation example is byte-identical).
+- **hep-detector cross-file consistency** (F-XREF-3, docs; issues CHK-AU-02-02, -05, -07, CHK-AU-04-04,
+  CHK-AU-06-07, CHK-AU-07-06, -07, -08, CHK-AU-08-04, -05, -06, CHK-AU-09-03, -04, CHK-AU-10-06, CHK-AU-13-03,
+  CHK-AU-14-01, -06). `nuclear-interactions-in-detector-material.md` says the grammage is along the track
+  (`t / cos theta` for a planar layer, P averaged over directions) and that `survival_feeddown.py` reads every cross
+  section under `inelastic`, whatever its kind; hep-measurement's `correction-chain.md` says survival is without an
+  inelastic or, for a charge-tagged selection, a charge-changing interaction. `muon-systems.md` writes the sagitta
+  with `p_perp` and the projected path length. `timing-detectors.md` and the photosensor page name the
+  photostatistics times `tau_decay` and `tau_rise` (not the glossary's dead time `tau_d`); `timing-detectors.md`
+  says the `1/p^2` TOF separation holds only for `p >> m` and that a walk curve from minimum-ionizing particles does
+  not transfer to nuclei. `calibration-and-alignment.md` links the timing calibration, corrects the weak-mode
+  example's locators and its twist sentence, and cites PDG RPP 2025. `performance-metrics-and-residual-diagnostics.md`
+  gives `Omega_gen = pi sin^2(theta_max)` for a cosine law limited to `theta_max` and separates a centred tail count
+  from a mixture weight. The straw-tube line names both TRD concepts; the clustering optimum in
+  `event-reconstruction.md` depends on the noise level and, where interactions overlap, the pileup level;
+  `signal-formation-and-readout.md` writes the Fano factor `F_Fano` and cites PDG RPP 2025 sections and pages. No
+  number changes.
 
 ## 0.70.0 (2026-11-16)
 

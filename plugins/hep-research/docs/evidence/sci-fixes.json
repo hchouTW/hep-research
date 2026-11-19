@@ -8039,6 +8039,114 @@
     "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_property_interval_68_and_rate_error_do_not_depend_on_cl",
     "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_third_party_interval_68_and_rate_error_at_cl95"
    ]
+  },
+  {
+   "id": "SURVIVAL-FEEDDOWN-SAME-SPECIES",
+   "title": "survival_feeddown.py refuses (exit 2, status rejected) a fragmentation fraction from a species into itself, which it reported with status ok as feed-down events and a subtract_background step (CHK-AU-02-06)",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S2",
+   "oracle_kinds": [
+    "exhaustive"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "compute() accepted fragmentation_fraction {S: {S: f}} and, with status ok and exit 0, reported N_heavy (1 - P) f feed-down events from S into S and a subtract_background recipe step for species:S, although the docstring and nuclear-interactions-in-detector-material.md define feed-down into a lighter species. The tool has no charges, so it now refuses only a pair whose two species are the same (InputError, exit 2); survival rows and every pair of different species are unchanged (examples/bc-fragmentation rerun byte-identical in session 1). Oracle: every ordered pair of the stated domain {B, C, N} x {B, C, N} (9 runs), expected verdict written by hand from that rule: refused exactly on the diagonal, otherwise one feed-down entry heavy -> light and one subtract_background step for species:light (exhaustive). Also the single-pair refusal C -> C and a negative control (C -> B still computed). No tolerances: every comparison is exact (stated in the test file). The evidence reads only keys the parent writes; inputs SYNTHETIC. follow_up c7cdc6df is the docs: commit for CHK-AU-02-02 and CHK-AU-02-05 (page and one docstring sentence of survival_feeddown.py; no code change).",
+   "independence": [
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same",
+     "basis": "exhaustive",
+     "detail": "every ordered pair (heavy, light) of {B, C, N} (9 pairs, one run each, f = 0.5, SYNTHETIC cross sections): exit 2, status rejected, no feeddown and no recipe_steps exactly when heavy == light; otherwise exit 0, status ok, feeddown [(heavy, light)] and one subtract_background step with fragmentation_feeddown target_scope species:light; expected verdicts written by hand from the rule that a species does not feed down into itself",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "1fe370c5cfa2f01983b6c2d4f7b68aa64a92786e",
+    "fix": "42338675026665aead1ad279a4f4d0f15d9fd498",
+    "follow_up": [
+     "c7cdc6dfc92206ca49c896a37e7e0b09e798728d"
+    ]
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-3",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_a_species_feeding_into_itself_is_refused",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-3",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_negative_control_a_lighter_species_is_still_computed",
+     "parent": "pass",
+     "fix": "pass",
+     "failure": null,
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-3",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/survival_feeddown.py::compute",
+     "mutation": "other",
+     "detail": "disables the same-species check (if False and heavy == light), the pre-fix behaviour",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/survival_feeddown.py::compute",
+     "mutation": "other",
+     "detail": "turns the refusal into a warning and computes the same-species feed-down",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/survival_feeddown.py::compute",
+     "mutation": "other",
+     "detail": "inverts the check (heavy != light), refusing every pair of different species",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_a_species_feeding_into_itself_is_refused",
+    "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same",
+    "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_negative_control_a_lighter_species_is_still_computed"
+   ]
   }
  ],
  "documentation_fixes": [
@@ -10926,6 +11034,257 @@
    ],
    "gaps": [],
    "note": "fix commit 229f4b4626dc6995c1b0cd6082019cc52038613f (docs:); grep of skills/hep-detector found no relation labelled detector-specific"
+  },
+  {
+   "id": "F-XREF-3-SURVIVAL-GRAMMAGE-XS-KIND",
+   "title": "nuclear-interactions-in-detector-material.md: the grammage is along the track (t / cos theta for a planar layer; P averaged over directions, not taken at the mean grammage); survival_feeddown.py reads every cross section under 'inelastic' whatever its kind, named in the table's source (CHK-AU-02-02, CHK-AU-02-05)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/survival_feeddown.py",
+     "locator": "module docstring (Assumptions: grammage along the track; cross-section key 'inelastic')",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
+     "locator": "## Survival; ## Feed-down",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit c7cdc6dfc92206ca49c896a37e7e0b09e798728d (docs:); no code change (one docstring sentence of survival_feeddown.py); the page's sentence on refusing a same-species fraction describes the CHK-AU-02-06 fix (ledger SURVIVAL-FEEDDOWN-SAME-SPECIES)"
+  },
+  {
+   "id": "F-XREF-3-CORRECTION-CHAIN-CHARGE-CHANGING",
+   "title": "correction-chain.md: survival is without an inelastic or, for a charge-tagged selection, a charge-changing interaction, as the hep-detector page and hep-theory's nuclear-cross-sections.md say (CHK-AU-02-07)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-theory/references/nuclear-cross-sections.md",
+     "locator": "## Kinds of cross section",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
+     "locator": "## Survival, 'Which cross section'",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "contracts/vocab/effects.json, effect survival, still defines survival as crossing without an inelastic interaction, and contracts/vocab/core.json response_corrections survival carries the same text: not changed. The catalog is versioned (catalog_version 1.1.0, pinned by the effect_catalog.json schema enum and tests/contracts/test_catalog_version_and_retired_rules.py) and core.json by contracts_version 3.28.0; widening the definition under the same versions, or in one copy only, would break that versioning (core.json is also outside this unit's files). Left for a contracts change with a version decision"
+   ],
+   "note": "fix commit 31ae64d0b7587917f29fca923f7b6a9bb787f4b2 (docs:)"
+  },
+  {
+   "id": "F-XREF-3-MUON-SAGITTA-PPERP",
+   "title": "muon-systems.md: the sagitta relation uses the momentum component perpendicular to B and the path length projected on the bending plane (CHK-AU-04-04)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.11.1, eq. (35.57), p. 108; sec. 35.12, eqs. (35.66) and (35.68) (L'), p. 112",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/tracking-and-vertexing.md",
+     "locator": "momentum-resolution block (p_T, projected length)",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit f4e94cb4816b6d7f4ac4edc3372eca6ff91818a3 (docs:)"
+  },
+  {
+   "id": "F-XREF-3-PHOTOSTAT-TAU-DECAY",
+   "title": "timing-detectors.md photostatistics row and the photosensor page's scaling line name the decay and rise times tau_decay and tau_rise, not the glossary's dead time tau_d (CHK-AU-06-07, CHK-AU-07-08)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/detector-glossary.md",
+     "locator": "row `t_p`, `tau`, `tau_d`",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/front-end-waveform-processing.md",
+     "locator": "Dead time",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit a38ac123202e8d8d90b54e193616411938129446 (docs:)"
+  },
+  {
+   "id": "F-XREF-3-TOF-P-GG-M",
+   "title": "timing-detectors.md: the 1/p^2 TOF separation holds only for p >> m; the exact form at p comparable to m (CHK-AU-07-07)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/core-detector-equations.md",
+     "locator": "E8",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 631b4b9ed52fcac4852b4288ab727277dad764ee (docs:); ratios recomputed from the exact E8 form (pi/K: 1.94 at 0.2, 1.22 at 0.5, 1.06 at 1.0 GeV/c)"
+  },
+  {
+   "id": "F-XREF-3-WALK-NUCLEI",
+   "title": "timing-detectors.md calibration: the walk curve spans the data's amplitudes; for nuclei a curve from minimum-ionizing particles does not transfer (CHK-AU-07-06)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+     "locator": "## Time pickoff, Walk",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/particle-identification.md",
+     "locator": "## Time of flight (TOF), Time-walk and charge dependence",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit e8f96a40683ff76a8a11af7bfef48b9f841612aa (docs:)"
+  },
+  {
+   "id": "F-XREF-3-CALIB-ALIGN-XREF",
+   "title": "calibration-and-alignment.md: the opening links the timing calibration in timing-detectors.md; the weak-mode example's locators are secs. 4.4, 5, 9.3 and 10 and its twist sentence adds the field-off cosmic tracks of sec. 5; the MIP-calibration citation is PDG RPP 2025 with pages (CHK-AU-08-04, CHK-AU-08-05, CHK-AU-08-06)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "CMS Collaboration, Alignment of the CMS tracker with LHC and cosmic ray data, JINST 9 (2014) P06009, https://arxiv.org/abs/1403.2286v2 (ledger scifix:S2202)",
+     "locator": "sec. 4.4, text p. 14 (printed p. 12); sec. 5, text p. 18 (printed p. 16); sec. 9.3, text p. 33 (printed p. 31); sec. 10",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 34. Passage of Particles Through Matter, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf (ledger scifix:S2101)",
+     "locator": "sec. 34.2.3, p. 5; sec. 34.2.9, eq. (34.12), p. 12",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/timing-detectors.md",
+     "locator": "## Calibration and diagnostics",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "the page is 24,753 B, above the 24,576 B soft budget (reference_inventory.py warning)"
+   ],
+   "note": "fix commit 8ba77dd5c73b02c1a923cb0b5da9b07492ed00a7 (docs:)"
+  },
+  {
+   "id": "F-XREF-3-PERF-OMEGA-GEN-TAIL",
+   "title": "performance-metrics-and-residual-diagnostics.md: Omega_gen = pi only for the full hemisphere (pi sin^2(theta_max) within theta_max, as acceptance_from_generation.py); the tail fraction is centred on the bias or median when it is not negligible, as build_response.py, and a mixture weight (--tail-fraction) is a different quantity (CHK-AU-09-03, CHK-AU-09-04)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-measurement/scripts/acceptance_from_generation.py",
+     "locator": "module docstring, Method (plane)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/build_response.py",
+     "locator": "module docstring (tail fraction)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/propagate_scale_distortion.py",
+     "locator": "module docstring (resolution: tail-fraction)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/design_estimates.py",
+     "locator": "response-assembly --tail-fraction",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "no external source is cached for the cosine-law integral; pi sin^2(theta_max) recomputed by integration"
+   ],
+   "note": "fix commit 41d75594e08e89dfeaf026e94a42382e78d18de3 (docs:); follow-up ee1e2285f3b94f215d898ce69ccdbdb046400b46 (docs:, CHK-AU-09-03: acceptance_from_generation.py named by its <plugin root>/skills/hep-measurement/scripts/ path, so tools/skill_scripts.py resolves it; unresolved 71 -> 70)"
+  },
+  {
+   "id": "F-XREF-3-TRD-TWO-CONCEPTS",
+   "title": "gaseous-and-specialized-tracking-technologies.md: straws are one of the two TRD concepts; the other is radiator modules each followed by a xenon-filled chamber (CHK-AU-10-06)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.6.5, p. 46",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/trd.md",
+     "locator": "opening definition",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "the page is 24,768 B, above the 24,576 B soft budget (reference_inventory.py warning); the optional named-experiment examples were not added"
+   ],
+   "note": "fix commit 64c84ae6970d942b7846ebfc3299b222083ec52f (docs:)"
+  },
+  {
+   "id": "F-XREF-3-CLUSTERING-NOISE-PILEUP",
+   "title": "event-reconstruction.md: the clustering optimum depends on the noise level and, where unrelated interactions overlap in the readout window (at a collider, pileup), on the pileup level (CHK-AU-13-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
+     "locator": "noise term (electronic noise and, at a collider, pileup energy)",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 07a2637060588ff5cbc1bd7ae990675514f707ef (docs:)"
+  },
+  {
+   "id": "F-XREF-3-FANO-SYMBOL-PDG2025",
+   "title": "signal-formation-and-readout.md: the Fano factor is F_Fano (F is the excess noise factor, as the glossary and E10); the charge-yield numbers cite PDG RPP 2025 secs. 35.8.1, 35.6.1 and 35.7.3 with pages (CHK-AU-14-01, CHK-AU-14-06)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "Particle Data Group (S. Navas et al.), Review of Particle Physics 2025, 35. Particle Detectors at Accelerators, https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf (ledger scifix:S03)",
+     "locator": "sec. 35.8.1, Table 35.11 and text, p. 64; sec. 35.6.1, Table 35.6, p. 24; sec. 35.7.3, p. 57",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/detector-glossary.md",
+     "locator": "row `F`",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/core-detector-equations.md",
+     "locator": "E10",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 41b98d0e5133c4f2122146c8187d43a90b90951e (docs:)"
   }
  ],
  "superseded": [

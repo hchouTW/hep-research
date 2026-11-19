@@ -1,0 +1,54 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-917",
+  "published": "2026-11-19T03:28:35Z",
+  "modified": "2026-11-19T03:28:35Z",
+  "severity": "S2",
+  "ledger": [
+    "SURVIVAL-FEEDDOWN-SAME-SPECIES"
+  ],
+  "summary": "survival_feeddown.py compute accepted a fragmentation fraction from a species into itself (for example {\"C\": {\"C\": 0.5}}) and reported, with status ok and exit 0, feed-down events from that species into itself and a subtract_background recipe step for it, although feed-down is defined as fragmentation into a lighter species; it now refuses the input (exit 2, status rejected).",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/survival_feeddown.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "c3afd32c537b42dc40640832027cbdf84cb15229",
+        "fixed_commit": "42338675026665aead1ad279a4f4d0f15d9fd498"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "feeddown[] entries whose from and to are the same species (events, probability_per_arriving, dN_dscale)",
+      "recipe_steps subtract_background step feeddown-<s>-to-<s> (fragmentation_feeddown, target_scope species:<s>)",
+      "status ok and exit code 0 for that input"
+    ],
+    "bias": "a same-species fraction f gave N_heavy (1 - P) f 'feed-down events' to subtract from the species' own count (SYNTHETIC: 59.2 of 1000 carbon arriving for f = 0.5 on the example layers); subtracting them lowers that species' count by that amount, with status ok and no warning. Survival probabilities and correction factors, and every feed-down between two different species, are unchanged",
+    "trigger": "a cross-section table whose fragmentation_fraction names the same species as source and target ({\"S\": {\"S\": f}}) with that species listed in --species; a table without such a pair is not affected"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/survival_feeddown.py"
+      ],
+      "how_to_recognize": "JSON on stdout of survival_feeddown.py compute with status ok whose feeddown[] holds an entry with from equal to to, and a recipe step with step_id feeddown-<s>-to-<s>; recipe steps copied from it into a measurement recipe carry operator subtract_background and fragmentation_feeddown target_scope species:<s> for the same species <s> the step's id names twice; no artifact records the run"
+    }
+  },
+  "remedy": "remove the same-species pair from fragmentation_fraction (a species does not feed down into itself; migration within a species belongs to the response) and rerun on a version with the fix, then drop the subtract_background step and add the subtracted events back to that species' count; outputs without such a pair stand",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/42338675026665aead1ad279a4f4d0f15d9fd498"
+  ]
+}

@@ -10142,3 +10142,18 @@ interval_68 at CL 0.68. The other F-XREF-2 issues are `docs:` commits (ledger `d
 | `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_exhaustive_tail_equalities_at_cl95` | exhaustive (k = 0..n, n = 1..20; Clopper-Pearson tail equalities) | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_property_interval_68_and_rate_error_do_not_depend_on_cl` | invariant | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_negative_control_95_half_width_is_not_the_rate_error` | behavioral (negative control, emulates pre-fix) | fail (assertion) | pass | no | E6 |
+
+## DC-F-XREF-3 (2026-11-19, detector content Stage B, fix unit F-XREF-3; issue CHK-AU-02-06)
+
+sci-fix SURVIVAL-FEEDDOWN-SAME-SPECIES (S2, advisory SFA-2026-917) in `skills/hep-detector/scripts/survival_feeddown.py`
+compute: tests-only commit `1fe370c5`, fix `42338675` directly on top; follow-up `c7cdc6df` (docs:, CHK-AU-02-02 and
+CHK-AU-02-05, no code change). Oracle, domain and the absence of tolerances (all comparisons exact) are in the module
+docstring of `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py`. Mutant patches (all `other`):
+CHK-AU-02-06-1 disables the same-species check, -2 turns the refusal into a warning, -3 inverts the check. The other
+F-XREF-3 issues are `docs:` commits (ledger `documentation_fixes` F-XREF-3-*).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_exhaustive_every_ordered_pair_refused_exactly_when_the_species_are_the_same` | exhaustive (every ordered pair of {B, C, N}) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_a_species_feeding_into_itself_is_refused` | behavioral (refusal of C -> C) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py::SelfFeeddown::test_negative_control_a_lighter_species_is_still_computed` | negative control (C -> B computed) | pass | pass | no | E6 |
