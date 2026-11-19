@@ -11,7 +11,7 @@ basis (2), the TOF row of §12 and §11.4. Folder rules: [index](index.md).
 | `scintillator` | 1 | scintillator deposition | `g4sim_run` |
 | `quanta` | 2 | scintillation photons, emission time | response stage 1 |
 | `light` | 3 | light propagation, attenuation, path dispersion | efficiency map with mapped transit times |
-| `pde` | 4a | photoelectric conversion, TTS | surface `efficiency`; TTS as a digitization-job timing input |
+| `pde` | 4a | photoelectric conversion, TTS | surface `efficiency`; TTS: no g4sim field |
 | `sensor` | 4b | gain | response stage 3 |
 | `tdc` | 5 | TDC, slewing | response stage 4 |
 | `tracker_path` | control variable | flight path (and momentum, for a charged track): from the tracker, or for neutral particles from the counter's own hit position and the source geometry | another subsystem (upstream result), or the counter itself |
@@ -21,17 +21,24 @@ Control variables usually come from another subsystem, so the graph is a DAG wit
 (§12). For neutral particles (neutron time of flight) the flight path comes from the counter itself and the source
 position, or from a calibrated effective flight path; the time of flight then gives the energy of a particle of
 known mass instead of β at known momentum, and the graph may stay a chain. A laser into the counter would sit on the
-2/3 or 3/4a edge and needs a conversion relation (§3.4).
+2/3 or 3/4a edge and needs a conversion relation (§3.4). On g4sim, stages 1 and 2 are drawn from one volume
+sub-stream, so no hand-off exists before stage 3 (Part B §11.4) and the 2/3 edge cannot carry an injection; the 3/4a
+edge exists only under the PDE split of §6.7 (otherwise refused: `binding.injection_light_pde`), so the example
+declares no laser reference.
+
+The T0 and slewing of node 5 (the physical time offset and walk) and the T0 and slewing correction constants of `reco`
+are different parameters; the example binds the correction constants, on `reco`.
 
 ## 2. Mechanisms and parameterization
 
 | Parameter (§12) | Mechanism / node | Parameterization | g4sim field (Table 2 row) |
 |---|---|---|---|
-| emission time | time / 2 | decay and rise time | detector-spec scintillation component field: no Table 2 row |
-| effective light speed, path dispersion | transport / 3 | velocity, spread | map transit times: no Table 2 row (resimulate the map with another rindex) |
+| emission time | time / 2 | decay and rise time | detector-spec scintillation component `rise_ns`, `decay_ns` and the digitization job's `timing`: no Table 2 row |
+| effective light speed, path dispersion | transport / 3 | velocity, spread | not a field: derived from `optical/rindex` and the geometry, changed through the optical row (resimulation with a new mapping run, which refreshes the mapped transit times) |
 | attenuation | transport / 3 | absorption and scattering lengths; surface reflectivity | detector-spec `optical/absorption_length_mm` and, where scattering matters, `optical/rayleigh_length_mm` (optical row); the wrapping reflectivity is a separate optical-row parameter |
-| TTS | time / 4a | width | digitization-job timing: no Table 2 row |
-| T0, slewing | time / 5 | offset, coefficient | reconstruction (rerun) |
+| TTS | time / 4a | width | no field in g4sim (`response-pipeline/1`, `g4sim-digi-job/1`): not bindable |
+| T0, slewing | time / 5 (the physical offset and walk); bound as reconstruction corrections on `reco` (6–7) | offset, coefficient | reconstruction (rerun) |
+| electronics noise, threshold (jitter = noise/slope: [time-resolution budget](../timing-detectors.md#time-resolution-budget-single-hit)) | noise-threshold / 5 | width, level | `electronics` stage `noise_sigma`, `threshold` (Table 2 "Parameters of response stages 2–5"); the stage draws no time, so the jitter itself has no g4sim field |
 | light yield | yield / 2 | photons per MeV | LY row |
 
 ## 3. Kernel properties
@@ -81,5 +88,8 @@ the time resolution and the spread of hit positions in the sample; use it only w
 
 `assets/simulation-calibration/tof.binding.example.json`: light yield rerun; attenuation length resimulation or
 surrogate model; T0 and slewing rerun; P4 met by the known input and by the tracker's internal constraint.
-Degeneracies (§12): T0 plus x/v_eff; addition in quadrature. Also: the attenuation measured along a counter combines
+Degeneracies (§12): T0 plus x/v_eff; addition in quadrature, broken by the pulse height (for ions, the charge Z),
+along which the photostatistics term falls while the electronics floor stays, and by the hit position; common mode of
+the redundant measurement (the common T0 of the counters in the three-counter method, §3.5), broken by the known
+input or the tracker's internal constraint. Also: the attenuation measured along a counter combines
 absorption, scattering and surface and wrapping losses, so a fitted absorption length alone absorbs the other two.
