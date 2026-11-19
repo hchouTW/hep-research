@@ -418,7 +418,10 @@ def sipm(cells, npe, crosstalk=0.0, dcr_hz=0.0, gate_ns=0.0):
                                             'crosstalk_probability': pct, 'mean_secondaries_lambda': p},
             'dark_counts_in_gate': {'mean_cells': lam * borel_mean, 'sigma_cells': math.sqrt(lam * second)},
             'assumptions': ['prompt, uniform illumination for saturation; crosstalk as a Borel branching process; '
-                            'afterpulses not included'],
+                            'afterpulses not included',
+                            'fired_cells and linearity_fraction are for primary photoelectrons only; crosstalk '
+                            '(crosstalk_cells_per_primary) and dark counts are not folded into the saturation '
+                            'curve, and on a saturated array they change it'],
             'validity': validity}
 
 
