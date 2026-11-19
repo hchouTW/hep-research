@@ -413,9 +413,12 @@ def run_likelihood(args, warnings, defaults):
                 floored += 1
             floor = PDF_FLOOR * max(max(ps), max(pb))
             llr += math.log(max(s, floor)) - math.log(max(b, floor))
-        lab = int(_num(r[args.label_column], args.label_column)) if args.label_column else None
-        if lab not in (None, 0, 1):
-            raise InputError(f"{args.label_column} must be 0 or 1")
+        lab = None
+        if args.label_column:
+            v = _num(r[args.label_column], args.label_column)
+            if v not in (0.0, 1.0):
+                raise InputError(f"{args.label_column} must be 0 or 1, got {v:g}")
+            lab = int(v)
         llrs.append((lab, llr))
     if floored:
         warnings.append(f"{floored} layer values fell in an empty PDF bin (floor {PDF_FLOOR:g} of the PDF maximum)")
