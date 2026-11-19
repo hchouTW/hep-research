@@ -27,7 +27,8 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
     2 ns and −0.8 % to −1.5 % at 5 ns, depending on the direction. With correlated or
     pileup noise the weights extrapolate harder and the bias reaches several percent
     with either sign (same pulse, `rho = 0.6`, samples two before to two after the
-    peak: +0.9 % / −1.8 % at ∓2 ns, up to −5.8 % at 5 ns). This appears as an energy
+    peak: +0.9 % / −1.8 % at ∓2 ns, +0.5 % at −5 ns and −5.8 % at +5 ns; phase error `dt > 0`: the
+    pulse starts `dt` earlier than the weights assume, the convention of `optimal-filter --phase-errors`). This appears as an energy
     scale that drifts with the timing calibration.
 - **Sampling.** With a known pulse shape and a phase locked to the clock, a few
   samples per pulse below the Nyquist rate of the signal give unbiased amplitudes
