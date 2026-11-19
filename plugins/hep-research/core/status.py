@@ -6,8 +6,9 @@ Two vocabularies meet in a script's output and are kept apart:
   incomplete. No other exit code is used;
 - the artifact status label (contracts/vocab/core.json artifact_statuses): what the inputs and results are
   (synthetic, observed, ...). A script takes it with --status (default unvalidated) and echoes it as "status_label".
-  Some older detector and measurement scripts echo the label under "status"; they are listed in
-  tests/skills/test_cli_contract.py.
+  Some older detector and measurement scripts echo the label under "status" (the measurement ones are marked 'json'
+  in CASES of tests/skills/hep_measurement/test_cli_contract.py; the hep-detector ones are recorded in VALIDATION.md,
+  T17 decisions).
 The obligation states of the rule registry (satisfied, violated, not_applicable, unverified, unsupported) are a third
 vocabulary and are not mapped here.
 
