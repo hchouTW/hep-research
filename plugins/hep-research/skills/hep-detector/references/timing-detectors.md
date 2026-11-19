@@ -19,8 +19,11 @@ beta = L / (c t)        m^2 = p^2 (1/beta^2 - 1)      Delta t = (L/c) [ (1/beta_
 `L` path length along the track (not straight-line distance; requires the track fit),
 `t` measured flight time (stop minus start), `p` momentum. The TOF separation of two
 species with the same `p` in the ultrarelativistic limit is
-`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate); separation in `N_sigma` falls as
-`1/p^2` and is lost above a momentum set by `L` and total time resolution.
+`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate, valid only for `p >> m`); separation in
+`N_sigma` falls as `1/p^2` and is lost above a momentum set by `L` and total time resolution.
+At `p` comparable to `m`, where TOF is used, take the exact form above (the limit overestimates
+`Delta t` by 22% for pi/K at 0.5 GeV/c and by a factor of about 2 at 0.2 GeV/c); below `m` the
+difference falls as `1/p` ([core detector equations](core-detector-equations.md), E8).
 
 ## Pulse-time extraction
 
@@ -120,7 +123,7 @@ propagation; versus run/fill reveals clock drift.
 - **Natural objects**: hit time, track time, event start time. **Informative
   residual**: time residual to the expected time for a known species vs amplitude,
   position, and run.
-- **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2`.
+- **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2` for `p >> m`.
 - **Conventions**: quote resolution with the reference, core Gaussian sigma and tail
   fraction; state whether clock jitter is included.
 - **Tails**: wrong-bunch (COL) or wrong-window, afterpulses, late light, mis-association.
