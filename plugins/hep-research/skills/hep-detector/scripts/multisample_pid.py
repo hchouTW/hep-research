@@ -9,8 +9,10 @@ samplings) identifies a particle, with the choices stated. See "Combining many s
 Subcommands:
 - charge EVENTS.csv: per layer, the signal is corrected for the path length (signal x cos(theta) from --path-column;
   or --no-path-correction, which must be said explicitly) and inverted through a user response curve
-  (--response JSON {"z2": [...], "signal": [...]}, increasing; saturation is allowed; linear interpolation, values
-  outside the table are counted as out of range and left out) to a per-layer estimate of |Z|. The layers are combined
+  (--response JSON {"z2": [...], "signal": [...]}, increasing; saturation is allowed; linear interpolation; with
+  truncated-mean and weighted-mean an event with any layer signal outside the table is counted as out of range and
+  left out; with likelihood the curve is extrapolated linearly beyond its ends and nothing is counted) to a per-layer
+  estimate of |Z|. The layers are combined
   by --method:
     truncated-mean  mean after dropping the highest --truncate-high fraction (and --truncate-low, default 0) of the
                     per-layer estimates (robust against the Landau tail);
