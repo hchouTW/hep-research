@@ -17,7 +17,9 @@ Folder rules: [index](index.md).
 | `reco` | 6–7 | pixels and time; likelihood of angle and time | reconstruction |
 
 The refractive index acts on `bar` (emission angle) and `tir` (propagation, group velocity): one parameter on two
-nodes (§12). In g4sim both are `g4sim_run`; no injection edge between them or before stage 3 exists (§11.4).
+nodes (§12). In g4sim both are `g4sim_run`; no injection edge between them or before stage 3 exists, so neither
+injection reference (known photon count, single photoelectron) can be declared unless the surface `efficiency` is set
+to 1 and the workflow thins `photons.csv` by photon energy itself (§11.4).
 
 ## 2. Mechanisms and parameterization
 
@@ -46,8 +48,9 @@ Tracks of known momentum at several incidence angles on the bar (known input: th
 the incidence angle, which breaks PDE × reflectivity, §12). The angle is taken in the bar frame; it equals the polar
 angle, the word §12 uses, only when the bars run parallel to the beam axis (a barrel layout), not for bars
 perpendicular to the beam in an endcap. Momentum from the tracker (internal constraint); a laser pulse into the
-photodetector plane would be a mid-chain injection after node 1 and needs a conversion relation (*Inferred*; not
-declarable on g4sim's optical path).
+photodetector plane would be a mid-chain injection on the `tir` → `pde` (3/4a) edge and needs a conversion relation
+(*Inferred*; on g4sim's optical path declarable only with the surface `efficiency` set to 1 and `photons.csv` thinned
+by photon energy, §11.4).
 
 ## 6. Special functionals and link functions
 
