@@ -261,7 +261,9 @@ choice stated:
   width is biased low.
 - **Log-likelihood ratio from per-layer PDFs** (`likelihood`). LLR = sum over layers of log(p_signal / p_background)
   from binned per-layer PDFs (measured on control samples, as above), with the efficiency - mis-identification curve
-  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum.
+  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum. A
+  layer value outside the PDF edges contributes no term (skipped, counted in a warning), so the edges must cover the
+  full range of the layer signal, including the high amplitudes in which a TRD signal shows up.
 - **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
   declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
   separation (see "Combining measurements" below).

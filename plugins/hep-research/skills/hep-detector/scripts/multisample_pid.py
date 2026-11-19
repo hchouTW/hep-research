@@ -31,8 +31,10 @@ Subcommands:
   prediction to hold, else the predicted width is biased low.
 - likelihood EVENTS.csv: LLR = sum over layers of log(p_sig/p_bkg) from binned per-layer PDFs (--pdfs JSON
   {"edges", "signal", "background"} for every layer, or {"layers": {name: {...}}}); empty bins get a floor of 1e-12
-  times the largest bin density of the layer's signal and background PDFs, and are counted. With --label-column (1 signal, 0 background): the efficiency - mis-identification curve
-  over LLR thresholds with Clopper-Pearson intervals, and the rejection 1/misid.
+  times the largest bin density of the layer's signal and background PDFs, and are counted. A layer value outside
+  the PDF edges contributes no term (it is skipped and counted in a warning), so the edges must cover the full range
+  of the layer signal, including its high amplitudes. With --label-column (1 signal, 0 background): the efficiency -
+  mis-identification curve over LLR thresholds with Clopper-Pearson intervals, and the rejection 1/misid.
 Correlations between layers are optional; without them the output says "independence assumed".
 
 Input CSV: one row per particle, one column per layer (--layers a,b,c); lines starting with # are skipped.
