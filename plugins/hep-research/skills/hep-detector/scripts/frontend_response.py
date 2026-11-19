@@ -408,7 +408,8 @@ def sipm(cells, npe, crosstalk=0.0, dcr_hz=0.0, gate_ns=0.0):
     second = borel_var + borel_mean ** 2
     validity = []
     if mu / nc > 0.2:
-        validity.append('more than 20 % of cells fired: nonlinear regime; use a measured response curve, and '
+        validity.append('expected photoelectrons above 20 % of the cell count (about 18 % of cells fired): '
+                        'nonlinear regime; use a measured response curve, and '
                         'note that light longer than the cell recovery time raises the effective cell count')
     if p > 0.5:
         validity.append('mean secondaries above 0.5: branching is near critical; check the device data')
