@@ -10741,6 +10741,191 @@
     "adapters/timing-pid/assets/timing_recipe/__init__.py line 14 still says timing-method-card/1 (not in this unit's files)"
    ],
    "note": "fix commit 383fbff05be71a06c92dda90044660c89f759f3e (docs:); adapter version not bumped (text only, the version is tied to its jobs of record)"
+  },
+  {
+   "id": "F-XREF-4-SIMCAL-PAGES-G4SIM",
+   "title": "simcal specialization pages (hcal, index, muon-detector, rich, dirc, tof, trd) and trd.binding.example.json agree with the g4sim binding and with each other: Birks at node 1, unread stage parameters, ionisation and drift-table content, t0/T0/slewing bound on reconstruction, PDE and injection edges, TTS without a field, the Poisson branch of ionisation_quanta, no Poisson kernel on gas gain (CHK-AU-16-02, CHK-AU-16-08, CHK-AU-16-09, CHK-AU-16-10, CHK-AU-16-11, CHK-AU-18-02, CHK-AU-18-03, CHK-AU-18-04, CHK-AU-18-05, CHK-AU-19-01, CHK-AU-19-02, CHK-AU-20-03, CHK-AU-20-04, CHK-AU-21-01, CHK-AU-21-02, CHK-AU-21-03, CHK-AU-21-05, CHK-AU-21-10, CHK-AU-21-11, CHK-AU-22-03, CHK-AU-22-04)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md",
+     "locator": "§11.4 Table 1 (rows 2, 4a, 4b, 5); §11.4 'log_density of the kernel registration'; §11.4 hand-offs (stages 1 and 2 on one volume sub-stream); Table 2 rows 'Parameters of response stages 2-5' and 'Optical properties, efficiency map'; §3.5 'Common mode of redundant measurements'; §6.3, §6.4",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "core/simulation/response.py",
+     "locator": "POISSON_LIMIT; ionisation_quanta(); drift_points(), drift_speed(); sensor_response(); electronics_response()",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "core/simulation/digitize.py",
+     "locator": "module docstring; check_job() timing block (decay_ns, rise_ns, transit)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "core/simcal/chain.py",
+     "locator": "REWEIGHTABLE, NO_HANDOFF_BEFORE; binding_row() response-pipeline branch; candidates 'response' row; injection_light_pde",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, 34. Passage of Particles Through Matter (cached as pdg_2025_passage-of-particles-through-matter)",
+     "locator": "sec. 34.3, eq. (34.16), p. 16",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "The checker does not refuse a response-pipeline binding to a stage parameter the stage does not read (CHK-AU-16-11); the page states it, the checker change is hep-statistics' and not made here.",
+    "simcal_chain.py candidates accepts a laser declared on quanta -> light without a finding although Part B §11.4 says no hand-off exists there (CHK-AU-21-03 note): a hep-statistics engine question, not changed here."
+   ],
+   "note": "fix commits 90c8395028b696287bcc7d9cc0d876e643df3c31, d431b3074ec42fdf8c5674e7db73a3dd66c68fa1, 4143fd5925149d87dc176cb230650c46a3f9fcb6, 440763a062460d5b3631601677dcc26822417316, 06fc10a2d466cceba4356fc6a743efadb9397422, c26647aca80c9f0e5cc82763cf9b416a68f30402, 9fccee05c7307afe2af65b9bcd8f0859363a5763, d16dbb1cbaa421d5ed13a7ed223265a5d1b84e6a (docs:); text and one example field only; tests/core/test_simcal_specialization.py passes unchanged"
+  },
+  {
+   "id": "F-XREF-4-SUMMARY-SINGLE-HOMES",
+   "title": "detector-principles-summary.md: forward model, sources of spread and residual covariance linked to their single homes instead of diverged copies; no label sentence; Gaussian errors not a pull-width condition; 1 - P over selected objects (CHK-AU-24-01, CHK-AU-24-02, CHK-AU-24-03, CHK-AU-24-04, CHK-AU-24-08)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/core-detector-equations.md",
+     "locator": "label sentence (lines 6-7); E1, E12, E14",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/detector-measurement-framework.md",
+     "locator": "'## Forward model and inverse problem'; '### Separating the sources of spread'",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+     "locator": "purity identity '1 - P = (unmatched + matched-but-wrong-identity + duplicates) / selected'; pull paragraph (Gaussian errors only for the N(0,1) shape)",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit a635b63980bb836c6c70534ddec4e3af1d61ca1f (docs:); the entry reference shrinks from 15,085 B to 14,464 B; no routing text changed"
+  },
+  {
+   "id": "F-XREF-4-CORE-EQ-E9-LOCATOR",
+   "title": "core-detector-equations.md: the swapped-letter calorimeter resolution form is in RPP 2025 sec. 35.10.2, p. 97, not p. 86 (CHK-AU-23-06)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, 35. Particle Detectors at Accelerators (cached as pdg_2025_particle-detectors-at-accelerators)",
+     "locator": "sec. 35.10.2, p. 97 ('can be parameterized as a/sqrt(E) + b + c/E'); table of contents: sec. 35.9.4 Timing measurements at p. 86",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 69a051d882fc6520e95270e51a79bd963e44fe36 (docs:); locator only, no number changed"
+  },
+  {
+   "id": "F-XREF-4-COMPARISON-MWPC-STRAW",
+   "title": "detector-comparison-tables.md Table 1: the merged MWPC/straw row gives ambiguity (left-right for straws, wire-crossing ghosts for MWPCs), resolution terms and t0 per technology, as Table 2 does (CHK-AU-25-02)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/detector-comparison-tables.md",
+     "locator": "Table 2, rows MWPC and Straw",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+     "locator": "straw and MWPC topology bullets ('left-right (straws), ghosts (wire crossing)')",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "external",
+     "citation": "PDG RPP 2025, 35. Particle Detectors at Accelerators (cached as pdg_2025_particle-detectors-at-accelerators)",
+     "locator": "sec. 35.6.2.1 and 35.6.2.2, p. 31",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [
+    "Filed as consistency; raising it to S3 would need a second cached external source."
+   ],
+   "note": "fix commit 7249d24b9e4d04ad29b297bb674d2cfbd0243845 (docs:)"
+  },
+  {
+   "id": "F-XREF-4-BINDING-EXAMPLES-PAGES",
+   "title": "simcal binding examples (ecal, hcal, rich, dirc, tof, tracker, muon) agree with the corrected pages: no Poisson kernel on the 4b sensor node, deterministic silicon preamp, absorber energy loss, incidence angle on the bar and PMT/MaPMT/MCP-PMT, TTS without a g4sim field and v_eff through the optical row, Birks at node 1 (CHK-AU-22-04; pages of CHK-AU-16-08, CHK-AU-17-04, CHK-AU-18-01, CHK-AU-20-01, CHK-AU-20-02, CHK-AU-21-01, CHK-AU-21-11)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "core/simulation/response.py",
+     "locator": "sensor_response() (Poisson dark counts, then Gaussian gain with excess noise)",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "core/simcal/chain.py",
+     "locator": "TABLE1 row 4b (kernel property None); NO_HANDOFF_BEFORE",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md",
+     "locator": "§3.2 mechanism vocabulary (Yield: multiplicative factor); §11.4 Table 1 row 4b",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tracker.md",
+     "locator": "§1 row preamp; §3 kernel properties",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/muon-detector.md",
+     "locator": "§1 row absorber",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/dirc.md",
+     "locator": "§1 rows source and pde; §5; §6",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/tof.md",
+     "locator": "§1 row pde; §2 rows 'effective light speed, path dispersion' and TTS",
+     "read": "2026-11-19"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/simulation-calibration/hcal.md",
+     "locator": "§1 row shower; §2 row 'light yield, Birks'",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commits 0c1f8e20c7ac1042f6f6be5e44c0b2f9952d6c32, e18a16ffed773cb8420b5ae1ead9de0107989ad1, ad3aba3c2898e971572e62698e4b796f753a1ccb, 6b38300ff941f31c56dae49d8228953837bdf488, 34060db5bad0640c8bd472478b34207fa942a90c, cd9c00fe299a8888b8d938384e9d40764423953d (docs:); example JSON text and two node fields only; tests/core/test_simcal_specialization.py passes unchanged (candidate methods unchanged)"
+  },
+  {
+   "id": "F-XREF-4-RELATION-LABELS",
+   "title": "detector-glossary.md and detector-measurement-framework.md use the four relation labels of core-detector-equations.md, without detector-specific (lead note; CHK-AU-24-01 label sentence)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/references/core-detector-equations.md",
+     "locator": "label sentence (lines 6-7)",
+     "read": "2026-11-19"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 229f4b4626dc6995c1b0cd6082019cc52038613f (docs:); grep of skills/hep-detector found no relation labelled detector-specific"
   }
  ],
  "superseded": [

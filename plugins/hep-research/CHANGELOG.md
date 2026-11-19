@@ -154,6 +154,43 @@ Software checks establish contract consistency only, not physical validity.
   (decisions.md, "T07: final", 2026-11-14), instead of waiting for K09; `adapters/timing-pid/adapter.json` names the
   method card format the tool reads, timing-method-card/2; the calo-cluster tool contract's check-product exit 2
   names what check-product refuses (the product), not reconstruct's input refusals. No number and no status changes.
+- **hep-detector simcal specialization pages agree with g4sim and with each other** (docs, F-XREF-4; issues
+  CHK-AU-16-02, -08 to -11, CHK-AU-18-02 to -05, CHK-AU-19-01, -02, CHK-AU-20-03, -04, CHK-AU-21-01 to -03, -05,
+  -10, -11, CHK-AU-22-03, -04). `simulation-calibration/hcal.md` puts Birks at the output of node 1 (applied per step),
+  reaches deposition-level fluctuations through resimulation or a surrogate model, says that a binding to a stage
+  parameter the stage does not read is accepted by the checker and has no effect, and defines e/π as the inverse of
+  π/e. `muon-detector.md` says the ionisation stage draws a total carrier count (no primary-cluster positions or
+  sizes), the drift table holds drift velocity only (no diffusion), t₀ is bound at `segment` (the g4sim electronics
+  stage has no time offset), the multiple-scattering parameter is geometry and material (x/X₀), and cosmic-ray muons
+  are a known input only with a measured momentum or a declared distribution. `rich.md`: the surface PDE selects
+  photons rather than changing their path; node 1 yields the photoelectron count and 4b is the gain given it plus dark
+  counts. `dirc.md`: a laser into the photodetector plane sits on the `tir` → `pde` edge; both injection statements
+  give the §11.4 exception (surface efficiency 1, `photons.csv` thinned by the workflow). `tof.md`: TTS has no g4sim
+  field, T0 and slewing are bound as reconstruction corrections on `reco`, the 2/3 and 3/4a injection limits of g4sim,
+  an electronics noise and threshold row, v_eff and path dispersion change through the optical row, and the
+  degeneracies name what breaks them. `trd.md`: `ionisation_quanta` draws a Poisson count up to a mean of 10 and a
+  rounded Gaussian above. `trd.binding.example.json` no longer declares a Poisson distribution on the `gas_gain`
+  node (candidate methods unchanged). The `index.md` binding limits add the HCAL hadronic-model limit and say that the
+  scintillation emission time has fields but no Table 2 row.
+- **hep-detector summary, equations and comparison table consistency** (docs, F-XREF-4; issues CHK-AU-23-06,
+  CHK-AU-24-01 to -04, -08, CHK-AU-25-02). `detector-principles-summary.md` links the forward model, the sources of
+  spread (detector-measurement-framework.md, E1) and the residual covariance (E12) instead of diverged copies, drops
+  the label sentence and "errors are Gaussian" from the pull conditions (Gaussian errors are needed only for the
+  N(0,1) shape), and writes `1 - P` as (fakes + mis-ID + extra duplicate objects)/selected; the entry reference
+  shrinks from 15,085 B to 14,464 B. `core-detector-equations.md` locates the swapped-letter resolution form in RPP
+  2025 sec. 35.10.2, p. 97 (not p. 86). The Table 1 MWPC/straw row of `detector-comparison-tables.md` gives
+  left-right (straw) and wire-crossing ghosts (MWPC), and the resolution terms and `t0` per technology.
+- **hep-detector simcal binding examples agree with the corrected pages** (docs, F-XREF-4; CHK-AU-22-04 and the
+  pages of CHK-AU-16-08, CHK-AU-17-04, CHK-AU-18-01, CHK-AU-20-01, -02, CHK-AU-21-01, -11). The `sensor` (4b) node of
+  the ecal, hcal, rich, dirc and tof examples no longer declares a Poisson distribution (the sensor stage draws a
+  Gaussian gain with excess noise plus Poisson dark counts; candidate methods unchanged). The tracker `preamp` node is
+  deterministic with mechanism `yield` (silicon without intrinsic amplification). The muon absorber node names energy
+  loss and its fluctuations. The dirc example uses the incidence angle on the bar and a PMT, MaPMT or MCP-PMT. The tof
+  note says TTS has no g4sim field and v_eff and path dispersion change through the optical row. The hcal example puts
+  Birks per step at node 1.
+- **hep-detector relation labels** (docs, F-XREF-4). `detector-glossary.md` and `detector-measurement-framework.md`
+  use the four labels of `core-detector-equations.md` (exact, approximate, asymptotic, empirical) and no longer add
+  *detector-specific*, which no relation carries.
 
 ## 0.70.0 (2026-11-16)
 
