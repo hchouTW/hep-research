@@ -2,7 +2,8 @@
 
 Covers the constants that connect a simulated or idealized detector to the real one:
 energy and timing calibration, alignment of sensor positions, their time dependence,
-and how a change in any of them propagates through everything downstream. This is the
+and how a change in any of them propagates through everything downstream (timing:
+[timing detectors](timing-detectors.md#calibration-and-diagnostics)). This is the
 feedback loop that closes the chain from
 [detector simulation](detector-simulation.md) back to
 [event reconstruction](event-reconstruction.md).
@@ -63,7 +64,7 @@ error) give a relative scale error constant in rigidity.
 
 <!-- example: experiment-specific illustration -->
 Three weak modes named in the CMS tracker alignment (JINST 9 (2014) P06009,
-arXiv:1403.2286, sec. 4.4 and the summary) `[General method]`:
+arXiv:1403.2286, secs. 4.4, 5, 9.3 and 10) `[General method]`:
 
 | Mode | Deformation | What the paper reports |
 |---|---|---|
@@ -73,7 +74,8 @@ arXiv:1403.2286, sec. 4.4 and the summary) `[General method]`:
 
 Cosmic-ray tracks (which break the cylindrical symmetry), straight tracks taken with the
 field off, vertex knowledge and resonance masses are the inputs the paper uses against
-weak modes; the cosmic tracks have limited power against a twist.
+weak modes; cosmic tracks have limited power against a twist (sec. 4.4), though field-off
+cosmic tracks controlled it where they were available (sec. 5).
 <!-- /example -->
 
 Weak modes must be constrained with information beyond the track residuals the
@@ -112,8 +114,8 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
   scale below about 100 GeV/c and cosmic-ray muons above it; the Z finds the larger, pT-dependent bias.
   <!-- /example -->
 - **MIP calibration**: use the most probable value of the Landau-like deposit, not the mean, which is pulled by the
-  tail (PDG RPP 2024, Passage of particles through matter, secs. 34.2.3 and 34.2.9). The most probable loss is not
-  proportional to path length (per unit length it grows as `a ln x + b`, PDG Eq. 34.12), so a pure `1/cos theta`
+  tail (PDG RPP 2025, Passage of particles through matter, secs. 34.2.3, p. 5, and 34.2.9, p. 12). The most probable
+  loss is not proportional to path length (per unit length it grows as `a ln x + b`, PDG Eq. 34.12), so a pure `1/cos theta`
   correction leaves an angle-dependent bias (in 300 um silicon about 1% at 30 deg and 5% at 60 deg): compare MPVs
   at fixed path length (angle bins) or correct with the Landau-Vavilov-Bichsel thickness dependence.
 - **Intercalibration** (COL): pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
