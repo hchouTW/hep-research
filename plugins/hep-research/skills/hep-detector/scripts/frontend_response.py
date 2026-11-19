@@ -304,6 +304,10 @@ def timing(rise_ns, snr, threshold_fraction=None, amplitudes=None, cfd_fraction=
         else:
             out['cfd'] = {'mode': 'true constant fraction', 'crossing_after_start_ns': td + f * tr,
                           'depends_on_rise_time': True}
+        out['cfd']['jitter_note'] = ('jitter_ps is the jitter of a leading-edge pickoff on the linear edge (slope '
+                                     'A/t_r); a CFD forms its crossing from the attenuated prompt and the delayed '
+                                     'pulse, so its noise and slope differ and its jitter is not jitter_ps '
+                                     '(timing-detectors.md: a CFD removes the amplitude dependence at the cost of jitter)')
     if tdc_lsb_ps is not None:
         lsb = _num(tdc_lsb_ps, 'TDC bin')
         out['tdc_quantization_ps'] = lsb / math.sqrt(12)
