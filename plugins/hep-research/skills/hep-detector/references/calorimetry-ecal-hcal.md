@@ -8,6 +8,10 @@ jet energy scale and its calibration are treated at the object level in
 [physics-objects-jets-btagging-met.md](physics-objects-jets-btagging-met.md),
 and the calibration machinery itself in
 [calibration and alignment](calibration-and-alignment.md).
+An optional development binding of a cell chain and clustering for a homogeneous analog cell grid is
+`<plugin root>/adapters/calo-cluster/` (status demonstrated-on-synthetic-data, synthetic fixtures only, no
+calorimetry quality claim; its energy is clustered deposited energy, never incident energy); example
+`<plugin root>/examples/reconstruction-calorimetry/`.
 
 ## The measurement, and why it complements tracking
 

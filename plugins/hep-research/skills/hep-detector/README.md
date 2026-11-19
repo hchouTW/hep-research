@@ -127,6 +127,7 @@ Script notes:
 - NumPy: `toy_spectrometer.py` (exit 3 without it).
 - Geant4 through `adapters/geant4`: produces the run files the Geant4 checkers read; `evaluate_design.py search` with `budget.geant4 > 0` also needs it (with `--geant4-work DIR` and `HEP_GEANT4_CONFIG`).
 - OTSO through `<plugin root>/adapters/geomagnetic-backtracing/assets/otso_cutoff.py`: optional, installed separately (GPL-3.0, never bundled).
+- Reconstruction development bindings in `<plugin root>/adapters/` (`calo-cluster`, `acts-tracking`, `timing-pid`, `photon-likelihood`): optional, each demonstrated-on-synthetic-data, required by no script of this skill; status and environment in `<plugin root>/docs/capability-matrix.md`.
 - Environment variables:
   - `HEP_GEANT4_CONFIG`: required by `evaluate_design.py search` when `budget.geant4 > 0`; a JSON file naming `element_sim`, `simreco` and `build_record`.
   - `SOURCE_DATE_EPOCH`: when set, the created date of `evaluate_design.py` envelopes (reproducible reruns); else today.

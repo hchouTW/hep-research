@@ -124,6 +124,10 @@ telescope) can test every hit combination and rank by fit quality, since the com
 are small. The risk then moves to noise and secondary hits that fit well by chance and to
 tracks with a missing plane. Whatever the strategy, quote the efficiency separately for
 the populations it can miss: displaced, low-momentum, kinked and closely spaced tracks.
+An optional ACTS wrapper for a planar telescope geometry (refit of a known hit set; seeds, CKF and ambiguity
+resolution; optional vertex step) is `<plugin root>/adapters/acts-tracking/` (status
+demonstrated-on-synthetic-data, synthetic fixtures only, no tracking quality claim); example
+`<plugin root>/examples/reconstruction-tracking/`.
 
 **Check:** The finding strategy and its trajectory assumption are stated, and efficiency is
 quoted for displaced, low-momentum and closely spaced tracks, not only for prompt isolated

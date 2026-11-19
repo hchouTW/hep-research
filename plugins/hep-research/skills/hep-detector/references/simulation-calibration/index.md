@@ -4,7 +4,8 @@ The specialization interface of simcal (simulator parameter calibration), the wo
 (`docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md`, §11.1, §12, §13), for eight detector
 types. simcal differs from detector calibration and alignment (hep-detector) and from the calibration of ML model
 outputs (hep-ml). Each page gives the eight items a detector type must provide (§11.1) and a node-binding example (§11.4) that
-the existing generic layer accepts unchanged. The engine, gates and scripts are hep-statistics' (`simcal_*.py`); this
+the existing generic layer accepts unchanged. The engine, gates and scripts are hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts), `simcal_*.py`); this
 folder only describes detector types. Experiment-specific content (control samples, conditions, thresholds, model
 identities) belongs to an experiment instance (§11.2), never here.
 
