@@ -5,6 +5,280 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **charge_confusion_rate.py, template and control modes** (sci-fixes CHARGECONF-TEMPLATE-MAXIMUM S1,
+  CHARGECONF-TEMPLATE-STATUS S2, CHARGECONF-TEMPLATE-IDENTIFICATION S2, CHARGECONF-CONTROL-MC-SIGN S1; advisories
+  SFA-2026-044 to SFA-2026-047; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
+  profile likelihood in the rate: at about 5e5 events or more per bin the fit started from the naive fit could stop at
+  the wrong-sign boundary and return a rate near 1e-6 with status ok. Template status follows one per-bin rule:
+  not-converged or infeasible fails; converged-at-boundary or covariance-warning is ok with a warning naming the bin. A
+  bin whose rate is not identified (its 68% profile interval reaches r = 1, or a background template is compatible in
+  shape with the right-sign template, chi2 p >= 0.01) fails with a warning, and its sign_rates entries are null.
+  Control mode refuses (exit 2) an `--mc` sample that does not have exactly the data sample's true sign. Template mode
+  now takes about 1 s per bin (was about 0.3 s). A rate is never evaluated at exactly r = 0 or 1, where a zero
+  yield drops that template's MC terms from the likelihood: with a sparse wrong-sign MC template this had given rate 0
+  with a ~1e-12-wide interval and status ok.
+- **hep-detector: four corrections in `geant4_benchmarks.py`** (sci-fixes G4BENCH-TRUNC98 and
+  G4BENCH-HIGHLAND-KINEMATICS, S1; G4BENCH-HELIX-SIGN and G4BENCH-HEAVY-ONLY, S2; advisories SFA-2026-048 to -051;
+  VALIDATION SCIFIX-F-S12-G4BENCH). The `multiple-scattering` sanity benchmark divides the RMS of the central 98 % by
+  0.9346, the RMS of a unit Gaussian truncated to its central 98 % (was 0.8673, 7.8 % high), and evaluates Highland at
+  the benchmark's particle and energy (it used `multiple_scattering.py`'s 100 GV default; the output records
+  `highland_kinematics`). The g4sim `field-propagation` helix bends to the other side in a negative field instead of
+  running backwards (a correct propagation in B < 0 failed). `stopping-power`, `thin-layer-mpv`, `thin-layer-width`
+  and the `reference` command refuse e- and e+ (exit 2): their references (RPP eqs. 34.5 and 34.12) are stated for
+  heavy charged particles. `geant4-study-protocol.md` now says the tail inside the window widens the RMS estimator by
+  about 3 % (the recorded +11 % was mostly the old factor). The
+  committed `geant4-thin-silicon` outputs are regenerated (the script hash).
+- **g4kit.py: a geometric default given in the design geometry file is used** (sci-fix, S1, CHK-AT-12-01, advisory
+  SFA-2026-052). `g4kit.py derive` accepted a design-geometry/1 field named after a kit's geometric default (a gap or
+  margin of the calorimeter, endcap_disks, shell_veto, tof or trd kit) but built the detector-spec with the kit's own
+  default, without a message, while the derivation record hashed the design file as if its value had been used: a tof
+  design with eight 100 mm bars and `bar_gap_mm` 0 got a 100.5 mm pitch and an 804 mm plane instead of 100.0 mm and
+  800 mm. The specification now takes the design's value. Only hand-written design geometry files are affected: the
+  shipped mappings map kit inputs only. Derive affected specifications again; their geometry_id changes.
+- sci-fix (S2, DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE, advisory SFA-2026-053): the tof kit's design geometry mapping (`contracts/rules/design_geometry/tof.json`) now marks `time-resolution` tail-sensitive, so an F4 time resolution of the tof kit is labelled `optimistic` unless the study simulated all four tail sources, as `geant4-study-protocol.md` and the FID-03 rule state; it was always `estimate`.
+- robust-fix (S4, DC-CHERENKOV-NONFINITE-YIELD): `cherenkov_angle.py` refuses an expected photon number that is not finite (exit 2, `error_kind` invalid-input) and reports a per-track angular resolution that underflows to zero as a failure with JSON `ok` false (exit 1), instead of a `ZeroDivisionError` traceback with an empty stdout.
+- **hep-detector: `multisample_pid.py charge` reports what it leaves out** (sci-fixes MULTISAMPLE-TOYS-TABLE-EDGE, S1, advisory SFA-2026-042; MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE, S1, advisory SFA-2026-043; MULTISAMPLE-NONPOSITIVE-RESPONSE, S4). `--toys` counts the toy events with a sample outside the response table (`toy_prediction.toys_requested`, `toys_used`, and a warning): before, they were dropped silently and the predicted width came out too narrow when the table ends inside the per-layer tail. `--method likelihood` no longer returns the first or last point of `--z-range` when the maximum lies outside it: such events and toys are left out, counted (`at_z_range_edge`) and named in a warning; before, they were reported at the edge. A response that is not positive anywhere in `--z-range` is rejected (exit 2) instead of a traceback (exit 1). Evidence in VALIDATION `SCIFIX-F-S12-PID`.
+- `tracker_resolution.py momentum` keeps each `--point-resolution-um` value with its own layer position when it sorts
+  the positions; unsorted positions with unequal resolutions gave the curvature error of a different layout (a factor
+  2.2 too small on a four-layer example) (sci-fix CHK-AT-02-01, S1).
+- **hep-detector: guidance corrections in calorimetry, nuclear interactions and particle identification** (S3,
+  documentation fixes F-S3-1-*, issues CHK-AT-01-04/05, CHK-AT-03-01, CHK-AT-04-01/04/05/06, CHK-AT-06-05,
+  CHK-AU-01-01 to -06, CHK-AU-02-01/03/04, CHK-AU-05-01/02/04/06/07/09/10/12; VALIDATION DC-F-S3-1).
+  `cherenkov_angle.py` warns when its first-order mass resolution `gamma^2 dbeta/beta` exceeds 0.1;
+  `calorimeter_resolution.py --evaluate` refuses all three terms zero (exit 2) and warns on a zero noise or constant
+  term (three-term outputs unchanged); `multiple_scattering.py --help` says the PDG 0.016 GeV/c coefficient is 2/sqrt(3)
+  times the Highland term it uses, PDG's value being for many uniformly spaced measurements. Calorimetry: the stochastic term dominates between the two crossovers, the letter
+  conventions of the three terms, quadrature-only fits, granularity and software compensation, the X0 fit attributed
+  to Dahl (RPP 2010) and Rossi's critical energy, `<h/e>` below unity for many but not all hadronic calorimeters, and
+  thermal calorimeters outside the `1/sqrt(E)` scaling. Nuclear interactions: A is the molar mass, survival covers
+  nuclear losses only, and material outside the instrument counts. PID: start-time source as a parameter, time walk
+  from the measured amplitude, the TOF up/down decision for space-borne spectrometers, truncation 30-50%, the TRD
+  estimators, the RICH per-photon term and the `n beta` factor in `dbeta/beta`, muon identification without an
+  absorber, the charge response curve as the most probable signal, and which events and toys `multisample_pid.py`
+  leaves out and counts (out_of_range only for the truncated and weighted means). No number changes.
+- **hep-detector: collider recipes stated as general guidance are now parameters or marked collider** (documentation
+  fixes F-S3-2-CHK-AU-03-01 to F-S3-2-CHK-AU-09-02, S3; 18 issues). `tracking-and-vertexing.md`: vertex seeds come
+  from the expected interaction region (a beam line only where there is one). `muon-systems.md`: a radial expansion
+  is a charge-symmetric scale error, unlike curl, sagitta and twist; charge misID per muon is fitted from the
+  same-sign pair probability `c_i (1 - c_j) + (1 - c_i) c_j` (about twice the per-muon rate), not read as the
+  same-sign fraction; a background-subtracted tag-and-probe needs the pass/fail fit, not a binomial interval; the
+  `eta`, `phi`, `pT` binning, the `J/psi` and `Z` samples and the cosmic-ray and halo suppression are marked collider,
+  with the other roles of cosmic muons named. `cherenkov-imaging-variants-and-photosensors.md`: threshold-counter
+  rejection is limited by light from below-threshold particles and by excess noise; photon time is an imaging
+  dimension of every DIRC; data samples per environment. `timing-detectors.md`: the transit-time spread enters a
+  many-photon hit about as `TTS/sqrt(N_pe)`; the start-time source, the time window and the reference clock are
+  parameters. `calibration-and-alignment.md`: pileup, pT balance, the `J/psi`-and-`Z` momentum scale and `pi0`/`eta`
+  intercalibration are marked collider, source and activation lines are added, and instruments without a test beam
+  are named. `performance-metrics-and-residual-diagnostics.md`: in-data resolution methods per environment, and the
+  shared variables of the efficiency chain rule are parameters. Pages that use environment codes now define them.
+- **hep-detector: sixteen guidance corrections in six references** (sci-fix S3 documentation fixes F-S3-3-AU10-01 to
+  F-S3-3-AU16-03; issues CHK-AU-10-01 to -04, CHK-AU-12-01 to -03, CHK-AU-13-01, -02, -04, -05, CHK-AU-14-02, -03,
+  CHK-AU-15-01, CHK-AU-16-01, -03). `gaseous-and-specialized-tracking-technologies.md`: silicon carbide charge
+  collection degrades faster with fluence than in silicon and diamond; RPC rate capability scales as
+  `1/(rho d <Q>)`; silicon data samples, pileup and the TPC start time `t_0` are stated as environment parameters.
+  `front-end-waveform-processing.md`: the multi-pulse fit takes the pulse times as its parameter (bunch crossings at
+  a collider, a free-time scan otherwise), and the baseline bias and the bipolar transient follow the pulse rate and
+  a rate step, with luminosity and the bunch train as the collider case. `event-reconstruction.md`: the chain, the
+  period weighting of channel masks (luminosity or live time and exposure), timing association (start-time source,
+  direction hypothesis; albedo separated by the sign of the time difference) and pileup are stated generally, with
+  the collider case named. `signal-formation-and-readout.md`: in liquid argon `N = E/W_el` counts pairs before
+  recombination, and `W_el` differs from the `W` per detectable quantum; `kappa` grows as `z^2`, so nuclei can leave
+  the Landau regime in thin layers. `simulation-calibration/ecal.md`: crystal transparency monitoring is an
+  injection into `collection`, not on the 3/4a edge. `simulation-calibration/hcal.md`: the non-compensation power
+  law is in the hadronic fraction, and the hadron beam points are of the species the instance measures.
+- **hep-detector simcal specializations, tracker, μ detector, RICH, DIRC, TOF and TRD** (documentation fixes
+  F-S3-4-*, S3; issues CHK-AU-17-01 to -04, CHK-AU-18-01, -06, -07, CHK-AU-19-03, -04, CHK-AU-20-01, -02,
+  CHK-AU-21-04, -06, -07, -09, CHK-AU-22-01, -02). Guidance that held for one detector environment or configuration is
+  now general. Tracker: cosmic-ray tracks are a known input only with a measured or declared momentum (field-off
+  tracks are a population feature); a field polarity flip needs a reversible magnet; gas trackers list the drift-time
+  origin t₀ and the r–t relation, with the t₀ source as a parameter of the instance; a silicon preamplifier without
+  intrinsic gain is deterministic. μ detector: the absorber node includes energy loss and its fluctuations; the
+  tag-and-probe sample and the neutron and photon background belong to the experiment instance and the site, with
+  collider examples. RICH: the angle residual versus ring azimuth sees mirror misalignment; photon count and
+  per-photon resolution are degenerate only in the per-ring width. DIRC: any PMT type; the control variable is the
+  incidence angle on the bar. TOF: the three-counter method uses three comparison nodes; v_eff is the slope of the
+  end-time difference versus position; attenuation combines absorption, scattering and surface losses; neutral
+  particles take their flight path from the counter and the source geometry. TRD: hadron samples fix the gas gain
+  only below the TR onset; the identification functional is the hadron efficiency at fixed electron efficiency.
+- **hep-detector: core equations, comparison tables and failure signatures no longer state collider or
+  singly-charged cases as general** (documentation fixes F-S3-5-CHK-AU-23-01 to -05, -24-05 to -07, -25-01 and
+  -25-03 to -07, S3). `core-detector-equations.md`: E2 relates the momentum component perpendicular to `B`
+  (`p cos(lambda) = 0.299792458 |q| B rho`, exact only with that coefficient), which is `pT` only for a field along
+  the beam axis, and spectrometers for nuclei report rigidity `pc/(Ze)`; E4 locates the "11% or better" Highland
+  accuracy in RPP 2010 eq. (27.14), stated for `z = 1`, `beta = 1`; E5 says that straggling in very thick absorbers
+  is less skewed but never Gaussian, and that with `z^2` alone it is for singly charged or light projectiles (ions
+  need higher-order and finite-size terms, up to a factor of two or more); E11 says that for an isotropic flux the
+  acceptance is a geometric factor or aperture in m^2 sr. `detector-comparison-tables.md` defines the environment
+  codes and tags collider entries: the start time `t_0` is a parameter (bunch crossing at COL), LGAD and MCP get
+  separate rows, ECAL, HCAL and muon validation samples and conventions are given per environment, and TPC
+  efficiency is binned in direction (`eta` at COL). `detector-principles-summary.md` failure signatures: mass peak
+  vs charge and direction, energy scale vs angle, hadron response vs species (no size growth of the entry
+  reference).
+- **hep-detector and adapters: scope statements made explicit** (F-SCOPE; issues CHK-AC-04-01, -03 to -08, -10,
+  CHK-AT-05-01, CHK-AT-10-05, CHK-AT-12-03, CHK-AT-13-01, -02, CHK-AU-01-07 to -10, CHK-AU-02-09, CHK-AU-12-04).
+  `g4kit.py list` now prints each kit's `role` and `purpose`. The kit purposes state their limits: `cherenkov` is a
+  threshold counter with one photodetector volume (no pixelated plane, no ring image), `calorimeter` is a plate-stack
+  sampling calorimeter (fibre-readout, accordion and homogeneous calorimeters need their own detector-spec), and `tof`
+  has active bars only (no light guide, photodetector or optical surface, so end read-out and light propagation are
+  not modelled). These purpose changes bump the kit versions, with the matching `kit.version` in each
+  `contracts/rules/design_geometry/` mapping: `cherenkov` 1.0.0 -> 1.0.1, `calorimeter` 1.2.0 -> 1.2.1, `tof`
+  1.1.0 -> 1.1.1 (purpose text only; the derived geometry is unchanged, the kit SHA-256 in geometry-derivation/1
+  records changes). The storage recommendations of the RICH, DIRC, TRD, muon-detector and TOF simcal pages name the
+  user's reconstruction, not simreco, as the source of ring, likelihood, t0, segment, T0 and slewing columns.
+  The g4sim binding-limits list of `simulation-calibration/index.md` adds simreco's single-Gaussian TOF time (no
+  amplitude, T0 or slewing). The hep-detector `README.md` states the SKILL.md budget as 12,288 bytes
+  (`tools/measure_entrypoints.py`), not 8 KiB.
+  `particle-identification.md` says that `pid_separation_power.py` gives the velocity term only, with no momentum,
+  path-length or start-time error. The README row and `photon-likelihood-reconstruction.md` state what the
+  photon-likelihood binding reconstructs (one or two point sources in its 5 m, 1,000-sensor sphere; no rings, tracks
+  or species hypotheses). The calo-cluster `adapter.json` purpose records that the zdcsim thresholds are carried-over,
+  unresolved constants. `calorimetry-ecal-hcal.md`, `nuclear-interactions-in-detector-material.md` and
+  `front-end-waveform-processing.md` label collider, space and cosmic-ray content and link the environment
+  references.
+- **charge_confusion_rate.py control mode keeps `interval_68` and `rate_error` at 68.27%** (sci-fix
+  CHARGECONF-CONTROL-INTERVAL-CL S1; advisory SFA-2026-054; issue CHK-AT-08-05). With `--cl` other than 68.27%, a
+  control bin's `interval_68` held the Clopper-Pearson interval at `--cl` and `sign_rates` `rate_error` its
+  half-width, with status ok (at `--cl 0.95` about 1.8 times the one-sigma error, e.g. 0.0190 instead of 0.0105 for 7
+  wrong-sign of 300). Now `interval_68` is always the 68.27% interval and `rate_error` half its width; the interval
+  at `--cl` is `interval`, with `interval_cl`. Outputs at the default `--cl` are unchanged apart from the new key.
+- **charge-confusion.md says what the template mode needs and returns** (docs, CHK-AT-08-07, CHK-AT-08-08,
+  CHK-AU-11-01, CHK-AU-11-03, CHK-AU-11-04). The page and the docstring say that the template histogram holds the
+  tracks of one true sign in both reconstructed signs (fitted on the opposite-sign sample alone, the tool returns the
+  confused fraction of that sample, not `c`), state the template status rule, that the coverage test runs at 50,000
+  events per bin (at least 50 expected wrong-sign events), and that `species_response.py from-rates` builds blocks
+  diagonal in rigidity with no rate uncertainty. The capability matrix no longer says that no script computes a
+  confusion rate.
+- **Stale T07 and timing-pid statements** (docs, CHK-AT-11-01, CHK-AT-11-02, CHK-AT-12-04, CHK-AT-10-03, and the
+  docstring part of CHK-AT-11-03). `adapters/acts-tracking/adapter.json` (status_rule), its capability-matrix row and
+  the docstring of `examples/reconstruction-tracking/run.py` say T07's evaluation ended failed at attempt 1, final
+  (decisions.md, "T07: final", 2026-11-14), instead of waiting for K09; `adapters/timing-pid/adapter.json` names the
+  method card format the tool reads, timing-method-card/2; the calo-cluster tool contract's check-product exit 2
+  names what check-product refuses (the product), not reconstruct's input refusals. No number and no status changes.
+- **hep-detector simcal specialization pages agree with g4sim and with each other** (docs, F-XREF-4; issues
+  CHK-AU-16-02, -08 to -11, CHK-AU-18-02 to -05, CHK-AU-19-01, -02, CHK-AU-20-03, -04, CHK-AU-21-01 to -03, -05,
+  -10, -11, CHK-AU-22-03, -04). `simulation-calibration/hcal.md` puts Birks at the output of node 1 (applied per step),
+  reaches deposition-level fluctuations through resimulation or a surrogate model, says that a binding to a stage
+  parameter the stage does not read is accepted by the checker and has no effect, and defines e/π as the inverse of
+  π/e. `muon-detector.md` says the ionisation stage draws a total carrier count (no primary-cluster positions or
+  sizes), the drift table holds drift velocity only (no diffusion), t₀ is bound at `segment` (the g4sim electronics
+  stage has no time offset), the multiple-scattering parameter is geometry and material (x/X₀), and cosmic-ray muons
+  are a known input only with a measured momentum or a declared distribution. `rich.md`: the surface PDE selects
+  photons rather than changing their path; node 1 yields the photoelectron count and 4b is the gain given it plus dark
+  counts. `dirc.md`: a laser into the photodetector plane sits on the `tir` → `pde` edge; both injection statements
+  give the §11.4 exception (surface efficiency 1, `photons.csv` thinned by the workflow). `tof.md`: TTS has no g4sim
+  field, T0 and slewing are bound as reconstruction corrections on `reco`, the 2/3 and 3/4a injection limits of g4sim,
+  an electronics noise and threshold row, v_eff and path dispersion change through the optical row, and the
+  degeneracies name what breaks them. `trd.md`: `ionisation_quanta` draws a Poisson count up to a mean of 10 and a
+  rounded Gaussian above. `trd.binding.example.json` no longer declares a Poisson distribution on the `gas_gain`
+  node (candidate methods unchanged). The `index.md` binding limits add the HCAL hadronic-model limit and say that the
+  scintillation emission time has fields but no Table 2 row.
+- **hep-detector summary, equations and comparison table consistency** (docs, F-XREF-4; issues CHK-AU-23-06,
+  CHK-AU-24-01 to -04, -08, CHK-AU-25-02). `detector-principles-summary.md` links the forward model, the sources of
+  spread (detector-measurement-framework.md, E1) and the residual covariance (E12) instead of diverged copies, drops
+  the label sentence and "errors are Gaussian" from the pull conditions (Gaussian errors are needed only for the
+  N(0,1) shape), and writes `1 - P` as (fakes + mis-ID + extra duplicate objects)/selected; the entry reference
+  shrinks from 15,085 B to 14,464 B. `core-detector-equations.md` locates the swapped-letter resolution form in RPP
+  2025 sec. 35.10.2, p. 97 (not p. 86). The Table 1 MWPC/straw row of `detector-comparison-tables.md` gives
+  left-right (straw) and wire-crossing ghosts (MWPC), and the resolution terms and `t0` per technology.
+- **hep-detector simcal binding examples agree with the corrected pages** (docs, F-XREF-4; CHK-AU-22-04 and the
+  pages of CHK-AU-16-08, CHK-AU-17-04, CHK-AU-18-01, CHK-AU-20-01, -02, CHK-AU-21-01, -11). The `sensor` (4b) node of
+  the ecal, hcal, rich, dirc and tof examples no longer declares a Poisson distribution (the sensor stage draws a
+  Gaussian gain with excess noise plus Poisson dark counts; candidate methods unchanged). The tracker `preamp` node is
+  deterministic with mechanism `yield` (silicon without intrinsic amplification). The muon absorber node names energy
+  loss and its fluctuations. The dirc example uses the incidence angle on the bar and a PMT, MaPMT or MCP-PMT. The tof
+  note says TTS has no g4sim field and v_eff and path dispersion change through the optical row. The hcal example puts
+  Birks per step at node 1.
+- **hep-detector relation labels** (docs, F-XREF-4). `detector-glossary.md` and `detector-measurement-framework.md`
+  use the four labels of `core-detector-equations.md` (exact, approximate, asymptotic, empirical) and no longer add
+  *detector-specific*, which no relation carries.
+- **survival_feeddown.py refuses a feed-down into the same species** (sci-fix SURVIVAL-FEEDDOWN-SAME-SPECIES S2;
+  advisory SFA-2026-055; issue CHK-AU-02-06). A fragmentation fraction from a species into itself (`{"C": {"C": f}}`)
+  was accepted with status ok and reported as `N (1 - P) f` feed-down events from that species into itself, with a
+  `subtract_background` recipe step for it. It now exits 2 (status rejected); the tool has no charges, so it checks
+  only that the two species differ. Survival probabilities and feed-down between different species are unchanged
+  (the bc-fragmentation example is byte-identical).
+- **hep-detector cross-file consistency** (F-XREF-3, docs; issues CHK-AU-02-02, -05, -07, CHK-AU-04-04,
+  CHK-AU-06-07, CHK-AU-07-06, -07, -08, CHK-AU-08-04, -05, -06, CHK-AU-09-03, -04, CHK-AU-10-06, CHK-AU-13-03,
+  CHK-AU-14-01, -06). `nuclear-interactions-in-detector-material.md` says the grammage is along the track
+  (`t / cos theta` for a planar layer, P averaged over directions) and that `survival_feeddown.py` reads every cross
+  section under `inelastic`, whatever its kind; hep-measurement's `correction-chain.md` says survival is without an
+  inelastic or, for a charge-tagged selection, a charge-changing interaction. `muon-systems.md` writes the sagitta
+  with `p_perp` and the projected path length. `timing-detectors.md` and the photosensor page name the
+  photostatistics times `tau_decay` and `tau_rise` (not the glossary's dead time `tau_d`); `timing-detectors.md`
+  says the `1/p^2` TOF separation holds only for `p >> m` and that a walk curve from minimum-ionizing particles does
+  not transfer to nuclei. `calibration-and-alignment.md` links the timing calibration, corrects the weak-mode
+  example's locators and its twist sentence, and cites PDG RPP 2025. `performance-metrics-and-residual-diagnostics.md`
+  gives `Omega_gen = pi sin^2(theta_max)` for a cosine law limited to `theta_max` and separates a centred tail count
+  from a mixture weight. The straw-tube line names both TRD concepts; the clustering optimum in
+  `event-reconstruction.md` depends on the noise level and, where interactions overlap, the pileup level;
+  `signal-formation-and-readout.md` writes the Fano factor `F_Fano` and cites PDG RPP 2025 sections and pages. No
+  number changes.
+- **hep-detector: tool texts, contracts and pages agree with each other** (F-XREF-1; documentation fixes
+  F-XREF-1-*; issues CHK-AC-06-06, CHK-AT-01-02, -03, CHK-AT-02-03, CHK-AT-03-03,
+  CHK-AT-04-02, -03, CHK-AT-05-02, -03, CHK-AT-06-04, -06, -07, -08, -11, CHK-AT-07-02 to -05, CHK-AU-03-02, -03,
+  CHK-AU-05-05, -11, -13,
+  CHK-AU-12-05, -06, CHK-AU-15-02, -03). The `cherenkov_angle` and `multiple_scattering` tool contracts say that
+  `--status` is echoed as `status` (not `status_label`); the `--help` of `cherenkov_angle.py` and
+  `pid_separation_power.py` no longer names an input file for exit 1, and `pid_separation_power.py` says that the
+  ceiling ends the separated range that starts at the lowest evaluable momentum (null when separation starts below
+  threshold). `calorimeter_resolution.py` says that a failed separation still echoes the input status label (read
+  `ok` and the exit code); `calorimetry-ecal-hcal.md` says that its covariance is that of `(a^2, b^2, c^2)`.
+  `multisample_pid.py`: the truncated mean drops `floor(f N)` samples and now reports `samples_dropped_high` and
+  `samples_dropped_low`, with a warning when a nonzero fraction drops none; the
+  docstring and `particle-identification.md` state the out-of-range rule per method, the empty-bin floor, that a value
+  outside the PDF edges adds no LLR term, and that only `charge --method weighted-mean` takes a layer correlation.
+  `frontend_response.py`: `timing` says that `jitter_ps` is the leading-edge jitter, not a CFD's; the `sipm`
+  nonlinearity message names its test (N_pe above 20 % of the cells, about 18 % fired) and its assumptions say that
+  `fired_cells` excludes crosstalk and dark counts. `front-end-waveform-processing.md` names `deadtime` and `sipm`,
+  quotes the unconstrained phase bias at +2 ns as −2.9 % (was −3.0 %) and states the phase-error sign convention
+  (−5.8 % is at +5 ns; +0.5 % at −5 ns). `tracking-and-vertexing.md` points to PDG eq. (35.69) and
+  `tracker_resolution.py momentum` for arbitrary layer spacing, links wire-readout TPC imaging and photon-pattern
+  fits, and quotes `alpha_I` at 20 °C after 80 min at 60 °C. `particle-identification.md`: TRD rejection is that of
+  the heavier species at a fixed electron efficiency, the TOF resolution is the system time resolution (linked to timing
+  detectors), and the environment references are linked. the eight `simulation-calibration/` pages are titled as
+  simcal pages with a link to hep-statistics; `ecal.md` binds Birks at the output of node 1 on g4sim, and names the P0
+  full-simulation points of §5.4 (extreme k_B and LY, r outside 0.15 to 1). `core/status.py` says where the scripts that
+  echo the label under `status` are recorded. No other number and no status changes.
+- **multisample_pid.py likelihood refuses a `--layers` list that names no column** (sci-fix
+  MULTISAMPLE-LLR-NO-LAYERS S2; advisory SFA-2026-056; issue CHK-AT-06-09). `--layers ,` (empty, or only commas)
+  gave status ok with every LLR 0 and a one-point curve at efficiency 1 and misid 1. Now exit 2, status rejected,
+  "--layers names no column", as `charge` does.
+- **multisample_pid.py likelihood refuses a label other than 0 or 1** (sci-fix MULTISAMPLE-LLR-LABEL-01 S2; advisory
+  SFA-2026-057; issue CHK-AT-06-10). The label was truncated with `int()` before the check, so 0.7 was counted as
+  background (and 1.5 as signal) with status ok. Now exit 2, status rejected, naming the value; labels 0 and 1 (also
+  written 0.0 and 1.0) give the same output as before.
+- **hep-detector: routing links** (issues CHK-AC-05-02 to -10). The calorimetry, tracking and timing references and
+  the skill README name the optional reconstruction development bindings `adapters/calo-cluster`,
+  `adapters/acts-tracking`, `adapters/timing-pid` and `adapters/photon-likelihood` (each demonstrated-on-synthetic-data,
+  no quality claim, required by no script). The photon-likelihood reference sends DIRC and TOP to the Cherenkov PID
+  variants section instead of the RICH section, which does not cover them; the particle-identification opening links the
+  Cherenkov variants, timing and muon pages; the muon-systems page links the atmospheric-muon rejection of neutrino
+  telescopes; the simcal specialization index links hep-statistics' simcal scripts. Ten routing cases (five English,
+  five natural zh-Hant) cover DIRC, LGAD and MRPC timing with time walk, software compensation and punch-through,
+  Millepede alignment with the muon momentum scale, and the muon veto efficiency.
+- **hep-detector number-scan repairs** (SCAN-a1-01, SCAN-a2-01, SCAN-a3-01; text only): `geant4-study-protocol.md`
+  moves the configuration-specific multiple-scattering core-estimator numbers into an example block that names the
+  package's synthetic benchmark and its `VALIDATION.md` GEANT4-F4 row; `front-end-waveform-processing.md` no longer
+  states the LHC 40 MHz clock as a property of all colliders; `simulation-calibration/hcal.md` replaces an ambiguous
+  "ibid." with an explicit locator in Groom, arXiv:physics/0605164v4, sec. 3, p. 10.
+- **hep-detector: two sections move to their own references** (issues CHK-AC-06-01, CHK-AC-06-02). The method
+  contract of `event-reconstruction.md` ("Planning a reconstruction: the method contract", 10.8 kB) moves unchanged
+  to `reconstruction-method-contract.md`, and "Propagating a calibration residual" of `calibration-and-alignment.md`
+  moves unchanged to `calibration-residual-propagation.md`. Both headings stay with a summary and a link, so their
+  anchors still resolve; the new pages are linked from the registered hub `event-reconstruction.md`. The two pages
+  drop to about 17.5 kB and 22.8 kB, under the 24 KB soft limit.
+- **hep-detector: feature blocks, environment codes and owner links** (issues CHK-AC-06-03 to -05, CHK-AU-05-08,
+  CHK-AU-07-04, CHK-AU-07-05, CHK-AU-25-08, CHK-AU-25-09). The gaseous-tracking opening says which families have a
+  features block and that items a block omits are not stated; the TPC, wire/RPC and MPGD method and gap entries sit
+  under their own "Methods and recorded gaps" headings, and the gap preamble moves to the opening. The photosensor
+  features block records natural objects and conventions as not stated. The TOF mass-resolution formula in
+  `particle-identification.md` drops a PDG pointer that the cached review does not hold. `timing-detectors.md` codes
+  its data sample (COL; an ion test beam, FXT; no in-flight sample, a gap), vertex-time pileup rejection (COL) and
+  the beam, bunch and luminosity monitors (COL, FXT). `detector-comparison-tables.md` links the environment references
+  that own its noble-liquid, water/scintillator, bolometer, rare-event and air-shower/IACT/neutrino-telescope rows,
+  fills two "—" cells of Table 7 with links, and says that the forward-proton, beam-monitor and luminosity rows of
+  Table 9 are stated for a collider only.
+
 ## 0.70.0 (2026-11-16)
 
 Minor release (PR #418); contracts 3.28.0 unchanged, `CORE_VERSION` 1.16.0 (from 1.15.0), `adapters/geant4` 0.18.0

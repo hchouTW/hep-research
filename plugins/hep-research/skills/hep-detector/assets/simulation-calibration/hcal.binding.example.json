@@ -26,7 +26,7 @@
      "id": "shower",
      "kernel": "black-box",
      "kind": "stage",
-     "description": "1 hadronic shower and sampling (g4sim_run)",
+     "description": "1 hadronic shower and sampling (g4sim_run); Birks applied per step in the SD",
      "samplable": true,
      "mechanisms": [
       "physics-process",
@@ -38,7 +38,7 @@
      "id": "quanta",
      "kernel": "density",
      "kind": "stage",
-     "description": "2 scintillation photons, Birks (response stage 1)",
+     "description": "2 scintillation photons (response stage 1)",
      "mechanisms": [
       "yield"
      ]
@@ -370,8 +370,7 @@
       "edep_visible_ly_split",
       "hits",
       "simreco_columns"
-     ],
-     "distribution": "poisson"
+     ]
     },
     "electronics": {
      "table1": "5e",

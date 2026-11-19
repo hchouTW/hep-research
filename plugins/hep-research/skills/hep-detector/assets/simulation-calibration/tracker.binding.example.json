@@ -54,11 +54,11 @@
     },
     {
      "id": "preamp",
-     "kernel": "density",
+     "kernel": "deterministic",
      "kind": "stage",
-     "description": "4b preamplifier",
+     "description": "4b preamplifier conversion gain (silicon without intrinsic amplification: deterministic; its noise is the electronics noise)",
      "mechanisms": [
-      "fluctuation"
+      "yield"
      ]
     },
     {

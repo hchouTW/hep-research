@@ -9,11 +9,13 @@ Modes:
 - template: per bin, the data histogram of a sign discriminant is fitted with right-sign and wrong-sign templates
   (and an optional background template) by the extended Poisson likelihood with the full Barlow-Beeston treatment of
   the template statistics (core/stats/template_fit.py; at most 6 templates and 60 discriminant bins). Rate
-  r = Y_wrong / (Y_right + Y_wrong), its error from the fit covariance (delta method; a symmetric 68% interval);
+  r = Y_wrong / (Y_right + Y_wrong) at the maximum of the profile likelihood in r (a scan over r, then a polishing fit),
+  its 68% interval from the profile likelihood (rate_error its half-width; rate_error_hessian from the fit covariance);
 - control: a sample of known true sign (CSV); per bin k wrong-sign of n events, the Clopper-Pearson interval
-  (core/stats/tail_estimation.py), and with --mc a second sample, the data/MC scale factor r_data / r_mc with an
-  approximate (delta-method) error. Weights must be integer frequency weights: non-integer weights are refused
-  (hep-statistics owns weighted binomial intervals);
+  (core/stats/tail_estimation.py) at --cl ("interval", with "interval_cl") and at 68.27% ("interval_68"; rate_error
+  is half its width whatever --cl is), and with --mc a second sample of the same one true sign (else refused), the
+  data/MC scale factor r_data / r_mc with an approximate (delta-method) error. Weights must be integer frequency
+  weights: non-integer weights are refused (hep-statistics owns weighted binomial intervals);
 - gaussian-core: Phi(-|1/R| / sigma(1/R)) at the bin edges from a Gaussian curvature core. It ignores the non-Gaussian
   tails that dominate real confusion, so it is a lower-bound reference labelled "not an estimate"; no estimate and no
   sign rates are output from it.
@@ -21,13 +23,21 @@ Output: per-bin rates and, for template and control, "sign_rates" in the format 
 {"edges": [...], "variable": ..., "rates": [{"true": SIGN, "reco": OTHER SIGN, "rate": [...], "rate_error": [...]}]}.
 Input: template JSON {"edges": [...], "true_sign": "negative"|"positive", "variable"?: TEXT,
   "bins": [{"data": [...], "templates": {"right": [...], "wrong": [...], "background"?: [...]}, "mc_events"?: {...}}]}.
+  Each bin's data histogram holds the tracks of the one true sign true_sign in both reconstructed signs, so that
+  Y_wrong / (Y_right + Y_wrong) is the confusion rate; fitted on the opposite-sign sample alone, r is the confused
+  fraction of that sample, not the rate (charge-confusion.md, route 2).
 Usage:
   charge_confusion_rate.py template --input T.json [--status LABEL]
   charge_confusion_rate.py control --data CTRL.csv [--mc CTRL_MC.csv] --edges E ... --bin-column C
       --true-sign-column C --reco-sign-column C [--weight-column W] [--cl 0.6827] [--status LABEL]
   charge_confusion_rate.py gaussian-core --edges E ... --sigma-inv-r S ... [--status LABEL]
-Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, warnings, bins, sign_rates.
-Exit codes: 0 ok; 1 a template fit failed; 2 bad input. Standard library only.
+Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, warnings, bins, sign_rates. Template
+  status per bin: fit_outcome not-converged or infeasible gives failed and a warning naming the bin;
+  converged-at-boundary or covariance-warning alone gives ok and a warning naming the bin; a rate that is not
+  identified (its profile interval reaches r = 1, or a background template is compatible in shape with the right-sign
+  template within the template statistics, chi2 p >= 0.01) gives failed and a warning naming the bin, and its
+  sign_rates entries are null.
+Exit codes: 0 ok; 1 a template bin failed (see the status rule); 2 bad input. Standard library only.
 """
 from __future__ import annotations
 if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
@@ -55,6 +65,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from core.stats import template_fit  # noqa: E402
+from core.stats.statistical_toys import chi2_sf  # noqa: E402
 from core.stats.tail_estimation import clopper_pearson  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
 
@@ -87,8 +98,104 @@ def _edges(values) -> list[float]:
     return e
 
 
+# rates are never evaluated at exactly 0 or 1: there a yield is 0 and template_fit._ll_bb drops that template's MC
+# terms, so ln L there is not the limit r -> 0+ (or r -> 1-); R_FLOOR stands in for both ends
+R_FLOOR = 1e-12
+SCAN_R = [R_FLOOR] + [10.0 ** (-6 + 0.25 * t) for t in range(24)] + [1.0 - R_FLOOR]  # 1e-6 to 1 in quarter decades
+START_AGREE = 0.5  # ln L by which another fit may beat the rate scan before the outcome is not-converged
+DEGENERATE_P = 0.01  # a background shape compatible with the right-sign one at p >= this is degenerate
+
+
+def _profile_at(observed, m, mc, i: int, j: int, r: float, start) -> tuple[float, list]:
+    """-ln L profiled at fixed r = y_j / (y_i + y_j): the total N = y_i + y_j and the other yields by Nelder-Mead
+    (restarted once from its end); returns (-ln L, yields). `start` is [N, other yields...]."""
+    others = [k for k in range(len(m)) if k not in (i, j)]
+
+    def yields(x):
+        yy = [0.0] * len(m)
+        yy[i], yy[j] = x[0] * (1 - r), x[0] * r
+        for k, v in zip(others, x[1:]):
+            yy[k] = v
+        return yy
+
+    def f(x):
+        if x[0] <= 0 or any(v < 0 for v in x[1:]):
+            return 1e300
+        return -template_fit._ll_bb(observed, m, mc, yields(x))
+    x, val = template_fit._nelder_mead(f, list(start), [max(0.05 * v, 1.0) for v in start])
+    x, val = template_fit._nelder_mead(f, x, [max(0.01 * v, 1.0) for v in x])
+    return val, yields(x)
+
+
+def _bb_maximum(observed, m, mc, i: int, j: int):
+    """Barlow-Beeston maximum found through the profile likelihood in the rate (PDG eqs. 40.9 and 40.41).
+
+    A Nelder-Mead fit of all yields stops on a relative tolerance (1e-10 (1 + |ln L|), about 1e-3 at ln L ~ 1e7 for
+    1e6 events), so one started from the naive fit, which often ends with the wrong-sign yield at 0, can stop at that
+    boundary far below the maximum. Instead the profile -ln L is evaluated on the grid SCAN_R, refined by golden-section
+    search between the neighbours of the best grid point, and the yields there are polished by a full fit. The deepest
+    of the scan, the polished fit and the fit from the naive start is kept; if a fit beats the scan by more than
+    START_AGREE, the scan missed the maximum and the outcome is not-converged.
+    Returns (yields, covariance, diagnostics).
+    """
+    k = len(m)
+    total = max(sum(observed), 1.0)
+    y0 = template_fit._fit_yields_full(observed, m, mc, "naive", [max(total / k, 1.0)] * k)[0]
+    y_old, _, ll_old, _ = template_fit._fit_yields_full(observed, m, mc, "bb", [max(v, 1.0) for v in y0])
+    start = [max(y_old[i] + y_old[j], 1.0)] + [max(y_old[t], 1.0) for t in range(k) if t not in (i, j)]
+    grid = [_profile_at(observed, m, mc, i, j, r, start) for r in SCAN_R]
+    b = min(range(len(SCAN_R)), key=lambda t: grid[t][0])
+    lo, hi = SCAN_R[max(b - 1, 0)], SCAN_R[min(b + 1, len(SCAN_R) - 1)]
+    yb = grid[b][1]
+    start = [yb[i] + yb[j]] + [yb[t] for t in range(k) if t not in (i, j)]
+    g = (math.sqrt(5.0) - 1.0) / 2.0
+    c, d = hi - g * (hi - lo), lo + g * (hi - lo)
+    fc, fd = _profile_at(observed, m, mc, i, j, c, start), _profile_at(observed, m, mc, i, j, d, start)
+    for _ in range(40):
+        if fc[0] < fd[0]:
+            hi, d, fd = d, c, fc
+            c = hi - g * (hi - lo)
+            fc = _profile_at(observed, m, mc, i, j, c, start)
+        else:
+            lo, c, fc = c, d, fd
+            d = lo + g * (hi - lo)
+            fd = _profile_at(observed, m, mc, i, j, d, start)
+    nll_scan, y_scan = min([grid[b], fc, fd], key=lambda t: t[0])
+    y_pol, _, ll_pol, d_pol = template_fit._fit_yields_full(observed, m, mc, "bb", [max(v, 1e-6) for v in y_scan])
+    # a fit that ends with the right- or wrong-sign yield at the boundary has the ln L of dropped terms: not compared
+    cands = [(nll_scan, y_scan)] + [(v, z) for v, z in ((-ll_pol, y_pol), (-ll_old, y_old))
+                                    if z[i] + z[j] > 0 and R_FLOOR <= z[j] / (z[i] + z[j]) <= 1.0 - R_FLOOR]
+    nll, y = min(cands, key=lambda t: t[0])
+    found = nll_scan - nll <= START_AGREE
+    cov = template_fit._hessian_cov(lambda z: template_fit._ll_bb(observed, m, mc, [max(v, 1e-9) for v in z]), y)
+    info = {"converged": bool(d_pol["converged"]) and found,
+            "termination": "rate-scan" if found else "rate-scan-missed-maximum"}
+    return y, cov, template_fit._diagnostics([info], -nll, cov, y, [])
+
+
+def _degenerate_backgrounds(tnames, m, i: int, j: int) -> list[str]:
+    """Background templates whose shape is compatible with the right-sign template within the template statistics:
+    Pearson chi2 of the two-sample (2 x bins) homogeneity table, p >= DEGENERATE_P. With such a template the data
+    cannot separate it from the right-sign yield, so the rate is not identified."""
+    out = []
+    for t in range(len(m)):
+        if t in (i, j):
+            continue
+        cols = [(a, b) for a, b in zip(m[i], m[t]) if a + b > 0]
+        sa, sb = sum(a for a, _ in cols), sum(b for _, b in cols)
+        if len(cols) < 2 or sa <= 0 or sb <= 0:
+            continue
+        chi2 = sum((sb * a - sa * b) ** 2 / (a + b) for a, b in cols) / (sa * sb)
+        p = chi2_sf(chi2, len(cols) - 1)
+        if p >= DEGENERATE_P:
+            out.append(f"the background template '{tnames[t]}' is compatible in shape with the right-sign template "
+                       f"(chi2 = {chi2:.3g} for {len(cols) - 1} degrees of freedom, p = {p:.3g} >= {DEGENERATE_P})")
+    return out
+
+
 def template_rate(bin_doc: dict, names: dict) -> dict:
-    """Fit one bin; names maps 'right'/'wrong' to template names."""
+    """Fit one bin; names maps 'right'/'wrong' to template names. not_identified gives the reasons the rate is not
+    identified (its profile interval reaches r = 1, or a background template is degenerate with the right-sign one)."""
     try:
         tnames, data, m, mc = template_fit._load(bin_doc)
     except template_fit.ToyError as exc:
@@ -96,13 +203,8 @@ def template_rate(bin_doc: dict, names: dict) -> dict:
     for role in ("right", "wrong"):
         if names[role] not in tnames:
             raise InputError(f"template '{names[role]}' missing")
-    # start from a positive split of the data (a start at a boundary can leave the simplex there), then the naive fit,
-    # as template_fit.bb_fit does
-    total = sum(data)
-    start = [max(total / len(tnames), 1.0)] * len(tnames)
-    y0 = template_fit._fit_yields_full(data, m, mc, "naive", start)[0]
-    y, cov, _, diag = template_fit._fit_yields_full(data, m, mc, "bb", [max(v, 1.0) for v in y0])
     i, j = tnames.index(names["right"]), tnames.index(names["wrong"])
+    y, cov, diag = _bb_maximum(data, m, mc, i, j)
     yr, yw = y[i], y[j]
     tot = yr + yw
     if tot <= 0:
@@ -115,30 +217,21 @@ def template_rate(bin_doc: dict, names: dict) -> dict:
         var = sum(g[a] * g[b] * cov[a][b] for a in g for b in g)
         err = math.sqrt(var) if var > 0 else None
     lo, hi = profile_interval(data, m, mc, y, i, j)
+    why = (["its 68% profile interval reaches r = 1"] if hi >= 1.0 else []) + _degenerate_backgrounds(tnames, m, i, j)
     return {"rate": rate, "rate_error_hessian": err, "interval_68": [lo, hi], "rate_error": (hi - lo) / 2.0,
             "interval_method": "profile likelihood in the rate, -2 Delta ln L = 1 (Barlow-Beeston), lower end at 0 "
                                "when the boundary is inside",
-            "yields": {n: y[k] for k, n in enumerate(tnames)}, "fit_outcome": diag["outcome"]}
+            "yields": {n: y[k] for k, n in enumerate(tnames)}, "fit_outcome": diag["outcome"],
+            "not_identified": "; ".join(why) or None}
 
 
 def profile_interval(data, m, mc, y, i: int, j: int) -> tuple[float, float]:
-    """68% profile-likelihood interval of r = y_j / (y_i + y_j): for fixed r the total N = y_i + y_j and the other
-    yields are profiled (Nelder-Mead on the Barlow-Beeston log-likelihood)."""
+    """68% profile-likelihood interval of r = y_j / (y_i + y_j) about the maximum y: for fixed r the total
+    N = y_i + y_j and the other yields are profiled (_profile_at)."""
     others = [k for k in range(len(y)) if k not in (i, j)]
 
     def nll_at(r: float, start):
-        def f(x):
-            n = x[0]
-            if n <= 0 or any(v < 0 for v in x[1:]):
-                return 1e300
-            yy = [0.0] * len(y)
-            yy[i], yy[j] = n * (1 - r), n * r
-            for k, v in zip(others, x[1:]):
-                yy[k] = v
-            return -template_fit._ll_bb(data, m, mc, yy)
-        steps = [max(0.05 * v, 1.0) for v in start]
-        x, val = template_fit._nelder_mead(f, start, steps)
-        return val, x
+        return _profile_at(data, m, mc, i, j, r, start)
 
     n0 = y[i] + y[j]
     start = [n0] + [y[k] for k in others]
@@ -156,8 +249,10 @@ def profile_interval(data, m, mc, y, i: int, j: int) -> tuple[float, float]:
             else:
                 b = c
         return 0.5 * (a + b)
-    lo = 0.0 if excess(0.0) < 0 else _bisect_down(excess, r_hat)
-    hi = 1.0 if excess(1.0) < 0 else root(r_hat, 1.0)
+    # the ends are tested at R_FLOOR and 1 - R_FLOOR, never at exactly 0 or 1 (see R_FLOOR)
+    lo = 0.0 if excess(R_FLOOR) < 0 else _bisect_down(excess, r_hat)
+    top = 1.0 - R_FLOOR
+    hi = 1.0 if excess(top) < 0 else root(r_hat, top)
     return lo, hi
 
 
@@ -173,24 +268,35 @@ def _bisect_down(excess, r_hat: float) -> float:
     return 0.5 * (a + b)
 
 
-def run_template(doc: dict) -> tuple[dict, str]:
+def run_template(doc: dict) -> tuple[dict, str, list]:
     edges = _edges(doc.get("edges", []))
     sign = doc.get("true_sign")
     other = _other(sign)
     bins = doc.get("bins")
     if not isinstance(bins, list) or len(bins) != len(edges) - 1:
         raise InputError(f"bins must list {len(edges) - 1} entries (one per pair of edges)")
-    rows, status = [], "ok"
+    rows, status, warnings = [], "ok", []
     for k, b in enumerate(bins):
         row = template_rate(b, {"right": "right", "wrong": "wrong"})
         row["bin"] = [edges[k], edges[k + 1]]
-        if row["fit_outcome"] in template_fit.FAILED_OUTCOMES or row["rate_error"] is None:
+        outcome = row["fit_outcome"]
+        if outcome in template_fit.FAILED_OUTCOMES:
             status = "failed"
+            warnings.append(f"bin {k + 1}: the fit is {outcome}; its rate is not a result")
+        elif outcome != "converged":  # converged-at-boundary or covariance-warning, as template_fit._overall
+            warnings.append(f"bin {k + 1}: the fit is {outcome}; rate_error_hessian is unreliable there, use the "
+                            "profile interval")
+        if row.get("not_identified"):
+            status = "failed"
+            warnings.append(f"bin {k + 1}: rate not identified: {row['not_identified']}; it is not passed on in "
+                            "sign_rates")
         rows.append(row)
     rates = {"edges": edges, "variable": doc.get("variable"),
-             "rates": [{"true": sign, "reco": other, "rate": [r["rate"] for r in rows],
-                        "rate_error": [r["rate_error"] for r in rows]}]}
-    return {"bins": rows, "sign_rates": rates, "method": "Barlow-Beeston template fit (core/stats/template_fit.py)"}, status
+             "rates": [{"true": sign, "reco": other,
+                        "rate": [None if r.get("not_identified") else r["rate"] for r in rows],
+                        "rate_error": [None if r.get("not_identified") else r["rate_error"] for r in rows]}]}
+    return ({"bins": rows, "sign_rates": rates, "method": "Barlow-Beeston template fit (core/stats/template_fit.py)"},
+            status, warnings)
 
 
 def _read_counts(path: Path, args, edges) -> tuple[list[float], list[float], set]:
@@ -230,16 +336,21 @@ def run_control(args) -> tuple[dict, str, list]:
         raise InputError(f"a control sample has one known true sign; found {sorted(signs) or 'none'}")
     sign = signs.pop()
     mc = _read_counts(args.mc, args, edges) if args.mc else None
+    if mc is not None and mc[2] != {sign}:
+        # the scale factor r_data / r_mc compares one species: c+ and c- differ
+        raise InputError(f"the MC control sample must have the data's one true sign ({sign}); "
+                         f"found {sorted(mc[2]) or 'none'}")
     rows = []
     for b in range(len(edges) - 1):
         nb, kb = int(n[b]), int(k[b])
         row = {"bin": [edges[b], edges[b + 1]], "n": nb, "k": kb}
         if nb == 0:
-            row.update(rate=None, interval_68=None)
+            row.update(rate=None, interval=None, interval_68=None)
             warnings.append(f"bin {b + 1}: no control events")
         else:
             lo, hi = clopper_pearson(kb, nb, args.cl)
-            row.update(rate=kb / nb, interval_68=[lo, hi], interval_cl=args.cl)
+            row.update(rate=kb / nb, interval=[lo, hi], interval_cl=args.cl,
+                       interval_68=list(clopper_pearson(kb, nb, CL68)))
         if mc is not None:
             nm, km = int(mc[0][b]), int(mc[1][b])
             row["mc"] = {"n": nm, "k": km, "rate": km / nm if nm else None}
@@ -306,7 +417,7 @@ def main(argv=None) -> int:
                 raise InputError(f"cannot read {args.input}: {exc}") from None
             if not isinstance(doc, dict):
                 raise InputError("the template input must be a JSON object")
-            result, status = run_template(doc)
+            result, status, warnings = run_template(doc)
         elif args.command == "control":
             if not 0 < args.cl < 1:
                 raise InputError("--cl must be in (0, 1)")

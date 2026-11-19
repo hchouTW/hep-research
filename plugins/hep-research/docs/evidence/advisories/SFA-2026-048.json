@@ -1,0 +1,68 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-048",
+  "published": "2026-11-17T14:40:00Z",
+  "modified": "2026-11-17T14:40:00Z",
+  "severity": "S1",
+  "ledger": [
+    "G4BENCH-TRUNC98"
+  ],
+  "summary": "The multiple-scattering sanity benchmark of geant4_benchmarks.py divided the RMS of the central 98 % of the projected exit angles by 0.8673 (close to the truncated variance) instead of 0.9346, the RMS of a unit Gaussian truncated to its central 98 %: its core width was 7.8 % high for exactly Gaussian angles.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.19.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "3f4f9985388cf9c39131cd8819bc90050fd54314",
+        "fixed_commit": "17ff42e54dec2d3a9701b70757655b4477e272b6"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "the core width (geant4) and relative_difference of the multiple-scattering sanity benchmark",
+      "its plausibility verdict (within 20 % of Highland)"
+    ],
+    "bias": "+7.8 % on the core width (0.93459 / 0.8673) whatever the angles; most of the +11 % that VALIDATION GEANT4-F4 recorded for RMS(central 98 %) / 0.8673 against Lynch and Dahl is this factor (about +3 % with the correct one)",
+    "trigger": "a geant4_benchmarks.py run with a multiple-scattering benchmark; multiple-scattering-reference (the truncated-normal fit) is not affected"
+  },
+  "applies_to": {
+    "artifact_types": [
+      "computational-run"
+    ],
+    "match": [
+      [
+        {
+          "path": "extension.study.benchmarks[*].benchmark",
+          "op": "in",
+          "values": [
+            "multiple-scattering"
+          ]
+        }
+      ]
+    ],
+    "match_basis": "a Geant4 study record (check_geant4_study.py) embeds the benchmark results of geant4_benchmarks.py in extension.study.benchmarks; a record that lists one of these benchmarks was evaluated by the affected code",
+    "no_trace": "possibly-affected",
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "how_to_recognize": "geant4_benchmarks.py run output (JSON) whose benchmarks list holds benchmark multiple-scattering"
+    }
+  },
+  "remedy": "rerun geant4_benchmarks.py on the same CSVs with this version; the sanity verdict can change for widths within about 8 % of the 20 % window edge",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/17ff42e54dec2d3a9701b70757655b4477e272b6"
+  ]
+}

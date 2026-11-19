@@ -1,8 +1,9 @@
-# ECAL: simulator-calibration specialization
+# ECAL: simcal specialization
 
 Part B §11.1 items 1–8 for an electromagnetic calorimeter (scintillating crystal or sampling, light read out by a
 photosensor), from §3.1 derivation basis (1), the ECAL row of §12 and the g4sim binding of §11.4. Folder rules and the
-literature search record: [index](index.md).
+literature search record: [index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
@@ -28,7 +29,7 @@ single-photoelectron reference cannot be declared (§11.4).
 | Parameter (§12) | Mechanism / node | Parameterization | g4sim field (Table 2 row) |
 |---|---|---|---|
 | light yield | yield / 2 | multiplicative, photons per MeV | `response-pipeline` scintillation `light_yield_per_MeV` (LY row) |
-| Birks k_B | nonlinearity / 2 | quenching 1/(1 + k_B·dE/dx) | detector-spec `ionisation/birks_mm_per_MeV` (Birks row) |
+| Birks k_B | nonlinearity / 2 (§12); bound at the output of node 1 (`shower`) on g4sim (§11.4 Table 1, D75) | quenching 1/(1 + k_B·dE/dx) | detector-spec `ionisation/birks_mm_per_MeV` (Birks row) |
 | collection efficiency | transport / 3 | reflectivity, absorption length | optical tables and surfaces (optical row) |
 | PDE | yield / 4a | probability, or PDE(E) | surface `efficiency`; a θ of its own only under the §6.7 split |
 | gain | 4b | multiplicative, with ENF | `sensor` stage `gain` (response row) |
@@ -41,7 +42,7 @@ Nodes 0, 2, 3, 4a, 4b and 5 (electronics) are densities, node 1 a samplable blac
 deterministic. `log_density`: Poisson and binomial pmf; the multinomial of the map as successive binomials; for a bin
 with μ_b > 10 the pmf of g4sim's rounded Gaussian (width √(v_b − 1/12), cut at 0), not the normal density (§11.4).
 `run`: readout and reconstruction. `resample`: the full `g4sim_run` plus response, as used by P0 at the extreme points
-of k_B and r (§5.4).
+of k_B and of LY within the prior, and at design points with r outside 0.15 ≤ r ≤ 1 (§5.4).
 
 ## 4. Storage recommendations
 
@@ -56,8 +57,19 @@ Record as `column` or `event_file` (moments forbid reweighting and rerun, §6.1)
 | beam energy | known input | into `source` | yes; its uncertainty is φ |
 | MIP peak, cosmic rays | population feature | out of the observation | yes |
 | E/p with tracker momentum | internal constraint | merging branch (§3.4) | yes, upstream result by hash |
-| laser or LED monitoring | mid-chain injection | 3/4a, with conversion S/S₀ = (R/R₀)^α, α as φ | only under the §6.7 split |
+| laser monitoring of crystal transparency | mid-chain injection | `quanta` → `collection` (the injected light crosses the crystal), with conversion S/S₀ = (R/R₀)^α, α as φ | not declarable: no g4sim hand-off before response stage 3 (§11.4) |
+| LED or light source at the photosensor | mid-chain injection | 3/4a, with a declared conversion (α = 1 when only the photosensor response changes) | only under the §6.7 split |
 | single photoelectron | mid-chain injection | `pde` → `sensor` | refused (`binding.injection_single_pe`) |
+
+A reference on the 3/4a edge constrains only nodes downstream of it (§3.4), so it cannot track the transparency loss in
+`collection`: radiation-induced absorption shortens the attenuation length and so the light output (PDG RPP 2025
+sec. 35.4, p. 18).
+
+<!-- example: source citation -->
+In the CMS ECAL light monitoring the laser light is injected into each crystal through optical fibres, with a spectrum
+and path to the photodetector different from scintillation light, and the power-law conversion has α = 1 for the same
+path length and for photodetector (VPT) response losses (arXiv:1306.2016v2, sec. 4.1, pp. 10-13).
+<!-- /example -->
 
 ## 6. Special functionals and link functions
 

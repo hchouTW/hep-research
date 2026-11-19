@@ -4,7 +4,7 @@
  "geometry": "tof",
  "kit": {
   "name": "tof",
-  "version": "1.1.0"
+  "version": "1.1.1"
  },
  "fields": [
   {
@@ -107,7 +107,7 @@
     "species": "string",
     "position_mm": "number"
    },
-   "tail_sensitive": false
+   "tail_sensitive": true
   }
  }
 }

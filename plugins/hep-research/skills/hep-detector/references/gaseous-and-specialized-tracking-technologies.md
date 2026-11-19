@@ -6,8 +6,11 @@ trackers, RPCs, micro-pattern gaseous detectors (GEM, Micromegas), scintillating
 fibers, nuclear emulsions, monolithic and other silicon variants, and radiation-hard
 sensors. Physics of signal formation is in
 [signal formation and readout](signal-formation-and-readout.md); alignment and drift calibration in
-[calibration and alignment](calibration-and-alignment.md). Each family ends with the required
-**Distinctive but generalizable reconstruction and performance features** block.
+[calibration and alignment](calibration-and-alignment.md). Each family except diamond has a
+**Distinctive but generalizable reconstruction and performance features** block (headed *Features* for fibers and
+emulsions, before their reconstruction subsections); an item a block does not list is not stated for that family.
+Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is
+a recorded gap, not a claim that no method exists.
 
 ## Silicon pixels and strips (recap of what is distinctive)
 
@@ -38,9 +41,11 @@ smaller depleted region (less charge, more diffusion-driven sharing).
   sharing; momentum and impact-parameter floors from multiple scattering and lever
   arm ([tracking and vertexing](tracking-and-vertexing.md)).
 - **Tails**: delta rays, merged clusters, noise hits, dead/noisy channels.
-- **Dependence**: occupancy, pileup, dose (leakage, `CCE`, threshold, Lorentz angle
-  drift), temperature. **Data sample**: `Z -> ll`/cosmic tracks for hit efficiency
-  and alignment, overlaps and tag-and-probe for module efficiency.
+- **Dependence**: occupancy (at a collider, pileup), dose (leakage, `CCE`, threshold, Lorentz angle
+  drift), temperature. **Data sample**: the tracks the environment provides, over its incidence-angle
+  range: collision (`Z -> ll`) or cosmic-ray tracks, or a test beam before installation or flight
+  (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit efficiency and alignment;
+  overlaps and tag-and-probe for module efficiency.
 - **Transfers**: charge-sharing interpolation and template methods to any segmented
   readout (TPC pads, fibers); does not transfer: time-of-arrival coordinates.
 
@@ -103,8 +108,9 @@ image and many `dE/dx` samples per track.
 (wires, GEM, Micromegas), **ion backflow** (positive ions drifting back distort `E`),
 **space-charge distortions** (a radially and `z`-dependent position shift), field-cage
 and `E x B` distortions, gating, and **crossing-time ambiguity**: the absolute drift
-coordinate needs the interaction time `t_0`, unknown for particles not associated with
-a bunch crossing or trigger (pileup/out-of-time tracks are displaced along `z`).
+coordinate needs the start time `t_0`: an external trigger (PDG RPP 2025 sec. 35.6.4, p. 41),
+a collider's bunch crossing, or `S1` light in rare-event TPCs (sec. 36.4, p. 31); tracks
+not associated with it (pileup, cosmics) are displaced along `z`.
 
 **`dE/dx`.** Truncated mean or cluster counting over `~10^2` samples, corrected for
 path length, saturation, gain, and attachment ([particle identification](particle-identification.md)).
@@ -128,6 +134,9 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Transfers**: drift-plus-readout concept to noble-liquid TPCs
   ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)) and any imaging detector;
   does not transfer: gas-specific diffusion and ion-backflow numerology.
+
+### Methods and recorded gaps (TPC)
+
 <!-- example: source citation -->
 - **Signal extraction in a gaseous TPC with wire-chamber readout** (the ALICE TPC: Alme et al.,
   Nucl. Instrum. Methods A 622 (2010) 316, arXiv:1001.1950v1, secs. 1, 4.1, 4.3). Each pad signal is shaped and
@@ -138,7 +147,7 @@ path length, saturation, gain, and attachment ([particle identification](particl
   zero-suppresses below a threshold, keeping pre- and post-samples and requiring several
   samples above threshold. Tail and baseline correction must come before zero suppression.
 <!-- /example -->
-- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. **No method text, no source read**: deconvolution of the field
+- **No method text, no source read**: deconvolution of the field
   response from gaseous-TPC waveforms; the liquid-argon processing in
   [front-end waveform processing](front-end-waveform-processing.md#lar-tpc-signal-processing)
   is not stated for gas.
@@ -149,8 +158,10 @@ path length, saturation, gain, and attachment ([particle identification](particl
   or from induced cathode charge for the second coordinate; fast, robust; limited
   granularity and rate by wire pitch and space charge.
 - **Straw-tube tracker**: many thin drift tubes; combination of drift measurement and a
-  large number of hits per track (good tracking robustness at low material); also the
-  basis for transition radiation stacks (electron ID, [particle identification](particle-identification.md));
+  large number of hits per track (good tracking robustness at low material); also one
+  of the two transition-radiation detector concepts, straws spread through the radiator so
+  that the TRD is part of the tracker; the other is radiator modules each followed by a
+  xenon-filled chamber (PDG RPP 2025, sec. 35.6.5, p. 46; electron ID, [particle identification](particle-identification.md));
   left-right ambiguity per straw resolved by staggered layers.
 - **RPC / multi-gap RPC (MRPC)**: resistive plates with a gas gap and a high
   uniform field; fast signal from a streamer/avalanche, strip readout, timing resolution
@@ -164,12 +175,16 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Topology**: sparse points/segments. **Ambiguity**: left-right (straws), ghosts
   (wire crossing), efficiency dead zones at wire/cell edges and spacer positions.
 - **Informative residual**: layer-by-layer (unbiased) residual versus position in the
-  cell. **Scaling**: RPC rate capability inverse to resistivity; timing set by gap
-  width and gas.
+  cell. **Scaling**: RPC rate capability `phi/Delta V = 1/(rho d <Q>)` (electrode resistivity
+  and thickness, mean avalanche charge; PDG RPP 2025 sec. 35.6.6.3, p. 53; arXiv:1606.03448v1,
+  sec. 1); timing set by gap width and gas.
 - **Tails**: streamers, afterpulses, cluster-size multiplicity growth with high
   voltage. **Data sample**: cosmic/collision muons for efficiency versus voltage
   (efficiency-plateau scan).
 - **Transfers**: plateau-scan concept (efficiency vs voltage) to every gas detector.
+
+### Methods and recorded gaps (wire/RPC)
+
 - **Collected charge in an integrating ionization chamber** (parallel-plate chambers in
   clinical ion beams: Christensen et al., Med. Phys. 43 (2016) 5484, arXiv:1610.06749v1, abstract and sec. I).
   Fewer ion pairs are collected than released, because charges recombine within one track
@@ -204,6 +219,9 @@ effects** (space charge, gain drop), and time resolution set by gap and gas.
 - **Tails**: discharge events, gain-nonuniformity-induced position biases.
 - **Data sample**: cosmic/test-beam and in-situ tracks for gain map.
 - **Transfers**: charge-centroid/micro-TPC to other segmented gas detectors.
+
+### Methods and recorded gaps (MPGD)
+
 <!-- example: source citation -->
 - **Identification in a TPC read out by Micromegas** (the T2K near-detector TPCs: Abgrall et al.,
   Nucl. Instrum. Methods A 637 (2011) 25, arXiv:1012.0865v1, sec. 7.3). The charge of a cluster, summed over its
@@ -327,9 +345,12 @@ with the fake-link rate measured on the exposed background.
 
 ## Diamond and other radiation-hard sensors
 
-Diamond and other wide-bandgap sensors (e.g. silicon carbide) offer low leakage current and
-tolerance to very high fluence at the cost of smaller signal and lower charge
-collection in poly-crystalline material. Reconstruction is the same as for silicon
+Diamond offers low leakage current and tolerance to very high fluence (large bandgap, about
+twice silicon's displacement threshold) at the cost of smaller signal and lower charge
+collection in poly-crystalline material. Other wide-bandgap sensors (e.g. silicon carbide) keep
+a very low leakage current after high fluence, but their charge collection so far degrades
+faster with fluence than in silicon and diamond (PDG RPP 2025 sec. 35.8.5, p. 78; Gsponer et
+al., JINST 18 (2023) C11027, arXiv:2310.02047v1, abstract). Reconstruction is the same as for silicon
 (cluster/charge or timing), with the focus on **response versus dose** (pumping,
 priming, polarization), efficiency loss with fluence, and beam/luminosity monitor
 use. Quote fluence-dependent signal loss only with its source and conditions

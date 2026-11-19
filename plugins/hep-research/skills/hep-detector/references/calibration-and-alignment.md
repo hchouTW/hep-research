@@ -2,7 +2,8 @@
 
 Covers the constants that connect a simulated or idealized detector to the real one:
 energy and timing calibration, alignment of sensor positions, their time dependence,
-and how a change in any of them propagates through everything downstream. This is the
+and how a change in any of them propagates through everything downstream (timing:
+[timing detectors](timing-detectors.md#calibration-and-diagnostics)). This is the
 feedback loop that closes the chain from
 [detector simulation](detector-simulation.md) back to
 [event reconstruction](event-reconstruction.md).
@@ -23,24 +24,24 @@ calibration was applied" is not a single answer.
 ## Test-beam versus in-situ calibration
 
 **Test-beam** calibration measures the response of detector modules to particles of
-known type and energy before installation. It gives an absolute, well-controlled
-reference, but it applies to a small sample of modules, under conditions - no magnetic
-field, no surrounding material, no pileup, pre-irradiation - that differ from the final
-environment. Test-beam constants are a starting point, not a final answer.
+known type and energy before installation: an absolute reference, but for a small sample
+of modules, under conditions - no magnetic field, no surrounding material, no pileup
+(COL: collider), pre-irradiation - that differ from the final environment. Test-beam
+constants are a starting point, not a final answer. An imaging air-Cherenkov telescope
+has none; muon rings calibrate it (PDG RPP 2025, sec. 36.2.2).
 
-**In-situ** calibration derives constants from the data itself, using physics that is
-known independently: a resonance of known mass, momentum-energy consistency (`E/p`),
-back-to-back balance in transverse momentum, or the uniformity of an isotropic flux.
-It captures the real environment and its time evolution (LED, laser and
-single-photoelectron monitoring also track gain drift without physics events, but not the
-absolute scale), and it is what sets the achievable constant term of a calorimeter (see
-[calorimetry](calorimetry-ecal-hcal.md)).
+**In-situ** calibration derives constants from data, using independently known physics:
+a resonance of known mass, a mono-energetic source or activation line (sec. 36.4),
+momentum-energy consistency (`E/p`), back-to-back balance in transverse momentum (COL),
+or the uniformity of an isotropic flux. It captures the real environment and its time
+evolution (LED, laser and single-photoelectron monitoring track gain drift, not the
+absolute scale) and sets the achievable constant term of a calorimeter
+([calorimetry](calorimetry-ecal-hcal.md)).
 
-The limitation of in-situ calibration is circularity: the reference physics is measured
-with the same detector being calibrated. A resonance mass calibration constrains the
-energy scale at the resonance's energy and must be extrapolated elsewhere, and the
-extrapolation - not the calibration point - is usually the dominant uncertainty. State
-where the calibration is anchored and how far it is extrapolated.
+Its limitation is circularity: the reference physics is measured with the detector being
+calibrated. A resonance mass or a line constrains the scale at its own energy and is
+extrapolated elsewhere; the extrapolation - not the calibration point - is usually the
+dominant uncertainty. State where it is anchored and how far it is extrapolated.
 
 ## Alignment and weak modes
 
@@ -63,7 +64,7 @@ error) give a relative scale error constant in rigidity.
 
 <!-- example: experiment-specific illustration -->
 Three weak modes named in the CMS tracker alignment (JINST 9 (2014) P06009,
-arXiv:1403.2286, sec. 4.4 and the summary) `[General method]`:
+arXiv:1403.2286, secs. 4.4, 5, 9.3 and 10) `[General method]`:
 
 | Mode | Deformation | What the paper reports |
 |---|---|---|
@@ -73,7 +74,8 @@ arXiv:1403.2286, sec. 4.4 and the summary) `[General method]`:
 
 Cosmic-ray tracks (which break the cylindrical symmetry), straight tracks taken with the
 field off, vertex knowledge and resonance masses are the inputs the paper uses against
-weak modes; the cosmic tracks have limited power against a twist.
+weak modes; cosmic tracks have limited power against a twist (sec. 4.4), though field-off
+cosmic tracks controlled it where they were available (sec. 5).
 <!-- /example -->
 
 Weak modes must be constrained with information beyond the track residuals the
@@ -99,25 +101,26 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
 
 ### Calibration standards and their pitfalls
 
-- **`E/p` with electrons**: bremsstrahlung lowers the track momentum and the track momentum scale enters directly;
-  use it with a bremsstrahlung-aware track fit, in bins where both are controlled.
-- **A resonance mass**: fit the line shape (natural width convolved with the resolution, with a final-state-radiation
-  tail), not the peak position; a peak position moves with the resolution and the radiation.
-- **Low-momentum scale**: a low-mass resonance anchors the scale at low transverse momentum and the Z at higher;
-  the extrapolation between the anchors in pT is part of the uncertainty.
+- **`E/p` with electrons**: bremsstrahlung lowers the track momentum, whose scale enters directly; use a
+  bremsstrahlung-aware track fit, in bins where both are controlled.
+- **A resonance mass or a source line** (also the resolution; PDG RPP 2025, sec. 36.4): fit the line shape
+  (natural width convolved with the resolution, with a final-state-radiation tail), not the peak position, which
+  moves with the resolution and the radiation.
+- **Momentum scale** (COL): a low-mass resonance anchors the scale at low pT and the Z at higher; the
+  extrapolation between them is part of the uncertainty. Without a resonance, use the anchors under "Adding a
+  tracking layer".
   <!-- example: source citation -->
-  In CMS muon performance (JINST 7 (2012) P10002, arXiv:1206.4071, section 6; read 2026-10-22) the J/psi and Z
-  dimuon masses calibrate the scale below about 100 GeV/c and cosmic-ray muons above it, and the bias found with
-  the Z is larger than with the J/psi (pT dependent).
+  In CMS muon performance (arXiv:1206.4071, sec. 6; read 2026-10-22) the J/psi and Z masses calibrate the
+  scale below about 100 GeV/c and cosmic-ray muons above it; the Z finds the larger, pT-dependent bias.
   <!-- /example -->
 - **MIP calibration**: use the most probable value of the Landau-like deposit, not the mean, which is pulled by the
-  tail (PDG RPP 2024, Passage of particles through matter, secs. 34.2.3 and 34.2.9). The most probable loss is not
-  proportional to path length (per unit length it grows as `a ln x + b`, PDG Eq. 34.12), so a pure `1/cos theta`
+  tail (PDG RPP 2025, Passage of particles through matter, secs. 34.2.3, p. 5, and 34.2.9, p. 12). The most probable
+  loss is not proportional to path length (per unit length it grows as `a ln x + b`, PDG Eq. 34.12), so a pure `1/cos theta`
   correction leaves an angle-dependent bias (in 300 um silicon about 1% at 30 deg and 5% at 60 deg): compare MPVs
   at fixed path length (angle bins) or correct with the Landau-Vavilov-Bichsel thickness dependence.
-- **Intercalibration**: pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
+- **Intercalibration** (COL): pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
   absolute scale still needs a reference.
-- **Hadronic calorimeters**: `E/p` of isolated single hadrons, with its own selection bias from the isolation cut.
+- **Hadronic calorimeters**: `E/p` of isolated single hadrons, biased by the isolation cut itself.
 
 ## Adding a tracking layer to a running detector
 
@@ -229,32 +232,10 @@ A calibration update is therefore not a local change:
 ## Propagating a calibration residual
 
 A calibration change is re-derived; a calibration *residual* (the uncertainty left after the best calibration, or a
-weak-mode bound) is propagated as a systematic. Declare its form, then compute what it does to every bin:
-
-| Form | Model | Effect on a power law `dN/dx ~ x^-gamma` |
-|---|---|---|
-| Scale | `x_m = (1+s) x` (energy or momentum scale) | every bin `(1+s)^(gamma-1) - 1 ~ (gamma-1) s`, the same in all bins |
-| Inverse offset | `1/x_m = 1/x + q delta` (curvature offset, e.g. a weak mode) | density factor `(1 - q x_m delta)^(gamma-2)`, first order `(2-gamma) q x_m delta`: grows with x_m, opposite for the two charge signs |
-| Resolution | core and tail widths scaled by `1 +/- r` | factor `E[(1+eps)^(gamma-1)]`, about `1 + (gamma-1)(gamma-2) sigma^2/2` for a Gaussian |
-
-- **Opposite-sign ratios.** One curvature offset moves both operands, in opposite directions: the signed shifts
-  subtract and their magnitudes add. A ratio does not cancel this residual; it doubles it. Same-sign operands with
-  different spectral indices cancel only partly.
-- **Validity.** In the inverse-offset row, x_m is the measured value (the bin value), x the true one. The tool warns
-  when `|q x_m delta|` exceeds 0.3, a conventional threshold, not a derived bound: the error of the first-order form
-  depends on gamma (at 0.3 about 1.4% of the factor at gamma 2.7, 3.8% at gamma 1.5, none at gamma 2 or 3), so use
-  the exact factor where `|q x_m delta|` is not small. At `q x_m delta >= 1` the mapping is no longer one-to-one and
-  events change charge sign (see [charge-confusion.md](charge-confusion.md)).
-- **No default size.** `s` or `delta` comes from the calibration itself (a reference line, E/p, a known-mass peak,
-  the external constraint on a weak mode), never from a typical value.
-- **Deliverables.** Per-variation yields and per-bin shifts, `{nominal, up, down}` for
-  `check_systematic_variations.py` (with the variance of the *difference*, because the variations reuse the same
-  events), a fully correlated covariance block, and the ratio shift. A validation record that states the
-  correlation between operands is written only on request.
-
-Tool: `propagate_scale_distortion.py` (`response`: analytic yields for power-law components; `events`: the same
-distortions applied to an event table; modes `scale`, `inverse-offset`, `resolution`, `plugin`). A seeded test
-sample comes from `toy_spectrometer.py`.
+weak-mode bound) is propagated as a systematic of declared form (scale, inverse offset, resolution), with its size
+taken from the calibration itself. The forms, their effect on a power law, opposite-sign ratios, validity and the
+deliverables of `propagate_scale_distortion.py` are in
+[calibration residual propagation](calibration-residual-propagation.md).
 
 ## Iterative loops as contract steps
 

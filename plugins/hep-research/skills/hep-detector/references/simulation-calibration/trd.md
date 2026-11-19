@@ -1,7 +1,9 @@
-# TRD: simulator-calibration specialization
+# TRD: simcal specialization
 
 Part B §11.1 items 1–8 for a transition-radiation detector (radiator plus gas drift chambers), from §3.1 derivation
 basis (2), the TRD row of §12 and §11.4. Folder rules: [index](index.md).
+simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
@@ -29,26 +31,31 @@ There is no 4a node. An ⁵⁵Fe-type source in the gas would be a mid-chain inj
 
 ## 3. Kernel properties
 
-Node 1 samplable black box; `ionisation` density (g4sim's `response.ionisation_quanta` draws a Gaussian of
-width √(F·mean), rounded and cut at 0, read from the plugin source; its `log_density` is that discrete pmf, as in
-§11.4's rule for the photon count); `drift`
-deterministic given its table; 4b and 5 densities; reconstruction deterministic.
+Node 1 samplable black box; `ionisation` density (g4sim's `response.ionisation_quanta` draws a Poisson count when
+the mean E/W is at most 10, `POISSON_LIMIT`, and otherwise a Gaussian of width √(F·mean), rounded and cut at 0, read
+from the plugin source; its `log_density` is the Poisson pmf on the first branch and the discrete rounded-Gaussian
+pmf on the second, as in §11.4's rule for the photon count; the Poisson branch has variance mean, not F·mean);
+`drift` deterministic given its table; 4b and 5 densities; reconstruction deterministic.
 
 ## 4. Storage recommendations
 
-Hits for re-digitization of stages 2–5; simreco columns for the likelihood; the cluster-charge spectrum must keep its
+Hits for re-digitization of stages 2–5; the reconstruction's output columns for the likelihood (the user's
+reconstruction: simreco has no TRD reconstruction); the cluster-charge spectrum must keep its
 tail (the tail functional needs local ESS, §3.3).
 
 ## 5. Reference catalog
 
-Pions and electrons of known momentum (known input). §12: the width alone cannot separate TR yield and gas gain; π
-samples (no TR) and known momentum are needed. Electron samples from photon conversions (tag and probe, *Inferred*).
+Pions and electrons of known momentum (known input). §12: the width alone cannot separate TR yield and gas gain;
+samples of the heavier species below the TR onset (γ ≲ 10³: about 140 GeV/c for pions and 940 GeV/c for protons,
+[particle identification](../particle-identification.md); PDG RPP 2025 sec. 35.6.5) and known momentum are needed;
+above the onset the hadron sample carries TR itself and no longer fixes the gain. Electron samples from photon
+conversions (tag and probe, *Inferred*).
 
 ## 6. Special functionals and link functions
 
 Mean cluster charge: location, log. Cluster-charge tail above a threshold: tail, logit (D41 open: P5/G4 decisions on
-tail functionals are rejected until the determining region is defined). Electron efficiency at fixed pion
-efficiency: efficiency, logit. Cluster-charge spectrum: normalized shape, alr/ilr.
+tail functionals are rejected until the determining region is defined). Hadron (pion or proton) efficiency at
+fixed electron efficiency, the inverse of the rejection factor: efficiency, logit. Cluster-charge spectrum: normalized shape, alr/ilr.
 
 ## 7. V_model correlation kernel (advisory)
 

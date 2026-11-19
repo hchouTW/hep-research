@@ -1,0 +1,53 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-056",
+  "published": "2026-11-19T03:41:49Z",
+  "modified": "2026-11-19T03:41:49Z",
+  "severity": "S2",
+  "ledger": [
+    "MULTISAMPLE-LLR-NO-LAYERS"
+  ],
+  "summary": "multisample_pid.py likelihood accepted a --layers value that names no column (empty or only commas) and reported status ok with every LLR 0 and, with --label-column, a one-point curve at efficiency 1 and mis-identification 1, instead of refusing the input as charge does.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/multisample_pid.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "f7d5722df19d1bdf93472d86721c50c4c0b53ac7",
+        "fixed_commit": "efb40a0423d3e3bf185252739b500c2785aad783"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "likelihood status and exit code",
+      "likelihood llr_summary and curve"
+    ],
+    "bias": "no layer entered the likelihood: every event's LLR was the empty sum 0 and the curve the single point efficiency 1, misid 1 (no separation), reported as a valid result with status ok, exit 0 and no warning",
+    "trigger": "multisample_pid.py likelihood with --layers empty or made only of commas"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/multisample_pid.py"
+      ],
+      "how_to_recognize": "JSON on stdout of multisample_pid.py likelihood: status ok with \"layers\": [] (inputs.layers empty or only commas), llr_summary all 0; no artifact records the run"
+    }
+  },
+  "remedy": "discard any likelihood output with layers []; rerun with --layers naming the layer columns",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/efb40a0423d3e3bf185252739b500c2785aad783"
+  ]
+}

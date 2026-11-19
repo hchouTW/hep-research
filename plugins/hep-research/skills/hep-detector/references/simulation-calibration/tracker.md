@@ -1,7 +1,8 @@
-# Tracker: simulator-calibration specialization
+# Tracker: simcal specialization
 
 Part B §11.1 items 1–8 for a silicon or gas tracker, from §3.1 derivation basis (2), the Tracker row of §12 and
-§11.4. Folder rules: [index](index.md).
+§11.4. Folder rules: [index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
@@ -11,7 +12,7 @@ Part B §11.1 items 1–8 for a silicon or gas tracker, from §3.1 derivation ba
 | `material` | 1 | ionisation, multiple scattering in material | `g4sim_run` |
 | `pairs` | 2 | electron-hole pairs, or primary electrons in gas | response stage `ionisation` |
 | `sharing` | 3 | drift, Lorentz angle, diffusion, attachment, charge sharing | `charge_sharing` or `drift_table` stage (hashed table) |
-| `preamp` | 4b | preamplifier (silicon) / gas gain (drift chamber, TPC) | `sensor` stage (gas gain: *Inferred* mapping) |
+| `preamp` | 4b | preamplifier conversion gain (silicon without intrinsic amplification: deterministic; a sensor with an implanted gain layer, LGAD: avalanche gain, a density) / gas gain (drift chamber, TPC): a density | `sensor` stage (gas gain: *Inferred* mapping) |
 | `electronics` | 5 | noise, threshold, shaping | response stage 4 |
 | `hits` | 5 | zero suppression, clustering | response stage 5 |
 | `reco` | 6–7 | clusters or hits, tracks; alignment assumed by reconstruction | reconstruction |
@@ -29,15 +30,24 @@ conversion relation and g4sim has no hand-off before stage 3, so it is not decla
 | Lorentz shift assumed by reconstruction | transport / 7 | offset | reconstruction (rerun) |
 | gas gain | 4b | multiplicative | `sensor` stage `gain` |
 | noise, threshold | 5 | width, level | `electronics` stage `noise_sigma`, `threshold` |
+| drift-time origin t₀ (gas) | time / 5 | offset | reconstruction (rerun) |
+| drift velocity, r–t relation (gas) | transport / 3 | table | inside the `drift_table` hash: not bindable |
 | residual smearing | noise / 5 | width | only when the microscopic mechanism is not modeled (§12) |
 | alignment | geometry / 7 | offsets and rotations per module | reconstruction (rerun); simulation misalignment via overlay waits for D83 (7) |
 | material thickness | geometry / 1 | length | detector-spec `params` (geometry row) |
 
+In a gas tracker the drift coordinate is undetermined without t₀ and the r–t relation. The t₀ source is a parameter
+of the instance: an external fast interaction trigger (PDG RPP 2025 sec. 35.6.4) or, in a noble-liquid TPC,
+scintillation light, a beam spill or an external trigger
+([noble-liquid detectors](../noble-liquid-neutrino-and-rare-event-detectors.md), 3D position).
+
 ## 3. Kernel properties
 
-Node 1 samplable black box; `pairs`, `preamp`, `electronics` densities; `sharing` deterministic given its table;
-readout and reconstruction deterministic. Redundant measurements use a comparison node with exactly two upstream
-observation nodes (§3.4); common modes of the two modules are decided by P3/G5, not by the graph.
+Node 1 samplable black box; `pairs`, `electronics` densities; `preamp` a density for gas gain or an internal sensor
+gain, deterministic for a silicon preamplifier without intrinsic amplification (its noise is the additive
+`electronics` noise); `sharing` deterministic given its table; readout and reconstruction deterministic. Redundant
+measurements use a comparison node with exactly two upstream observation nodes (§3.4); common modes of the two
+modules are decided by P3/G5, not by the graph.
 
 ## 4. Storage recommendations
 
@@ -48,10 +58,11 @@ rerun; keep the incidence angle per hit so that "sum of two terms" can be broken
 
 | Reference | Type | Edge |
 |---|---|---|
-| beam or cosmic tracks of known momentum | known input | into `source` |
+| beam tracks of known momentum; cosmic-ray tracks with a measured momentum or a declared momentum distribution (its uncertainty as φ, §3.4) | known input | into `source` |
+| cosmic-ray tracks without a momentum measurement (field off: straight tracks, steeply falling spectrum) | population feature | out of the observation |
 | overlapping modules | redundant measurement | out of the comparison node |
 | known resonance mass | internal constraint | out of the observation |
-| magnetic-field polarity flip, incidence-angle scan | control variables | conditioning (§3.5) |
+| magnetic-field polarity flip where the magnet can be reversed ([field-reversal running, where available](../calibration-and-alignment.md#alignment-and-weak-modes); not with a permanent magnet, *Inferred*); incidence-angle scan, or the spread of incidence angles of an isotropic cosmic-ray flux | control variables | conditioning (§3.5) |
 
 ## 6. Special functionals and link functions
 
@@ -78,4 +89,5 @@ size: multiplicity, log; its distribution: normalized shape, alr/ilr. Hit effici
 
 `assets/simulation-calibration/tracker.binding.example.json`: material thickness (φ) resimulation or surrogate
 model; noise, threshold, Lorentz shift and module offset rerun; P4 is met by the known input and by the overlap
-comparison node. Degeneracies (§12): addition in quadrature; Lorentz angle plus alignment; offset mixed into width.
+comparison node. Degeneracies (§12): addition in quadrature; Lorentz angle plus alignment; offset mixed into width;
+in gas, t₀ plus the r–t relation (sum of two terms, §3.5).

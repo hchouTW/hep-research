@@ -38,7 +38,7 @@ pair costs `w_i ≈ 3.65 eV`; a minimum-ionizing particle deposits most probably
 `d = sqrt(2 eps (V + V_bi)/(N e))`, so full depletion of a thickness `d` needs about
 `V ≈ e |N_eff| d^2/(2 eps)`. Bulk damage scales, to first order, with non-ionizing energy
 loss expressed as 1 MeV neutron-equivalent fluence (`n_eq/cm^2`): the leakage current
-grows as `alpha_I Phi_eq V` (`alpha_I ≈ 4e-17 A/cm` after the standard anneal), trapping
+grows as `alpha_I Phi_eq V` (`alpha_I ≈ 4e-17 A/cm` at 20 °C after 80 min at 60 °C; PDG RPP 2025, sec. 35.8.5, p. 74), trapping
 cuts the collected charge (effective trapping times of order 1 ns near `1e15 n_eq/cm^2`,
 so electron collection is favoured), and space charge changes the depletion voltage,
 with beneficial and then reverse annealing over months at room temperature. In a
@@ -93,7 +93,7 @@ collimated decay.
 ### Track-finding strategies
 
 The finding algorithm sets which tracks can be found at all, so its assumptions are part
-of the efficiency definition. Four families are in use:
+of the efficiency definition. Four families are common in hit-based trackers:
 
 - **Road following / combinatorial Kalman filter.** Seeds of a few hits are extended
   layer by layer; the filter's predicted covariance sets the search window, the search
@@ -115,11 +115,19 @@ of the efficiency definition. Four families are in use:
   reconstruction ([event reconstruction](event-reconstruction.md#validating-a-learned-reconstruction));
   the parameters and covariance still come from the classical fit.
 
+Wire-readout TPCs match 2D plane views or image in 3D tomographically (PDG RPP 2025, sec. 35.7.6,
+p. 61; [noble-liquid TPCs](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs));
+fits to a photon arrival pattern are in [photon likelihood reconstruction](photon-likelihood-reconstruction.md).
+
 Detectors with few measurement planes (a space-borne spectrometer, a cosmic-ray
 telescope) can test every hit combination and rank by fit quality, since the combinatorics
 are small. The risk then moves to noise and secondary hits that fit well by chance and to
 tracks with a missing plane. Whatever the strategy, quote the efficiency separately for
 the populations it can miss: displaced, low-momentum, kinked and closely spaced tracks.
+An optional ACTS wrapper for a planar telescope geometry (refit of a known hit set; seeds, CKF and ambiguity
+resolution; optional vertex step) is `<plugin root>/adapters/acts-tracking/` (status
+demonstrated-on-synthetic-data, synthetic fixtures only, no tracking quality claim); example
+`<plugin root>/examples/reconstruction-tracking/`.
 
 **Check:** The finding strategy and its trajectory assumption are stated, and efficiency is
 quoted for displaced, low-momentum and closely spaced tracks, not only for prompt isolated
@@ -235,7 +243,8 @@ measurement: eq. (35.68), p. 112, RPP 2025, eq. (35.61), p. 109, RPP 2024, read 
 
 PDG states the measurement term for many (N >= 10) uniformly spaced points; for N = 3
 the exact coefficient is `8 sqrt(3/2) = 9.8`, not `sqrt(720/7) = 10.1`. Below N = 10, `multiple_scattering.py` reports the
-exact coefficient for equally spaced points next to Gluckstern and warns (Gluckstern is 5.4% high at N = 4). `L` in the
+exact coefficient for equally spaced points next to Gluckstern and warns (Gluckstern is 5.4% high at N = 4). For arbitrary spacing and per-layer errors
+PDG eq. (35.69), p. 112, gives the exact curvature error; `tracker_resolution.py momentum` evaluates it. `L` in the
 measurement term is the track length projected onto the bending plane, and `X0` is a
 length (the radiation length in g/cm^2 divided by the density, here in m). The
 scattering term carries `beta` to the first power: PDG eq. 35.70 gives
@@ -296,8 +305,12 @@ that map is both a background to reject and a useful tool for validating the mat
 model against data.
 
 **Vertex finding** comes before the vertex fit: it decides which tracks belong to which
-vertex. Seeds come from clustering the tracks' longitudinal positions (and times, where
-measured) near the beam line or from pairs of compatible tracks. Iterative finding fits
+vertex. Seeds come from the expected interaction region: where tracks come from a beam line, from
+clustering the tracks' longitudinal positions (and times, where measured) along it; otherwise from
+pairs of compatible tracks. In a large homogeneous volume read out by photosensors the vertex is
+fitted from the relative timing and charge of the photosensors (PDG RPP 2025, sec. 36.3.1), and in
+liquid-argon TPC images vertices are found in pattern recognition together with tracks and showers
+(sec. 35.7.6; [noble-liquid TPC imaging](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs)). Iterative finding fits
 all candidate tracks, removes the least compatible, refits, and repeats for the next
 vertex. Adaptive fitting gives each track a weight from its compatibility, recomputed
 with a decreasing annealing temperature, which makes the fit robust against mis-assigned

@@ -1,7 +1,7 @@
 # High-Energy-Physics Detectors: A Quick Reference
 
 A summary of one framework for understanding, comparing and validating HEP detectors.
-Symbols and acronyms: [glossary](detector-glossary.md). Relations are labeled *exact*, *approximate*, *asymptotic*, *empirical*, or *detector-specific*.
+Symbols and acronyms: [glossary](detector-glossary.md).
 No experiment-specific performance number appears here; quote such numbers only with the
 apparatus, configuration, phase space, conditions, and source.
 
@@ -14,19 +14,10 @@ Each arrow has its own model, parameters, failure modes, and validation sample. 
 a defect by finding where it first becomes visible; find its physics impact by pushing
 it through every later arrow.
 
-**Forward/inverse view.** A measurement is a probabilistic inverse problem:
-`y = f(x; theta) + epsilon`, with likelihood `p(y|x,theta)` (simulable) and posterior
-`p(x|y,theta) ∝ p(y|x,theta) p(x)` (what reconstruction approximates). `x` = latent
-particle/event properties, `y` = recorded observables, `theta` = detector, geometry,
-field, material, electronics, environment and calibration parameters, `epsilon` =
-stochastic fluctuation and noise. Identifiability, the assumed `theta`, priors, and model
-mismatch decide how good an estimate of `x` can be. Errors in `theta` are *shared,
-correlated systematics*; more events never average them away.
-
-**Sources of spread.** Irreducible physical fluctuation (Landau, photostatistics,
-sampling) and electronic noise are stochastic and average with statistics. Calibration,
-alignment, field, material, algorithm priors, and model mismatch are systematic and do
-not.
+**Forward/inverse view and sources of spread**: [forward model](detector-measurement-framework.md#forward-model-and-inverse-problem)
+(E1 in [core equations](core-detector-equations.md)) and [sources of spread](detector-measurement-framework.md#separating-the-sources-of-spread).
+Errors in `theta` are shared, correlated systematics; more events never average them away; stochastic fluctuation
+and noise do.
 
 **Distinctions to keep.** Response (what the detector does) vs calibration (the
 correction procedure); alignment vs position/timing calibration; bias/scale vs
@@ -69,7 +60,7 @@ definitions (purity, fake, duplicate rate, `N_sigma`, width estimators) are in
 - **Fake rate**: selected objects with no valid truth match. **Mis-ID**: a real particle
   assigned the wrong species. **Duplicate rate**: truths matched by several objects,
   over matched truths (say which convention).
-  `1 - P` = fakes + mis-ID + duplicates, so fake rate is not universally `1 - P`.
+  `1 - P` = (fakes + mis-ID + extra duplicate objects)/selected, so fake rate is not universally `1 - P`.
 - **Response** (`<x_reco>/x_true`) and **bias** (`<x_reco - x_true>`), binned in *truth*. **Resolution**: width
   of `x_reco - x_true` with an explicit estimator (core `sigma`, `sigma_68`,
   `IQR/1.349`, `1.4826 MAD`, RMS or std), quoted with the **tail fraction**.
@@ -90,11 +81,11 @@ driven by one event, so quote core bias, core width, and tail separately.
 
 ## 6. Residuals, pulls, and coverage
 
-- A **biased** residual (prediction includes the measurement) has `V_r = V_meas - V_pred`
-  and is narrower than `sigma_meas`; an **unbiased** (exclusive or leave-one-out) residual has
-  `V_r = V_meas + V_pred'`. Use the unbiased one for intrinsic resolution and efficiency.
+- Residual covariance: E12 in [core equations](core-detector-equations.md). A **biased** residual (prediction
+  includes the measurement) is narrower than `sigma_meas`; use the **unbiased** (exclusive) one for intrinsic
+  resolution and efficiency.
 - Pulls have mean 0 and width 1 only if the model is correct, the estimator is unbiased,
-  the covariance (including correlations) is right, errors are Gaussian, and the
+  the covariance (including correlations) is right, and the
   population is not selected on the residual. Width > 1: underestimated errors or
   mismatch; < 1: overestimated errors or biased residual with `sigma_meas`.
 - Read plots for: mean trends (bias, misalignment), width trends (resolution scaling),
@@ -133,7 +124,7 @@ sideband, cosmic ray) whose own bias is part of the uncertainty.
   control. Changing only a final weight is insufficient for a kinematic variation.
 - State each uncertainty's correlation model: normalization/shape,
   correlated/uncorrelated, symmetric/asymmetric, local/global, time-correlated.
-- Use `V_f ≃ J V_x J^T` only where responses are near-linear; otherwise use toys or
+- Use linear propagation (E14) only where responses are near-linear; otherwise use toys or
   profiling.
 - Avoid double counting, noisy (finite-MC) variations promoted to shapes, excessive
   smoothing, arbitrary envelopes, and unjustified decorrelation.
@@ -158,13 +149,13 @@ mode.
 
 | Symptom | First suspects |
 |---|---|
-| Dimuon mass shifts with `q*eta` | Alignment weak mode, field map |
+| Mass peak vs `q` and direction | Alignment weak mode, field map |
 | Residual left/right structure vs drift distance | `t0`, `r(t)`, wire position (sign pattern depends on the residual convention, [glossary](detector-glossary.md)) |
 | Coherent residual trend with rate or radius | Space-charge distortion |
-| Energy scale wrong vs `eta` | Upstream material, intercalibration |
+| Energy scale wrong vs angle | Upstream material, intercalibration |
 | PID efficiency drifting with run | Refractive index, gain, clock |
 | Charge shrinks with drift time | Electron lifetime / purity |
-| Jet response depends on flavor | `e/h` non-compensation |
+| Hadron response vs species | `e/h` non-compensation |
 | Resolution improves after a reco-level cut | Selection bias, not detector improvement |
 | Pulls wider than 1 with narrow residuals | Underestimated errors or missing correlations |
 

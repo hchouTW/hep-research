@@ -8,13 +8,21 @@ jet energy scale and its calibration are treated at the object level in
 [physics-objects-jets-btagging-met.md](physics-objects-jets-btagging-met.md),
 and the calibration machinery itself in
 [calibration and alignment](calibration-and-alignment.md).
+An optional development binding of a cell chain and clustering for a homogeneous analog cell grid is
+`<plugin root>/adapters/calo-cluster/` (status demonstrated-on-synthetic-data, synthetic fixtures only, no
+calorimetry quality claim; its energy is clustered deposited energy, never incident energy); example
+`<plugin root>/examples/reconstruction-calorimetry/`.
 
 ## The measurement, and why it complements tracking
 
-A calorimeter absorbs a particle and measures the energy deposited. Its defining
+A shower calorimeter absorbs a particle and measures the energy deposited. Its defining
 property is that relative resolution *improves* with energy, roughly as `1/sqrt(E)`,
 because the measurement is a count of shower constituents subject to Poisson
-fluctuations. This is exactly opposite to a magnetic spectrometer, whose relative
+fluctuations. (Thermal, low-temperature calorimeters measure a deposit through heat or
+phonons, without a shower; their resolution limit is set by the heat capacity and the
+temperature, independent of the deposit, and does not follow this scaling: see the
+cryogenic bolometers of
+[noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md).) This is exactly opposite to a magnetic spectrometer, whose relative
 resolution degrades with rigidity. The two are therefore complementary: tracking wins
 at low momentum, calorimetry wins at high energy, and the crossover is a basic design
 parameter of any experiment that has both. A calorimeter also measures neutral
@@ -25,13 +33,18 @@ particles, which leave no track at all.
 A high-energy electron or photon initiates a cascade: bremsstrahlung and pair
 production alternate, roughly doubling the number of particles every radiation length
 `X0`, while the average energy per particle halves. The cascade stops multiplying at
-the **critical energy**, below which ionization loss overtakes radiative loss, and the
-remaining particles are absorbed.
+the **critical energy** `E_c`, where ionization loss takes over from radiation, and the
+remaining particles are absorbed. Two definitions are in use: the energy at which the two
+loss rates are equal, and Rossi's, at which the ionization loss per radiation length
+equals the electron energy (PDG RPP 2025, "Passage of particles through matter",
+sec. 34.4.4). The fits below and the Molière radius use Rossi's.
 
-Approximate scales, with `Z`, `A` the absorber's atomic number and atomic mass (g/mol)
-(empirical fits from the PDG Review of Particle Physics, "Passage of particles through
-matter", radiation length and electromagnetic cascades; use the PDG tabulated material
-values when they exist):
+Approximate scales, with `Z`, `A` the absorber's atomic number and atomic mass (g/mol);
+use the PDG tabulated material values when they exist. `X0` is Dahl's compact fit
+(PDG RPP 2010, "Passage of particles through matter", sec. 27.4.1, eq. 27.24), within
+2.5% of Tsai's computed values (RPP 2025 sec. 34.4.2, eq. 34.25) except for helium (about
+5% low); `E_c` is the fit to Rossi's definition (RPP 2025 Fig. 34.14); `R_M` is
+eq. 34.37:
 
     X0    ~= 716.4 * A / (Z * (Z + 1) * ln(287 / sqrt(Z)))   g/cm^2
     E_c   ~= 610 MeV / (Z + 1.24)    (solids and liquids; 710 MeV / (Z + 0.92) for gases)
@@ -44,8 +57,11 @@ logarithmically with energy - measured in `X0`, the depth of shower maximum scal
 range, and depth requirements are modest. Shower *width* is set by the Molière radius,
 which is a material property largely independent of energy, so lateral containment is
 essentially an energy-independent geometric requirement. Because the Molière radius
-sets the transverse scale, granularity finer than it buys shower-shape discrimination,
-not better energy resolution.
+sets the transverse scale, for an electromagnetic shower granularity finer than it buys
+position resolution, shower-shape discrimination and two-shower separation, not better
+energy resolution. For hadronic showers, segmentation fine enough to resolve the
+electromagnetic sub-showers (scales `X0` and `R_M`) enables software compensation, which
+does improve the energy resolution (see Routes to compensation below).
 
 Longitudinal and lateral shower shape are the basis of calorimeter-level particle
 identification. Electromagnetic showers are compact, start early, and deposit a
@@ -67,6 +83,16 @@ sampling fraction introduces an additional, dominant Poisson fluctuation - the
 **sampling term** - which is the price paid for compactness, cost, and the ability to
 build a deep hadronic section.
 
+Homogeneous calorimetry is not limited to crystals and noble liquids: in non-accelerator
+and neutrino-beam experiments water or ice, scintillator, a noble liquid or the
+atmosphere itself serves as the medium (PDG RPP 2025, sec. 35.10.1). Those cases are
+covered in [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+(LArTPC calorimetry, water Cherenkov, liquid scintillator),
+[ground-based detection arrays](ground-based-detection-arrays.md#fluorescence-detectors)
+(the fluorescence calorimetric energy and its invisible-energy correction),
+[extensive air showers](extensive-air-showers.md) and
+[gamma-ray imaging and polarimetry](gamma-ray-imaging-and-polarimetry-reconstruction.md).
+
 The practical distinction for analysis is that a sampling calorimeter's energy scale
 depends on the sampling fraction, which is *not* the same for electromagnetic and
 hadronic showers. That difference is the origin of the non-compensation problem below.
@@ -78,8 +104,17 @@ quadrature:
 
     (sigma_E / E)^2 = a^2 / E + b^2 / E^2 + c^2
 
+The letters are not standard. PDG RPP 2025 writes `A/sqrt(E) (+) B/E (+) C` (this page's
+order) in sec. 35.10.1.1, but `a/sqrt(E) (+) b (+) c/E`, with `b` the constant and `c` the
+noise term, in sec. 35.10.2, as many test-beam papers do. Identify each published term by
+its energy dependence (`1/sqrt(E)`, `1/E`, constant), not by its letter, before comparing
+values or passing them to `calorimeter_resolution.py` (`--noise` is the `1/E` term in GeV,
+`--constant` the energy-independent one).
+
 - **`a`, the stochastic (sampling) term** - Poisson fluctuations in the number of
-  detected shower constituents. Dominates at low energy.
+  detected shower constituents. Dominates at intermediate energies: below `E = (b/a)^2`
+  the noise term dominates, and above `E = (a/c)^2` the constant term
+  (`calorimeter_resolution.py` reports both crossovers).
 - **`b`, the noise term** - electronic noise and, at a collider, pileup energy inside
   the reconstruction cone. It enters as a fixed energy uncertainty, so its *relative*
   contribution falls as `1/E`. It is the term that grows when pileup increases, and
@@ -100,12 +135,17 @@ the constant term forbids. `<plugin root>/skills/hep-detector/scripts/calorimete
 from measured points and reports which one dominates at a given energy and where the
 crossovers lie; note that the parameterization is *linear* in `(a^2, b^2, c^2)` over
 the basis `{1/E, 1/E^2, 1}`, so the fit is an exact linear least squares with no minimizer and no
-starting values required. A squared coefficient can come out negative on noisy or narrow-range data;
+starting values required. The script fits the quadrature form only: a linear sum of the
+stochastic and constant terms sometimes describes the energy dependence better, and its
+coefficients lose this interpretation and are not comparable with these (PDG RPP 2025,
+sec. 35.10.1.1). A squared coefficient can come out negative on noisy or narrow-range data;
 the script reports it as a failure. Do not clip it to zero.
 
 Fitting fewer than three distinct energies cannot separate three terms, and fitting
-over a narrow energy range gives strongly correlated parameters even when it converges:
-quote the covariance, or at least the range fitted, alongside the values.
+over a narrow energy range gives strongly correlated parameters even though the linear fit
+always returns a solution: quote the covariance, or at least the range fitted, alongside the
+values. The script's covariance (`covariance_squared_terms`) is that of `(a^2, b^2, c^2)`,
+not of `(a, b, c)`.
 
 ## Hadronic showers and non-compensation
 
@@ -125,9 +165,9 @@ If the calorimeter's response to the electromagnetic component differs from its
 response to the hadronic component (the ratio conventionally written `e/h` differs from
 1, the **non-compensating** case, which is the usual case), then the measured energy
 depends on the fluctuating electromagnetic fraction `f_em`. The pion-to-electron
-response ratio is approximately as follows. PDG RPP 2025, sec. 35.10, states the non-linearity
-and `h/e < 1` but does not print this ratio; its eqs. 35.51-35.52 give the same form per
-channel for dual readout.
+response ratio is approximately as follows. PDG RPP 2025, sec. 35.10.3, states the non-linearity
+and that `<h/e>` is smaller than unity for many, but not all, hadronic calorimeters, but does
+not print this ratio; its eqs. 35.51-35.52 give the same form per channel for dual readout.
 
     pi/e = f_em + (1 - f_em) * h/e
 
@@ -171,9 +211,17 @@ radius `R_M` and about 99% within `3.5 R_M` (PDG RPP 2025, sec. 34.5). **Dead
 material** upstream or between compartments absorbs energy invisibly and must be
 corrected using the observed energy sharing between compartments.
 
+Some instruments do not contain the shower at all, and leakage is then not a
+correction but the measurement regime. A calorimetric space or balloon instrument does
+not contain the hadronic shower and obtains the incident energy by unfolding the
+deposited energy with a simulated response matrix (calorimetric instruments in
+[space-based direct detection](space-based-direct-detection.md)); a fluorescence
+detector corrects its calorimetric energy for the invisible energy carried by muons and
+neutrinos ([ground-based detection arrays](ground-based-detection-arrays.md#fluorescence-detectors)).
+
 All three are energy-dependent and direction-dependent, so a single global correction
-is inadequate; corrections are normally parameterized in energy and pseudorapidity or
-polar angle, and their residual uncertainty flows into the constant term.
+is inadequate; corrections are normally parameterized in energy and in the direction of incidence
+and impact point on the calorimeter (at a collider, pseudorapidity or polar angle), and their residual uncertainty flows into the constant term.
 
 ## Shower position, direction and shape
 
@@ -200,9 +248,12 @@ estimated from a cluster besides its energy.
   longitudinal profile are common inputs. Hadronic showers start later on average because
   the interaction length exceeds the radiation length (strongly in high-`Z` absorbers; the
   contrast is weaker in low-`Z` media). Two nearby photons (a neutral-pion
-  decay) appear as a broadened or double-peaked deposit. In an imaging calorimeter without
-  a magnet in front of it, a multivariate combination of shape variables is often the main
-  electron-proton separator. Its proton rejection is measured on data, with control
+  decay) appear as a broadened or double-peaked deposit. In a calorimetric space or
+  balloon instrument (an imaging calorimeter without a magnet in front of it; see
+  [space-based direct detection](space-based-direct-detection.md) and
+  [gamma-ray imaging and polarimetry](gamma-ray-imaging-and-polarimetry-reconstruction.md)),
+  a multivariate combination of shape variables separates electrons from protons. Its
+  proton rejection is measured on data, with control
   samples tagged by an independent subsystem or by template fits of the shape variable,
   because the simulated tails of hadronic showers are the least reliable part of the
   model.

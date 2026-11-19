@@ -6,7 +6,12 @@ detectors, precision timing in trackers and calorimeters, and beam/start-time,
 bunch-timing, and luminosity monitors. The TOF physics (`beta`, `m^2`, separation
 ceiling) is in [particle identification](particle-identification.md); event-level timing/association is in
 [event reconstruction](event-reconstruction.md); `<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` evaluates
-TOF separation. This file adds the timing-error budget and the objects.
+TOF separation. This file adds the timing-error budget and the objects. An optional development binding of a
+counter time chain (offset, walk and propagation steps), event-time estimators, TOF and beta, and TOF species
+likelihoods is `<plugin root>/adapters/timing-pid/` (status demonstrated-on-synthetic-data; synthetic constants
+only, no timing, TOF, PID, dE/dx, calibration or counting quality claim). Environment codes
+used here: COL collider; FXT fixed-target and test beam; SPC space and balloon; UGD underground, neutrino and rare-event;
+GND ground-based cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy.
 
 ## Relations (definition, exact unless noted)
 
@@ -17,8 +22,11 @@ beta = L / (c t)        m^2 = p^2 (1/beta^2 - 1)      Delta t = (L/c) [ (1/beta_
 `L` path length along the track (not straight-line distance; requires the track fit),
 `t` measured flight time (stop minus start), `p` momentum. The TOF separation of two
 species with the same `p` in the ultrarelativistic limit is
-`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate); separation in `N_sigma` falls as
-`1/p^2` and is lost above a momentum set by `L` and total time resolution.
+`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate, valid only for `p >> m`); separation in
+`N_sigma` falls as `1/p^2` and is lost above a momentum set by `L` and total time resolution.
+At `p` comparable to `m`, where TOF is used, take the exact form above (the limit overestimates
+`Delta t` by 22% for pi/K at 0.5 GeV/c and by a factor of about 2 at 0.2 GeV/c); below `m` the
+difference falls as `1/p` ([core detector equations](core-detector-equations.md), E8).
 
 ## Pulse-time extraction
 
@@ -41,13 +49,13 @@ sigma_calib^2 + sigma_geom^2 + sigma_ref^2`
 
 | Term | Origin | Scaling / handle |
 |---|---|---|
-| Sensor / intrinsic | transit-time spread (PMT), Landau (silicon), drift (gas) | detector design; irreducible per hit |
-| Photostatistics | first-photon time `tau_d/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_d/N_pe`; with rise time `~ sqrt(tau_r tau_d/N_pe)` (approximate) | more photons, faster rise and decay |
+| Sensor / intrinsic | single-photoelectron transit-time spread (PMT, MCP, SiPM), entering a many-photon hit about as `TTS/sqrt(N_pe)`; Landau (silicon), drift (gas) | detector design; the silicon and gas terms are irreducible per hit |
+| Photostatistics | first-photon time `tau_decay/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_decay/N_pe`; with rise time `~ sqrt(tau_rise tau_decay/N_pe)` (approximate; `tau_decay`, `tau_rise` the scintillation decay and rise times, not the dead time `tau_d` of the [glossary](detector-glossary.md)) | more photons, faster rise and decay |
 | Electronics | jitter (`noise/slope`), TDC bin `/sqrt(12)` (rms over random phases; at a fixed phase it averages out only with >= 0.5 bin of noise), time walk | design, calibration ([front-end electronics](front-end-electronics-and-signal-processing.md)) |
 | Clock | distribution jitter and offsets | global part: common to all channels, not averaged, but cancels in time differences within one event; local part (per board/PLL): averages over independent boards |
 | Calibration | `t0` per channel, walk curve, cable/fiber delay | in-situ residual method |
 | Geometry | path length, position along the bar, `L` error | tracking quality |
-| Reference/start time | collision time, event-start time | improves as `1/sqrt(N_tracks)` when estimated from tracks; dominates in low-multiplicity events or when only the bunch-crossing spread is known |
+| Reference/start time | the experiment's start-time source: collision or bunch-crossing time (COL); the prompt gamma flash of a pulsed neutron source, corrected for its flight time (NUC; arXiv:2505.00042, sec. 4.1); a timing plane of the same instrument, so `t` is a difference of two measured times and both planes' terms enter (SPC; [particle identification](particle-identification.md)); or an event time fitted with the direction or vertex from the hit times (GND, UGD; [ground-based detection arrays](ground-based-detection-arrays.md), [neutrino astronomy](neutrino-astronomy.md)) | improves as `1/sqrt(N_tracks)` when estimated from tracks; dominates in low-multiplicity events or when only the bunch-crossing spread is known (COL) |
 
 Keep four resolutions apart: **single-hit** (one channel), **per-track** (all hits on
 one track, after averaging the uncorrelated part), **event-time** (start time
@@ -58,10 +66,15 @@ uncorrelated terms as `1/sqrt(N)`; correlated ones (clock, `t_ref`) remain.
 **Track-to-hit association and multi-hit ambiguity.** A time is meaningless without the
 right track: extrapolate the track to the layer, match by position (and time), and
 resolve multiple candidate hits/tracks per cell. Wrong association creates a late/early
-tail. **Bunch assignment**: the measured time must be assigned to the right bunch
-crossing; out-of-time pileup and late tails (afterpulses, delayed light, slow
-components) produce non-Gaussian tails and mis-assigned bunches, so quote core width
-and tail fraction separately.
+tail. **Time-window assignment**: the measured time must be assigned to the right time
+window of the experiment's start-time source, the bunch crossing at a collider (COL). A
+self-triggered instrument has no external window: its own timing planes or a fitted
+event time set the reference, and the ambiguity is instead the direction of travel, the
+sign of the time difference between planes (SPC; arXiv:hep-ex/0305074, sec. 2;
+[particle identification](particle-identification.md)), or the synchronisation of many
+stations or optical modules (GND, UGD; PDG RPP 2025, sec. 36.3.2). Out-of-time pileup and
+late tails (afterpulses, delayed light, slow components) produce non-Gaussian tails and
+mis-assigned windows, so quote core width and tail fraction separately.
 
 ## Technologies
 
@@ -84,19 +97,26 @@ and tail fraction separately.
   precision photon/particle timing; aging by charge extracted, ion feedback.
 - **RPC/MRPC**: gas gap timing, rate-dependent ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 - **Precision timing in trackers/calorimeters**: time assigned to tracks or clusters
-  (e.g. shower-time for photons, vertex-time for pileup rejection); needs the same
+  (e.g. shower-time for photons, vertex-time for pileup rejection (COL)); needs the same
   calibration/clock discipline, and a time-of-arrival correction for shower depth and
   time-walk with energy.
-- **Beam/start-time, bunch-timing, luminosity monitors**: give `t_0` and bunch
+- **Beam/start-time, bunch-timing, luminosity monitors (COL, FXT)**: give `t_0` and bunch
   identification; beam-phase drift and asymmetric bunch shapes are systematic inputs to
-  every timing analysis ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Luminosity monitors
+  every timing analysis at an accelerator ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Luminosity monitors
   count coincidences or hits and carry their own linearity/pileup correction.
 
 ## Calibration and diagnostics
 
 Per-channel `t0` and walk from a common reference (laser, pulser, minimum-ionizing
-particle), then global offset (start time) and clock-transfer from the accelerator
-clock; validated with **time residuals** `t_meas - t_pred(p, m, L)` per species, using a
+particle); the walk curve must span the amplitude range of the data: for nuclei (SPC, NUC,
+heavy-ion beams) the amplitude scales as `Z^2`, so a curve from minimum-ionizing particles
+does not transfer ([front-end electronics](front-end-electronics-and-signal-processing.md#time-pickoff)).
+Then the global offset (start time) and the distribution of the experiment's
+reference clock: the accelerator clock at an accelerator; synchronisation signals sent
+to the optical modules, checked with in-situ LED or laser flashers (UGD neutrino
+telescopes; PDG RPP 2025, sec. 36.3.2); the synchronisation of fluorescence and surface
+detectors of a hybrid air-shower array (GND; sec. 36.2.1); or the instrument's own
+trigger and clock (SPC; arXiv:hep-ex/0305074, sec. 2); validated with **time residuals** `t_meas - t_pred(p, m, L)` per species, using a
 sample of known particle type (muons, identified pions, electrons at `beta = 1`).
 Residual versus amplitude reveals walk; versus position along the bar reveals
 propagation; versus run/fill reveals clock drift.
@@ -109,13 +129,15 @@ propagation; versus run/fill reveals clock drift.
 - **Natural objects**: hit time, track time, event start time. **Informative
   residual**: time residual to the expected time for a known species vs amplitude,
   position, and run.
-- **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2`.
+- **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2` for `p >> m`.
 - **Conventions**: quote resolution with the reference, core Gaussian sigma and tail
   fraction; state whether clock jitter is included.
-- **Tails**: wrong-bunch, afterpulses, late light, mis-association.
+- **Tails**: wrong-bunch (COL) or wrong-window, afterpulses, late light, mis-association.
 - **Dependence**: rate (baseline shifts), dose (LGAD gain, SiPM dark counts), temperature,
-  clock distribution. **Data sample**: `Z`/`J/psi -> mu mu` or cosmic muons, identified
-  species in overlapping momentum ranges.
+  clock distribution. **Data sample**: `Z`/`J/psi -> mu mu` (COL); cosmic muons (ground and
+  underground set-ups); secondary nuclei of known charge in an ion test beam, for the resolution versus charge
+  (FXT; arXiv:hep-ex/0305074, sec. 3); identified species in overlapping momentum ranges. A sample for a counter in
+  flight (SPC) is not given here (a gap).
 - **Transfers**: walk/offset calibration and jitter budget to every timed detector;
   **does not transfer**: TOF's `1/p^2` separation ceiling to non-timing PID.
 
@@ -135,5 +157,5 @@ propagation; versus run/fill reveals clock drift.
 
 - A time-resolution budget with each term's origin and whether it averages.
 - Single-hit, per-track, event-time, and system resolutions, with tail fractions.
-- The association rule (track-to-hit, bunch assignment) and its failure rate.
+- The association rule (track-to-hit, time-window assignment) and its failure rate.
 - Calibration chain (`t0`, walk, clock) and the residual used to validate it.

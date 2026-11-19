@@ -16,7 +16,10 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
   stopping-power    (reference) mean energy loss of transmitted primaries (E_in - E_exit), as linear dE/dx, against
                     the Bethe mean rate (PDG RPP 2024 eq. 34.5, valid 0.1 <~ beta gamma <~ 1000 to a few percent)
                     at the mean energy in the slab; non-transmitted primaries and primaries that ended in a process
-                    other than Transportation are excluded and counted. Deposit is not energy loss.
+                    other than Transportation are excluded and counted. Deposit is not energy loss. Heavy charged
+                    particles only (mu+-, pi+-, proton, deuteron, alpha): e- and e+ are refused here and in
+                    thin-layer-mpv, thin-layer-width and the reference command (their collision stopping power is
+                    RPP eqs. 34.23-34.24, and their mean loss includes bremsstrahlung).
   range             (reference) mean projected stopping depth of primaries in a thick block against a user-supplied
                     PSTAR/ASTAR projected range (dataset-record, interpolated in log-log); primaries that ended in a
                     hadronic process are excluded and counted (PSTAR excludes nuclear interactions).
@@ -29,8 +32,10 @@ only validation evidence; `sanity` benchmarks are plausibility checks; `interfac
                     than tol/5 + 2 SE from the merged histogram's mode, is not applicable (incomplete).
   thin-layer-width  (sanity) FWHM of the deposit distribution against 4 xi (thin-layer widths are wider: RPP 2024).
   multiple-scattering (sanity) core width of the projected exit angle (both projections, RMS of the central 98 %
-                    divided by the Gaussian truncation factor 0.8673) against Highland from multiple_scattering.py,
-                    run as a subprocess (RPP 2024 gives no numerical accuracy for it).
+                    divided by the Gaussian truncation factor 0.9346, the RMS of a unit Gaussian truncated to its
+                    central 98 %) against Highland from multiple_scattering.py, run as a subprocess at the
+                    benchmark's particle and energy (rigidity p / |z|, mass and charge number; RPP 2024 gives no
+                    numerical accuracy for it).
   em-shower-shape   (sanity) depth of the longitudinal maximum from per-copy deposits against t_max = ln(E/E_c) + C_j
                     (config keys layer_x0 and critical_energy_MeV); not applicable when the stack does not contain t_max.
   shower-containment (sanity) rear leakage fraction of an e+-/gamma shower against the PDG gamma-function profile
@@ -184,7 +189,10 @@ N_A = K.constant("avogadro_constant").value
 K_BETHE = 4 * math.pi * N_A * R_E_CM ** 2 * ME  # MeV mol^-1 cm^2 (PDG Table 34.1: 0.307075)
 J_LANDAU = 0.200  # PDG RPP 2024 eq. 34.12
 PATH_LENGTH = "primary_path_length"  # element_sim's semantic name (column map) of the per-element primary path
-TRUNC_98 = 0.8673  # RMS of a unit Gaussian truncated to its central 98 %
+# RMS of a unit Gaussian truncated to its central 98 %: sqrt(1 - 2 z phi(z) / (2 Phi(z) - 1)), z = Phi^-1(0.99),
+# 0.93459 (its square, the truncated variance, is 0.87346)
+_Z99 = statistics.NormalDist().inv_cdf(0.99)
+TRUNC_98 = math.sqrt(1 - 2 * _Z99 * statistics.NormalDist().pdf(_Z99) / (2 * 0.99 - 1))
 GRADES = {"stopping-power": "reference", "range": "reference", "thin-layer-mpv": "reference",
           "thin-layer-width": "sanity", "multiple-scattering": "sanity", "em-shower-shape": "sanity",
           "shower-containment": "sanity", "longitudinal-profile": "setup-matched",
@@ -224,6 +232,19 @@ def particle_props(name: str) -> tuple[float, int]:
     if name in ("pi+", "pi-"):
         return K.particle("pi+", "mass", unit="MeV").value, 1 if name == "pi+" else -1
     raise BenchmarkError(f"no mass for particle {name!r} (known: {sorted(table) + ['pi+', 'pi-']})")
+
+
+LEPTONS = ("e-", "e+")
+
+
+def heavy_particle_props(name: str, what: str) -> tuple[float, int]:
+    """particle_props for a reference stated for heavy charged particles (Bethe, RPP eq. 34.5; Landau-Vavilov,
+    eq. 34.12, both in RPP sec. 34.2): electrons and positrons are refused (BenchmarkError)."""
+    if name in LEPTONS:
+        raise BenchmarkError(f"{what}: the reference (RPP 2024 sec. 34.2, eqs. 34.5 and 34.12) is stated for heavy "
+                             f"charged particles; {name} is refused (e+- collision stopping power is eqs. 34.23-34.24, "
+                             "and their energy loss includes bremsstrahlung)")
+    return particle_props(name)
 
 
 def check_inputs(energy_mev, thickness_mm=None) -> None:
@@ -432,7 +453,7 @@ class Summary:
 
 def bench_stopping_power(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], "stopping-power")
     o = summ.obs(b["observable"], "primary.energy_loss", TRANSMITTED, "the energy loss of transmitted primaries")
     e = summ.estimate(o, "mean")
     t_cm = b["thickness_mm"] / 10
@@ -491,7 +512,7 @@ def bench_range(b: dict, summ: Summary, study: dict, cfg_dir: Path) -> dict:
 
 def bench_mpv(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], "thin-layer-mpv")
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
     width = b.get("binning", {}).get("bin_width_MeV")
     if not isinstance(width, (int, float)) or width <= 0:
@@ -530,7 +551,7 @@ def bench_mpv(b: dict, summ: Summary, study: dict) -> dict:
 
 def bench_width(b: dict, summ: Summary, study: dict) -> dict:
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], "thin-layer-width")
     lv = landau_mpv(b["energy_MeV"], mass, z, mat, b["thickness_mm"])
     o = summ.obs(b["observable"], f"energy_deposit.{b['slab']}", TRANSMITTED, "the deposit of transmitted primaries")
     hist, w = S.merged_accumulators(o)["hist"], o["bins"]["width"]
@@ -558,7 +579,11 @@ def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
     stack = b.get("highland_stack")
     if not stack:
         raise BenchmarkError("multiple-scattering: highland_stack (a multiple_scattering.py input) is required")
-    p = subprocess.run([sys.executable, "-B", str(MS_SCRIPT), str(cfg_dir / stack)], capture_output=True, text=True,
+    mass, z = particle_props(b["particle"])
+    ekin = float(b["energy_MeV"])
+    rigidity = math.sqrt(ekin * (ekin + 2 * mass)) / 1000 / abs(z)  # GV: Highland at the benchmark's p, beta and z
+    p = subprocess.run([sys.executable, "-B", str(MS_SCRIPT), str(cfg_dir / stack), "--rigidity", repr(rigidity),
+                        "--mass", repr(mass / 1000), "--charge", str(abs(z))], capture_output=True, text=True,
                        timeout=600)
     try:
         ms = json.loads(p.stdout)
@@ -567,9 +592,14 @@ def bench_ms(b: dict, rows: list[dict], study: dict, cfg_dir: Path) -> dict:
     ref = ms.get("scattering_angle_rad")  # Highland theta0 of the stack (multiple_scattering.py)
     if not isinstance(ref, (int, float)):
         raise BenchmarkError(f"multiple_scattering.py output has no theta0: {sorted(ms)}")
+    got = ms.get("rigidity_gv")
+    if not isinstance(got, (int, float)) or abs(got - rigidity) > 1e-12 * rigidity or ms.get("charge_number") != abs(z):
+        raise BenchmarkError(f"multiple_scattering.py evaluated Highland at rigidity {got} GV, charge "
+                             f"{ms.get('charge_number')}, not at the benchmark's {rigidity:.10g} GV, charge {abs(z)}")
     return {"statistic": "core width of the projected exit angle (rad)", "geant4": g4, "reference_value": ref,
             "relative_difference": (g4 - ref) / ref, "verdict": "plausible" if abs(g4 / ref - 1) <= 0.2 else
             "implausible", "plausibility_window": "within 20 % of Highland", "selection": sel,
+            "highland_kinematics": {"rigidity_GV": rigidity, "beta": ms.get("beta"), "charge_number": abs(z)},
             "reference": {"source": f"Highland (Lynch and Dahl) via multiple_scattering.py; {RPP}, eq. 34.16",
                           "version": "RPP 2024", "validity": "sanity only: RPP 2024 gives no numerical accuracy; "
                                                               "the beta dependence is poor for large Z, small x"}}
@@ -916,9 +946,10 @@ def bench_field_g4sim(b: dict, cfg_dir: Path) -> dict:
         energy, x0, y0, z0, ux, uy, uz = starts[int(row["event_id"])]
         transverse = math.hypot(ux, uy)
         radius = energy * transverse / (0.299792458 * abs(field))  # mm: a massless charged geantino, p = E
-        turned = (float(row["z_mm"]) - z0) / uz * transverse / radius * (1 if field > 0 else -1)  # a positive charge turns clockwise about +z
+        turned = (float(row["z_mm"]) - z0) / uz * transverse / radius  # the angle turned, never negative
         cosine, sine = ux / transverse, uy / transverse
-        along, across = radius * math.sin(turned), -radius * (1 - math.cos(turned))
+        # a positive charge turns clockwise about +z for B > 0 and anticlockwise for B < 0: only the bend's side flips
+        along, across = radius * math.sin(turned), -math.copysign(1.0, field) * radius * (1 - math.cos(turned))
         x = x0 + along * cosine - across * sine
         y = y0 + along * sine + across * cosine
         worst = max(worst, math.hypot(float(row["x_mm"]) - x, float(row["y_mm"]) - y) * 1000)
@@ -1169,8 +1200,8 @@ def _exit_angles(rows: list[dict], plane_id: int) -> dict[int, list[float]]:
 
 def _core98(angles: list[float], fraction: float = 0.98) -> float:
     """Lynch and Dahl's core width: the sigma of a zero-mean Gaussian fitted (maximum likelihood, truncated normal) to
-    the angles inside the symmetric window |x| <= c that holds the central fraction F. Not RMS / 0.8673: that assumes
-    the inner 98 % is itself Gaussian, and the single-scattering tail inside the window widens it by about 10 %."""
+    the angles inside the symmetric window |x| <= c that holds the central fraction F. Not RMS / TRUNC_98: that
+    assumes the inner 98 % is itself Gaussian, and the single-scattering tail inside the window widens it."""
     mags = sorted(abs(x) for x in angles)
     c = mags[min(len(mags) - 1, int(fraction * len(mags)))]
     inside = [x * x for x in angles if abs(x) <= c]
@@ -1356,7 +1387,7 @@ def slab_expected_shift(b: dict, study: dict, injected_relative: float) -> float
     if not -1.0 < d:
         raise BenchmarkError("injected_relative must be above -1")
     mat = material(study, b["material"])
-    mass, z = particle_props(b["particle"])
+    mass, z = heavy_particle_props(b["particle"], b["benchmark"])
     e, t = float(b["energy_MeV"]), float(b["thickness_mm"])
     if b["benchmark"] == "stopping-power":
         loss = bethe(e, mass, z, mat) * mat["density_g_cm3"] * t / 10
@@ -1691,7 +1722,7 @@ def cmd_plan_controls(args) -> tuple[str, dict]:
 def cmd_reference(args) -> tuple[str, dict]:
     study = json.loads(Path(args.study_spec).read_text(encoding="utf-8"))
     mat = material(study, args.material)
-    mass, z = particle_props(args.particle)
+    mass, z = heavy_particle_props(args.particle, "reference")
     check_inputs(args.energy_mev, args.thickness_mm)
     out = {"bethe_MeV_cm2_g": bethe(args.energy_mev, mass, z, mat), "w_max_MeV": w_max(args.energy_mev, mass),
            "beta_gamma": kinematics(args.energy_mev, mass)[2],

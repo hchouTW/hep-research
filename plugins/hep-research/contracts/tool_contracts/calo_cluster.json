@@ -263,7 +263,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a configuration key that is not version 4's); stdout carries status rejected (core/status.py) and the reason; no product is written"
+     "meaning": "the product is refused (missing, not UTF-8, malformed or incomplete, as product.read_product names it); stdout carries status rejected (core/status.py) and the reason"
     },
     {
      "exit_code": 3,

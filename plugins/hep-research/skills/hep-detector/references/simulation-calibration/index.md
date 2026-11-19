@@ -4,7 +4,8 @@ The specialization interface of simcal (simulator parameter calibration), the wo
 (`docs/dev/simulator-calibration/simulator-calibration-v7.37.4-clean-en.md`, §11.1, §12, §13), for eight detector
 types. simcal differs from detector calibration and alignment (hep-detector) and from the calibration of ML model
 outputs (hep-ml). Each page gives the eight items a detector type must provide (§11.1) and a node-binding example (§11.4) that
-the existing generic layer accepts unchanged. The engine, gates and scripts are hep-statistics' (`simcal_*.py`); this
+the existing generic layer accepts unchanged. The engine, gates and scripts are hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts), `simcal_*.py`); this
 folder only describes detector types. Experiment-specific content (control samples, conditions, thresholds, model
 identities) belongs to an experiment instance (§11.2), never here.
 
@@ -67,8 +68,14 @@ parameters it could not bind and why.
 - Hashed tables (`charge_sharing`, `drift_table`) carry no stage parameter value, so Lorentz angle, diffusion,
   charge sharing, cluster size and the r–t relation have no Table 2 row (Tracker, TRD, μ detector).
 - No gas-avalanche stage kind: gas gain is bound to the `sensor` stage gain (*Inferred* mapping; TRD, μ detector).
-- No field for TTS, the effective light speed or the scintillation emission time (TOF, DIRC); no SiPM saturation
-  stage (HCAL); no single-photoelectron injection before response stage 3 (ECAL).
+- No field for TTS or the effective light speed (TOF, DIRC); the scintillation emission time has detector-spec fields
+  (scintillation component `rise_ns`, `decay_ns`) but no Table 2 row (TOF); no SiPM saturation stage (HCAL); no
+  single-photoelectron injection before response stage 3 (ECAL).
+- No run-card field for cross-section scaling or hadronic-model internal parameters: the hadronic model is a discrete
+  model M (HCAL).
+- simreco (`adapters/geant4/assets/simreco/`) forms each TOF layer time as the true crossing time plus one Gaussian
+  draw of width `sigma_t_ps`; it reads no amplitude and applies no T0 or slewing step, so T0 and slewing columns come
+  from the user's reconstruction (TOF).
 - Misalignment through `alignment-overlay/1` has no recorded run yet (D83 (7)); the RICH mirror is bound as a
   detector-spec parameter instead.
 - The run-card physics fields `/physics/pai`, `/physics/xtr`, `/physics/optical` and `/physics/decay` are discrete

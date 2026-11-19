@@ -1,0 +1,54 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-044",
+  "published": "2026-11-17T14:38:52Z",
+  "modified": "2026-11-18T02:40:20Z",
+  "severity": "S1",
+  "ledger": [
+    "CHARGECONF-TEMPLATE-MAXIMUM"
+  ],
+  "summary": "charge_confusion_rate.py template mode could return a charge-confusion rate near 0 with status ok from a Barlow-Beeston fit that stopped at the wrong-sign boundary, far below the likelihood maximum, at large event counts per bin; its profile interval was built against that point.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "4c1cb8713932d802d8dcd6664f43bd68e773835c",
+        "fixed_commit": "dbbaadceedaf12fcc60d89f26bcf4113225ff766"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "template-mode rate, interval_68, rate_error, rate_error_hessian and yields per bin",
+      "sign_rates passed to species_response.py from-rates"
+    ],
+    "bias": "at 1e6 events per bin and injected rates 1e-2 and 5e-2, 2 of 3 seeds gave rates of ~7e-7 (the boundary) instead of the maximum (e.g. 7.4e-7 against 0.0116, 2 Delta ln L = 45 to 285 below the maximum), with an interval from ~0 to 1.5-8e-2; at 5e4 and 5e5 events no case seen",
+    "trigger": "template mode with about 5e5 events or more in a bin, where Nelder-Mead's relative tolerance (1e-10 (1 + |ln L|)) is large in absolute terms; a reported rate near 1e-6 with a wide interval starting at ~0 is the signature"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "how_to_recognize": "JSON on stdout of charge_confusion_rate.py template: bins[] with rate, interval_68, rate_error, rate_error_hessian, yields and fit_outcome, plus sign_rates; no artifact records the run"
+    }
+  },
+  "remedy": "rerun charge_confusion_rate.py template on a version with the fix and replace rates and sign_rates derived from it (species_response.py from-rates manifests built from them too)",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/9c93aeed1464b13fa7a697fca2a6d28a9709a967",
+    "https://github.com/hchouTW/hep-research/commit/dbbaadceedaf12fcc60d89f26bcf4113225ff766"
+  ]
+}

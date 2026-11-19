@@ -1,0 +1,78 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-051",
+  "published": "2026-11-17T14:40:00Z",
+  "modified": "2026-11-17T14:40:00Z",
+  "severity": "S2",
+  "ledger": [
+    "G4BENCH-HEAVY-ONLY"
+  ],
+  "summary": "geant4_benchmarks.py applied its heavy-particle references (Bethe mean rate, RPP eq. 34.5; Landau-Vavilov Delta_p and xi, eq. 34.12) to electrons and positrons in stopping-power, thin-layer-mpv, thin-layer-width and the reference command; they now refuse e- and e+.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.19.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "3f4f9985388cf9c39131cd8819bc90050fd54314",
+        "fixed_commit": "4926e18b7309072a69c6c5a5ddd5f5b6c64a70c5"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "reference_value and verdict of stopping-power, thin-layer-mpv and thin-layer-width benchmarks for e- and e+",
+      "the numbers of the reference command for e- and e+"
+    ],
+    "bias": "Bethe with W_max = T gave 1.4865 MeV cm2/g at gamma 3.3 for both e- and e+ in silicon, where RPP prints 1.50 (e-) and 1.46 (e+, gamma 3.7); the mean loss of a 100 MeV electron in 0.3 mm of silicon includes about 0.32 MeV of bremsstrahlung against a 0.130 MeV reference, so a correct Geant4 run failed the reference benchmark",
+    "trigger": "a stopping-power, thin-layer-mpv or thin-layer-width benchmark, or the reference command, with particle e- or e+"
+  },
+  "applies_to": {
+    "artifact_types": [
+      "computational-run"
+    ],
+    "match": [
+      [
+        {
+          "path": "extension.study.benchmarks[*].benchmark",
+          "op": "in",
+          "values": [
+            "stopping-power",
+            "thin-layer-mpv",
+            "thin-layer-width"
+          ]
+        },
+        {
+          "path": "extension.study.benchmarks[*].scope.particle",
+          "op": "in",
+          "values": [
+            "e-",
+            "e+"
+          ]
+        }
+      ]
+    ],
+    "match_basis": "a Geant4 study record (check_geant4_study.py) embeds the benchmark results of geant4_benchmarks.py in extension.study.benchmarks; a record that lists one of these benchmarks was evaluated by the affected code",
+    "no_trace": "possibly-affected",
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/geant4_benchmarks.py"
+      ],
+      "how_to_recognize": "geant4_benchmarks.py run or reference output (JSON) for particle e- or e+ (the run's benchmarks[*].scope.particle, the reference command's inputs.particle)"
+    }
+  },
+  "remedy": "electron and positron energy-loss studies need a reference stated for e+- (collision stopping power, RPP eqs. 34.23-34.24, plus bremsstrahlung, or a published measurement through published-data); rerunning with this version refuses them (exit 2)",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/4926e18b7309072a69c6c5a5ddd5f5b6c64a70c5"
+  ]
+}

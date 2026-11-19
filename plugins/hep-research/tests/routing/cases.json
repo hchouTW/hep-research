@@ -5783,6 +5783,114 @@
    "not": "hep-statistics",
    "set": "SIMCAL",
    "natural": true
+  },
+  {
+   "id": "dr-route-dirc-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I identify kaons with our DIRC bars from the Cherenkov angle and photon times?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "Cherenkov/RICH",
+    "particle identification"
+   ],
+   "set": "C5"
+  },
+  {
+   "id": "dr-route-dirc-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我們的 DIRC 石英棒要怎麼用切倫可夫角與光子到達時間分辨 K 介子和 π 介子？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [],
+   "set": "C5",
+   "natural": true
+  },
+  {
+   "id": "dr-route-timing-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What limits the time resolution of an LGAD or MRPC timing layer, and how do I correct time walk?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "timing"
+   ],
+   "set": "C5"
+  },
+  {
+   "id": "dr-route-timing-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "LGAD 或 MRPC 計時層的時間解析度受什麼限制？訊號幅度造成的時間偏移要怎麼修正？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [],
+   "set": "C5",
+   "natural": true
+  },
+  {
+   "id": "dr-route-hcal-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I apply software compensation and estimate punch-through in our hadronic calorimeter?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calorimetry"
+   ],
+   "set": "C5"
+  },
+  {
+   "id": "dr-route-hcal-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我們的強子量能器要怎麼做軟體補償，又要怎麼估計穿出量能器後方的粒子？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [],
+   "set": "C5",
+   "natural": true
+  },
+  {
+   "id": "dr-route-align-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I align the tracker with Millepede and check the muon momentum scale?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "calibration and alignment",
+    "muon systems"
+   ],
+   "set": "C5"
+  },
+  {
+   "id": "dr-route-align-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "要怎麼用 Millepede 對準徑跡偵測器，並檢查 μ 子的動量刻度？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [],
+   "set": "C5",
+   "natural": true
+  },
+  {
+   "id": "dr-route-veto-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How do I measure the efficiency of the muon veto of our detector?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "muon systems",
+    "efficiency and resolution"
+   ],
+   "set": "C5"
+  },
+  {
+   "id": "dr-route-veto-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我們偵測器的 μ 子否決系統效率要怎麼量測？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [],
+   "set": "C5",
+   "natural": true
   }
  ]
 }

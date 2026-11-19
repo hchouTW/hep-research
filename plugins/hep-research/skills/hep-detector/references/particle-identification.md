@@ -6,7 +6,16 @@ or charge (muon systems use penetration instead), and converts that - combined w
 [tracking and vertexing](tracking-and-vertexing.md) - into a mass or species
 hypothesis. Organized by technology and independent of experiment; calorimeter-based
 identification (`E/p`, shower shape) is in
-[calorimetry](calorimetry-ecal-hcal.md).
+[calorimetry](calorimetry-ecal-hcal.md); DIRC, TOP, threshold counters and photosensors in
+[Cherenkov imaging variants](cherenkov-imaging-variants-and-photosensors.md); timing technologies in
+[timing detectors](timing-detectors.md); muon spectrometers in [muon systems](muon-systems.md). Identification methods specific to one environment are in the
+environment references: [space-based direct detection](space-based-direct-detection.md) (which uses this page for
+TOF, TRD and RICH), [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+(ring sharpness, `dE/dx` versus residual range, recoil discrimination), [neutrino astronomy](neutrino-astronomy.md)
+(tracks and cascades), [ground-based detection arrays](ground-based-detection-arrays.md) and
+[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) (gamma/hadron separation). Environment labels: `COL` collider, `FXT` fixed
+target and test beam, `SPC` space and high-altitude balloon, `UGD` underground, neutrino
+and rare-event, `GND` ground-based arrays, `NUC` nuclear and low-energy physics.
 
 ## The common principle
 
@@ -27,23 +36,25 @@ quote for any PID system. Propagating `dm/m` from `dbeta/beta` gives
     dm/m = gamma^2 * (dbeta/beta)   (at fixed momentum)
 
 and, including the momentum error (approximate: first-order propagation of
-`m = p/(beta*gamma)` with uncorrelated `p` and `beta` errors; the standard TOF mass
-resolution, cf. PDG Review of Particle Physics, "Particle detectors at accelerators",
-particle identification),
+`m = p/(beta*gamma)` with uncorrelated `p` and `beta` errors),
 
     (dm/m)^2 = (dp/p)^2 + (gamma^2 * dbeta/beta)^2
 
 - the `gamma^2` factor is why velocity-based identification degrades so quickly with
 momentum, and why different technologies are needed in different momentum bands.
-`<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` evaluates this for time-of-flight and ionization
-measurements, and `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` for ring-imaging detectors.
+`<plugin root>/skills/hep-detector/scripts/pid_separation_power.py` gives the separation for time-of-flight,
+ionization (mean dE/dx) and velocity measurements, and the velocity term `gamma^2 * dbeta/beta` of species A in its
+tof and velocity modes; it has no momentum, path-length or start-time error (its tool contract), so add `dp/p` in
+quadrature yourself. `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` covers ring-imaging detectors.
 
 ## Time of flight (TOF)
 
 A TOF system measures the time a particle takes to traverse a known flight path `L`,
 giving `beta = L / (c * t)` directly. Two scintillator planes (or any two timing
-layers) define the path; the resolution is set by the timing resolution `sigma_t` of
-the pair and by the uncertainty in `L`, which comes from the track fit.
+layers) define the path; the resolution is set by the system time resolution (stop and start,
+including common-mode clock and reference terms) and by the uncertainty in `L`, which comes from the track
+fit; the time-resolution budget and the four resolutions (single-hit, per-track, event-time, system) are in
+[timing detectors](timing-detectors.md).
 
 Separation between two species of mass `m1` and `m2` at momentum `p` follows from
 their time difference over the same path, which for relativistic particles scales as
@@ -60,21 +71,29 @@ the momentum reach grows only as `sqrt(L/sigma_t)`.
 
 Practical points that dominate real TOF performance:
 
-- **The start time must be known.** At a collider it comes from the bunch crossing or
-  from a dedicated start detector; in a non-collider experiment one plane defines the
-  start. An error in start time is common to all particles in the event and biases
+- **The start time must be known.** Its source is a design parameter: the bunch crossing
+  or a dedicated start detector (`COL`); an event time estimated from the tracks
+  themselves, which improves as `1/sqrt(N_tracks)` (see [timing detectors](timing-detectors.md));
+  or, in a multi-plane system that measures time differences between its own planes
+  (`SPC`, for example two planes above and two below the magnet, arXiv:hep-ex/0305074,
+  sec. 2), the first plane crossed. An error in start time is common to all particles in the event and biases
   every `beta` in the same direction - so it does not average out and shows up as a
   species-dependent mass shift.
 - **Path length is a track-fit output**, not a constant. For curved tracks it depends
   on the fitted trajectory, and using a straight-line approximation at low momentum
   introduces a bias that grows exactly where TOF is most useful.
 - **Time-walk and charge dependence.** Signal amplitude affects the measured time in
-  most discriminator schemes; the correction depends on deposited charge, which for
-  nuclei scales as `Z^2`. A TOF calibrated on singly-charged particles is not
+  most discriminator schemes; the correction depends on the signal amplitude. The energy
+  deposit scales as `Z^2`, but a scintillator's light output saturates at large `dE/dx`
+  (Birks' law, PDG RPP 2025 eq. 35.2), so the walk correction is a function of the
+  measured amplitude, calibrated over the charges in use. A TOF calibrated on singly-charged particles is not
   automatically valid for heavier ones.
 - **TOF also measures direction of travel.** The sign of the time difference between
-  planes distinguishes downward- from upward-going particles, which is the primary
-  rejection against albedo and backward-going background in non-collider geometries.
+  planes distinguishes downward- from upward-going particles. In a space-borne
+  spectrometer (`SPC`) the up/down decision is what lets the curvature sign separate
+  particles from antiparticles (arXiv:hep-ex/0305074, sec. 2), and it identifies
+  upward-going particles such as splash albedo; see
+  [space-based direct detection](space-based-direct-detection.md).
 
 ## Ionization energy loss (dE/dx)
 
@@ -94,7 +113,8 @@ a thin layer is not Gaussian but **Landau-distributed**, with a long high-side t
 from rare large energy transfers. Consequently the *mean* of a few samples is a poor
 estimator - it is dominated by the tail and has large variance. The standard remedy is
 a **truncated mean**: discard the highest-loss fraction of samples (commonly the top
-30-40%) and average the rest. This is why detectors with many samples (a TPC with
+30-50%: the mean of the 50-70% smallest values, PDG RPP 2025 secs. 34.2.3 and 35.6.4)
+and average the rest. This is why detectors with many samples (a TPC with
 hundreds of measurements) achieve far better dE/dx resolution than a few silicon
 layers, and why quoting "dE/dx resolution" without stating the number of samples and the truncation
 fraction is meaningless. Empirically `sigma_dE/dx ≈ 0.41 N^-0.43 (t P)^-0.32` for `N` samples of
@@ -125,11 +145,15 @@ high-energy deposits in some layers on top of ordinary ionization - not a distin
 signature in any single layer. That has two direct consequences:
 
 - **Identification is inherently a likelihood problem across layers**, not a cut on one
-  measurement. The standard estimators are a likelihood ratio built from per-layer
-  amplitude distributions, or a count of layers exceeding a threshold. Either way the
+  measurement. Estimators include the total energy per module, the number of clusters
+  above an optimal threshold, a likelihood ratio from per-layer amplitude (or
+  amplitude-versus-drift-time) distributions, and neural networks; most experiments use a
+  likelihood, and a neural network or a higher-dimensional likelihood gives more
+  rejection (PDG RPP 2025, sec. 35.6.5). Whatever the estimator, the
   per-layer response distributions are the calibration, and they must be measured from
   data control samples, not taken from simulation alone.
-- **Performance is quoted as a rejection factor at a fixed efficiency**, and it is
+- **Performance is quoted as the rejection of the heavier species (1 / its efficiency) at a
+  fixed electron efficiency** (PDG RPP 2025, sec. 35.6.5 and Fig. 35.18, uses 90 %), and it is
   strongly `gamma`-dependent. Transition-radiation yield turns on near `gamma ~ 10^3`
   (the exact onset and saturation depend on the radiator). A TRD separates electrons
   from a heavier species - pions (`e/pi`, the usual collider figure) or protons (the
@@ -169,13 +193,20 @@ Key behaviors:
   different indices, and each has its own calibration and its own window.
 - **Angular resolution improves with photon count.** The single-photon angular
   resolution is set by chromatic dispersion (index varies with photon energy), by pixel
-  granularity, and by the emission-point uncertainty along the track; the per-track
-  resolution improves as the square root of the number of detected photons. Photon
+  granularity, and by the emission-point uncertainty along the track. The per-photon part
+  of the per-track resolution falls as `1/sqrt(N_pe)`; terms common to all photons of the
+  track (track direction, alignment, multiple scattering) do not average down, so
+  `sigma(theta_c) = sigma_photon/sqrt(N_pe) (+) C` (PDG RPP 2025, sec. 35.5, eq. 35.12), as in
+  [Cherenkov imaging variants](cherenkov-imaging-variants-and-photosensors.md). Photon
   yield is itself proportional to `sin^2(theta_c)`, so rings are dimmest exactly at
   threshold, where the angle is most sensitive to velocity. For a fixed single-photon
-  resolution the two cancel exactly in `dbeta`, but the chromatic term
-  (`dtheta = dn/(n tan theta_c)`) and few-photon effects (ring finding, background) do
-  not, so they must be evaluated together, not separately.
+  resolution the `sin theta_c` factors cancel in `dbeta/beta = tan(theta_c) sigma_theta`,
+  which becomes `n beta sigma_photon / sqrt(N_0 L)` (no track term; PDG RPP 2025, eqs.
+  35.8, 35.11, 35.12): it still grows by the factor `n beta = 1/cos(theta_c)`, from 1 at
+  threshold to `n` at saturation (nearly constant for a gas, up to a factor `n` for a
+  solid radiator). The chromatic term (`dtheta = dn/(n tan theta_c)`) and few-photon
+  effects (ring finding, background) do not cancel, so they must be evaluated together,
+  not separately.
 - **Velocity precision translates to mass precision with the `gamma^2` amplification**
   above. A RICH achieving a `dbeta/beta` of order `1e-3` still loses isotope separation
   at high `gamma`, which is the limiting factor in isotope measurements.
@@ -193,10 +224,17 @@ validation problem: the mass difference is `Delta m/m ≈ 1/A` (about 25% for 3H
 
 ## Muon systems
 
-Muons are identified largely by *survival*: they penetrate the calorimeters and any
+In a detector with absorbers (calorimeters, iron, or an overburden), muons are identified
+largely by *survival*: they penetrate the calorimeters and any
 additional absorber, so a track segment found beyond that material, matched to an
 inner track, identifies a muon. This is not a velocity measurement and the
 identification quality is set by the amount of absorber and by the matching criterion.
+Without such an absorber the muon is identified by its pattern: a sharp Cherenkov ring
+against the fuzzy ring of an electron shower in a water Cherenkov detector (`UGD`; PDG
+RPP 2025, sec. 36.3.1.2), a track against a cascade in a neutrino telescope (`UGD`;
+sec. 36.3.2), or `dE/dx` versus residual range for stopping particles in a liquid-argon
+TPC; see [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+and [neutrino astronomy](neutrino-astronomy.md).
 
 The dominant background is **punch-through** - hadrons, or their shower remnants, that
 survive the absorber - plus **decay in flight** of pions and kaons producing genuine
@@ -211,21 +249,34 @@ choice stated:
 
 - **Charge from many dE/dx samples** (`charge`). Each sample is corrected for the path length (signal x cos(theta);
   skipping the correction must be said), then inverted through the measured response curve Z^2 -> signal, which may
-  saturate at high Z (the inversion uses the curve, never a pure Z^2 law). The per-layer estimates are combined by a
-  truncated mean (drop the highest fraction against the Landau tail), a weighted mean (weights 1/sigma^2, or the
+  saturate at high Z (the inversion uses the curve, never a pure Z^2 law). The curve gives the most probable (peak)
+  per-layer signal at each Z^2, which the likelihood and `--toys` use as the Moyal location, not the mean signal,
+  which is larger (PDG RPP 2025 sec. 34.2.3; the most probable value is the best estimator of the deposit, sec.
+  35.6.4). The per-layer estimates are combined by a
+  truncated mean (drop the highest floor(f N) of N samples against the Landau tail), a weighted mean (weights 1/sigma^2, or the
   generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
-  Landau-like Moyal densities at the response). The output gives, per true charge in simulation, the peak, the core
+  Landau-like Moyal densities at the response; a maximum on the first or last scanned Z point is not a maximum, so
+  such events are left out and counted, at_z_range_edge). With the truncated or weighted mean, events with a signal
+  outside the response table are left out and counted (out_of_range), with a warning; the likelihood scans Z instead
+  of inverting the table, so its out_of_range stays 0. The output gives, per true charge in simulation, the peak, the core
   width sigma68 and the tail fraction, and the **leakage matrix** P(reco | true) between neighbouring charges with
   Clopper-Pearson intervals. That matrix is a species-migration block for the correction chain (hep-measurement) and
   for unfolding (hep-statistics); it is measured on simulation validated against data, and it depends on the
   selection and the momentum range, which travel with it. `--toys` predicts the core width from the per-layer model,
-  so a data width far from it signals a wrong model (an extra tail, a miscalibrated layer).
+  so a data width far from it signals a wrong model (an extra tail, a miscalibrated layer). Toys with a sample outside
+  the response table, or with the likelihood maximum at the edge of the Z scan, are left out with a warning and
+  counted (toys_requested, toys_used): the table and the scan must cover the per-layer tail, else the predicted
+  width is biased low.
 - **Log-likelihood ratio from per-layer PDFs** (`likelihood`). LLR = sum over layers of log(p_signal / p_background)
   from binned per-layer PDFs (measured on control samples, as above), with the efficiency - mis-identification curve
-  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum.
-- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
-  declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
-  separation (see "Combining measurements" below).
+  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum. A
+  layer value outside the PDF edges contributes no term (skipped, counted in a warning), so the edges must cover the
+  full range of the layer signal, including the high amplitudes in which a TRD signal shows up.
+- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Only
+  `charge --method weighted-mean` takes a declared correlation (`--correlation`, one common rho, generalized
+  least-squares weights); the truncated-mean and likelihood methods of `charge` and the `likelihood` mode cannot take
+  one and always say "independence assumed"; summing correlated layers as independent overstates the separation (see
+  "Combining measurements" below).
 - **Assigning samples to the track.** The samples above arrive already assigned to one particle.
 <!-- example: source citation -->
   In the ALICE TRD (ALICE Collaboration, Nucl. Instrum. Methods A 881 (2018) 88, arXiv:1709.02743v2, secs. 8-8.2),
@@ -285,7 +336,7 @@ easy to violate:
   any charge-dependent time-walk correction.
 - For dE/dx: number of samples, truncation fraction, and whether it is used for charge,
   for velocity, or both.
-- For TRD: estimator (likelihood or threshold count), working-point efficiency, the
+- For TRD: estimator (total energy, cluster count, likelihood, or neural network), working-point efficiency, the
   rejection factor at that point, the momentum band, and how the per-layer response
   templates were calibrated.
 - For RICH: radiator(s) and index, per-track angular resolution and photon yield,

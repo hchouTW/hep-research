@@ -1,16 +1,18 @@
-# μ detector: simulator-calibration specialization
+# μ detector: simcal specialization
 
 Part B §11.1 items 1–8 for a muon system of gaseous chambers behind an absorber, matched to an inner tracker, from
 §3.1 derivation basis (2), the μ detector row of §12 and §11.4. Folder rules: [index](index.md).
+simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
 | Node | Abstract node | Content (§3.1) | g4sim object |
 |---|---|---|---|
 | `source` | 0 | muons of known momentum | `simulation-request/1` source |
-| `absorber` | 1 | absorber traversal (multiple scattering), gas ionisation | `g4sim_run` |
-| `gas` | 2 | primary electron clusters | response stage `ionisation` |
-| `drift` | 3 | drift, diffusion | `drift_table` stage (hashed table) |
+| `absorber` | 1 | absorber traversal (multiple scattering; ionization and radiative energy loss with its fluctuations, PDG RPP 2025 sec. 34.6), gas ionisation | `g4sim_run` |
+| `gas` | 2 | primary electron clusters | response stage `ionisation` (*Inferred* mapping: a total carrier count only, of mean E/W, `response.ionisation_quanta`; no cluster positions or sizes, so primary-cluster statistics near the wire are not modelled) |
+| `drift` | 3 | drift, diffusion | `drift_table` stage (hashed table of drift velocity versus field; diffusion is not in the table and has no g4sim kernel) |
 | `avalanche` | 4b | avalanche gain | `sensor` stage gain (*Inferred* mapping) |
 | `discriminator` | 5 | threshold, time, dead time | response stage 4 |
 | `readout` | 5 | clusters of strips or wires | response stage 5 |
@@ -29,29 +31,32 @@ stage 4; on g4sim only the 3→4 and 4→5 hand-offs exist.
 | HV (as φ) | 4b | gain factor per IOV | `condition-snapshot/1` `gain_factor` row (D87; φ) |
 | threshold | 5 | level | `electronics` stage `threshold` (or a snapshot row per cell and IOV) |
 | cluster size | sharing / 3 | table | hashed table: no Table 2 row |
-| multiple scattering in the absorber | physics process / 1 | absorber thickness, cut | detector-spec `params`, run card cuts (geometry row) |
-| t₀ | time / 5 | offset | reconstruction (rerun) |
+| multiple scattering in the absorber | physics process / 1 (§12); the parameter is geometry and material | absorber thickness and material (θ₀ depends on x/X₀, PDG RPP 2025 eq. 34.16); run card cuts | detector-spec `params`, run card cuts (geometry row) |
+| energy loss in the absorber | physics process / 1 | absorber thickness and material; physics list or EM option | detector-spec `params` (geometry row); physics list or EM option as a discrete model M (Table 2) |
+| t₀ | time / 5 (§12); bound at `segment` (6–7), because the g4sim electronics stage has no time offset | offset | reconstruction (rerun) |
 
 Dead time is a cross-event effect: only approximated by conditioning variables such as rate (§3.1, §19-6).
 
 ## 3. Kernel properties
 
-Node 1 samplable black box; `gas`, `avalanche`, `discriminator` densities; `drift` deterministic given its table;
-readout and reconstruction deterministic. Re-digitization at two condition values uses exact common random numbers;
-`threshold` and `dead` change the code discontinuously (§11.4 "Conditions").
+Node 1 samplable black box; `gas`, `avalanche`, `discriminator` densities; `drift` deterministic given its table
+(drift velocity only; diffusion, a random spread, is not modelled); readout and reconstruction deterministic.
+Re-digitization at two condition values uses exact common random numbers; `threshold` and `dead` change the code
+discontinuously (§11.4 "Conditions").
 
 ## 4. Storage recommendations
 
 Hits (re-digitization in Python: `g4sim_digi` ignores conditions, C24); the event time per global event number for
-the snapshot IOVs; simreco columns for t₀ and segment fits.
+the snapshot IOVs; the reconstruction's output columns for t₀ and segment fits (the user's reconstruction: simreco
+has no muon-chamber reconstruction).
 
 ## 5. Reference catalog
 
 | Reference | Type | Edge |
 |---|---|---|
-| muons of known momentum (beam or cosmic) | known input | into `source` |
+| beam muons of known momentum; cosmic-ray muons with a measured momentum or a declared momentum distribution (its uncertainty as φ, §3.4) | known input | into `source` |
 | inner-tracker match | redundant measurement | out of the `matching` comparison node |
-| Z → μμ tag and probe | tag and probe | out of the observation (tag-probe correlation biases, §3.4) |
+| tag and probe (control sample chosen by the experiment instance, §11.2; collider example: J/ψ or Z → μμ) | tag and probe | out of the observation (tag-probe correlation biases, §3.4) |
 | threshold scan, multiplicity | control variables | break efficiency, threshold and noise (§3.5) |
 
 ## 6. Special functionals and link functions
@@ -73,7 +78,7 @@ multiplicity, log. Drift-time spectrum: normalized shape, alr/ilr.
 |---|---|
 | drift table from another gas-mixture computation | drift-time spectrum edges, r–t residual versus distance |
 | multiple-scattering model of another EM option | matching residual width versus momentum |
-| neutron and photon background added to the event (overlay of cavern background) | hit multiplicity and efficiency versus rate (*Inferred*) |
+| neutron and photon background added to the event (an overlay of the site's measured or simulated background; collider example: cavern background) | hit multiplicity and efficiency versus rate (*Inferred*) |
 
 ## Node-binding example
 

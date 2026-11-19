@@ -34,8 +34,14 @@ is kept as an operating guard: outside it the output carries highland_validity.i
 Resolution-term convention: the scattering term of sigma(R)/R uses
 0.0136 GeV * sqrt(x/X0) / (0.3 beta B L), the Highland constant without its log factor,
 so the term stays independent of rigidity. The PDG tracking section writes the same term
-with 0.016 GeV/c instead; the two differ by about 15%, a convention difference within
-the precision of a design estimate. State which coefficient was used when comparing.
+with 0.016 GeV/c instead (RPP 2025 sec. 35.12, eq. 35.70): its curvature error of about
+8 s_rms_plane / L^2 (p. 113), with s_rms_plane = x theta0 / (4 sqrt 3) (sec. 34.3, eq. 34.21),
+is 2/sqrt(3) = 1.155 times the Highland leading term used here (0.0136 x 1.155 = 0.0157).
+PDG gives 0.016 for a large number of uniformly spaced measurements (sec. 35.12, the
+context of eq. 35.67); the coefficient depends on the number and placement of the
+measurements and on the fit, so the 0.0136 used here gives a scattering term about 15%
+smaller than PDG's, and a crossover rigidity placed correspondingly low. State which
+coefficient was used when comparing.
 Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
 echoed as status.
 Exit codes: 0 ok; 1 the computation failed or the input file's content is invalid (JSON with ok false);

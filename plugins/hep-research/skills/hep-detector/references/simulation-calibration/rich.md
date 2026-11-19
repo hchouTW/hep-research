@@ -1,8 +1,9 @@
-# RICH: simulator-calibration specialization
+# RICH: simcal specialization
 
 Part B §11.1 items 1–8 for a ring-imaging Cherenkov detector (radiator, optional mirrors, pixelated photodetector),
 from §3.1 derivation basis (1), the RICH row of §12 and the full optical tracking path of §11.4. Folder rules:
-[index](index.md).
+[index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
@@ -28,18 +29,22 @@ The semantic graph may still keep nodes 2, 3 and 4a separate; they then bind to 
 | PDE | yield / 4a | surface `efficiency` spectrum | detector-spec `optical_surfaces/<s>/efficiency` (optical row) |
 | gain | 4b | multiplicative, ENF | `sensor` stage `gain` |
 
-Every node-1 parameter changes the light path and needs resimulation, and for the optical row the production run is
-resimulated with it (§11.4 Table 2).
+Every node-1 parameter needs resimulation, and for the optical row the production run is resimulated with it (§11.4
+Table 2): the refractive index and the mirror alignment change the light path, the surface PDE changes which photons
+are detected. A PDE(E) applied after transport (surface `efficiency` set to 1 and `photons.csv` thinned by photon
+energy, §11.4) is then not a node-1 parameter.
 
 ## 3. Kernel properties
 
-Node 1 samplable black box; 4b and 5 densities (Poisson photoelectrons, gain with ENF); 6–7 deterministic (ring
-association is an association mechanism, §3.2).
+Node 1 samplable black box (it yields the Poisson photoelectron count); 4b a density (gain with ENF given that count,
+plus Poisson dark counts); 5 a density or deterministic, depending on the stage (§11.4 Table 1); 6–7 deterministic
+(ring association is an association mechanism, §3.2).
 
 ## 4. Storage recommendations
 
 Keep `photons.csv` (photon energy per detected photon) when a PDE(E) is to be applied after transport; record the hit
-file for re-digitization of stages 3–5 and simreco columns for the ring fit.
+file for re-digitization of stages 3–5 and the reconstruction's output columns for the ring fit (the user's
+reconstruction: simreco has no RICH reconstruction).
 
 ## 5. Reference catalog
 
@@ -51,6 +56,8 @@ constraint, by hash).
 
 Cherenkov angle: location, identity link (signed residual) or log. Angle resolution per photon and per ring: core
 width, log. Photon count per ring: multiplicity, log. Ring-hit background: tail or efficiency, logit.
+Cherenkov-angle residual versus the photon's azimuth φ around the ring: location per φ bin, identity link (signed); a
+misalignment appears as Δθ_C = θ_x cos φ + θ_y sin φ, which the ring-averaged location does not see.
 
 ## 7. V_model correlation kernel (advisory)
 
@@ -72,4 +79,7 @@ width, log. Photon count per ring: multiplicity, log. Ring-hit background: tail 
 
 `assets/simulation-calibration/rich.binding.example.json`: refractive index, mirror tilt and surface efficiency
 resimulation or surrogate model; gain rerun. Degeneracies (§12): refractive index and geometric scale; photon count ×
-per-photon resolution.
+per-photon resolution in the per-ring width (σ_ring = σ_photon/√N_pe ⊕ C, PDG RPP 2025 eq. 35.12), broken by the
+per-photon residual width and the photon count per ring of item 6; C (tracking, alignment, background, hits of
+other tracks) does not fall with N_pe. Not in the §12 row: mirror alignment and per-photon resolution (offset mixed into width,
+§3.5), broken by the signed residual versus φ.

@@ -1,10 +1,10 @@
 {
  "schema": "g4kit/1",
  "name": "calorimeter",
- "version": "1.2.0",
+ "version": "1.2.1",
  "geometry_kind": "calorimeter",
  "role": "calorimetry-em",
- "purpose": "A grid of wrapped sampling towers, each with a tapered guide behind it. A period is absorber, active layer and a support layer of readout and air, as real sampling calorimeters have.",
+ "purpose": "A grid of wrapped sampling towers, each with a tapered guide behind it. A period is absorber, active layer and a support layer (readout and air) of a plate-stack sampling calorimeter; fibre-readout, accordion and homogeneous calorimeters need their own detector-spec.",
  "inputs": {
   "layers": {
    "kind": "integer"

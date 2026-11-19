@@ -1,0 +1,64 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-053",
+  "published": "2026-11-17T15:50:21Z",
+  "modified": "2026-11-18T03:35:47Z",
+  "severity": "S2",
+  "ledger": [
+    "DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE"
+  ],
+  "summary": "An F4 time resolution of the tof Geant4 kit was labelled an estimate even when the study simulated no tail source; it is optimistic unless all four tail sources are simulated.",
+  "affected": [
+    {
+      "paths": [
+        "contracts/rules/design_geometry/tof.json"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.60.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "fixed_commit": "7fb6494ce29a9a634c05a8ee90ab7ffdf5eee9ac",
+        "introduced_commit": "5fd0534f2499bd1c2d75d162be33869096287a0b"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "the bound (estimate or optimistic) of F4 design-evaluations of the figure of merit time-resolution on a tof kit candidate",
+      "design verdicts and aggregations that combine those bounds"
+    ],
+    "bias": "the tof kit's time is the truth crossing time plus one Gaussian smear, so its time resolution omits the scintillator, photodetector and electronics terms; labelled estimate, such a value could pass a requirement that an optimistic bound would leave undecided or fail",
+    "trigger": "an F4 design-evaluation of time-resolution whose study did not simulate all four tail sources (alignment, calibration-non-uniformity, noise-digitization, pattern-recognition)"
+  },
+  "applies_to": {
+    "artifact_types": [
+      "design-evaluation"
+    ],
+    "match": [
+      [
+        {
+          "path": "extension.fidelity",
+          "op": "eq",
+          "value": "F4"
+        },
+        {
+          "path": "extension.figure_of_merit",
+          "op": "eq",
+          "value": "time-resolution"
+        }
+      ]
+    ],
+    "no_trace": "possibly-affected"
+  },
+  "remedy": "rerun contracts/design.py (or evaluate_design.py f4 --replace) on the affected F4 time-resolution evaluations with a release that has the fix; an evaluation that recorded estimate without all four tail sources is then a design.contract_mismatch until it is redone with bound optimistic",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/7fb6494ce29a9a634c05a8ee90ab7ffdf5eee9ac"
+  ]
+}

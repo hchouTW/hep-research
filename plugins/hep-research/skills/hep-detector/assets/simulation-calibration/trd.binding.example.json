@@ -276,8 +276,7 @@
       "edep_visible_ly_split",
       "hits",
       "simreco_columns"
-     ],
-     "distribution": "poisson"
+     ]
     },
     "adc": {
      "table1": "5e",

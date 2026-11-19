@@ -166,8 +166,9 @@ class HelixOnG4sim(unittest.TestCase):
 
 class CoreWidth(unittest.TestCase):
     """multiple-scattering-reference's estimator is Lynch and Dahl's: the sigma of a Gaussian fitted to the central
-    98 % (truncated-normal maximum likelihood), not RMS(central 98 %) / 0.8673, which a single-scattering tail inside
-    the window inflates (about +11 % in the B2 trial on 0.3 mm of silicon; PLAN and VALIDATION GEANT4-F4)."""
+    98 % (truncated-normal maximum likelihood), not RMS(central 98 %) / 0.9346 (TRUNC_98, the RMS of a unit Gaussian
+    truncated to its central 98 %), which a single-scattering tail inside the window inflates (about +3 % in the B2
+    trial on 0.3 mm of silicon; the +11 % recorded in PLAN and VALIDATION GEANT4-F4 divided by 0.8673 instead)."""
 
     def test_a_pure_gaussian_and_a_gaussian_with_a_tail(self):
         rng = random.Random(3)

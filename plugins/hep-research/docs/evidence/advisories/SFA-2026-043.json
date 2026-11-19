@@ -1,0 +1,53 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-043",
+  "published": "2026-11-17T12:00:00Z",
+  "modified": "2026-11-17T12:00:00Z",
+  "severity": "S1",
+  "ledger": [
+    "MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE"
+  ],
+  "summary": "multisample_pid.py charge --method likelihood returned the first or last point of --z-range for an event whose likelihood maximum lies outside it, so particles of a charge outside the range were reported at the range's edge, with no warning.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/multisample_pid.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "f7d5722df19d1bdf93472d86721c50c4c0b53ac7",
+        "fixed_commit": "ff5ef6faf0b8821598f2ba656a4d7ff7c6a213ef",
+        "introduced_basis": "the defective code is in the script as first released (hep-research 0.14.0, commit f7d5722d); the 0.14.0 release already held the file"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "summary, per_true_z, leakage and toy_prediction of multisample_pid.py charge --method likelihood"
+    ],
+    "bias": "events beyond --z-range pile up at its edge: in the audit's case 50 events of Z = 5 with --z-range 0.5 3 were all reported at 3.0 with sigma68 0, so the peak, the width and the leakage matrix are wrong for those charges",
+    "trigger": "--method likelihood with a --z-range that does not hold the maxima of all events (or toys)"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/multisample_pid.py"
+      ],
+      "how_to_recognize": "JSON on stdout of multisample_pid.py charge with method likelihood; affected when an estimate equals the first or last scanned value (a per_true_z median at inputs.z_range or a sigma68 of 0 there); outputs of the fixed version carry at_z_range_edge"
+    }
+  },
+  "remedy": "rerun multisample_pid.py charge with this version and read at_z_range_edge and the warning; widen --z-range until no event is at its edge",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/ff5ef6faf0b8821598f2ba656a4d7ff7c6a213ef"
+  ]
+}

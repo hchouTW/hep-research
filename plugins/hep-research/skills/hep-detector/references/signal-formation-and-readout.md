@@ -44,15 +44,18 @@ energetic delta rays escape, so the measured rise is *smaller than the mean sugg
 loss (PDG): `Delta_p = xi [ln(2 m_e c^2 beta^2 gamma^2/I) + ln(xi/I) + 0.200 - beta^2 - delta]`.
 
 **Fluctuations (regime by `kappa = xi/W_max`, `xi = (K/2)(Z/A) z^2 (x rho)/beta^2`)**:
-`kappa <~ 0.05-0.1` (PDG "moderate thickness", most detectors; thin absorber, gases, silicon of
-~100 um): the Landau (Landau-Vavilov) distribution - asymmetric with a long high tail from
+`kappa <~ 0.05-0.1` (PDG "moderate thickness"; most detectors for unit-charge particles: gases,
+scintillators, silicon of ~100 um): the Landau (Landau-Vavilov) distribution - asymmetric with a long high tail from
 delta rays, most-probable value
 (MPV) below the mean, no finite mean or variance in the pure Landau limit; for thin silicon
 Bichsel's straggling functions (atomic binding included) describe the width better than
-Landau-Vavilov (PDG); larger `kappa`: Vavilov's distribution, less skewed as `kappa` grows;
-`kappa >> 1` (very thick absorbers): less skewed still but, per PDG, never Gaussian - a
-Gaussian approximates only the core. Consequences: use the truncated mean, MPV fit, or
-likelihood, not the raw mean, for thin-layer `dE/dx` ([particle identification](particle-identification.md));
+Landau-Vavilov (PDG); larger `kappa` (thicker absorbers, or nuclei: `xi` carries `z^2` while
+`W_max`, PDG Eq. 34.4, does not depend on `z`, so a thin layer can leave the Landau regime for
+the nuclei a direct cosmic-ray instrument measures, [space based direct detection](space-based-direct-detection.md)):
+Vavilov's distribution, less skewed as `kappa` grows; for very thick absorbers PDG states the
+distribution is less skewed but never approaches a Gaussian (sec. 34.2.9, p. 14) - a
+Gaussian approximates only the core. Consequences, for thin layers at small `kappa`: use the
+truncated mean, MPV fit, or likelihood, not the raw mean, for thin-layer `dE/dx` ([particle identification](particle-identification.md));
 the fluctuation is a *physical, irreducible* per-layer term, reduced only by more layers
 or cluster counting.
 
@@ -63,7 +66,7 @@ It sets the low-momentum resolution floor of every tracker
 ([tracking and vertexing](tracking-and-vertexing.md)); the non-Gaussian large-angle tail
 (single-scatter) is why fit `chi^2` has heavy tails. `theta_0` is the rms of the projected angle (`theta_space,rms = sqrt(2) theta_0`); for a stack apply the formula once with the total `x/X_0`, since per-layer values added in quadrature come out too small (PDG).
 
-**Charge yield and intrinsic statistics** (approximate; PDG RPP 2024, particle detectors at accelerators): `N = E/W` carriers, with `W` = 3.65 eV in silicon, 2.96 eV in germanium, about 26 eV in argon gas and 23.6 eV in liquid argon; for a fixed deposit in a semiconductor the variance is reduced by the Fano factor, `sigma_N = sqrt(F N)` with `F ≈ 0.1` in Si and Ge, so `sigma_E/E = sqrt(F W/E)`, usually below the electronic noise. A minimum-ionizing particle leaves a most probable charge of about 23 000 electrons (3.7 fC) in 300 um of silicon, about 77 e-h pairs per um, against a mean of about 106 per um (3.88 MeV/cm over 3.65 eV): quote which.
+**Charge yield and intrinsic statistics** (approximate; PDG RPP 2025, Particle detectors at accelerators: sec. 35.8.1, Table 35.11 and text, p. 64, silicon, germanium and the Fano factor; sec. 35.6.1, Table 35.6, p. 24, argon gas; sec. 35.7.3, p. 57, liquid argon): `N = E/W` carriers, with `W` = 3.65 eV in silicon, 2.96 eV in germanium, about 26 eV in argon gas and 23.6 eV in liquid argon (the energy per electron-ion pair, `W_el`; in noble liquids only a field- and `dE/dx`-dependent fraction `R` escapes recombination, `R ≈ 0.70` for a minimum-ionizing particle at 500 V/cm, about 30 000 electrons per MeV; PDG RPP 2025 sec. 35.7.3, p. 57). This `W_el` differs from the recombination-independent `W` per detectable quantum (photon or electron), 19.5 eV in liquid argon, used in [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md) (PDG RPP 2025 sec. 36.4, p. 32): state which `W` is used. For a fixed deposit in a semiconductor the variance is reduced by the Fano factor, `sigma_N = sqrt(F_Fano N)` with `F_Fano ≈ 0.1` in Si and Ge, so `sigma_E/E = sqrt(F_Fano W/E)`, usually below the electronic noise. A minimum-ionizing particle leaves a most probable charge of about 23 000 electrons (3.7 fC) in 300 um of silicon, about 77 e-h pairs per um, against a mean of about 106 per um (3.88 MeV/cm over 3.65 eV): quote which.
 
 **Radiative and nuclear processes.** Bremsstrahlung (energy scale `~ X_0`, critical
 energy `E_c`), photon conversion (`~ 9/7 X_0` mean free path; at low energy the photoelectric effect and Compton scattering dominate the photon cross section, with attenuation `I = I_0 exp(-(mu/rho) rho x)` and `mu/rho` from the NIST XCOM tables), delta rays (extended

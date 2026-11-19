@@ -33,15 +33,18 @@ dE/dx resolution 0.01-0.5, relative beta resolution above 0.1) add a warning. It
 density-effect correction, which suppresses the relativistic rise, so numbers with either
 species above beta*gamma = 4 are optimistic and flagged (n_sigma_optimistic). The dE/dx
 bands of two species can cross, so separation is not monotonic in momentum: the scan
-reports below_threshold_intervals, the ceiling is the end of the first separated range,
-highest_separated is the top of the last separated range, and ceiling_is_lower_bound is
-true when the scan limit is reached still separated (the true end lies beyond it).
+reports below_threshold_intervals, the ceiling is the end of the separated range that
+starts at the lowest evaluable momentum (null when separation is already below threshold
+there; then use highest_separated and below_threshold_intervals), highest_separated is the
+top of the last separated range, and ceiling_is_lower_bound is true when the scan limit is
+reached still separated (the end of the last separated range, and of the ceiling when nothing
+is below threshold, lies beyond it).
 See <plugin root>/skills/hep-detector/references/particle-identification.md.
 Defaults (F-06): the output lists the values used ("inputs") and those taken by default ("defaults_used"); a
 defaulted detector parameter of the chosen mode (tof: path 1 m, time resolution 60 ps; dedx: silicon, 6%;
 velocity: 1e-3) is also a warning, because the default describes no particular detector.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
-Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+Exit codes: 0 ok; 1 the computation failed (the result is not representable, JSON with ok false);
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/pid_separation_power.py --mode tof --species pi K --momentum 2.0 --path 1.2 --time-resolution 60
 """
@@ -556,8 +559,9 @@ def main(argv=None):
             **result,
             'note': ('n_sigma follows separation_convention (single: one measurement of the '
                      'reference species; quadrature: both widths). The ceiling is the end of '
-                     'the first separated range; separation can recover above it (see '
-                     'below_threshold_intervals). dE/dx omits the density effect, so values '
+                     'the separated range that starts at the lowest evaluable momentum (null '
+                     'if separation starts below threshold); separation can recover above it '
+                     '(see below_threshold_intervals). dE/dx omits the density effect, so values '
                      'in the relativistic rise are optimistic.'),
         }, indent=2, allow_nan=False)
     except (ValueError, OverflowError, ZeroDivisionError) as exc:

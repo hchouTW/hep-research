@@ -1,0 +1,52 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-047",
+  "published": "2026-11-17T14:38:52Z",
+  "modified": "2026-11-17T14:38:52Z",
+  "severity": "S1",
+  "ledger": [
+    "CHARGECONF-CONTROL-MC-SIGN"
+  ],
+  "summary": "charge_confusion_rate.py control mode accepted an MC control sample of the other true sign, or of both signs pooled, so the data/MC scale factor silently compared different species.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "4c1cb8713932d802d8dcd6664f43bd68e773835c",
+        "fixed_commit": "eb9005e2621711abd47c4d6951134bc00edc64e6"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "control-mode scale_factor and mc rate per bin"
+    ],
+    "bias": "an MC sample of the other sign gave e.g. a scale factor 0.069 instead of the same-species value; pooled signs gave an MC rate of 0.0166 against 0.0010 for the data's species (c+ and c- differ), with status ok and no warning",
+    "trigger": "control mode with --mc whose true-sign column holds the other sign or both signs"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "how_to_recognize": "JSON on stdout of charge_confusion_rate.py control with --mc: bins[].mc and scale_factor; the MC file's true-sign column shows whether it held other signs; no artifact records the run"
+    }
+  },
+  "remedy": "check the true signs of the MC control samples used; rerun with an MC sample of the data's true sign only (a mixed file must be split by true sign) on a version with the fix",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/eb9005e2621711abd47c4d6951134bc00edc64e6"
+  ]
+}

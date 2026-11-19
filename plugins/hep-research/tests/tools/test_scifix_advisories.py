@@ -259,11 +259,11 @@ class StricterCheck(unittest.TestCase):
         self.assertEqual({a["id"] for a in advisories if "outputs" in a["applies_to"]},
                          {"SFA-2026-001", "SFA-2026-014", "SFA-2026-015", "SFA-2026-016", "SFA-2026-017",
                           "SFA-2026-018", "SFA-2026-019", "SFA-2026-030", "SFA-2026-031", "SFA-2026-036",
-                          "SFA-2026-037", "SFA-2026-038"})
+                          "SFA-2026-037", "SFA-2026-038", "SFA-2026-044", "SFA-2026-045", "SFA-2026-046", "SFA-2026-047", "SFA-2026-048", "SFA-2026-049", "SFA-2026-050", "SFA-2026-051", "SFA-2026-052", "SFA-2026-042", "SFA-2026-043", "SFA-2026-041", "SFA-2026-054", "SFA-2026-055", "SFA-2026-056", "SFA-2026-057"})
         self.assertEqual({a["id"] for a in advisories if not a["applies_to"]["artifact_types"]},
                          {"SFA-2026-001", "SFA-2026-014", "SFA-2026-015", "SFA-2026-016", "SFA-2026-017",
                           "SFA-2026-018", "SFA-2026-019", "SFA-2026-030", "SFA-2026-036", "SFA-2026-037",
-                          "SFA-2026-038"})
+                          "SFA-2026-038", "SFA-2026-044", "SFA-2026-045", "SFA-2026-046", "SFA-2026-047", "SFA-2026-042", "SFA-2026-043", "SFA-2026-041", "SFA-2026-054", "SFA-2026-055", "SFA-2026-056", "SFA-2026-057"})
 
 
 class PredicateEngine(unittest.TestCase):
