@@ -12,9 +12,10 @@ Modes:
   r = Y_wrong / (Y_right + Y_wrong) at the maximum of the profile likelihood in r (a scan over r, then a polishing fit),
   its 68% interval from the profile likelihood (rate_error its half-width; rate_error_hessian from the fit covariance);
 - control: a sample of known true sign (CSV); per bin k wrong-sign of n events, the Clopper-Pearson interval
-  (core/stats/tail_estimation.py), and with --mc a second sample of the same one true sign (else refused), the data/MC
-  scale factor r_data / r_mc with an approximate (delta-method) error. Weights must be integer frequency weights:
-  non-integer weights are refused (hep-statistics owns weighted binomial intervals);
+  (core/stats/tail_estimation.py) at --cl ("interval", with "interval_cl") and at 68.27% ("interval_68"; rate_error
+  is half its width whatever --cl is), and with --mc a second sample of the same one true sign (else refused), the
+  data/MC scale factor r_data / r_mc with an approximate (delta-method) error. Weights must be integer frequency
+  weights: non-integer weights are refused (hep-statistics owns weighted binomial intervals);
 - gaussian-core: Phi(-|1/R| / sigma(1/R)) at the bin edges from a Gaussian curvature core. It ignores the non-Gaussian
   tails that dominate real confusion, so it is a lower-bound reference labelled "not an estimate"; no estimate and no
   sign rates are output from it.
@@ -22,6 +23,9 @@ Output: per-bin rates and, for template and control, "sign_rates" in the format 
 {"edges": [...], "variable": ..., "rates": [{"true": SIGN, "reco": OTHER SIGN, "rate": [...], "rate_error": [...]}]}.
 Input: template JSON {"edges": [...], "true_sign": "negative"|"positive", "variable"?: TEXT,
   "bins": [{"data": [...], "templates": {"right": [...], "wrong": [...], "background"?: [...]}, "mc_events"?: {...}}]}.
+  Each bin's data histogram holds the tracks of the one true sign true_sign in both reconstructed signs, so that
+  Y_wrong / (Y_right + Y_wrong) is the confusion rate; fitted on the opposite-sign sample alone, r is the confused
+  fraction of that sample, not the rate (charge-confusion.md, route 2).
 Usage:
   charge_confusion_rate.py template --input T.json [--status LABEL]
   charge_confusion_rate.py control --data CTRL.csv [--mc CTRL_MC.csv] --edges E ... --bin-column C
@@ -341,11 +345,12 @@ def run_control(args) -> tuple[dict, str, list]:
         nb, kb = int(n[b]), int(k[b])
         row = {"bin": [edges[b], edges[b + 1]], "n": nb, "k": kb}
         if nb == 0:
-            row.update(rate=None, interval_68=None)
+            row.update(rate=None, interval=None, interval_68=None)
             warnings.append(f"bin {b + 1}: no control events")
         else:
             lo, hi = clopper_pearson(kb, nb, args.cl)
-            row.update(rate=kb / nb, interval_68=[lo, hi], interval_cl=args.cl)
+            row.update(rate=kb / nb, interval=[lo, hi], interval_cl=args.cl,
+                       interval_68=list(clopper_pearson(kb, nb, CL68)))
         if mc is not None:
             nm, km = int(mc[0][b]), int(mc[1][b])
             row["mc"] = {"n": nm, "k": km, "rate": km / nm if nm else None}

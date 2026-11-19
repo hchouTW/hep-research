@@ -4,7 +4,7 @@
 ILLUSTRATIVE and SYNTHETIC. Two events of the frozen fixture t07-telescope-clean/1 (block 1, the tuning block; stratum 0: the lowest
 momentum bin, 1.5 to 3 GeV, occupancy o1, six tracks from one vertex, no noise hits) on the eight-plane telescope in 1 T, through
 adapters/acts-tracking/assets/acts_tracking.py on ACTS 48.2.0. Names no experiment. Makes no tracking quality claim: the counts below
-are what the programs wrote, not an efficiency, and T07's quality verdict waits for K09 at Freeze B.
+are what the programs wrote, not an efficiency; T07's evaluation ended failed at attempt 1, final (decisions.md, "T07: final").
 - generate-fixture writes a data file (role reconstruction-input: hits only) and a truth file (role truth), apart.
 - find (recipe reco.track.acts-ckf-planar/1, data side) reads the data file alone: seeds from hits, CKF, ambiguity resolution and a
   fit per selected track. Its product says finding.
