@@ -264,9 +264,11 @@ choice stated:
   and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum. A
   layer value outside the PDF edges contributes no term (skipped, counted in a warning), so the edges must cover the
   full range of the layer signal, including the high amplitudes in which a TRD signal shows up.
-- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
-  declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
-  separation (see "Combining measurements" below).
+- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Only
+  `charge --method weighted-mean` takes a declared correlation (`--correlation`, one common rho, generalized
+  least-squares weights); the truncated-mean and likelihood methods of `charge` and the `likelihood` mode cannot take
+  one and always say "independence assumed"; summing correlated layers as independent overstates the separation (see
+  "Combining measurements" below).
 - **Assigning samples to the track.** The samples above arrive already assigned to one particle.
 <!-- example: source citation -->
   In the ALICE TRD (ALICE Collaboration, Nucl. Instrum. Methods A 881 (2018) 88, arXiv:1709.02743v2, secs. 8-8.2),

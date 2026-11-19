@@ -35,7 +35,8 @@ Subcommands:
   the PDF edges contributes no term (it is skipped and counted in a warning), so the edges must cover the full range
   of the layer signal, including its high amplitudes. With --label-column (1 signal, 0 background): the efficiency -
   mis-identification curve over LLR thresholds with Clopper-Pearson intervals, and the rejection 1/misid.
-Correlations between layers are optional; without them the output says "independence assumed".
+A layer correlation can be declared only for charge --method weighted-mean (--correlation); otherwise the output
+says "independence assumed".
 
 Input CSV: one row per particle, one column per layer (--layers a,b,c); lines starting with # are skipped.
 Output: JSON with status, status_label (--status, default unvalidated), inputs, defaults_used, warnings, the results
