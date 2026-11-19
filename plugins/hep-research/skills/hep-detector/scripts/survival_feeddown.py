@@ -15,10 +15,13 @@ Method:
   reports P at s = -S and +S;
 - first-order feed-down into a lighter species: N_feed = N_heavy (1 - P_heavy) f(heavy -> light), with the
   fragmentation fraction f from the table and N_heavy the number arriving above the material (no re-interaction of
-  the fragment, no second-step fragmentation); dN_feed/ds_heavy = -N_heavy f P_heavy ln P_heavy.
+  the fragment, no second-step fragmentation); dN_feed/ds_heavy = -N_heavy f P_heavy ln P_heavy. The tool has no
+  charges: it checks only that the two species differ, not that the first is heavier.
 Assumptions: straight-through crossing (the grammage is along the track), first-order feed-down, one energy point
 (the cross sections are those at the energy of interest). There are no built-in cross sections; the table must name
-its source, or the output is labelled unvalidated whatever --status says.
+its source, or the output is labelled unvalidated whatever --status says. Every cross section is read under the key
+"inelastic", whatever its kind: for a charge-tagged selection put the charge-changing cross sections there and name
+the kind in "source" (the output does not record the kind otherwise).
 
 Input (JSON):
   --layers   {"layers": [{"name", "grammage_g_cm2", "composition": [{"target", "A", "mass_fraction"}]}]}
@@ -30,7 +33,7 @@ survival_probability, correction_factor, dP_dscale, scale_variation), feeddown (
 dN_dscale), and recipe_steps: the corrections as recipe steps with the correction keys of
 measurement:correction-keys-v1 (effects survival and fragmentation_feeddown of contracts/vocab/effects.json).
 Exit codes: 0 ok; 2 bad input (missing file, species or cross section; mass fractions that do not sum to 1;
-non-finite or negative numbers). Standard library only.
+non-finite or negative numbers; a fragmentation fraction from a species into itself). Standard library only.
 Usage: survival_feeddown.py compute --layers L.json --species S.json --xs XS.json [--scale-nuisance S]
        [--stage top-of-instrument] [--status LABEL]
 """
@@ -160,6 +163,8 @@ def compute(layers_doc: dict, species_doc: dict, xs_doc: dict, scale: float | No
             f = _num(f, f"xs.fragmentation_fraction.{heavy}.{light}")
             if f > 1:
                 raise InputError(f"fragmentation fraction {heavy} -> {light} is above 1")
+            if heavy == light:
+                raise InputError(f"fragmentation fraction {heavy} -> {light}: a species cannot feed down into itself")
             if heavy not in prob or light not in prob:
                 warnings.append(f"fragmentation {heavy} -> {light} skipped: both species must be listed")
                 continue

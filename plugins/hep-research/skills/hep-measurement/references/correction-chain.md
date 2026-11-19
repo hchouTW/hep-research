@@ -117,8 +117,9 @@ two fluxes would be 1.25e-2, 15% higher.
 
 ## Nuclei and isotopes
 
-- **Survival probability.** A nucleus crossing material of grammage x survives without an inelastic interaction with
-  probability `P = exp(-x / lambda_int)`, with lambda_int the interaction length of that nucleus in that material; the
+- **Survival probability.** A nucleus crossing material of grammage x survives without an inelastic (for a
+  charge-tagged selection, charge-changing) interaction with probability `P = exp(-x / lambda_int)`, with lambda_int
+  the interaction length of that nucleus in that material for that kind of cross section; the
   top-of-instrument flux divides by P for the material above the measuring layers. lambda_int comes from measured
   cross sections or a validated simulation, per species and energy; its uncertainty is a systematic.
 - **Fragmentation in the detector and above it.** A heavier nucleus that fragments in the material above the layers

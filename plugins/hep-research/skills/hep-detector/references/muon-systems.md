@@ -48,8 +48,11 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 - **Resolution**: at low `p`, multiple scattering and energy-loss fluctuations in the absorbers and
   calorimeters upstream of the muon system dominate; at high `p`, spatial
   resolution and alignment of the muon stations limits the *sagitta*
-  `s ≈ 0.3 z B L^2/(8 p)`-like measurement (approximate, uniform field; `s` and `L`
-  in m, `B` in T, `p` in GeV/c, `z` the charge number; momentum error `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem
+  `s ≈ 0.3 z B L^2/(8 p_perp)`-like measurement (approximate, uniform field; `s` and `L`
+  in m, `B` in T, `p_perp` in GeV/c, `z` the charge number; `p_perp` the momentum component
+  perpendicular to `B` (`p cos lambda` for pitch angle `lambda`) and `L` the path length in
+  the field projected on the bending plane: PDG RPP 2025, eq. 35.57, p. 108, eqs. 35.66 and
+  35.68 (`L'`), p. 112; momentum error `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem
   (see below).
 - **Efficiency**: geometric gaps (cracks, support structures, feet), chamber
   inefficiency, matching and reconstruction inefficiency, quoted **per type and versus

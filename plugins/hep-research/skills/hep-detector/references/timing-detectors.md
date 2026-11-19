@@ -19,8 +19,11 @@ beta = L / (c t)        m^2 = p^2 (1/beta^2 - 1)      Delta t = (L/c) [ (1/beta_
 `L` path length along the track (not straight-line distance; requires the track fit),
 `t` measured flight time (stop minus start), `p` momentum. The TOF separation of two
 species with the same `p` in the ultrarelativistic limit is
-`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate); separation in `N_sigma` falls as
-`1/p^2` and is lost above a momentum set by `L` and total time resolution.
+`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate, valid only for `p >> m`); separation in
+`N_sigma` falls as `1/p^2` and is lost above a momentum set by `L` and total time resolution.
+At `p` comparable to `m`, where TOF is used, take the exact form above (the limit overestimates
+`Delta t` by 22% for pi/K at 0.5 GeV/c and by a factor of about 2 at 0.2 GeV/c); below `m` the
+difference falls as `1/p` ([core detector equations](core-detector-equations.md), E8).
 
 ## Pulse-time extraction
 
@@ -44,7 +47,7 @@ sigma_calib^2 + sigma_geom^2 + sigma_ref^2`
 | Term | Origin | Scaling / handle |
 |---|---|---|
 | Sensor / intrinsic | single-photoelectron transit-time spread (PMT, MCP, SiPM), entering a many-photon hit about as `TTS/sqrt(N_pe)`; Landau (silicon), drift (gas) | detector design; the silicon and gas terms are irreducible per hit |
-| Photostatistics | first-photon time `tau_d/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_d/N_pe`; with rise time `~ sqrt(tau_r tau_d/N_pe)` (approximate) | more photons, faster rise and decay |
+| Photostatistics | first-photon time `tau_decay/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_decay/N_pe`; with rise time `~ sqrt(tau_rise tau_decay/N_pe)` (approximate; `tau_decay`, `tau_rise` the scintillation decay and rise times, not the dead time `tau_d` of the [glossary](detector-glossary.md)) | more photons, faster rise and decay |
 | Electronics | jitter (`noise/slope`), TDC bin `/sqrt(12)` (rms over random phases; at a fixed phase it averages out only with >= 0.5 bin of noise), time walk | design, calibration ([front-end electronics](front-end-electronics-and-signal-processing.md)) |
 | Clock | distribution jitter and offsets | global part: common to all channels, not averaged, but cancels in time differences within one event; local part (per board/PLL): averages over independent boards |
 | Calibration | `t0` per channel, walk curve, cable/fiber delay | in-situ residual method |
@@ -102,7 +105,10 @@ mis-assigned windows, so quote core width and tail fraction separately.
 ## Calibration and diagnostics
 
 Per-channel `t0` and walk from a common reference (laser, pulser, minimum-ionizing
-particle), then the global offset (start time) and the distribution of the experiment's
+particle); the walk curve must span the amplitude range of the data: for nuclei (SPC, NUC,
+heavy-ion beams) the amplitude scales as `Z^2`, so a curve from minimum-ionizing particles
+does not transfer ([front-end electronics](front-end-electronics-and-signal-processing.md#time-pickoff)).
+Then the global offset (start time) and the distribution of the experiment's
 reference clock: the accelerator clock at an accelerator; synchronisation signals sent
 to the optical modules, checked with in-situ LED or laser flashers (UGD neutrino
 telescopes; PDG RPP 2025, sec. 36.3.2); the synchronisation of fluorescence and surface
@@ -120,7 +126,7 @@ propagation; versus run/fill reveals clock drift.
 - **Natural objects**: hit time, track time, event start time. **Informative
   residual**: time residual to the expected time for a known species vs amplitude,
   position, and run.
-- **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2`.
+- **Scaling**: `1/sqrt(N_pe)` and `noise/slope`; TOF separation `~ L/p^2` for `p >> m`.
 - **Conventions**: quote resolution with the reference, core Gaussian sigma and tail
   fraction; state whether clock jitter is included.
 - **Tails**: wrong-bunch (COL) or wrong-window, afterpulses, late light, mis-association.

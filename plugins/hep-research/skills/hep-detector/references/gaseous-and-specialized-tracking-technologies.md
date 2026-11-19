@@ -152,8 +152,10 @@ path length, saturation, gain, and attachment ([particle identification](particl
   or from induced cathode charge for the second coordinate; fast, robust; limited
   granularity and rate by wire pitch and space charge.
 - **Straw-tube tracker**: many thin drift tubes; combination of drift measurement and a
-  large number of hits per track (good tracking robustness at low material); also the
-  basis for transition radiation stacks (electron ID, [particle identification](particle-identification.md));
+  large number of hits per track (good tracking robustness at low material); also one
+  of the two transition-radiation detector concepts, straws spread through the radiator so
+  that the TRD is part of the tracker; the other is radiator modules each followed by a
+  xenon-filled chamber (PDG RPP 2025, sec. 35.6.5, p. 46; electron ID, [particle identification](particle-identification.md));
   left-right ambiguity per straw resolved by staggered layers.
 - **RPC / multi-gap RPC (MRPC)**: resistive plates with a gas gap and a high
   uniform field; fast signal from a streamer/avalanche, strip readout, timing resolution
