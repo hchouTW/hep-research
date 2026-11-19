@@ -9,6 +9,8 @@ sensors. Physics of signal formation is in
 [calibration and alignment](calibration-and-alignment.md). Each family except diamond has a
 **Distinctive but generalizable reconstruction and performance features** block (headed *Features* for fibers and
 emulsions, before their reconstruction subsections); an item a block does not list is not stated for that family.
+Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is
+a recorded gap, not a claim that no method exists.
 
 ## Silicon pixels and strips (recap of what is distinctive)
 
@@ -132,6 +134,9 @@ path length, saturation, gain, and attachment ([particle identification](particl
 - **Transfers**: drift-plus-readout concept to noble-liquid TPCs
   ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)) and any imaging detector;
   does not transfer: gas-specific diffusion and ion-backflow numerology.
+
+### Methods and recorded gaps (TPC)
+
 <!-- example: source citation -->
 - **Signal extraction in a gaseous TPC with wire-chamber readout** (the ALICE TPC: Alme et al.,
   Nucl. Instrum. Methods A 622 (2010) 316, arXiv:1001.1950v1, secs. 1, 4.1, 4.3). Each pad signal is shaped and
@@ -142,7 +147,7 @@ path length, saturation, gain, and attachment ([particle identification](particl
   zero-suppresses below a threshold, keeping pre- and post-samples and requiring several
   samples above threshold. Tail and baseline correction must come before zero suppression.
 <!-- /example -->
-- Where an entry below says 'no method text, no source read', no source read for this skill gives that method; it is a recorded gap, not a claim that no method exists. **No method text, no source read**: deconvolution of the field
+- **No method text, no source read**: deconvolution of the field
   response from gaseous-TPC waveforms; the liquid-argon processing in
   [front-end waveform processing](front-end-waveform-processing.md#lar-tpc-signal-processing)
   is not stated for gas.
@@ -177,6 +182,9 @@ path length, saturation, gain, and attachment ([particle identification](particl
   voltage. **Data sample**: cosmic/collision muons for efficiency versus voltage
   (efficiency-plateau scan).
 - **Transfers**: plateau-scan concept (efficiency vs voltage) to every gas detector.
+
+### Methods and recorded gaps (wire/RPC)
+
 - **Collected charge in an integrating ionization chamber** (parallel-plate chambers in
   clinical ion beams: Christensen et al., Med. Phys. 43 (2016) 5484, arXiv:1610.06749v1, abstract and sec. I).
   Fewer ion pairs are collected than released, because charges recombine within one track
@@ -211,6 +219,9 @@ effects** (space charge, gain drop), and time resolution set by gap and gas.
 - **Tails**: discharge events, gain-nonuniformity-induced position biases.
 - **Data sample**: cosmic/test-beam and in-situ tracks for gain map.
 - **Transfers**: charge-centroid/micro-TPC to other segmented gas detectors.
+
+### Methods and recorded gaps (MPGD)
+
 <!-- example: source citation -->
 - **Identification in a TPC read out by Micromegas** (the T2K near-detector TPCs: Abgrall et al.,
   Nucl. Instrum. Methods A 637 (2011) 25, arXiv:1012.0865v1, sec. 7.3). The charge of a cluster, summed over its
