@@ -59,7 +59,8 @@ The first stage converts readout values into physical quantities using calibrati
 constants: pedestals, gains, channel-by-channel intercalibration, timing offsets, and
 dead or noisy channel maps. Everything downstream inherits these, and their versioning
 is part of the analysis's reproducibility record - see
-[calibration and alignment](calibration-and-alignment.md).
+[calibration and alignment](calibration-and-alignment.md); a residual left after calibration is propagated as in
+[calibration residual propagation](calibration-residual-propagation.md).
 
 Two failure modes recur. **Dead and noisy channel maps must match between data and
 simulation**, or simulated events see a detector that does not exist; when the masks
