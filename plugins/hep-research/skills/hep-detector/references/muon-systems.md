@@ -7,6 +7,8 @@ technology physics is in [gaseous and specialized tracking technologies](gaseous
 alignment weak modes in [calibration and alignment](calibration-and-alignment.md) and
 [tracking and vertexing](tracking-and-vertexing.md). Environment codes used here: COL collider;
 UGD underground, neutrino and rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
+Atmospheric-muon rejection in neutrino telescopes (upward-going selection, containment and veto regions,
+self-veto) is in [neutrino astronomy](neutrino-astronomy.md#backgrounds).
 
 ## Why muons are special
 
