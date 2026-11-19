@@ -97,12 +97,12 @@ mis-assigned windows, so quote core width and tail fraction separately.
   precision photon/particle timing; aging by charge extracted, ion feedback.
 - **RPC/MRPC**: gas gap timing, rate-dependent ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 - **Precision timing in trackers/calorimeters**: time assigned to tracks or clusters
-  (e.g. shower-time for photons, vertex-time for pileup rejection); needs the same
+  (e.g. shower-time for photons, vertex-time for pileup rejection (COL)); needs the same
   calibration/clock discipline, and a time-of-arrival correction for shower depth and
   time-walk with energy.
-- **Beam/start-time, bunch-timing, luminosity monitors**: give `t_0` and bunch
+- **Beam/start-time, bunch-timing, luminosity monitors (COL, FXT)**: give `t_0` and bunch
   identification; beam-phase drift and asymmetric bunch shapes are systematic inputs to
-  every timing analysis ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Luminosity monitors
+  every timing analysis at an accelerator ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Luminosity monitors
   count coincidences or hits and carry their own linearity/pileup correction.
 
 ## Calibration and diagnostics
