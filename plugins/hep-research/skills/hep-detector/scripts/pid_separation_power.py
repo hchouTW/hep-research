@@ -33,9 +33,12 @@ dE/dx resolution 0.01-0.5, relative beta resolution above 0.1) add a warning. It
 density-effect correction, which suppresses the relativistic rise, so numbers with either
 species above beta*gamma = 4 are optimistic and flagged (n_sigma_optimistic). The dE/dx
 bands of two species can cross, so separation is not monotonic in momentum: the scan
-reports below_threshold_intervals, the ceiling is the end of the first separated range,
-highest_separated is the top of the last separated range, and ceiling_is_lower_bound is
-true when the scan limit is reached still separated (the true end lies beyond it).
+reports below_threshold_intervals, the ceiling is the end of the separated range that
+starts at the lowest evaluable momentum (null when separation is already below threshold
+there; then use highest_separated and below_threshold_intervals), highest_separated is the
+top of the last separated range, and ceiling_is_lower_bound is true when the scan limit is
+reached still separated (the end of the last separated range, and of the ceiling when nothing
+is below threshold, lies beyond it).
 See <plugin root>/skills/hep-detector/references/particle-identification.md.
 Defaults (F-06): the output lists the values used ("inputs") and those taken by default ("defaults_used"); a
 defaulted detector parameter of the chosen mode (tof: path 1 m, time resolution 60 ps; dedx: silicon, 6%;
@@ -556,8 +559,9 @@ def main(argv=None):
             **result,
             'note': ('n_sigma follows separation_convention (single: one measurement of the '
                      'reference species; quadrature: both widths). The ceiling is the end of '
-                     'the first separated range; separation can recover above it (see '
-                     'below_threshold_intervals). dE/dx omits the density effect, so values '
+                     'the separated range that starts at the lowest evaluable momentum (null '
+                     'if separation starts below threshold); separation can recover above it '
+                     '(see below_threshold_intervals). dE/dx omits the density effect, so values '
                      'in the relativistic rise are optimistic.'),
         }, indent=2, allow_nan=False)
     except (ValueError, OverflowError, ZeroDivisionError) as exc:
