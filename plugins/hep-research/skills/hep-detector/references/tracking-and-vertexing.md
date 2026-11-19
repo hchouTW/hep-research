@@ -38,7 +38,7 @@ pair costs `w_i ≈ 3.65 eV`; a minimum-ionizing particle deposits most probably
 `d = sqrt(2 eps (V + V_bi)/(N e))`, so full depletion of a thickness `d` needs about
 `V ≈ e |N_eff| d^2/(2 eps)`. Bulk damage scales, to first order, with non-ionizing energy
 loss expressed as 1 MeV neutron-equivalent fluence (`n_eq/cm^2`): the leakage current
-grows as `alpha_I Phi_eq V` (`alpha_I ≈ 4e-17 A/cm` after the standard anneal), trapping
+grows as `alpha_I Phi_eq V` (`alpha_I ≈ 4e-17 A/cm` at 20 °C after 80 min at 60 °C; PDG RPP 2025, sec. 35.8.5, p. 74), trapping
 cuts the collected charge (effective trapping times of order 1 ns near `1e15 n_eq/cm^2`,
 so electron collection is favoured), and space charge changes the depletion voltage,
 with beneficial and then reverse annealing over months at room temperature. In a
