@@ -105,7 +105,10 @@ mis-assigned windows, so quote core width and tail fraction separately.
 ## Calibration and diagnostics
 
 Per-channel `t0` and walk from a common reference (laser, pulser, minimum-ionizing
-particle), then the global offset (start time) and the distribution of the experiment's
+particle); the walk curve must span the amplitude range of the data: for nuclei (SPC, NUC,
+heavy-ion beams) the amplitude scales as `Z^2`, so a curve from minimum-ionizing particles
+does not transfer ([front-end electronics](front-end-electronics-and-signal-processing.md#time-pickoff)).
+Then the global offset (start time) and the distribution of the experiment's
 reference clock: the accelerator clock at an accelerator; synchronisation signals sent
 to the optical modules, checked with in-situ LED or laser flashers (UGD neutrino
 telescopes; PDG RPP 2025, sec. 36.3.2); the synchronisation of fluorescence and surface
