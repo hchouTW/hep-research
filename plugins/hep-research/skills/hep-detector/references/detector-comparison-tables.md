@@ -164,6 +164,9 @@ specific to specialized detectors.
 
 ## Table 9: Specialized and auxiliary detectors
 
+The forward-proton, beam-monitor and luminosity rows are accelerator instruments; this page states them for a collider
+(COL) only.
+
 | Detector | Signal | Reconstructs | Distinctive concern |
 |---|---|---|---|
 | Neutron detectors | recoil/capture | neutron flux, energy (TOF) | gamma discrimination, efficiency model |
