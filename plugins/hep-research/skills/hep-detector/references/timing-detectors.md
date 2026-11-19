@@ -10,7 +10,7 @@ TOF separation. This file adds the timing-error budget and the objects. An optio
 counter time chain (offset, walk and propagation steps), event-time estimators, TOF and beta, and TOF species
 likelihoods is `<plugin root>/adapters/timing-pid/` (status demonstrated-on-synthetic-data; synthetic constants
 only, no timing, TOF, PID, dE/dx, calibration or counting quality claim). Environment codes
-used here: COL collider; SPC space and balloon; UGD underground, neutrino and rare-event;
+used here: COL collider; FXT fixed-target and test beam; SPC space and balloon; UGD underground, neutrino and rare-event;
 GND ground-based cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy.
 
 ## Relations (definition, exact unless noted)
@@ -97,12 +97,12 @@ mis-assigned windows, so quote core width and tail fraction separately.
   precision photon/particle timing; aging by charge extracted, ion feedback.
 - **RPC/MRPC**: gas gap timing, rate-dependent ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 - **Precision timing in trackers/calorimeters**: time assigned to tracks or clusters
-  (e.g. shower-time for photons, vertex-time for pileup rejection); needs the same
+  (e.g. shower-time for photons, vertex-time for pileup rejection (COL)); needs the same
   calibration/clock discipline, and a time-of-arrival correction for shower depth and
   time-walk with energy.
-- **Beam/start-time, bunch-timing, luminosity monitors**: give `t_0` and bunch
+- **Beam/start-time, bunch-timing, luminosity monitors (COL, FXT)**: give `t_0` and bunch
   identification; beam-phase drift and asymmetric bunch shapes are systematic inputs to
-  every timing analysis ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Luminosity monitors
+  every timing analysis at an accelerator ([triggers luminosity pileup](triggers-luminosity-pileup.md)). Luminosity monitors
   count coincidences or hits and carry their own linearity/pileup correction.
 
 ## Calibration and diagnostics
@@ -134,8 +134,10 @@ propagation; versus run/fill reveals clock drift.
   fraction; state whether clock jitter is included.
 - **Tails**: wrong-bunch (COL) or wrong-window, afterpulses, late light, mis-association.
 - **Dependence**: rate (baseline shifts), dose (LGAD gain, SiPM dark counts), temperature,
-  clock distribution. **Data sample**: `Z`/`J/psi -> mu mu` or cosmic muons, identified
-  species in overlapping momentum ranges.
+  clock distribution. **Data sample**: `Z`/`J/psi -> mu mu` (COL); cosmic muons (ground and
+  underground set-ups); secondary nuclei of known charge in an ion test beam, for the resolution versus charge
+  (FXT; arXiv:hep-ex/0305074, sec. 3); identified species in overlapping momentum ranges. A sample for a counter in
+  flight (SPC) is not given here (a gap).
 - **Transfers**: walk/offset calibration and jitter budget to every timed detector;
   **does not transfer**: TOF's `1/p^2` separation ceiling to non-timing PID.
 

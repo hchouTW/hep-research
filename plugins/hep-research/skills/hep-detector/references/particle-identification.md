@@ -36,9 +36,7 @@ quote for any PID system. Propagating `dm/m` from `dbeta/beta` gives
     dm/m = gamma^2 * (dbeta/beta)   (at fixed momentum)
 
 and, including the momentum error (approximate: first-order propagation of
-`m = p/(beta*gamma)` with uncorrelated `p` and `beta` errors; the standard TOF mass
-resolution, cf. PDG Review of Particle Physics, "Particle detectors at accelerators",
-particle identification),
+`m = p/(beta*gamma)` with uncorrelated `p` and `beta` errors),
 
     (dm/m)^2 = (dp/p)^2 + (gamma^2 * dbeta/beta)^2
 
