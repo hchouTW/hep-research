@@ -28,7 +28,7 @@ single-photoelectron reference cannot be declared (§11.4).
 | Parameter (§12) | Mechanism / node | Parameterization | g4sim field (Table 2 row) |
 |---|---|---|---|
 | light yield | yield / 2 | multiplicative, photons per MeV | `response-pipeline` scintillation `light_yield_per_MeV` (LY row) |
-| Birks k_B | nonlinearity / 2 | quenching 1/(1 + k_B·dE/dx) | detector-spec `ionisation/birks_mm_per_MeV` (Birks row) |
+| Birks k_B | nonlinearity / 2 (§12); bound at the output of node 1 (`shower`) on g4sim (§11.4 Table 1, D75) | quenching 1/(1 + k_B·dE/dx) | detector-spec `ionisation/birks_mm_per_MeV` (Birks row) |
 | collection efficiency | transport / 3 | reflectivity, absorption length | optical tables and surfaces (optical row) |
 | PDE | yield / 4a | probability, or PDE(E) | surface `efficiency`; a θ of its own only under the §6.7 split |
 | gain | 4b | multiplicative, with ENF | `sensor` stage `gain` (response row) |
