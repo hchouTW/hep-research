@@ -146,9 +146,10 @@ time series* (gain versus temperature/dose) rather than a single constant.
   fluctuations and detection efficiency; degeneracy: gain vs light yield vs coupling.
 - **Informative residual**: SPE spectrum, gain and DCR vs time, LED-linearity curve,
   light-yield vs position.
-- **Scaling**: `sigma/N ≈ sqrt(F/N_pe)`; timing from the first photoelectrons `~ tau_d/N_pe`
-  for a negligible rise time, closer to `sqrt(tau_r tau_d/N_pe)` with a finite one
-  ([timing detectors](timing-detectors.md)).
+- **Scaling**: `sigma/N ≈ sqrt(F/N_pe)`; timing from the first photoelectrons `~ tau_decay/N_pe`
+  for a negligible rise time, closer to `sqrt(tau_rise tau_decay/N_pe)` with a finite one
+  (`tau_decay`, `tau_rise` the emission decay and rise times, not the dead time `tau_d`;
+  [timing detectors](timing-detectors.md)).
 - **Tails**: afterpulses, crosstalk clusters, dark-count pileup, saturation.
 - **Dependence**: temperature (SiPM), magnetic field (PMT), dose, rate.
 - **Data sample**: LED/laser, SPE, MIPs, mono-energetic lines.
