@@ -7,7 +7,7 @@ Software checks establish contract consistency only, not physical validity.
 
 - **charge_confusion_rate.py, template and control modes** (sci-fixes CHARGECONF-TEMPLATE-MAXIMUM S1,
   CHARGECONF-TEMPLATE-STATUS S2, CHARGECONF-TEMPLATE-IDENTIFICATION S2, CHARGECONF-CONTROL-MC-SIGN S1; advisories
-  SFA-2026-906 to SFA-2026-909; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
+  SFA-2026-044 to SFA-2026-047; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
   profile likelihood in the rate: at about 5e5 events or more per bin the fit started from the naive fit could stop at
   the wrong-sign boundary and return a rate near 1e-6 with status ok. Template status follows one per-bin rule:
   not-converged or infeasible fails; converged-at-boundary or covariance-warning is ok with a warning naming the bin. A
@@ -18,7 +18,7 @@ Software checks establish contract consistency only, not physical validity.
   yield drops that template's MC terms from the likelihood: with a sparse wrong-sign MC template this had given rate 0
   with a ~1e-12-wide interval and status ok.
 - **hep-detector: four corrections in `geant4_benchmarks.py`** (sci-fixes G4BENCH-TRUNC98 and
-  G4BENCH-HIGHLAND-KINEMATICS, S1; G4BENCH-HELIX-SIGN and G4BENCH-HEAVY-ONLY, S2; advisories SFA-2026-910 to -913;
+  G4BENCH-HIGHLAND-KINEMATICS, S1; G4BENCH-HELIX-SIGN and G4BENCH-HEAVY-ONLY, S2; advisories SFA-2026-048 to -051;
   VALIDATION SCIFIX-F-S12-G4BENCH). The `multiple-scattering` sanity benchmark divides the RMS of the central 98 % by
   0.9346, the RMS of a unit Gaussian truncated to its central 98 % (was 0.8673, 7.8 % high), and evaluates Highland at
   the benchmark's particle and energy (it used `multiple_scattering.py`'s 100 GV default; the output records
@@ -29,15 +29,15 @@ Software checks establish contract consistency only, not physical validity.
   about 3 % (the recorded +11 % was mostly the old factor). The
   committed `geant4-thin-silicon` outputs are regenerated (the script hash).
 - **g4kit.py: a geometric default given in the design geometry file is used** (sci-fix, S1, CHK-AT-12-01, advisory
-  SFA-2026-914). `g4kit.py derive` accepted a design-geometry/1 field named after a kit's geometric default (a gap or
+  SFA-2026-052). `g4kit.py derive` accepted a design-geometry/1 field named after a kit's geometric default (a gap or
   margin of the calorimeter, endcap_disks, shell_veto, tof or trd kit) but built the detector-spec with the kit's own
   default, without a message, while the derivation record hashed the design file as if its value had been used: a tof
   design with eight 100 mm bars and `bar_gap_mm` 0 got a 100.5 mm pitch and an 804 mm plane instead of 100.0 mm and
   800 mm. The specification now takes the design's value. Only hand-written design geometry files are affected: the
   shipped mappings map kit inputs only. Derive affected specifications again; their geometry_id changes.
-- sci-fix (S2, DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE, advisory SFA-2026-915): the tof kit's design geometry mapping (`contracts/rules/design_geometry/tof.json`) now marks `time-resolution` tail-sensitive, so an F4 time resolution of the tof kit is labelled `optimistic` unless the study simulated all four tail sources, as `geant4-study-protocol.md` and the FID-03 rule state; it was always `estimate`.
+- sci-fix (S2, DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE, advisory SFA-2026-053): the tof kit's design geometry mapping (`contracts/rules/design_geometry/tof.json`) now marks `time-resolution` tail-sensitive, so an F4 time resolution of the tof kit is labelled `optimistic` unless the study simulated all four tail sources, as `geant4-study-protocol.md` and the FID-03 rule state; it was always `estimate`.
 - robust-fix (S4, DC-CHERENKOV-NONFINITE-YIELD): `cherenkov_angle.py` refuses an expected photon number that is not finite (exit 2, `error_kind` invalid-input) and reports a per-track angular resolution that underflows to zero as a failure with JSON `ok` false (exit 1), instead of a `ZeroDivisionError` traceback with an empty stdout.
-- **hep-detector: `multisample_pid.py charge` reports what it leaves out** (sci-fixes MULTISAMPLE-TOYS-TABLE-EDGE, S1, advisory SFA-2026-904; MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE, S1, advisory SFA-2026-905; MULTISAMPLE-NONPOSITIVE-RESPONSE, S4). `--toys` counts the toy events with a sample outside the response table (`toy_prediction.toys_requested`, `toys_used`, and a warning): before, they were dropped silently and the predicted width came out too narrow when the table ends inside the per-layer tail. `--method likelihood` no longer returns the first or last point of `--z-range` when the maximum lies outside it: such events and toys are left out, counted (`at_z_range_edge`) and named in a warning; before, they were reported at the edge. A response that is not positive anywhere in `--z-range` is rejected (exit 2) instead of a traceback (exit 1). Evidence in VALIDATION `SCIFIX-F-S12-PID`.
+- **hep-detector: `multisample_pid.py charge` reports what it leaves out** (sci-fixes MULTISAMPLE-TOYS-TABLE-EDGE, S1, advisory SFA-2026-042; MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE, S1, advisory SFA-2026-043; MULTISAMPLE-NONPOSITIVE-RESPONSE, S4). `--toys` counts the toy events with a sample outside the response table (`toy_prediction.toys_requested`, `toys_used`, and a warning): before, they were dropped silently and the predicted width came out too narrow when the table ends inside the per-layer tail. `--method likelihood` no longer returns the first or last point of `--z-range` when the maximum lies outside it: such events and toys are left out, counted (`at_z_range_edge`) and named in a warning; before, they were reported at the edge. A response that is not positive anywhere in `--z-range` is rejected (exit 2) instead of a traceback (exit 1). Evidence in VALIDATION `SCIFIX-F-S12-PID`.
 - `tracker_resolution.py momentum` keeps each `--point-resolution-um` value with its own layer position when it sorts
   the positions; unsorted positions with unequal resolutions gave the curvature error of a different layout (a factor
   2.2 too small on a four-layer example) (sci-fix CHK-AT-02-01, S1).
@@ -136,7 +136,7 @@ Software checks establish contract consistency only, not physical validity.
   `front-end-waveform-processing.md` label collider, space and cosmic-ray content and link the environment
   references.
 - **charge_confusion_rate.py control mode keeps `interval_68` and `rate_error` at 68.27%** (sci-fix
-  CHARGECONF-CONTROL-INTERVAL-CL S1; advisory SFA-2026-916; issue CHK-AT-08-05). With `--cl` other than 68.27%, a
+  CHARGECONF-CONTROL-INTERVAL-CL S1; advisory SFA-2026-054; issue CHK-AT-08-05). With `--cl` other than 68.27%, a
   control bin's `interval_68` held the Clopper-Pearson interval at `--cl` and `sign_rates` `rate_error` its
   half-width, with status ok (at `--cl 0.95` about 1.8 times the one-sigma error, e.g. 0.0190 instead of 0.0105 for 7
   wrong-sign of 300). Now `interval_68` is always the 68.27% interval and `rate_error` half its width; the interval
@@ -192,7 +192,7 @@ Software checks establish contract consistency only, not physical validity.
   use the four labels of `core-detector-equations.md` (exact, approximate, asymptotic, empirical) and no longer add
   *detector-specific*, which no relation carries.
 - **survival_feeddown.py refuses a feed-down into the same species** (sci-fix SURVIVAL-FEEDDOWN-SAME-SPECIES S2;
-  advisory SFA-2026-917; issue CHK-AU-02-06). A fragmentation fraction from a species into itself (`{"C": {"C": f}}`)
+  advisory SFA-2026-055; issue CHK-AU-02-06). A fragmentation fraction from a species into itself (`{"C": {"C": f}}`)
   was accepted with status ok and reported as `N (1 - P) f` feed-down events from that species into itself, with a
   `subtract_background` recipe step for it. It now exits 2 (status rejected); the tool has no charges, so it checks
   only that the two species differ. Survival probabilities and feed-down between different species are unchanged
@@ -240,11 +240,11 @@ Software checks establish contract consistency only, not physical validity.
   full-simulation points of §5.4 (extreme k_B and LY, r outside 0.15 to 1). `core/status.py` says where the scripts that
   echo the label under `status` are recorded. No other number and no status changes.
 - **multisample_pid.py likelihood refuses a `--layers` list that names no column** (sci-fix
-  MULTISAMPLE-LLR-NO-LAYERS S2; advisory SFA-2026-918; issue CHK-AT-06-09). `--layers ,` (empty, or only commas)
+  MULTISAMPLE-LLR-NO-LAYERS S2; advisory SFA-2026-056; issue CHK-AT-06-09). `--layers ,` (empty, or only commas)
   gave status ok with every LLR 0 and a one-point curve at efficiency 1 and misid 1. Now exit 2, status rejected,
   "--layers names no column", as `charge` does.
 - **multisample_pid.py likelihood refuses a label other than 0 or 1** (sci-fix MULTISAMPLE-LLR-LABEL-01 S2; advisory
-  SFA-2026-919; issue CHK-AT-06-10). The label was truncated with `int()` before the check, so 0.7 was counted as
+  SFA-2026-057; issue CHK-AT-06-10). The label was truncated with `int()` before the check, so 0.7 was counted as
   background (and 1.5 as signal) with status ok. Now exit 2, status rejected, naming the value; labels 0 and 1 (also
   written 0.0 and 1.0) give the same output as before.
 - **hep-detector: routing links** (issues CHK-AC-05-02 to -10). The calorimetry, tracking and timing references and

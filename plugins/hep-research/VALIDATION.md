@@ -10030,7 +10030,7 @@ Mutant patches: `CHK-AT-09-0n-k.patch` of the unit's fragments (all recorded as 
 
 ## CHK-AT-12-01 (2026-11-17, Stage B of the hep-detector content task; branch `detector-content/fixes-unit/F-S12-g4kit`)
 
-Sci-fix CHK-AT-12-01 (S1, advisory SFA-2026-914): `skills/hep-detector/scripts/g4kit.py` builds the detector-spec
+Sci-fix CHK-AT-12-01 (S1, advisory SFA-2026-052): `skills/hep-detector/scripts/g4kit.py` builds the detector-spec
 params of a kit's geometric defaults from the design geometry file's values instead of the kit's defaults. Evidence
 tests in `tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py`, added in the tests-only commit `6f235878`
 before the fix `d5afb4df`; tolerance zero (exact decimal arithmetic), justified in the module docstring. Software
@@ -10058,7 +10058,7 @@ per-track angular resolution underflows to zero. Before the fix both cases ended
 | `tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_resolution_underflowing_to_zero_fails_with_json` | behavioral | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_s12_misc_cherenkov_nonfinite.py::NonFinitePhotonNumber::test_negative_control_ordinary_case_is_unchanged` | behavioral (negative control) | pass | pass | no | E6 |
 
-**DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE** (S2, CHK-AT-12-02, advisory SFA-2026-915; tests `18d225d9`, fix `7fb6494c`):
+**DC-TOF-TIME-RESOLUTION-TAIL-SENSITIVE** (S2, CHK-AT-12-02, advisory SFA-2026-053; tests `18d225d9`, fix `7fb6494c`):
 `contracts/rules/design_geometry/tof.json` marks `time-resolution` `tail_sensitive: true`. The rule comes from
 `geant4-study-protocol.md` (an F4 resolution is an `estimate` only with all four tail sources simulated, else
 `optimistic`) and FID-03. PDG RPP 2025 sec. 35.4, p. 16 and eq. (35.25), p. 73 (scifix:S03; claims scifix:C915 and
@@ -10130,7 +10130,7 @@ warns on a zero noise or constant term; three-term outputs are unchanged.
 
 ## DC-F-XREF-2 (2026-11-18, detector content Stage B, fix unit F-XREF-2; issue CHK-AT-08-05)
 
-sci-fix CHARGECONF-CONTROL-INTERVAL-CL (S1, advisory SFA-2026-916) in `skills/hep-detector/scripts/charge_confusion_rate.py`
+sci-fix CHARGECONF-CONTROL-INTERVAL-CL (S1, advisory SFA-2026-054) in `skills/hep-detector/scripts/charge_confusion_rate.py`
 control mode: tests-only commit `b394e678`, fix `909b2b2e` directly on top. Oracles, domain and tolerances are in the
 module docstring of `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py`. Mutant patches (all `other`):
 CHK-AT-08-05-1 computes interval_68 at `--cl` again, -2 takes rate_error from the `--cl` interval, -3 computes
@@ -10145,7 +10145,7 @@ interval_68 at CL 0.68. The other F-XREF-2 issues are `docs:` commits (ledger `d
 
 ## DC-F-XREF-3 (2026-11-19, detector content Stage B, fix unit F-XREF-3; issue CHK-AU-02-06)
 
-sci-fix SURVIVAL-FEEDDOWN-SAME-SPECIES (S2, advisory SFA-2026-917) in `skills/hep-detector/scripts/survival_feeddown.py`
+sci-fix SURVIVAL-FEEDDOWN-SAME-SPECIES (S2, advisory SFA-2026-055) in `skills/hep-detector/scripts/survival_feeddown.py`
 compute: tests-only commit `1fe370c5`, fix `42338675` directly on top; follow-up `c7cdc6df` (docs:, CHK-AU-02-02 and
 CHK-AU-02-05, no code change). Oracle, domain and the absence of tolerances (all comparisons exact) are in the module
 docstring of `tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py`. Mutant patches (all `other`):
@@ -10161,9 +10161,9 @@ F-XREF-3 issues are `docs:` commits (ledger `documentation_fixes` F-XREF-3-*).
 ## DC-F-XREF-1 (2026-11-19, detector content Stage B, fix unit F-XREF-1; issues CHK-AT-06-09, CHK-AT-06-10)
 
 Two S2 sci-fixes in `skills/hep-detector/scripts/multisample_pid.py` likelihood, each a tests-only commit followed
-directly by its fix. MULTISAMPLE-LLR-NO-LAYERS (S2, advisory SFA-2026-918, CHK-AT-06-09; tests `167eb176`, fix
+directly by its fix. MULTISAMPLE-LLR-NO-LAYERS (S2, advisory SFA-2026-056, CHK-AT-06-09; tests `167eb176`, fix
 `efb40a04`): a `--layers` value naming no column is refused (exit 2) as in charge. MULTISAMPLE-LLR-LABEL-01 (S2,
-advisory SFA-2026-919, CHK-AT-06-10; tests `6b1adc7d`, fix `2a631306`): a label other than 0 or 1 is refused instead
+advisory SFA-2026-057, CHK-AT-06-10; tests `6b1adc7d`, fix `2a631306`): a label other than 0 or 1 is refused instead
 of truncated by `int()`. Oracles, domains and tolerances are in the module docstrings of
 `tests/skills/hep_detector/test_f_xref_1_likelihood_layers.py` and `test_f_xref_1_likelihood_labels.py`. Mutant
 patches (all `other`): CHK-AT-06-09-1 removes the refusal, -2 refuses only the empty string, -3 refuses fewer than
