@@ -46,6 +46,11 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 | Bolometer / semiconductor | phonons / ionization | pulse | `E`, recoil type | energy scale | thermal | pulse | noise | statistics, noise | threshold, surface | lines | threshold |
 | Air-shower / IACT / neutrino telescope | atmosphere / ice / water optics | sparse samples | direction, energy, mass | atmosphere, optics | geometry | footprint / image / hit pattern | topology | sampling | acceptance | hybrid, star tracker | atmosphere, ice |
 
+The environment references own the last four families: noble-liquid TPC, water / scintillator and bolometer /
+semiconductor in [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md);
+air-shower, IACT and neutrino telescope in [ground-based detection arrays](ground-based-detection-arrays.md),
+[imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md) and [neutrino astronomy](neutrino-astronomy.md).
+
 ## Table 2: Tracking-technology comparison
 
 | Technology | Info topology | Position mechanism | Ambiguity | Material | Rate | Radiation | Distinctive tail |
@@ -134,7 +139,9 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 | Noble liquid | charge/light vs `z`, time | lifetime | purity drift | threshold efficiency |
 | Rare-event | line scale, leakage vs `E` | leakage plot | wall events | threshold and fiducial efficiency |
 | Water / scintillator | — | Michel electron, `pi^0` closure | ring counting, optics | containment |
-| Air-shower / IACT / neutrino telescope | — | hybrid or independent cross-check | topology, atmosphere/medium optics | — |
+| Air-shower / IACT / neutrino telescope | see [surface-array event reconstruction](ground-based-detection-arrays.md#surface-array-event-reconstruction) | hybrid or independent cross-check | topology, atmosphere/medium optics | effective area, aperture or volume: see the response checklists of [arrays](ground-based-detection-arrays.md#instrument-response-functions-checklist), [IACTs](imaging-atmospheric-cherenkov.md#instrument-response-functions-checklist), [neutrino telescopes](neutrino-astronomy.md#instrument-response-functions-checklist) |
+
+The last four rows are owned by the environment references linked under Table 1.
 
 Muon detectors in ground arrays, where no dimuon resonance exists: [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays).
 
@@ -152,8 +159,8 @@ specific to specialized detectors.
 | Optical attenuation | light yield vs position | energy scale, resolution |
 | Refractive index | angle, threshold | PID |
 | Electron lifetime | charge vs depth | scale, threshold |
-| Atmospheric profile | shower energy/`X_max` | flux, composition |
-| Ice/water optics | angular/energy | effective volume, flux |
+| Atmospheric profile ([atmospheric monitoring](ground-based-detection-arrays.md#atmospheric-monitoring)) | shower energy/`X_max` | flux, composition |
+| Ice/water optics ([neutrino astronomy](neutrino-astronomy.md)) | angular/energy | effective volume, flux |
 
 ## Table 9: Specialized and auxiliary detectors
 
