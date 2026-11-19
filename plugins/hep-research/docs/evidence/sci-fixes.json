@@ -6511,7 +6511,12 @@
     "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_and_interval_match_profile_scan",
     "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_rate_matches_scipy_explicit_nuisance_fit",
     "tests/skills/hep_detector/test_f_s12_chargeconf_template_maximum.py::TemplateMaximum::test_reported_yields_are_the_maximum"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "CHARGECONF-TEMPLATE-STATUS",
@@ -6782,7 +6787,12 @@
    ],
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_s12_chargeconf_control_mc_sign.py::ControlMcSign::test_exhaustive_sign_combinations"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "G4BENCH-TRUNC98",
@@ -6901,7 +6911,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::GaussianCoreWidth::test_bench_ms_recovers_the_width_of_gaussian_quantile_angles",
     "tests/skills/hep_detector/test_f_s12_g4bench_trunc98.py::TruncationFactor::test_factor_is_the_rms_of_the_central_98_percent_of_a_unit_gaussian"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "G4BENCH-HIGHLAND-KINEMATICS",
@@ -7021,7 +7036,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_every_known_particle_and_energy",
     "tests/skills/hep_detector/test_f_s12_g4bench_highland_kinematics.py::HighlandAtTheBenchmarkKinematics::test_proton_of_1_gev_kinetic_energy"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "G4BENCH-HELIX-SIGN",
@@ -7316,7 +7336,12 @@
     "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExhaustiveGeometricDefaults::test_every_geometric_default_takes_the_design_value",
     "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry::test_a_geometric_default_in_the_design_changes_the_geometry",
     "tests/skills/hep_detector/test_f_s12_g4kit_geometric_defaults.py::ExpandedTofGeometry::test_neighbouring_bars_are_separated_by_the_design_gap"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "DC-CHERENKOV-NONFINITE-YIELD",
@@ -7609,7 +7634,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_scipy_sampling",
     "tests/skills/hep_detector/test_f_s12_pid_toy_table_edge.py::ToyTableEdge::test_left_out_fraction_matches_the_moyal_cdf"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "MULTISAMPLE-LIKELIHOOD-ZRANGE-EDGE",
@@ -7738,7 +7768,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_exhaustive_constant_signals",
     "tests/skills/hep_detector/test_f_s12_pid_likelihood_edge.py::LikelihoodEdge::test_maxima_outside_the_range_are_counted_not_returned"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "MULTISAMPLE-NONPOSITIVE-RESPONSE",
@@ -7897,7 +7932,12 @@
    "evidence_tests": [
     "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error",
     "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "CHARGECONF-CONTROL-INTERVAL-CL",
@@ -8038,7 +8078,12 @@
     "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_negative_control_95_half_width_is_not_the_rate_error",
     "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_property_interval_68_and_rate_error_do_not_depend_on_cl",
     "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_third_party_interval_68_and_rate_error_at_cl95"
-   ]
+   ],
+   "review": {
+    "by": "hchouTW",
+    "date": "2026-11-19",
+    "scope": "fix, evidence tests and advisory reviewed"
+   }
   },
   {
    "id": "SURVIVAL-FEEDDOWN-SAME-SPECIES",
