@@ -152,7 +152,8 @@ signature in any single layer. That has two direct consequences:
   rejection (PDG RPP 2025, sec. 35.6.5). Whatever the estimator, the
   per-layer response distributions are the calibration, and they must be measured from
   data control samples, not taken from simulation alone.
-- **Performance is quoted as a rejection factor at a fixed efficiency**, and it is
+- **Performance is quoted as the rejection of the heavier species (1 / its efficiency) at a
+  fixed electron efficiency** (PDG RPP 2025, sec. 35.6.5 and Fig. 35.18, uses 90 %), and it is
   strongly `gamma`-dependent. Transition-radiation yield turns on near `gamma ~ 10^3`
   (the exact onset and saturation depend on the radiator). A TRD separates electrons
   from a heavier species - pions (`e/pi`, the usual collider figure) or protons (the
