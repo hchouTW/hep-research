@@ -94,8 +94,9 @@ and pileup contribution that varies event by event).
 The seed threshold and the growth threshold are the two parameters that matter most.
 Raising them suppresses noise and pileup at the cost of low-energy efficiency and of
 truncating shower tails; lowering them recovers energy but couples the measurement to
-pileup. Because the optimum depends on the pileup level, a clustering configuration
-tuned for one running condition is not automatically valid for another - and
+pileup. Because the optimum depends on the noise level and, where unrelated interactions
+overlap in the readout window (at a collider, pileup), on the pileup level, a clustering
+configuration tuned for one running condition is not automatically valid for another - and
 comparisons across data-taking periods must confirm that the clustering behaved the
 same way, not just that the calibration was applied.
 
