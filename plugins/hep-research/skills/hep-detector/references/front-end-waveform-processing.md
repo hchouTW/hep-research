@@ -3,8 +3,8 @@
 Reconstruction from sampled waveforms and the signal processing of particular readouts, moved from
 [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md), which keeps
 the chain, signal induction, shaping, noise, thresholds, digitization, time pickoff and radiation effects.
-`<plugin root>/skills/hep-detector/scripts/frontend_response.py` gives `optimal-filter`, `waveform-toy` and
-`pileup` for the numbers below.
+`<plugin root>/skills/hep-detector/scripts/frontend_response.py` gives `optimal-filter`, `waveform-toy`,
+`pileup`, `deadtime` and `sipm` for the numbers below.
 
 ## Amplitude and time from sampled waveforms
 
