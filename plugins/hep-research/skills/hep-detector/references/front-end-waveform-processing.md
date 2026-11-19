@@ -3,8 +3,8 @@
 Reconstruction from sampled waveforms and the signal processing of particular readouts, moved from
 [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md), which keeps
 the chain, signal induction, shaping, noise, thresholds, digitization, time pickoff and radiation effects.
-`<plugin root>/skills/hep-detector/scripts/frontend_response.py` gives `optimal-filter`, `waveform-toy` and
-`pileup` for the numbers below.
+`<plugin root>/skills/hep-detector/scripts/frontend_response.py` gives `optimal-filter`, `waveform-toy`,
+`pileup`, `deadtime` and `sipm` for the numbers below.
 
 ## Amplitude and time from sampled waveforms
 
@@ -27,7 +27,8 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
     2 ns and −0.8 % to −1.5 % at 5 ns, depending on the direction. With correlated or
     pileup noise the weights extrapolate harder and the bias reaches several percent
     with either sign (same pulse, `rho = 0.6`, samples two before to two after the
-    peak: +0.9 % / −1.8 % at ∓2 ns, up to −5.8 % at 5 ns). This appears as an energy
+    peak: +0.9 % / −1.8 % at ∓2 ns, +0.5 % at −5 ns and −5.8 % at +5 ns; phase error `dt > 0`: the
+    pulse starts `dt` earlier than the weights assume, the convention of `optimal-filter --phase-errors`). This appears as an energy
     scale that drifts with the timing calibration.
 - **Sampling.** With a known pulse shape and a phase locked to the clock, a few
   samples per pulse below the Nyquist rate of the signal give unbiased amplitudes
@@ -57,7 +58,7 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   baseline offset (pedestal drift, the mean of unipolar pileup) does not bias the amplitude.
   Each constraint costs noise. Example (`optimal-filter`: CR-RC^4, `t_p = 45 ns`, 7 samples
   every 25 ns from three before the peak, `rho = 0.6`, pileup 2 MHz of rms amplitude
-  4 sigma): unconstrained sigma 1.38 with phase bias +1.9 % / −3.0 % at ∓2 ns and
+  4 sigma): unconstrained sigma 1.38 with phase bias +1.9 % / −2.9 % at ∓2 ns and
   `sum w = 0.56`; with the phase constraint sigma 1.40 and −0.5 % at either sign (second
   order); with the baseline constraint sigma 1.49 and `sum w = 0`.
   <!-- example: source citation -->

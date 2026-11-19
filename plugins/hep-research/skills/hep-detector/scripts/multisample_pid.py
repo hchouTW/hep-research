@@ -9,11 +9,15 @@ samplings) identifies a particle, with the choices stated. See "Combining many s
 Subcommands:
 - charge EVENTS.csv: per layer, the signal is corrected for the path length (signal x cos(theta) from --path-column;
   or --no-path-correction, which must be said explicitly) and inverted through a user response curve
-  (--response JSON {"z2": [...], "signal": [...]}, increasing; saturation is allowed; linear interpolation, values
-  outside the table are counted as out of range and left out) to a per-layer estimate of |Z|. The layers are combined
+  (--response JSON {"z2": [...], "signal": [...]}, increasing; saturation is allowed; linear interpolation; with
+  truncated-mean and weighted-mean an event with any layer signal outside the table is counted as out of range and
+  left out; with likelihood the curve is extrapolated linearly beyond its ends and nothing is counted) to a per-layer
+  estimate of |Z|. The layers are combined
   by --method:
-    truncated-mean  mean after dropping the highest --truncate-high fraction (and --truncate-low, default 0) of the
-                    per-layer estimates (robust against the Landau tail);
+    truncated-mean  mean after dropping the floor(f N) highest (--truncate-high f) and floor(f_low N) lowest
+                    (--truncate-low f_low, default 0) of the N per-layer estimates (robust against the Landau tail);
+                    with f N < 1 no sample is dropped (a warning); samples_dropped_high and samples_dropped_low
+                    give the numbers dropped;
     weighted-mean   weights 1/sigma^2 (--layer-sigma, one value or one per layer); --correlation rho (a common
                     correlation between layers) uses the generalized least-squares weights C^-1 1;
     likelihood      the |Z| that maximizes the product of per-layer Moyal densities (a Landau approximation) located
@@ -29,9 +33,12 @@ Subcommands:
   prediction to hold, else the predicted width is biased low.
 - likelihood EVENTS.csv: LLR = sum over layers of log(p_sig/p_bkg) from binned per-layer PDFs (--pdfs JSON
   {"edges", "signal", "background"} for every layer, or {"layers": {name: {...}}}); empty bins get a floor of 1e-12
-  of the PDF and are counted. With --label-column (1 signal, 0 background): the efficiency - mis-identification curve
-  over LLR thresholds with Clopper-Pearson intervals, and the rejection 1/misid.
-Correlations between layers are optional; without them the output says "independence assumed".
+  times the largest bin density of the layer's signal and background PDFs, and are counted. A layer value outside
+  the PDF edges contributes no term (it is skipped and counted in a warning), so the edges must cover the full range
+  of the layer signal, including its high amplitudes. With --label-column (1 signal, 0 background): the efficiency -
+  mis-identification curve over LLR thresholds with Clopper-Pearson intervals, and the rejection 1/misid.
+A layer correlation can be declared only for charge --method weighted-mean (--correlation); otherwise the output
+says "independence assumed".
 
 Input CSV: one row per particle, one column per layer (--layers a,b,c); lines starting with # are skipped.
 Output: JSON with status, status_label (--status, default unvalidated), inputs, defaults_used, warnings, the results
@@ -233,6 +240,7 @@ def run_charge(args, warnings, defaults):
         raise InputError("--response is required (the curve that turns a signal into Z^2)")
     response = Response(load_json(args.response, "response"))
     method = args.method
+    dropped = {}
     if method == "truncated-mean":
         if args.truncate_high is None:
             raise InputError("truncated-mean needs --truncate-high (the fraction of highest samples dropped)")
@@ -241,6 +249,12 @@ def run_charge(args, warnings, defaults):
                 raise InputError(f"{name} must be in [0, 1)")
         if args.truncate_low + args.truncate_high >= 1.0:
             raise InputError("--truncate-low + --truncate-high must be < 1")
+        dropped = {"samples_dropped_high": int(math.floor(args.truncate_high * len(layers))),
+                   "samples_dropped_low": int(math.floor(args.truncate_low * len(layers)))}
+        for name, f, key in (("--truncate-high", args.truncate_high, "samples_dropped_high"),
+                             ("--truncate-low", args.truncate_low, "samples_dropped_low")):
+            if f > 0 and dropped[key] == 0:
+                warnings.append(f"{name} {f:g} drops no sample of {len(layers)} layers (floor(f N) = 0)")
     sigmas = None
     if method == "weighted-mean":
         if not args.layer_sigma:
@@ -297,6 +311,7 @@ def run_charge(args, warnings, defaults):
             if args.correlation is not None else "independence assumed (no layer correlations declared)")
     result = {"method": method, "layers": layers, "events_used": len(estimates), "out_of_range": out_of_range,
               **({"at_z_range_edge": at_edge} if method == "likelihood" else {}),
+              **dropped,
               "correlations": corr, "summary": summarize([z for _, z in estimates]),
               "path_correction": "signal x cos(theta) from " + args.path_column if args.path_column else "none (waived)"}
     if weights:
@@ -374,6 +389,8 @@ def _pdf(doc, what):
 
 def run_likelihood(args, warnings, defaults):
     layers = [c for c in args.layers.split(",") if c]
+    if not layers:
+        raise InputError("--layers names no column")
     doc = load_json(args.pdfs, "PDF file")
     per_layer = {}
     for c in layers:
@@ -396,9 +413,12 @@ def run_likelihood(args, warnings, defaults):
                 floored += 1
             floor = PDF_FLOOR * max(max(ps), max(pb))
             llr += math.log(max(s, floor)) - math.log(max(b, floor))
-        lab = int(_num(r[args.label_column], args.label_column)) if args.label_column else None
-        if lab not in (None, 0, 1):
-            raise InputError(f"{args.label_column} must be 0 or 1")
+        lab = None
+        if args.label_column:
+            v = _num(r[args.label_column], args.label_column)
+            if v not in (0.0, 1.0):
+                raise InputError(f"{args.label_column} must be 0 or 1, got {v:g}")
+            lab = int(v)
         llrs.append((lab, llr))
     if floored:
         warnings.append(f"{floored} layer values fell in an empty PDF bin (floor {PDF_FLOOR:g} of the PDF maximum)")

@@ -6,7 +6,12 @@ or charge (muon systems use penetration instead), and converts that - combined w
 [tracking and vertexing](tracking-and-vertexing.md) - into a mass or species
 hypothesis. Organized by technology and independent of experiment; calorimeter-based
 identification (`E/p`, shower shape) is in
-[calorimetry](calorimetry-ecal-hcal.md). Environment labels: `COL` collider, `FXT` fixed
+[calorimetry](calorimetry-ecal-hcal.md). Identification methods specific to one environment are in the
+environment references: [space-based direct detection](space-based-direct-detection.md) (which uses this page for
+TOF, TRD and RICH), [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+(ring sharpness, `dE/dx` versus residual range, recoil discrimination), [neutrino astronomy](neutrino-astronomy.md)
+(tracks and cascades), [ground-based detection arrays](ground-based-detection-arrays.md) and
+[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) (gamma/hadron separation). Environment labels: `COL` collider, `FXT` fixed
 target and test beam, `SPC` space and high-altitude balloon, `UGD` underground, neutrino
 and rare-event, `GND` ground-based arrays, `NUC` nuclear and low-energy physics.
 
@@ -46,8 +51,10 @@ quadrature yourself. `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.
 
 A TOF system measures the time a particle takes to traverse a known flight path `L`,
 giving `beta = L / (c * t)` directly. Two scintillator planes (or any two timing
-layers) define the path; the resolution is set by the timing resolution `sigma_t` of
-the pair and by the uncertainty in `L`, which comes from the track fit.
+layers) define the path; the resolution is set by the system time resolution (stop and start,
+including common-mode clock and reference terms) and by the uncertainty in `L`, which comes from the track
+fit; the time-resolution budget and the four resolutions (single-hit, per-track, event-time, system) are in
+[timing detectors](timing-detectors.md).
 
 Separation between two species of mass `m1` and `m2` at momentum `p` follows from
 their time difference over the same path, which for relativistic particles scales as
@@ -145,7 +152,8 @@ signature in any single layer. That has two direct consequences:
   rejection (PDG RPP 2025, sec. 35.6.5). Whatever the estimator, the
   per-layer response distributions are the calibration, and they must be measured from
   data control samples, not taken from simulation alone.
-- **Performance is quoted as a rejection factor at a fixed efficiency**, and it is
+- **Performance is quoted as the rejection of the heavier species (1 / its efficiency) at a
+  fixed electron efficiency** (PDG RPP 2025, sec. 35.6.5 and Fig. 35.18, uses 90 %), and it is
   strongly `gamma`-dependent. Transition-radiation yield turns on near `gamma ~ 10^3`
   (the exact onset and saturation depend on the radiator). A TRD separates electrons
   from a heavier species - pions (`e/pi`, the usual collider figure) or protons (the
@@ -245,7 +253,7 @@ choice stated:
   per-layer signal at each Z^2, which the likelihood and `--toys` use as the Moyal location, not the mean signal,
   which is larger (PDG RPP 2025 sec. 34.2.3; the most probable value is the best estimator of the deposit, sec.
   35.6.4). The per-layer estimates are combined by a
-  truncated mean (drop the highest fraction against the Landau tail), a weighted mean (weights 1/sigma^2, or the
+  truncated mean (drop the highest floor(f N) of N samples against the Landau tail), a weighted mean (weights 1/sigma^2, or the
   generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
   Landau-like Moyal densities at the response; a maximum on the first or last scanned Z point is not a maximum, so
   such events are left out and counted, at_z_range_edge). With the truncated or weighted mean, events with a signal
@@ -261,10 +269,14 @@ choice stated:
   width is biased low.
 - **Log-likelihood ratio from per-layer PDFs** (`likelihood`). LLR = sum over layers of log(p_signal / p_background)
   from binned per-layer PDFs (measured on control samples, as above), with the efficiency - mis-identification curve
-  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum.
-- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Without a
-  declared correlation both modes say "independence assumed"; summing correlated layers as independent overstates the
-  separation (see "Combining measurements" below).
+  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum. A
+  layer value outside the PDF edges contributes no term (skipped, counted in a warning), so the edges must cover the
+  full range of the layer signal, including the high amplitudes in which a TRD signal shows up.
+- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Only
+  `charge --method weighted-mean` takes a declared correlation (`--correlation`, one common rho, generalized
+  least-squares weights); the truncated-mean and likelihood methods of `charge` and the `likelihood` mode cannot take
+  one and always say "independence assumed"; summing correlated layers as independent overstates the separation (see
+  "Combining measurements" below).
 - **Assigning samples to the track.** The samples above arrive already assigned to one particle.
 <!-- example: source citation -->
   In the ALICE TRD (ALICE Collaboration, Nucl. Instrum. Methods A 881 (2018) 88, arXiv:1709.02743v2, secs. 8-8.2),

@@ -27,7 +27,8 @@ refused). Needs at least
 three distinct energies to separate three terms; with exactly three points there are
 zero degrees of freedom and the output warns. A fitted squared coefficient can come
 out negative on noisy or narrow-range input - that is a failed separation: all three
-roots are null, ok is false, the reason is in warnings and the exit code is 1. An evaluation energy outside the
+roots are null, ok is false, the reason is in warnings and the exit code is 1; status still echoes the input's
+status label, so read ok and the exit code, not status, for the failure. An evaluation energy outside the
 fitted range (or outside --valid-range in --evaluate mode) is marked extrapolated. In --evaluate mode every term
 defaults to 0: all three zero is refused (exit 2), and a zero noise or constant term is a warning (a zero constant
 term leaves the resolution without its high-energy floor). See

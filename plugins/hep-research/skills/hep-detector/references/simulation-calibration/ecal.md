@@ -1,8 +1,9 @@
-# ECAL: simulator-calibration specialization
+# ECAL: simcal specialization
 
 Part B §11.1 items 1–8 for an electromagnetic calorimeter (scintillating crystal or sampling, light read out by a
 photosensor), from §3.1 derivation basis (1), the ECAL row of §12 and the g4sim binding of §11.4. Folder rules and the
-literature search record: [index](index.md).
+literature search record: [index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
@@ -28,7 +29,7 @@ single-photoelectron reference cannot be declared (§11.4).
 | Parameter (§12) | Mechanism / node | Parameterization | g4sim field (Table 2 row) |
 |---|---|---|---|
 | light yield | yield / 2 | multiplicative, photons per MeV | `response-pipeline` scintillation `light_yield_per_MeV` (LY row) |
-| Birks k_B | nonlinearity / 2 | quenching 1/(1 + k_B·dE/dx) | detector-spec `ionisation/birks_mm_per_MeV` (Birks row) |
+| Birks k_B | nonlinearity / 2 (§12); bound at the output of node 1 (`shower`) on g4sim (§11.4 Table 1, D75) | quenching 1/(1 + k_B·dE/dx) | detector-spec `ionisation/birks_mm_per_MeV` (Birks row) |
 | collection efficiency | transport / 3 | reflectivity, absorption length | optical tables and surfaces (optical row) |
 | PDE | yield / 4a | probability, or PDE(E) | surface `efficiency`; a θ of its own only under the §6.7 split |
 | gain | 4b | multiplicative, with ENF | `sensor` stage `gain` (response row) |
@@ -41,7 +42,7 @@ Nodes 0, 2, 3, 4a, 4b and 5 (electronics) are densities, node 1 a samplable blac
 deterministic. `log_density`: Poisson and binomial pmf; the multinomial of the map as successive binomials; for a bin
 with μ_b > 10 the pmf of g4sim's rounded Gaussian (width √(v_b − 1/12), cut at 0), not the normal density (§11.4).
 `run`: readout and reconstruction. `resample`: the full `g4sim_run` plus response, as used by P0 at the extreme points
-of k_B and r (§5.4).
+of k_B and of LY within the prior, and at design points with r outside 0.15 ≤ r ≤ 1 (§5.4).
 
 ## 4. Storage recommendations
 

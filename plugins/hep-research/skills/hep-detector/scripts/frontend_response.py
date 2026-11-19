@@ -304,6 +304,10 @@ def timing(rise_ns, snr, threshold_fraction=None, amplitudes=None, cfd_fraction=
         else:
             out['cfd'] = {'mode': 'true constant fraction', 'crossing_after_start_ns': td + f * tr,
                           'depends_on_rise_time': True}
+        out['cfd']['jitter_note'] = ('jitter_ps is the jitter of a leading-edge pickoff on the linear edge (slope '
+                                     'A/t_r); a CFD forms its crossing from the attenuated prompt and the delayed '
+                                     'pulse, so its noise and slope differ and its jitter is not jitter_ps '
+                                     '(timing-detectors.md: a CFD removes the amplitude dependence at the cost of jitter)')
     if tdc_lsb_ps is not None:
         lsb = _num(tdc_lsb_ps, 'TDC bin')
         out['tdc_quantization_ps'] = lsb / math.sqrt(12)
@@ -404,7 +408,8 @@ def sipm(cells, npe, crosstalk=0.0, dcr_hz=0.0, gate_ns=0.0):
     second = borel_var + borel_mean ** 2
     validity = []
     if mu / nc > 0.2:
-        validity.append('more than 20 % of cells fired: nonlinear regime; use a measured response curve, and '
+        validity.append('expected photoelectrons above 20 % of the cell count (about 18 % of cells fired): '
+                        'nonlinear regime; use a measured response curve, and '
                         'note that light longer than the cell recovery time raises the effective cell count')
     if p > 0.5:
         validity.append('mean secondaries above 0.5: branching is near critical; check the device data')
@@ -413,7 +418,10 @@ def sipm(cells, npe, crosstalk=0.0, dcr_hz=0.0, gate_ns=0.0):
                                             'crosstalk_probability': pct, 'mean_secondaries_lambda': p},
             'dark_counts_in_gate': {'mean_cells': lam * borel_mean, 'sigma_cells': math.sqrt(lam * second)},
             'assumptions': ['prompt, uniform illumination for saturation; crosstalk as a Borel branching process; '
-                            'afterpulses not included'],
+                            'afterpulses not included',
+                            'fired_cells and linearity_fraction are for primary photoelectrons only; crosstalk '
+                            '(crosstalk_cells_per_primary) and dark counts are not folded into the saturation '
+                            'curve, and on a saturated array they change it'],
             'validity': validity}
 
 

@@ -118,7 +118,7 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": false,
-     "constraint": "one of the core artifact_statuses; echoed as status_label (default unvalidated)"
+     "constraint": "one of the core artifact_statuses; echoed as status (default: the input file's status, else unvalidated)"
     }
    ],
    "outputs": [
