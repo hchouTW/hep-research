@@ -46,8 +46,10 @@ quadrature yourself. `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.
 
 A TOF system measures the time a particle takes to traverse a known flight path `L`,
 giving `beta = L / (c * t)` directly. Two scintillator planes (or any two timing
-layers) define the path; the resolution is set by the timing resolution `sigma_t` of
-the pair and by the uncertainty in `L`, which comes from the track fit.
+layers) define the path; the resolution is set by the system time resolution (stop and start,
+including common-mode clock and reference terms) and by the uncertainty in `L`, which comes from the track
+fit; the time-resolution budget and the four resolutions (single-hit, per-track, event-time, system) are in
+[timing detectors](timing-detectors.md).
 
 Separation between two species of mass `m1` and `m2` at momentum `p` follows from
 their time difference over the same path, which for relativistic particles scales as
