@@ -256,6 +256,28 @@ Software checks establish contract consistency only, not physical validity.
   telescopes; the simcal specialization index links hep-statistics' simcal scripts. Ten routing cases (five English,
   five natural zh-Hant) cover DIRC, LGAD and MRPC timing with time walk, software compensation and punch-through,
   Millepede alignment with the muon momentum scale, and the muon veto efficiency.
+- **hep-detector number-scan repairs** (SCAN-a1-01, SCAN-a2-01, SCAN-a3-01; text only): `geant4-study-protocol.md`
+  moves the configuration-specific multiple-scattering core-estimator numbers into an example block that names the
+  package's synthetic benchmark and its `VALIDATION.md` GEANT4-F4 row; `front-end-waveform-processing.md` no longer
+  states the LHC 40 MHz clock as a property of all colliders; `simulation-calibration/hcal.md` replaces an ambiguous
+  "ibid." with an explicit locator in Groom, arXiv:physics/0605164v4, sec. 3, p. 10.
+- **hep-detector: two sections move to their own references** (issues CHK-AC-06-01, CHK-AC-06-02). The method
+  contract of `event-reconstruction.md` ("Planning a reconstruction: the method contract", 10.8 kB) moves unchanged
+  to `reconstruction-method-contract.md`, and "Propagating a calibration residual" of `calibration-and-alignment.md`
+  moves unchanged to `calibration-residual-propagation.md`. Both headings stay with a summary and a link, so their
+  anchors still resolve; the new pages are linked from the registered hub `event-reconstruction.md`. The two pages
+  drop to about 17.5 kB and 22.8 kB, under the 24 KB soft limit.
+- **hep-detector: feature blocks, environment codes and owner links** (issues CHK-AC-06-03 to -05, CHK-AU-05-08,
+  CHK-AU-07-04, CHK-AU-07-05, CHK-AU-25-08, CHK-AU-25-09). The gaseous-tracking opening says which families have a
+  features block and that items a block omits are not stated; the TPC, wire/RPC and MPGD method and gap entries sit
+  under their own "Methods and recorded gaps" headings, and the gap preamble moves to the opening. The photosensor
+  features block records natural objects and conventions as not stated. The TOF mass-resolution formula in
+  `particle-identification.md` drops a PDG pointer that the cached review does not hold. `timing-detectors.md` codes
+  its data sample (COL; an ion test beam, FXT; no in-flight sample, a gap), vertex-time pileup rejection (COL) and
+  the beam, bunch and luminosity monitors (COL, FXT). `detector-comparison-tables.md` links the environment references
+  that own its noble-liquid, water/scintillator, bolometer, rare-event and air-shower/IACT/neutrino-telescope rows,
+  fills two "—" cells of Table 7 with links, and says that the forward-proton, beam-monitor and luminosity rows of
+  Table 9 are stated for a collider only.
 
 ## 0.70.0 (2026-11-16)
 

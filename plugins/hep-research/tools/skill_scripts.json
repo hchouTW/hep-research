@@ -1774,13 +1774,13 @@
   {
    "skill": "hep-detector",
    "name": "check_citations.py",
-   "source": "skills/hep-detector/references/geant4-study-protocol.md:459",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:468",
    "matches": []
   },
   {
    "skill": "hep-detector",
    "name": "check_systematic_variations.py",
-   "source": "skills/hep-detector/references/calibration-and-alignment.md:254",
+   "source": "skills/hep-detector/references/calibration-residual-propagation.md:27",
    "matches": []
   },
   {
@@ -1792,7 +1792,7 @@
   {
    "skill": "hep-detector",
    "name": "local_partition.py",
-   "source": "skills/hep-detector/references/geant4-study-protocol.md:393",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:402",
    "matches": []
   },
   {
