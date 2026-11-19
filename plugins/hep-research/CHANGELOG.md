@@ -114,6 +114,46 @@ Software checks establish contract consistency only, not physical validity.
   efficiency is binned in direction (`eta` at COL). `detector-principles-summary.md` failure signatures: mass peak
   vs charge and direction, energy scale vs angle, hadron response vs species (no size growth of the entry
   reference).
+- **hep-detector and adapters: scope statements made explicit** (F-SCOPE; issues CHK-AC-04-01, -03 to -08, -10,
+  CHK-AT-05-01, CHK-AT-10-05, CHK-AT-12-03, CHK-AT-13-01, -02, CHK-AU-01-07 to -10, CHK-AU-02-09, CHK-AU-12-04).
+  `g4kit.py list` now prints each kit's `role` and `purpose`. The kit purposes state their limits: `cherenkov` is a
+  threshold counter with one photodetector volume (no pixelated plane, no ring image), `calorimeter` is a plate-stack
+  sampling calorimeter (fibre-readout, accordion and homogeneous calorimeters need their own detector-spec), and `tof`
+  has active bars only (no light guide, photodetector or optical surface, so end read-out and light propagation are
+  not modelled). These purpose changes bump the kit versions, with the matching `kit.version` in each
+  `contracts/rules/design_geometry/` mapping: `cherenkov` 1.0.0 -> 1.0.1, `calorimeter` 1.2.0 -> 1.2.1, `tof`
+  1.1.0 -> 1.1.1 (purpose text only; the derived geometry is unchanged, the kit SHA-256 in geometry-derivation/1
+  records changes). The storage recommendations of the RICH, DIRC, TRD, muon-detector and TOF simcal pages name the
+  user's reconstruction, not simreco, as the source of ring, likelihood, t0, segment, T0 and slewing columns.
+  The g4sim binding-limits list of `simulation-calibration/index.md` adds simreco's single-Gaussian TOF time (no
+  amplitude, T0 or slewing). The hep-detector `README.md` states the SKILL.md budget as 12,288 bytes
+  (`tools/measure_entrypoints.py`), not 8 KiB.
+  `particle-identification.md` says that `pid_separation_power.py` gives the velocity term only, with no momentum,
+  path-length or start-time error. The README row and `photon-likelihood-reconstruction.md` state what the
+  photon-likelihood binding reconstructs (one or two point sources in its 5 m, 1,000-sensor sphere; no rings, tracks
+  or species hypotheses). The calo-cluster `adapter.json` purpose records that the zdcsim thresholds are carried-over,
+  unresolved constants. `calorimetry-ecal-hcal.md`, `nuclear-interactions-in-detector-material.md` and
+  `front-end-waveform-processing.md` label collider, space and cosmic-ray content and link the environment
+  references.
+- **charge_confusion_rate.py control mode keeps `interval_68` and `rate_error` at 68.27%** (sci-fix
+  CHARGECONF-CONTROL-INTERVAL-CL S1; advisory SFA-2026-916; issue CHK-AT-08-05). With `--cl` other than 68.27%, a
+  control bin's `interval_68` held the Clopper-Pearson interval at `--cl` and `sign_rates` `rate_error` its
+  half-width, with status ok (at `--cl 0.95` about 1.8 times the one-sigma error, e.g. 0.0190 instead of 0.0105 for 7
+  wrong-sign of 300). Now `interval_68` is always the 68.27% interval and `rate_error` half its width; the interval
+  at `--cl` is `interval`, with `interval_cl`. Outputs at the default `--cl` are unchanged apart from the new key.
+- **charge-confusion.md says what the template mode needs and returns** (docs, CHK-AT-08-07, CHK-AT-08-08,
+  CHK-AU-11-01, CHK-AU-11-03, CHK-AU-11-04). The page and the docstring say that the template histogram holds the
+  tracks of one true sign in both reconstructed signs (fitted on the opposite-sign sample alone, the tool returns the
+  confused fraction of that sample, not `c`), state the template status rule, that the coverage test runs at 50,000
+  events per bin (at least 50 expected wrong-sign events), and that `species_response.py from-rates` builds blocks
+  diagonal in rigidity with no rate uncertainty. The capability matrix no longer says that no script computes a
+  confusion rate.
+- **Stale T07 and timing-pid statements** (docs, CHK-AT-11-01, CHK-AT-11-02, CHK-AT-12-04, CHK-AT-10-03, and the
+  docstring part of CHK-AT-11-03). `adapters/acts-tracking/adapter.json` (status_rule), its capability-matrix row and
+  the docstring of `examples/reconstruction-tracking/run.py` say T07's evaluation ended failed at attempt 1, final
+  (decisions.md, "T07: final", 2026-11-14), instead of waiting for K09; `adapters/timing-pid/adapter.json` names the
+  method card format the tool reads, timing-method-card/2; the calo-cluster tool contract's check-product exit 2
+  names what check-product refuses (the product), not reconstruct's input refusals. No number and no status changes.
 
 ## 0.70.0 (2026-11-16)
 

@@ -10127,3 +10127,18 @@ warns on a zero noise or constant term; three-term outputs are unchanged.
 | `tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py::ZeroTerms::test_all_terms_zero_is_refused` | behavioral | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py::ZeroTerms::test_zero_constant_and_noise_are_warned` | behavioral | fail (assertion) | pass | no | E6 |
 | `tests/skills/hep_detector/test_f_s3_1_calorimeter_zero_terms.py::ZeroTerms::test_negative_control_three_terms_have_no_warnings_key` | behavioral (negative control) | pass | pass | no | E6 |
+
+## DC-F-XREF-2 (2026-11-18, detector content Stage B, fix unit F-XREF-2; issue CHK-AT-08-05)
+
+sci-fix CHARGECONF-CONTROL-INTERVAL-CL (S1, advisory SFA-2026-916) in `skills/hep-detector/scripts/charge_confusion_rate.py`
+control mode: tests-only commit `b394e678`, fix `909b2b2e` directly on top. Oracles, domain and tolerances are in the
+module docstring of `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py`. Mutant patches (all `other`):
+CHK-AT-08-05-1 computes interval_68 at `--cl` again, -2 takes rate_error from the `--cl` interval, -3 computes
+interval_68 at CL 0.68. The other F-XREF-2 issues are `docs:` commits (ledger `documentation_fixes` F-XREF-2-*).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_third_party_interval_68_and_rate_error_at_cl95` | independent implementation (third-party, scipy.stats.binomtest exact) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_exhaustive_tail_equalities_at_cl95` | exhaustive (k = 0..n, n = 1..20; Clopper-Pearson tail equalities) | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_property_interval_68_and_rate_error_do_not_depend_on_cl` | invariant | fail (assertion) | pass | no | E6 |
+| `tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_negative_control_95_half_width_is_not_the_rate_error` | behavioral (negative control, emulates pre-fix) | fail (assertion) | pass | no | E6 |

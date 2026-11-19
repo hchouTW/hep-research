@@ -7898,6 +7898,147 @@
     "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_every_order_of_the_pairs_gives_the_same_curvature_error",
     "tests/skills/hep_detector/test_f_s12_tracker_resolution_pairs.py::PairsKeptTogether::test_unsorted_unequal_layout_matches_the_pdg_fit_of_the_given_pairs"
    ]
+  },
+  {
+   "id": "CHARGECONF-CONTROL-INTERVAL-CL",
+   "title": "charge_confusion_rate.py control mode keeps interval_68 and sign_rates rate_error at 68.27% whatever --cl is; the interval at --cl is 'interval' with interval_cl",
+   "changelog": {
+    "kind": "unreleased"
+   },
+   "severity": "S1",
+   "oracle_kinds": [
+    "exhaustive",
+    "independent-implementation",
+    "invariant"
+   ],
+   "correctness": "C4",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": true,
+   "gaps": [],
+   "note": "with --cl other than 68.27%, each control bin's interval_68 held the Clopper-Pearson interval at --cl and sign_rates rate_error its half-width, with status ok: at --cl 0.95 and 7 wrong-sign of 300 (SYNTHETIC) rate_error 0.0190 instead of 0.0105; in the audit's bin 9.59e-4 instead of 5.12e-4. The rate itself and the default --cl outputs are unchanged (apart from the new 'interval' key). Evidence reads only keys the parent writes. Oracles: scipy.stats.binomtest exact interval (third-party); every k for n = 1..20 against the Clopper-Pearson tail equalities at 68.27%, binomial tails summed in the test (exhaustive, C4 over that stated domain; scipy covers n = 200 and 300); property: interval_68 and rate_error do not depend on --cl (0.5, 0.9, 0.95, 0.99); negative control: the pre-fix 95% half-width differs from rate_error by more than 1e-4. Tolerances 1e-9 (interval ends, tail probabilities), justified in the test file. species_response.py from-rates ignores rate_error, so no block in the tree changed; no committed example runs control mode.",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_third_party_interval_68_and_rate_error_at_cl95",
+     "basis": "third-party",
+     "detail": "scipy.stats.binomtest(k, n).proportion_ci(confidence_level=0.6826894921370859, method='exact') for 7 of 300 and 2 of 200 at --cl 0.95: interval_68 ends and rate_error = half its width within 1e-9",
+     "requires": {
+      "core": [
+       "scipy"
+      ],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    },
+    {
+     "kind": "exhaustive",
+     "test": "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_exhaustive_tail_equalities_at_cl95",
+     "basis": "exhaustive",
+     "detail": "every outcome k = 0..n for n = 1..20 (230 bins, one run at --cl 0.95): for k > 0 P(X >= k; n, lo) = (1 - 0.6827)/2 and for k < n P(X <= k; n, hi) = (1 - 0.6827)/2 within 1e-9 (tails summed with math.comb), lo = 0 at k = 0, hi = 1 at k = n, rate_error = (hi - lo)/2",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "exhaustive"
+    }
+   ],
+   "commits": {
+    "parent": "b394e67831847b085fdb1f1f47a30bb08a3a6abf",
+    "fix": "909b2b2e5dcbaecc455abdac1ae5695bbe0d5505",
+    "follow_up": [
+     "b16e1795ffe7d291d39c855173411bb486002d81"
+    ]
+   },
+   "parent_records": [
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_third_party_interval_68_and_rate_error_at_cl95",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-2",
+     "requires": {
+      "core": [
+       "scipy"
+      ],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_exhaustive_tail_equalities_at_cl95",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-2",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_property_interval_68_and_rate_error_do_not_depend_on_cl",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-2",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_negative_control_95_half_width_is_not_the_rate_error",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "E6",
+     "adapted_parent": false,
+     "validation": "DC-F-XREF-2",
+     "requires": {
+      "core": [
+       "scipy"
+      ],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_control",
+     "mutation": "other",
+     "detail": "computes interval_68 at --cl again (the pre-fix behaviour of interval_68 and rate_error)",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_control",
+     "mutation": "other",
+     "detail": "takes rate_error from the --cl interval instead of interval_68",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl"
+     ]
+    },
+    {
+     "function": "skills/hep-detector/scripts/charge_confusion_rate.py::run_control",
+     "mutation": "other",
+     "detail": "computes interval_68 at CL 0.68 instead of 0.6826894921370859",
+     "killed_by": [
+      "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl"
+     ]
+    }
+   ],
+   "evidence_tests": [
+    "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_exhaustive_tail_equalities_at_cl95",
+    "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_negative_control_95_half_width_is_not_the_rate_error",
+    "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_property_interval_68_and_rate_error_do_not_depend_on_cl",
+    "tests/skills/hep_detector/test_f_xref_2_control_interval_cl.py::ControlInterval68AtAnyCl::test_third_party_interval_68_and_rate_error_at_cl95"
+   ]
   }
  ],
  "documentation_fixes": [
@@ -10506,6 +10647,100 @@
     "The issue record cited no source; the sources were located for this fix. They show direction-dependent TPC response and resolution; no cached source was read that bins TPC tracking efficiency itself in direction."
    ],
    "note": "yes; read in the cached full texts 2026-11-18; documentation only, no regression test"
+  },
+  {
+   "id": "F-XREF-2-CHARGECONF-TEMPLATE-INPUT",
+   "title": "charge-confusion.md and charge_confusion_rate.py: the template histogram holds one true sign in both reconstructed signs; fitted on the opposite-sign sample alone the tool returns that sample's confused fraction, not c; template status rule; coverage test at 50,000 events per bin; from-rates blocks diagonal in rigidity without rate uncertainty; matrix row no longer says no script computes a rate (CHK-AT-08-07, CHK-AU-11-01, CHK-AU-11-03, CHK-AU-11-04, CHK-AT-08-08)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/charge_confusion_rate.py",
+     "locator": "module docstring; template_rate(); run_template()",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "tests/skills/hep_detector/test_charge_confusion_rate.py",
+     "locator": "toy_bin(); TemplateMode.test_slow_coverage_200_toys",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-detector/scripts/species_response.py",
+     "locator": "from_rates()",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit d4db6a954a140200ee1bac331a008d6d3aff7be4 (docs:); text only for these issues; the lead's unverified note (5e4 events per bin, template status rule) confirmed against the merged test and script"
+  },
+  {
+   "id": "F-XREF-2-T07-FINAL",
+   "title": "acts-tracking adapter.json status_rule, its capability-matrix row and the reconstruction-tracking run.py docstring: T07's evaluation ended failed at attempt 1, final, not waiting for K09 (CHK-AT-11-01, CHK-AT-11-02, CHK-AT-11-03 docstring part)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "docs/dev/detector-reconstruction/decisions.md",
+     "locator": "'## T07: final at \"failed at attempt 1\"' (line 1098)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "docs/dev/detector-reconstruction/final-report.md",
+     "locator": "line 21, T07 row",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "examples/reconstruction-tracking report line (run.py report_text, output/report.md line 3) still says the verdict waits for K09: needs regeneration in the recorded Slurm environment"
+   ],
+   "note": "fix commit dd44fa6c1a524a1fe6b5880037c9ccfe2bb69f54 (docs:); adapter version not bumped (the records test ties the version to a job of record); status label unchanged"
+  },
+  {
+   "id": "F-XREF-2-CALO-CONTRACT-CHECK-PRODUCT",
+   "title": "calo_cluster tool contract: check-product exit 2 means the product is refused (missing, not UTF-8, malformed or incomplete), not reconstruct's input refusals (CHK-AT-10-03)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "adapters/calo-cluster/assets/calo_cluster.py",
+     "locator": "check_product()",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "adapters/calo-cluster/assets/calo_recipe/product.py",
+     "locator": "module docstring; read_product()",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit c833d1592fa82be8d59b820b7021c17c8c8c401a (docs:)"
+  },
+  {
+   "id": "F-XREF-2-TIMING-METHOD-CARD-2",
+   "title": "timing-pid adapter.json purpose names timing-method-card/2, the only format method_card.py reads (CHK-AT-12-04)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "internal",
+     "citation": "adapters/timing-pid/assets/timing_recipe/method_card.py",
+     "locator": "FORMAT (line 18)",
+     "read": "2026-11-18"
+    },
+    {
+     "kind": "internal",
+     "citation": "adapters/timing-pid/assets/timing-method-card.json",
+     "locator": "format",
+     "read": "2026-11-18"
+    }
+   ],
+   "gaps": [
+    "adapters/timing-pid/assets/timing_recipe/__init__.py line 14 still says timing-method-card/1 (not in this unit's files)"
+   ],
+   "note": "fix commit 383fbff05be71a06c92dda90044660c89f759f3e (docs:); adapter version not bumped (text only, the version is tied to its jobs of record)"
   }
  ],
  "superseded": [

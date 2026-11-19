@@ -1,0 +1,53 @@
+{
+  "format": "hep-research-scifix-advisory/2",
+  "id": "SFA-2026-916",
+  "published": "2026-11-18T23:58:54Z",
+  "modified": "2026-11-18T23:58:54Z",
+  "severity": "S1",
+  "ledger": [
+    "CHARGECONF-CONTROL-INTERVAL-CL"
+  ],
+  "summary": "charge_confusion_rate.py control mode with --cl other than 68.27% wrote the Clopper-Pearson interval at --cl under interval_68 and its half-width as sign_rates rate_error, so a reader took, for example, a 95% half-width for a one-sigma error.",
+  "affected": [
+    {
+      "paths": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            {
+              "introduced": "0.14.0"
+            }
+          ]
+        }
+      ],
+      "database_specific": {
+        "introduced_commit": "4c1cb8713932d802d8dcd6664f43bd68e773835c",
+        "fixed_commit": "909b2b2e5dcbaecc455abdac1ae5695bbe0d5505"
+      }
+    }
+  ],
+  "impact": {
+    "observables": [
+      "control-mode interval_68 per bin",
+      "control-mode sign_rates rate_error (passed on with sign_rates)"
+    ],
+    "bias": "rate_error was the half-width at --cl instead of at 68.27%: at --cl 0.95 about 1.8 times too large (7 wrong-sign of 300: 0.0190 instead of 0.0105; 9.59e-4 instead of 5.12e-4 in the audit's bin), at --cl 0.5 too small; interval_68 held the --cl interval; status ok, no warning. The rate itself was right, and species_response.py from-rates does not read rate_error",
+    "trigger": "charge_confusion_rate.py control with --cl other than the default 0.6826894921370859; the bins carry interval_cl, which shows the --cl used"
+  },
+  "applies_to": {
+    "artifact_types": [],
+    "outputs": {
+      "producer": [
+        "skills/hep-detector/scripts/charge_confusion_rate.py"
+      ],
+      "how_to_recognize": "JSON on stdout of charge_confusion_rate.py control: bins[] with interval_68 and interval_cl different from 0.6826894921370859, and no 'interval' key; sign_rates rates[].rate_error; no artifact records the run"
+    }
+  },
+  "remedy": "for runs with --cl other than the default, rerun on a version with the fix (or recompute the 68.27% Clopper-Pearson interval from each bin's n and k) and replace rate_error and interval_68 taken from them; rates are unchanged",
+  "references": [
+    "https://github.com/hchouTW/hep-research/commit/909b2b2e5dcbaecc455abdac1ae5695bbe0d5505"
+  ]
+}
