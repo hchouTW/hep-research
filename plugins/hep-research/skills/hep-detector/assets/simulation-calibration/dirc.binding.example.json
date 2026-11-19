@@ -20,7 +20,7 @@
      "id": "source",
      "kernel": "density",
      "kind": "stage",
-     "description": "0 input: tracks of known momentum, species and polar angle"
+     "description": "0 input: tracks of known momentum, species and incidence angle on the bar"
     },
     {
      "id": "bar",
@@ -47,7 +47,7 @@
      "id": "pde",
      "kernel": "density",
      "kind": "stage",
-     "description": "4a MCP-PMT PDE as the sensor surface efficiency (applied in Geant4)",
+     "description": "4a photodetector (PMT, MaPMT or MCP-PMT) PDE as the sensor surface efficiency (applied in Geant4)",
      "mechanisms": [
       "yield"
      ]
@@ -84,7 +84,7 @@
      "id": "pattern",
      "kernel": "deterministic",
      "kind": "observation",
-     "description": "observation: hit pattern in (pixel, time) per polar angle (two-dimensional shape)"
+     "description": "observation: hit pattern in (pixel, time) per incidence-angle bin (two-dimensional shape)"
     }
    ],
    "edges": [
@@ -232,7 +232,7 @@
    {
     "kind": "simulation-setting",
     "description": "bar-surface roughness (unified model sigma_alpha) turned on versus a polished surface",
-    "observable": "photon yield versus polar angle (number of reflections)",
+    "observable": "photon yield versus incidence angle on the bar (number of reflections)",
     "identity_difference": "detector-spec optical surface finish and sigma_alpha_deg"
    },
    {
