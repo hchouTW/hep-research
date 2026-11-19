@@ -93,7 +93,7 @@ collimated decay.
 ### Track-finding strategies
 
 The finding algorithm sets which tracks can be found at all, so its assumptions are part
-of the efficiency definition. Four families are in use:
+of the efficiency definition. Four families are common in hit-based trackers:
 
 - **Road following / combinatorial Kalman filter.** Seeds of a few hits are extended
   layer by layer; the filter's predicted covariance sets the search window, the search
@@ -114,6 +114,10 @@ of the efficiency definition. Four families are in use:
   trained network scores the edges before a classical fit. It is validated as a learned
   reconstruction ([event reconstruction](event-reconstruction.md#validating-a-learned-reconstruction));
   the parameters and covariance still come from the classical fit.
+
+Wire-readout TPCs match 2D plane views or image in 3D tomographically (PDG RPP 2025, sec. 35.7.6,
+p. 61; [noble-liquid TPCs](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs));
+fits to a photon arrival pattern are in [photon likelihood reconstruction](photon-likelihood-reconstruction.md).
 
 Detectors with few measurement planes (a space-borne spectrometer, a cosmic-ray
 telescope) can test every hit combination and rank by fit quality, since the combinatorics
