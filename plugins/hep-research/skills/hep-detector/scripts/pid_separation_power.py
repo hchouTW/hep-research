@@ -44,7 +44,7 @@ Defaults (F-06): the output lists the values used ("inputs") and those taken by 
 defaulted detector parameter of the chosen mode (tof: path 1 m, time resolution 60 ps; dedx: silicon, 6%;
 velocity: 1e-3) is also a warning, because the default describes no particular detector.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
-Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+Exit codes: 0 ok; 1 the computation failed (the result is not representable, JSON with ok false);
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/pid_separation_power.py --mode tof --species pi K --momentum 2.0 --path 1.2 --time-resolution 60
 """
