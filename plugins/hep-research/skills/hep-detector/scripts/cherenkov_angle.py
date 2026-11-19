@@ -39,7 +39,7 @@ defaulted detector parameter (radiator length 2 cm, N0 100 /cm, single-photon re
 also a warning, because the default describes no particular detector. A relative beta resolution above 0.1, or a
 relative mass resolution gamma^2 dbeta/beta above 0.1, is a warning: the first-order propagation is not reliable there.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
-Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+Exit codes: 0 ok; 1 the computation failed (JSON with ok false);
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/cherenkov_angle.py --index 1.05 --species pi K --momentum 10
 """
