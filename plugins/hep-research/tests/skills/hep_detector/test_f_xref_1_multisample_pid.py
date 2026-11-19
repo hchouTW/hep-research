@@ -3,8 +3,8 @@
 - CHK-AT-06-06: the truncated mean drops floor(f N) of the N layer estimates; the output gives the numbers dropped
   (samples_dropped_high, samples_dropped_low) and warns when a nonzero fraction drops no sample. The expected means
   are written by hand from the definition (sort, drop, average), not taken from the tool.
-- CHK-AT-06-09: likelihood refuses a --layers list that names no column (exit 2), as charge does.
-- CHK-AT-06-10: likelihood refuses a label other than 0 or 1 (0.7 was truncated to 0 by int()).
+The likelihood input checks (CHK-AT-06-09, CHK-AT-06-10, S2) have their evidence in test_f_xref_1_likelihood_layers.py
+and test_f_xref_1_likelihood_labels.py.
 All inputs are SYNTHETIC. Exact comparisons: every expected value is a short exact sum.
 """
 import json
@@ -29,13 +29,13 @@ def run(*args):
 
 class Base(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.d = Path(self.tmp.name)
+        self.workdir = tempfile.TemporaryDirectory()
+        self.d = Path(self.workdir.name)
         (self.d / "response.json").write_text(json.dumps(RESPONSE), encoding="utf-8")
         (self.d / "pdfs.json").write_text(json.dumps(PDFS), encoding="utf-8")
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self.workdir.cleanup()
 
     def csv(self, name, text):
         path = self.d / name
@@ -84,30 +84,6 @@ class TruncatedMeanCounts(Base):
                         "weighted-mean", "--layer-sigma", "0.1", "--no-path-correction")
         self.assertEqual(code, 0, out)
         self.assertNotIn("samples_dropped_high", out)
-
-
-class LikelihoodInput(Base):
-    def test_layers_naming_no_column_is_refused(self):
-        path = self.csv("events.csv", "a,label\n0.5,1\n1.5,0\n")
-        code, out = run("likelihood", path, "--layers", ",", "--pdfs", self.d / "pdfs.json")
-        self.assertEqual(code, 2, out)
-        self.assertIn("--layers names no column", out.get("error", ""))
-
-    def test_fractional_label_is_refused(self):
-        path = self.csv("events.csv", "a,label\n0.5,1\n1.5,0\n1.5,0.7\n")
-        code, out = run("likelihood", path, "--layers", "a", "--pdfs", self.d / "pdfs.json",
-                        "--label-column", "label")
-        self.assertEqual(code, 2, out)
-        self.assertIn("must be 0 or 1", out.get("error", ""))
-
-    def test_integer_labels_still_accepted(self):
-        # negative control: labels 1 and 0 (also written 1.0 and 0.0) give the curve as before
-        path = self.csv("events.csv", "a,label\n0.5,1\n1.5,0\n1.5,1.0\n0.5,0.0\n")
-        code, out = run("likelihood", path, "--layers", "a", "--pdfs", self.d / "pdfs.json",
-                        "--label-column", "label", "--points", "2")
-        self.assertEqual(code, 0, out)
-        self.assertEqual(out["events"], 4)
-        self.assertIn("curve", out)
 
 
 if __name__ == "__main__":
