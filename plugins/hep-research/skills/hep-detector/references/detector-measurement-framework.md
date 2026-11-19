@@ -48,7 +48,7 @@ y = f(x; theta) + epsilon        p(y | x, theta)        p(x | y, theta)
   approximates). Bayes: `p(x|y,theta) ∝ p(y|x,theta) p(x)`.
 
 Relations in this framework are labeled throughout the package as **exact**,
-**approximate**, **asymptotic**, **empirical**, or **detector-specific**; `y = f + eps`
+**approximate**, **asymptotic** or **empirical**; `y = f + eps`
 with additive Gaussian `eps` is an approximation, and Poisson, Landau-like, and
 heavy-tailed noise violate it routinely.
 

@@ -71,5 +71,5 @@ response; **calibration** = the procedure that corrects them; **alignment** = el
   ([muon systems](muon-systems.md)).
 - **Electron-equivalent** vs **nuclear-recoil** energy scales are distinct
   ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)).
-- Relations are labeled *exact*, *approximate*, *asymptotic*, *empirical*, or
-  *detector-specific* where they appear.
+- Relations are labeled *exact*, *approximate*, *asymptotic* or *empirical* where they
+  appear ([core detector equations](core-detector-equations.md)).
