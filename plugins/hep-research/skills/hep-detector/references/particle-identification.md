@@ -245,7 +245,7 @@ choice stated:
   per-layer signal at each Z^2, which the likelihood and `--toys` use as the Moyal location, not the mean signal,
   which is larger (PDG RPP 2025 sec. 34.2.3; the most probable value is the best estimator of the deposit, sec.
   35.6.4). The per-layer estimates are combined by a
-  truncated mean (drop the highest fraction against the Landau tail), a weighted mean (weights 1/sigma^2, or the
+  truncated mean (drop the highest floor(f N) of N samples against the Landau tail), a weighted mean (weights 1/sigma^2, or the
   generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
   Landau-like Moyal densities at the response; a maximum on the first or last scanned Z point is not a maximum, so
   such events are left out and counted, at_z_range_edge). With the truncated or weighted mean, events with a signal

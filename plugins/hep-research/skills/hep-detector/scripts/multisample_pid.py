@@ -14,8 +14,10 @@ Subcommands:
   left out; with likelihood the curve is extrapolated linearly beyond its ends and nothing is counted) to a per-layer
   estimate of |Z|. The layers are combined
   by --method:
-    truncated-mean  mean after dropping the highest --truncate-high fraction (and --truncate-low, default 0) of the
-                    per-layer estimates (robust against the Landau tail);
+    truncated-mean  mean after dropping the floor(f N) highest (--truncate-high f) and floor(f_low N) lowest
+                    (--truncate-low f_low, default 0) of the N per-layer estimates (robust against the Landau tail);
+                    with f N < 1 no sample is dropped (a warning); samples_dropped_high and samples_dropped_low
+                    give the numbers dropped;
     weighted-mean   weights 1/sigma^2 (--layer-sigma, one value or one per layer); --correlation rho (a common
                     correlation between layers) uses the generalized least-squares weights C^-1 1;
     likelihood      the |Z| that maximizes the product of per-layer Moyal densities (a Landau approximation) located
@@ -238,6 +240,7 @@ def run_charge(args, warnings, defaults):
         raise InputError("--response is required (the curve that turns a signal into Z^2)")
     response = Response(load_json(args.response, "response"))
     method = args.method
+    dropped = {}
     if method == "truncated-mean":
         if args.truncate_high is None:
             raise InputError("truncated-mean needs --truncate-high (the fraction of highest samples dropped)")
@@ -246,6 +249,12 @@ def run_charge(args, warnings, defaults):
                 raise InputError(f"{name} must be in [0, 1)")
         if args.truncate_low + args.truncate_high >= 1.0:
             raise InputError("--truncate-low + --truncate-high must be < 1")
+        dropped = {"samples_dropped_high": int(math.floor(args.truncate_high * len(layers))),
+                   "samples_dropped_low": int(math.floor(args.truncate_low * len(layers)))}
+        for name, f, key in (("--truncate-high", args.truncate_high, "samples_dropped_high"),
+                             ("--truncate-low", args.truncate_low, "samples_dropped_low")):
+            if f > 0 and dropped[key] == 0:
+                warnings.append(f"{name} {f:g} drops no sample of {len(layers)} layers (floor(f N) = 0)")
     sigmas = None
     if method == "weighted-mean":
         if not args.layer_sigma:
@@ -302,6 +311,7 @@ def run_charge(args, warnings, defaults):
             if args.correlation is not None else "independence assumed (no layer correlations declared)")
     result = {"method": method, "layers": layers, "events_used": len(estimates), "out_of_range": out_of_range,
               **({"at_z_range_edge": at_edge} if method == "likelihood" else {}),
+              **dropped,
               "correlations": corr, "summary": summarize([z for _, z in estimates]),
               "path_correction": "signal x cos(theta) from " + args.path_column if args.path_column else "none (waived)"}
     if weights:
