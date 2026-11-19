@@ -19,7 +19,9 @@ Method:
   charges: it checks only that the two species differ, not that the first is heavier.
 Assumptions: straight-through crossing (the grammage is along the track), first-order feed-down, one energy point
 (the cross sections are those at the energy of interest). There are no built-in cross sections; the table must name
-its source, or the output is labelled unvalidated whatever --status says.
+its source, or the output is labelled unvalidated whatever --status says. Every cross section is read under the key
+"inelastic", whatever its kind: for a charge-tagged selection put the charge-changing cross sections there and name
+the kind in "source" (the output does not record the kind otherwise).
 
 Input (JSON):
   --layers   {"layers": [{"name", "grammage_g_cm2", "composition": [{"target", "A", "mass_fraction"}]}]}
