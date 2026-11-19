@@ -1,10 +1,10 @@
 {
  "schema": "g4kit/1",
  "name": "cherenkov",
- "version": "1.0.0",
+ "version": "1.0.1",
  "geometry_kind": "cherenkov",
  "role": "particle-id",
- "purpose": "A gas radiator vessel with a spherical mirror cap downstream and a photodetector under a conical light guide upstream, all inside optical_scope.",
+ "purpose": "A threshold Cherenkov counter: a gas radiator vessel with a spherical mirror cap downstream that focuses the light onto a single photodetector under a conical light guide upstream, all inside optical_scope. It has one photodetector volume, so it counts and times detected photons; it has no pixelated photodetector plane and makes no ring image: a RICH, DIRC or TOP needs its own detector-spec.",
  "inputs": {
   "vessel_x_mm": {
    "kind": "length"

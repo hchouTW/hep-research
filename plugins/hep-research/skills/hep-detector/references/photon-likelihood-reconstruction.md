@@ -13,6 +13,10 @@ the detector families in [noble liquid neutrino and rare event detectors](noble-
 [neutrino astronomy](neutrino-astronomy.md) and [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md).
 Ring-imaging PID (RICH, DIRC, TOP) uses the same photon-counting logic and is covered in
 [particle identification](particle-identification.md#ring-imaging-cherenkov-detectors-rich).
+The optional development binding `<plugin root>/adapters/photon-likelihood/` implements this likelihood for one
+point source (two in its topology step) in a 5 m sphere of 1,000 sensors with the stated analytic light model of its
+fixture (shared-model closure; status demonstrated-on-synthetic-data); it does not reconstruct rings, tracks or
+species hypotheses.
 
 ## The per-channel likelihood
 

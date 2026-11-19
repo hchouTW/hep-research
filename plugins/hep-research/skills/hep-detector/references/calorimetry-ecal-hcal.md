@@ -79,6 +79,16 @@ sampling fraction introduces an additional, dominant Poisson fluctuation - the
 **sampling term** - which is the price paid for compactness, cost, and the ability to
 build a deep hadronic section.
 
+Homogeneous calorimetry is not limited to crystals and noble liquids: in non-accelerator
+and neutrino-beam experiments water or ice, scintillator, a noble liquid or the
+atmosphere itself serves as the medium (PDG RPP 2025, sec. 35.10.1). Those cases are
+covered in [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
+(LArTPC calorimetry, water Cherenkov, liquid scintillator),
+[ground-based detection arrays](ground-based-detection-arrays.md#fluorescence-detectors)
+(the fluorescence calorimetric energy and its invisible-energy correction),
+[extensive air showers](extensive-air-showers.md) and
+[gamma-ray imaging and polarimetry](gamma-ray-imaging-and-polarimetry-reconstruction.md).
+
 The practical distinction for analysis is that a sampling calorimeter's energy scale
 depends on the sampling fraction, which is *not* the same for electromagnetic and
 hadronic showers. That difference is the origin of the non-compensation problem below.
@@ -195,9 +205,17 @@ radius `R_M` and about 99% within `3.5 R_M` (PDG RPP 2025, sec. 34.5). **Dead
 material** upstream or between compartments absorbs energy invisibly and must be
 corrected using the observed energy sharing between compartments.
 
+Some instruments do not contain the shower at all, and leakage is then not a
+correction but the measurement regime. A calorimetric space or balloon instrument does
+not contain the hadronic shower and obtains the incident energy by unfolding the
+deposited energy with a simulated response matrix (calorimetric instruments in
+[space-based direct detection](space-based-direct-detection.md)); a fluorescence
+detector corrects its calorimetric energy for the invisible energy carried by muons and
+neutrinos ([ground-based detection arrays](ground-based-detection-arrays.md#fluorescence-detectors)).
+
 All three are energy-dependent and direction-dependent, so a single global correction
-is inadequate; corrections are normally parameterized in energy and pseudorapidity or
-polar angle, and their residual uncertainty flows into the constant term.
+is inadequate; corrections are normally parameterized in energy and in the direction of incidence
+and impact point on the calorimeter (at a collider, pseudorapidity or polar angle), and their residual uncertainty flows into the constant term.
 
 ## Shower position, direction and shape
 
@@ -224,9 +242,12 @@ estimated from a cluster besides its energy.
   longitudinal profile are common inputs. Hadronic showers start later on average because
   the interaction length exceeds the radiation length (strongly in high-`Z` absorbers; the
   contrast is weaker in low-`Z` media). Two nearby photons (a neutral-pion
-  decay) appear as a broadened or double-peaked deposit. In an imaging calorimeter without
-  a magnet in front of it, a multivariate combination of shape variables is often the main
-  electron-proton separator. Its proton rejection is measured on data, with control
+  decay) appear as a broadened or double-peaked deposit. In a calorimetric space or
+  balloon instrument (an imaging calorimeter without a magnet in front of it; see
+  [space-based direct detection](space-based-direct-detection.md) and
+  [gamma-ray imaging and polarimetry](gamma-ray-imaging-and-polarimetry-reconstruction.md)),
+  a multivariate combination of shape variables separates electrons from protons. Its
+  proton rejection is measured on data, with control
   samples tagged by an independent subsystem or by template fits of the shape variable,
   because the simulated tails of hadronic showers are the least reliable part of the
   model.

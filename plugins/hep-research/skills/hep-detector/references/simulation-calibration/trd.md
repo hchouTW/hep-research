@@ -36,7 +36,8 @@ deterministic given its table; 4b and 5 densities; reconstruction deterministic.
 
 ## 4. Storage recommendations
 
-Hits for re-digitization of stages 2–5; simreco columns for the likelihood; the cluster-charge spectrum must keep its
+Hits for re-digitization of stages 2–5; the reconstruction's output columns for the likelihood (the user's
+reconstruction: simreco has no TRD reconstruction); the cluster-charge spectrum must keep its
 tail (the tail functional needs local ESS, §3.3).
 
 ## 5. Reference catalog

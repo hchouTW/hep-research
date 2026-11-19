@@ -69,6 +69,9 @@ parameters it could not bind and why.
 - No gas-avalanche stage kind: gas gain is bound to the `sensor` stage gain (*Inferred* mapping; TRD, μ detector).
 - No field for TTS, the effective light speed or the scintillation emission time (TOF, DIRC); no SiPM saturation
   stage (HCAL); no single-photoelectron injection before response stage 3 (ECAL).
+- simreco (`adapters/geant4/assets/simreco/`) forms each TOF layer time as the true crossing time plus one Gaussian
+  draw of width `sigma_t_ps`; it reads no amplitude and applies no T0 or slewing step, so T0 and slewing columns come
+  from the user's reconstruction (TOF).
 - Misalignment through `alignment-overlay/1` has no recorded run yet (D83 (7)); the RICH mirror is bound as a
   detector-spec parameter instead.
 - The run-card physics fields `/physics/pai`, `/physics/xtr`, `/physics/optical` and `/physics/decay` are discrete
