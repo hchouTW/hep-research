@@ -63,7 +63,7 @@ Response ratio versus energy: location, log link, with the declared form of r(E;
 power law is in the mean hadronic fraction, f_h = (E/E₀)^(m−1), so r = π/e = 1 − (1 − h/e)(E/E₀)^(m−1) (Groom, Nucl.
 Instrum. Meth. A 572 (2007) 633, arXiv:physics/0605164v4, eqs. 1 and 7), not r = c·E^b, which has no limit r → 1 at high
 energy; h/e < 1 is calorimeter-dependent (PDG RPP 2025 sec. 35.10.3, p. 100). The form is not dependable below 5–10 GeV,
-and π/e versus energy alone fixes only m and a = (1 − h/e)E₀^(1−m), not h/e and E₀ separately (ibid., p. 10): an
+and π/e versus energy alone fixes only m and a = (1 − h/e)E₀^(1−m), not h/e and E₀ separately (Groom, arXiv:physics/0605164v4, sec. 3, p. 10): an
 instance of the §3.5 scale-and-response-shape degeneracy. Resolution: core width, log. Longitudinal profile: normalized shape, alr/ilr. e/π ratio, the inverse of the π/e response ratio of
 [calorimetry](../calorimetry-ecal-hcal.md#hadronic-showers-and-non-compensation) (π/e = f_em + (1 − f_em)·h/e): location
 of a ratio, log link.
