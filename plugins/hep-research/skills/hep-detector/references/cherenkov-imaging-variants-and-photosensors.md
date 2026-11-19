@@ -141,6 +141,8 @@ time series* (gain versus temperature/dose) rather than a single constant.
 
 ### Features (photosensors)
 
+- **Natural objects** and **Conventions**: not stated here for photosensors (a gap); those of Cherenkov imaging are in
+  the block above, those of timing in [timing detectors](timing-detectors.md).
 - **Topology**: pulses per channel (counts, time, amplitude), possibly a waveform.
 - **Inverse problem**: `N_gamma`, arrival time from a pulse with gain and noise
   fluctuations and detection efficiency; degeneracy: gain vs light yield vs coupling.
