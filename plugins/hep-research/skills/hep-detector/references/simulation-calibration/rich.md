@@ -1,8 +1,9 @@
-# RICH: simulator-calibration specialization
+# RICH: simcal specialization
 
 Part B §11.1 items 1–8 for a ring-imaging Cherenkov detector (radiator, optional mirrors, pixelated photodetector),
 from §3.1 derivation basis (1), the RICH row of §12 and the full optical tracking path of §11.4. Folder rules:
-[index](index.md).
+[index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 

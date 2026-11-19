@@ -1,7 +1,9 @@
-# TRD: simulator-calibration specialization
+# TRD: simcal specialization
 
 Part B §11.1 items 1–8 for a transition-radiation detector (radiator plus gas drift chambers), from §3.1 derivation
 basis (2), the TRD row of §12 and §11.4. Folder rules: [index](index.md).
+simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 

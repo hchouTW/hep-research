@@ -1,8 +1,9 @@
-# DIRC: simulator-calibration specialization
+# DIRC: simcal specialization
 
 Part B §11.1 items 1–8 for a DIRC (Cherenkov light trapped in a quartz bar by total internal reflection, imaged in
 pixel and time), from §3.1 derivation basis (1), the DIRC row of §12 and the full optical tracking path of §11.4.
-Folder rules: [index](index.md).
+Folder rules: [index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
