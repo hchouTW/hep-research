@@ -41,7 +41,7 @@ Nodes 0, 2, 3, 4a, 4b and 5 (electronics) are densities, node 1 a samplable blac
 deterministic. `log_density`: Poisson and binomial pmf; the multinomial of the map as successive binomials; for a bin
 with μ_b > 10 the pmf of g4sim's rounded Gaussian (width √(v_b − 1/12), cut at 0), not the normal density (§11.4).
 `run`: readout and reconstruction. `resample`: the full `g4sim_run` plus response, as used by P0 at the extreme points
-of k_B and r (§5.4).
+of k_B and of LY within the prior, and at design points with r outside 0.15 ≤ r ≤ 1 (§5.4).
 
 ## 4. Storage recommendations
 
