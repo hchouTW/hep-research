@@ -6,7 +6,9 @@ or charge (muon systems use penetration instead), and converts that - combined w
 [tracking and vertexing](tracking-and-vertexing.md) - into a mass or species
 hypothesis. Organized by technology and independent of experiment; calorimeter-based
 identification (`E/p`, shower shape) is in
-[calorimetry](calorimetry-ecal-hcal.md). Identification methods specific to one environment are in the
+[calorimetry](calorimetry-ecal-hcal.md); DIRC, TOP, threshold counters and photosensors in
+[Cherenkov imaging variants](cherenkov-imaging-variants-and-photosensors.md); timing technologies in
+[timing detectors](timing-detectors.md); muon spectrometers in [muon systems](muon-systems.md). Identification methods specific to one environment are in the
 environment references: [space-based direct detection](space-based-direct-detection.md) (which uses this page for
 TOF, TRD and RICH), [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)
 (ring sharpness, `dE/dx` versus residual range, recoil discrimination), [neutrino astronomy](neutrino-astronomy.md)
