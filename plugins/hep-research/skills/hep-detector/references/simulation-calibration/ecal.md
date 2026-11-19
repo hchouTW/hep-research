@@ -1,8 +1,9 @@
-# ECAL: simulator-calibration specialization
+# ECAL: simcal specialization
 
 Part B §11.1 items 1–8 for an electromagnetic calorimeter (scintillating crystal or sampling, light read out by a
 photosensor), from §3.1 derivation basis (1), the ECAL row of §12 and the g4sim binding of §11.4. Folder rules and the
-literature search record: [index](index.md).
+literature search record: [index](index.md). simcal (simulator parameter calibration) is hep-statistics'
+([simcal scripts](../../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## 1. Stage mapping and injection-point splits
 
