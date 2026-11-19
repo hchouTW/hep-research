@@ -29,10 +29,11 @@ There is no 4a node. An ⁵⁵Fe-type source in the gas would be a mid-chain inj
 
 ## 3. Kernel properties
 
-Node 1 samplable black box; `ionisation` density (g4sim's `response.ionisation_quanta` draws a Gaussian of
-width √(F·mean), rounded and cut at 0, read from the plugin source; its `log_density` is that discrete pmf, as in
-§11.4's rule for the photon count); `drift`
-deterministic given its table; 4b and 5 densities; reconstruction deterministic.
+Node 1 samplable black box; `ionisation` density (g4sim's `response.ionisation_quanta` draws a Poisson count when
+the mean E/W is at most 10, `POISSON_LIMIT`, and otherwise a Gaussian of width √(F·mean), rounded and cut at 0, read
+from the plugin source; its `log_density` is the Poisson pmf on the first branch and the discrete rounded-Gaussian
+pmf on the second, as in §11.4's rule for the photon count; the Poisson branch has variance mean, not F·mean);
+`drift` deterministic given its table; 4b and 5 densities; reconstruction deterministic.
 
 ## 4. Storage recommendations
 

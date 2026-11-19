@@ -67,8 +67,11 @@ parameters it could not bind and why.
 - Hashed tables (`charge_sharing`, `drift_table`) carry no stage parameter value, so Lorentz angle, diffusion,
   charge sharing, cluster size and the r–t relation have no Table 2 row (Tracker, TRD, μ detector).
 - No gas-avalanche stage kind: gas gain is bound to the `sensor` stage gain (*Inferred* mapping; TRD, μ detector).
-- No field for TTS, the effective light speed or the scintillation emission time (TOF, DIRC); no SiPM saturation
-  stage (HCAL); no single-photoelectron injection before response stage 3 (ECAL).
+- No field for TTS or the effective light speed (TOF, DIRC); the scintillation emission time has detector-spec fields
+  (scintillation component `rise_ns`, `decay_ns`) but no Table 2 row (TOF); no SiPM saturation stage (HCAL); no
+  single-photoelectron injection before response stage 3 (ECAL).
+- No run-card field for cross-section scaling or hadronic-model internal parameters: the hadronic model is a discrete
+  model M (HCAL).
 - simreco (`adapters/geant4/assets/simreco/`) forms each TOF layer time as the true crossing time plus one Gaussian
   draw of width `sigma_t_ps`; it reads no amplitude and applies no T0 or slewing step, so T0 and slewing columns come
   from the user's reconstruction (TOF).

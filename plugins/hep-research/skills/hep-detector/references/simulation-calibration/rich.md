@@ -28,13 +28,16 @@ The semantic graph may still keep nodes 2, 3 and 4a separate; they then bind to 
 | PDE | yield / 4a | surface `efficiency` spectrum | detector-spec `optical_surfaces/<s>/efficiency` (optical row) |
 | gain | 4b | multiplicative, ENF | `sensor` stage `gain` |
 
-Every node-1 parameter changes the light path and needs resimulation, and for the optical row the production run is
-resimulated with it (§11.4 Table 2).
+Every node-1 parameter needs resimulation, and for the optical row the production run is resimulated with it (§11.4
+Table 2): the refractive index and the mirror alignment change the light path, the surface PDE changes which photons
+are detected. A PDE(E) applied after transport (surface `efficiency` set to 1 and `photons.csv` thinned by photon
+energy, §11.4) is then not a node-1 parameter.
 
 ## 3. Kernel properties
 
-Node 1 samplable black box; 4b and 5 densities (Poisson photoelectrons, gain with ENF); 6–7 deterministic (ring
-association is an association mechanism, §3.2).
+Node 1 samplable black box (it yields the Poisson photoelectron count); 4b a density (gain with ENF given that count,
+plus Poisson dark counts); 5 a density or deterministic, depending on the stage (§11.4 Table 1); 6–7 deterministic
+(ring association is an association mechanism, §3.2).
 
 ## 4. Storage recommendations
 
