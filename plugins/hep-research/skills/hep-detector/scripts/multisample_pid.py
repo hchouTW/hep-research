@@ -31,7 +31,7 @@ Subcommands:
   prediction to hold, else the predicted width is biased low.
 - likelihood EVENTS.csv: LLR = sum over layers of log(p_sig/p_bkg) from binned per-layer PDFs (--pdfs JSON
   {"edges", "signal", "background"} for every layer, or {"layers": {name: {...}}}); empty bins get a floor of 1e-12
-  of the PDF and are counted. With --label-column (1 signal, 0 background): the efficiency - mis-identification curve
+  times the largest bin density of the layer's signal and background PDFs, and are counted. With --label-column (1 signal, 0 background): the efficiency - mis-identification curve
   over LLR thresholds with Clopper-Pearson intervals, and the rejection 1/misid.
 Correlations between layers are optional; without them the output says "independence assumed".
 
