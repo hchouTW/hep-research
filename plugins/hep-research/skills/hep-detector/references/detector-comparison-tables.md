@@ -26,7 +26,7 @@ ground-based cosmic-ray and gamma-ray arrays, `NUC` nuclear and low-energy physi
 | MAPS/DEPFET/CCD | ionization in Si | charge | position | pedestal, threshold | alignment | cluster | integration-time | diffusion, pitch | rolling readout | overlaps | timing association |
 | Drift chamber/tube | ionization in gas | drift time | radius, position | `t0`, `r(t)`, gain | wire position, sag | drift circle, segment | left-right | diffusion, ionization statistics | cell edges, delta rays | residual vs distance | `t0`, `v_d`, alignment |
 | TPC | ionization in gas/liquid | 3D charge + time | 3D track, `dE/dx` | `v_d`, gain, lifetime | field map | cluster, track | `t_0` | diffusion, MS | distortions, merging | laser, cross-detector | distortion map |
-| MWPC/straw | gas avalanche | wire hit / time | position | gain, `t0` | wire pos. | hit, straw circle | left-right | pitch, drift | edges, streamer | plateau scan | efficiency vs rate |
+| MWPC/straw | gas avalanche | wire hit / time | position | gain; `t0` (straw) | wire pos. | hit, straw circle | left-right (straw); wire-crossing ghosts (MWPC) | pitch, cathode centroid (MWPC); drift (straw) | edges, streamer | plateau scan | efficiency vs rate |
 | RPC/MRPC | gas gap avalanche (streamer in older RPCs) | strip time | position, time | `t0`, HV plateau | strip alignment | hit cluster | multi-hit | gap, rate | rate-dependent | cosmics | rate |
 | GEM/Micromegas | micropattern gas | pad/strip charge | position, angle | gain map | alignment | cluster | angle | pitch, diffusion | discharges | test beam, cosmics | gain, rate |
 | Scintillating fiber | scintillation | amplitude | position | gain, attenuation | mapping | hit | stereo ghosts | pitch, sharing | crosstalk, dark counts | MIPs | attenuation, dose |
