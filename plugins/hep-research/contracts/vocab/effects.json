@@ -109,7 +109,7 @@
   {
    "effect_id": "survival",
    "class": null,
-   "definition": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic interaction; the flux divides by P",
+   "definition": "Survival of a species through the material above the measuring layers: the probability P = exp(-sum x/lambda) that it crosses without an inelastic (for a charge-tagged selection, charge-changing) interaction; the flux divides by P",
    "description_required": true
   },
   {
