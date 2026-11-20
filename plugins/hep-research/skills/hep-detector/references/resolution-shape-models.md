@@ -20,8 +20,8 @@ row and says where each was sourced.
 Write `t = (x - xbar) / sigma` for the standardized variable, `xbar` (written `mu` in the DSCB and pedestal
 models and the examples) and `sigma` the Gaussian core's mean and width.
 
-- **Crystal Ball (CB), low-side tail** (exact, a definition; Das, arXiv:1603.08591, eq. 1; the original form is
-  Gaiser, SLAC-R-255, Appendix F.1, eq. F-1): `f = exp(-t^2/2)` for `t > -alpha`;
+- **Crystal Ball (CB), low-side tail** (exact, a definition; Das, arXiv:1603.08591, eq. 1; an early form is
+  Gaiser, App. F.1, eq. F-1; Das p. 1 credits the Crystal Ball Collaboration, refs. 6 and 8 there): `f = exp(-t^2/2)` for `t > -alpha`;
   `f = A (B - t)^(-n)` for `t <= -alpha`, with `A = (n/|alpha|)^n exp(-|alpha|^2/2)` and
   `B = n/|alpha| - |alpha|`, for `alpha > 0` and `n > 1` (normalizable, next item). `A` and `B` make the function
   and its first derivative continuous at the join (Gaiser, printed p. 179). A high-side tail is the mirror image
@@ -248,7 +248,7 @@ apparatus papers abbreviated, as in its astroparticle example block:
 
 - J. E. Gaiser, "Charmonium spectroscopy from radiative decays of the J/psi and psi-prime", PhD thesis, Stanford
   University (1982), report SLAC-R-255, https://www.slac.stanford.edu/pubs/slacreports/reports02/slac-r-255.pdf
-  (INSPIRE 183554), Appendix F.1 (eq. F-1, printed pp. 178-179) and Table 20. Origin of the CB.
+  (INSPIRE 183554), Appendix F.1 (eq. F-1, printed pp. 178-179) and Table 20. Early CB line shape.
 - S. Das, "A simple alternative to the Crystal Ball function", arXiv:1603.08591 (2016),
   https://arxiv.org/abs/1603.08591, eqs. 1-3 and Fig. 1.
   CB closed form, GaussExp and ExpGaussExp, instability from `n`.
