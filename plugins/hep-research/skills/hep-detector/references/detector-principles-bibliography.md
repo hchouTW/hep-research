@@ -17,6 +17,8 @@ paper (name, configuration, phase space, conditions), which are deliberately not
 here because they are experiment-specific. Prefer primary sources for technical claims;
 the textbooks are for principles.
 
+Split files (same format; apparatus sources inside example blocks): [in-situ calibration and alignment](detector-principles-bibliography-calibration.md), [particle identification reference PDFs](detector-principles-bibliography-particle-identification.md), [radiation damage and ageing](detector-principles-bibliography-radiation.md).
+
 ## General and cross-cutting
 
 - **Particle Data Group reviews**: S. Navas et al. (Particle Data Group), Phys. Rev. D 110 (2024) 030001, and

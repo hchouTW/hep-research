@@ -257,3 +257,8 @@ its routing table and representative cases, is in [reconstruction method contrac
   with the pileup reweighting applied to simulation.
 - Confirmation that a rerun reproduces the same output (no ordering or threading
   dependence).
+
+## Linked pages
+
+- [References: in-situ calibration and alignment](detector-principles-bibliography-calibration.md): annotated sources of the in-situ calibration and alignment pages
+- [References: particle identification reference PDFs](detector-principles-bibliography-particle-identification.md): annotated sources of the multisample PID and reference-PDF page

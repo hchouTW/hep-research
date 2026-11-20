@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 60,
-   "bytes": 894078,
+   "references": 63,
+   "bytes": 895970,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2088,8 +2088,8 @@
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
    "owner": "hep-detector",
-   "bytes": 5708,
-   "lines": 75,
+   "bytes": 5869,
+   "lines": 79,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -2149,13 +2149,55 @@
    "last_commit": "229f4b462 2026-11-19"
   },
   {
+   "path": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
+   "owner": "hep-detector",
+   "bytes": 366,
+   "lines": 6,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/event-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "owner": "hep-detector",
+   "bytes": 357,
+   "lines": 6,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/event-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+   "owner": "hep-detector",
+   "bytes": 308,
+   "lines": 6,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-design-principles.md",
+    "skills/hep-detector/references/detector-principles-bibliography.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 25373,
-   "lines": 309,
+   "bytes": 25709,
+   "lines": 311,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
+    "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
+    "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+    "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
@@ -2256,8 +2298,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 17549,
-   "lines": 260,
+   "bytes": 17913,
+   "lines": 265,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2443,7 +2485,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "8841b8bd9 2026-11-19"
+   "last_commit": "43ee063e0 2026-11-19"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -5512,6 +5554,27 @@
  ],
  "overlap_pairs": [
   {
+   "a": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+   "jaccard": 0.279,
+   "containment": 0.459,
+   "shared_shingles": 17
+  },
+  {
+   "a": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
+   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+   "jaccard": 0.254,
+   "containment": 0.459,
+   "shared_shingles": 17
+  },
+  {
+   "a": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
+   "b": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "jaccard": 0.239,
+   "containment": 0.415,
+   "shared_shingles": 17
+  },
+  {
    "a": "skills/hep-detector/references/simulation-calibration/dirc.md",
    "b": "skills/hep-detector/references/simulation-calibration/rich.md",
    "jaccard": 0.097,
@@ -5550,9 +5613,16 @@
    "skills/hep-computing/references/batch-site-cern-htcondor.md",
    "skills/hep-computing/references/batch-site-nstccore-slurm.md"
   ],
+  "bibliography": [
+   "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
+   "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+   "skills/hep-detector/references/detector-principles-bibliography.md"
+  ],
   "calibration": [
    "skills/hep-detector/references/calibration-and-alignment.md",
    "skills/hep-detector/references/calibration-residual-propagation.md",
+   "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
    "skills/hep-detector/references/front-end-calibration.md"
   ],
   "cern": [
@@ -5650,6 +5720,10 @@
    "skills/hep-computing/references/python-balanced-design-guidelines.md",
    "skills/hep-computing/references/root-balanced-design-guidelines.md"
   ],
+  "identification": [
+   "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "skills/hep-detector/references/particle-identification.md"
+  ],
   "imaging": [
    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
@@ -5700,6 +5774,10 @@
    "skills/hep-computing/references/numerical-and-computational-methods.md",
    "skills/hep-computing/references/symbolic-and-numerical-computation.md"
   ],
+  "particle": [
+   "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "skills/hep-detector/references/particle-identification.md"
+  ],
   "performance": [
    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
@@ -5712,11 +5790,6 @@
    "skills/hep-theory/references/cosmic-ray-new-physics.md",
    "skills/hep-theory/references/nuclear-physics-essentials.md",
    "skills/hep-theory/references/particle-physics-essentials.md"
-  ],
-  "principle": [
-   "skills/hep-detector/references/detector-design-principles.md",
-   "skills/hep-detector/references/detector-principles-bibliography.md",
-   "skills/hep-detector/references/detector-principles-summary.md"
   ],
   "processing": [
    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
