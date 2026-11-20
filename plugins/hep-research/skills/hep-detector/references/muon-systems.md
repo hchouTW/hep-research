@@ -5,22 +5,20 @@ Micromegas-based chambers; standalone, combined, segment-tagged, calorimeter-tag
 trigger-level muons. The PID summary is in [particle identification](particle-identification.md);
 technology physics is in [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md);
 alignment weak modes in [calibration and alignment](calibration-and-alignment.md) and
-[tracking and vertexing](tracking-and-vertexing.md). Also: chamber alignment and momentum scale, absorber energy
-loss, and the muon part of charge-sign quality. Environment codes: COL collider; FXT fixed-target
+[tracking and vertexing](tracking-and-vertexing.md). Environment codes: COL collider; FXT fixed-target
 and test beam; SPC space and high-altitude balloon; UGD underground, neutrino and rare-event; GND ground-based
 cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy physics. Environments covered: COL, UGD, SPC, FXT
 (table below); NUC has no muon system source. Muon vetoes, veto-efficiency measurement, cosmogenic tagging,
 muon counting, and muons and albedo in orbit are in
 [non-collider muon detection](non-collider-muon-detection.md). Atmospheric-muon rejection in neutrino telescopes (up-going
-selection, veto regions, self-veto) is in [neutrino astronomy](neutrino-astronomy.md#backgrounds).
+selection, veto regions) and the self-veto of atmospheric neutrinos are in [neutrino astronomy](neutrino-astronomy.md#backgrounds).
 
 ## Why muons are special
 
 Muons are close to minimum-ionizing, rarely shower below a few hundred GeV, and
 traverse the calorimeters, so the outermost layers see them nearly free of other
-particles. Radiative losses (bremsstrahlung, pair production, photonuclear) equal ionization near
-the muon critical energy (a few hundred GeV in iron) and dominate at TeV energies, so catastrophic energy losses and accompanying showers in the
-absorbers must be expected and modelled. A muon system therefore
+particles. Radiative losses dominate above the muon critical energy (a few hundred GeV in iron), so
+catastrophic losses and showers in the absorbers must be modelled ([Relations](#relations)). A muon system therefore
 does two jobs: identification (it is the layer that survives absorbers) and an
 independent momentum measurement at large lever arm, often in its own field.
 
@@ -36,7 +34,6 @@ independent momentum measurement at large lever arm, often in its own field.
   sec. IV, eqs. 2-4, p. 7): `r = [(N+/N-)_forward × (N+/N-)_reverse]^(1/2)`; acceptance and live time cancel.
 - **Same-sign pair probability** for per-muon confusion rates `c_i`, `c_j` (exact for independent legs;
   arXiv:1908.00005, sec. 9.2, p. 47): `c_i (1 - c_j) + (1 - c_i) c_j`; see Conventions below.
-- **Sagitta and resolution**: see [Performance and scaling](#performance-and-scaling) (approximate, uniform field).
 
 ## Reconstruction chain
 
@@ -47,19 +44,16 @@ independent momentum measurement at large lever arm, often in its own field.
    fit with material (multiple scattering, energy loss in absorbers).
 4. **Extrapolation and matching** to the inner tracker: propagate the tracker track
    through calorimeter material (energy loss, scattering) to the muon system; match by
-   position/direction with the extrapolated covariance (a `chi^2` match, not a fixed
-   cut only).
+   position/direction with the extrapolated covariance (a `chi^2` match).
 5. **Combined fit**: refit hits from both systems; the inner tracker dominates at low
-   `p`, the muon system's long lever arm at high `p`. Resolution scales as (approximate)
-   `sigma_pT/pT ≈ a pT (measurement) ⊕ b (multiple scattering)`
-   ([tracking and vertexing](tracking-and-vertexing.md)).
+   `p`, the muon system's long lever arm at high `p` ([tracking and vertexing](tracking-and-vertexing.md)).
 6. **Trigger matching**: the hardware-level (coarse) muon candidate matched to the
    offline muon for the trigger efficiency ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
 
 **Muon types (definitions differ by community; state the one used).**
 *Standalone*: muon-system track only. *Combined/global*: tracker + muon-system fit.
 *Segment-tagged*: tracker track that extrapolates to at least one muon segment (recovers
-low-momentum muons that do not reach far). *Calorimeter-tagged*: tracker track with
+low-momentum muons). *Calorimeter-tagged*: tracker track with
 minimum-ionizing calorimeter deposit (recovers acceptance gaps). *Trigger-level*: coarse
 online track. Each type has its own efficiency, purity, and momentum resolution.
 
@@ -72,17 +66,16 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   in m, `B` in T, `p_perp` in GeV/c, `z` the charge number; `p_perp` the momentum component
   perpendicular to `B` (`p cos lambda` for pitch angle `lambda`) and `L` the path length in
   the field projected on the bending plane: PDG RPP 2025, eq. 35.57, p. 108, eqs. 35.66 and
-  35.68 (`L'`), p. 112; momentum error `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem
-  (see below).
+  35.68 (`L'`), p. 112; momentum error `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem.
 - **Efficiency**: geometric gaps (cracks, support structures, feet), chamber
   inefficiency, matching and reconstruction inefficiency, quoted **per type and versus
   the detector's coordinates and momentum**; the binning variables and the reference
   sample are parameters to state. At a collider (COL): versus `pT` and `eta`, with a
-  tag-and-probe from `J/psi` (low `pT`) and `Z -> mu mu` (arXiv:1206.4071, sec. 5.1, Figs. 11-12, PDF pp. 20-22;
+  tag-and-probe from `J/psi` (low `pT`) and `Z -> mu mu` (arXiv:1206.4071, sec. 5.1, Figs. 11-12, PDF pp. 20-23;
   [triggers luminosity pileup](triggers-luminosity-pileup.md#tag-and-probe-efficiency-measurement)). Muon counters of
   ground-based and underground arrays and the outer muon vetoes of underground detectors
-  (GND, UGD; PDG RPP 2025, secs. 35.6.6.1 and 36.3.1) need a reference sample of their
-  own: see [veto-efficiency measurement](non-collider-muon-detection.md#veto-efficiency-measurement).
+  (GND, UGD; counters: [ground-based detection arrays](ground-based-detection-arrays.md); vetoes: PDG RPP 2025,
+  sec. 36.3.1) need a reference sample of their own: see [veto-efficiency measurement](non-collider-muon-detection.md#veto-efficiency-measurement).
 - **Rate capability**: drift tubes (long drift, space-charge and occupancy limits),
   cathode-strip chambers (multiwire chambers read on cathode strips: wire pitch and space charge limit
   rate as for an MWPC), RPCs (fast, rate
@@ -100,7 +93,7 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 
 Muon chambers are aligned with tracks relative to each other and to the inner tracker, while photogrammetry and
 in-situ sensors monitor movements and fix the degrees of freedom that tracks constrain weakly; material between
-stations (scattering) limits track-based alignment (COL; arXiv:0911.4022, sec. 1, p. 3). General methods, weak
+stations (scattering) limits track-based alignment (COL; arXiv:0911.4022, sec. 1, p. 1). General methods, weak
 modes and external constraints are in
 [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes); chamber alignment is
 shown here for one environment (COL). The **momentum scale** is calibrated against an independent momentum estimate: a resonance
@@ -112,16 +105,13 @@ eq. 5, p. 19). A range-based scale inherits the detector mass, the geometry mode
 <!-- example: source citation -->
 A magnetized steel-scintillator neutrino detector (MINOS) compares range and curvature momenta of stopping muons;
 the range momentum carries a 2% systematic error from detector mass, geometry and energy-loss model, which bounds
-the field-scale check (arXiv:0805.3170, sec. 2.4.1, p. 18). A collider muon spectrometer (ATLAS) uses a scale term
-for the field integral and one for the calorimeter energy loss, per eta-phi region (arXiv:1603.05598, sec. 8.1,
-eq. 5, p. 19).
+the field-scale check (arXiv:0805.3170, sec. 2.4.1, p. 18).
 <!-- /example -->
 
 ## Energy loss in iron and other absorbers
 
-A muon crossing an absorber or calorimeter loses energy mostly by ionization at low energy and by radiation above
-the muon critical energy ([Relations](#relations)). Fit and extrapolation choices follow from three facts (PDG RPP
-2025, sec. 34.6, p. 31): the distribution is skewed, so the **most probable loss is far below the mean**; the
+For a muon crossing absorbers and calorimeters ([Relations](#relations)), fit and extrapolation choices follow
+from three facts (PDG RPP 2025, sec. 34.6, p. 31): the distribution is skewed, so the **most probable loss is far below the mean**; the
 radiative tail comes mostly from bremsstrahlung, with photonuclear interactions in the hardest losses; and hard
 losses can exceed the detector resolution, so the lost energy must be reconstructed, not only modelled. The
 standalone muon-system track is corrected back to the vertex with the absorber loss; a combined fit treats the loss
@@ -147,26 +137,27 @@ are in [charge confusion](charge-confusion.md#how-hep-detector-measures-the-rate
   flat above the cut in arXiv:0705.3815, sec. III B 3, p. 5).
 - **Fit agreement**: take the combined (tracker plus muon system) fit only when both fits give a momentum above the
   crossover where the muon system improves the resolution and its `q/p` agrees with the tracker-only fit within a
-  few `sigma(q/p)`; otherwise the tracker-only fit (COL; arXiv:1206.4071, sec. 3, p. 9).
+  stated number of `sigma(q/p)` of that fit; otherwise the tracker-only fit (COL; arXiv:1206.4071, sec. 3, PDF p. 9).
 - **Field reversal**: combine forward and reversed field data with the geometric mean of [Relations](#relations),
-  which cancels charge-dependent acceptance and alignment errors (UGD, the one environment in the sources found;
+  which cancels the acceptance and alignment errors that swap with the field, not charge confusion (UGD, the one environment in the sources found;
   arXiv:0705.3815, sec. IV, p. 7).
 - **Weak-mode curvature bias**: a twist (`delta phi = tau z`) biases `kappa ∝ q/pT` and is weakly constrained by
-  cosmic tracks alone (COL in the sources found; arXiv:1403.2286, sec. 4.4, p. 14); see
+  cosmic tracks alone (COL inner tracker in the sources found; arXiv:1403.2286, sec. 4.4, PDF p. 14); see
   [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes).
 - **Two charges of one muon**: a through-going cosmic muon reconstructed in the upper and lower halves, with strict
   cuts on the tag half; multi-muon events are the background, so require exactly one muon per half (COL only in the
-  sources found; arXiv:0911.4994, sec. 7, p. 25).
+  sources found; arXiv:0911.4994, sec. 7, PDF p. 25).
 - **Resonance same-sign pairs**: the pair model of [Relations](#relations), both legs fitted together with the
   same-sign background as an additive term of the expected count (COL only: it needs abundant neutral resonances;
   shown for `Z -> ee` in arXiv:1908.00005, sec. 9.2, p. 47). The route with a beam of known sign (FXT) is a **gap**: no source was found.
 
 <!-- example: source citation -->
-Atmospheric-muon charge ratio in a magnetized-iron detector (MINOS): `|q/p|/sigma(q/p) >= 2.2`, and the ratio from
+Atmospheric-muon charge ratio in a magnetized-iron detector (MINOS): `|q/p|/sigma(q/p) >= 2.2`, read off where the
+measured ratio turns flat (Fig. 5: the cross-check route, not the simulation-fixed rule above), and the ratio from
 forward and reversed field runs, whose single-polarity ratios on the significance plateau were 1.40 and 1.33
 (arXiv:0705.3815, sec. III B 3, p. 5; sec. IV, eq. 4, p. 7). Collider "sigma
 switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c and their `q/p` agree within
-`2 sigma(q/p)` of the tracker-only fit (arXiv:1206.4071, sec. 3, p. 9).
+`2 sigma(q/p)` of the tracker-only fit (arXiv:1206.4071, sec. 3, PDF p. 9).
 <!-- /example -->
 
 ## Methods
@@ -196,8 +187,8 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
   source of cosmogenic backgrounds, whose short-lived part a veto on the time correlation with the crossing muon
   removes and whose long-lived isotopes need other mitigation (UGD; sec. 36.6.5, pp. 54-55), or the calibration source of a surface array
   ([ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
-- **Hadron mis-identification vs reconstruction fake**: a pion identified as a muon
-  (mis-ID, real object with wrong identity) is a different failure from a fake track
+- **Hadron mis-identification vs fake**: a pion identified as a muon (real object, wrong identity) is
+  not a fake track
   ([performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md)).
 
 ## Distinctive but generalizable reconstruction and performance features (muon system)
@@ -206,23 +197,20 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
   other particles (clean but low redundancy).
 - **Inverse problem**: momentum and charge from sagitta in a field with material
   between stations; degeneracy: alignment weak modes that leave `chi^2` nearly
-  unchanged; a twist mode adds a curvature offset that shifts `q/p`
-  charge-antisymmetrically (arXiv:1403.2286, sec. 4.4, p. 14;
+  unchanged; a twist mode adds a `q/pT` offset that is the same for both charges, so the momentum bias flips
+  sign with charge (arXiv:1403.2286, sec. 4.4, PDF p. 14, a collider inner tracker, transferred;
   [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)).
 - **Objects**: segment, standalone, combined, tagged muon. **Informative
   residual/closure**: at a collider (COL), `Z -> mu mu` mass versus `eta`, `phi`, `pT`,
-  and charge (`m` and `q/p` residual versus `q * eta`); in any spectrometer, cosmic-ray
-  track splitting (upper/lower half fits) to expose sagitta bias.
+  and charge (`m` and `q/p` residual versus `q * eta`); in a spectrometer that a cosmic muon crosses in two independently
+  measured halves, cosmic-ray track splitting (upper/lower half fits) to expose sagitta bias.
 - **Scaling**: `sigma_pT/pT ∝ pT` at high `p` (measurement-dominated), constant at low
   `p` (scattering); charge misID rises steeply with `pT`.
 - **Conventions** (COL): efficiency measured with tag-and-probe at fixed working point and
   isolation; resolution from `Z` line-shape width or MC truth for the momentum range.
-  Charge misID per muon comes from same-sign pairs of a resonance that decays to an
-  opposite-sign pair (`Z -> mu mu` at a collider): with per-muon rates `c_i`, `c_j` a pair
-  is same-sign with probability `c_i (1 - c_j) + (1 - c_i) c_j` (about `2c` for equal small
-  rates), so fit `c` per bin to the same-sign counts with their background, vary the mass window and check the
-  fitted `c` against truth in simulation, rather than quoting the same-sign fraction as the per-muon rate (the same
-  pair model is fitted for
+  Charge misID per muon: fit `c` per bin with the pair model of [Relations](#relations) (about `2c` for equal small
+  rates) to the same-sign counts of an opposite-sign resonance with their background, vary the mass window and
+  check `c` against truth in simulation, never quoting the same-sign fraction as the rate (pair model fitted for
   `Z -> ee` in arXiv:1908.00005, sec. 9.2, p. 47).
 - **Tails**: wrong-segment link, decay-in-flight, delta-ray overlap, charge flip.
 - **Dependence**: rate/occupancy (background hits), magnetic field map stability,
@@ -230,12 +218,12 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
 - **Strongest data sample**: at a collider (COL), `Z -> mu mu` and `J/psi -> mu mu` (mass
   scale and resolution in bins) and collision tracks for alignment with external
   constraints; in a spectrometer that a cosmic muon crosses in two independently measured halves, cosmic muons (split
-  tracks; COL in the source, barrel only: arXiv:1206.4071, sec. 6.2.1, PDF p. 36).
-  For other muon detectors (the muon vetoes of underground detectors, the muon counters of
-  air-shower arrays, muon rings in imaging Cherenkov telescopes; PDG RPP 2025, secs. 36.3.1,
-  36.2.2 and 35.6.6.1) the closure sample is a parameter: see
+  tracks, halves selected to resemble the physics tracks; COL in the source: near the interaction point, barrel
+  only: arXiv:1206.4071, sec. 6.2.1, PDF p. 36).
+  For other muon detectors (underground muon vetoes, air-shower muon counters, muon
+  rings in imaging Cherenkov telescopes; PDG RPP 2025, secs. 36.3.1,
+  35.6.6.1 (RPC counters only) and 36.2.2) the closure sample is a parameter: see
   [non-collider muon detection](non-collider-muon-detection.md),
-  [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
   [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays)
   and [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md).
 - **Transfers**: sagitta-weak-mode and charge-dependent-bias reasoning to any
@@ -251,8 +239,6 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
   `q/p` versus `q*eta` and mass versus `eta`, `phi`.
 - **Same-sign fraction read as charge flip only.** Backgrounds also contribute; correct
   for them before quoting charge misID.
-- **Identical efficiency applied to all muon types.** A segment-tagged muon is not a
-  combined muon.
 - **Ignoring decay in flight for hadron-mimic estimates.** Depends on the track's
   position in the tracker.
 - **Mean loss used as the typical loss.** At high energy the most probable loss in iron is far below the mean;
@@ -278,29 +264,37 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
 
 A field-reversal charge-ratio tool (not yet in the plugin):
 
-- **Inputs**: per momentum bin, counts `N+` and `N-` and live time `t` for each field polarity (integers; seconds),
-  optionally as forward/reverse subsets of equal live time; the minimum count `n_min` and the tolerance `k`.
+- **Inputs**: per momentum bin, counts `N+` and `N-` and live time `t` for each field polarity (integers;
+  seconds), optionally as forward/reverse subsets of equal live time; `n_min` (default 10, at least 5) and `k` (default
+  3, 2 to 5), fixed in advance and written out; a simulated confusion bias.
 - **Outputs**, with statistical errors: `r_a = (N+/t)_forward / (N-/t)_reverse`,
   `r_b = (N+/t)_reverse / (N-/t)_forward` (arXiv:0705.3815, sec. IV A, eqs. 2-3, p. 7), `r = (r_a r_b)^(1/2)`
-  (eq. 4), and `(r_a - r_b)/2`, the residual of incomplete cancellation, quoted as the systematic of the combination
-  (sec. IV D, item 1, p. 10); `r` per equal-live-time pair (eqs. 5-6, p. 8); the single-polarity ratios, whose
-  spread measures the acceptance asymmetry only when the swap holds.
+  (eq. 4), and `|r_a - r_b|/2` on equal-live-time subsets, the residual of bias errors (acceptance, field, alignment)
+  (sec. IV D, item 1, p. 10); `r` per equal-live-time pair and its range over shifted pairs (eqs. 5-6 on p. 8;
+  item 2, p. 10); the one-sided confusion systematic (`r` biased low for `r > 1`; item 3); the single-polarity
+  ratios, whose spread measures the acceptance asymmetry only when the swap holds.
 - **Conventions**: polarity labels `forward` and `reverse`; `N+` means positive reconstructed charge.
-- **Negative control**: (1) exactly swapped acceptances with `A+ != A-` and a known true ratio: each
-  single-polarity ratio is biased, `r_a = r_b` and `r` give the true ratio within errors (`ok`); (2) the reverse-polarity
-  `mu+` acceptance drifted by a factor `d != 1`: `r_b/r_a = d`, `r` is biased by
-  `d^(1/2)`, and the tool must emit `cancellation-failed`.
-- **Statuses**: `ok`; `polarity-missing` (only one polarity: no cancellation, ratio reported as biased);
-  `low-counts` (a count below `n_min`: exact binomial interval on `N+/(N+ + N-)`, no ratio at zero); `cancellation-failed` (`|r_a - r_b|` above `k` times its error: swap or live-time normalisation
-  failed; never `ok`).
+- **Negative control**: (1) an exact swap with `A+ != A-`: the single-polarity ratios are biased,
+  `r_a = r_b` and `r` give the true ratio within errors (`ok`); (2) the reverse-polarity
+  `mu+` acceptance drifted by `d` = 1.2 with 10^4 muons per charge and polarity (significant at `k` = 3):
+  `r_b/r_a = d`, `r` biased by `d^(1/2)`: `cancellation-failed`; (3) confusion 0.1 with `A+ = A-`: `r_a = r_b`, `r`
+  6% low, never reported without the confusion systematic; (4) a 10% live-time error: `r` exact and kept.
+- **Statuses** (a set; headline `polarity-missing` > `low-counts` > `cancellation-failed` > `ok`): `ok`;
+  `polarity-missing` (only one polarity: no cancellation, ratio reported as biased);
+  `low-counts` (a count below `n_min`: exact binomial intervals on `N+_forward/(N+_forward + N-_reverse)` and its
+  `r_b` twin, mapped to `r_a`, `r_b` with the live times; no ratio at zero);
+  `cancellation-failed` (`|r_a - r_b|` above `k` times its error, on equal-live-time subsets: the swap failed;
+  a live-time error alone also splits them, so a warning: `r` is kept); `no-drift-check` (no equal-live-time
+  subsets). Confusion and charge-dependent effects that do not reverse with the field leave `r_a = r_b`: the test
+  is blind to them.
 
 ## Environment coverage
 
-Cells give source IDs of the run's cache (PDG = PDG RPP 2025, passage of particles through matter).
+Cells give source IDs (PDG = PDG RPP 2025, passage of particles through matter).
 
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
-| Muon-chamber alignment | arxiv_0911.4022 | gap ([calibration and alignment](calibration-and-alignment.md)) | n/a: no muon system in orbit found | gap ([calibration and alignment](calibration-and-alignment.md)) | n/a: counters, not tracking chambers | gap |
+| Muon-chamber alignment | arxiv_0911.4022 | gap | n/a: no muon system in orbit found | gap | n/a: counters, not tracking chambers | gap |
 | Momentum scale | arxiv_1603.05598 | gap | gap | arxiv_0805.3170 | n/a: no momentum measurement | gap |
 | Energy loss in absorbers | PDG; arxiv_1603.05598 | gap | n/a: absorber-free spectrometers | PDG; arxiv_0805.3170 | gap | gap |
 | `q/p` significance, fit agreement | arxiv_1206.4071 | gap | gap ([space-based direct detection](space-based-direct-detection.md#rigidity-not-energy-is-the-natural-variable---for-a-spectrometer): MDR only) | arxiv_0705.3815 | n/a: no charge sign | n/a |
@@ -313,6 +307,6 @@ Cells give source IDs of the run's cache (PDG = PDG RPP 2025, passage of particl
 
 ## Citations
 
-Inline citations give the arXiv number and a locator; annotated entries are in the
+Inline citations give the arXiv number and a locator (p. is the printed page; PDF p. the PDF page where it differs); annotated entries are in the
 [muon-systems bibliography](detector-principles-bibliography-muon-systems.md), a split file of the
 [bibliography](detector-principles-bibliography.md).
