@@ -46,7 +46,7 @@ independent momentum measurement at large lever arm, often in its own field.
    position/direction with the extrapolated covariance (a `chi^2` match).
 5. **Combined fit**: refit hits from both systems; the inner tracker dominates at low
    `p`, the muon system's long lever arm at high `p` ([tracking and vertexing](tracking-and-vertexing.md), COL
-   crossover in `pT`: arXiv:1206.4071, secs. 3 and 6.2.1, PDF pp. 8 and 36).
+   crossover in `pT`: arXiv:1206.4071, secs. 3 and 6.2.1, PDF pp. 7 and 36).
 6. **Trigger matching**: the hardware-level (coarse) muon candidate matched to the
    offline muon for the trigger efficiency ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
 
@@ -192,9 +192,9 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
   other particles (clean but low redundancy).
 - **Inverse problem**: momentum and charge from sagitta in a field with material
   between stations; degeneracy: alignment weak modes that leave `chi^2` nearly
-  unchanged; a twist mode adds a constant `q/pT` offset, the same for both charges, so the momentum bias flips
-  sign with charge (arXiv:1403.2286, sec. 4.4, PDF p. 14, a collider inner tracker, transferred;
-  the twist in [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)).
+  unchanged; a twist biases `kappa ∝ q/pT` (arXiv:1403.2286, sec. 4.4, PDF p. 14, COL, transferred);
+  derived, not in it: at fixed `eta` the `q/pT` offset is charge- and `pT`-independent,
+  so the momentum bias flips sign with charge (the twist in [calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)).
 - **Objects**: segment, standalone, combined, tagged muon. **Informative
   residual/closure**: at a collider (COL), `Z -> mu mu` mass versus `eta`, `phi`, `pT`,
   and charge (`m` and `q/p` residual versus `q * eta`); cosmic split tracks (below) to expose sagitta bias.

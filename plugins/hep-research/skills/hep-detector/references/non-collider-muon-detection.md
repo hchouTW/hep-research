@@ -251,8 +251,8 @@ A veto-efficiency tool (not yet in the plugin):
   failures, and the one-sided test must give `independence-violated`. An independent sample with 10^-3 non-muon
   events that fail every layer, entered as 10^-3 ± 10^-4, must give exactly `{impurity-dominated}` (`Z` and `Z_imp`
   about -24, `|Z - Z_imp|` at most 3), and the staggered sample with 5 x 10^-4 such events, entered as
-  5 x 10^-4 ± 5 x 10^-5, must give `independence-violated` and `impurity-dominated`, never `ok` (`Z` about +1 to +4,
-  `Z_imp` about -19, `Z_c` about +10).
+  5 x 10^-4 ± 5 x 10^-5, must give `independence-violated` and `impurity-dominated`, never `ok` (`Z` +1.6 without sampling noise,
+  seed spread ±1.0, so -0.3 to +3.6 in 95% of seeds; `Z_imp` about -19, `Z_c` about +10).
 - **Impurity**: non-muon events (modelled here as failing every layer) push the direct efficiency below the
   extrapolation, so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
   of the direct inefficiency is likely due to non-muon events that pass the selection (supported by simulation;
