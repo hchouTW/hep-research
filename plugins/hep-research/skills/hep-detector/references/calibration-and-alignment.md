@@ -120,7 +120,8 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
   at fixed path length (angle bins) or correct with the Landau-Vavilov-Bichsel thickness dependence.
 - **Intercalibration** (COL): pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
   absolute scale still needs a reference.
-- **Hadronic calorimeters**: `E/p` of isolated single hadrons, biased by the isolation cut itself.
+- **Hadronic calorimeters**: `E/p` of isolated single hadrons; check that the isolation cut does not bias `E/p` for the
+  isolation you use.
 
 ## Adding a tracking layer to a running detector
 
