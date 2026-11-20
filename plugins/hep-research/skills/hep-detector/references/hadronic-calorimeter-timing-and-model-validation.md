@@ -4,12 +4,13 @@ How the time of a hadronic shower is reconstructed, and which observables valida
 calorimeter simulation. Energy reconstruction, compensation, the calibration chain and leakage are in
 [hadronic calorimeter reconstruction](hadronic-calorimeter-reconstruction.md), whose relation numbers (HC1-HC9) this
 page shares; physics-list choice is in [detector simulation](detector-simulation.md#physics-lists-and-their-validity)
-and the [Geant4 study protocol](geant4-study-protocol.md) (secs. 3, 5 and 6; sec. 6 for which list pairs are a model
-variation). Fitting simulator parameters to data is simcal, owned by hep-statistics
+and the [Geant4 study protocol](geant4-study-protocol.md) (secs. 3, 5 and 6; sec. 6 checks the model at the primary
+particle and energy only, see Methods). Fitting simulator parameters to data is simcal, owned by hep-statistics
 ([simulation-calibration/hcal](simulation-calibration/hcal.md)).
 
-Environment codes (R1): COL collider; FXT fixed-target and test beam; SPC space and balloon; UGD underground,
-neutrino and rare-event; GND ground-based arrays; NUC nuclear and low-energy. Content for one environment carries its
+Environment codes (as in [comparison tables](detector-comparison-tables.md), column conventions): COL collider; FXT
+fixed-target and test beam; SPC space and high-altitude balloon; UGD underground, neutrino and rare-event; GND
+ground-based cosmic-ray and gamma-ray arrays; NUC nuclear and low-energy physics. Content for one environment carries its
 code. Named apparatus and every performance number sit in example blocks.
 
 ## Relations
@@ -28,7 +29,7 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
 | Time per cell or cluster | sample-centroid time (HC8), pulse-shape and slewing corrections, per-channel offsets, out-of-time windows; simulation smeared to the measured time resolution | known pulse shape spread over three or four samples (HC8); offsets from beam, cosmic or calibration data; a measured time resolution for the smearing | late neutron energy outside the window changes the response; overlapping pulses | COL, FXT |
-| Validating the hadronic model | compare data with at least two lists that differ in the model producing the observable, each list's model assignment stated at its Geant4 version: the inelastic model at the primary particle and energy for response, resolution, profiles and radial width ([Geant4 study protocol](geant4-study-protocol.md) sec. 6; `check_geant4_study.py variations` states this model only when the study spec sets `observable.domain` to `hadronic`, since the default `em` compares EM constructors, lists an EM-only pair such as FTFP_BERT against FTFP_BERT_EMZ as a change and gives QGSP_BIC and FTFP_BERT as the same model: from its table for QGSP_BIC and FTFP_BERT, their EM-suffix variants included, at Geant4 11.4.3 (any other list, an `_HP` variant included, as model unknown) or from the run's probe (any list's inelastic model, so a pair whose probed models differ is listed and an `_HP` variant against its base list is the same model)); the neutron transport below 20 MeV for the time structure and late energy (for example an `_HP` variant; protocol sec. 3, rule `G4R-HP-NEUTRON`; arXiv:1404.6454, sec. 5.1, PDF p. 12), its assignment, like any for another list or Geant4 version, stated by hand from the list's constructors at that version, and such a variation is not in the tool's `envelope_relative` (its row is not listed), so compute the envelope including it by hand; observables: response, resolution, the longitudinal profile from the shower start (per-event start, HC9 in the [main page](hadronic-calorimeter-reconstruction.md#relations); no benchmark yet, see Tool hooks), the radial width and the time structure | a model-independent observable and stated configuration; data not used in any tuning of the simulation | data or observables used to tune the simulation reused as validation; lists that differ only in EM, elastic or cross-section data, or share the model producing the observable | FXT, COL only (SPC: list selection and model systematic, UGD: tuning data, neither a validation point; GND, NUC: gap; coverage table) |
+| Validating the hadronic model | compare data with at least two lists that differ in the model producing the observable, each list's model assignment stated at its Geant4 version. For response, resolution, profiles and radial width that is the inelastic models over the energy range the shower's secondaries populate, not only at the primary particle and energy: lists that share the primary's model can differ below it (the Binary cascade for nucleons below 1.5 GeV in QGSP_BIC against Bertini in FTFP_BERT, [Geant4 study protocol](geant4-study-protocol.md) sec. 6; QBBC against QGSP_BERT below 25 GeV, arXiv:1404.6454, sec. 5.1, PDF p. 12). Protocol sec. 6 and `check_geant4_study.py variations` compare the model at the primary particle and energy only, so state the secondaries' models by hand, treat lists that differ there as a variation and add it to the envelope by hand; a row the tool gives as the same model is no evidence that the pair is not a variation. The tool states the inelastic model only when the study spec sets `observable.domain` to `hadronic`; the default `em` compares EM constructors, lists an EM-only pair such as FTFP_BERT against FTFP_BERT_EMZ as a change and gives QGSP_BIC and FTFP_BERT as the same model. With `hadronic`, the model comes from its table for QGSP_BIC and FTFP_BERT, their EM-suffix variants included, at Geant4 11.4.3 (any other list, an `_HP` variant included, or any primary other than p, n and pi+-, as model unknown) or from the run's probe (any list's inelastic model, so a pair whose probed models differ is listed and an `_HP` variant against its base list is the same model). For the time structure and late energy the model is the neutron transport below 20 MeV (an `_HP` variant; arXiv:1404.6454, sec. 5.1, PDF p. 12): protocol sec. 3 says which lists carry ParticleHP, and its rule `G4R-HP-NEUTRON` fires only for neutron observables with a primary below 20 MeV, never for a hadron time-structure study, so state the transport by hand from the list's constructors at that version, like any assignment for another list or Geant4 version. With `hadronic` such a variation is not listed and not in the tool's `envelope_relative`; with the default `em`, QGSP_BIC_HP against QGSP_BIC is listed as an EM change, since QGSP_BIC_HP builds option 4. Compute the envelope including it by hand, once, from a pair with the same EM constructor (QGSP_BERT_HP against QGSP_BERT, or FTFP_BERT_HP against FTFP_BERT). Observables and their tool status (Tool hooks): the front-referenced longitudinal profile (setup-matched, `longitudinal-profile` benchmark); response, resolution and radial width (published-data, interface only); the profile from the shower start (HC9 in the [main page](hadronic-calorimeter-reconstruction.md#relations)) and the time structure (no benchmark yet) | a model-independent observable and stated configuration; data not used in any tuning of the simulation | data or observables used to tune the simulation reused as validation; for response-type observables, lists that differ only in EM, elastic or cross-section data (for the time structure and late energy, the low-energy neutron treatment, its data included, is the model producing the observable); lists that share the models producing the observable over the shower's energy range | FXT, COL only (SPC: list selection and model systematic, UGD: tuning data, neither a validation point; GND, NUC: gap; coverage table) |
 
 ## Distinctive but generalizable features (timing and model validation)
 
@@ -97,9 +98,11 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
   model and that rule, and as the DL grows with the tolerance (`systematic_relative` is uncapped), state before the
   runs the largest DL that keeps the validation useful and treat a larger one as a gap, a control off the limit, not
   caught or in one direction only (`detection_limit_sign`) being a gap that blocks the upgrade. A physics-list swap is a model
-  variation only when the two lists differ in the model producing the observable, the inelastic model at that
-  particle and energy or the neutron transport below 20 MeV for the time structure and late energy (Methods row,
-  [Geant4 study protocol](geant4-study-protocol.md) secs. 3 and 6), not a negative control.
+  variation when the two lists differ in a model producing the observable: an inelastic model used anywhere in the
+  shower's energy range, or the neutron transport below 20 MeV for the time structure and late energy (Methods row;
+  inelastic model: [Geant4 study protocol](geant4-study-protocol.md) sec. 6, which compares at the primary energy
+  only; neutron transport: protocol sec. 3 for which lists carry it, arXiv:1404.6454 secs. 5.1 and 7 for its effect on
+  the time structure); it is not a negative control.
   Controls run only for reference and setup-matched benchmarks.
 - Statuses: labels from the script's `STATUSES`; `validated-in-scope` only from
   `check_geant4_study.py label --upgrade` (Geant4 study protocol section 7), never from
@@ -112,7 +115,8 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
   benchmark scope (whose particle and energy the script copies from the benchmark config, not from the run record,
   so check them against the run's gun by hand), a variation table (the script checks only that one is given: check
   by hand that at least one row is a change of the model producing the observable: listed by the tool for the
-  inelastic model only from a run with `observable.domain` `hadronic`, stated by hand for a neutron-transport change
+  inelastic model only when the study spec sets `observable.domain` to `hadronic`, stated by hand for a
+  neutron-transport change
   for the time structure),
   material inputs declared independent (`reference_origin`, a declaration the script does not verify, and only for the
   materials the spec lists, an empty list passing: check by hand that every absorber of the run's target is listed)
@@ -132,7 +136,8 @@ Both techniques have at least two environments.
 
 <!-- example: shower timing (arXiv:0911.4877, arXiv:1404.6454, PDG RPP 2025) -->
 CMS HCAL: time resolution about 1.2 ns for showers above 100 GeV in test beams; optical summing of layers limits
-hadron timing to about 1 ns; the slewing correction is `(3.59 ns) log10(1 TeV / E)`, at most 10 ns; channels
+hadron timing to about 1 ns; the slewing correction, for pulse energies below 1 TeV, is `(3.59 ns) log10(1 TeV / E)`,
+at most 10 ns; channels
 synchronized within ±2 ns, derived and verified with beam-splash data; simulation smeared to match the measured time resolution
 (abstract and secs. 2.1, 3, 4.1, 4.2, PDF pp. 1, 5-6, 8-9).
 CALICE T3B (15 SiPM tiles, 2.4 µs window): late energy is more
