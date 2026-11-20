@@ -78,8 +78,8 @@ gauge fixing by a reference plane.
 
 ## Convergence, bias and per-channel precision
 
-- **Convergence criterion, declared in advance:** the largest parameter change between successive iterations below
-  a threshold (arXiv:0904.2226, sec. 10.1, p. 44). Step-size control is not a stopping rule (arXiv:1712.02739,
+- **Stopping rule, fixed in advance:** the largest parameter change between successive iterations below
+  a threshold (arXiv:0904.2226, p. 44, sec. 10.1). Step-size control is not a stopping rule (arXiv:1712.02739,
   sec. 5.2.1, pp. 7-8): under halving the parameter change is the step, so the threshold passes once the step
   collapses. Also require the gradient norm (or the `chi2` decrease) below a declared threshold, and report
   `not-converged` when the step was halved below a declared floor. Converged means numerically stable, not correct.
@@ -179,8 +179,8 @@ With 5000 muon hits per tube the pulse-height intercalibration error is below 2%
   (approximate: small tilts), with photons split by mirror pair (COL; arXiv:1211.6759, sec. 3.3, p. 11).
 - **Ring-centre offsets**: the mean difference between fitted and expected ring centre per mirror, relative to a
   reference mirror (FXT; arXiv:1809.04026, sec. 3.1, p. 5).
-- **Refractive index** from high-momentum tracks, tuned so that `dtheta_C` peaks at zero; a gas radiator drifts with
-  temperature, pressure and composition (COL only in the sources read; arXiv:1211.6759, sec. 3.4, p. 12).
+- **Refractive index** from the same high-momentum tracks, tuned so that `dtheta_C` peaks at zero; a gas radiator
+  drifts with temperature, pressure and composition (COL only in the sources read; arXiv:1211.6759, sec. 3.4, p. 12).
 - **Second reference sample:** not sourced (gap); all three methods use one sample, tracks with their rings.
 
 ### Alignment and momentum scale
@@ -224,7 +224,7 @@ Cherenkov](imaging-atmospheric-cherenkov.md) (muon rings).
 - **Data sample:** the strongest reference available per environment (resonances COL; nuclei by cutoff SPC; cosmic
   muons UGD and FXT; muon rings GND).
 - **Transfers:** formulation, solvers and mode analysis transfer to any detector; the collider references
-  (minimum-bias symmetry, W, Z) were sourced in COL only; pi0 and eta need a hadronic flux, not a collider.
+  (minimum-bias symmetry, W, Z) were sourced only in COL; pi0 and eta need a hadronic flux, not a collider.
 
 ## Common misconceptions and failure modes
 

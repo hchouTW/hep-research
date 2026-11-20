@@ -16,7 +16,7 @@ their charge-antisymmetric bias and the constraints against them are in
 
 | # | Relation | Label | Validity and source |
 |---|---|---|---|
-| 1 | `chi2(p, q) = sum_tracks sum_meas ((m_ij - f_ij(p, q_j)) / sigma_ij)^2`, then `C' dp = b'` | exact objective; linearised solve, iterated if corrections are large | arXiv:1403.2286, sec. 4, Eqs. 1-2, pp. 9-10 |
+| 1 | `chi2(p, q) = sum_tracks sum_meas ((m_ij - f_ij(p, q_j)) / sigma_ij)^2`, then `C' dp = b'` | exact objective; linearised solve, iterated if corrections are large | arXiv:1403.2286, sec. 4, Eqs. 1-2, PDF p. 9 |
 | 2 | rigid-body hit correction `x_a = x + dX - y theta_Z`, `y_a = y + dY + x theta_Z`, `z_a = z + dZ - x theta_Y + y theta_X` | approximate (first order in the rotations; rotations about the origin of the xy frame in the plane where the sensor nominally sits, `x`, `y` global hit coordinates; for a pivot off that plane add `+ z theta_Y` to `x_a` and `- z theta_X` to `y_a`) | arXiv:1712.02739, sec. 5.2, Eqs. 2-4, p. 6 |
 | 3 | residual in a plane `= dx + dz tan(theta)` for a horizontal shift `dx` and a vertical shift `dz` | approximate (small deviations) | arXiv:0904.2226, sec. 10.1, Fig. 27, p. 42 |
 | 4 | General Broken Lines: kinks at scatterers give linear equations whose matrix solves in time linear in the number of measurements, with the full covariance along the track | exact for the linearised track model | arXiv:1201.4320, abstract and sec. 1, p. 1 |
@@ -28,21 +28,21 @@ their charge-antisymmetric bias and the constraints against them are in
 ## Track-based alignment
 
 - **Global fit.** Millepede-II solves all alignment parameters with all track parameters eliminated (relation 1); the
-  track model needs multiple scattering, which General Broken Lines provide (COL: arXiv:1403.2286, sec. 4, PDF pp. 9-10,
-  and sec. 4.1, PDF pp. 10-11; arXiv:1201.4320, sec. 1, p. 1). FXT telescopes prealign by correlating each plane with a
-  reference plane, track with loose cuts, then run an iterative `chi2` minimisation or Millepede-II, with
+  track model needs multiple scattering, which General Broken Lines provide (COL: arXiv:1403.2286, sec. 4.1,
+  PDF pp. 10-11; arXiv:1201.4320, sec. 1, p. 1). FXT telescopes prealign by correlating each plane with a reference
+  plane, track with loose cuts, then run an iterative `chi2` minimisation or Millepede-II, with
   straight-line, kinked or GBL tracks (arXiv:2011.12730, secs. 3.3 and 3.5, pp. 8-9).
-- **Iterative global minimisation** (SPC): the total `chi2` of straight tracks over rigid sensors (relation 2) by
-  gradient descent, all parameters at once; each sensor term is divided by the number of tracks crossing that
-  sensor (arXiv:1712.02739, sec. 5.2, Eq. 5, pp. 6-7). With a fixed sample relation 7 halves the step: `eps = 0`
-  oscillates and converges more slowly than the reference `eps = 0.5`, and with `eps = 1` the step collapses and it
-  does not converge (sec. 5.2.1, pp. 7-8). With tracks re-selected each iteration `chi2` cannot set the step, and
-  relation 8 is the source's baseline (sec. 5.2.2, p. 8). The source fixes no frame explicitly. Started from zero,
-  gradient descent never moves along exact gauge directions (the gradient is orthogonal to them) and moves along
-  weak modes slowly, so a converged `chi2` does not show the modes fixed: compute the Hessian eigenvalue spectrum
-  at the solution (Tool hooks; this page's reasoning). Shifting elements by their mean residuals and iterating
-  instead biases the parameters, more so with each iteration (arXiv:hep-ex/0208021, sec. 1, p. 1); FXT telescopes
-  use residual centring only as a prealignment (arXiv:2011.12730, sec. 3.5, p. 9).
+- **Iterative global minimisation** (SPC, no explicit frame fixing): the total `chi2` of straight tracks over rigid
+  sensors (relation 2) by gradient descent, all parameters at once; each sensor term is divided by the number of
+  tracks crossing that sensor (arXiv:1712.02739, sec. 5.2, Eq. 5, pp. 6-7). With a fixed sample relation 7 halves the
+  step: `eps = 0` oscillates and converges more slowly than the reference `eps = 0.5`, and with `eps = 1` the step
+  collapses and it does not converge (sec. 5.2.1, pp. 7-8). With tracks re-selected each iteration `chi2` cannot set
+  the step, and relation 8 is the source's baseline (sec. 5.2.2, p. 8). The source fixes no frame explicitly. Started
+  from zero, gradient descent never moves along exact gauge directions (the gradient is orthogonal to them) and moves
+  along weak modes slowly, so a converged `chi2` does not show the modes fixed: compute the Hessian eigenvalue
+  spectrum at the solution (Tool hooks; this page's reasoning). Shifting elements by their mean residuals and
+  iterating instead biases the parameters, more so with each iteration (arXiv:hep-ex/0208021, sec. 1, p. 1); FXT
+  telescopes use residual centring only as a prealignment (arXiv:2011.12730, sec. 3.5, p. 9).
 - **Hierarchy** (SPC): planes within a module from hit residuals, then modules from track segments crossing module
   boundaries, then the instrument to the spacecraft frame (arXiv:0904.2226, secs. 10.1-10.3, pp. 41-49).
 - **Data sets together.** Align all tracking components simultaneously and use several data sets at once
@@ -77,11 +77,11 @@ resolution of the chambers; hence the two track-based approaches above.
 
 ## Momentum scale
 
-- **Resonances and cosmic muons** (COL): the dimuon mass constraints of the J/psi and the Z, in bins of the
-  kinematics, calibrate the scale at low and intermediate momenta; at high momentum cosmic-ray muons give the scale
+- **Resonances and cosmic muons** (COL): the dimuon mass constraints of the J/psi and the Z, in kinematic bins,
+  calibrate the scale at low and intermediate `pT`; at high momentum cosmic-ray muons give the scale
   bias from the position of the minimum of the `q/pT` spectrum against simulation with injected biases (cosmics
-  endpoint method) (arXiv:1206.4071, sec. 6, p. 27, and sec. 6.2.2, pp. 38-39; arXiv:1603.05598, abstract, p. 1).
-  The extrapolation between the resonances is part of the uncertainty
+  endpoint method) (arXiv:1206.4071, sec. 6, PDF p. 27, and sec. 6.2.2, PDF pp. 38-39;
+  arXiv:1603.05598, abstract, p. 1). The extrapolation between the resonances is part of the uncertainty
   ([calibration standards](calibration-and-alignment.md#calibration-standards-and-their-pitfalls)); so is any
   extrapolation beyond the anchors used.
 - **Range versus curvature** (UGD, magnetized iron): stopping muons have a momentum from range and one from
