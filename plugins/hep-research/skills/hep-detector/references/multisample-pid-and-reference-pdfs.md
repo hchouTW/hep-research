@@ -1,9 +1,9 @@
 # Multisample PID and Reference PDFs
 
-How a detector that samples one particle many times (tracker, silicon or TRD layers, calorimeter samplings, time
-slices) turns the samples into one identification or charge estimate, and how its per-layer reference PDFs are made
-from control samples: sources per environment, binning, layer correlations, and the input format of
-`<plugin root>/skills/hep-detector/scripts/multisample_pid.py`. This page owns the topic;
+This page owns how a detector sampling one particle many times (tracker, silicon or TRD layers, calorimeter
+samplings, time slices) combines the samples into one identification or charge estimate, and how its per-layer
+reference PDFs are made from control samples: sources per environment, binning, layer correlations, and the input
+format of `<plugin root>/skills/hep-detector/scripts/multisample_pid.py`.
 [particle identification](particle-identification.md#combining-many-samples) keeps only a summary with a link here
 (the script's docstring points to that summary), and owns the detector technologies and, in
 [Combining measurements](particle-identification.md#combining-measurements), the combination of whole subsystems
@@ -114,7 +114,7 @@ detectors at accelerators*, sec. 35.6.5); PDFs derived in data improve on simula
 
 - **Bin in what the response depends on**: momentum or rigidity, `eta`, layer, occupancy or multiplicity, gas
   pressure, path length; split by run conditions where they change the response (arXiv:1803.00824 sec. 4,
-  printed p. 7; arXiv:1706.10182 sec. 3). One PDF averaged over all layers is a stated simplification
+  printed p. 7; arXiv:1706.10182 sec. 3). A single PDF averaged over all layers is a stated simplification
   (arXiv:astro-ph/0608641 sec. 5.2), suboptimal in principle where the response changes with depth (below):
   compare it with per-layer PDFs before adopting it.
 - **Smooth or parameterise** sparse histograms: an adaptive kernel density estimate (arXiv:1908.00005 sec. 6.2), an
