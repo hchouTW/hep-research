@@ -86,7 +86,7 @@ reference (arXiv:1306.2016, sec. 4.2, p. 14). Curvature weak modes:
   arXiv:astro-ph/0608641, sec. 4.2.2, p. 4); the statistical term falls roughly as `1/sqrt(N_k)` until the
   systematic floor (approximate). Quote both, per channel class, with the period needed to reach them.
 - **Validation.** Each method's precision is estimated with simulation and checked by a channel-by-channel
-  comparison of methods with different systematics (arXiv:1306.2016, sec. 4.2, pp. 14-15); compare before combining.
+  comparison of methods with different systematics (arXiv:1306.2016, sec. 4.2, pp. 14-15); compare unused sets before combining.
   A set that seeds the iteration, enters the combination, or built a set that does tests consistency, not precision;
   the pre-calibration validates precision only for channels where it did none of these.
 
@@ -202,7 +202,7 @@ Alignment (Millepede-II, General Broken Lines, iterative `chi2`) and the momentu
 Sourced in one environment only: minimum-bias symmetry, diphoton resonances and electron `E/p` (COL;
 the last two need a diphoton rate or a momentum measurement, not a collider), muon rings (GND), and source scans,
 radioactive gas, gas-gain equalization and the refractive index from data (COL; the FXT gas-chamber source is a
-test-beam whole-chain equalization).
+test-beam whole-chain equalization, astro-ph/0608641 sec. 4.2).
 
 ## Distinctive but generalizable features
 
@@ -267,7 +267,7 @@ without the stopping check above (gradient norm, or largest offset per uncertain
 | solvers | arxiv_hep-ex_0208021, arxiv_1403.2286 | arxiv_2011.12730 (test beam) | arxiv_1712.02739, arxiv_0904.2226 | gap | gap | gap |
 | unconstrained modes | arxiv_hep-ex_0208021, arxiv_2007.07624, arxiv_0911.4022, arxiv_1306.2016 | arxiv_2011.12730 (test beam; gauge fixing only) | arxiv_0904.2226 (gauge fixing only) | gap | gap | gap |
 | convergence, bias, precision | arxiv_hep-ex_0208021, arxiv_1306.2016 | arxiv_astro-ph_0608641 (test beam; per-channel precision only) | arxiv_0904.2226, arxiv_1712.02739 | gap | gap | gap |
-| ECAL | arxiv_1306.2016 | gap | arxiv_1901.00734, arxiv_0904.2226 | gap | gap (no source read); IACT muon-ring throughput: [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
+| ECAL | arxiv_1306.2016 | gap | arxiv_1901.00734, arxiv_0904.2226 | gap | gap (no source read); IACT optical throughput (muon rings): [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
 | HCAL | arxiv_1203.1302, arxiv_1806.02129 | arxiv_1207.4210 (test beam) | gap | arxiv_0805.3170 | gap (no source read) | gap |
 | TOF and timing | gap (accelerator clock, unsourced in [timing detectors](timing-detectors.md#calibration-and-diagnostics)) | arxiv_2004.10339 | arxiv_0904.2226 | arxiv_1307.0162, pdg_2025_particle-detectors-for-non-accelerator-physics | [timing detectors](timing-detectors.md#calibration-and-diagnostics) (hybrid synchronisation) | gap |
 | gas gain | arxiv_1709.02743, arxiv_nucl-ex_0101013 | gap (test beam only: arxiv_astro-ph_0608641, whole-chain equalization) | gap | gap | gap (gas chambers exist; no source read) | gap |
