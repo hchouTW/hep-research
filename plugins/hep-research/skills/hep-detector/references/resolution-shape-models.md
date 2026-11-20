@@ -164,8 +164,8 @@ recomputed tag-and-probe efficiencies with a Gaussian instead of a CB as the res
   `alpha = 2.5`, `n = 4`) and the sample RMS depends on the fit range. Quote the core `sigma` with the tail parameters, or
   an effective sigma with a tail fraction.
 - **A fitted `n` is a measurement.** It is usually unconstrained; fix it or use an exponential tail.
-- **Comparing `alpha` across fits with different fixed `n`.** `alpha` has the same definition in every fit,
-  but its fitted value depends on the fixed `n` (the `alpha`-`n` correlation), so the values are not comparable.
+- **Comparing `alpha` across fits with different fixed `n`.** The definition is the same, but the fitted
+  `alpha` depends on the fixed `n` (the `alpha`-`n` correlation), so the values are not comparable.
 - **Tails are always on the low side.** The side follows the mechanism (E/p with neutral overlap or
   annihilation gives a high-side tail).
 - **A pedestal fitted from the tails alone.** Constrain it from a signal-free control sample.
@@ -210,13 +210,13 @@ fraction, no parametric shape) would take:
   `n <= 3`); a fit stopped before convergence must return `fit_failed`. Positive control: a CB sample with known
   `alpha` and a fixed `n > 3` must return `alpha` within its uncertainty with status `ok` (with a fixed `n <= 3`
   the set contains `moments_undefined`, not `ok`).
-- **Statuses** (a set; `ok` only when no other status is set): `ok`; `tail_unconstrained` (a tail parameter
-  at its bound, or with relative uncertainty above `tail_rel_unc_max`); `moments_undefined` (any power `n`,
-  `n_L` or `n_R`, fitted or fixed, is `<= 3`; no RMS reported); `shape_mismatch` (goodness-of-fit p-value below
-  `gof_p_min`); `floor_from_tails` (a flat term, in `gauss_plus_const` or `gauss_late_tail_const`, without a
-  control sample or a measured random-hit rate); `insufficient_entries` (fewer than `min_entries` in the fit range
-  or for a quantile width, or fewer than `min_tail_entries` beyond a join); `fit_failed` (minimizer not
-  converged or covariance not positive definite; no parameter reported as measured).
+- **Statuses** (a set, all that apply are reported; `ok` only when no other is set): `ok`; `tail_unconstrained` (a
+  tail parameter at its bound, or with relative uncertainty above `tail_rel_unc_max`); `moments_undefined` (any
+  power `n`, `n_L` or `n_R`, fitted or fixed, is `<= 3`; no RMS reported); `shape_mismatch` (the stated
+  goodness-of-fit p-value below `gof_p_min`); `floor_from_tails` (a flat term, in `gauss_plus_const` or
+  `gauss_late_tail_const`, without a control sample or a measured random-hit rate); `insufficient_entries` (fewer
+  than `min_entries` in the fit range or for a quantile width, or fewer than `min_tail_entries` beyond a join);
+  `fit_failed` (minimizer not converged or covariance not positive definite; no parameter reported as measured).
 
 ## Environment coverage
 
