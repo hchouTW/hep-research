@@ -244,49 +244,14 @@ are estimated from data control samples rather than trusted from simulation.
 ## Combining many samples
 
 A detector that samples one particle many times (tracker or silicon layers, TRD layers, calorimeter samplings) turns
-the samples into one estimate. `<plugin root>/skills/hep-detector/scripts/multisample_pid.py` does it with every
-choice stated:
-
-- **Charge from many dE/dx samples** (`charge`). Each sample is corrected for the path length (signal x cos(theta);
-  skipping the correction must be said), then inverted through the measured response curve Z^2 -> signal, which may
-  saturate at high Z (the inversion uses the curve, never a pure Z^2 law). The curve gives the most probable (peak)
-  per-layer signal at each Z^2, which the likelihood and `--toys` use as the Moyal location, not the mean signal,
-  which is larger (PDG RPP 2025 sec. 34.2.3; the most probable value is the best estimator of the deposit, sec.
-  35.6.4). The per-layer estimates are combined by a
-  truncated mean (drop the highest floor(f N) of N samples against the Landau tail), a weighted mean (weights 1/sigma^2, or the
-  generalized least-squares weights when a correlation between layers is declared) or a likelihood (per-layer
-  Landau-like Moyal densities at the response; a maximum on the first or last scanned Z point is not a maximum, so
-  such events are left out and counted, at_z_range_edge). With the truncated or weighted mean, events with a signal
-  outside the response table are left out and counted (out_of_range), with a warning; the likelihood scans Z instead
-  of inverting the table, so its out_of_range stays 0. The output gives, per true charge in simulation, the peak, the core
-  width sigma68 and the tail fraction, and the **leakage matrix** P(reco | true) between neighbouring charges with
-  Clopper-Pearson intervals. That matrix is a species-migration block for the correction chain (hep-measurement) and
-  for unfolding (hep-statistics); it is measured on simulation validated against data, and it depends on the
-  selection and the momentum range, which travel with it. `--toys` predicts the core width from the per-layer model,
-  so a data width far from it signals a wrong model (an extra tail, a miscalibrated layer). Toys with a sample outside
-  the response table, or with the likelihood maximum at the edge of the Z scan, are left out with a warning and
-  counted (toys_requested, toys_used): the table and the scan must cover the per-layer tail, else the predicted
-  width is biased low.
-- **Log-likelihood ratio from per-layer PDFs** (`likelihood`). LLR = sum over layers of log(p_signal / p_background)
-  from binned per-layer PDFs (measured on control samples, as above), with the efficiency - mis-identification curve
-  and Clopper-Pearson intervals. With the true PDFs and independent layers this is the Neyman-Pearson optimum. A
-  layer value outside the PDF edges contributes no term (skipped, counted in a warning), so the edges must cover the
-  full range of the layer signal, including the high amplitudes in which a TRD signal shows up.
-- **Correlations.** Samples of one particle share its path, its momentum and any common-mode calibration. Only
-  `charge --method weighted-mean` takes a declared correlation (`--correlation`, one common rho, generalized
-  least-squares weights); the truncated-mean and likelihood methods of `charge` and the `likelihood` mode cannot take
-  one and always say "independence assumed"; summing correlated layers as independent overstates the separation (see
-  "Combining measurements" below).
-- **Assigning samples to the track.** The samples above arrive already assigned to one particle.
-<!-- example: source citation -->
-  In the ALICE TRD (ALICE Collaboration, Nucl. Instrum. Methods A 881 (2018) 88, arXiv:1709.02743v2, secs. 8-8.2),
-  layer signals are assigned layer by layer: a seed track from the TPC is propagated to the
-  anode-wire radius of each chamber, the clusters near that intersection are combined into a
-  tracklet (a straight-line fit within the chamber), and the global track is updated with it
-  by the Kalman filter. Clusters are formed per time bin from adjacent pads, and an exponential ion
-  tail is subtracted from each pad's later samples; imperfect cancellation biases tracklet positions differently
-  for positive and negative tracks.
-<!-- /example -->
+the samples into one estimate: a charge from many dE/dx samples (path-length correction, inversion through the
+measured response curve, then a truncated mean, a weighted mean or a likelihood, with the leakage matrix between
+neighbouring charges), or a log-likelihood ratio summed over per-layer reference PDFs. The per-layer PDFs are a
+calibration, measured on control samples selected without the variable; samples of one particle share its path,
+momentum and calibration, so summing correlated layers as independent overstates the separation.
+`<plugin root>/skills/hep-detector/scripts/multisample_pid.py` does both. The control samples by environment, PDF
+binning, layer correlations, a variable number of layers, the script's input format and its limits are in
+[multisample PID and reference PDFs](multisample-pid-and-reference-pdfs.md).
 
 ## Combining measurements
 
@@ -304,7 +269,8 @@ easy to violate:
 - **Each response distribution is a calibration.** The likelihood is only as good as
   the per-species response templates, which must be measured on data control samples
   selected *without* the variable being calibrated, or the selection biases the
-  template.
+  template ([multisample PID and reference PDFs](multisample-pid-and-reference-pdfs.md) gives the control samples
+  by environment).
 - **Priors matter and must be stated.** A likelihood ratio becomes a probability only
   with a prior on species abundance, and in a sample where one species outnumbers
   another by orders of magnitude, a modest likelihood ratio does not establish the rare
