@@ -16,7 +16,7 @@ code. Named apparatus and every performance number sit in example blocks.
 
 | # | Relation | Status and validity | Source |
 |---|---|---|---|
-| HC8 | first-order pulse time `t ~= C [(p-1) A_(p-1) + p A_p + (p+1) A_(p+1)] / (A_(p-1) + A_p + A_(p+1))` from the three samples around the peak `p`, then a pulse-asymmetry correction and an amplitude-dependent slewing term | approximate; for a pulse spread over three or four samples, not when consecutive bunch crossings give similar amplitudes in the same cell (anomalous pulse shape) | arXiv:0911.4877, sec. 3, eqs. 1-2, PDF pp. 5-6 |
+| HC8 | first-order pulse time `t ~= C [(p-1) A_(p-1) + p A_p + (p+1) A_(p+1)] / (A_(p-1) + A_p + A_(p+1))` from the three samples around the peak `p` (the largest sample, the earliest on ties), then a pulse-asymmetry correction and an amplitude-dependent slewing term | approximate; for a pulse spread over three or four samples, not when consecutive bunch crossings give similar amplitudes in the same cell (anomalous pulse shape) | arXiv:0911.4877, sec. 3, eqs. 1-2, PDF pp. 5-6 |
 
 The time structure has a prompt component (relativistic hadrons, electromagnetic subshowers from `pi0` and `eta`) and
 a delayed one reaching microsecond scales, mainly from neutrons; the absorber sets the neutron yield and the hydrogen
@@ -28,7 +28,7 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
 | Time per cell or cluster | sample-centroid time (HC8), pulse-shape and slewing corrections, per-channel offsets, out-of-time windows; simulation smeared to the measured time resolution | known pulse shape spread over three or four samples (HC8); offsets from beam, cosmic or calibration data; a measured time resolution for the smearing | late neutron energy outside the window changes the response; overlapping pulses | COL, FXT |
-| Validating the hadronic model | compare data with several lists that differ in the model at the particle and energy concerned ([Geant4 study protocol](geant4-study-protocol.md) sec. 6) on response, resolution, the longitudinal profile from the shower start, the radial width and the time structure | a model-independent observable and stated configuration; data not used to tune the simulation | tuning on the same observable used for validation; lists that share the model at that energy | FXT, COL, UGD (tuning data only), SPC |
+| Validating the hadronic model | compare data with at least two lists that differ in the model producing the observable, each list's model assignment stated at its Geant4 version ([Geant4 study protocol](geant4-study-protocol.md) sec. 6; `check_geant4_study.py variations`): the inelastic model at the primary particle and energy for response, resolution, profiles and radial width; the neutron transport below 20 MeV (for example an `_HP` variant; arXiv:1404.6454, sec. 5.1, PDF p. 12) for the time structure and late energy; observables: response, resolution, the longitudinal profile from the shower start (per-event start, HC9 in the [main page](hadronic-calorimeter-reconstruction.md#relations)), the radial width and the time structure | a model-independent observable and stated configuration; data not used in any tuning of the simulation | data or observables used to tune the simulation reused as validation; lists that differ only in EM, elastic or cross-section data, or share the model producing the observable | FXT, COL (SPC, UGD: list selection or tuning data only, no independent validation point; GND: gap) |
 
 ## Distinctive but generalizable features (timing and model validation)
 
@@ -38,7 +38,8 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
 - **Natural objects**: pulse samples, cell times, cluster times, per-layer and radial profiles from the shower start.
 - **Informative residual**: cell time minus a reference time against energy (slewing); data minus simulation per
   observable and energy.
-- **Scaling**: the slewing correction grows as the pulse energy falls (HC8; arXiv:0911.4877, eq. 2); the delayed
+- **Scaling**: the slewing correction grows as the pulse energy falls, up to the cap the source sets (HC8;
+  arXiv:0911.4877, eq. 2 and the text after it); the delayed
   fraction grows with the absorber's neutron yield.
 - **Conventions**: the time zero (bunch crossing in COL, beam counter in FXT, a cosmic or calibration reference) and
   the window; a physics list is named with its Geant4 version.
@@ -56,7 +57,7 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
 - **Timing windows set from the electromagnetic pulse.** The delayed neutron component carries part of the
   hadronic signal; the window changes the response.
 - **A tuned comparison read as validation.** Agreement on the data that tuned the simulation is not a validation
-  point (the UGD entry of the coverage table below).
+  point (the SPC and UGD entries of the coverage table below).
 
 ## Deliverables
 
@@ -67,28 +68,41 @@ response therefore depends on the electronics integration time (PDG RPP 2025 sec
 
 **Hadronic benchmark in `geant4_benchmarks.py`** (planned):
 
-- Inputs: per-layer mean deposits and per-event sums from a Geant4 run of a stated configuration; a published test-beam
-  data set with its uncertainties, apparatus description and configuration hash.
-- Outputs: the longitudinal profile through the existing `longitudinal-profile` benchmark, today the script's only
-  `setup-matched` grade; mean response, resolution and mean shower radius as `published-data` comparisons (grade
+- Inputs: per-layer mean deposits, per-event sums and per-hit deposits with transverse position (for the radius) from a
+  Geant4 run of a stated configuration, the time structure staying outside the planned tool unless it adds hit times;
+  a published test-beam data set with its uncertainties and apparatus description, and a measured configuration hash
+  computed from a geometry built from that description.
+- Outputs: the front-referenced longitudinal profile (`t_max` of one Gamma-function fit to the per-layer mean deposits
+  at fixed depths) through the existing `longitudinal-profile` benchmark, today the script's only `setup-matched`
+  grade, which counts only against published data defined and fitted the same way, while a profile from the shower
+  start needs per-event start alignment (HC9) and the published parametrisation, which the planned benchmark must add
+  before it is setup-matched evidence;
+  mean response, resolution and mean shower radius as `published-data` comparisons (grade
   `interface`, handed to hep-statistics, never validation evidence) unless the planned tool adds setup-matched
   benchmarks for them.
 - Negative control: a Geant4 run with an absorber thickness or density change of declared size (`injected_relative`,
   checked in the control's run record), its expected shift fixed before the runs as under `declared-size/1` (today
   implemented, with `plan-controls`, only for three non-hadronic benchmarks, so the planned benchmark must add its
-  expected-shift model), caught at the detection limit the script computes (tolerance + |relative difference| +
-  t SE of the shift). A physics-list swap is a model variation ([Geant4 study protocol](geant4-study-protocol.md)
-  sec. 6), not a negative control. Controls run only for reference and setup-matched benchmarks.
-- Statuses: labels from the script's `STATUSES`; `validated-in-scope` only when a setup-matched benchmark passes on an
-  isolated target with a matching configuration hash and every negative control is caught (the script's
-  `validation_evidence`); `failed` when its verdict fails or a control is not caught; otherwise `unvalidated`.
+  expected-shift model), caught (its verdict fails) and at the claimed detection limit (|shift| <= 1.1 DL, DL =
+  tolerance + |relative difference| + t SE of the shift, or under `declared-size/1` an expected shift within 1.5 x the
+  planned limit), a control off the limit being a gap that blocks the upgrade. A physics-list swap is a model
+  variation only when the two lists differ in the model at that particle and energy ([Geant4 study
+  protocol](geant4-study-protocol.md) sec. 6), not a negative control.
+  Controls run only for reference and setup-matched benchmarks.
+- Statuses: labels from the script's `STATUSES`; `validated-in-scope` only from
+  `check_geant4_study.py label --upgrade` (Geant4 study protocol section 7), never from
+  `geant4_benchmarks.py run --status`, which echoes the label it is given: the upgrade needs a setup-matched
+  benchmark with `validation_evidence` (a pass on an isolated target whose hash matches the measured configuration
+  hash, every negative control caught, and the script only compares the two hashes, so a measured hash copied from
+  the run proves nothing) plus a passed convergence gate, the declared scope inside the benchmark scope, a variation table, independent material inputs and no remaining gap;
+  `failed` when its verdict fails or a control is not caught; otherwise `unvalidated`.
 
 ## Environment coverage
 
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
 | Shower timing | arxiv_0911.4877 | arxiv_1404.6454; pdg_2025_particle-detectors-at-accelerators | gap | gap | gap | gap |
-| Physics-list validation points | arxiv_1203.1302 | arxiv_1412.2653; arxiv_1404.6454 | arxiv_1909.12860 | tuning data (arxiv_1501.06431), not an independent validation | [extensive air showers](extensive-air-showers.md) (hadronic-model dependence) | gap |
+| Physics-list validation points | arxiv_1203.1302 | arxiv_1412.2653; arxiv_1404.6454 | list selection and model systematic (arxiv_1909.12860), not an independent validation | tuning data (arxiv_1501.06431), not an independent validation | gap (air-shower hadronic interaction models are a different model family: [extensive air showers](extensive-air-showers.md)) | gap |
 
 Both techniques have at least two environments.
 
@@ -99,15 +113,17 @@ CMS HCAL: time resolution about 1.2 ns for showers above 100 GeV in test beams; 
 hadron timing to about 1 ns; the slewing correction is `(3.59 ns) log10(1 TeV / E)`, at most 10 ns; channels
 synchronized within ±2 ns with cosmic and beam-splash data; simulation smeared to match the measured time resolution
 (abstract and secs. 2.1, 3, 4.1, PDF pp. 1, 5-6, 8). CALICE T3B (15 SiPM tiles, 2.4 µs window): late energy is more
-pronounced in tungsten than in steel; QGSP_BERT overestimates late deposits in tungsten (mean time of first hit too
-large by 2.0 ns at 9.2 cm and 7.8 ns at 40.2 cm), while lists with high-precision neutron treatment agree (sec. 6.4
+pronounced in tungsten than in steel; QGSP_BERT (Geant4 9.4p03, section 5, PDF page 12) overestimates late deposits
+in tungsten (mean time of first hit too large by 2.0 ns at 9.2 cm and 7.8 ns at 40.2 cm), while
+QGSP_BERT_HP and QBBC (two other neutron treatments) agree, overestimating it by only 1-2 ns beyond 10 cm (sec. 6.4
 and sec. 7, PDF pp. 21-22). PDG RPP 2025 sec. 35.10.3 (PDF p. 102): in beam tests of a combined HGCAL prototype,
 timing reached 60 ps per channel and better than 20 ps for full showers at the highest energies.
 <!-- /example -->
 
 <!-- example: physics-list validation points (arXiv:1412.2653) -->
-CALICE Fe-AHCAL, 10-80 GeV: FTFP_BERT predicts the proton mean radius within uncertainties and underestimates the pion
-radius by about 5-7%; QGSP_BERT underestimates the width by about 10% above 10 GeV (sec. 3, PDF p. 20).
+CALICE Fe-AHCAL, 10-80 GeV: FTFP_BERT (Geant4 9.6.p01, section 2.2, PDF page 6) predicts the proton mean radius within
+uncertainties and underestimates the pion radius by about 5-7%; QGSP_BERT (Geant4 9.6.p01) underestimates the width by
+about 10% above 10 GeV (sec. 3, PDF p. 20).
 <!-- /example -->
 
 ## Citations
