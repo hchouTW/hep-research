@@ -23,7 +23,7 @@ holds well for leakage current and is "moderately violated" for other effects (s
 | `I_L(T) ∝ T^2 exp(-E_a/(2kT))`, `E_a ≈ 1.2 eV` | approximate; PDG quotes about 7-fold from room temperature to 0 °C; for `E_a = 1.2 eV` the relation gives 6.6 from 20 °C and about 10 from 25 °C. PDG eq. (35.26), p. 74 |
 | `N_id = N_id,0 exp(-c Phi_eq)` (initial dopant removal) | approximate; `c` depends on `N_id,0`, particle type and impurities (Fig. 35.32). PDG sec. 35.8.5, p. 76 |
 | induced current times `exp(-t/tau_eff,e/h)`; `1/tau_eff ∝ Phi_eq` | approximate; linear up to about `1e15 n_eq/cm^2`, where `tau_eff` is of order 1 ns, then saturating. PDG p. 77 |
-| bias limit from single-event effects at average fields near 12 V/um | approximate; sets the sensor lifetime. PDG pp. 77-78 |
+| bias limit from single-event effects at average fields near 12 V/um | approximate; sets the lifetime in highly energetic particle fields. PDG pp. 77-78 |
 | `I_leak = (Phi/L_int) sum_i V_i L_int,i [alpha_I exp(-sum_{j>=i} t_j/tau(T_j)) + alpha_0* - beta ln(sum_{j>=i} Theta(T_j) t_j / t_0)]` | approximate (phenomenological annealing model); per time interval `i` with luminosity, duration and temperature. arXiv:1905.03739, sec. 3.1, eq. (1), p. 5 |
 | `L/L_0 ≈ exp(-D/D_c)` for plastic scintillator | approximate; `D_c` of tens of kGy at dose rates from a few `1e-3` to 10 Gy/h, larger damage at lower rate. PDG sec. 35.3.2, p. 12 |
 | `S(t)/S_0 = (R(t)/R_0)^alpha` (scintillation versus monitoring-light response) | approximate, for small transparency losses, where `alpha` does not depend on the loss; `alpha` differs between producers of the same crystal (set by the initial transparency), with a channel-to-channel spread, measured in a beam test under irradiation. A value tuned in situ on collision data is an effective exponent for large losses that also absorbs photodetector loss, outside this validity. arXiv:1306.2016, sec. 4.1, eq. (3), pp. 10-11, and sec. 4.1.1, p. 12 |
@@ -60,7 +60,7 @@ space detectors is below `1e12 /cm^2` (arXiv:1809.06361, sec. 1, p. 1).
 Timing consequences: [timing detectors](timing-detectors.md).
 
 <!-- example: LGAD prototypes for the HL-LHC timing layers (ATLAS HGTD, CMS ETL; COL) -->
-arXiv:2004.05260: 50 um HPK and 55 um FBK LGADs, neutron-irradiated from `4e14` to `4e15 n_eq/cm^2`, measured at
+arXiv:2004.05260: 50 um HPK and 55 um FBK LGADs (abstract; Table 1, p. 2), neutron-irradiated from `4e14` to `4e15 n_eq/cm^2`, measured at
 -30 °C; the deep gain layer and the carbonated gain layer perform reasonably up to `3e15`; time resolution versus
 gain does not depend on fluence for the same thickness (abstract); requirements up to a few `1e15 n_eq/cm^2` and a
 few MGy (sec. 1, p. 1).
@@ -104,7 +104,7 @@ a radioactive source or physics signal sees both (COL; arXiv:1806.02129, sec. 4.
 <!-- example: ATLAS Tile Calorimeter (COL) and T2K near detectors (UGD) -->
 TileCal (arXiv:1806.02129, sec. 4.5, pp. 23-24): the difference between minimum-bias (or Cs) and laser response is
 read as scintillator irradiation, while laser data alone show PMT gain loss with light exposure and recovery
-between fills. T2K near detectors (arXiv:2207.12982): light yield fell 0.9-2.2% per year over ten years (abstract,
+when there are no collisions. T2K near detectors (arXiv:2207.12982): light yield fell 0.9-2.2% per year over ten years (abstract,
 p. 5); most of the loss is in the scintillator, not the WLS fibres, whose long attenuation component degrades by
 1-5% per year (sec. 7, p. 31).
 <!-- /example -->
@@ -134,8 +134,8 @@ technologies](gaseous-and-specialized-tracking-technologies.md#drift-chambers-an
 
 <!-- example: HERA-B honeycomb drift tubes and muon chambers (FXT) -->
 arXiv:hep-ex/0204005, sec. V.D, pp. 8-9: prototype honeycomb drift tubes aged severely after a few mC/cm in the hadron
-environment of 920 GeV protons on a nuclear target, though X-ray tests to 5 C/cm showed nothing; the ageing rate
-in Ar/CF4/CH4 was more than two orders of magnitude higher in hadron beams than with radioactive sources.
+environment of 920 GeV protons on a nuclear target, though X-ray tests to 5 C/cm showed nothing; in the muon
+proportional chambers the ageing rate in Ar/CF4/CH4 was more than two orders of magnitude higher in hadron beams than with radioactive sources.
 <!-- /example -->
 
 ## Radiation fields by environment
@@ -143,12 +143,10 @@ in Ar/CF4/CH4 was more than two orders of magnitude higher in hadron beams than 
 - **COL.** Dose and hadron fluence depend on position (radius, pseudorapidity) and scale with integrated luminosity;
   the fluence comes from an event generator plus particle transport, as a factor `Phi/L_int`, checked against the
   measured leakage current through the annealing model (arXiv:1905.03739, secs. 2-3.1, pp. 4-5).
-- **SPC (low Earth orbit).** The proton/electron balance depends on shielding and spectrum: behind the 2-2.5 mm PbSb
-  (about 2.2-2.8 g/cm^2) of the cited CubeSat detector trapped protons dominate TID and NIEL; for lighter
-  shielding (in g/cm^2) model trapped electrons too;
-  solar protons and Galactic cosmic rays add little TID (arXiv:2411.00607, sec. 4.1, p. 10). Dose
-  depends on altitude, shielding and solar cycle (same page), from trapped-particle models (AP-8 protons, AE-8
-  electrons), with a quoted factor-of-two uncertainty on the AP-8 proton flux (sec. 3.2, p. 7); none is
+- **SPC (low Earth orbit).** The proton/electron balance depends on shielding and spectrum (example below), so
+  model trapped electrons too; solar protons and Galactic cosmic rays add little TID (arXiv:2411.00607, sec. 4.1,
+  p. 10). Dose depends on altitude, shielding and solar cycle (same page), from trapped-particle models (AP-8 protons,
+  AE-8 electrons), with a quoted factor-of-two uncertainty on the AP-8 proton flux (sec. 3.2, p. 7); none is
   quoted for AE-8, which does not make it exact. In AP-8, trapped protons at low altitude are more numerous at
   solar minimum (AP8-MIN above AP8-MAX; arXiv:1503.07682, sec. 1, p. 3; and arXiv:2411.00607, sec. 4.1, p. 10). For
   the low-inclination orbit of the cited drift-detector study, protons dominate, especially those trapped in the
@@ -160,12 +158,13 @@ in Ar/CF4/CH4 was more than two orders of magnitude higher in hadron beams than 
   cited here (coverage gap). Detector context:
   [noble liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md).
 
-<!-- example: CMS ECAL (COL), LOFT and Fermi orbits (SPC) -->
+<!-- example: CMS ECAL (COL), LOFT, Fermi and GRBAlpha orbits (SPC) -->
 CMS ECAL: expected dose up to 4 kGy in the barrel and 200 kGy at |eta| = 3 after 10 years (500 fb^-1); expected
 hadron fluence from about `1e13` to `1e14 cm^-2`, as quoted (weighting and NIEL source not stated;
 arXiv:1306.2016, sec. 2, p. 6). LOFT: AP8-MIN via SPENVIS, 600 km and 5° worst case, behind 3.3 mm Al equivalent;
 AP8-MIN is about 7 times AP8-MAX at 1 MeV (arXiv:1503.07682, sec. 1, p. 3). Fermi: 565 km at 25.6°, about 15% of the
-time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p. 25).
+time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p. 25). GRBAlpha: behind 2-2.5 mm
+PbSb, trapped protons dominate TID and NIEL (arXiv:2411.00607, sec. 4.1, p. 10).
 <!-- /example -->
 
 ## Feeding damage into conditions and simulation
@@ -206,7 +205,7 @@ correctable energy-scale shift of about 4.5% after 10 years, consistent with pre
 | LGAD gain loss | gain-versus-bias curves per fluence step; raise bias | single-event limit known | bias raised past the burnout limit | COL |
 | SiPM dark rate | dark rate and threshold versus time; annealing; cooling; shielding | temperature recorded | threshold drift read as signal loss | COL, SPC |
 | crystal or plastic transparency | monitoring light plus a physics or source reference | transfer exponent measured | monitor and scintillation light take different paths | COL, SPC, UGD |
-| photosensor versus scintillator | compare a light-bypass monitor with source or physics response | both monitors in the same period | PMT fatigue and recovery read as scintillator damage | COL, UGD |
+| photosensor versus scintillator | compare a light-bypass monitor with source or physics response | both monitors in the same period | PMT fatigue and recovery read as scintillator damage | COL |
 | MCP-PMT lifetime | QE scans versus integrated anode charge, partly covered cathode | rate and gain logged | time-driven loss (leaks) read as charge-driven | FXT |
 | gas ageing | irradiation at the real rate, particle type and area; gain and current monitoring | final gas and materials | X-ray tests read as a lifetime for hadron fields | COL, FXT |
 
