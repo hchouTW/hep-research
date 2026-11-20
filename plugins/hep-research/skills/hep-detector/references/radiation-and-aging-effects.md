@@ -179,7 +179,7 @@ time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p
    stable peak (non-interacting protons) tracks the scale, fitted in time (arXiv:1206.1896, sec. 7.3.2, p. 137);
    annealing: item 2.
 2. **Digitization.** The digitizer simulates the damage with device-model fields and trapping but no annealing,
-   then the induced signal (arXiv:1905.03739, sec. 4, pp. 12-30; sec. 2, page 5). The annealing model only
+   then the induced signal (arXiv:1905.03739, sec. 4, pp. 12-30; sec. 2, PDF p. 5). The annealing model only
    validates the conditions (fluence, depletion voltage; sec. 3) and does not enter the simulated response. No
    annealing correction or uncertainty is applied (sec. 2, p. 5; sec. 4.2.4, pp. 18-20): its variation lies within
    the field-model variations (secs. 4.2.3-4.2.4, p. 20) and the trapping-constant range (sec. 4.5 and Table 5,
