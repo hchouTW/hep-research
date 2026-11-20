@@ -90,8 +90,10 @@ Borexino direct efficiencies from high-energy inner-detector events: at least (9
 for two outer-detector flags, both lower limits, with 95% C.L. Clopper-Pearson intervals (arXiv:1101.3101, sec.
 3.2, p. 14; sec. 3.2.1, printed p. 15, PDF p. 18; Table 3, p. 16). The mutual efficiencies of these two flags, which
 share their PMTs, are 0.9997 each, above the direct ones (Table 3, p. 16; sec. 3.2.2, p. 16), and the source says to
-handle them with care, but the tests of the same flags against the independent inner-detector flag, 0.9933 and
-0.9935, also exceed the direct ones, so the excess alone does not show a shared-PMT bias. Daya Bay inner water shield
+handle them with care, and they exceed the tests of the same flags against the independent inner-detector flag,
+0.9933 and 0.9935, by about 0.006, far beyond the errors of at most 10^-4, as a shared-PMT correlation would, but the
+inner-detector flag's over-efficiency (below 0.7%, section 3.2.2, page 17) could also contribute, so the size of the
+bias is not determined. Daya Bay inner water shield
 efficiency for muons tagged by an antineutrino detector: (99.98 ± 0.01)%, confidence level not stated, the small
 apparent inefficiency being rock neutrons tagged as muons (arXiv:1407.0275, sec. 4.3, eq. 2, p. 15).
 <!-- /example -->
@@ -139,13 +141,15 @@ underground under 28 m of rock: up and down TPC tracks matched per muon, events 
 No space-borne muon system (absorber-backed chambers) was found in the sources surveyed. A magnetic spectrometer
 without absorber identifies muon candidates as a band in velocity versus rigidity ([Relations](#relations)), with
 protons,
-electrons and positrons as the main contamination (arXiv:astro-ph/0205344, sec. 4, p. 7). The cited run was at
-ground level (GND; abstract), and no in-flight muon selection was found, so this technique is a gap for SPC. Particles below the geomagnetic cutoff seen in orbit are
+electrons and positrons as the main contamination (arXiv:astro-ph/0205344, sec. 4, p. 7). The cited run of this balloon
+instrument was at ground level (SPC, labelled as a ground-level run; abstract), and no in-flight muon selection was
+found. Particles below the geomagnetic cutoff seen in orbit are
 atmospheric secondaries (albedo; arXiv:astro-ph/0101559, abstract): the cutoff, albedo and their removal are in
 [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff).
 
 <!-- example: source citation -->
-BESS at sea level and 360 m altitude: muons selected by `1/beta` within ±3.89 sigma of the muon curve versus
+BESS, a balloon spectrometer, at sea level and 360 m altitude: muons selected by `1/beta` within ±3.89 sigma of the
+muon curve versus
 rigidity; protons removed by the band only below 1.4 GV (2.0% contamination at 1.4 GV) and subtracted above it with
 an external proton spectrum normalised below 1.4 GV, at a systematic of 1% at 1.4 GeV/c; e+- estimated with a
 Cherenkov shower counter behind 12 mm of lead and subtracted, 0.5% systematic at 0.6 GeV/c (arXiv:astro-ph/0205344,
@@ -162,7 +166,7 @@ characterized with cosmic muons before flight (SPC; arXiv:astro-ph/0702581, sec.
 stand measures counter efficiency and light-yield ageing (FXT; arXiv:2510.13798, abstract); collider muon chambers
 are aligned with cosmic-ray and beam-halo muons (COL; arXiv:0911.4022, abstract; the method is in
 [muon systems](muon-systems.md#chamber-alignment-and-momentum-scale)). Surface arrays calibrate
-on atmospheric muons ([ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
+on atmospheric muons (GND, not sourced in this survey: see [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
 
 <!-- example: source citation -->
 Super-Kamiokande: absolute energy scale at GeV energies known to about 2-3% from cosmic-muon energy deposition, Michel
@@ -175,13 +179,13 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
 | Veto with an independent inner detector | Direct efficiency from inner-detector-selected muons | Flag independent of the selection | Reference impurities; acceptance mismatch | UGD |
-| Veto with several tags | Mutual efficiencies | Tags share no sensors | Shared sensors correlate the tags (high in the cited case) | UGD |
+| Veto with several tags | Mutual efficiencies | Tags share no sensors | Shared sensors correlate the tags (mutual values above the independent-reference ones in the cited case) | UGD |
 | Layered veto | Defining layers; k-of-n from single layers and directly | Pure muon sample, impurity estimated | Non-independent layer inefficiencies bias the extrapolation either way (pessimistic with staggered layers, as measured; optimistic with a shared gap); reference impurity mimics the shared gap | FXT, SPC |
 | Short-lived cosmogenics | Time veto after each muon | Low muon rate | Dead time | UGD |
 | Long-lived cosmogenics | Track cylinder; muon-neutron-decay coincidence | Muon tracking; neutron tag | Track-cut efficiency not measured; isotopes made without a detected neutron escape the coincidence | UGD |
 | Muon counting in showers | Space and time segmentation | Segment size against the expected density | Undercounting from pile-up | GND |
 | Multi-muon cosmic events in a tracker | Track matching across halves | Simulated high-multiplicity events | Double counting | COL |
-| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; protons separated only at low rigidity; an independent e+- identifier; an external proton spectrum for the subtraction above that rigidity | p, e+- contamination; a corrected yield, not a pure sample; subtraction-model systematic | GND (SPC a gap) |
+| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; protons separated only at low rigidity; an independent e+- identifier; an external proton spectrum for the subtraction above that rigidity | p, e+- contamination; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
 
 ## Distinctive but generalizable features (non-collider muons)
 
@@ -223,30 +227,39 @@ A veto-efficiency tool (not yet in the plugin):
 
 - **Inputs**: the counts of the `2^n` hit patterns over the `n` test layers (integers), from one reference sample
   selected without the test layers (per-layer counts alone give `no-direct-count`), the coincidence `k` of `n`, and
-  an estimate of the non-muon fraction of the reference sample with its uncertainty (required).
+  an estimate or upper bound of the non-muon fraction of the reference sample, with its uncertainty and how it was
+  obtained (required, and a bound or 0 ± 0 gives `impurity-unmeasured`).
 - **Outputs**: from the same pattern counts, single-layer efficiencies with intervals and their confidence level,
   the k-of-n efficiency extrapolated under independence, the direct k-of-n efficiency, and their difference `Z` in
   standard errors of the difference (bootstrap over the reference muons, which both estimates share), with the `Z`
-  that the estimated impurity alone would give and the `Z_max` used. Efficiencies are fractions
+  that the estimated impurity alone would give (`Z_imp`), the impurity-corrected `Z_c` (difference less the
+  impurity's, in standard errors that include the impurity uncertainty) and the `Z_max` used. Efficiencies are fractions
   in [0, 1].
-- **Decision rule**: `independence-violated` when `|Z| > Z_max` in either direction (`Z_max` an input from 2 to 5,
+- **Decision rule**: `independence-violated` when `|Z_c| > Z_max` in either direction (`Z_max` an input from 2 to 5,
   default 3, listed with the status when it is not 3) or, when the direct count alone has no failures, when the
   extrapolated inefficiency less `Z_max` standard errors exceeds the one-sided upper limit on the direct inefficiency
-  at the confidence matching `Z_max`; `ok` when a test ran and did not give `independence-violated`.
-- **Negative controls** (each with 10^6 reference muons, `k = 3`, `n = 4`, single-layer inefficiency about 0.01 and
-  stated seeds): a sample in which a shared gap removes layers 1 and 2 together for a fraction 10^-3 of the muons
-  must give a direct k-of-n efficiency below the extrapolation and `independence-violated` (`Z` about -25); a
+  at the confidence matching `Z_max`; `ok` when a test ran and gave neither that nor `impurity-dominated`
+  (`|Z_imp| > Z_max`), which means that the extrapolation agrees with the direct k-of-n count, not that the layers are
+  independent (a shared gap and staggering can cancel).
+- **Negative controls** (each with 10^6 reference muons, `k = 3`, `n = 4`, `Z_max = 3`, single-layer inefficiency
+  about 0.01, impurity input 0 ± 10^-5 unless stated, and stated seeds): a sample in which a shared gap removes
+  layers 1 and 2 together for a fraction 10^-3 of the muons must give a direct k-of-n efficiency below the extrapolation and `independence-violated` (`Z` about -25); a
   staggered sample, in which each layer's inefficiency is a gap part of about 0.009 that never hits two layers of the
   same muon plus an independent part of 10^-3, so that the direct count has about 114 failures, must give one above
   it and `independence-violated` (`Z` about +41); at least 990 of 1,000 seeded independent samples must give exactly
-  `{ok}` (a correct tool gives about 997). With the gap part alone (0.01 per layer) the direct count has no
+  `{ok}` at `Z_max = 3` (a correct tool gives about 997). With the gap part alone (0.01 per layer) the direct count has no
   failures, and the one-sided test must give `independence-violated`. An independent sample with 10^-3 non-muon
-  events that fail every layer must give `independence-violated` (`Z` about -24) and an impurity `Z` that matches it.
-- **Impurity**: non-muon events that fail every layer also push the direct efficiency below the extrapolation (the
-  plateau of the direct inefficiency at low thresholds is attributed to them; arXiv:2510.13798, sec. 6.2, p. 12), so
-  `independence-violated` means that the extrapolation disagrees with the direct count, and is read against the
-  impurity `Z`.
-- **Statuses** (a set): `ok`; `independence-violated`; `no-failures` (a single layer has no failed
+  events that fail every layer, entered as 10^-3 ± 10^-4, must give exactly `{impurity-dominated}` (`Z` and `Z_imp`
+  about -24, `|Z - Z_imp|` at most 3), and the staggered sample with 5 x 10^-4 such events, entered as
+  5 x 10^-4 ± 5 x 10^-5, must give `independence-violated` and `impurity-dominated`, never `ok` (`Z` about +1 to +4,
+  `Z_imp` about -19, `Z_c` about +10).
+- **Impurity**: non-muon events (modelled here as failing every layer) push the direct efficiency below the
+  extrapolation, so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
+  of the direct inefficiency is likely due to non-muon events that pass the selection (supported by simulation;
+  arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at thresholds where the direct efficiency still exceeds the extrapolation.
+- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated`; `impurity-unmeasured` (the test
+  runs at zero impurity and at the bound, a status holds only if both give it, and the efficiencies and `Z_imp` are
+  bounds); `no-failures` (a single layer has no failed
   muon: only an upper limit on its inefficiency, and the test does not run); `no-direct-count` (per-layer counts
   only: the extrapolation is given, labelled as an assumption, without `Z`). With `no-failures` or
   `no-direct-count`, neither `ok` nor `independence-violated` is emitted.
@@ -259,18 +272,18 @@ cell counts the environment the instrument is built for; a cited run made elsewh
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
 | Muon vetoes, segmentation against self-veto | n/a: timing and vertex cuts ([muon systems](muon-systems.md#backgrounds-and-fakes)) | arxiv_2510.13798 | arxiv_astro-ph_0702581 | PDG; arxiv_1101.3101 | gap | gap |
-| Veto-efficiency measurement | n/a | arxiv_2510.13798 | arxiv_astro-ph_0702581 (pre-flight, on ground) | arxiv_1101.3101; arxiv_1407.0275 | gap | gap |
+| Veto-efficiency measurement | n/a | arxiv_2510.13798 (cosmic-ray test stand) | arxiv_astro-ph_0702581 (pre-flight, on ground) | arxiv_1101.3101; arxiv_1407.0275 | gap | gap |
 | Cosmogenic tagging | n/a: muon rate too high to correlate decays with single muons (text) | n/a: same | n/a: activation is a different problem | PDG; arxiv_1101.3101; arxiv_0907.0066 | n/a: same as COL | n/a: single-environment technique (text) |
 | Muon counting | arxiv_1507.07577 | gap | gap | gap | arxiv_1703.06193 | gap |
-| Muons in absorber-free spectrometers | n/a: muon systems used | gap | gap: no in-flight muon selection found | n/a | arxiv_astro-ph_0205344 (ground-level spectrometer run, not an array) | n/a |
+| Muons in absorber-free spectrometers | n/a: muon systems used | gap | arxiv_astro-ph_0205344 (ground-level run; in flight a gap: no in-flight muon selection found) | n/a | n/a: arrays have no spectrometer | n/a |
 | Albedo below cutoff | n/a | n/a | arxiv_astro-ph_0101559; [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) | n/a | n/a | n/a |
-| Cosmic muons as calibration samples | arxiv_0911.4022 (chamber alignment, text) | arxiv_2510.13798 | arxiv_astro-ph_0702581 (pre-flight, on ground) | PDG; arxiv_0805.3170 | [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction) | gap |
+| Cosmic muons as calibration samples | arxiv_0911.4022 (chamber alignment, text) | arxiv_2510.13798 (cosmic-ray test stand) | arxiv_astro-ph_0702581 (pre-flight, on ground) | PDG; arxiv_0805.3170 | gap (method in [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)) | gap |
 
 ## Citations
 
 Inline citations give the arXiv number and a locator. Page numbers are the printed page numbers of the cached
 arXiv version, which for arXiv:1101.3101, 1703.06193 and 2510.13798 differ from the PDF page index (two locators
-add the PDF page). Annotated
+also give the PDF page). Annotated
 entries for every source of this page, the PDG review included, are in the
 [muon-systems bibliography](detector-principles-bibliography-muon-systems.md), a split file of the
 [bibliography](detector-principles-bibliography.md).
