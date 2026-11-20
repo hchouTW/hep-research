@@ -218,7 +218,7 @@ tail fraction, and coverage across phase space, not just the core width.
 
 A resolution is a model or an estimator; name it, and quote the core and the tails separately. The parametric
 shapes (single- and double-sided Crystal Ball and the correlation of their tail parameters, Gaussian plus pedestal,
-core-plus-tail time PDFs, low-side hadronic tails) and the effective sigma (`sigma_eff`, two conventions), with when
+core-plus-tail time PDFs, hadronic tails) and the effective sigma (`sigma_eff`, three conventions), with when
 to use each, are in [resolution shape models](resolution-shape-models.md). Other common choices (general method):
 
 - **Double Gaussian**: two widths and a fraction; define the effective width you quote (for example the fraction-
