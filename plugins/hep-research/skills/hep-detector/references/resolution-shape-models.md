@@ -151,8 +151,8 @@ recomputed tag-and-probe efficiencies with a Gaussian instead of a CB as the res
 
 ## Common misconceptions and failure modes
 
-- **The RMS of a CB is the resolution.** It is not, for any `n`: for `n <= 3` the model has no finite variance (no
-  mean for `n <= 2`, not normalizable for `n <= 1`); for larger `n` the RMS mixes core and tail by an amount set by
+- **The RMS of a CB is the resolution.** It is not: it mixes core and tail, is infinite for `n <= 3` (no
+  mean if `n <= 2`, unnormalizable if `n <= 1`); for larger `n` the RMS mixes core and tail by an amount set by
   `alpha` and `n`, diverging as `n -> 3` (from eq. 1: RMS/`sigma` 1.46, 1.29, 1.14 at `alpha = 1.5` for `n = 4`, 5,
   10; 1.03 at `alpha = 2.5`, `n = 4`), and the sample RMS depends on the fit range. Quote the core `sigma` with the
   tail parameters, or an effective sigma with a tail fraction.
@@ -204,7 +204,7 @@ shape) would take:
   the pulls have mean 0 and width 1): a pure Gaussian sample fitted with `cb_low` and with `dscb` must return the
   generated width as core `sigma` and a status set containing `tail_unconstrained` (`moments_undefined` also
   allowed); `gauss_plus_const` without a control must return `floor_from_tails`, and with the floor fixed from a
-  signal-free control must not; a fit stopped before convergence must return `fit_failed`. Positive control: a CB
+  signal-free control must not; an unconverged fit must return `fit_failed`, not `ok`, at any threshold. Positive control: a CB
   sample with known `alpha`, a fixed `n > 3` and enough entries for `min_entries` and `min_tail_entries` must
   return `alpha` with status `ok` (over toys, `ok` in a fraction consistent with `1 - gof_p_min`; with a fixed
   `n <= 3` the set contains `moments_undefined`).
