@@ -279,6 +279,25 @@ Software checks establish contract consistency only, not physical validity.
   that own its noble-liquid, water/scintillator, bolometer, rare-event and air-shower/IACT/neutrino-telescope rows,
   fills two "—" cells of Table 7 with links, and says that the forward-proton, beam-monitor and luminosity rows of
   Table 9 are stated for a collider only.
+- **hep-detector: in-situ calibration methods** (Stage C unit A1). New `in-situ-calibration-methods.md` states how
+  detector constants are solved from data: unknowns, reference sample and residual; per-channel iteration, global
+  least squares with Millepede-type reduction and iterative minimisation; unconstrained modes and their external
+  constraints; convergence, bias and per-channel precision; and the methods for electromagnetic and hadronic
+  calorimeters, time-of-flight bars, gas gain and RICH optics, with their reference samples (a second RICH sample
+  is a stated gap) and an environment coverage table. New `in-situ-alignment-and-momentum-scale.md` covers track
+  and chamber alignment (Millepede-II with General Broken Lines, gradient descent with step halving, optical,
+  acoustic and photogrammetric positioning) and the momentum scale from resonances, cosmic muons or range versus
+  curvature. Both link `calibration-and-alignment.md` instead of repeating it; simulator parameter fitting is simcal
+  (hep-statistics). Named apparatus and numbers stay in example blocks.
+- **hep-detector: multisample PID and reference PDFs** (documentation only). A new reference,
+  `multisample-pid-and-reference-pdfs.md`, linked from `event-reconstruction.md`, takes over "Combining many samples"
+  from `particle-identification.md` (which keeps a summary and a link under the same heading) and adds how per-layer
+  reference PDFs are measured on control samples selected without the variable (decay, conversion and tag-and-probe
+  samples at colliders, charge- and velocity-selected flight data in space, tagged test beams and their transfer to
+  the instrument), their binning and smoothing, layer correlations and the n-layer independence test, a variable
+  number of layers, control-sample contamination, and the input format and limits of `multisample_pid.py`. Every
+  method is cited at the sections read, with named instruments and their numbers in example blocks.
+- **hep-detector: calorimeter cluster reconstruction reference.** New `calorimeter-cluster-reconstruction.md`, linked from `event-reconstruction.md`: seeded clustering on cell noise significance, graph clustering for non-projective calorimeters, splitting at local maxima with shared-cell weights, superclustering in a field, logarithmic-weight and S-curve position, depth and direction, shower shapes for electron, photon, neutral-pion and hadron separation, converted photons, cluster energy corrections, preshower, dual readout and imaging calorimeters, each with source locators, a decision table, tool hooks with a closure test and a negative control, and a technique-by-environment coverage table; named apparatus and their numbers sit in example blocks. The "Shower position, direction and shape" section of `calorimetry-ecal-hcal.md` becomes a summary with a link, and drops its inline citation of an unread source. Its sources are in the new split file `detector-principles-bibliography-calorimetry.md`.
 
 ## 0.70.0 (2026-11-16)
 
