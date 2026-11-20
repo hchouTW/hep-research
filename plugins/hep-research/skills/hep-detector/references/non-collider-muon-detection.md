@@ -100,7 +100,7 @@ p. 8). The technique exists in one environment: it needs a muon rate low enough 
 half-lives after each muon leaves usable live time.
 
 <!-- example: source citation -->
-Borexino: 11C (half-life 20.38 min) is accompanied by a knock-out neutron in 95% of cases, which makes the threefold
+Borexino: 11C (half-life 20.38 min) is accompanied by a knock-out neutron in only 95% of cases, so the tag is incomplete, but this makes the threefold
 coincidence possible where a full-volume veto would leave a dead exposure close to 100% (arXiv:1101.3101, sec. 4,
 p. 17); the remaining 5% of 11C, made without a neutron, and any undetected neutron escape the coincidence. KamLAND:
 a cut at 3 m from the muon track keeps (91.6 ± 4.3)% of 12B and (95.9 ± 0.7)% of neutron events from non-showering
@@ -235,7 +235,7 @@ Cells give source IDs of the run's cache (PDG = PDG RPP 2025, particle detectors
 | Muon counting | arxiv_1507.07577 | gap | gap | gap | arxiv_1703.06193 | gap |
 | Muons in absorber-free spectrometers | n/a: muon systems used | gap | gap: no in-flight muon selection found | n/a | arxiv_astro-ph_0205344 | n/a |
 | Albedo below cutoff | n/a | n/a | arxiv_astro-ph_0101559; [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) | n/a | n/a | n/a |
-| Cosmic muons as calibration samples | arxiv_0911.4022 | arxiv_2510.13798 | arxiv_astro-ph_0702581 | PDG; arxiv_0805.3170 | [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction) | gap |
+| Cosmic muons as calibration samples | arxiv_0911.4022 (chamber alignment) | arxiv_2510.13798 | arxiv_astro-ph_0702581 | PDG; arxiv_0805.3170 | [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction) | gap |
 
 ## Citations
 
