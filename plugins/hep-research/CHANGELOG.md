@@ -5,6 +5,7 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **contracts: the `survival` definition names the charge-changing case** (documentation fix CONTRACTS-SURVIVAL-CHARGE-CHANGING, doc; follows F-XREF-3-CORRECTION-CHAIN-CHARGE-CHANGING, issue CHK-AU-02-07). `contracts/vocab/effects.json` (effect `survival`) and `contracts/vocab/core.json` (`response_corrections`) now say a species crosses "without an inelastic (for a charge-tagged selection, charge-changing) interaction", as `correction-chain.md`, `nuclear-interactions-in-detector-material.md` and hep-theory's `nuclear-cross-sections.md` already do. Definition text only: contracts 3.28.0 and catalog 1.1.0 are unchanged, and no validator reads the text.
 - **charge_confusion_rate.py, template and control modes** (sci-fixes CHARGECONF-TEMPLATE-MAXIMUM S1,
   CHARGECONF-TEMPLATE-STATUS S2, CHARGECONF-TEMPLATE-IDENTIFICATION S2, CHARGECONF-CONTROL-MC-SIGN S1; advisories
   SFA-2026-044 to SFA-2026-047; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
