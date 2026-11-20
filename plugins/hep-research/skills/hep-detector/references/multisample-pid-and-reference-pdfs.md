@@ -291,8 +291,8 @@ updates the track with it; imperfect ion-tail cancellation biases tracklet posit
 
 `V0` and conversion samples and tag-and-probe are sourced only at colliders; charge- and velocity-selected
 cosmic-ray data mainly in space and balloon flight, also at sea level (arXiv:hep-ex/9805001 sec. 3) and with
-cosmic-ray muons at a collider (arXiv:1709.02743 sec. 11); the other rows hold their analogues. Dense-detector stopping-track
-identification (`UGD`) is in [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md);
+cosmic-ray muons at a collider (arXiv:1709.02743 sec. 11); the other rows hold their analogues. Dense-detector
+stopping-track identification (`UGD`) is in [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md);
 its control samples are a gap here.
 
 ## Citations
