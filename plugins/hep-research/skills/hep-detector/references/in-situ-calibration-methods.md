@@ -5,26 +5,28 @@ from data: the unknowns, the reference sample, the residual, the solver, the mod
 convergence, bias and per-channel precision are judged. Then the method per detector type, each with at least two
 reference samples. Environments (R1 codes): COL, FXT, SPC, UGD, GND; NUC is a gap (no source read).
 
-This page covers the solving. Chain order, test beam versus in-situ, weak modes of curvature, conditions and
-iteration contracts are in [calibration and alignment](calibration-and-alignment.md) (its
-[iterative loops](calibration-and-alignment.md#iterative-loops-as-contract-steps) section records a loop as contract
-steps). Residual propagation: [calibration residual propagation](calibration-residual-propagation.md). Charge
-injection and linearity: [front-end calibration](front-end-calibration.md). Timing reference distribution:
-[timing detectors](timing-detectors.md#calibration-and-diagnostics). Track and chamber alignment, and the momentum
-scale, are in [in-situ alignment and momentum scale](in-situ-alignment-and-momentum-scale.md). Fitting *simulator*
-parameters to data is simcal, owned by hep-statistics
-([simcal scripts](../../hep-statistics/references/core-stats-guide.md#skill-scripts)); this page is about detector
-constants only.
+This page covers the solving. Chain order, test beam versus in-situ, weak modes of curvature, conditions and iteration
+contracts are in [calibration and alignment](calibration-and-alignment.md) ([iterative
+loops](calibration-and-alignment.md#iterative-loops-as-contract-steps)). Residual propagation: [calibration residual
+propagation](calibration-residual-propagation.md). Charge injection and linearity: [front-end
+calibration](front-end-calibration.md). Timing reference distribution: [timing
+detectors](timing-detectors.md#calibration-and-diagnostics). Track and chamber alignment, and the momentum scale, are
+in [in-situ alignment and momentum scale](in-situ-alignment-and-momentum-scale.md). Fitting *simulator* parameters to
+data is simcal, owned by hep-statistics ([simcal
+scripts](../../hep-statistics/references/core-stats-guide.md#skill-scripts)); this page is about detector constants
+only.
 
 ## General formulation
 
 Every in-situ calibration has three parts:
 
 - **Unknowns.** Per-channel constants `c_k` (a multiplicative gain, an additive offset, a shape parameter), often an
-  ordered chain of factors, each derived with the earlier ones applied (arXiv:0805.3170, sec. 5, Eq. 1, p. 58).
+  ordered chain of factors applied in sequence (arXiv:0805.3170, sec. 5, Eq. 1, p. 58). Each is derived with the
+  corrections it depends on applied, not only earlier ones (sec. 5.2.2, p. 64: strip-to-strip after attenuation).
 - **Reference sample.** Events whose expected response is known independently of `c_k`: a resonance mass, an
   ionization loss over a known path length (arXiv:0904.2226, sec. 5.2, pp. 20-21), a symmetry of the flux, a source
-  line, a beam of known energy, a track momentum. Where no test beam exists the atmosphere or the sky supplies it
+  line, a beam of known energy (FXT: the hadron-to-electron scale factor from pions of known beam energy;
+  arXiv:1207.4210, sec. 2.3, p. 8), a track momentum. Where no test beam exists the atmosphere or the sky supplies it
   (GND: muon rings; PDG RPP 2025, Particle detectors for non-accelerator physics, sec. 36.2.2, p. 9).
 - **Residual.** Measured minus expected response as a function of `c_k`, summed over the sample.
 
@@ -32,8 +34,8 @@ Every in-situ calibration has three parts:
 
 | # | Relation | Label | Validity and source |
 |---|---|---|---|
-| 1 | `Q_corr = Q_raw * F_1 * F_2 * ... * F_n` (drift, linearity, channel-to-channel, attenuation, absolute scale) | exact (definition) | each `F_i` is derived with `F_1..F_(i-1)` applied; arXiv:0805.3170, sec. 5, Eq. 1, p. 58 |
-| 2 | per-channel iteration `c_k <- c_k * x_ref / x_fit,k` (peak, mass or MPV fitted per channel) | approximate | converges when the channels in one entry are weakly coupled; arXiv:1306.2016, sec. 4.2.2, p. 16 |
+| 1 | `Q_corr = Q_raw * F_1 * F_2 * ... * F_n` (drift, linearity, channel-to-channel, attenuation, absolute scale) | exact (definition) | applied in sequence; each derived with what it depends on applied (S after L, A); arXiv:0805.3170, sec. 5, Eq. 1, p. 58, and sec. 5.2.2, p. 64 |
+| 2 | per-channel iteration `c_k <- c_k * x_ref / x_fit,k` (peak, mass or MPV fitted per channel) | approximate | quality depends on entries per channel and S/B (arXiv:1306.2016, sec. 4.2.2, p. 16); convergence needs weakly coupled channels (inference, not in the source) |
 | 3 | `chi2(p, q) = sum_tracks sum_meas ((m_ij - f_ij(p, q_j)) / sigma_ij)^2`, global `p`, local `q_j` | exact (objective) | arXiv:1403.2286, sec. 4, Eq. 1, p. 9 |
 | 4 | linearised normal equations `C a = b`, reduced to `C' dp = b'` by block algebra | exact for the linearised problem; iterate when corrections are not small | no information on `dp` is lost; arXiv:1403.2286, sec. 4, Eq. 2, pp. 9-10 |
 | 5 | constraints `f^T a = f_0` by Lagrange multipliers: `[[C, f], [f^T, 0]] [a, lambda] = [b, f_0]` | exact (linear constraints) | solved directly, no initial values; arXiv:hep-ex/0208021, sec. 2, Eq. 9, p. 4 |
@@ -44,8 +46,8 @@ Every in-situ calibration has three parts:
 ## Solvers
 
 - **Per-channel iteration** (relation 2): fit the reference peak in each channel, correct, repeat. It suits gains
-  where one entry touches one or a few channels: in the cited diphoton method each candidate enters the channel on
-  which one photon is centred (arXiv:1306.2016, sec. 4.2.2, p. 16).
+  where one entry touches one or a few channels: in the cited diphoton method each candidate enters the channels on
+  which its photons are centred (arXiv:1306.2016, sec. 4.2.2, p. 16).
 - **Iterative residual corrections** for positions: correct each element from its mean residual, refit, repeat. The
   residuals shrink, but the fitted parameters stay biased, more so when repeated, because each local fit used a
   wrong model; correlated parameters (a position shift and a drift-velocity shift) cannot be separated
@@ -57,10 +59,9 @@ Every in-situ calibration has three parts:
 - **Global iterative minimisation** of the total `chi2` by gradient descent, all parameters at once, with step-size
   control (relation 7; SPC: arXiv:1712.02739, sec. 5.2, pp. 6-7). FXT telescopes offer both an iterative per-detector
   `chi2` minimisation and a Millepede-II fit (arXiv:2011.12730, sec. 3.5, p. 9).
-- **Hierarchy and gauge.** Elements within a structure and the structures relative to each other can be ordered
-  steps (SPC: planes within a module first, then modules; arXiv:0904.2226, secs. 10.1-10.2, pp. 41-44). The global
-  frame is fixed by a reference element (FXT; arXiv:2011.12730, sec. 2.3.2, p. 6) or by zero mean shifts by
-  construction (SPC; arXiv:0904.2226, sec. 10.1, p. 44).
+- **Hierarchy and gauge.** Steps can be ordered, elements within a structure first (SPC; arXiv:0904.2226,
+  secs. 10.1-10.2, pp. 41-44). The global frame is fixed by a reference element (FXT; arXiv:2011.12730, sec. 2.3.2,
+  p. 6) or by zero mean shifts (SPC; arXiv:0904.2226, sec. 10.1, p. 44).
 
 ## Unconstrained modes and external constraints
 
@@ -80,18 +81,23 @@ gauge fixing by a reference plane; it does not discuss `chi2`-invariant deformat
 ## Convergence, bias and per-channel precision
 
 - **Convergence criterion, declared in advance:** the largest parameter change between successive iterations below
-  a threshold (arXiv:0904.2226, sec. 10.1, p. 44), or a `chi2` improvement test (relation 7): with `eps = 0` the
-  solver oscillates around the minimum, with `eps = 1` the step shrinks after a few iterations and it does not
-  converge (arXiv:1712.02739, sec. 5.2.1, pp. 7-8). Converged means numerically stable, not correct.
+  a threshold (arXiv:0904.2226, sec. 10.1, p. 44). Step-size control (relation 7) is not a stopping rule: with
+  `eps = 0` the solver oscillates around the minimum and converges more slowly than with the reference `eps = 0.5`,
+  with `eps = 1` the step shrinks after a few iterations and it does not converge (arXiv:1712.02739, sec. 5.2.1,
+  pp. 7-8). A parameter-change threshold is met trivially once halving has collapsed the step: check the step size
+  or gradient norm too. Converged means numerically stable, not correct.
 - **Bias.** Iterating on biased residuals reduces the residuals, not the bias (arXiv:hep-ex/0208021, sec. 1, p. 1).
   A symmetry method reaches a systematic floor set by how well the symmetry holds (material in front of the
   detector), not by statistics; ratios of the same method over successive periods cancel much of it, so the method
   serves to monitor stability and to refine constants from other methods (arXiv:1306.2016, sec. 4.2.1, p. 15).
 - **Per-channel precision** depends on the entries per channel and on the signal-to-background ratio of the
-  reference peak (arXiv:1306.2016, sec. 4.2.2, p. 16); the statistical term falls roughly as `1/sqrt(N_k)` until the
+  reference peak (arXiv:1306.2016, sec. 4.2.2, p. 16; FXT, per straw from the number of muon hits:
+  arXiv:astro-ph/0608641, sec. 4.2.2, p. 4); the statistical term falls roughly as `1/sqrt(N_k)` until the
   systematic floor (approximate). Quote both, per channel class, with the period needed to reach them.
-- **Validation.** Methods with different systematics are compared channel by channel before they are combined
-  (arXiv:1306.2016, sec. 4.2, p. 15). A quantity used in the derivation no longer validates it.
+- **Validation.** Methods with different systematics are compared channel by channel to validate their precision
+  estimates, together with simulation and the pre-calibration (arXiv:1306.2016, sec. 4.2, p. 15); compare them
+  before combining. Starting values and sets that enter the combination count as used in the derivation: a
+  comparison against them tests consistency, not precision.
 
 <!-- example: experiment-specific illustration (CMS ECAL, LHC pp at 7 TeV, 2011; arXiv:1306.2016) -->
 CMS ECAL intercalibration: phi-symmetry with about 10^8 events is limited by a systematic 1.5% in the central
@@ -139,18 +145,19 @@ alignment stops when no parameter moves by more than 0.01 um (1 urad), typically
 Constants per channel: `t0`, walk, effective light speed, attenuation length.
 
 - **Walk** `t - t_ref = alpha + beta / sqrt(A)` from a laser with a variable attenuator; the form underestimates the
-  walk near threshold, and residuals are corrected iteratively (FXT; arXiv:2004.10339, sec. 3.1.3, Eq. 2, p. 10). A
+  walk near threshold, where the source drops the (background-dominated) hits; residuals at higher pulse heights are
+  corrected iteratively with the same form (FXT; arXiv:2004.10339v1, sec. 3.1.3, Eq. 2, p. 10). A
   per-channel time-versus-charge map from a laser diffuser carries the offset and the walk together (UGD;
   arXiv:1307.0162, sec. 3.1.8, pp. 25-26).
 - **Effective light speed and left-right offset** of a bar read at both ends from cosmic rays:
   `t_L - t_R = -2x/v`, bounded by `+-L/v` (exact for a uniform bar), so the width gives `v` and the centre the offset
-  (FXT; arXiv:2004.10339, sec. 3.1.4, Eq. 3, p. 10).
+  (FXT; arXiv:2004.10339v1, sec. 3.1.4, Eq. 3, p. 10).
 - **Attenuation length** from `ln(A_L/A_R) = 2x/mu = -v (t_L - t_R)/mu` (approximate: one exponential length;
-  arXiv:2004.10339, sec. 3.1.5, Eq. 4, p. 11). In SPC the two-end light asymmetry is calibrated on the ground with
+  arXiv:2004.10339v1, sec. 3.1.5, Eq. 4, p. 11). In SPC the two-end light asymmetry is calibrated on the ground with
   cosmic muons and again in orbit with cosmic nuclei against the extrapolated track position
   (arXiv:0904.2226, sec. 5.3, pp. 24-25).
 - **Large volumes** (UGD): synchronisation signals plus LED or laser flashers at known times (PDG RPP 2025,
-  sec. 36.3.2, p. 20); see [neutrino astronomy](neutrino-astronomy.md).
+  sec. 36.3.2, p. 20); see [timing detectors](timing-detectors.md#calibration-and-diagnostics).
 
 ### Gas gain equalization
 
@@ -160,9 +167,10 @@ Constants per channel: `t0`, walk, effective light speed, attenuation length.
   sec. 1.1, p. 2).
 - **MIP pulse height** per straw from muons, plus the gain dependence on gas density, measured on the same muons
   and used to normalise runs to standard temperature and pressure; an X-ray source line sets the energy scale
-  (FXT; arXiv:astro-ph/0608641, secs. 4.2.2-4.2.4, p. 4).
-- MRPC and muon-chamber gain equalization were not separately sourced; no chamber-specific procedure is stated for
-  them.
+  (FXT, a beam test; arXiv:astro-ph/0608641, secs. 4.2.2-4.2.4, p. 4). The per-straw factors there are mostly
+  preamplifier gain, the gas-gain part being small (sec. 4.2.2, p. 4), so this equalizes the whole chain; it is not
+  a gas-gain equalization on its own.
+- MRPC and muon-chamber gain equalization: not sourced (gap); no procedure is stated.
 
 <!-- example: experiment-specific illustration (AMS-02 TRD beam-test prototype; arXiv:astro-ph/0608641, p. 4) -->
 With 5000 muon hits per tube the pulse-height intercalibration error is below 2%; at the beam-test operating point a
@@ -181,30 +189,29 @@ With 5000 muon hits per tube the pulse-height intercalibration error is below 2%
 
 ### Alignment and momentum scale
 
-Track-based alignment (Millepede-II, General Broken Lines, iterative `chi2`), chamber alignment with optical,
-acoustic and photogrammetric positioning, and the momentum scale from resonances or range versus curvature are in
+Track and chamber alignment (Millepede-II, General Broken Lines, iterative `chi2`) and the momentum scale:
 [in-situ alignment and momentum scale](in-situ-alignment-and-momentum-scale.md).
 
 ## Methods
 
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
-| many channels, a flux symmetric in one coordinate | symmetry equalization | symmetry holds to the target precision; rate | fixes within a class only; material breaks the symmetry (floor) | COL |
+| many channels, a flux symmetric in one coordinate | symmetry equalization | symmetry holds to the target precision, or (monitoring by ratios) its breaking is stable between periods; rate | fixes within a class only; material breaks the symmetry (floor) | COL |
 | a copious narrow resonance | per-channel peak iteration | enough entries per channel; S/B | coupled channels converge slowly; background shape biases the peak | COL |
 | tracks with a momentum measurement | `E/p` | track momentum scale known; isolation | bremsstrahlung; the isolation cut biases hadron `E/p` | COL |
 | MIP (muons, protons, nuclei) | MPV equalization, path-length corrected | MIP selection (cutoff, beam, cosmics) | mean instead of MPV; thickness dependence | COL, FXT, SPC, UGD |
-| a radioactive source or gas | source scan; 83mKr | access to the volume | electronics and gas gain mixed without a pulser | COL |
+| a radioactive source or gas | source scan; 83mKr | access to the volume | electronics and gas gain mixed without a pulser | COL, FXT |
 | an absolute scale from a beam | transfer by source response or calibration detector | identical method in both setups | environment differences (field, temperature, source decay) | COL, UGD |
 | two-ended bars | cosmic `t_L - t_R`, `ln(A_L/A_R)`; laser walk scan | track or position reference | walk form near threshold; non-exponential attenuation | FXT, SPC, UGD |
 | RICH optics | `dtheta_C(phi)` or ring-centre offsets; index from high-p tracks | tracks; unique mirror assignment | photons with two mirror pairs; index drift with temperature and pressure | COL, FXT |
 | no test beam | muon rings, sky references | known muon emission | atmosphere-dependent throughput | GND |
 
-One environment only: symmetry equalization, diphoton resonances and electron `E/p` exist in COL alone (they need
-collision rates and symmetries); muon rings are GND. Source scans, radioactive gas and the refractive index from data
-were sourced in COL only. Environment-specific references: [space-based direct
-detection](space-based-direct-detection.md), [neutrino astronomy](neutrino-astronomy.md), [noble-liquid, neutrino
-and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
-[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md).
+Sourced in one environment only: minimum-bias symmetry equalization (COL), diphoton resonances and electron `E/p`
+(COL; they need a diphoton rate or a momentum measurement, not a collider), muon rings (GND), and source scans,
+radioactive gas and the refractive index from data (COL). Environment-specific references: [space-based direct
+detection](space-based-direct-detection.md), [neutrino astronomy](neutrino-astronomy.md), [noble-liquid, neutrino and
+rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md), [imaging atmospheric
+Cherenkov](imaging-atmospheric-cherenkov.md).
 
 ## Distinctive but generalizable features
 
@@ -221,15 +228,17 @@ and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
 - **Data sample:** the strongest reference available per environment (resonances COL; nuclei by cutoff SPC; cosmic
   muons UGD and FXT; muon rings GND).
 - **Transfers:** the formulation, solvers and mode analysis transfer to any detector; the collider references
-  (minimum-bias symmetry, W, Z, pi0) do not.
+  (minimum-bias symmetry, W, Z) were sourced in COL only; pi0 needs a hadronic flux, not a collider.
 
 ## Common misconceptions and failure modes
 
 - **A converged solution taken as a correct one.** Convergence is numerical; modes and biases survive it.
 - **Iterating residual corrections to remove a bias.** It removes residuals, not the bias.
 - **A symmetry method used as an absolute calibration.** It fixes constants within a symmetry class only.
-- **Electronics and gas or light-yield gains mixed.** Separate them with a pulser or charge injection first.
-- **One reference sample per instance.** A second sample with different systematics is the only check.
+- **Electronics and gas or light-yield gains mixed.** Separate them with a pulser or charge injection when the two
+  vary independently in time; a muon equalization of the whole chain is fine when called that.
+- **One reference sample per instance.** A second sample with different systematics is the strongest check; two
+  methods on the same sample do not count as two samples.
 - **Collider references stated as general.** Pseudorapidity rings, W and Z samples and minimum-bias symmetry are COL.
 
 ## Deliverables
@@ -243,13 +252,16 @@ and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
 
 ## Tool hooks
 
-No script implements these solvers yet. A tool built on this page takes per-channel peak positions (or residual
-sums) with uncertainties and entries, the reference value, the chain position and the declared convergence
-criterion; it returns `c_k` with statistical uncertainties, the iteration count, and the list of unconstrained
-modes. Units: gains dimensionless and normalised to a mean of one per class; offsets in the unit of the measured
-quantity. **Negative control:** inject a known per-channel pattern plus a global mode (a common scale, a common
-shift); the tool must recover the pattern and report the mode as unconstrained, not fit it. Statuses: `converged`,
-`not-converged`, `unconstrained-mode`, `insufficient-entries`. Stability across periods:
+No script implements these solvers yet. A tool built on this page takes per-channel peak positions (or residual sums)
+with uncertainties and entries, the reference value, the chain position and the declared convergence criterion; it
+returns `c_k` with statistical uncertainties and the systematic floor (or `floor-not-estimated`), the period, the
+iteration count, and the list of unconstrained modes. Units: gains dimensionless and normalised to a mean of one per
+class; offsets in the unit of the measured quantity. **Negative controls,** run before normalisation: (a) relative
+reference (a symmetry class, time differences): inject a per-channel pattern plus a common scale or shift; the tool
+recovers the pattern and reports the common mode as `unconstrained-mode`, not fitted; (b) absolute reference (a
+resonance mass, a known `x_ref`): an injected common scale is recovered within its uncertainty. Statuses form a set:
+`converged` or `not-converged`, plus `unconstrained-mode` (naming the mode) and `insufficient-entries` (below a stated
+minimum per channel); `converged` alone is not allowed while a mode is free. Stability across periods:
 `stability_monitor.py` ([calibration and alignment](calibration-and-alignment.md#monitoring-stability-over-time)).
 
 ## Environment coverage
@@ -259,20 +271,20 @@ shift); the tool must recover the pattern and report the mode as unconstrained, 
 | general formulation | arxiv_1306.2016 | arxiv_1207.4210 | arxiv_0904.2226 | arxiv_0805.3170 | pdg_2025_particle-detectors-for-non-accelerator-physics | gap |
 | solvers | arxiv_hep-ex_0208021, arxiv_1403.2286 | arxiv_2011.12730 | arxiv_1712.02739 | gap | gap | gap |
 | unconstrained modes | arxiv_hep-ex_0208021, arxiv_2007.07624 | arxiv_2011.12730 (gauge only) | gap | gap | gap | gap |
-| convergence, bias, precision | arxiv_hep-ex_0208021, arxiv_1306.2016 | arxiv_astro-ph_0608641 | arxiv_0904.2226, arxiv_1712.02739 | gap | gap | gap |
-| ECAL | arxiv_1306.2016 | gap | arxiv_1901.00734, arxiv_0904.2226 | gap | n/a: no ECAL; the atmosphere's muon-ring calibration is in [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
-| HCAL | arxiv_1203.1302, arxiv_1806.02129 | arxiv_1207.4210 | gap | arxiv_0805.3170 | n/a: arrays have no hadron calorimeter | gap |
+| convergence, bias, precision | arxiv_hep-ex_0208021, arxiv_1306.2016 | arxiv_astro-ph_0608641 (per-channel precision only) | arxiv_0904.2226, arxiv_1712.02739 | gap | gap | gap |
+| ECAL | arxiv_1306.2016 | gap | arxiv_1901.00734, arxiv_0904.2226 | gap | n/a: no ECAL; the IACT optical-throughput calibration with muon rings is in [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
+| HCAL | arxiv_1203.1302, arxiv_1806.02129 | arxiv_1207.4210 | gap | arxiv_0805.3170 | gap (no source read) | gap |
 | TOF and timing | [timing detectors](timing-detectors.md#calibration-and-diagnostics) | arxiv_2004.10339 | arxiv_0904.2226 | arxiv_1307.0162, pdg_2025_particle-detectors-for-non-accelerator-physics | [timing detectors](timing-detectors.md#calibration-and-diagnostics) (hybrid synchronisation) | gap |
-| gas gain | arxiv_1709.02743, arxiv_nucl-ex_0101013 | arxiv_astro-ph_0608641 (beam test of a space TRD) | gap | gap | n/a: no gas chamber in the arrays read | gap |
-| RICH | arxiv_1211.6759 | arxiv_1809.04026 | gap | gap | n/a: no RICH | gap |
-| alignment, momentum scale | [in-situ alignment and momentum scale](in-situ-alignment-and-momentum-scale.md) | same | same | same | n/a: no tracker | gap |
+| gas gain | arxiv_1709.02743, arxiv_nucl-ex_0101013 | arxiv_astro-ph_0608641 (test beam; electronics plus gas gain) | gap | gap | gap (no source read) | gap |
+| RICH | arxiv_1211.6759 | arxiv_1809.04026 | gap | gap | gap (no source read) | gap |
+| alignment, momentum scale | [in-situ alignment and momentum scale](in-situ-alignment-and-momentum-scale.md) | same | same | same | same | gap |
 
 ## Citations
 
-Full entries are in the hep-detector [bibliography](detector-principles-bibliography.md) and its split files
-(section "In-situ calibration and alignment"). Sources (the arXiv
-version was read where the paper is paywalled): arXiv:1306.2016, arXiv:0904.2226, arXiv:0805.3170,
-arXiv:hep-ex/0208021 (preprint), arXiv:1403.2286, arXiv:1712.02739, arXiv:2011.12730, arXiv:2007.07624,
-arXiv:0911.4022, arXiv:astro-ph/0608641, arXiv:1901.00734, arXiv:1203.1302, arXiv:1806.02129, arXiv:1207.4210,
-arXiv:2004.10339, arXiv:1307.0162, arXiv:1709.02743, arXiv:nucl-ex/0101013 (preprint), arXiv:1211.6759,
-arXiv:1809.04026; PDG RPP 2025, Particle detectors for non-accelerator physics.
+Full entries are in the hep-detector [bibliography](detector-principles-bibliography.md) and its split files (section
+"In-situ calibration and alignment"). Page numbers are PDF page indices of the arXiv version read (printed folios can
+differ). Sources (the arXiv version was read where paywalled): arXiv:1306.2016, arXiv:0904.2226,
+arXiv:0805.3170, arXiv:hep-ex/0208021 (preprint), arXiv:1403.2286, arXiv:1712.02739, arXiv:2011.12730,
+arXiv:2007.07624, arXiv:0911.4022, arXiv:astro-ph/0608641, arXiv:1901.00734, arXiv:1203.1302, arXiv:1806.02129,
+arXiv:1207.4210, arXiv:2004.10339, arXiv:1307.0162, arXiv:1709.02743, arXiv:nucl-ex/0101013 (preprint),
+arXiv:1211.6759, arXiv:1809.04026; PDG RPP 2025, Particle detectors for non-accelerator physics.
