@@ -5,7 +5,7 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-- **hep-detector bibliography split files.** `detector-principles-bibliography-calibration.md`, `-particle-identification.md` and `-radiation.md` hold the sources of the new Stage C reference pages in the format of the annotated bibliography (25 KB already), with apparatus sources inside example blocks; the main bibliography lists them, and `event-reconstruction.md` and `detector-design-principles.md` link them.
+- **hep-detector bibliography split files.** `detector-principles-bibliography-calibration.md`, `detector-principles-bibliography-particle-identification.md` and `detector-principles-bibliography-radiation.md` hold the sources of the new Stage C reference pages in the format of the annotated bibliography (25 KB already), with apparatus sources inside example blocks; the main bibliography lists them, and `event-reconstruction.md` and `detector-design-principles.md` link them.
 - **charge_confusion_rate.py, template and control modes** (sci-fixes CHARGECONF-TEMPLATE-MAXIMUM S1,
   CHARGECONF-TEMPLATE-STATUS S2, CHARGECONF-TEMPLATE-IDENTIFICATION S2, CHARGECONF-CONTROL-MC-SIGN S1; advisories
   SFA-2026-044 to SFA-2026-047; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
