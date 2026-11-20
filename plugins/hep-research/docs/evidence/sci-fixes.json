@@ -11795,6 +11795,33 @@
    ],
    "gaps": [],
    "note": "fix commit 31fff271aaabcb36f4ebe00a5f6185f5a5522de8 (docs:); docstring only; ruff 0.16.10 and mypy 2.4.0 on core and contracts pass"
+  },
+  {
+   "id": "CONTRACTS-SURVIVAL-CHARGE-CHANGING",
+   "title": "contracts vocab: survival is crossing without an inelastic or, for a charge-tagged selection, a charge-changing interaction, in effects.json and core.json alike (CHK-AU-02-07; follows F-XREF-3-CORRECTION-CHAIN-CHARGE-CHANGING)",
+   "severity": "doc",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "H. S. Ahn et al., Measurements of cosmic-ray secondary nuclei at high energies with the first flight of the CREAM balloon-borne experiment, arXiv:0808.1718, source arxiv_0808.1718",
+     "locator": "sec. 5, p. 17 (charge-changing interactions in the instrument and the atmosphere; charge cuts remove fragmented events)",
+     "read": "2026-11-20"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-measurement/references/correction-chain.md",
+     "locator": "survival (fixed by F-XREF-3-CORRECTION-CHAIN-CHARGE-CHANGING)",
+     "read": "2026-11-20"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-theory/references/nuclear-cross-sections.md",
+     "locator": "## Kinds of cross section",
+     "read": "2026-11-20"
+    }
+   ],
+   "gaps": [],
+   "note": "fix commit 7bed0d582c952856d5469c236d77a87b56d3d7e3 (docs:); definition text only, contracts 3.28.0 and catalog 1.1.0 unchanged; closes the gap recorded in F-XREF-3-CORRECTION-CHAIN-CHARGE-CHANGING, which is not edited"
   }
  ],
  "superseded": [
