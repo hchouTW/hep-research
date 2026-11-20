@@ -70,15 +70,15 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 - **Efficiency**: geometric gaps (cracks, support structures, feet), chamber
   inefficiency, matching and reconstruction inefficiency, quoted **per type and versus
   the detector's coordinates and momentum**; the binning variables and the reference
-  sample are parameters to state. At a collider (COL): versus `pT` and `eta`, with a
-  tag-and-probe from `J/psi` (low `pT`) and `Z -> mu mu` (arXiv:1206.4071, sec. 5.1, Figs. 11-12, PDF pp. 20-23;
+  sample are parameters to state. At a collider (COL): versus `pT` (Fig. 11) and `eta` (Fig. 12), with a
+  tag-and-probe from `J/psi` (low `pT`) and `Z -> mu mu` (arXiv:1206.4071, sec. 5.1, PDF pp. 20-23;
   [triggers luminosity pileup](triggers-luminosity-pileup.md#tag-and-probe-efficiency-measurement)). Muon counters of
   ground-based and underground arrays and the outer muon vetoes of underground detectors
   (GND, UGD; counters: [ground-based detection arrays](ground-based-detection-arrays.md); vetoes: PDG RPP 2025,
   sec. 36.3.1) need a reference sample of their own: see [veto-efficiency measurement](non-collider-muon-detection.md#veto-efficiency-measurement).
 - **Rate capability**: drift tubes (long drift, space-charge and occupancy limits),
-  cathode-strip chambers (multiwire chambers read on cathode strips: wire pitch and space charge limit
-  rate as for an MWPC), RPCs (fast, rate
+  cathode-strip chambers (MWPCs read on cathode strips: wire pitch and space charge limit
+  rate), RPCs (fast, rate
   limited by resistivity), GEM/Micromegas (high rate, discharge risk)
   ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 - **Charge sign**: from curvature direction; at high momentum the sagitta shrinks
@@ -122,7 +122,7 @@ arXiv:0805.3170, sec. 2.4.1, p. 18).
 
 <!-- example: source citation (simulated case in PDG RPP 2025 and one apparatus) -->
 A 1 TeV/c muon crossing 3 m of iron (simulation): most probable loss 8 GeV, full width at half maximum 9 GeV/c,
-mean loss 23 GeV (PDG RPP 2025, sec. 34.6, p. 31, and Fig. 34.25, p. 32). A collider muon reconstruction (ATLAS) combining
+mean loss 23 GeV (PDG RPP 2025, sec. 34.6, text p. 31, Fig. 34.25 on p. 32). A collider muon reconstruction (ATLAS) combining
 the parametrized and calorimeter-measured loss reaches a precision of about 30 MeV on the mean loss for 50 GeV
 muons (arXiv:1603.05598, sec. 3.2, p. 5).
 <!-- /example -->
@@ -132,8 +132,8 @@ muons (arXiv:1603.05598, sec. 3.2, p. 5).
 The muon part of charge-sign confusion; mechanisms, the three measurement routes and the handoff to hep-measurement
 are in [charge confusion](charge-confusion.md#how-hep-detector-measures-the-rate).
 
-- **Significance cut**: require `|q/p| / sigma(q/p)` above a threshold fixed without the measured ratio (in
-  simulation), then check that the measured ratio is flat above it within its errors, as a cross-check only (UGD;
+- **Significance cut**: require `|q/p| / sigma(q/p)` above a threshold fixed in simulation, blind to the measured
+  ratio, then check that the measured ratio is flat above it within its errors, as a cross-check only (UGD;
   flat above the cut in arXiv:0705.3815, sec. III B 3, p. 5).
 - **Fit agreement**: take the combined (tracker plus muon system) fit only when both fits give a momentum above the
   crossover where the muon system improves the resolution and its `q/p` agrees with the tracker-only fit within a
@@ -148,7 +148,7 @@ are in [charge confusion](charge-confusion.md#how-hep-detector-measures-the-rate
   cuts on the tag half; multi-muon events are the background, so require exactly one muon per half (COL only in the
   sources found; arXiv:0911.4994, sec. 7, PDF p. 25).
 - **Resonance same-sign pairs**: the pair model of [Relations](#relations), both legs fitted together with the
-  same-sign background as an additive term of the expected count (COL only: it needs abundant neutral resonances;
+  same-sign background as an additive term of the fitted expectation (COL only: it needs abundant neutral resonances;
   shown for `Z -> ee` in arXiv:1908.00005, sec. 9.2, p. 47). The route with a beam of known sign (FXT) is a **gap**: no source was found.
 
 <!-- example: source citation -->
@@ -184,8 +184,8 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
   vertex/impact parameter, and back-to-back topology. Outside a collider the same muons
   are the background to reject with a veto or an up-going selection (neutrino telescopes,
   PDG RPP 2025, sec. 36.3.2; [neutrino astronomy](neutrino-astronomy.md#backgrounds)), the
-  source of cosmogenic backgrounds, whose short-lived part a veto on the time correlation with the crossing muon
-  removes and whose long-lived isotopes need other mitigation (UGD; sec. 36.6.5, pp. 54-55), or the calibration source of a surface array
+  source of cosmogenic backgrounds, whose short-lived part a veto on time correlation with the crossing muon
+  removes but whose long-lived isotopes need other mitigation (UGD; sec. 36.6.5, pp. 54-55), or the calibration source of a surface array
   ([ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
 - **Hadron mis-identification vs fake**: a pion identified as a muon (real object, wrong identity) is
   not a fake track
@@ -235,7 +235,7 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
 - **One "muon efficiency."** Reconstruction, identification, isolation, and trigger
   efficiencies differ, and each is conditional on the previous
   ([performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md)).
-- **Trusting `chi^2` for alignment.** Weak modes leave the fit quality nearly unchanged; check
+- **Trusting `chi^2` for alignment.** Weak modes change the fit quality only slightly; check
   `q/p` versus `q*eta` and mass versus `eta`, `phi`.
 - **Same-sign fraction read as charge flip only.** Backgrounds also contribute; correct
   for them before quoting charge misID.
@@ -254,7 +254,7 @@ switch" (CMS): the global fit is used when both fits give `pT` above 200 GeV/c a
   exact only for unweighted (or frequency-weighted), background-free, independent probes, approximate with positive
   sampling weights (Kish effective size); a resonance sample with any background needs the simultaneous pass/fail
   fit of [triggers luminosity pileup](triggers-luminosity-pileup.md#tag-and-probe-efficiency-measurement),
-  with the tag-probe correlations handled and the method bias measured in simulation; and the trigger matching definition.
+  with tag-probe correlations handled and the method bias measured versus MC truth; and the trigger matching definition.
 - The high-`pT` alignment/field validation (mass and `q/p` versus `q*eta`, cosmic split).
 - The background model for punch-through, decay-in-flight, accidental, cosmic.
 - The momentum-scale reference (resonance or range), the absorber energy-loss treatment (mean or most probable,
@@ -297,9 +297,9 @@ Cells give source IDs (PDG = PDG RPP 2025, passage of particles through matter).
 | Muon-chamber alignment | arxiv_0911.4022 | gap | n/a: no muon system in orbit found | gap | n/a: counters, not tracking chambers | gap |
 | Momentum scale | arxiv_1603.05598 | gap | gap | arxiv_0805.3170 | n/a: no momentum measurement | gap |
 | Energy loss in absorbers | PDG; arxiv_1603.05598 | gap | n/a: absorber-free spectrometers | PDG; arxiv_0805.3170 | gap | gap |
-| `q/p` significance, fit agreement | arxiv_1206.4071 | gap | gap ([space-based direct detection](space-based-direct-detection.md#rigidity-not-energy-is-the-natural-variable---for-a-spectrometer): MDR only) | arxiv_0705.3815 | n/a: no charge sign | n/a |
+| `q/p` significance, fit agreement | arxiv_1206.4071 | gap | gap ([space-based direct detection](space-based-direct-detection.md#rigidity-not-energy-is-the-natural-variable---for-a-spectrometer): MDR only, no cut) | arxiv_0705.3815 | n/a: no charge sign | n/a |
 | Field reversal | gap | gap | gap | arxiv_0705.3815 | n/a: no charge sign | n/a |
-| Weak-mode curvature bias | arxiv_1403.2286 (inner tracker; transfer) | gap | gap | arxiv_0705.3815 (cancelled by field reversal) | n/a | n/a |
+| Weak-mode curvature bias | arxiv_1403.2286 (inner tracker; transfer) | gap | gap | arxiv_0705.3815 (field reversal cancels it) | n/a | n/a |
 | Split cosmic halves | arxiv_0911.4994 | gap | gap | gap | n/a | n/a |
 | Resonance same-sign pairs | arxiv_1908.00005 | n/a: no abundant neutral resonance | n/a: same | n/a: same | n/a | n/a |
 | Known-sign beam | n/a | gap | n/a | n/a | n/a | gap |
@@ -308,5 +308,5 @@ Cells give source IDs (PDG = PDG RPP 2025, passage of particles through matter).
 ## Citations
 
 Inline citations give the arXiv number and a locator (p. is the printed page; PDF p. the PDF page where it differs); annotated entries are in the
-[muon-systems bibliography](detector-principles-bibliography-muon-systems.md), a split file of the
+[muon-systems bibliography](detector-principles-bibliography-muon-systems.md), a new split file of the
 [bibliography](detector-principles-bibliography.md).
