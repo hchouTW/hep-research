@@ -69,8 +69,8 @@ detectors at accelerators*, sec. 35.6.5); PDFs derived in data improve on simula
 - **Tag-and-probe on resonances (`COL` only).** One leg passes a tight identification, the opposite-charge probe is
   selected with no PID requirement (arXiv:1803.00824 sec. 4); signal PDFs from `Z -> ee` and `J/psi -> ee`
   (arXiv:1908.00005 sec. 6.2); a purity cut on the probe distorts the PDF (below).
-- **Charge- and velocity-selected cosmic-ray data (`SPC`; also ground-level data).** An instrument in an untagged flux
-  selects control samples from flight or ground-level data with its other subdetectors (arXiv:1706.10182 sec. 3): the
+- **Charge- and velocity-selected cosmic-ray data (`SPC`; also sea-level data).** An instrument in an untagged flux
+  selects control samples from flight or sea-level data with its other subdetectors (arXiv:1706.10182 sec. 3): the
   rigidity sign (negative-rigidity muons as the `beta ~ 1` reference, in sea-level cosmic-ray data,
   arXiv:hep-ex/9805001 sec. 3.1), a velocity cut from TOF (same) or a Cherenkov detector (arXiv:0808.1718 sec. 4.2),
   and a velocity-dependent charge cut in an independent detector (arXiv:1407.1657 sec. 3.3). Cut on velocity only in
@@ -288,12 +288,12 @@ imperfect ion-tail cancellation gives positive and negative tracks different tra
 | Per-layer PDFs from control samples | arxiv_1709.02743, arxiv_1803.00824 | arxiv_astro-ph_0608641 (layer-averaged PDF) | arxiv_1706.10182 | gap | n/a: no per-layer samples of one particle; see [ground-based detection arrays](ground-based-detection-arrays.md) | gap |
 | `V0` and conversion samples | arxiv_1709.02743 (purity), arxiv_1803.00824 | gap: tagged beams instead | n/a: no `V0` source | gap | n/a: as above | gap |
 | Tag-and-probe on resonances | arxiv_1803.00824, arxiv_1908.00005 | n/a: tagged beams instead | n/a: no resonances | gap | n/a: as above | gap |
-| Charge- and velocity-selected cosmic-ray data | gap (analogue: flight-direction-selected cosmic muons for the MPV curve, arxiv_1709.02743) | n/a: beam is tagged | arxiv_1706.10182, arxiv_hep-ex_9805001 (sea level), arxiv_1407.1657, arxiv_0808.1718 | gap | n/a: as above | n/a: beams are tagged |
+| Charge- and velocity-selected cosmic-ray data | gap (analogue only: flight-direction-selected cosmic muons, MPV curve, arxiv_1709.02743) | n/a: beam is tagged | arxiv_1706.10182, arxiv_hep-ex_9805001 (sea level), arxiv_1407.1657, arxiv_0808.1718 | gap | n/a: as above | n/a: beams are tagged |
 | Tagged beams and transfer to the instrument | arxiv_1709.02743 (test beam) | arxiv_astro-ph_0608641, arxiv_physics_0402131 | gap | gap | n/a: as above | gap |
 | Binning and parameterisation | arxiv_1803.00824, arxiv_1908.00005, arxiv_1709.02743 (momentum bins) | arxiv_astro-ph_0608641 | arxiv_1706.10182 | gap | n/a: as above | gap |
 | Layer correlations | arxiv_1709.02743, arxiv_1803.00824, pdg_2025_particle-detectors-at-accelerators | arxiv_physics_0402131 | arxiv_1706.10182 | gap | n/a: as above | gap |
 | Variable number of layers | arxiv_1709.02743 | arxiv_astro-ph_0608641 | arxiv_1706.10182 | gap | n/a: as above | gap |
-| Control-sample contamination | arxiv_1709.02743, arxiv_1803.00824, arxiv_1908.00005 | arxiv_astro-ph_0608641 (possible veto inefficiency) | arxiv_1407.1657, arxiv_hep-ex_9805001 | gap | n/a: as above | gap |
+| Control-sample contamination | arxiv_1709.02743 (purity), arxiv_1803.00824, arxiv_1908.00005 | arxiv_astro-ph_0608641 (veto may be inefficient) | arxiv_1407.1657, arxiv_hep-ex_9805001 | gap | n/a: as above | gap |
 | `multisample_pid.py` input format | n/a: plugin format | n/a | n/a | n/a | n/a | n/a |
 
 `V0` and conversion samples and tag-and-probe are sourced only at colliders; charge- and velocity-selected cosmic-ray
