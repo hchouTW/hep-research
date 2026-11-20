@@ -17,7 +17,7 @@ their charge-antisymmetric bias and the constraints against them are in
 | # | Relation | Label | Validity and source |
 |---|---|---|---|
 | 1 | `chi2(p, q) = sum_tracks sum_meas ((m_ij - f_ij(p, q_j)) / sigma_ij)^2`, then `C' dp = b'` | exact objective; linearised solve, iterated if corrections are large | arXiv:1403.2286, sec. 4, Eqs. 1-2, PDF p. 9 |
-| 2 | rigid-body hit correction `x_a = x + dX - y theta_Z`, `y_a = y + dY + x theta_Z`, `z_a = z + dZ - x theta_Y + y theta_X` | approximate (first order in the rotations; rotations about the origin of the xy frame in the plane where the sensor nominally sits, `x`, `y` global hit coordinates; for a pivot off that plane add `+ z theta_Y` to `x_a` and `- z theta_X` to `y_a`) | arXiv:1712.02739, sec. 5.2, Eqs. 2-4, p. 6 |
+| 2 | rigid-body hit correction `x_a = x + dX - y theta_Z`, `y_a = y + dY + x theta_Z`, `z_a = z + dZ - x theta_Y + y theta_X` | approximate (first order in the rotations; rotations about the origin of the xy frame in the plane where the sensor nominally sits, `x`, `y` global hit coordinates; for a pivot off that plane, at `z_p`, add `+ (z - z_p) theta_Y` to `x_a` and `- (z - z_p) theta_X` to `y_a`, with `x`, `y` also taken relative to the pivot) | arXiv:1712.02739, sec. 5.2, Eqs. 2-4, p. 6 |
 | 3 | residual in a plane `= dx + dz tan(theta)` for a horizontal shift `dx` and a vertical shift `dz` | approximate (small deviations) | arXiv:0904.2226, sec. 10.1, Fig. 27, p. 42 |
 | 4 | General Broken Lines: kinks at scatterers give linear equations whose matrix solves in time linear in the number of measurements, with the full covariance along the track | exact for the linearised track model | arXiv:1201.4320, abstract and sec. 1, p. 1 |
 | 5 | momentum scale double ratio `(P_range / P_fit)_data / (P_range / P_fit)_MC` | approximate (range scale known to its own systematic) | arXiv:0805.3170, sec. 2.4.1, p. 18 |
@@ -28,7 +28,7 @@ their charge-antisymmetric bias and the constraints against them are in
 ## Track-based alignment
 
 - **Global fit.** Millepede-II solves all alignment parameters with all track parameters eliminated (relation 1); the
-  track model needs multiple scattering, which General Broken Lines provide (COL: arXiv:1403.2286, sec. 4.1,
+  track model needs multiple scattering, which General Broken Lines provide (COL: arXiv:1403.2286 printed pages 8-9, sec. 4.1,
   PDF pp. 10-11; arXiv:1201.4320, sec. 1, p. 1). FXT telescopes prealign by correlating each plane with a reference
   plane, track with loose cuts, then run an iterative `chi2` minimisation or Millepede-II, with
   straight-line, kinked or GBL tracks (arXiv:2011.12730, secs. 3.3 and 3.5, pp. 8-9).
@@ -78,9 +78,10 @@ resolution of the chambers; hence the two track-based approaches above.
 ## Momentum scale
 
 - **Resonances and cosmic muons** (COL): the dimuon mass constraints of the J/psi and the Z, in kinematic bins,
-  calibrate the scale at low and intermediate `pT`; at high momentum cosmic-ray muons give the scale
-  bias from the position of the minimum of the `q/pT` spectrum against simulation with injected biases (cosmics
-  endpoint method) (arXiv:1206.4071, sec. 6, PDF p. 27, and sec. 6.2.2, PDF pp. 38-39;
+  calibrate the scale at low and intermediate `pT`; at high momentum cosmic-ray muons give the additive
+  curvature bias `kappa` (`q/pT -> q/pT + kappa`, equation 9 of the source; a multiplicative scale leaves the
+  minimum at zero and is not measured this way) from the position of the minimum of the `q/pT` spectrum against
+  simulation with injected biases (cosmics endpoint method) (arXiv:1206.4071, sec. 6, PDF p. 27, and sec. 6.2.2, PDF pp. 38-39;
   arXiv:1603.05598, abstract, p. 1). The extrapolation between the resonances is part of the uncertainty
   ([calibration standards](calibration-and-alignment.md#calibration-standards-and-their-pitfalls)); so is any
   extrapolation beyond the anchors used.
@@ -102,11 +103,11 @@ detector: the range-to-curvature double ratio is about 1.01, with a 2% systemati
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
 | many elements, tracks with scattering | Millepede-II with GBL | track model with material; constraints on global modes | weak modes left free; linearisation with large corrections | COL, FXT |
-| straight tracks, scattering negligible, any number of elements | iterative global `chi2` (gradient descent); residual iteration only as prealignment | global frame fixed (reference element or zero-mean constraints); shear and `z` scale fixed too (a second reference element, a survey, or zero-mean-shear and zero-mean-`z`-scale constraints) | global, shear, `z`-scale and weak modes left free; step-size control (relations 7, 8); bias of residual iteration | SPC, FXT |
+| straight tracks with negligible scattering (SPC), or straight, kinked or GBL tracks (FXT); any number of elements | iterative global `chi2` (gradient descent in SPC; Minuit2 refits minimising the summed track `chi2` in FXT); residual iteration only as prealignment | global frame fixed (reference element or zero-mean constraints); shear and `z` scale fixed too (a second reference element, a survey, or zero-mean-shear and zero-mean-`z`-scale constraints) | global, shear, `z`-scale and weak modes left free; step-size control (relations 7, 8); bias of residual iteration | SPC, FXT |
 | chambers behind absorbers | local relative alignment, or alignment to inner-tracker tracks | scattering-insensitive residuals | distant frames unlinked | COL |
 | degrees of freedom tracks barely see | photogrammetry, optical or acoustic positioning | sensors installed | survey frame versus track frame | COL, UGD |
 | momentum scale with a resonance | mass versus kinematics | resonance rate | extrapolation beyond the anchor | COL |
-| momentum scale at high momentum | cosmics endpoint: `q/pT` minimum against simulation with injected biases | cosmic muons through the tracker | charge-ratio differences between data and simulation (normalise each charge sign separately) | COL |
+| curvature bias at high momentum | cosmics endpoint: `q/pT` minimum against simulation with injected biases | cosmic muons through the tracker | charge-ratio differences between data and simulation (normalise each charge sign separately); blind to a multiplicative scale (extrapolate it from the resonances with an uncertainty) | COL |
 | momentum scale without a resonance | range versus curvature | stopping tracks; known mass and energy loss | range systematic | UGD |
 
 One environment only: resonance scales and the cosmics endpoint are COL; range versus curvature is UGD in the
@@ -148,16 +149,25 @@ No hep-detector script solves alignment. A tool built on this page takes per-hit
 identifiers and uncertainties, and optional constraint inputs (resonance-mass track pairs with the known mass and a
 common vertex, vertex constraints, field-off or cosmic track sets); it returns per-element corrections (um, urad)
 with uncertainties and the eigenvalue spectrum of the reduced matrix, or of the Hessian at the solution for solvers
-that do not form one. A mode is unconstrained when its eigenvalue is below a fraction of the largest, declared
-before the controls run and used unchanged in all of them. **Negative control:** a simulated barrel geometry with
-the global gauges fixed and an injected twist (`dphi=tau*z`), fitted from track residuals alone with no constraint
-input, must return `unconstrained-mode` naming the twist eigenvector, not corrections that absorb it; no constrained
-mode may be flagged. **Positive controls:** (1) on the same input, an injected rigid misalignment of the constrained
-degrees of freedom (all per-element parameters except the fixed gauges and the named weak modes) must return
-`converged`, flagged `unconstrained-mode` for the twist (and any other named weak mode) only, with the injected
-values recovered within their uncertainties; (2) with Z-mass track pairs sharing a vertex added, the same twist must
-be recovered within its uncertainty, with its eigenvalue above the threshold, status `converged` without the twist
-flag, and the constraint used reported. Statuses: `converged` or `not-converged`, with `unconstrained-mode` as a
+that do not form one. A mode is unconstrained when its eigenvalue, taken after each parameter is divided by its
+alignment tolerance (um by um, urad by urad) so that units cannot move it, is below a fraction of the largest; the
+scaling and the fraction are declared before the controls run and used unchanged in the controls and in every fit
+the tool reports. **Negative control:** a simulated barrel geometry with
+the global gauges fixed and an injected twist (`dphi=tau*z`), fitted from residuals of collision tracks from the
+nominal vertex alone (no cosmic tracks, no constraint input), with the modes expected below the threshold for that
+geometry and sample listed with the threshold before the run (for a barrel: twist, sagitta, skew;
+[calibration and alignment](calibration-and-alignment.md#alignment-and-weak-modes)), must return
+`unconstrained-mode` naming the twist eigenvector, not corrections that absorb it; a flag on any mode outside that
+declared list fails this control and both positive controls. **Positive controls:** (1) on the same input, an
+injected rigid misalignment of the constrained degrees of freedom (every per-element parameter combination outside
+the fixed gauges and the declared list) must return `converged`, flagged `unconstrained-mode` for modes on the
+declared list only (the twist among them, still free in this residual-only input) and for none of the injected
+degrees of freedom, with the pulls of the injected values (recovered minus injected, over the reported uncertainty)
+of mean zero and unit width within their statistical precision; (2) with Z-mass track pairs sharing a vertex added,
+the same twist, injected at no less than 5 standard deviations of its reported uncertainty, must be recovered within
+2 standard deviations, with that uncertainty below the one in control (1), its eigenvalue above the threshold,
+status `converged` without the twist flag, `unconstrained-mode` still flagged for every declared mode whose
+eigenvalue stays below the threshold, no other mode flagged, and the constraint used reported. Statuses: `converged` or `not-converged`, with `unconstrained-mode` as a
 flag on either; `converged` alone is not allowed while a mode is free. A scale or
 curvature-offset residual goes to `propagate_scale_distortion.py` ([calibration residual
 propagation](calibration-residual-propagation.md)).
@@ -167,7 +177,7 @@ propagation](calibration-residual-propagation.md)).
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
 | global track fit (Millepede-II, GBL) | arxiv_1403.2286, arxiv_1201.4320, arxiv_hep-ex_0208021 | arxiv_2011.12730 (test beam) | gap | gap | gap: no tracker alignment in the arrays read | gap |
-| iterative `chi2` alignment | gap | arxiv_2011.12730 (test beam) | arxiv_1712.02739, arxiv_0904.2226 | gap | gap: no tracker alignment in the arrays read | gap |
+| iterative `chi2` alignment | gap | arxiv_2011.12730 (test beam) | arxiv_1712.02739 (gradient descent); arxiv_0904.2226 (iterated per-plane residual fits as the final alignment, the residual iteration this page calls biased) | gap | gap: no tracker alignment in the arrays read | gap |
 | chamber and large-structure alignment | arxiv_0911.4022 | gap | gap | pdg_2025_particle-detectors-for-non-accelerator-physics | gap | gap |
 | momentum scale | arxiv_1206.4071, arxiv_1603.05598 | gap | gap (source not retrieved) | arxiv_0805.3170 | gap (geomagnetic methods such as the Moon-shadow shift; no source read) | gap |
 
