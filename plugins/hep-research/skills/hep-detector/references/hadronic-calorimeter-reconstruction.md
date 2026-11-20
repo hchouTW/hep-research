@@ -53,8 +53,8 @@ sec. 35.10.3, PDF p. 98).
 | Calorimeter much shallower than the shower | unfolding the deposited energy with a simulated response (HC6) | a response validated on beam tests and on-orbit or in-situ profiles over the unfolded range; above the highest validated energy, only a two-model envelope | model dependence dominates the systematic; the prior spectrum biases the unfolding | SPC only (GND fluorescence detectors integrate the profile and correct for invisible energy instead; see the coverage table) |
 | Rear leakage and punch-through | tail catcher or extra instrumented depth; leakage corrections binned in energy, direction and cluster depth; shower-start-based correction | depth beyond the absorber instrumented, or simulation of the leakage tail | low-side tail not described by a Gaussian; punch-through mistaken for muons | COL, FXT, SPC |
 
-Time per cell or cluster and validating the hadronic model are in the
-[timing and model validation](hadronic-calorimeter-timing-and-model-validation.md#methods) methods.
+Timing and model-validation methods are in the
+[companion](hadronic-calorimeter-timing-and-model-validation.md#methods).
 
 ## Distinctive but generalizable features (hadronic calorimeter)
 
@@ -174,8 +174,8 @@ exists (sec. 5.2.1, PDF pp. 16-17). The TileCal scale comes from minimum-ionizin
 MINOS (UGD): a 60-plane calibration detector measured responses in CERN PS beams with both readout electronics; the
 three detectors were normalized to each other with cosmic-ray muons (0805.3170 sec. 1, PDF p. 9). MINERvA (UGD): a
 scaled replica in a 0.35-2.0 GeV/c test beam measured proton, pion and electron response and the Birks parameter;
-simulation, tuned with these data, agrees better than 4% for the calorimetric response, though some features are
-not precisely modelled (1501.06431 abstract, PDF p. 2). DAMPE (SPC): a BGO
+Geant4 simulation, tuned with these data (not an independent check), agrees better than 4% for the calorimetric
+response, though some features are not precisely modelled (1501.06431 abstract, PDF p. 2). DAMPE (SPC): a BGO
 calorimeter of about 1.6 `lambda_I`; on-orbit calibration with MIP signals per crystal, energy by Bayesian unfolding
 with a simulated response matrix (Materials and Methods, PDF p. 11); the hadronic-model systematic on the proton flux
 is about 7% below 400 GeV, from the 400 GeV test beam against FTFP_BERT, and 7-10% above, from FTFP_BERT against
@@ -183,8 +183,8 @@ FLUKA (PDF p. 13).
 <!-- /example -->
 
 <!-- example: leakage and punch-through (arXiv:hep-ex/0007045, arXiv:1201.1653, arXiv:1806.02129, RD5, DOI 10.1007/BF01650426) -->
-CMS HCAL prototype (H4 1995, about 8 `lambda_I`): pion response rises about 9% from 15 to 375 GeV/c; the estimated
-leakage correction is 1.5% at 120 GeV/c and 3.5% at 375 GeV/c (sec. 6, PDF p. 27 of hep-ex/0007045). In the 27-layer H2 1996 module (11 `lambda_I`), profiles extend beyond
+CMS HCAL prototype (H4 1995, about 8 `lambda_I`, ECAL removed): pion response rises about 9% from 15 to 375 GeV/c; the
+estimated longitudinal-leakage correction is 1.5% at 120 GeV/c and 3.5% at 375 GeV/c (sec. 6 on e/h, PDF p. 27 of hep-ex/0007045). In the 27-layer H2 1996 module (11 `lambda_I`), profiles extend beyond
 7 `lambda_I`; at the 9.5 `lambda_I` of HCAL, ECAL and the outer tail catcher HO behind the coil, fewer than 2% of
 300 GeV/c pions are catastrophically mismeasured (sec. 7.3, PDF pp. 33-34). CALICE TCMT, October 2006 run with a
 partial AHCAL (23 instrumented cassettes, sec. 3, PDF pp. 11-12; not the complete 5.3 `lambda_I` AHCAL of arXiv:1207.4210), the
