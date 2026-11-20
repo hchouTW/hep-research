@@ -16,7 +16,7 @@ code. Named apparatus and every performance number sit in example blocks.
 
 | # | Relation | Status and validity | Source |
 |---|---|---|---|
-| HC8 | first-order pulse time `t ~= C [(p-1) A_(p-1) + p A_p + (p+1) A_(p+1)] / (A_(p-1) + A_p + A_(p+1))` from the three samples around the peak `p` (the largest sample, the earliest on ties), then a pulse-asymmetry correction and an amplitude-dependent slewing term | approximate; for a pulse spread over three or four samples, not when consecutive bunch crossings give similar amplitudes in the same cell (anomalous pulse shape) | arXiv:0911.4877, sec. 3, eqs. 1-2, PDF pp. 5-6 |
+| HC8 | first-order pulse time `t ~= C [(p-1) A_(p-1) + p A_p + (p+1) A_(p+1)] / (A_(p-1) + A_p + A_(p+1))` from the three samples around the peak `p` (the largest sample, the earliest on ties), then a pulse-asymmetry correction and an amplitude-dependent slewing term | approximate; for a pulse spread over three or four samples, not when two pulses overlap in the sampled window of the same cell (in COL: consecutive bunch crossings with similar amplitudes; flagged by the anomalous pulse shape) | arXiv:0911.4877, sec. 3, eqs. 1-2, PDF pp. 5-6 |
 
 The time structure has a prompt component (relativistic hadrons, electromagnetic subshowers from `pi0` and `eta`) and
 a delayed one reaching microsecond scales, mainly from neutrons; the absorber sets the neutron yield and the hydrogen
@@ -139,10 +139,11 @@ CALICE T3B (15 SiPM tiles, 2.4 µs window): late energy is more
 pronounced in tungsten than in steel; QGSP_BERT (Geant4 9.4p03, section 5, PDF page 12) overestimates late deposits
 in tungsten for 60 GeV hadrons (section 4, PDF page 10), with the mean time of first hit too large by 2.0 ns at
 9.2 cm and 7.8 ns at 40.2 cm, while QGSP_BERT_HP (high-precision neutrons below 20 MeV, otherwise identical to
-QGSP_BERT) and QBBC (another slow-neutron treatment, and other inelastic models below 25 GeV: FTF, and the Binary
-cascade for nucleons below 1.5 GeV, where QGSP_BERT uses LEP and Bertini, section 5.1, PDF page 12) agree,
+QGSP_BERT) and QBBC (another slow-neutron treatment, and FTF between 4 and 25 GeV, Bertini below 5 GeV and the Binary
+cascade for nucleons below 1.5 GeV, where QGSP_BERT uses LEP between 9.5 and 25 GeV and Bertini below 10 GeV;
+section 5.1, PDF page 12) agree,
 overestimating it by only 1-2 ns beyond 10 cm (sec. 6.4
-and sec. 7, PDF pp. 21-22). PDG RPP 2025 sec. 35.10.3 (PDF p. 102): in beam tests of a combined HGCAL prototype,
+and sec. 7, PDF pp. 21-22). PDG RPP 2025 sec. 35.10.3 (PDF p. 102): in HGCAL prototype beam tests (its ref. [491]),
 timing reached 60 ps per channel and better than 20 ps for full showers at the highest energies.
 <!-- /example -->
 

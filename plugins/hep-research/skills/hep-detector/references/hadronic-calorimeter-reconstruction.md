@@ -175,7 +175,7 @@ exists (sec. 5.2.1, PDF pp. 16-17). The TileCal scale comes from minimum-ionizin
 MINOS (UGD): a 60-plane calibration detector measured responses in CERN PS beams with both readout electronics; the
 three detectors were normalized to each other with cosmic-ray muons (0805.3170 sec. 1, PDF p. 9). MINERvA (UGD): a
 scaled replica in a 0.35-2.0 GeV/c test beam measured proton, pion and electron response and the Birks parameter;
-Geant4 simulation, tuned with these data (not an independent check), agrees better than 4% for the calorimetric
+Geant4 simulation, tuned with these data (sec. 4, PDF p. 14; not an independent check), agrees better than 4% for the calorimetric
 response, though some features are not precisely modelled (1501.06431 abstract, PDF p. 2). DAMPE (SPC): a BGO
 calorimeter of about 1.6 `lambda_I`; on-orbit calibration with MIP signals per crystal, energy by Bayesian unfolding
 with a simulated response matrix (Materials and Methods, PDF p. 11); the hadronic-model systematic on the proton flux
@@ -199,8 +199,8 @@ showers at 30-300 GeV/c in iron up to 5.3 m equivalent (abstract only).
 <!-- /example -->
 
 <!-- example: high-granularity HCALs (arXiv:1702.08082, arXiv:2211.04740) -->
-CALICE SDHCAL: track segments inside showers, found with a Hough transform, calibrate the active layers in situ,
-improve the energy and separate hadronic from electromagnetic showers (abstract, PDF p. 3). CMS HGCAL prototype with
+CALICE SDHCAL: track segments inside showers, found with a Hough transform, calibrate the active layers in situ (sec. 5, PDF p. 18),
+improve the energy and separate hadronic from EM showers (abstract, PDF p. 3). CMS HGCAL prototype with
 CALICE AHCAL, CERN SPS H2, pions 20-300 GeV: shower start from layer multiplicity, energy within 10 cm and
 `R_i < 0.96` with 2 cm and 10 cm radii; energy within 10 cm above 12 MIPs at 20 GeV and 40 MIPs at 200 GeV, tuned on Geant4 simulation (sec. 4, PDF pp. 17-18).
 <!-- /example -->
