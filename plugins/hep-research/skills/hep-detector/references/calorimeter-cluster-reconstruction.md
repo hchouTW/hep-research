@@ -128,8 +128,8 @@ Rules that hold across the rows:
   clustering separates ghost signals, with a 5 to 10% gain in effective area above about 1 GeV
   (arXiv:1303.3514 sec. 2.2.1, p. 3). Tracker energy added (arXiv:1206.1896 sec. 3.2.1, p. 41,
   Passes 6-7: one undivided deposit).
-- DAMPE BGO: `zeta_DAMPE = F_last (sum_i RMS_i / mm)^4 / (8 x 10^6)` (not the cell significance) separates
-  electrons from protons (arXiv:1711.10981 Methods, eq. 2, p. 11); gap correction with a core-energy ratio,
+- DAMPE BGO: `zeta_DAMPE = F_last (sum_i RMS_i / mm)^4 / (8 x 10^6)` (equation 2, not the cell significance) separates
+  electrons from protons (arXiv:1711.10981 Methods, p. 11); gap correction with a core-energy ratio,
   rear leakage from the fitted `t_max` (arXiv:1703.02821 secs. III.A-B, pp. 3-4).
 - DREAM copper-fibre calorimeter: `h/e` of 0.21 (Cherenkov) and 0.77 (scintillation), `chi` about 0.3
   (arXiv:1703.09120 sec. 3.1, eqs. 1-2, p. 10).
@@ -163,7 +163,7 @@ Rules that hold across the rows:
 - **A single `W0` treated as universal.** It depends on cell size relative to the Molière radius and on the
   compartment; tune it per geometry and compartment.
 - **S-curve corrections applied at another angle or energy.** The curve depends on the incidence angle
-  (arXiv:hep-ex/0209055 sec. 8, PDF pp. 15, 19) and on beam energy and direction (arXiv:physics/0505127 sec. 3.1,
+  (0-15 deg, arXiv:hep-ex/0209055 sec. 8, PDF pp. 15, 19) and on energy and (eta, phi) direction (arXiv:physics/0505127 sec. 3.1,
   p. 9); one prototype found it almost energy independent at normal incidence (arXiv:hep-ex/0209055 p. 15).
 - **Noise-suppression thresholds in energy units carried across run conditions.** Seed, growth and boundary
   thresholds follow the noise; energy thresholds by design (local maxima, seed clusters) are stated with their
@@ -220,8 +220,8 @@ Rules that hold across the rows:
 | Logarithmic weights | arxiv_2012.06888 (moment only; position: gap) | arxiv_1812.11426, arxiv_physics_0505127 | gap | gap | gap | gap |
 | S-curve derivation | gap: no track-based in-situ derivation read | arxiv_hep-ex_0209055, arxiv_physics_0505127 | gap | gap | gap | gap |
 | Depth and direction | pdg_2025_particle-detectors-at-accelerators | arxiv_physics_0505127 | arxiv_1206.1896 | gap | [air showers](extensive-air-showers.md) (depth), [fluorescence geometry](ground-based-detection-arrays.md#fluorescence-geometry-and-profile-reconstruction) (direction) | gap |
-| Shower shapes for identification | arxiv_2012.06888, arxiv_1908.00005 | gap | arxiv_1711.10981 | [e/γ showers](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs) | [Hillas parameters](imaging-atmospheric-cherenkov.md#the-technique) | gap |
-| Photon versus neutral pion | arxiv_1908.00005, arxiv_1603.02934 | arxiv_1802.00672 | gap | gap | n/a: neutral pions decay at their source | gap |
+| Shower shapes for identification | arxiv_2012.06888, arxiv_1908.00005 | gap | arxiv_1711.10981 | [e/γ showers](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs) | [Hillas parameters](imaging-atmospheric-cherenkov.md#the-technique) | gap: unsurveyed |
+| Photon versus neutral pion | arxiv_1908.00005, arxiv_1603.02934 | arxiv_1802.00672 | gap | gap | n/a: neutral pions decay at their source | gap: unsurveyed |
 | Converted photons | arxiv_1908.00005, arxiv_2012.06888 | gap | arxiv_1206.1896, [pair-conversion telescopes](gamma-ray-imaging-and-polarimetry-reconstruction.md#pair-conversion-gamma-ray-telescopes) | n/a: conversion inside the active volume | n/a: the atmosphere is the converter and the absorber | gap |
 | Energy corrections | arxiv_2012.06888 | gap | arxiv_1703.02821, arxiv_1206.1896 | gap | [fluorescence energy](ground-based-detection-arrays.md#fluorescence-detectors) | gap |
 | Preshower | arxiv_1306.2016, arxiv_2012.06888 | arxiv_physics_0104033 (identification use only) | gap | gap | n/a: the atmosphere is the absorber | gap |
