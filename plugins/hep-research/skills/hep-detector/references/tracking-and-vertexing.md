@@ -36,16 +36,13 @@ efficiency-occupancy window for a given charge on the channel is in
 pair costs `w_i ≈ 3.65 eV`; a minimum-ionizing particle deposits most probably about
 23 000 electrons (3.7 fC) in 300 um. The depletion depth is
 `d = sqrt(2 eps (V + V_bi)/(N e))`, so full depletion of a thickness `d` needs about
-`V ≈ e |N_eff| d^2/(2 eps)`. Bulk damage scales, to first order, with non-ionizing energy
-loss expressed as 1 MeV neutron-equivalent fluence (`n_eq/cm^2`): the leakage current
-grows as `alpha_I Phi_eq V` (`alpha_I ≈ 4e-17 A/cm` at 20 °C after 80 min at 60 °C; PDG RPP 2025, sec. 35.8.5, p. 74), trapping
-cuts the collected charge (effective trapping times of order 1 ns near `1e15 n_eq/cm^2`,
-so electron collection is favoured), and space charge changes the depletion voltage,
-with beneficial and then reverse annealing over months at room temperature. In a
+`V ≈ e |N_eff| d^2/(2 eps)`. Radiation damage (fluence in `n_eq/cm^2`) raises the leakage
+current, traps carriers and changes `N_eff` and so the depletion voltage, with annealing;
+relations and sources are in [radiation and ageing effects](radiation-and-aging-effects.md). In a
 magnetic field carriers drift at the Lorentz angle `tan alpha_L = r_H mu B` (`r_H` about
 1.15 for electrons and 0.8 for holes at room temperature and small `B`). Leakage current
-and its temperature scaling: [front-end electronics](front-end-electronics-and-signal-processing.md).
-Treat damage constants as conditions data, not as these reference values.
+noise: [front-end electronics](front-end-electronics-and-signal-processing.md).
+Treat damage constants as conditions data, not as reference values.
 
 Silicon also measures deposited charge, which is approximately proportional to `Z^2` (before readout saturation, quenching and delta-ray escape) for a
 traversing nucleus. A silicon tracker is therefore simultaneously a charge (|Z|)

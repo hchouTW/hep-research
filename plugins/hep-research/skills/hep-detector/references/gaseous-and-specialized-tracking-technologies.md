@@ -18,7 +18,7 @@ a recorded gap, not a claim that no method exists.
 gives sub-pixel position by centroid or by template (charge-profile) fit; the
 **Lorentz drift** shifts and broadens clusters in a field (calibrate `theta_L`);
 merged clusters at high density; radiation damage lowers `CCE` and shifts thresholds
-and depletion voltage.
+and depletion voltage ([radiation and ageing effects](radiation-and-aging-effects.md)).
 
 **Strips/microstrips**: 1D measurement; a 2D point needs a stereo pair, creating
 `n^2` candidate intersections for `n` hits, of which `n^2 - n` are ghosts; capacitive coupling, common-mode noise, and
@@ -92,7 +92,7 @@ angle and versus amplitude reveal time walk and crossing-angle effects.
   a delta electron can deposit charge closer to the wire, so the time is early and the
   distance underestimated. Also out-of-time hits.
 - **Dependence**: rate/occupancy (space charge, deadtime), `T`/`P`/gas composition
-  (drift velocity), aging (Malter effect, deposits on wires).
+  (drift velocity), ageing (Malter effect, deposits on wires; [radiation and ageing effects](radiation-and-aging-effects.md)).
 - **Data sample**: cosmic rays and collision tracks for `r(t)` self-calibration.
 - **Transfers**: time-to-distance calibration to muon tubes, straws and TPC drift coordinates;
 time-difference coordinates (RPC strip ends, TOP) reuse the offset and velocity calibration logic; does not transfer: charge-centroid interpolation.

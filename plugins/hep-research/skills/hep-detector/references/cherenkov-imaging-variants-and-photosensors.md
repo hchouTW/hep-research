@@ -104,6 +104,8 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
 | Microchannel plate (MCP) | channel electron multiplier | very fast, position sensitive | aging, ion feedback, rate/gain droop |
 | Gaseous photon detector | photoionization + gas gain | large area, magnetic-field tolerant | quantum efficiency (window/gas), aging, ion backflow |
 
+Mechanisms and monitoring of SiPM, MCP-PMT and gas ageing: [radiation and ageing effects](radiation-and-aging-effects.md).
+
 **Response model.** `N_pe ~ Poisson(N_gamma * eps_coll * QE)`; gain per photoelectron
 fluctuates (Polya/excess-noise `F`); SiPMs add crosstalk and afterpulsing as
 compound-Poisson terms (optical crosstalk is a branching process: with `lambda` the mean
@@ -166,7 +168,8 @@ time series* (gain versus temperature/dose) rather than a single constant.
   background if not modeled in the likelihood.
 - **SiPM dark counts and crosstalk treated as Gaussian noise.** They are correlated and
   non-Gaussian; model as compound Poisson.
-- **Ignoring dose-dependent aging** of scintillators, WLS fibers, and mirrors.
+- **Ignoring dose-dependent aging** of scintillators, WLS fibers, and mirrors (scintillator and WLS
+  mechanisms, including ageing without dose: [radiation and ageing effects](radiation-and-aging-effects.md)).
 - **Assuming the gain is constant across an SPE calibration** interval.
 
 ## Deliverables

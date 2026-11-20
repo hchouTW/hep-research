@@ -164,7 +164,8 @@ experiment's own sources (the installation and commissioning dates), not from a 
 
 ## Time dependence and conditions data
 
-Detectors change: gains drift with temperature, sensors accumulate radiation damage,
+Detectors change: gains drift with temperature, sensors accumulate radiation damage
+([radiation and ageing effects](radiation-and-aging-effects.md)),
 gas composition and pressure vary, channels die, and alignment moves with thermal
 cycles and magnet ramps. Calibration constants are therefore time-dependent payloads
 indexed by run or by a finer interval-of-validity, and this creates its own set of

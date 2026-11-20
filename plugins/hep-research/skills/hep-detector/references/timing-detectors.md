@@ -89,12 +89,13 @@ mis-assigned windows, so quote core width and tail fraction separately.
   arrival-time term from non-uniform charge deposition, weighting-field distortion and
   TDC terms; 15-20 ps for minimum-ionizing particles reached with thin, high-gain
   (> 40) LGADs, better only with several layers; walk, jitter and CFD formulas are in
-  [front-end electronics](front-end-electronics-and-signal-processing.md)); **radiation damage** reduces the
-  effective doping (gain layer), so gain and time resolution degrade with fluence and
-  operating voltage must be raised (single-event burnout limit); fill factor at
+  [front-end electronics](front-end-electronics-and-signal-processing.md)); **radiation damage** removes
+  gain-layer acceptors, so gain and time resolution degrade with fluence and the bias must rise
+  up to the single-event limit ([radiation and ageing effects](radiation-and-aging-effects.md)); fill factor at
   pad boundaries is a design issue.
 - **MCP timing detectors**: fast rise and small transit-time spread; used as
-  precision photon/particle timing; aging by charge extracted, ion feedback.
+  precision photon/particle timing; ageing with integrated anode charge through ion feedback
+  ([radiation and ageing effects](radiation-and-aging-effects.md)).
 - **RPC/MRPC**: gas gap timing, rate-dependent ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 - **Precision timing in trackers/calorimeters**: time assigned to tracks or clusters
   (e.g. shower-time for photons, vertex-time for pileup rejection (COL)); needs the same
@@ -149,7 +150,7 @@ propagation; versus run/fill reveals clock drift.
 - **Time-walk not corrected.** Looks like a momentum- or amplitude-dependent
   mass-hypothesis shift.
 - **Radiation damage treated as a static constant.** LGAD/SiPM timing evolves with
-  dose and operating point.
+  dose, annealing and operating point ([radiation and ageing effects](radiation-and-aging-effects.md)).
 - **Clock offsets look like PID or alignment problems.** Check run-by-run/fill-by-fill
   offsets first ([detector case studies and checklists](detector-case-studies-and-checklists.md)).
 
