@@ -177,7 +177,8 @@ CB for the resonance (arXiv:1206.4071, sec. 5.1.3).
 
 - The named line shape with its formula, all fitted and fixed parameters (fixed ones marked), the fit
   range, and the fit quality ([likelihood fitting](../../hep-statistics/references/likelihood-fitting.md)).
-- The core width and a tail measure (tail parameters or a tail fraction), never one number for both.
+- A width and a tail measure, never one number for both: the core width with its tail parameters, or an
+  effective sigma or FWHM with a tail fraction.
 - For a pedestal: the control sample and the floor it gave.
 - For quantile widths: the convention and a bootstrap uncertainty.
 - The line-shape and fit-range systematics, and the shape used for each energy or angle bin.
