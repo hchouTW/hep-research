@@ -175,12 +175,12 @@ time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p
    ([calibration and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data)). The light
    monitor corrects per channel through the transfer relation above (arXiv:1306.2016, sec. 4.1, p. 10); in orbit a
    stable peak (non-interacting protons) tracks the scale, fitted in time (arXiv:1206.1896, sec. 7.3.2, p. 137).
-2. **Digitization.** A damaged sensor is simulated in the digitization step: electric field from a device model,
-   trapping, and the induced signal (arXiv:1905.03739, sec. 4, pp. 12-30). Its digitizer uses device-model
-   damage without annealing (sec. 2, p. 5); annealing enters only through the conditions its annealing model
-   validates, fluence and depletion voltage (sec. 3), an approximate combination is not used for final results
-   (sec. 4.2.4, p. 18), and annealing variation is covered only by the trapping-constant uncertainty range (sec.
-   4.5, p. 24). Keep the annealing history in the conditions (item 1). General digitization:
+2. **Digitization.** The digitizer simulates the damage with device-model fields and trapping but no annealing,
+   then the induced signal (arXiv:1905.03739, sec. 4, pp. 12-30; sec. 2, p. 5). Annealing enters only
+   through the conditions its annealing model validates, fluence and depletion voltage (sec. 3), an
+   approximate combination is not used for final results (sec. 4.2.4, p. 18), and annealing variation is
+   covered only by the trapping-constant uncertainty range (sec. 4.5, p. 24). Keep the annealing history in
+   the conditions (item 1). General digitization:
    [detector simulation](detector-simulation.md#digitization) and
    [readout, digitization and overlay](readout-digitization-and-overlay.md).
 3. **Dose prediction.** Pre-launch shielding and in-orbit TID/NIEL come from Geant4-based transport (MULASSIS,
