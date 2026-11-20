@@ -130,10 +130,10 @@ alignment stops when no parameter moves by more than 0.01 um (1 urad), typically
 
 - **Single-hadron `E/p`** of isolated tracks (COL; arXiv:1203.1302, sec. 1, p. 2); the isolation cut biases it
   ([calibration standards](calibration-and-alignment.md#calibration-standards-and-their-pitfalls)).
-- **MIP equalization** with muons, cell to cell, then the MIP as the base unit and electrons for the MIP-to-GeV step
-  (FXT; arXiv:1207.4210, sec. 2.2, p. 6); cosmic-muon strip-to-strip equalization (UGD; arXiv:0805.3170, sec. 5,
-  p. 58); in a running detector, cosmic and collision muons probe the response per cell (COL; arXiv:1806.02129,
-  sec. 6.1, pp. 30-31).
+- **MIP equalization** with muons, cell to cell, then the MIP as the base unit (FXT; arXiv:1207.4210, sec. 2.2,
+  p. 6) and electrons for the MIP-to-GeV step (sec. 2.3, p. 8); cosmic-muon strip-to-strip equalization (UGD;
+  arXiv:0805.3170, sec. 5, p. 58); in a running detector, cosmic and collision muons probe the response per cell
+  (COL; arXiv:1806.02129, sec. 6.1, pp. 30-31).
 - **Radioactive source scans** moved through the calorimeter, per channel (COL only in the sources read;
   arXiv:1806.02129, sec. 4.1, p. 19).
 - **Transfer of a test-beam scale**: set the source response equal to the one seen in the beam test, correcting for
