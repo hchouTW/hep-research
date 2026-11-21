@@ -1,7 +1,6 @@
 # Radiation and Ageing Effects
 
-How sensors change with dose, fluence and accumulated charge, and how that enters conditions and
-simulation, per sensor, then radiation fields.
+Sensor damage from dose, fluence and charge, and its use in conditions and simulation.
 Environments: COL collider, FXT fixed target and test beam, SPC space and balloon, UGD underground, neutrino
 and rare event; GND (ground arrays) and NUC (nuclear) are gaps. Electronics damage (SEU, circuit TID):
 [front-end electronics](front-end-electronics-and-signal-processing.md#radiation-and-the-electronics).
@@ -20,12 +19,12 @@ holds well for leakage current and is "moderately violated" for other effects (s
 | `N_id = N_id,0 exp(-c Phi_eq)` (initial dopant removal) | approximate; `c` depends on `N_id,0`, particle type and impurities (Fig. 35.32). PDG sec. 35.8.5, p. 76 |
 | induced current times `exp(-t/tau_eff,e/h)`; `1/tau_eff ∝ Phi_eq` | approximate; linear up to about `1e15 n_eq/cm^2`, where `tau_eff` is of order 1 ns, then saturating. PDG p. 77 |
 | bias limit from single-event effects at average fields near 12 V/um | approximate; sets the lifetime in highly energetic particle fields. PDG pp. 77-78 |
-| `I_leak = (Phi/L_int) sum_i V_i L_int,i [alpha_I exp(-sum_{j>=i} t_j/tau(T_j)) + alpha_0* - beta ln(sum_{j>=i} Theta(T_j) t_j / t_0)]` | approximate (phenomenological annealing model); per interval `i` with luminosity, duration, temperature and depleted volume `V_i`; `alpha_I` is the short-term amplitude; currents scaled to 20 °C with `E_eff = 1.12 eV`, not the 1.2 eV above. arXiv:1905.03739, sec. 3.1, eqs. (1)-(2), pp. 5-6 |
+| `I_leak = (Phi/L_int) sum_i V_i L_int,i [alpha_I exp(-sum_{j>=i} t_j/tau(T_j)) + alpha_0* - beta ln(sum_{j>=i} Theta(T_j) t_j / t_0)]` | approximate (phenomenological annealing model); per interval `i` with luminosity, duration, temperature and depleted volume `V_i`; `alpha_I` is the short-term amplitude; `t_0` = 1 min, natural log; currents scaled to 20 °C with `E_eff = 1.12 eV`, not the 1.2 eV above. arXiv:1905.03739, sec. 3.1, eqs. (1)-(2), pp. 5-6 |
 | `L/L_0 ≈ exp(-D/D_c)` for plastic scintillator | approximate; `D_c` of tens of kGy at dose rates from a few `1e-3` to 10 Gy/h, larger damage at lower rate. PDG sec. 35.3.2, p. 12 |
 | `S(t)/S_0 = (R(t)/R_0)^alpha` (scintillation versus monitoring-light response) | approximate, for small transparency losses; `alpha` differs between crystal producers (initial transparency), measured in a beam test under irradiation; a value tuned in situ is an effective exponent for large losses that also absorbs photosensor (VPT) loss, outside this validity. arXiv:1306.2016, sec. 4.1, eq. (3), pp. 10-11, and sec. 4.1.1, p. 12 |
-| `s(t) = (p_0 - p_1) + p_1 exp(-(t - t_0)/tau)` (energy-scale drift) | approximate, empirical fit to a monitored peak. arXiv:1206.1896, sec. 7.3.2, eq. (53), p. 137 |
+| `s(t) = (p_0 - p_1) + p_1 exp(-(t - t_s)/tau)` (energy-scale drift) | approximate, empirical fit to a monitored peak; `t_s` is eq. (53)'s `t_0`. arXiv:1206.1896, sec. 7.3.2, eq. (53), p. 137 |
 | `R = -(1/G) dG/dQ` (% per C/cm) | definition of the gas ageing rate; **not** a predictor at high rate, where ageing is not a function of `Q` alone. arXiv:hep-ex/0204005, sec. I, p. 1 |
-| `Q_A = r_pe T f_duty G e` (integrated anode charge per area) | exact bookkeeping for a constant photoelectron rate `r_pe` per area, run time `T`, duty factor, gain `G`; a photon rate not stated as incident or detected, taken as `r_pe`, gives an upper bound (`r_pe` = DQE × incident rate): state which |
+| `Q_A = r_pe T f_duty G e` (integrated anode charge per area) | exact bookkeeping for a constant photoelectron rate `r_pe` (DQE × incident rate) per area, run time `T`, duty factor, gain `G`; an unspecified photon rate taken as `r_pe` gives an upper bound: state which |
 
 ## Damage and ageing by sensor
 
@@ -41,9 +40,8 @@ design study took trapped protons only (SPC; arXiv:1503.07682, abstract; sec. 1,
 <!-- example: ATLAS pixel detector (COL) and LOFT silicon drift detectors (SPC design study) -->
 ATLAS pixel (arXiv:1905.03739):
 eq. (1) has the short-term amplitude `alpha_I = (1.23 ± 0.06)e-17
-A/cm` (not `alpha_80`) with `alpha_0* = 7.07e-17 A/cm` and `beta = (3.29 ± 0.18)e-18 A/cm` (sec. 3.1, pp. 5-6): with its
-`tau(T)` and `Theta(T)`, the bracket is about `4.1e-17 A/cm` after 80 min at 60 °C (central values, `T_ref` = 20 °C, natural log, `3.2e-17` to `5.2e-17` over the quoted ranges, computed here), the `alpha_80` above. LOFT SDDs (arXiv:1503.07682): displacement damage from trapped protons
-reduces the charge collection efficiency, measured with protons against the expected
+A/cm` with `alpha_0* = 7.07e-17 A/cm` and `beta = (3.29 ± 0.18)e-18 A/cm` (sec. 3.1, pp. 5-6): with its
+`tau(T)` and `Theta(T)`, the bracket is about `4.1e-17 A/cm` after 80 min at 60 °C (central values, `T_ref` = 20 °C, natural log, `3.2e-17` to `5.2e-17` over the quoted ranges, computed here), the `alpha_80` above. LOFT SDDs (arXiv:1503.07682): charge collection loss measured with protons against the expected
 in-orbit damage (abstract; sec. 1, p. 3).
 <!-- /example -->
 
@@ -70,9 +68,9 @@ bias) recovers part of it (secs. 3.4 and 6, pp. 12 and 15). With a scintillator,
 energy threshold (SPC; arXiv:2411.00607v2, abstract).
 
 <!-- example: GRBAlpha and VZLUSAT-2 CubeSats, Hamamatsu S13360-3050PE MPPCs (SPC) -->
-arXiv:2411.00607: GRBAlpha, 550 km sun-synchronous orbit, CsI(Tl) read by eight MPPCs behind 2-2.5 mm PbSb: the
+arXiv:2411.00607v2: GRBAlpha, 550 km sun-synchronous orbit, CsI(Tl) read by eight MPPCs behind 2-2.5 mm PbSb: the
 low-energy threshold rose from about 20 keV to about 120 keV in 3 years 5 months, matching a simulated TID of 1.6
-Gy (160 rad) and `2.1e9 n_eq/cm^2` from trapped protons (AP-8) (abstract; sec. 6, p. 14).
+Gy and `2.1e9 n_eq/cm^2` from trapped protons (AP-8) (abstract; sec. 6, p. 14).
 <!-- /example -->
 
 **Crystal scintillators.** Ionizing dose forms colour centres; the induced absorption shortens the attenuation
@@ -81,16 +79,16 @@ displacement and fission-fragment damage (PDG sec. 35.4, p. 18). Damage and spon
 loss depends on dose rate; injected monitoring light tracks it (COL; arXiv:1306.2016, sec. 3, p. 8).
 
 <!-- example: CMS ECAL PbWO4 (COL) and the Fermi LAT CsI(Tl) calorimeter (SPC) -->
-CMS ECAL (arXiv:1306.2016): laser light into each crystal; by the end of 2011 the average laser response
+CMS ECAL (arXiv:1306.2016): by the end of 2011 the average laser response
 dropped 2-3% in the barrel and 40% at 2.7 ≤ |eta| ≤ 3.0 in the endcap, there partly from VPT loss (sec.
 3, p. 8); `alpha` of eq. (3) is 1.52 and 1.0 for the two crystal producers, BTCP and SIC, with a 10% spread, from a
 beam test (sec. 4.1, pp. 10-11); an effective 1.16 is used for the endcap BTCP crystals, tuned on Z to ee events, absorbing the VPT loss
 (sec. 4.1.1, p. 12). Fermi LAT (arXiv:1206.1896): light yield fell about 1% per year over its first three
-years in orbit (sec. 2.1.2, p. 20).
+years in orbit (sec. 2.1.2, p. 20); eq. (53) on the proton peak gives `tau` ≈ 2 years and a correctable
+4.5% energy-scale shift after 10 years (sec. 7.3.2, p. 137).
 <!-- /example -->
 
-**Plastic scintillator and WLS fibres.** Radiation yellows the plastic and lowers its transparency; damage per dose
-is larger at low dose rate, and the transparency partly recovers after irradiation, faster with oxygen (PDG sec.
+**Plastic scintillator and WLS fibres.** Radiation yellows the plastic and lowers its transparency, which partly recovers after irradiation, faster with oxygen (PDG sec.
 35.3.2, p. 12). Plastics also age **without dose**: crazing under mechanical stress or solvents, and fogging from
 humidity at elevated temperature (same page); for a measured long-term loss the cause can stay unknown, with
 photochemical oxidation a further candidate (arXiv:2207.12982, sec. 1.2, pp. 7-8). Separate the causes with two
@@ -99,8 +97,8 @@ a radioactive source or physics signal sees both (COL; arXiv:1806.02129, sec. 4.
 
 <!-- example: ATLAS Tile Calorimeter (COL) and T2K near detectors (UGD) -->
 TileCal (arXiv:1806.02129, sec. 4.5, pp. 23-24): the difference between minimum-bias (or Cs) and laser response is
-read as scintillator irradiation, while laser data alone show PMT gain loss with light exposure and recovery
-when there are no collisions. T2K near detectors (arXiv:2207.12982): light yield fell 0.9-2.2% per year over ten years (abstract,
+read as scintillator irradiation; laser data alone show PMT gain loss under light and recovery
+without collisions. T2K near detectors (arXiv:2207.12982): light yield fell 0.9-2.2% per year over ten years (abstract,
 p. 5); most of the loss is in the scintillator, not the WLS fibres, whose long attenuation component degrades by
 1-5% per year (sec. 7, p. 31).
 <!-- /example -->
@@ -113,7 +111,7 @@ time alone, such as vacuum micro-leaks (arXiv:2311.16676, sec. 2.1, p. 2). Lifet
 
 <!-- example: PANDA Barrel and Endcap Disc DIRC MCP-PMTs (FXT) -->
 arXiv:2311.16676: before ALD the QE dropped by a factor of 2 or more after a few hundred mC/cm^2; a photon rate of
-about 200 kHz/cm^2 (incident or detected is not stated), 10 years, 50% duty and gain `1e6` give an expected
+about 200 kHz/cm^2 (incident or detected not stated), 10 years, 50% duty and gain `1e6` give an expected
 charge of about 5 C/cm^2 for the Barrel DIRC (sec. 1, p. 1; the upper bound of the relation above gives 5.1
 C/cm^2); a tube with two ALD layers reached more than 34 C/cm^2 of anode charge with no QE loss yet (sec. 2.1,
 p. 2).
@@ -124,26 +122,26 @@ outgassing insulators, glues and oils; strict materials and gas control allow se
 ageing (PDG sec. 35.6.2.4, p. 33). An insulating cathode layer can ignite the self-sustained Malter discharge;
 ageing depends on gas, materials, irradiated area, current density, gain, rate, particle type and energy, so
 laboratory tests with X-ray sources may not transfer to a hadron environment (arXiv:hep-ex/0204005, secs. II.A
-and V.D, pp. 2 and 8). Data: FXT only. Drift chambers: [gaseous
+and V.D, pp. 2 and 8). Data: FXT and COL (collider chambers in situ and in tests), same review, sections IV.A and V.D, pages 4 and 9. Drift chambers: [gaseous
 tracking](gaseous-and-specialized-tracking-technologies.md#drift-chambers-and-drift-tubes).
 
 <!-- example: HERA-B honeycomb drift tubes and muon chambers (FXT) -->
 arXiv:hep-ex/0204005, sec. V.D, pp. 8-9: prototype honeycomb drift tubes aged severely after a few mC/cm in the hadron
 environment of 920 GeV protons on a nuclear target, though X-ray tests to 5 C/cm showed nothing; in the muon
-proportional chambers the ageing rate in Ar/CF4/CH4 was more than two orders of magnitude higher in hadron beams than with radioactive sources.
+proportional chambers the ageing rate in Ar/CF4/CH4 was over 100 times higher in hadron beams than with radioactive sources.
 <!-- /example -->
 
 ## Radiation fields by environment
 
 - **COL.** Dose and hadron fluence depend on position (radius, pseudorapidity) and scale with integrated luminosity;
   the fluence comes from an event generator plus particle transport (Pythia8, FLUKA) as a factor `Phi/L_int`, validated per
-  module group against the measured leakage current through the annealing model, FLUKA kept for the central value with a 15% uncertainty at central `|z| ≈ 0` only: the data show a stronger `z`-dependence,
+  module group against the measured leakage current through the annealing model, FLUKA kept for the central value, with a 15% uncertainty valid only at central `|z| ≈ 0`: the data show a stronger `z`-dependence,
   FLUKA about 1.5 sigma off at `z = 0` and more at larger `|z|` (arXiv:1905.03739, secs. 2-3.1, pp. 3-7).
 - **SPC (low Earth orbit).** The proton/electron balance depends on shielding and spectrum (example below), so
-  model trapped electrons too; solar protons and Galactic cosmic rays add little TID (arXiv:2411.00607, sec. 4.1,
+  model trapped electrons too; solar protons and Galactic cosmic rays add little TID (arXiv:2411.00607v2, sec. 4.1,
   p. 10). Dose depends on altitude, shielding and solar cycle (same page), from trapped-particle models (AP-8 protons,
-  AE-8 electrons), with a quoted factor-of-two uncertainty on the AP-8 proton flux, integral or differential not stated (sec. 3.2, p. 7); the paper quotes
-  none for AE-8, and the SPENVIS page it cites is not cached here: assign at least a factor of two to both, more for differential spectra. In AP-8, trapped protons at low altitude are more numerous at
+  AE-8 electrons), with a quoted factor-of-two uncertainty on the AP-8 proton flux, integral or differential not stated, for the differential fluences the paper uses (sec. 3.2, p. 7); the paper quotes
+  none for AE-8, and the SPENVIS page it cites is not cached here: assign at least a factor of two to both, and more, unquantified here, for differential spectra: state the factor used or vary it. In AP-8, trapped protons at low altitude are more numerous at
   solar minimum (arXiv:1503.07682, sec. 1, p. 3). Cutoff
   handling is in [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff).
 - **UGD.** The measured ageing of one accelerator-neutrino near detector's plastic scintillator has no identified cause (arXiv:2207.12982, sec. 1.2, pp. 7-8).
@@ -151,64 +149,58 @@ proportional chambers the ageing rate in Ar/CF4/CH4 was more than two orders of 
   [noble liquid and neutrino detectors](noble-liquid-neutrino-and-rare-event-detectors.md).
 
 <!-- example: CMS ECAL (COL), LOFT, Fermi and GRBAlpha orbits (SPC) -->
-CMS ECAL: expected dose up to 4 kGy in the barrel and 200 kGy at |eta| = 3 after 10 years (500 fb^-1); expected
-hadron fluence from about `1e13` to `1e14 cm^-2`, as quoted (weighting and NIEL source not stated;
+CMS ECAL: expected dose up to 4 kGy in the barrel and 200 kGy at |eta| = 3 after 10 years (500 fb^-1); hadron
+fluence from about `1e13` to `1e14 cm^-2`, as quoted (weighting and NIEL source not stated;
 arXiv:1306.2016, sec. 2, p. 6). LOFT: AP8-MIN via SPENVIS, 600 km and 5° worst case, behind 3.3 mm Al equivalent;
 AP8-MIN is about 7 times AP8-MAX at 1 MeV (arXiv:1503.07682, sec. 1, p. 3). Fermi: 565 km at 25.6°, about 15% of the
 time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p. 25). GRBAlpha: behind 2-2.5 mm
 PbSb, trapped protons dominate TID and TNID, electrons about 1-6% of TID (central values, 1.1-7.3% within the quoted uncertainties, computed here from `TID(p)/TID(e)`:
-1.3% at ~550 km, solar minimum, 74 ± 14; 5.8% at ~475 km, solar maximum, 16.1 ± 3.4, as `1/(1 + ratio)`; arXiv:2411.00607, sec. 4.1, p. 10).
+1.3% at ~550 km with the solar-minimum AP-8/AE-8 models, 74 ± 14; 5.8% at ~475 km with the solar-maximum models (altitude and model changed together), 16.1 ± 3.4, as `1/(1 + ratio)`; arXiv:2411.00607v2, sec. 4.1, p. 10).
 <!-- /example -->
 
 ## Feeding damage into conditions and simulation
 
-1. **Conditions.** Store the damage history, not a constant: per interval the [Tool hooks](#tool-hooks) inputs (particle
-   spectrum, NIEL source and gas test conditions included, fluence from `Phi/L_int` or orbit segments) and the monitored response. Derived constants (depletion voltage, trapping,
+1. **Conditions.** Store the damage history, not a constant: per interval the [Tool hooks](#tool-hooks) inputs (fluence
+   from `Phi/L_int` or orbit segments) and the monitored response. Derived constants (depletion voltage, trapping,
    threshold, light-yield factor `S_i(t)`, energy-scale drift) are payloads with intervals of validity
    ([calibration and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data)). The light
    monitor corrects each channel by the transfer relation (COL; arXiv:1306.2016, sec. 4.1, p. 10); in orbit a
    stable peak (non-interacting protons) tracks the scale, fitted in time (arXiv:1206.1896, sec. 7.3.2, p. 137).
 2. **Digitization.** Digitize with device-model fields and trapping; state whether annealing enters. One collider
-   pixel digitizer omits annealing (COL; arXiv:1905.03739, sec. 4, pp. 12-30; sec. 2, pp. 4-5). No annealing correction or uncertainty is applied (sec. 2, p. 5; sec. 4.2.4, p. 20, checked at `1e14` and `2e14 n_eq/cm^2`,
-   to be revisited after significant annealing): its variation lies within the field-model variations of sec. 4.2.3
-   and the trapping-constant range (sec. 4.5 and Table 5,
-   p. 24), so it holds at those fluences only. General digitization:
+   pixel digitizer omits annealing with no correction or uncertainty: its variation, checked at `1e14` and `2e14 n_eq/cm^2`,
+   lies within the field-model and trapping-constant variations, so this holds at those fluences only (COL; arXiv:1905.03739,
+   secs. 2, 4.2.3, 4.2.4 and 4.5, Table 5, pp. 4-5, 20 and 24). General digitization:
    [detector simulation](detector-simulation.md#digitization).
 3. **Dose prediction.** Pre-launch shielding was studied with Geant4-based MULASSIS on two 500 km orbits, TID
    only and without electrons (protons, and cosmic-ray 2H, 3He, 4He),
    and in orbit AE-8 electron and AP-8 proton fluences per mission segment (IRENE) go into Geant4-based GRAS for TID and TNID (SPC;
-   arXiv:2411.00607, secs. 2 and 3.2, pp. 3-4 and 7). A TID-only prediction misses displacement damage (TNID), and one without trapped electrons misses their dose: compute TNID and the electron dose, or state the shielding that makes electrons negligible (example above).
+   arXiv:2411.00607v2, secs. 2 and 3.2, pp. 3-4 and 7). A TID-only prediction misses displacement damage (TNID), and one without trapped electrons misses their dose: compute TNID and the electron dose, or show for that shielding and orbit segment that the electron share of TID, with the factor of two above on both models, is below your assigned dose uncertainty (example above: 1.3-5.8% central, up to about 24% for the solar-maximum models, computed here).
 4. **Extrapolation.** A measured ageing trend, extrapolated, says when simulation and reconstruction must model the
    reduced response (UGD; arXiv:2207.12982, sec. 7, p. 31).
-
-<!-- example: Fermi LAT calorimeter energy scale (SPC) -->
-arXiv:1206.1896, sec. 7.3.2, p. 137: eq. (53) fitted to the proton-peak position gives `tau` of about 2 years and a
-correctable energy-scale shift of about 4.5% after 10 years.
-<!-- /example -->
 
 ## Methods
 
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
-| silicon leakage current versus time | fluence per luminosity, annealing model fitted to measured currents | temperature log, depleted volume | NIEL factors for the wrong spectrum; warm-ups not logged | COL |
-| charge collection loss | bias scans per period; damaged-sensor digitization | device model of the field | one constant per run range hides annealing | COL; SPC (design study: ground tests) |
+| silicon leakage current versus time | fluence per luminosity, annealing model fitted to currents | temperature log, depleted volume | NIEL factors for the wrong spectrum; warm-ups not logged | COL |
+| charge collection loss | bias scans per period; damaged-sensor digitization | device model of the field | one constant per run range hides annealing | COL; SPC (design study) |
 | LGAD gain loss | gain-versus-bias curves per fluence step; raise bias | single-event limit known | bias raised past the burnout limit | COL |
 | SiPM dark rate | dark rate and threshold versus time; annealing; cooling; shielding | temperature recorded | threshold drift read as signal loss | COL, SPC |
 | crystal or plastic transparency | monitoring light plus a physics or source reference | transfer exponent measured per producer (crystals) | monitor and scintillation light take different paths | COL |
 | photosensor versus scintillator | compare a light-bypass monitor with source or physics response | both monitors in the same period | PMT fatigue and recovery read as scintillator damage | COL |
 | MCP-PMT lifetime | QE scans versus integrated anode charge, partly covered cathode | rate and gain logged | time-driven loss (leaks) read as charge-driven | FXT |
-| gas ageing | irradiation at the real rate, particle type and area; gain and current monitoring | final gas and materials | X-ray tests read as a lifetime for hadron fields | FXT |
+| gas ageing | irradiation at the real rate, particle type and area; gain and current monitoring | final gas and materials | X-ray tests read as a lifetime for hadron fields | FXT, COL |
 
 ## Distinctive but generalizable features
 
 - **Topology**: a slow per-channel drift under the event response.
 - **Inverse problem**: separate dose, annealing, temperature and photosensor drift from one monitored response.
-- **Natural objects**: per-channel series of current, gain, dark rate and monitored response.
+- **Natural objects**: per-channel time series of the monitored quantities.
 - **Informative residual**: monitored response minus the history-based prediction.
 - **Scaling**: leakage current linear in `Phi_eq`; trapping rate linear to about `1e15 n_eq/cm^2`; MCP and gas loss
   per integrated charge; plastic loss exponential in dose.
-- **Conventions**: `n_eq/cm^2`, Gy, C/cm^2 per area or C/cm per wire, each with the inputs [Tool hooks](#tool-hooks) marks required, whose per-interval
-  temperature gives the annealing state.
+- **Conventions**: `n_eq/cm^2`, Gy, C/cm^2 per area or C/cm per wire, each with the inputs [Tool hooks](#tool-hooks) marks required, the annealing state derived
+  from their per-interval temperature.
 - **Tails**: dead channels, Malter discharges, sudden breakdown at the bias limit.
 - **Dependence**: dose rate, temperature, gas flow and materials, solar cycle (SPC), luminosity (COL).
 - **Data sample**: currents, monitoring light, stable peaks (resonances, MIPs,
@@ -227,23 +219,23 @@ correctable energy-scale shift of about 4.5% after 10 years.
 
 ## Deliverables
 
-- The damage history per channel group (and the channel-to-group map): per-interval duration, fluence, TID, anode charge, temperature, bias and depleted volume, and the response per channel.
+- The damage history per channel group (and the channel-to-group map): the inputs [Tool hooks](#tool-hooks) marks required, per interval, and the monitored response per channel.
 - The history-to-response model, with source, validity and residual to monitored data.
 - Time-dependent constants with intervals of validity, and the end-of-life extrapolation.
 - For simulation: damaged-sensor digitization or response scaling, and the periods it covers.
 
 ## Tool hooks
 
-A damage-history tool (none shipped) would take the per-interval inputs below and the monitored response (optional); output per interval the predicted leakage
+A damage-history tool (none shipped) takes the inputs below and the monitored response (optional); it outputs per interval the predicted leakage
 current, depletion voltage or response factor. Units, all required per interval:
 fluence in `n_eq/cm^2` (silicon sensors, LGADs, SiPMs), dose in Gy (those and crystals, plastics and WLS), each stated
-even when zero, with particle species and spectrum (and NIEL source for fluence) when non-zero, depleted volume `V_i` in cm^3 (silicon),
-bias in V (silicon sensors, LGADs, SiPMs), charge in C/cm^2 per area (MCP-PMT, micro-pattern gas) or C/cm per wire (wire chambers) with the
+even when zero (absent is not zero), with particle species and spectrum (and NIEL source for fluence) when non-zero, depleted volume `V_i` in cm^3 (silicon),
+bias in V (silicon sensors, LGADs, SiPMs), charge in C/cm^2 per area (MCP-PMT, micro-pattern gas, and any PMT, VPT or SiPM reading a dosed scintillator) or C/cm per wire (wire chambers) with the
 geometry stated, with gain and photoelectron rate (MCP-PMT) and, for gas, current density, irradiated area, particle type and energy, gain, rate, gas mixture and materials,
 time in s, temperature in K. Required negative control: a
-history with zero fluence, dose and charge returns no radiation-induced change, and a history with a warm-up returns the
-annealing step. Statuses, first match wins: `missing-history` (an interval or a required input, temperature included, is absent), `no-predictor` (no validated relation: SiPM dark rate, MCP-PMT QE versus charge, gas outside the current density, area and particle field of a cited ageing test), `extrapolated` (an input outside a valid relation's
-fitted range), `no-dose-ageing` (the response changes while fluence, dose and charge are zero), `ok`.
+history whose required fluence, dose and charge are all zero returns no radiation-induced change (zero is inside every relation's range), and a history with a warm-up returns the
+annealing step. Statuses, first match wins: `missing-history` (an interval or a required input, temperature included, is absent), `no-dose-ageing` (the response changes while the sensor's required fluence, dose and charge are all zero), `no-predictor` (non-zero exposure and no relation in [Relations](#relations) for the output: depletion voltage, LGAD gain, SiPM dark rate, WLS fibres, crystals without a monitored response, MCP-PMT QE versus charge, gas outside the conditions of a cited ageing test, all gas inputs above), `extrapolated` (an input or the monitored response outside a relation's
+fitted range or stated validity, such as a large crystal transparency loss), `ok`.
 
 ## Environment coverage
 
@@ -251,18 +243,18 @@ Cells credit the target detector's environment and mark lab, irradiation or beam
 
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
-| silicon bulk and surface | pdg_2025_particle-detectors-at-accelerators; arxiv_1905.03739 | gap | arxiv_1503.07682 (design study: ground proton tests) | gap | gap | gap |
-| LGAD gain layer | pdg_2025_particle-detectors-at-accelerators; arxiv_2004.05260 (irradiation) | gap | n/a: lifetime fluence far below acceptor removal (arxiv_1809.06361) | gap | gap | gap |
+| silicon bulk and surface | arxiv_1905.03739 | gap | arxiv_1503.07682 (design study) | gap | gap | gap |
+| LGAD gain layer | arxiv_2004.05260 (irradiation) | gap | n/a: lifetime fluence far below acceptor removal (arxiv_1809.06361) | gap | gap | gap |
 | SiPM | arxiv_1809.06361 | gap | arxiv_2411.00607 | gap | gap | gap |
-| crystal scintillators | pdg_2025_particle-detectors-at-accelerators; arxiv_1306.2016 (exponent: beam test) | gap | arxiv_1206.1896 | gap | gap | gap |
-| plastic scintillator and WLS | pdg_2025_particle-detectors-at-accelerators; arxiv_1806.02129 | gap | gap | arxiv_2207.12982 | gap | gap |
-| MCP-PMT | gap (related): general principle only (pdg_2025_particle-detectors-at-accelerators) | arxiv_2311.16676 (laboratory tests) | gap | gap | gap | gap |
-| gas ageing | gap (related): general statements only (pdg_2025_particle-detectors-at-accelerators; arxiv_hep-ex_0204005) | arxiv_hep-ex_0204005 | gap | gap | gap | gap |
-| radiation fields | arxiv_1306.2016; arxiv_1905.03739 | gap | arxiv_2411.00607; arxiv_1503.07682; arxiv_1206.1896 (orbit and SAA exposure only) | gap: ageing without an identified dose only (arxiv_2207.12982) | gap | gap |
+| crystal scintillators | arxiv_1306.2016 (exponent: beam test) | gap | arxiv_1206.1896 | gap | gap | gap |
+| plastic scintillator and WLS | arxiv_1806.02129 | gap | gap | arxiv_2207.12982 | gap | gap |
+| MCP-PMT | gap (related): general principle only (pdg_2025_particle-detectors-at-accelerators) | arxiv_2311.16676 (laboratory tests for an FXT detector) | gap | gap | gap | gap |
+| gas ageing | arxiv_hep-ex_0204005 (in situ, and tests of collider chambers) | arxiv_hep-ex_0204005 | gap | gap | gap | gap |
+| radiation fields | arxiv_1306.2016; arxiv_1905.03739 | gap | arxiv_2411.00607; arxiv_1503.07682; arxiv_1206.1896 (exposure only) | gap (arxiv_2207.12982: no identified dose) | gap | gap |
 | conditions and simulation | arxiv_1905.03739; arxiv_1306.2016 | gap | arxiv_1206.1896; arxiv_2411.00607 | arxiv_2207.12982 | gap | gap |
 
 ## Citations
 
 PDG: [the bibliography](detector-principles-bibliography.md), "General and cross-cutting"; the rest:
-`detector-principles-bibliography-radiation.md`, "Radiation damage and ageing". Read 2026-11-19 (PDG: the date in its bibliography entry);
+`detector-principles-bibliography-radiation.md`, "Radiation damage and ageing". Read dates: per bibliography entry (radiation sources from 2026-11-19, PDG 2026-10-14, re-read 2026-11-19);
 locators count PDF pages (PDG: the printed pages).
