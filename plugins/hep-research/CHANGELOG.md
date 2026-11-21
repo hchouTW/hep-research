@@ -298,6 +298,20 @@ Software checks establish contract consistency only, not physical validity.
   number of layers, control-sample contamination, and the input format and limits of `multisample_pid.py`. Every
   method is cited at the sections read, with named instruments and their numbers in example blocks.
 - **hep-detector: calorimeter cluster reconstruction reference.** New `calorimeter-cluster-reconstruction.md`, linked from `event-reconstruction.md`: seeded clustering on cell noise significance, graph clustering for non-projective calorimeters, splitting at local maxima with shared-cell weights, superclustering in a field, logarithmic-weight and S-curve position, depth and direction, shower shapes for electron, photon, neutral-pion and hadron separation, converted photons, cluster energy corrections, preshower, dual readout and imaging calorimeters, each with source locators, a decision table, tool hooks with a closure test and a negative control, and a technique-by-environment coverage table; named apparatus and their numbers sit in example blocks. The "Shower position, direction and shape" section of `calorimetry-ecal-hcal.md` becomes a summary with a link, and drops its inline citation of an unread source. Its sources are in the new split file `detector-principles-bibliography-calorimetry.md`.
+- **New hep-detector reference, resolution shape models** (`skills/hep-detector/references/resolution-shape-models.md`,
+  linked from event-reconstruction). Single- and double-sided Crystal Ball with their closed forms and sign
+  convention, the moments that do not exist for small `n` and the large-`n` limit behind the `alpha`-`n`
+  correlation (fix `n` or use an exponential tail), Gaussian plus pedestal with the floor fixed, or constrained
+  no more loosely than the scaled control's uncertainty, from a signal-free control scaled to the fit sample (or, for a floor flat by
+  construction, from a sideband chosen before the fit beyond the signal tail, flagged separately), core-plus-tail
+  time PDFs, hadronic and partially contained response (the tail side follows the mechanism, and a response matrix,
+  validated in data, replaces the shape when the fit fails in an energy bin), and the three effective-sigma conventions; with a
+  decision table, a rule for transferring a simulated shape to data, tool hooks with inputs, a default
+  goodness-of-fit statistic on bins fixed before the fit, also tested beyond each join at a combined size, thresholds with stated defaults and limits, status rules
+  that name every status blocking each gate and fixed-seed controls with stated sample sizes and rates, and an
+  environment coverage table. The "Resolution models and widths" section of
+  performance-metrics-and-residual-diagnostics.md now summarizes these and links to the new page.
+- **hep-detector: hadronic calorimeter reconstruction references.** New `hadronic-calorimeter-reconstruction.md` and its companion `hadronic-calorimeter-timing-and-model-validation.md`, both linked from `event-reconstruction.md`. The first covers dual-readout and software-compensation relations with their validity (weights on the hadronic-section hits, the weight set chosen by the uncorrected energy), the hadronic calibration chain (EM scale, MIP and muon equalization, test-beam response and its transfer, isolated-track `E/p`, response-matrix unfolding for shallow calorimeters), leakage, dead material and punch-through, and high-granularity hadronic calorimeters, with a tool hook for a software-compensation weight fit. The companion covers shower timing and the observables that validate hadronic physics lists, with a tool hook for a hadronic `geant4_benchmarks.py` benchmark that follows the script's grades, negative-control rules and validation conditions. Each page has a method decision table, an environment coverage table (collider, test beam, space, underground; gaps marked) and a citation list with DOIs and arXiv ids; named apparatus and their numbers sit in example blocks, and every number is located in a cited source.
 
 ## 0.70.0 (2026-11-16)
 

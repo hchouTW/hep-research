@@ -298,6 +298,14 @@ entry was matched against the Crossref record of its DOI on 2026-11-12 and read 
   in the case of the binomial", Biometrika 26 (1934) 404-413, DOI 10.1093/biomet/26.4.404; L. D. Brown, T. T. Cai and
   A. DasGupta, "Interval estimation for a binomial proportion", Statist. Sci. 16 (2001)
   101-133, DOI 10.1214/ss/1009213286. Exact and alternative binomial intervals for efficiencies.
+- J. E. Gaiser, "Charmonium spectroscopy from radiative decays of the J/psi and psi-prime", PhD thesis, Stanford
+  University (1982), report SLAC-R-255, <https://www.slac.stanford.edu/pubs/slacreports/reports02/slac-r-255.pdf>,
+  Appendix F.1. Early Crystal Ball line shape, eq. F-1 (read 2026-11-19 for
+  [resolution shape models](resolution-shape-models.md)).
+- S. Das, "A simple alternative to the Crystal Ball function", arXiv:1603.08591 (2016),
+  <https://arxiv.org/abs/1603.08591>. Crystal Ball closed form, GaussExp and ExpGaussExp (read 2026-11-19).
+- <!-- example: apparatus source --> C. Ligtenberg et al., "Performance of the GridPix detector quad", Nucl. Instrum. Methods A 956 (2020) 163331, DOI 10.1016/j.nima.2019.163331, arXiv:2001.01540v1 (read 2026-11-19/20). Gaussian plus a constant offset for test-beam residuals, background estimated with the telescope timing shifted by 1000 frames (sec. 5.8, Fig. 12). <!-- /example -->
+- <!-- example: apparatus source --> M. Aehle et al., "Performance of the electromagnetic and hadronic prototype segments of the ALICE Forward Calorimeter", JINST 19 (2024) P07006, DOI 10.1088/1748-0221/19/07/P07006, arXiv:2311.07413v2 (read 2026-11-19/21). Resolution from FWHM/2.355 of the response with fit-range and line-shape systematics (sec. 6.3, PDF pp. 48-49). <!-- /example -->
 
 ## Not listed here
 
