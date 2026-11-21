@@ -67,13 +67,9 @@ adjacent-layer staggering, by segment or track fit, or by wire signal timing.
 `(z, +-r)` circles with a two-fold ambiguity per layer), then linking segments to
 tracks.
 
-**Diagnostics.** Residual versus drift distance (the standard plot): state the residual convention
-([glossary](detector-glossary.md): signed track coordinate). In the signed coordinate a `t0` offset
-gives opposite-sign residuals for left and right passages, a drift-velocity error a residual growing
-with distance, and a wire offset the same sign on both sides; in the unsigned drift radius the `t0`
-and wire-offset patterns swap. `t0` and alignment become degenerate when one side dominates the
-track population or the geometry is fixed. Residual versus
-angle and versus amplitude reveal time walk and crossing-angle effects.
+**Diagnostics.** Residual versus drift distance, angle and amplitude separates `t0`, drift-velocity,
+wire-offset and time-walk errors; the signatures and the `r(t)` calibration are in
+[gaseous tracker distortions](gaseous-tracker-distortions.md#drift-chamber-time-to-distance-calibration).
 
 ### Distinctive but generalizable reconstruction and performance features (drift systems)
 
@@ -107,7 +103,7 @@ image and many `dE/dx` samples per track.
 **Pieces.** Diffusion (transverse `~ sqrt(L)`; reduced by `B`), gain stage
 (wires, GEM, Micromegas), **ion backflow** (positive ions drifting back distort `E`),
 **space-charge distortions** (a radially and `z`-dependent position shift), field-cage
-and `E x B` distortions, gating, and **crossing-time ambiguity**: the absolute drift
+and `E x B` distortions ([gaseous tracker distortions](gaseous-tracker-distortions.md)), gating, and **crossing-time ambiguity**: the absolute drift
 coordinate needs the start time `t_0`: an external trigger (PDG RPP 2025 sec. 35.6.4, p. 41),
 a collider's bunch crossing, or `S1` light in rare-event TPCs (sec. 36.4, p. 31); tracks
 not associated with it (pileup, cosmics) are displaced along `z`.
