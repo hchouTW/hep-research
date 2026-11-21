@@ -7,13 +7,12 @@ charge. Sensors, radiation damage, ghosts:
 [silicon recap](gaseous-and-specialized-tracking-technologies.md#silicon-pixels-and-strips-recap-of-what-is-distinctive);
 thresholds and zero suppression:
 [front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression);
-common mode: [noise](front-end-electronics-and-signal-processing.md#noise); alignment and pulls:
+alignment and pulls:
 [in-situ alignment](in-situ-alignment-and-momentum-scale.md),
 [performance metrics](performance-metrics-and-residual-diagnostics.md#residuals-pulls-and-their-covariance).
 Simcal of the Lorentz angle or charge sharing is hep-statistics'
 ([tracker simcal](simulation-calibration/tracker.md)); splitting or charge networks are hep-ml's
-([multivariate analysis](../../hep-ml/references/multivariate-analysis-bdt-nn.md)). Space:
-[space-based direct detection](space-based-direct-detection.md).
+([multivariate analysis](../../hep-ml/references/multivariate-analysis-bdt-nn.md)).
 
 Environments: COL collider; FXT fixed target, test beam; SPC space, balloon; UGD underground; GND ground arrays;
 NUC nuclear. Pitch, thickness, floating strips, field, noise, occupancy, fluence and angle range are parameters.
@@ -23,14 +22,15 @@ Source IDs: `arxiv_<id>` is arXiv:<id> with `/` written `_`; `pdg_2025_<review>`
 
 - **Centre of gravity** (exact as a definition, biased as an estimator; arXiv:2209.03006 sec. 2):
   `x_cog = sum_i S_i x_i / sum_i S_i` over the cluster channels. A noise-weighted form uses `S_i / N_i`
-  (arXiv:1712.02739 sec. 4.1). It is pulled toward the channel centres when charge division is non-linear.
+  (arXiv:1712.02739 sec. 4.1). With non-linear charge division it is biased toward where `dN/deta` peaks: the
+  intermediate strips in one floating-strip layout (arXiv:hep-ex/0212037 sec. 5.1, Fig. 8), readout and floating
+  strips in another (arXiv:1705.09791 sec. 3.2.3, Fig. 5a); use `f(eta)` or check per layout.
 - **Eta** (exact, a definition; arXiv:hep-ex/0212037 sec. 5.1, eq. 3; arXiv:2603.25080 sec. 3.1, eq. 1):
   `eta = S_R / (S_L + S_R)` from the two highest adjacent channels.
 - **Eta correction** (exact for uniform illumination across the pitch within one angle bin and charge
-  range;
-  arXiv:hep-ex/0212037 sec. 5.1, eqs. 4-5; arXiv:2603.25080 sec. 4.2, eqs. 3-4):
+  range; arXiv:hep-ex/0212037 sec. 5.1, eqs. 4-5; arXiv:2603.25080 sec. 4.2, eqs. 3-4):
   `f(eta_0) = (1/N) integral_0^eta_0 (dN/deta) deta`, `x = x_L + p f(eta)`, `p` the readout pitch, `x_L` the
-  left channel. A non-flat `dN/deta` signals non-linear sharing (for example floating strips).
+  left channel.
   `dN/deta` changes with `Z`: wider charge clouds make the central peaks less pronounced
   (arXiv:2603.25080 sec. 4.2, p. 18), so `f` is built per charge range and per angle bin.
 - **Binary resolution** (approximate: single-channel clusters, uniform illumination; arXiv:2603.25085 sec. 4.3,
@@ -39,15 +39,18 @@ Source IDs: `arxiv_<id>` is arXiv:<id> with `/` written `_`; `pdg_2025_<review>`
 - **Head-tail** (approximate, for wide clusters; arXiv:hep-ex/0212037 sec. 7.1, eq. 12):
   `x = (x_head + x_tail)/2 + p (S_tail - S_head) / (2 <S>)`, head and tail the first and last channels above
   threshold, `<S>` the mean channel signal of the cluster.
-- **End-pixel estimator** (approximate; arXiv:1405.6569 sec. 3.1.1, eqs. 1-2): with the projected cluster's
+- **End-pixel estimator** (approximate: two or more pixels, `W - W_inner` from zero to two pixel pitches,
+  else a modified form; arXiv:1405.6569 sec. 3.1.1, eqs. 1-2): with the projected cluster's
   geometric centre `u_geom` and end charges `Q_first`, `Q_last`,
   `u = u_geom + (Q_last - Q_first) / (2 (Q_last + Q_first)) |W - W_inner| - L/2`, where
   `W = D |tan(alpha - pi/2) + tan(theta_L)|` is the expected charge width from the track angle `alpha` and
   `W_inner` the width without the end pixels (zero below three pixels).
-- **Template fit** (approximate; arXiv:1405.6569 sec. 3.1.2, eqs. 3-4):
+- **Template fit** (approximate: angle ranges and fluence as simulated, clusters below an angle-dependent
+  charge maximum; arXiv:1405.6569 sec. 3.1.2, eqs. 3-4):
   `chi2(j) = sum_i ((P_i - N_j S_ij) / Delta P_i)^2`, `N_j = sum_i (P_i / Delta P_i^2) / sum_i (S_ij / Delta P_i^2)`,
   `S_ij` the simulated mean projected charge for intercept bin `j`, `Delta P_i` its expected spread.
-- **Lorentz angle** (approximate; pdg_2025_particle-detectors-at-accelerators sec. 35.8.1.2, p. 65;
+- **Lorentz angle** (approximate: `r_H` about 1.15 for electrons, 0.8 for holes at room temperature
+  and small `B`, about 1 at large `B`; pdg_2025_particle-detectors-at-accelerators sec. 35.8.1.2, p. 65;
   arXiv:physics/0012050 sec. 2, eq. 1): `tan(theta_L) = r_H mu B`, `r_H` the Hall factor. Through the mobility,
   `theta_L` changes with bias, depletion depth, temperature and fluence, and with depth in the sensor
   (arXiv:physics/0012050 secs. 2-3, pp. 3-4): a conditions quantity.
@@ -86,13 +89,13 @@ Across the rows:
   radiation-bias correction for pixels); small `W`: centre of gravity or eta; large `W`: head-tail or an
   end-channel estimator (strips: one tracker selects by observed size, a proxy for `W` that floating strips and
   high `Z` bias, by this page's inference from the examples, though that tracker has one floating strip, arXiv:2201.09824 sec. 8.2.2; pixels of two or more channels, end-pixel
-  or templates: arXiv:1405.6569 secs. 3.1.1-3.1.2, every projection of two or more pixels).
+  or templates: arXiv:1405.6569 secs. 3.1.1-3.1.2).
   `W` is the width expected from the track
   angle (end-pixel `W` above), not the observed size, which floating strips and high `Z` widen at any angle. Eta is
   better at small angles, head-tail at large ones (arXiv:hep-ex/0212037 sec. 7.2); measure the crossover angle.
-- **Cluster shape is a track-quality variable.** Grazing tracks give longer clusters; requiring the size
-  expected from the seed direction removes fake seeds (arXiv:1405.6569 sec. 4.1, p. 17), and the template chi2
-  rejects hits whose profile does not fit the track angle (sec. 3.1.2, p. 9).
+- **Cluster shape is a track-quality variable.** Requiring the size expected from the seed direction removes
+  fake seeds (arXiv:1405.6569 sec. 4.1, p. 17); the template chi2 rejects profiles that do not fit the track
+  angle (sec. 3.1.2, p. 9).
 - **Where the resolution minimum sits.** With one floating strip the resolution at normal incidence is near the
   digital value, which one source takes as `p/(2 sqrt(12))` for readout pitch `p`; it is then expected to be best where the projected track crosses about one implant pitch, half
   a readout pitch (derived here from the quoted minimum angles and geometry, the text saying two strip
@@ -170,10 +173,8 @@ Across the rows:
 
 ## Common misconceptions and failure modes
 
-- **One `f(eta)` for all particles.** It changes with `Z` and angle; from the wrong species it biases positions
-  and, through the position, the charge.
-- **`theta_L` as a constant.** It follows bias, temperature and fluence; re-measure after changes, with the
-  field-off control.
+- **One `f(eta)` for all particles.** From the wrong `Z` or angle it biases positions and, through them, the
+  charge.
 - **Resolution quoted at normal incidence only.** For isotropic fluxes the angle-averaged resolution is
   worse than at normal incidence when the resolution grows monotonically from there (three floating strips in
   the examples), and can be better when its minimum lies inside the acceptance (one floating strip, rule above); quote it versus angle.
