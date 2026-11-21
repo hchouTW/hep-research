@@ -1,11 +1,11 @@
 # Resolution Shape Models
 
-Parametric line shapes for a detector response or residual distribution, and when to use each: single- and
-double-sided Crystal Ball (the `alpha`-`n` correlation), Gaussian plus pedestal, core-plus-tail
-time PDF, hadronic or partially contained response, and effective sigma. Width estimators (RMS, `sigma_68`, MAD,
-RMS90, double Gaussian), residuals and pulls are in
-[performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md), while `sigma_eff`
-here has three conventions (Relations), one named with each value.
+Parametric line shapes for a response or residual distribution, and when to use each: single- and double-sided
+Crystal Ball (the `alpha`-`n` correlation), Gaussian plus pedestal, core-plus-tail time PDF, hadronic or partially
+contained response, and effective sigma. Width estimators (RMS, `sigma_68`, MAD, RMS90, double Gaussian), residuals
+and pulls are in [performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md),
+whose `sigma_68` forms (central, smallest) are two of the three `sigma_eff` conventions here (Relations), each value
+naming its own.
 Unbinned fitting and goodness of fit are hep-statistics'
 ([likelihood fitting](../../hep-statistics/references/likelihood-fitting.md)); a response that no shape describes
 is quoted as an effective sigma or FWHM (Methods, row 7) and, for folding or unfolding, goes into a response
@@ -40,19 +40,18 @@ mean and width.
 - **ExpGaussExp** (exact, a definition; Das, eq. 3): exponential tails on both sides, joined at `-k_L` and
   `+k_H`; two parameters fewer than the DSCB (Das, abstract).
 - **Gaussian plus pedestal** (a model, approximate: the floor is assumed flat over the fit range;
-  arXiv:2001.01540, sec. 5.8, Fig. 12; arXiv:1912.08739, sec. 9.2, Fig. 9):
+  arXiv:2001.01540, sec. 5.8, Fig. 12):
   `f(x) = N_s G(x; mu, sigma) + c`, with `c` the density of entries unrelated to the signal.
-- **Core-plus-tail time PDF** (a model, approximate; arXiv:astro-ph/0407044, secs. 3.1.1 and 3.2.2): a Gaussian of
-  width `sigma_g` for early and prompt residuals, joined smoothly to a one-sided late tail, plus a flat term for
-  random noise hits. `sigma_g` is a free parameter and includes all timing uncertainties, not only the photodetector
-  jitter (sec. 3.2.2). As a tool model (`gauss_late_tail_const`) of the time residual `r`: a Gaussian
+- **Core-plus-tail time PDF** (a model, approximate; arXiv:astro-ph/0407044, secs. 3.1.1 and 3.2.2): a half Gaussian
+  of width `sigma_g` for negative residuals, joined smoothly (a cubic spline up to `t_1`) to a one-sided late tail,
+  plus a flat term for random noise hits. `sigma_g` is free and includes all timing uncertainties, not only
+  photodetector jitter (sec. 3.2.2). As a tool model (`gauss_late_tail_const`) of the time residual `r`: a Gaussian
   core of width `sigma_g` for `r < 0`, a smooth join over `0 <= r < r_1`, a late-tail density `g_late(r; theta)`
   from the caller for `r >= r_1`, and a flat random-hit density `c_r`.
 - **Effective sigma** (exact, a definition with three conventions): the half-width of an interval holding 68.27% of
-  the entries (68% in the sources): the smallest such interval (arXiv:1703.02821, sec. IV), the interval
-  around the most probable value (arXiv:1306.2016, sec. 4.5), or the central interval,
-  `(q84 - q16)/2` (the central `sigma_68` of
-  [performance metrics](performance-metrics-and-residual-diagnostics.md) and `build_response.py`). All three equal
+  the entries (68% in the sources): the smallest such interval (arXiv:1703.02821, sec. IV), the interval around the
+  most probable value (half-width: this page's reading of arXiv:1306.2016, sec. 4.5), or the central interval,
+  `(q84 - q16)/2` (the central `sigma_68`, as in `build_response.py`). All three equal
   `sigma` for a Gaussian; they differ for an asymmetric shape.
 
 ## Methods
@@ -61,15 +60,15 @@ mean and width.
 |---|---|---|---|---|
 | One-sided losses: shower leakage or radiation, incomplete charge collection | Single-sided CB on the loss side | Loss on one side only; enough entries in the tail to see the join | `n` unconstrained (row 3); a tail on the other side ignored; the RMS quoted as the resolution | COL, FXT, UGD |
 | Losses on both sides, or a regression of the per-object resolution | DSCB; quote the core `sigma` as the resolution and the four tail parameters | Both tails populated | Six correlated parameters; the core `sigma` read as the full width | COL, FXT |
-| Tail looks exponential, or `n` runs to its bound | Fix `n` (state the value) and fit `alpha`, or use GaussExp / ExpGaussExp | Goodness of fit passes over the fit range and beyond the join (none of `shape_mismatch`, `insufficient_entries` with `min_tail_entries` beyond the join, `fit_failed` set); `alpha` and `sigma` varied as a systematic over fixed `n` from the smallest passing value to `n_max`, range stated | `alpha` quoted without the fixed `n`; results compared across different fixed `n` | COL only (see below) |
-| Entries unrelated to the signal (wrong matches, noise maxima, accidentals) | Gaussian plus pedestal; floor fixed, or constrained no more loosely than its own uncertainty, from a signal-free control outside the fitted distribution (shifted timing, other channels, an off-time window), scaled to the fit sample by a recorded factor | Control: at least `min_entries` effective entries (else `insufficient_entries`), fitted slope compatible with zero and other channels only at an equal noise rate (else `floor_from_tails`); or a floor flat by construction (argument recorded), fixed from a sideband chosen before the fit, outside the core fit, with a signal-tail contribution (simulation or tail model) below the floor's statistical uncertainty: `floor_from_sideband` (any other sideband use: `floor_from_tails`) | Floor floated with the core, or constrained more loosely, so it trades against the core width (`floor_from_tails`); a non-flat floor | FXT (source fitted the floor; fixing it is guidance here) (UGD: location fit only) |
+| Tail looks exponential, or `n` runs to its bound | Fix `n` (state the value) and fit `alpha`, or use GaussExp / ExpGaussExp | Goodness of fit passes over the fit range and beyond the join (none of `shape_mismatch`, `insufficient_entries` with `min_tail_entries` beyond the join, `fit_failed`, `tail_unconstrained` set); `alpha` and `sigma` varied as a systematic over fixed `n` from the smallest passing value to 50, range stated (zero span: not evaluated) | `alpha` quoted without the fixed `n`; results compared across different fixed `n` | COL only (see below) |
+| Entries unrelated to the signal (wrong matches, noise maxima, accidentals) | Gaussian plus pedestal; floor fixed, or constrained no more loosely than its own uncertainty, from a signal-free control outside the fitted distribution (shifted timing, other channels, an off-time window), scaled to the fit sample by a recorded factor | Control: at least `min_entries` effective entries, fitted slope compatible with zero, other channels only at an equal noise rate; or a floor flat by construction (argument recorded) from a sideband meeting `floor_from_sideband` (Statuses); else `floor_from_tails` (and `insufficient_entries` below `min_entries`) | Floor floated with the core, or constrained more loosely, so it trades against the core width (`floor_from_tails`); a non-flat floor | FXT (source fitted the floor; fixing it is guidance here) |
 | Times entering a likelihood (time residuals) | Core-plus-tail time PDF: Gaussian core, one-sided late tail, flat part | Tail mechanism known (slow shower components, scattering, late light); random hits rate | Tail cut instead of modelled, biasing the likelihood; `sigma_g` read as the photodetector jitter | UGD (COL: shape observed only) |
-| Hadronic or partially contained shower response | A single-sided CB on the observed tail side (row 1, mirrored for a high-side tail), or a DSCB (row 2) if both sides have tails, while each energy bin's own fit passes (none of `fit_failed`, `shape_mismatch`, `insufficient_entries`, `tail_unconstrained` set); otherwise a simulated response matrix with deconvolution | Tail side checked for the observable | Assuming a low-side tail where the mechanism gives a high-side one (E/p with neutral overlap); one shape across energies | COL, FXT, SPC |
+| Hadronic or partially contained shower response | Row 1 on the observed tail side (mirrored for a high side), or row 2 if both sides have tails, while each energy bin's own fit passes (none of `fit_failed`, `shape_mismatch`, `insufficient_entries`, `tail_unconstrained` set); otherwise a simulated response matrix with deconvolution | Tail side checked for the observable | Assuming a low-side tail where the mechanism gives a high-side one (E/p with neutral overlap); one shape across energies | COL, FXT, SPC |
 | Shape unknown or not described by any of the above | Effective sigma or FWHM with a tail fraction, stated with its convention | Enough entries for the quantile; bootstrap uncertainty | Conventions mixed in a comparison; a Gaussian formula used for its uncertainty | COL, FXT |
-| Any quoted resolution | Name the line shape; vary it (Gaussian versus CB, fit range) and take the change as a systematic | Nominal fails (`shape_mismatch`, `fit_failed` or `insufficient_entries` set): quote row 7 instead; nominal passes: try at least Gaussian, CB, DSCB, take the systematic from those that pass (none of these three nor `tail_unconstrained` set), else report it as not evaluated, keep the fit-range variation and add an effective sigma | A single Gaussian fitted over the full range; the fit range not stated | FXT (COL: efficiency fits only) |
+| Any quoted resolution | Name the line shape; vary it (Gaussian versus CB, fit range) and take the change as a systematic | Fewer than `min_entries` in the fit range: no resolution for that bin (merge bins); nominal fails otherwise (`shape_mismatch`, `fit_failed`, or `insufficient_entries` from `min_tail_entries`): quote row 7 instead; nominal passes: try at least Gaussian, CB, DSCB, take the systematic from those that pass (none of `shape_mismatch`, `fit_failed`, `insufficient_entries`, `tail_unconstrained` set), if none passes from the difference to the central effective sigma (said so), keep the fit-range variation and add an effective sigma | A single Gaussian fitted over the full range; the fit range not stated | FXT (COL: efficiency fits only) |
 
-**The `alpha`-`n` correlation** follows from the large-`n` limit (Relations), a property of the function wherever
-the CB is used (Das, Fig. 1). Gaiser (Table 20: power term fixed) and Das (p. 1: `n` makes the fit unstable) report
+**The `alpha`-`n` correlation** is a property of the function wherever the CB is used (Relations, Das, Fig. 1);
+Gaiser (Table 20: power term fixed) and Das (p. 1: `n` makes the fit unstable) report
 `n` unconstrained without naming it.
 
 <!-- example: the Crystal Ball NaI(Tl) detector at SPEAR (Gaiser, SLAC-R-255, App. F) -->
@@ -80,31 +79,25 @@ fits were "very insensitive" to the power term over 15.0-27.0, so it was "fixed 
 
 <!-- example: synthetic fits in Das, arXiv:1603.08591, Fig. 1 (page 3) -->
 On GaussExp samples with `k = 0.5`, converged CB fits gave `alpha = 0.7 +- 0.1`, `n = 10 +- 6` (1000 points) and
-`alpha = 0.53 +- 0.02`, `n = 70 +- 60` (10000 points; Fig. 1 legends a, b): `alpha` moved towards `k` as
-the fitted `n` grew, with `n` unconstrained.
+`alpha = 0.53 +- 0.02`, `n = 70 +- 60` (10000 points; Fig. 1 legends a, b): `alpha` moved towards `k` as the fitted
+`n` grew, `n` unconstrained.
 <!-- /example -->
 
 <!-- example: CMS electron and photon energy regression (arXiv:2012.06888, sec. 6.1, eqs. 4-5) -->
-The regression predicts all six DSCB parameters per object; "the width of the Gaussian core sigma is the
-estimate of the per-object energy resolution", and the most probable value `mu` is the energy correction.
+The regression predicts all six DSCB parameters per object; "the width of the Gaussian core sigma is the estimate of
+the per-object energy resolution", and `mu` the energy correction.
 <!-- /example -->
 
 <!-- example: GridPix quad in a test-beam telescope (arXiv:2001.01540, sec. 5.8, Fig. 12) -->
 Tails partly from wrongly matched background tracks, estimated by shifting the telescope timing by 1000
-frames, for comparison; fit: a Gaussian with a free constant offset. The 35-ton LArTPC prototype
-(arXiv:1912.08739, sec. 9.2, Fig. 9) fitted Gaussians plus constant offsets to the per-TDC-tick z of the wire with
-the largest standardized ADC value, for the counters' central z (a location fit, not a resolution); noise-only
-entries are equally likely on every wire, so the floor is flat only over working, uniformly spaced wires, not tested
-there (the fit used collection-plane wires, and 28% of all TPC channels were not working or not read out at the end
-of the run, printed page 9; outer distributions truncated).
+frames, for comparison; fit: a Gaussian with a free constant offset.
 <!-- /example -->
 
 <!-- example: ATLAS Tile Calorimeter cell times and AMANDA photon arrival times -->
 Tile Calorimeter channel times (arXiv:1806.02129, sec. 3.1, Fig. 5): Gaussian core, late tail from the slow hadronic
 component, symmetric out-of-time pileup tails. AMANDA (arXiv:astro-ph/0407044, secs. 3.1.1-3.2.2): Pandel gamma
-distribution (eq. 17) for scattering in ice from `t_1 = sqrt(2 pi) sigma_g` on, a half Gaussian of width `sigma_g`
-for negative residuals, a cubic spline over `0 <= t_res < t_1` (smooth, normalization kept), plus noise hits (Fig.
-4); `10 ns <= sigma_g <= 20 ns` reconstructed well (sec. 3.2.2).
+distribution (eq. 17) for scattering in ice from `t_1 = sqrt(2 pi) sigma_g` on, joined to the half Gaussian as above
+(smooth, normalization kept), plus noise hits (Fig. 4); `10 ns <= sigma_g <= 20 ns` reconstructed well (sec. 3.2.2).
 <!-- /example -->
 
 <!-- example: hadronic and partially contained response (ACCESS prototype, DAMPE, ATLAS E/p) -->
@@ -123,12 +116,15 @@ Gaussian signal model (arXiv:1206.4071, sec. 5.1.3): a shape systematic of an ef
 
 ## Distinctive but generalizable features (resolution shapes)
 
-- **Topology**: a 1D response (`x_reco / x_true`, `x_reco - x_true`) or residual per conditioning bin.
+- **Topology**: a 1D response (`x_reco / x_true`, `x_reco - x_true`) or residual per conditioning bin, or a line
+  about a known value, its natural width negligible or folded in (stated).
 - **Inverse problem**: core and tail parameters; degeneracies `alpha`-`n`, floor-core width, width-fit range.
 - **Natural objects**: a monoenergetic line (beam, source, resonance), a matched track residual, a hit time.
 - **Informative residual**: data minus the fitted shape at the joins and in the tails.
 - **Scaling**: the core width follows the resolution terms; tails change with energy (fit per bin).
-- **Conventions**: model, tail sides, fit range, fixed `n`, effective-sigma convention.
+- **Conventions**: model, tail sides and `alpha` sign, fit range, fixed parameters (`n`, floor, from simulation),
+  goodness-of-fit statistic and binning, thresholds, effective-sigma convention, tail fraction (`k_tail`, central
+  `sigma_68`).
 - **Tails**: leakage, radiation, charge loss, slow components, scattering, wrong matches, noise, (COL) pileup.
 - **Dependence**: energy, angle, position, rate, selection.
 - **Data sample**: test beams, calibration lines, narrow resonances, matched tracks, floor controls.
@@ -136,9 +132,10 @@ Gaussian signal model (arXiv:1206.4071, sec. 5.1.3): a shape systematic of an ef
   core and tail parameters free and none of `shape_mismatch`, `insufficient_entries`, `fit_failed`,
   `tail_unconstrained` set (one kept from simulation is listed and moves, freed in that fit, by less than its
   data-fit uncertainty, itself below `tail_rel_unc_max` of the value), or scaled and accepted only if its goodness
-  of fit in data passes in the same bin, core and tails (none of `shape_mismatch`, `insufficient_entries`,
-  `fit_failed` set), otherwise re-fitted or replaced by a response matrix; comparisons and smearing variations are
-  in [data/MC validation](data-mc-validation-and-detector-systematics.md).
+  of fit in data passes in the same bin over the fit range and, separately, beyond each join (none of
+  `shape_mismatch`, `insufficient_entries`, `fit_failed` set), otherwise it does not transfer: the data shape is
+  fitted under Methods (row 3 for a fixed `n`) or replaced by a response matrix; comparisons and smearing variations
+  are in [data/MC validation](data-mc-validation-and-detector-systematics.md).
 
 ## Common misconceptions and failure modes
 
@@ -153,9 +150,9 @@ Gaussian signal model (arXiv:1206.4071, sec. 5.1.3): a shape systematic of an ef
 
 - The named line shape with its formula, all fitted and fixed parameters (fixed ones marked), the fit
   range, and the fit quality.
-- A width and a tail measure, never one number for both: the core width with its tail parameters, or, for a
-  model without them (`gauss`, `gauss_plus_const`) or an effective sigma or FWHM, a tail fraction with its `k_tail`
-  and the `sigma_68` convention it multiplies.
+- A width and a tail measure, never one number for both: the core width with its tail parameters (and a tail
+  fraction if `tail_unconstrained` is set or all tail parameters are fixed), or, for a model without them (`gauss`,
+  `gauss_plus_const`) or an effective sigma or FWHM, a tail fraction with its `k_tail` (central `sigma_68`).
 - For a pedestal: the control sample and its scale factor (or the flatness argument, the sideband and its
   signal-tail contribution), the floor it gave, the fitted floor, and the change in core `sigma` from the floor's
   uncertainty.
@@ -173,17 +170,19 @@ A shape-fit tool (none yet; `build_response.py` fits no parametric shape) would 
   the sample's central `sigma_68` wide, merged to at least 5 entries keeping a bin beyond each join, or one at least
   as tail-sensitive on the positive control's DSCB toys), and the thresholds, all fixed before the fit: `gof_p_min`
   (default 0.05, from 0.05 to below 1), `tail_rel_unc_max` (default 0.5, at most 0.5), `n_max` (default 50, at most
-  50; Das, p. 4, rejects an `n` of 113 or 127), `min_entries` (default 100, at least 100) and `min_tail_entries`
+  50, tightening `tail_unconstrained` only, as row 3's scan runs to 50; Das, p. 4, rejects an `n` of 113 or 127),
+  `min_entries` (default 100, at least 100) and `min_tail_entries`
   (default 10, at least 10), counted as effective entries `(sum w)^2 / sum w^2`, and the tail-fraction threshold
   `k_tail` in units of the central `sigma_68` (default 3, at most 3, as in `build_response.py`). Defaults and limits
   are this page's unsourced convention; a non-default value is reported. For a flat term: a signal-free control
-  sample, or for `gauss_late_tail_const` a measured random-hit rate.
+  sample with its scale factor, a sideband (range, signal-tail estimate, flatness argument, chosen before the fit),
+  or for `gauss_late_tail_const` a measured random-hit rate with its uncertainty, entries and factor to `c_r`.
 -  **Outputs**: parameters with uncertainties, their correlation matrix and the bounds, the core `sigma`, the three
   effective-sigma conventions and the FWHM with bootstrap uncertainties, the tail fraction
   `|r - median| > k_tail sigma_68` (central `sigma_68`), the fit quality, the status set, the statistic and binning,
   the model standard deviation if finite (`moments_undefined` not set, never with a flat term: it depends on the fit
-  range), all thresholds used, the floor's source with the control and the fitted floor, and the change in core
-  `sigma` for each alternative model and fit range.
+  range), all thresholds used, the floor's source, control and fitted floor, and the change in core `sigma` for each
+  alternative model and fit range.
 -  **Units and conventions**: `mu`, `sigma`, `sigma_g`, `r`, `r_1` in the input's unit; `c`, `c_r` in sum of weights
   per input unit (entries if unweighted), `N_s` in sum of weights; `theta` in the units `g_late` defines; `alpha`
   (and `alpha_L`, `alpha_R`, `k`, `k_L`, `k_H`) in units of `sigma`; `n`, `n_L`, `n_R` dimensionless; tail sides
@@ -193,9 +192,10 @@ A shape-fit tool (none yet; `build_response.py` fits no parametric shape) would 
   generated width as core `sigma` and a status set containing `tail_unconstrained` (`moments_undefined` also
   allowed); `gauss_plus_const` without a control, or constrained more loosely than the control's uncertainty, and
   `gauss_late_tail_const` with a free flat term must return `floor_from_tails`, a floor fixed from a sideband
-  meeting row 4 `floor_from_sideband` (chosen after the fit: `floor_from_tails`), a 10-entry control
-  `insufficient_entries`, and a floor fixed from a signal-free control neither; an unconverged fit must return
-  `fit_failed`, not `ok`, at any threshold. Positive control: a CB sample of 10,000 entries generated with
+  meeting row 4 `floor_from_sideband` without `floor_from_tails` (chosen after the fit: `floor_from_tails`), a
+  10-entry control `insufficient_entries` and `floor_from_tails`, and a floor fixed from a signal-free control
+  meeting row 4 none of `floor_from_tails`, `floor_from_sideband`, `insufficient_entries`; an unconverged fit must
+  return `fit_failed`, not `ok`, at any threshold. Positive control: a CB sample of 10,000 entries generated with
   `alpha = 1.5`, `n = 5` and fitted with `n` fixed at 5, at default thresholds, must return `alpha` with status `ok`
   for a seed fixed and recorded before the first run (over 1000 toys, `shape_mismatch` in a fraction within binomial
   3 sigma of `gof_p_min` (p-values calibrated by toys if needed), `tail_unconstrained` and `fit_failed` each below
@@ -203,18 +203,21 @@ A shape-fit tool (none yet; `build_response.py` fits no parametric shape) would 
   `shape_mismatch` in at least 99% of toys; with a fixed `n <= 3` the set contains `moments_undefined`).
 -  **Statuses** (a set, all that apply are reported; `ok` only when no other is set, `floor_from_sideband` aside):
   `ok`; `tail_unconstrained` (a fitted tail parameter at its input bound, or with relative uncertainty above
-  `tail_rel_unc_max` or undefined, or a fitted power above `n_max`, fixed parameters exempt); `moments_undefined`
+  `tail_rel_unc_max` or undefined, or a fitted power above `n_max`, or a tail parameter fixed neither at a stated,
+  sourced value, such as a control's generated value, nor within row 3's scan); `moments_undefined`
   (any power `p` of `n`, `n_L`, `n_R` with `p <= 3` when fixed, or `p - sigma_p <= 3` or `sigma_p` undefined when
   fitted, or a `g_late` without finite variance; no standard deviation reported); `shape_mismatch` (the named
   statistic's p-value below `gof_p_min`); `floor_from_tails` (a flat term, in `gauss_plus_const` or
   `gauss_late_tail_const`, neither fixed from, nor constrained within its own uncertainty by, a scaled signal-free
-  control outside the fitted distribution meeting row 4 (slope compatible with zero, equal noise rate), nor from a
-  measured random-hit rate (`gauss_late_tail_const`), nor fixed from a sideband meeting `floor_from_sideband`);
-  `floor_from_sideband` (a floor fixed from a sideband chosen before the fit, outside the core fit, with a
-  signal-tail contribution below the floor's statistical uncertainty, flatness argued, `ok` still allowed);
-  `insufficient_entries` (fewer effective entries than `min_entries` in the fit range, for a quantile width or in a
-  floor control (row 4), or than `min_tail_entries` beyond a join); `fit_failed` (minimizer not converged or
-  covariance not positive definite; no parameter reported as measured).
+  control outside the fitted distribution meeting row 4 (at least `min_entries`, slope compatible with zero, equal
+  noise rate), nor by a measured random-hit rate (`gauss_late_tail_const`, within its uncertainty), nor fixed from a
+  sideband meeting `floor_from_sideband`);
+  `floor_from_sideband` (a floor flat by construction, argument recorded, fixed from a sideband chosen before the
+  fit, outside the core fit, with at least `min_entries` effective entries and a signal-tail contribution below the
+  floor's statistical uncertainty, `ok` still allowed);
+  `insufficient_entries` (fewer effective entries than `min_entries` in the fit range, for a quantile width, or in a
+  floor control, sideband or random-hit-rate measurement, or than `min_tail_entries` beyond a join); `fit_failed`
+  (minimizer not converged or covariance not positive definite; no parameter reported as measured).
 
 ## Environment coverage
 
@@ -225,11 +228,11 @@ link alone is a `gap` here, and a cell follows the measurement's environment (a 
 |---|---|---|---|---|---|---|
 | Single-sided CB | inspire_183554 | arxiv_2311.07413 | gap | arxiv_2604.25748 | gap | gap |
 | DSCB | arxiv_2012.06888 | arxiv_2607.28477 | gap | gap | gap | gap |
-| Fixed `n`, GaussExp (`alpha`-`n` correlation) | inspire_183554 (`n` fixed); related: arxiv_1603.08591 (synthetic, no environment); correlation: Relations | gap (not discussed) | gap | gap (not discussed) | gap | gap |
-| Gaussian plus pedestal | gap | arxiv_2001.01540 (control for comparison; floor fitted) | gap | gap (related: arxiv_1912.08739, location fit; floor assumed flat, not tested, fitted) | gap | gap |
-| Core-plus-tail time PDF | gap (related: arxiv_1806.02129, shape observed; not used as a likelihood PDF) | gap | gap | arxiv_astro-ph_0407044; [photon likelihood reconstruction](photon-likelihood-reconstruction.md) (time term) | gap | gap |
+| Fixed `n`, GaussExp (`alpha`-`n` correlation) | Fixed `n`: inspire_183554 (fixed at 15.0, no scan); GaussExp: gap (related: arxiv_1603.08591, synthetic); correlation: Relations | gap (not discussed) | gap | gap (not discussed) | gap | gap |
+| Gaussian plus pedestal | gap | arxiv_2001.01540 (control for comparison; floor fitted) | gap | gap | gap | gap |
+| Core-plus-tail time PDF | gap (related: arxiv_1806.02129, shape observed, no likelihood PDF) | gap | gap | arxiv_astro-ph_0407044; [photon likelihood reconstruction](photon-likelihood-reconstruction.md) (time term) | gap | gap |
 | Hadronic or partially contained response | arxiv_1203.1302 (high-side tail); low-side: gap (pdg_2025_particle-detectors-at-accelerators, sec. 35.10.1.1: non-Gaussian only) | arxiv_1712.05494 (low-side tail) | arxiv_1909.12860 (response-matrix branch); [space based direct detection](space-based-direct-detection.md) | gap | gap | gap |
-| Effective sigma | arxiv_1306.2016 | arxiv_1703.02821 (beam test, sec. IV) | gap (related: arxiv_1703.02821, beam test of a space instrument) | gap (related: R68, [neutrino astronomy](neutrino-astronomy.md)) | gap (related: R68, [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md), [ground based detection arrays](ground-based-detection-arrays.md)) | gap |
+| Effective sigma | arxiv_1306.2016 | arxiv_1703.02821 (beam test, sec. IV) | gap (related: arxiv_1703.02821, space instrument's beam test) | gap (related: R68, [neutrino astronomy](neutrino-astronomy.md)) | gap (related: R68, [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md), [ground based detection arrays](ground-based-detection-arrays.md)) | gap |
 | Model choice as a systematic | gap (related: arxiv_1206.4071, signal model of an efficiency fit) | arxiv_2311.07413 | gap | gap | gap | gap |
 
 R68 (68% containment radius of a point-spread function) is a related 2D measure those references own. Four uses were
@@ -243,7 +246,7 @@ Read 2026-11-19; format of the [detector principles bibliography](detector-princ
 apparatus papers by arXiv id:
 
 - J. E. Gaiser, "Charmonium spectroscopy from radiative decays of the J/psi and psi-prime", PhD thesis, Stanford
-  University (1982), report SLAC-R-255, https://www.slac.stanford.edu/pubs/slacreports/reports02/slac-r-255.pdf
+  University (1982), SLAC-R-255, https://www.slac.stanford.edu/pubs/slacreports/reports02/slac-r-255.pdf
   (INSPIRE 183554), Appendix F.1 (eq. F-1, printed pp. 178-179) and Table 20. Early CB line shape.
 - S. Das, "A simple alternative to the Crystal Ball function", arXiv:1603.08591 (2016),
   https://arxiv.org/abs/1603.08591, eqs. 1-3, Fig. 1, abstract and pages 1 and 4.
@@ -253,10 +256,6 @@ apparatus papers by arXiv id:
   https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf, sec. 35.10.1.1 (p. 92).
   Non-Gaussian hadronic response.
 
-<!-- example: apparatus papers read for this page (2026-11-19; sections where used) -->
-- CMS arXiv:2012.06888, 1306.2016, 1206.4071; ATLAS 1806.02129, 1203.1302; ALICE FoCal 2311.07413.
-- CRILIN arXiv:2607.28477, sec. 7.5.3; CONUS+ 2604.25748 (2026), sec. 4, Fig. 7.
--  GridPix quad 2001.01540; 35-ton LArTPC 1912.08739, secs. 5 and 9.2; AMANDA astro-ph/0407044; ACCESS prototype
-  1712.05494.
-- DAMPE arXiv:1909.12860 and 1703.02821 (arXiv versions read).
+<!-- example: apparatus papers cited only by ID above (read 2026-11-19, arXiv versions) -->
+- CRILIN arXiv:2607.28477, sec. 7.5.3; CONUS+ 2604.25748, sec. 4, Fig. 7; DAMPE 1909.12860, 1703.02821.
 <!-- /example -->
