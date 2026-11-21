@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 71,
-   "bytes": 1085431,
+   "references": 72,
+   "bytes": 1115880,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1890,6 +1890,7 @@
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-calibration.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/hadronic-calorimeter-reconstruction.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
@@ -2089,6 +2090,7 @@
    "cited_by": [
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md"
    ],
@@ -2138,7 +2140,7 @@
     "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
     "skills/hep-detector/references/detector-principles-summary.md",
-    "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
@@ -2178,12 +2180,13 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
    "owner": "hep-detector",
-   "bytes": 8429,
-   "lines": 87,
+   "bytes": 14358,
+   "lines": 101,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography.md",
-    "skills/hep-detector/references/event-reconstruction.md"
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "692e18d3d 2026-11-20"
@@ -2200,7 +2203,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4c5a215dd 2026-11-21"
+   "last_commit": "11d23f2fa 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
@@ -2242,12 +2245,13 @@
     "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/resolution-shape-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0e03be77c 2026-11-20"
+   "last_commit": "11d23f2fa 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2345,8 +2349,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 20041,
-   "lines": 273,
+   "bytes": 20259,
+   "lines": 274,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2371,7 +2375,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "692e18d3d 2026-11-20"
+   "last_commit": "11d23f2fa 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2492,14 +2496,15 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 25033,
-   "lines": 382,
+   "bytes": 24760,
+   "lines": 378,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-tracking.md",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -2510,7 +2515,20 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "33da8094f 2026-11-19"
+   "last_commit": "6ae35407e 2026-11-21"
+  },
+  {
+   "path": "skills/hep-detector/references/gaseous-tracker-distortions.md",
+   "owner": "hep-detector",
+   "bytes": 24575,
+   "lines": 278,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "adbf01c8e 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2656,6 +2674,7 @@
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md"
    ],
    "cited_by_other_skills": [],
@@ -2758,6 +2777,7 @@
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/multisample-pid-and-reference-pdfs.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/particle-identification.md",
@@ -3008,7 +3028,8 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
-    "skills/hep-detector/references/detector-simulation.md"
+    "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md"
    ],
    "cited_by_other_skills": [
     "hep-computing"
@@ -3031,6 +3052,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md"
@@ -4891,6 +4913,7 @@
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
     "profiles/experiments/ams-02/modules/methods/statistical-diagnostics.md",
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/simulation-calibration/dirc.md",
     "skills/hep-detector/references/simulation-calibration/ecal.md",
@@ -5739,7 +5762,7 @@
   {
    "a": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
    "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
-   "jaccard": 0.013,
+   "jaccard": 0.008,
    "containment": 0.459,
    "shared_shingles": 17
   },
@@ -5890,6 +5913,10 @@
   "function": [
    "skills/hep-theory/references/dis-structure-functions.md",
    "skills/hep-theory/references/fragmentation-functions.md"
+  ],
+  "gaseou": [
+   "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+   "skills/hep-detector/references/gaseous-tracker-distortions.md"
   ],
   "guideline": [
    "skills/hep-computing/references/bash-balanced-design-guidelines.md",

@@ -270,3 +270,4 @@ its routing table and representative cases, is in [reconstruction method contrac
 - [Resolution shape models](resolution-shape-models.md): Crystal Ball and double-sided Crystal Ball (alpha-n correlation), Gaussian plus pedestal, core-plus-tail time PDF, hadronic or partially contained response, effective sigma, and when to use each.
 - [Hadronic calorimeter reconstruction](hadronic-calorimeter-reconstruction.md): software compensation, the hadronic calibration chain, leakage and punch-through, high-granularity HCALs
 - [Hadronic calorimeter timing and model validation](hadronic-calorimeter-timing-and-model-validation.md): shower timing and the observables that validate hadronic physics lists
+- [Gaseous tracker distortions](gaseous-tracker-distortions.md): TPC space charge and E x B distortion maps (gas TPC and LArTPC treated separately), drift-velocity and t0 references, and drift-chamber r(t) calibration
