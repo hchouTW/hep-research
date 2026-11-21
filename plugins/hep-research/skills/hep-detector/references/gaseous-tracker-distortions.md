@@ -6,17 +6,15 @@ primary ionization (arXiv:2008.10472, sec. 1, fn. 1, p. 3); static field and `E 
 for drift velocity, `t0` and maps; and the drift-chamber `r(t)`. Environments: COL, FXT, UGD; SPC, GND and NUC are
 gaps (no source read).
 
-TPC and drift-chamber principles: [gaseous and specialized tracking
-technologies](gaseous-and-specialized-tracking-technologies.md). Transport, Lorentz angle and space charge in brief:
-[signal formation and readout](signal-formation-and-readout.md#charge-drift-diffusion-gain-losses). The LArTPC
-calorimetry chain (`dQ/dx` corrections, recombination, `t0` from light): [noble liquid neutrino and rare event
-detectors](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs).
-Residual solvers and convergence: [in-situ calibration methods](in-situ-calibration-methods.md);
-`t0` versus alignment, [case studies](detector-case-studies-and-checklists.md) (Case 3), and conditions, [calibration
-and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data); drift-velocity tables:
-[sensor and gas transport tools](sensor-and-gas-transport-tools.md). Fitting *simulator* parameters (a simulated
-`r(t)` or ion mobility) to data is simcal, owned by hep-statistics
-([simcal scripts](../../hep-statistics/references/core-stats-guide.md#skill-scripts)), not this page.
+Principles: [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md);
+transport and Lorentz angle: [signal formation](signal-formation-and-readout.md#charge-drift-diffusion-gain-losses);
+LArTPC `dQ/dx` and recombination: [noble liquid
+detectors](noble-liquid-neutrino-and-rare-event-detectors.md#imaging-reconstruction-in-single-phase-lartpcs);
+residual solvers: [in-situ calibration methods](in-situ-calibration-methods.md); `t0` versus alignment: [case
+studies](detector-case-studies-and-checklists.md) (Case 3); conditions: [calibration and
+alignment](calibration-and-alignment.md#time-dependence-and-conditions-data); drift-velocity tables: [gas transport
+tools](sensor-and-gas-transport-tools.md). Fitting simulator parameters to data is simcal
+([hep-statistics](../../hep-statistics/references/core-stats-guide.md#skill-scripts)).
 
 ## Relations
 
@@ -26,18 +24,18 @@ and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data)
 | 2 | the `E x B` term vanishes for `E` parallel to `B`; for `w tau > 1` electrons follow `B`, so `E` non-uniformity matters less | approximate | PDG sec. 35.6.4, pp. 42-43; near amplification wires `E` and `B` are not parallel (wire `E x B`), much less so with MPGDs (p. 44) |
 | 3 | `rho_SC` proportional to (rate x ion drift time) x primary ionization x `(1 + eps)`; `IB = (1 + eps) / G_eff`, so `eps` (ions fed back per primary electron) is about `gain x IBF` | definition exact; proportionality approximate (shape ignored) | arXiv:2109.12000, sec. 2, p. 2; arXiv:1209.0482, sec. 2, Eq. 5, p. 5 |
 | 4 | backflow ions enter at the readout plane each time step and drift through: `N_ijn = N_ij^I + N_(i,j-1,n-1)`; equilibrium after `z_max / u+` | approximate (azimuthal symmetry, instantaneous electron drift) | arXiv:1209.0482, sec. 3, Eqs. 12-13, p. 6 |
-| 5 | `sigma_SC / mu_SC = N_pile^(-1/2) sqrt(1 + (sigma_N/mu_N)^2 + (1 + (sigma_Q/mu_Q)^2) / F_mu)`: ion pile-up events, multiplicity spread, per-track charge spread, `F_mu` the tracks in the volume fraction | approximate (independent events) | arXiv:2109.12000, sec. 2, Eq. 1, p. 3; checked with toy and full simulation (Fig. 2, p. 4); larger for small volume elements |
+| 5 | `sigma_SC / mu_SC = N_pile^(-1/2) sqrt(1 + (sigma_N/mu_N)^2 + (1 + (sigma_Q/mu_Q)^2) / F_mu)`: ion pile-up events, multiplicity spread, per-track charge spread, `F_mu` the tracks in the volume fraction | approximate (independent events) | arXiv:2109.12000, sec. 2, Eq. 1, p. 3; larger for small volume elements |
 | 6 | LAr, one-dimensional: `alpha = (L/E_0) sqrt(K / (eps mu+))`, `E_x(x) = E_0 sqrt((E_a/E_0)^2 + alpha^2 (x/L)^2)`; the anode field vanishes for `alpha >= 2` | exact for uniform injection `K` and field-independent yield | arXiv:2008.10472, sec. 2.1, Eqs. 5-6, p. 4; recombination raises the threshold (sec. 2.3, p. 6) |
 | 7 | `delta x_max = gamma L^3 K / (9 sqrt(3) E_0^2 eps mu+)` at `x = L/sqrt(3)` from the anode, `gamma = (dv_e/v_e)/(dE/E)` | approximate (first order in `alpha^2`) | sec. 2.2, Eqs. 9-11, p. 6; the ion-mobility uncertainty enters `alpha^2` directly (p. 5) |
-| 8 | `t_meas = t0_channel + t_TOF + t_prop + t_L1 + t_drift`; pedestal `t_trig = t_TOF + t_prop + t_L1` (`t_L1`: Level-1 latency) | exact (decomposition) | arXiv:0911.4895, sec. 6.1, Eqs. 1-2, p. 10 |
+| 8 | `t_meas = t0_channel + t_TOF + t_prop + t_L1 + t_drift = t0_channel + t_trig + t_drift`, pedestal `t_trig = t_TOF + t_prop + t_L1` (`t_L1`: Level-1 latency) | exact (decomposition) | arXiv:0911.4895, sec. 6.1, Eqs. 1-2, p. 10 |
 | 9 | `v_eff = L_half-cell / <T_max>`, `T_max` from the mean-timer over three adjacent layers | approximate (linear `r(t)`) | sec. 7, Eq. 4, p. 13 |
-| 10 | map as a tensor-product spline `s(z, r) = sum_ij gamma_ij M_i(z) N_j(r)`, solved from `A^T W A gamma = A^T W f` | exact (linear least squares, fixed knots) | arXiv:1209.0482, sec. 5.2, Eqs. 19-23, pp. 9-10 |
+| 10 | map as a tensor-product spline `s(z, r) = sum_ij gamma_ij M_i(z) N_j(r)`, solved from `A^T W A gamma = A^T W f` (Eq. 23 with `A' = wA`, `w^2 = W`) | exact (linear least squares, fixed knots) | arXiv:1209.0482, sec. 5.2, Eqs. 19-23, pp. 9-10 |
 
 ## Space charge in gas TPCs
 
-- **Origin.** Ions drift slowly, so ions of many events coexist; the larger share comes from the amplification
-  stage. A gating grid stops them but limits the rate to a few kHz; MPGD stacks reduce the backflow instead. Neon
-  instead of argon gives fewer electrons per length and faster ions (PDG sec. 35.6.4, p. 44).
+- **Origin.** Ions drift slowly, so ions of many events coexist; the larger share comes from the amplification stage.
+  A gating grid stops them but limits the rate to a few kHz; MPGD stacks reduce the backflow instead (PDG sec. 35.6.4,
+  p. 44).
 - **From density to distortion.** Poisson's equation gives the field, the Langevin equation the drift
   (arXiv:2109.12000, sec. 2, p. 2; arXiv:1209.0482, secs. 4.1-4.2, pp. 7-8). With `E` parallel to `B` and a
   symmetric charge, the radial field still produces azimuthal shifts through the `E x B` term (p. 8).
@@ -53,8 +51,8 @@ and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data)
   its update interval (p. 3).
 - **Laser grid and spline fit** (FXT, a simulation study; arXiv:1209.0482, secs. 5-6, pp. 8-12): straight tracks at
   known positions, hits within a tube around each beam, residuals perpendicular to the track, a spline surface
-  (relation 10). Without symmetry or an optimal grid, hit errors set large along each laser track (cluster
-  covariance; sec. 5.2, p. 10) minimize residual-projection bias; extending it to reference tracks from other
+  (relation 10). Without symmetry or an optimal grid, hit errors are set large along each laser track (from the cluster
+  covariance; sec. 5.2, p. 10) to minimize residual-projection bias; extending it to reference tracks from other
   detectors, which must be undistorted, is an untested outlook (p. 12).
 
 <!-- example: experiment-specific illustration (ALICE TPC, Pb-Pb at 50 kHz, Run 3 design; arXiv:2109.12000, arXiv:2003.03174) -->
@@ -66,7 +64,7 @@ one map needs at least 450k matched tracks, one map per 40 minutes in Run 2, abo
 <!-- /example -->
 
 <!-- example: experiment-specific illustration (PANDA GEM-TPC design study, fixed target, simulation; arXiv:1209.0482) -->
-IB = 0.25% with G_eff = 2000 gives eps = 4 (sec. 2, p. 5); equilibrium densities 20-65 fC/cm^3 (p. 7), drift
+IB = 0.25% with G_eff = 2000 gives eps = 4 (sec. 2, p. 5); drift
 distortions up to 10 mm (abstract), spline map precision better than 100 um (sec. 6, p. 12).
 <!-- /example -->
 
@@ -82,27 +80,26 @@ distortions up to 10 mm (abstract), spline map precision better than 100 um (sec
 - **Cosmic-muon calibration** (UGD; arXiv:2008.09765, sec. 4, Fig. 6, pp. 12-13): `t0`-tagged tracks crossing the
   faces (anode-piercing tracks need no correction at the anode), then the cathode, then the bulk from nearly
   intersecting track pairs, which fix the offset in three dimensions; a nominal drift velocity from anode-to-cathode
-  tracks comes first (sec. 4.1, p. 13). The spatial maps give the field map. Data-driven maps (three spatial and
-  three field components) are inverted for data and for a data-driven simulation (FXT; arXiv:2007.06722, sec. 6.1,
+  tracks comes first (sec. 4.1, p. 13). The spatial maps give the field map. Data-driven spatial and
+  field maps are inverted for data and simulation alike (FXT; arXiv:2007.06722, sec. 6.1,
   p. 74).
-- **Laser in a LArTPC**: true positions known (arXiv:1910.01430, sec. 2.2, p. 8); coverage limited by the mirror
-  motion (arXiv:2008.09765, sec. 4, p. 12), the field-cage rings and the anode region (arXiv:1910.01430, sec. 2.1,
-  p. 8; p. 16). Laser residuals used to estimate and remove the bias of the cosmic map
-  then shrink by construction: a consistency check, not an independent test (arXiv:2008.09765, sec. 6.1, pp. 29-30).
+- **Laser in a LArTPC** (UGD): true positions known (arXiv:1910.01430, sec. 2.2, pp. 8-9); coverage limited by the
+  mirror motion (arXiv:2008.09765, sec. 4, p. 12) and shadowed by the field-cage rings and near the anode
+  (arXiv:1910.01430, sec. 2.1, p. 8; p. 16). The anode gap is filled by a null-displacement boundary condition and
+  interpolation, about 20% of the map (secs. 5.2-5.3, p. 16): mark such voxels interpolated, not covered.
 
 <!-- example: experiment-specific illustration (MicroBooNE, ICARUS T600, ProtoDUNE-SP; arXiv:2008.09765, arXiv:2001.08934, arXiv:2007.06722) -->
-MicroBooNE (surface, negligible overburden): 20-30 cosmic muons per readout window (pp. 5-6); nominal drift
-velocity to 0.4%, including an a-priori space-charge term with 100% uncertainty (sec. 4.1, p. 13).
+MicroBooNE (surface): nominal drift
+velocity to 0.4% (sec. 4.1, p. 13).
 ICARUS T600: a few mm maximum distortion for one module at the surface,
 none appreciable at LNGS with the flux suppressed by about 10^6 (abstract). ProtoDUNE-SP: offsets up to 40 cm, data
-up to twice the simulation in places, an asymmetry about the cathode absent from simulation (pp. 73-74), time
-dependence about 5% of the distortion during beam running (p. 78).
+up to twice the simulation in places, an asymmetry about the cathode absent from simulation (pp. 73-74).
 <!-- /example -->
 
 <!-- example: worked example (a 4 m LArTPC at the surface; arXiv:2008.10472) -->
-K = 2 x 10^-10 C m^-3 s^-1, L = 4 m, E_0 = 500 V/cm, mu+ = 1.6 x 10^-7 m^2/(V s) and eps = 1.504 eps_0 give
-alpha = 0.78 (pp. 4-5) and, with gamma = 0.5, delta x_max = 7.7 cm (p. 6); reported Ar+ mobilities span
-0.8-2.0 x 10^-7 m^2/(V s) (p. 5).
+K = 2 x 10^-10 C m^-3 s^-1, L = 4 m, E_0 = 500 V/cm, mu+ = 1.6 x 10^-7 m^2/(V s) and eps = 1.504 eps_0 give alpha =
+0.78 (alpha grows as L, reaching 1 near 5.2 m; pp. 4-5) and, with gamma = 0.5, delta x_max = 7.7 cm (p. 6); reported
+Ar+ mobilities span 0.8-2.0 x 10^-7 m^2/(V s) (p. 5).
 <!-- /example -->
 
 ## Static field distortions and E x B
@@ -120,10 +117,11 @@ alpha = 0.78 (pp. 4-5) and, with gamma = 0.5, delta x_max = 7.7 cm (p. 6); repor
   `B`; the fitted mobility differed significantly from Garfield/Magboltz.
 
 <!-- example: experiment-specific illustration (T2K ND280 TPCs, ALICE TPC, CERES TPC; arXiv:1012.0865, arXiv:1001.1950, arXiv:0801.4920) -->
-T2K ND280: a construction target of distortions of 0.2 mm or less against 0.7 mm point resolution and a 2%
-momentum scale; divider resistors matched to 0.1% rms, cathode flat to 0.1 mm (sec. 2.1, p. 4); dot centres repeat
-to about 0.5 mm (p. 28); magnetic displacements normally below 1 mm (Fig. 19, p. 29). ALICE: a field-cage goal of
-400 V/cm with field distortions in the 10^-4 range (p. 3); laser goal a relative error of 5 x 10^-4 (sec. 7.1, p. 32).
+T2K ND280: a design requirement of construction distortions of about 0.2 mm or less against 0.7 mm point resolution
+and a 2% momentum scale; divider resistors matched to 0.1% rms, cathode flat to 0.1 mm (sec. 2.1, p. 4); dot centres
+repeat to about 0.5 mm (p. 28); magnetic displacements normally below 1 mm, up to 5 mm in the most downstream TPC
+(Fig. 19, p. 29). ALICE: a field-cage goal of 400 V/cm with relative field distortions (Delta E/E) in the 10^-4 range
+(p. 3); laser goal a relative error of 5 x 10^-4 (sec. 7.1, p. 32).
 <!-- /example -->
 
 ## Reference sources for drift velocity, t0 and maps
@@ -139,10 +137,10 @@ to about 0.5 mm (p. 28); magnetic displacements normally below 1 mm (Fig. 19, p.
   cathode crossing tags `t0` (FXT; arXiv:2007.06722, sec. 6.1, p. 74).
 - **External trackers:** the reference positions of the residual map above (COL).
 
-<!-- example: experiment-specific illustration (CERES TPC, ALICE TPC, T2K ND280; arXiv:0801.4920, arXiv:1001.1950, arXiv:1012.0865) -->
+<!-- example: experiment-specific illustration (CERES TPC, ALICE TPC; arXiv:0801.4920, arXiv:1001.1950) -->
 CERES: laser 0.2 time bin per pad per event, about 0.003 bins combining 5120 pads, against 0.9 bins for the edge
 method (pp. 25-26). ALICE: 266 nm beams, positions known to 800 um (r phi) and 1000 um (z), a run every half hour
-(p. 32). T2K: about 10 ns per channel, a few ns per event from laser jitter (p. 27).
+(p. 32).
 <!-- /example -->
 
 ## Drift-chamber time-to-distance calibration
@@ -154,16 +152,16 @@ degrades near the wire from primary-cluster statistics (PDG sec. 35.6.2.2, p. 31
   secs. 3-7, pp. 6-13); per-cell `t0`, time walk (time versus amplitude per layer) and `r(t)` per layer, before the
   resolution is quoted with alignment (arXiv:1405.3397, sec. 1, p. 1; sec. 6, pp. 4-5).
   The pedestal is the turn-on of the drift-time distribution (time box), fitted with an integrated Gaussian; with
-  cosmic rays its precision is limited by the flat arrival time within the clock cycle (arXiv:0911.4895, secs. 3,
-  6.1, pp. 6, 10). Alternatively `t0` and `v_d` are free parameters of each track fit (sec. 3, p. 6).
+  cosmic rays, flat in arrival time within the clock cycle, that spread limits its precision (arXiv:0911.4895, secs. 3
+  and 6.1, pp. 5, 10-11). Alternatively `t0` and `v_d` are free parameters of each track fit (sec. 3, p. 6).
 - **Iterative `r(t)` from residuals:** start from Garfield++, calibrate per layer, average in distance bins near the
   wire and time bins near the cell edge, fit piecewise cubic polynomials over drift-time regions; separate relations
   per voltage and threshold (FXT; arXiv:2106.02316, sec. 3.2, p. 9). The residual `d - d_fit` excludes the tested
   layer from the fit (sec. 3.1, p. 8).
-- **Dependences:** per layer (cell size, field), left versus right, entrance angle, with low-momentum tracks for
-  large angles (COL; arXiv:1405.3397, secs. 1, 7, pp. 1, 5); non-linear `r(t)` where the radial magnetic-field component is
-  strongest (arXiv:0911.4895, sec. 3, p. 6); a field-free beam test leaves `B` and angle untested
-  (arXiv:2106.02316, sec. 5, pp. 17-18).
+- **Dependences:** per layer (cell size, field), left versus right, entrance angle, with low-momentum tracks for large
+  angles (COL; arXiv:1405.3397, secs. 1, 7, pp. 1, 5); non-linear `r(t)` where the radial magnetic-field component is
+  strongest (arXiv:0911.4895, sec. 3, p. 6); a field-free beam test leaves `B` and angle untested (arXiv:2106.02316,
+  sec. 5, pp. 17-18).
 - **Dead neighbours** change a cell's field: the `r(t)` bias grows with drift time, residuals shift, and momenta of
   tracks through the region bias; calibrate those cells separately (arXiv:1405.3397, pp. 4-5, Figs. 8-10).
 
@@ -174,11 +172,11 @@ wire offset the same sign on both sides; in the unsigned drift radius the `t0` a
 and alignment become degenerate when one side dominates the track population or the geometry is fixed. Residual
 versus angle and versus amplitude reveal time walk and crossing-angle effects.
 
-<!-- example: experiment-specific illustration (BESIII drift chamber, CMS barrel drift tubes, COMET CDC prototype; arXiv:1405.3397, arXiv:0911.4895, arXiv:2106.02316) -->
-BESIII: 43 layers, 1 T, He/C3H8 (60/40); 123 um averaged over cells for Bhabha tracks, below 65 um mid-cell (pp. 1,
+<!-- example: experiment-specific illustration (BESIII drift chamber, CMS barrel drift tubes; arXiv:1405.3397, arXiv:0911.4895) -->
+BESIII: 123 um averaged over cells for Bhabha tracks, below 65 um mid-cell (pp. 1,
 5). CMS drift tubes (cosmic rays): time box to about 380 ns (p. 10); 54.3 um/ns with a 10 ns pedestal uncertainty,
 about 2.5% on the velocity (p. 13); non-linearity near 0.8 T radial field in the innermost outer-wheel stations
-(p. 6). COMET prototype (electron beam, no B): 150 um at 99% efficiency above 1800 V (abstract).
+(p. 6).
 <!-- /example -->
 
 ## Methods (decision table)
@@ -192,49 +190,52 @@ about 2.5% on the velocity (p. 13); non-linearity near 0.8 T radial field in the
 | inhomogeneous drift field | joint fit of field factors, mobility and `t0` | tracks at known positions, `B` off | simulated mobility used unchecked | FXT |
 | LArTPC at the surface | `t0`-tagged faces, track pairs in the bulk, field map from offsets | electrode-crossing tracks; nominal `v_d` first | simulated ion distribution (flow); the laser both corrects and validates | UGD, FXT |
 | drift-velocity monitoring | laser or photoelectron timing; drift-time edge | stable optics; event rate | low laser rate | COL, FXT, UGD |
-| drift chamber | pedestal from the time box; iterative `r(t)` per layer, side, angle, voltage and threshold | unbiased residuals; `t0` first, or `t0` and `v_d` fitted per track | dead neighbours; `B` and angle; `t0` absorbed in alignment | COL, FXT |
+| drift chamber | pedestal from the time box; iterative `r(t)` per layer, side, angle, voltage and threshold | unbiased residuals; both sides populated; `t0` first, or `t0` and `v_d` fitted per track | dead neighbours; `B` and angle; `t0` absorbed in alignment | COL, FXT |
 
-Sourced in one environment only: the external-tracker residual map (COL), the fluctuation correction (COL), the
-point pattern (UGD) and the inhomogeneous-field fit (FXT).
+Sourced in one environment only (no other source read): the external-tracker residual map (COL), the fluctuation
+correction (COL, a design), the point pattern (UGD) and the inhomogeneous-field fit (FXT).
 
 ## Distinctive but generalizable features
 
-- **Topology:** a smooth 3D displacement field over the drift volume, in gas TPCs largest for long drift and near
-  the walls, for the LArTPC drift coordinate at `L/sqrt(3)` from the anode (relation 7); for drift cells, one `r(t)`
-  per cell class.
+- **Topology:** a smooth 3D displacement field; in gas TPCs localized at moderate rate and over the whole volume at
+  high rate (arXiv:2003.03174, pp. 1-2); in LArTPCs transverse offsets largest near the faces and far from the anode
+  (arXiv:2007.06722, p. 73), the drift coordinate at `L/sqrt(3)` from the anode (relation 7); for drift cells, one
+  `r(t)` per cell class.
 - **Inverse problem:** displacement and field from residuals against references; `t0`, drift velocity and alignment
-  can be degenerate along the drift coordinate (for drift cells, when one side dominates the track population or the
-  geometry is fixed).
+  can be degenerate along the drift coordinate (drift cells: when one side dominates the track population or the
+  geometry is fixed; TPCs: unless electrode-crossing tracks tag `t0`).
 - **Natural objects:** voxel residual vectors, laser or point images, time boxes, `r(t)` curves.
 - **Informative residual:** versus drift distance, radius, `phi` and side; field on versus off; per period.
-- **Scaling:** relations 3, 5 and 7: rate, ion drift time, backflow, `K`, ion mobility, drift length and field.
+- **Scaling:** relations 3, 5, 6 and 7 (7 only for `alpha^2 << 1`; the anode field vanishes for `alpha >= 2`, about
+  2.5 with recombination): rate, ion drift time, primary ionization, backflow, pile-up and its spreads, `F_mu`, `K`,
+  ion mobility, permittivity, `gamma`, drift length and field.
 - **Conventions:** drift coordinate from the anode or readout; the sign of residuals (reconstructed minus true or
   reference).
 - **Tails:** out-of-time tracks, mismatched references, cells beside dead channels.
 - **Dependence:** rate, gas or liquid mobility, temperature and pressure, flow, `B`, time.
 - **Data sample:** external trackers (COL), cosmic muons crossing electrodes (UGD, FXT), lasers and photoelectrons
   (all three).
-- **Transfers:** residual mapping, spline smoothing and the `t0`-`v_d`-alignment degeneracy (where one side dominates
-  or the geometry is fixed) transfer to any drift detector; gas backflow numerology does not transfer to liquids, nor
-  surface cosmic rates to underground.
+- **Transfers:** residual mapping, spline smoothing and the `t0`-`v_d`-alignment degeneracy (drift cells: one side
+  dominating or fixed geometry; TPCs: no electrode-crossing `t0` tag) transfer to any drift detector; gas backflow
+  numerology does not transfer to liquids, nor surface cosmic rates to underground.
 
 ## Common misconceptions and failure modes
 
-- **A simulated space-charge map used as the correction.** Mobility and flow are uncertain (arXiv:2008.10472,
-  p. 5); the correction comes from data; a simulated map rescaled to face data keeps its simulated bulk shape, so
-  state where data constrain it and check the interior independently (arXiv:2007.06722, sec. 6.1, pp. 74-76).
+- **A simulated space-charge map used as the correction.** Mobility (arXiv:2008.10472,
+  p. 5) and flow (sec. 8, p. 21; arXiv:2007.06722, sec. 6.1, pp. 73-74) are uncertain; the correction comes from data; a
+  simulated map rescaled to face data keeps its simulated bulk shape, and the face-to-centre extrapolation drives
+  the field-map uncertainty, so state where data constrain it and check the interior independently
+  (arXiv:2007.06722, sec. 6.1, PDF pp. 74-77).
 - **A reference used to correct the map counted as its validation.** Keep a sample apart.
 - **An average map used where fluctuations are faster than its interval.**
-- **Symmetric charge with `E` parallel to `B` taken to give only radial and `z` shifts.** The radial field gives
-  azimuthal `E x B` shifts.
 - **A transport simulation taken as the calibration.** Garfield/Magboltz is a start value; fit mobility and `r(t)`
   to data (simcal if simulator parameters are fitted).
 - **Residuals that include the hit under test**, which pull `r(t)` toward the start value.
 
 ## Deliverables
 
-- The distortion sources considered, the scaling parameters (rate, ion drift time, backflow, `K`, drift length,
-  field) and which dominate.
+- The distortion sources considered, the scaling parameters (the Scaling list above, ion mobility
+  included) and which dominate.
 - The reference per map region, its coverage, and the sample kept apart for validation.
 - The map: binning, smoothing, entries per voxel, interval, and how fluctuations shorter than it are treated.
 - For LArTPCs, the field map and its use in recombination.
@@ -244,19 +245,20 @@ point pattern (UGD) and the inhomogeneous-field fit (FXT).
 ## Tool hooks
 
 No script implements this yet. A tool takes residual vectors (reconstructed minus reference, in cm, with
-uncertainties), their coordinates (`r, phi, z` or `x, y, z`, drift coordinate from the readout), the time interval,
-the declared fluctuation time, the validation-sample ids, the binning, the smoothing kernel and the minimum entries
-per voxel, fixed before the fit; it returns the map with per-voxel uncertainty, entries and a coverage mask. For
-drift cells it takes hit times and amplitudes (time walk), fitted distances excluding the hit, side, angle, class
-keys (layer, voltage, threshold), dead channels and the residual convention (signed or unsigned), fixed before the
-fit, and returns `t0`, `r(t)` per class and the residual-versus-distance table. **Negative
-controls:** (a) inject a smooth field plus one step into pseudo-residuals: the map recovers both within uncertainty
-or emits the status `smoothed-discontinuity`; (b) zero distortion gives a map with pulls compatible with N(0, 1);
-(c) in the signed track coordinate, a pure `t0` shift gives opposite-sign left and right residuals and is assigned
-to `t0`, not to a wire offset.
+uncertainties), their coordinates (`r, phi, z` or `x, y, z`, drift coordinate from the readout), sample ids, the time
+interval, the fluctuation time with its origin (measured or sourced), the validation-sample ids, the binning, the
+smoothing kernel and the minimum entries per voxel, fixed before the fit; it returns the map with per-voxel
+uncertainty, entries and a coverage mask. For drift cells it takes hit times and amplitudes (time walk), fitted
+distances excluding the hit, class keys (layer, side, angle bin, voltage, threshold, dead-neighbour flag), dead
+channels and the residual convention (signed or unsigned), fixed before the fit, and returns `t0`, `r(t)` per class
+and the residual-versus-distance table. **Negative controls:** (a) inject a smooth field plus one step into
+pseudo-residuals: the map recovers both within uncertainty or emits `smoothed-discontinuity` (voxels named); (b) zero
+distortion gives pulls whose mean and width, over voxels with the minimum entries, lie within three standard errors of
+0 and 1; (c) in the signed track coordinate, a pure `t0` shift gives opposite-sign left and right residuals and is
+assigned to `t0`, not to a wire offset; (d) with one side only, the same shift gives `t0-alignment-degenerate`.
 Statuses: `map-ok`, `insufficient-entries` (voxels named), `no-coverage`, `stale-map` (interval longer than the
-declared fluctuation time), `reference-reused` (validation sample also built the map),
-`smoothed-discontinuity`, and for drift cells `class-missing` (a class without its own `r(t)`) and
+declared fluctuation time), `reference-reused` (validation sample also built the map), `smoothed-discontinuity`, and
+for drift cells `class-missing` (a class of those keys without its own `r(t)`), `t0-alignment-degenerate` and
 `convention-undeclared`.
 
 ## Environment coverage
@@ -264,14 +266,15 @@ declared fluctuation time), `reference-reused` (validation sample also built the
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
 | gas-TPC space charge | pdg_2025_particle-detectors-at-accelerators, arxiv_2109.12000, arxiv_2003.03174 | arxiv_1209.0482 (simulation) | gap | gap | gap | gap |
-| LArTPC space charge | n/a (no collider LArTPC source; gas row) | arxiv_2007.06722 (test beam) | gap | arxiv_2008.10472, arxiv_2008.09765, arxiv_2001.08934; [noble liquid](noble-liquid-neutrino-and-rare-event-detectors.md) | gap | gap |
+| LArTPC space charge | n/a (no collider LArTPC) | arxiv_2007.06722 (test beam) | gap | arxiv_2008.10472, arxiv_2008.09765, arxiv_2001.08934; [noble liquid](noble-liquid-neutrino-and-rare-event-detectors.md) | gap | gap |
 | static field, `E x B` | pdg_2025_particle-detectors-at-accelerators, arxiv_1001.1950 | arxiv_0801.4920 | gap | arxiv_1012.0865 | gap | gap |
 | reference sources | arxiv_1001.1950, arxiv_2003.03174 | arxiv_0801.4920, arxiv_2007.06722 | gap | arxiv_1012.0865, arxiv_1910.01430, arxiv_2008.09765 | gap | gap |
 | drift-chamber `r(t)` | pdg_2025_particle-detectors-at-accelerators, arxiv_1405.3397, arxiv_0911.4895 | arxiv_2106.02316 (test beam) | gap | gap | gap | gap |
 
 ## Citations
 
-Full entries are in the [in-situ calibration and alignment bibliography](detector-principles-bibliography-calibration.md);
-the PDG review is in the main [bibliography](detector-principles-bibliography.md).
-Page numbers are PDF page indices of the arXiv version each entry names (for 1405.3397, pp. 2-3 were not extractable
-and not read); PDG RPP 2025 (1 December 2025 web update).
+Full entries are in the [in-situ calibration and alignment
+bibliography](detector-principles-bibliography-calibration.md); the PDG review is in the main
+[bibliography](detector-principles-bibliography.md). Page numbers are PDF page indices of the arXiv version each entry
+names (arXiv:1405.3397 only: its pp. 2-3 could not be extracted and were not read); PDG RPP 2025 (1 December 2025 web
+update).
