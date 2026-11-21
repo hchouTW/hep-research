@@ -1,6 +1,6 @@
 # References: calorimeter cluster reconstruction
 
-A split file of the annotated [bibliography](detector-principles-bibliography.md), in the same citation format: the sources of `calorimeter-cluster-reconstruction.md`. Entries that name an experiment or apparatus sit inside example blocks.
+A split file of the annotated [bibliography](detector-principles-bibliography.md), in the same citation format: the sources of `calorimeter-cluster-reconstruction.md` and of the hadronic calorimeter pages (`hadronic-calorimeter-reconstruction.md`, `hadronic-calorimeter-timing-and-model-validation.md`). Entries that name an experiment or apparatus sit inside example blocks.
 
 ## Calorimeter cluster reconstruction
 
@@ -24,3 +24,5 @@ A split file of the annotated [bibliography](detector-principles-bibliography.md
 - S. Lee et al., "Hadron detection with a dual-readout fiber calorimeter", Nucl. Instrum. Methods A 866 (2017) 76, DOI 10.1016/j.nima.2017.05.025, arXiv:1703.09120 (read 2026-11-20). Dual-readout energy from the two signals (sec. 3.1, eqs. 1-2).
 - N. Akopov et al., "The HERMES dual-radiator ring imaging Cerenkov detector", Nucl. Instrum. Methods A 479 (2002) 511-530, DOI 10.1016/S0168-9002(01)00932-9, arXiv:physics/0104033 (read 2026-11-20). Lepton identification with calorimeter, preshower and TRD (p. 13, footnote 3).
 <!-- /example -->
+
+## Hadronic calorimeter reconstruction
