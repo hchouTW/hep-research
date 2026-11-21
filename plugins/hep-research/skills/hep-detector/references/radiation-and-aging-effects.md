@@ -36,8 +36,8 @@ raises surface currents and changes inter-electrode isolation (PDG sec. 35.8.5, 
 beneficial annealing first, then reverse annealing over months at room temperature and much longer when cold; n-type
 bulk inverts, p-type with n+ readout does not, and is preferred because electrons are collected (pp. 75-76).
 Operating temperature and warm-ups are therefore part of the damage history (p. 78). Related:
-[tracking and vertexing](tracking-and-vertexing.md). The same mechanisms apply in orbit, where
-the fluence comes from trapped protons (SPC; arXiv:1503.07682, abstract).
+[tracking and vertexing](tracking-and-vertexing.md). The same holds in low Earth orbit, where a
+design study took trapped protons only (SPC; arXiv:1503.07682, abstract; sec. 1, p. 3).
 
 <!-- example: ATLAS pixel detector (COL) and LOFT silicon drift detectors (SPC design study) -->
 ATLAS pixel (arXiv:1905.03739): the current detector will receive more than `1e15` 1 MeV `n_eq/cm^2`, the HL-LHC
@@ -73,7 +73,7 @@ energy threshold (SPC; arXiv:2411.00607, abstract).
 <!-- example: GRBAlpha and VZLUSAT-2 CubeSats, Hamamatsu S13360-3050PE MPPCs (SPC) -->
 arXiv:2411.00607: GRBAlpha, 550 km sun-synchronous orbit, CsI(Tl) read by eight MPPCs behind 2-2.5 mm PbSb: the
 low-energy threshold rose from about 20 keV to about 120 keV in 3 years 5 months, matching a simulated TID of 1.6
-Gy (160 rad) and `2.1e9 n_eq/cm^2` from trapped protons (AP-8) (sec. 6, p. 14).
+Gy (160 rad) and `2.1e9 n_eq/cm^2` from trapped protons (AP-8) (abstract; sec. 6, p. 14).
 <!-- /example -->
 
 **Crystal scintillators.** Ionizing dose forms colour centres; the induced absorption shortens the attenuation
@@ -157,8 +157,8 @@ hadron fluence from about `1e13` to `1e14 cm^-2`, as quoted (weighting and NIEL 
 arXiv:1306.2016, sec. 2, p. 6). LOFT: AP8-MIN via SPENVIS, 600 km and 5° worst case, behind 3.3 mm Al equivalent;
 AP8-MIN is about 7 times AP8-MAX at 1 MeV (arXiv:1503.07682, sec. 1, p. 3). Fermi: 565 km at 25.6°, about 15% of the
 time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p. 25). GRBAlpha: behind 2-2.5 mm
-PbSb, trapped protons dominate TID and TNID, electrons about 6% of TID (`TID(p)/TID(e)` = 16.1 ± 3.4
-at about 475 km with solar-maximum AP-8/AE-8, 74 ± 14 at about 550 km with solar-minimum models; arXiv:2411.00607, sec. 4.1, p. 10).
+PbSb, trapped protons dominate TID and TNID, electrons 1-6% of TID (computed here from `TID(p)/TID(e)`:
+1.3% at ~550 km, solar minimum, 74 ± 14; 5.8% at ~475 km, solar maximum, 16.1 ± 3.4; arXiv:2411.00607, sec. 4.1, p. 10).
 <!-- /example -->
 
 ## Feeding damage into conditions and simulation
@@ -168,10 +168,10 @@ at about 475 km with solar-maximum AP-8/AE-8, 74 ± 14 at about 550 km with sola
    monitored response. Derived constants (depletion voltage, trapping,
    threshold, light-yield factor `S_i(t)`, energy-scale drift) are payloads with intervals of validity
    ([calibration and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data)). The light
-   monitor corrects per channel through the transfer relation above (arXiv:1306.2016, sec. 4.1, p. 10); in orbit a
+   monitor corrects each channel by the transfer relation (COL; arXiv:1306.2016, sec. 4.1, p. 10); in orbit a
    stable peak (non-interacting protons) tracks the scale, fitted in time (arXiv:1206.1896, sec. 7.3.2, p. 137).
-2. **Digitization.** The digitizer simulates the damage with device-model fields and trapping but no annealing,
-   then the induced signal (arXiv:1905.03739, sec. 4, pp. 12-30; sec. 2, pp. 4-5). The annealing model only
+2. **Digitization.** Digitize with device-model fields and trapping; state whether annealing enters. One collider
+   pixel digitizer omits annealing (COL; arXiv:1905.03739, sec. 4, pp. 12-30; sec. 2, pp. 4-5). The annealing model only
    validates the conditions (fluence, depletion voltage; sec. 3) and does not enter the simulated response. No
    annealing correction or uncertainty is applied (sec. 2, p. 5; sec. 4.2.4, p. 20, checked at `1e14` and `2e14 n_eq/cm^2`,
    to be revisited after significant annealing): its variation lies within the field-model variations of sec. 4.2.3
