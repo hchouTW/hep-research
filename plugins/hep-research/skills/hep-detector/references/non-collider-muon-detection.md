@@ -8,12 +8,11 @@ events and chamber alignment with cosmic muons; NUC is a gap. Collider muon syst
 in absorbers and charge-sign quality are in [muon systems](muon-systems.md). Environment pages own their
 content and are linked:
 [neutrino astronomy](neutrino-astronomy.md#backgrounds) (atmospheric-muon veto, self-veto, up-going selection),
-[noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#rare-event-detectors),
+[noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#rare-event-detectors) (the protected detectors, not veto content),
 [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays),
 [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) (albedo). The background budget
-and the live time after vetoes belong to hep-measurement:
-[background budget](../../hep-measurement/references/rare-event-and-neutrino-measurements.md#background-budget) and
-[exposure and live time](../../hep-measurement/references/rare-event-and-neutrino-measurements.md#exposure-and-live-time).
+and the live time after vetoes belong to
+[hep-measurement](../../hep-measurement/references/rare-event-and-neutrino-measurements.md#background-budget).
 
 ## Relations
 
@@ -27,8 +26,8 @@ and the live time after vetoes belong to hep-measurement:
 - **Muon band in an absorber-free spectrometer** (exact kinematics for unit charge, with the band width set by the
   velocity resolution; arXiv:astro-ph/0205344, sec. 4, p. 7): `1/beta = sqrt((m_mu/R)^2 + 1)`, with `R` the
   rigidity in GV and `m_mu` in GeV; a band of `± n sigma(1/beta)` around it selects muon candidates, not a pure muon
-  sample. The band separates protons only at low rigidity, so electrons and positrons are estimated and subtracted
-  with an independent identifier, and above the rigidity where the proton band merges the residual protons are
+  sample. The band does not separate electrons and positrons, which are estimated and subtracted with an
+  independent identifier, and separates protons only at low rigidity: above the rigidity where the proton band merges the residual protons are
   subtracted statistically with an external proton spectrum normalised to the protons counted below it, with the
   systematic of that subtraction quoted: the result is a corrected muon yield, not a per-event selection
   (sec. 4, pp. 7-8).
@@ -40,22 +39,22 @@ and the live time after vetoes belong to hep-measurement:
 
 Underground detectors are surrounded by water, oil or other shielding and equipped with muon vetoes; light reflection
 is maximized in outer veto detectors to raise the muon detection efficiency, while it is minimized in the inner
-detector for reconstruction (UGD; PDG RPP 2025, particle detectors for non-accelerator physics, sec. 36.3.1, p. 12).
+detector for reconstruction (UGD; PDG RPP 2025, sec. 36.3.1, p. 12).
 The veto must identify muons with very high efficiency and, where cosmogenic isotopes matter, also reconstruct
 their tracks (UGD; arXiv:1101.3101, abstract). The same design problem appears in two other environments: a
 cosmic-ray veto of scintillator layers around the detector solenoid of a fixed-target experiment declares a muon,
 in most of the area it covers, by a space-time coincidence of at least 3 of 4 layers (FXT; arXiv:2510.13798, sec. 6,
 first paragraph, p. 9), and the anticoincidence shield of a space gamma-ray telescope vetoes charged particles with
 segmented tiles, because a single unsegmented shield would also fire on
-backsplash from the telescope's own showers (**self-veto**; SPC; arXiv:astro-ph/0702581, abstract). The
+backsplash from the telescope's own showers (**self-veto** in the SPC sense, not the neutrino-telescope one linked above; SPC; arXiv:astro-ph/0702581, abstract). The
 parameters are the coverage (hermeticity, gaps), the coincidence logic, the threshold, the segmentation against
 self-veto, and the veto window.
 
 <!-- example: source citation -->
 Borexino: an outer water-Cherenkov detector around the inner detector; combined veto efficiency at least 99.992%
 (arXiv:1101.3101, abstract; sec. 3.2.3, p. 17). Mu2e cosmic-ray veto: four layers of scintillation counters with
-wavelength-shifting fibres and SiPMs; required efficiency up to 99.99% in critical regions (arXiv:2510.13798,
-abstract; sec. 6, p. 9). Fermi LAT (GLAST) anticoincidence detector: about 8.3 m^2, 89 tiles; overall efficiency,
+wavelength-shifting fibres and SiPMs (arXiv:2510.13798, abstract); required 3-of-4-layer efficiency as high as 99.99% in
+some critical regions (sec. 6, p. 9; overall design goal 99.99%, sec. 1, pp. 2-3). Fermi LAT anticoincidence detector: about 8.3 m^2, 89 tiles; overall efficiency,
 averaged over the detector area, for singly charged relativistic particles entering the tracker from the top or the
 four sides the shield covers, above the required 0.9997 (arXiv:astro-ph/0702581, abstract; sec. 2.1, p. 3).
 <!-- /example -->
@@ -88,32 +87,30 @@ hep-statistics; the tag-and-probe structure is in
 <!-- example: source citation -->
 Borexino direct efficiencies from high-energy inner-detector events: at least (99.25 ± 0.02)% and (99.28 ± 0.02)%
 for two outer-detector flags, both lower limits, with 95% C.L. Clopper-Pearson intervals (arXiv:1101.3101, sec.
-3.2, p. 14; sec. 3.2.1, printed p. 15, PDF p. 18; Table 3, p. 16). The mutual efficiencies of these two flags, which
-share their PMTs, are 0.9997 each, above the direct ones (Table 3, p. 16; sec. 3.2.2, p. 16), and the source says to
-handle them with care, and they exceed the tests of the same flags against the independent inner-detector flag,
-0.9933 and 0.9935, by about 0.006, far beyond the errors of at most 10^-4, as a shared-PMT correlation would, but the
-inner-detector flag's over-efficiency (below 0.7%, section 3.2.2, page 17) could also contribute, so the size of the
-bias is not determined. Daya Bay inner water shield
+3.2, p. 14; sec. 3.2.1, p. 15; Table 3, p. 16). The mutual efficiencies of these two flags, which
+share their PMTs, are 0.9997 each (Table 3, p. 16; sec. 3.2.2, p. 16), above the direct ones and, by about 0.006
+(errors at most 10^-4), above the tests against the independent inner-detector flag, 0.9933 and 0.9935, as a
+shared-PMT correlation would make them; that flag's over-efficiency (below 0.7%, section 3.2.2, page 17) may also
+contribute, so the bias size is not determined. Daya Bay inner water shield
 efficiency for muons tagged by an antineutrino detector: (99.98 ± 0.01)%, confidence level not stated, the small
 apparent inefficiency being rock neutrons tagged as muons (arXiv:1407.0275, sec. 4.3, eq. 2, p. 15).
 <!-- /example -->
 
-## Cosmogenic tagging (UGD only)
+## Cosmogenic tagging (UGD in the sources found)
 
 Muons make radioisotopes by spallation inside the active volume and neutrons in the surroundings. Short-lived
 isotopes are removed by a veto on the time correlation with the crossing muon; long-lived ones need more (PDG RPP
 2025, sec. 36.6.5, p. 54): a veto restricted to a **cylinder around the reconstructed muon track** (arXiv:1101.3101,
 sec. 4, p. 17), or a **threefold coincidence** of muon, neutron capture and isotope decay, or a similar delayed
 coincidence (PDG RPP 2025, sec. 36.6.5, p. 55). The efficiency of a distance-to-track cut is measured on spallation
-products themselves, such as short-lived isotopes and muon-induced neutrons (arXiv:0907.0066, sec. V B, Fig. 10,
-p. 8). The technique exists in one environment, underground: there the muon rate is low enough to correlate each
-delayed decay in space and time with a single reconstructed muon, which a surface or collider muon rate prevents,
-and spallation in the active volume is a dominant background.
+products themselves, such as short-lived isotopes and muon-induced neutrons, and carried to other isotopes with a
+simulated systematic (arXiv:0907.0066, sec. V B, Fig. 10, pp. 8-9). Only underground sources were found, where spallation in the
+active volume is a dominant background; other environments are gaps.
 
 <!-- example: source citation -->
 Borexino: 11C (half-life 20.38 min) is accompanied by a knock-out neutron in only 95% of cases, so the tag is
 incomplete, but the neutron makes the threefold coincidence possible where a full-volume veto would leave a dead
-exposure close to 100% (arXiv:1101.3101, sec. 4, printed p. 17, PDF p. 20);
+exposure close to 100% (arXiv:1101.3101, sec. 4, p. 17);
 the remaining 5% of 11C, made without a neutron, and any undetected neutron escape the coincidence. KamLAND:
 a cut at 3 m from the muon track keeps (91.6 ± 4.3)% of 12B and (95.9 ± 0.7)% of neutron events from non-showering
 muons; for other isotopes the 12B value is used with a FLUKA systematic for the isotope dependence added, giving
@@ -127,7 +124,7 @@ that simultaneous muons are not undercounted (GND; arXiv:1703.06193, sec. 3, p. 
 [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays).
 A tracking detector under rock records multi-muon cosmic events; a muon crossing it may be reconstructed as two
 tracks, which are matched to avoid **double counting**, with simulated high-multiplicity events used to tune the
-matching (COL detector used for cosmic rays; arXiv:1507.07577, sec. 3, p. 4).
+matching (COL detector; arXiv:1507.07577, sec. 3, p. 4).
 
 <!-- example: source citation -->
 Pierre Auger Observatory, AMIGA: buried counters of three 10 m^2 scintillator modules, each in 64 segments; light
@@ -142,7 +139,7 @@ No space-borne muon system (absorber-backed chambers) was found in the sources s
 without absorber identifies muon candidates as a band in velocity versus rigidity ([Relations](#relations)), with
 protons,
 electrons and positrons as the main contamination (arXiv:astro-ph/0205344, sec. 4, p. 7). The cited run of this balloon
-instrument was at ground level (SPC, labelled as a ground-level run; abstract), and no in-flight muon selection was
+instrument was at ground level (abstract), and no in-flight muon selection was
 found. Particles below the geomagnetic cutoff seen in orbit are
 atmospheric secondaries (albedo; arXiv:astro-ph/0101559, abstract): the cutoff, albedo and their removal are in
 [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff).
@@ -160,11 +157,11 @@ abstract; sec. 4, pp. 7-8). AMS-01 in orbit: sub-cutoff fluxes with 3He/4He of o
 ## Cosmic muons as calibration samples
 
 Stopping cosmic muons serve as the minimum-ionizing reference of a scintillator calorimeter, with their position on
-the Bethe-Bloch curve accounted for (UGD; arXiv:0805.3170, sec. 3.8.3, p. 46); cosmic-muon energy deposition fixes
-the absolute energy scale of a water-Cherenkov detector (UGD; PDG RPP 2025, sec. 36.3.1.2, p. 14); veto tiles are
+the Bethe-Bloch curve accounted for (UGD; arXiv:0805.3170, sec. 3.8.3, p. 46); cosmic-muon energy deposition, with Michel electrons and `pi0`, sets
+the GeV-regime absolute energy scale of a water-Cherenkov detector (UGD; one apparatus, PDG RPP 2025, sec. 36.3.1.2, GeV regime, p. 14); veto tiles are
 characterized with cosmic muons before flight (SPC; arXiv:astro-ph/0702581, sec. 3.4, p. 10); a cosmic-ray test
 stand measures counter efficiency and light-yield ageing (FXT; arXiv:2510.13798, abstract); collider muon chambers
-are aligned with cosmic-ray and beam-halo muons (COL; arXiv:0911.4022, abstract; the method is in
+are aligned with cosmic-ray and beam-halo muons (COL; arXiv:0911.4022, abstract; method in
 [muon systems](muon-systems.md#chamber-alignment-and-momentum-scale)). Surface arrays calibrate
 on atmospheric muons (GND, not sourced in this survey: see [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)).
 
@@ -179,35 +176,32 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
 | Veto with an independent inner detector | Direct efficiency from inner-detector-selected muons | Flag independent of the selection | Reference impurities; acceptance mismatch | UGD |
-| Veto with several tags | Mutual efficiencies | Tags share no sensors | Shared sensors correlate the tags (mutual values above the independent-reference ones in the cited case) | UGD |
-| Layered veto | Defining layers; k-of-n from single layers and directly | Pure muon sample, impurity estimated | Non-independent layer inefficiencies bias the extrapolation either way (pessimistic with staggered layers, as measured; optimistic with a shared gap); reference impurity mimics the shared gap | FXT, SPC |
+| Veto with several tags | Mutual efficiencies | Tags share no sensors | Shared sensors correlate the tags | UGD |
+| Layered veto | Defining layers; k-of-n from single layers and directly | Pure muon sample, impurity estimated | Non-independent layer inefficiencies bias the extrapolation either way (pessimistic with staggered layers, as measured; optimistic with a shared gap); reference impurity (mimics the shared gap at high layer efficiency) | FXT, SPC |
 | Short-lived cosmogenics | Time veto after each muon | Low muon rate | Dead time | UGD |
 | Long-lived cosmogenics | Track cylinder; muon-neutron-decay coincidence | Muon tracking; neutron tag | Track-cut efficiency not measured; isotopes made without a detected neutron escape the coincidence | UGD |
 | Muon counting in showers | Space and time segmentation | Segment size against the expected density | Undercounting from pile-up | GND |
 | Multi-muon cosmic events in a tracker | Track matching across halves | Simulated high-multiplicity events | Double counting | COL |
-| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; protons separated only at low rigidity; an independent e+- identifier; an external proton spectrum for the subtraction above that rigidity | p, e+- contamination; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
+| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; an independent e+- identifier; an external proton spectrum above the rigidity where the proton band merges | Protons not separated above that rigidity; p, e+- contamination; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
 
 ## Distinctive but generalizable features (non-collider muons)
 
-- **Topology**: one or a few through-going muons per readout window, mostly near-vertical, rate set by depth or
-  altitude.
+- **Topology**: one or a few muons per readout window, mostly near-vertical, rate set by depth or altitude.
 - **Inverse problem**: veto efficiency and cosmogenic tagging efficiency from samples that are themselves impure.
 - **Natural objects**: veto flag, muon track, delayed-coincidence candidate, muon count per counter.
 - **Informative residual**: the efficiency difference between independent reference samples, and between the
   extrapolated and direct k-of-n efficiency.
-- **Scaling**: required veto inefficiency falls as the signal rate falls; dead time grows with muon rate times veto
-  length.
+- **Scaling**: required veto inefficiency falls with the signal rate; dead time as in [Relations](#relations).
 - **Conventions**: efficiency per flag and combined, quoted as a lower limit when the reference purity is unknown.
 - **Tails**: corner-clipping and gap-crossing muons; showering muons; neutrons from the rock.
 - **Dependence**: thresholds, light yield ageing, sensor gain drift, overburden profile.
 - **Data sample**: the cosmic muons themselves, beam-timed muons, spallation products.
-- **Transfers**: the reference-sample logic transfers to any veto or anticoincidence; the cosmogenic veto does not
-  transfer to high-rate surface or collider detectors.
+- **Transfers**: the reference-sample logic transfers to any veto or anticoincidence; the cosmogenic veto is shown only
+  underground.
 
 ## Common misconceptions and failure modes
 
 - **A reference sample selected with the flag under test.** The efficiency is then biased high.
-- **Mutual efficiencies of tags that share sensors.** They are correlated, not independent.
 - **k-of-n efficiency from single layers only.** Gaps make layer inefficiencies non-independent (anti-correlated
   when layers are staggered, as measured, and correlated when a gap is shared); measure it directly too.
 - **Apparent inefficiency read as veto failure.** Check the reference impurities first.
@@ -218,8 +212,8 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 - Veto efficiency per flag and combined, with the reference sample, its impurities and the limit type stated.
 - The cosmogenic veto definition (window, cylinder radius, coincidence), its efficiency and its dead time, handed to
   hep-measurement for the live time and background budget.
-- For muon counters, the segmentation and the pile-up correction; for spectrometers, the `1/beta` band and the
-  contamination subtracted.
+- For muon counters, the segmentation and the pile-up correction; for spectrometers, the `1/beta` band, the
+  contamination subtracted with the systematic of that subtraction, and the result labelled a corrected yield.
 
 ## Tool hooks
 
@@ -227,63 +221,61 @@ A veto-efficiency tool (not yet in the plugin):
 
 - **Inputs**: the counts of the `2^n` hit patterns over the `n` test layers (integers), from one reference sample
   selected without the test layers (per-layer counts alone give `no-direct-count`), the coincidence `k` of `n`, and
-  an estimate or upper bound of the non-muon fraction of the reference sample, with its uncertainty and how it was
-  obtained (required, and a bound or 0 ± 0 gives `impurity-unmeasured`).
+  an estimate or upper bound of the non-muon fraction of the reference sample, with its uncertainty and its source
+  (required: it is measured only if both come from a stated control-sample count, and an assumed value, a bound or 0 ±
+  anything without that count gives `impurity-unmeasured`).
 - **Outputs**: from the same pattern counts, single-layer efficiencies with intervals and their confidence level,
   the k-of-n efficiency extrapolated under independence, the direct k-of-n efficiency, and their difference `Z` in
   standard errors of the difference (bootstrap over the reference muons, which both estimates share), with the `Z`
   that the estimated impurity alone would give (`Z_imp`), the impurity-corrected `Z_c` (difference less the
-  impurity's, in standard errors that include the impurity uncertainty) and the `Z_max` used. Efficiencies are fractions
-  in [0, 1].
+  impurity's, in standard errors that include the impurity uncertainty) and the `Z_max` used; efficiencies are fractions.
 - **Decision rule**: `independence-violated` when `|Z_c| > Z_max` in either direction (`Z_max` an input from 2 to 5,
   default 3, listed with the status when it is not 3) or, when the direct count alone has no failures, when the
   extrapolated inefficiency less `Z_max` standard errors exceeds the one-sided upper limit on the direct inefficiency
   at the confidence matching `Z_max`; `ok` when a test ran and gave neither that nor `impurity-dominated`
-  (`|Z_imp| > Z_max`), which means that the extrapolation agrees with the direct k-of-n count, not that the layers are
-  independent (a shared gap and staggering can cancel).
+  (`|Z_imp| > Z_max`), meaning that extrapolation and direct count agree, not that the layers are independent
+  (a shared gap and staggering can cancel).
 - **Negative controls** (each with 10^6 reference muons, `k = 3`, `n = 4`, `Z_max = 3`, single-layer inefficiency
-  about 0.01, impurity input 0 ± 10^-5 unless stated, and stated seeds): a sample in which a shared gap removes
-  layers 1 and 2 together for a fraction 10^-3 of the muons must give a direct k-of-n efficiency below the extrapolation and `independence-violated` (`Z` about -25); a
-  staggered sample, in which each layer's inefficiency is a gap part of about 0.009 that never hits two layers of the
-  same muon plus an independent part of 10^-3, so that the direct count has about 114 failures, must give one above
-  it and `independence-violated` (`Z` about +41); at least 990 of 1,000 seeded independent samples must give exactly
-  `{ok}` at `Z_max = 3` (a correct tool gives about 997). With the gap part alone (0.01 per layer) the direct count has no
+  about 0.01, impurity input 0 ± 10^-5 unless stated (a test convention, taken as measured), and stated seeds): a shared gap removing layers 1 and 2 together
+  for 10^-3 of the muons must give the direct efficiency below the extrapolation and `independence-violated` (`Z` about -25); a
+  staggered sample (each layer's inefficiency a gap part of about 0.009 that never hits two layers of one muon plus an
+  independent 10^-3, about 114 direct failures) must give it above and `independence-violated` (`Z` about +41); at most 40 of 10,000 seeded independent samples may give other than exactly
+  `{ok}` at `Z_max = 3` (binomial: a correct tool passes 99.3%, an effective 2.8 cut 6%). With the gap part alone (0.01 per layer) the direct count has no
   failures, and the one-sided test must give `independence-violated`. An independent sample with 10^-3 non-muon
   events that fail every layer, entered as 10^-3 ± 10^-4, must give exactly `{impurity-dominated}` (`Z` and `Z_imp`
   about -24, `|Z - Z_imp|` at most 3), and the staggered sample with 5 x 10^-4 such events, entered as
   5 x 10^-4 ± 5 x 10^-5, must give `independence-violated` and `impurity-dominated`, never `ok` (`Z` +1.6 without sampling noise,
   seed spread ±1.0, so -0.3 to +3.6 in 95% of seeds; `Z_imp` about -19, `Z_c` about +10).
 - **Impurity**: non-muon events (modelled here as failing every layer) push the direct efficiency below the
-  extrapolation, so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
+  extrapolation while the single-layer inefficiency is below 1/9 (3 of 4, above it the sign reverses, which `Z_imp` carries), so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
   of the direct inefficiency is likely due to non-muon events that pass the selection (supported by simulation;
-  arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at thresholds where the direct efficiency still exceeds the extrapolation.
-- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated`; `impurity-unmeasured` (the test
+  arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at 15 to 50 PE where the direct efficiency still exceeds the extrapolation, while at 10 PE, near the operating threshold, the two agree (Fig. 6 on page 11), impurity masking staggering.
+- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, only when the two-sided test runs); `impurity-unmeasured` (the test
   runs at zero impurity and at the bound, a status holds only if both give it, and the efficiencies and `Z_imp` are
   bounds); `no-failures` (a single layer has no failed
-  muon: only an upper limit on its inefficiency, and the test does not run); `no-direct-count` (per-layer counts
-  only: the extrapolation is given, labelled as an assumption, without `Z`). With `no-failures` or
-  `no-direct-count`, neither `ok` nor `independence-violated` is emitted.
+  muon: only an upper limit on its inefficiency, which enters the extrapolation, and only a one-sided test runs: `independence-violated` when the direct inefficiency exceeds that extrapolation by more than `Z_max` standard errors); `no-direct-count` (per-layer counts
+  only: the extrapolation is given, labelled as an assumption, without `Z`). With `no-direct-count`, none of
+  `ok`, `independence-violated` or `impurity-dominated` is emitted, and with `no-failures` only `independence-violated` can be.
 
 ## Environment coverage
 
-Cells give source IDs of the run's cache (PDG = PDG RPP 2025, particle detectors for non-accelerator physics). A
+Cells give source IDs (PDG = PDG RPP 2025, non-accelerator detectors), `gap` (no source found), `n/a:` with the
+reason the technique does not apply, `same` (as the cell to the left) or a link. A
 cell counts the environment the instrument is built for; a cited run made elsewhere is labelled.
 
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
 | Muon vetoes, segmentation against self-veto | n/a: timing and vertex cuts ([muon systems](muon-systems.md#backgrounds-and-fakes)) | arxiv_2510.13798 | arxiv_astro-ph_0702581 | PDG; arxiv_1101.3101 | gap | gap |
-| Veto-efficiency measurement | n/a | arxiv_2510.13798 (cosmic-ray test stand) | arxiv_astro-ph_0702581 (pre-flight, on ground) | arxiv_1101.3101; arxiv_1407.0275 | gap | gap |
-| Cosmogenic tagging | n/a: muon rate too high to correlate decays with single muons (text) | n/a: same | n/a: activation is a different problem | PDG; arxiv_1101.3101; arxiv_0907.0066 | n/a: same as COL | n/a: single-environment technique (text) |
+| Veto-efficiency measurement | n/a: as above | arxiv_2510.13798 (cosmic-ray test stand) | arxiv_astro-ph_0702581 (pre-flight, on ground) | arxiv_1101.3101; arxiv_1407.0275 | gap | gap |
+| Cosmogenic tagging | gap | gap | gap | PDG; arxiv_1101.3101; arxiv_0907.0066 | gap | gap |
 | Muon counting | arxiv_1507.07577 | gap | gap | gap | arxiv_1703.06193 | gap |
-| Muons in absorber-free spectrometers | n/a: muon systems used | gap | arxiv_astro-ph_0205344 (ground-level run; in flight a gap: no in-flight muon selection found) | n/a | n/a: arrays have no spectrometer | n/a |
-| Albedo below cutoff | n/a | n/a | arxiv_astro-ph_0101559; [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) | n/a | n/a | n/a |
+| Muons in absorber-free spectrometers | n/a: muon systems used | gap | arxiv_astro-ph_0205344 (ground-level run; in flight a gap) | gap | n/a: arrays have no spectrometer | gap |
+| Albedo below cutoff | n/a: orbit only | n/a: same | arxiv_astro-ph_0101559; [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) | n/a: orbit only | n/a: same | n/a: same |
 | Cosmic muons as calibration samples | arxiv_0911.4022 (chamber alignment, text) | arxiv_2510.13798 (cosmic-ray test stand) | arxiv_astro-ph_0702581 (pre-flight, on ground) | PDG; arxiv_0805.3170 | gap (method in [ground-based detection arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction)) | gap |
 
 ## Citations
 
-Inline citations give the arXiv number and a locator. Page numbers are the printed page numbers of the cached
-arXiv version, which for arXiv:1101.3101, 1703.06193 and 2510.13798 differ from the PDF page index (two locators
-also give the PDF page). Annotated
+Inline citations give the arXiv number and a locator; page numbers are printed page numbers. Annotated
 entries for every source of this page, the PDG review included, are in the
 [muon-systems bibliography](detector-principles-bibliography-muon-systems.md), a split file of the
 [bibliography](detector-principles-bibliography.md).
