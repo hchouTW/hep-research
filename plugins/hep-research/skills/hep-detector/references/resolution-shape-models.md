@@ -20,7 +20,7 @@ neutrino, rare event; GND ground-based arrays; NUC nuclear and low energy.
 mean and width.
 
 - **Crystal Ball (CB), low-side tail** (exact, a definition; Das, arXiv:1603.08591, eq. 1; an early form is
-  Gaiser, App. F.1, eq. F-1; Das p. 1 credits the Crystal Ball Collaboration, refs.
+  Gaiser, App. F.1, eq. F-1; Das p. 1 credits its development to refs.
   6 and 8 there): `f = exp(-t^2/2)` for `t > -alpha`;
   `f = A (B - t)^(-n)` for `t <= -alpha`, with `A = (n/|alpha|)^n exp(-|alpha|^2/2)` and
   `B = n/|alpha| - |alpha|`, for `alpha > 0` and `n > 1`. `A` and `B` make the function
@@ -73,9 +73,9 @@ the CB is used (Das, Fig. 1). Gaiser (Table 20: power term fixed) and Das (p. 1:
 `n` unconstrained without naming it.
 
 <!-- example: the Crystal Ball NaI(Tl) detector at SPEAR (Gaiser, SLAC-R-255, App. F) -->
-Introduced for monoenergetic Bhabha electrons in a NaI(Tl) calorimeter: `sigma_E/E = 2.2%` at 1.547 GeV with
-`alpha = 1.5`, `n = 5.0` (printed p. 179). For inclusive photon spectra the fits were "very insensitive" to the
-power term over 15.0-27.0, so it was "fixed at 15.0" (Table 20, printed p. 181).
+Measured with monoenergetic Bhabha electrons (App. F.1, printed pp. 178-179) in a NaI(Tl) calorimeter:
+`sigma_E/E = 2.2%` at 1.547 GeV with `alpha = 1.5`, `n = 5.0` (printed p. 179). For inclusive photon spectra the
+fits were "very insensitive" to the power term over 15.0-27.0, so it was "fixed at 15.0" (Table 20, printed p. 181).
 <!-- /example -->
 
 <!-- example: synthetic fits in Das, arXiv:1603.08591, Fig. 1 (page 3) -->
@@ -144,7 +144,7 @@ Gaussian signal model (arXiv:1206.4071, sec. 5.1.3): a shape systematic of an ef
 
 - **The RMS of a CB is the resolution.** It is not: it mixes core and tail, has no finite RMS for `n <= 3`
   (Relations); for larger `n` it depends
-  on `alpha` and `n`, diverging as `n -> 3` (from eq. 1: standard deviation/`sigma` 1.46, 1.29, 1.14 at
+  on `alpha` and `n`, diverging as `n -> 3` (from eq. 1: standard deviation/`sigma` 1.46, 1.28, 1.14 at
   `alpha = 1.5` for `n = 4`, 5, 10), and the sample RMS depends on the fit range.
 - **Tails are always on the low side.** The side follows the mechanism (E/p with neutral overlap or
   annihilation gives a high-side tail).
