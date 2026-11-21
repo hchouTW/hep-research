@@ -20,17 +20,11 @@ particles crossing a stereo pair produce four candidate intersections, only two 
 which are real. Ghost rate grows quadratically with occupancy, which is why strip
 detectors are placed outside the highest-density region.
 
-Silicon position resolution is set by pitch and by charge sharing. A binary readout (hit/no-hit)
-gives about pitch divided by the square root of twelve for single-channel clusters; charge sharing
-into two-channel clusters does better even without amplitudes, depending on incidence angle,
-threshold and Lorentz drift; analog
-or multi-threshold readout that interpolates the charge division between neighboring
-channels does substantially better, at the cost of calibration complexity - the
-interpolation depends on the charge-sharing model, which is itself a calibration that
-drifts with radiation damage and bias voltage. Sharing also lowers the charge on each
-channel, so hit efficiency at a threshold depends on the track position in the cell; the
-efficiency-occupancy window for a given charge on the channel is in
-[front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression).
+Silicon position resolution is set by pitch and by charge sharing (pitch over `sqrt(12)` for binary
+single-channel clusters, better with interpolation, whose sharing model drifts with damage and bias); clusters,
+estimators, Lorentz shift and angle dependence: [silicon hit reconstruction](silicon-hit-reconstruction.md).
+Sharing also lowers the charge per channel, so hit efficiency at a threshold depends on the position in the cell; the efficiency-occupancy
+window is in [front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression).
 
 **Silicon response and radiation damage** (approximate; PDG RPP 2025, sec. 35.8). A
 pair costs `w_i ≈ 3.65 eV`; a minimum-ionizing particle deposits most probably about
@@ -47,11 +41,10 @@ magnetic field carriers drift at the Lorentz angle `tan alpha_L = r_H mu B` (`r_
 and its temperature scaling: [front-end electronics](front-end-electronics-and-signal-processing.md).
 Treat damage constants as conditions data, not as these reference values.
 
-Silicon also measures deposited charge, which is approximately proportional to `Z^2` (before readout saturation, quenching and delta-ray escape) for a
-traversing nucleus. A silicon tracker is therefore simultaneously a charge (|Z|)
-measuring device, and multi-layer charge consistency is a powerful rejection tool
-against interactions and against tracks built from mismatched hits - see
-[particle identification](particle-identification.md) for the dE/dx treatment.
+Silicon charge is approximately `∝ Z^2` (before saturation, quenching and delta-ray escape), so the tracker
+also measures |Z|; multi-layer charge consistency rejects interactions and mismatched hits. Cluster-charge
+corrections: [silicon hit reconstruction](silicon-hit-reconstruction.md); dE/dx:
+[particle identification](particle-identification.md).
 
 **Gaseous detectors** - time projection chambers, drift chambers, straw tubes -
 measure ionization in a gas volume and reconstruct position from drift time, requiring
