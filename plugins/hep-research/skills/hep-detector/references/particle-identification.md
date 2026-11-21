@@ -131,43 +131,17 @@ in charge determination at all momenta.
 
 ## Transition radiation detectors (TRD)
 
-When a relativistic charged particle crosses a boundary between materials of different
-dielectric constant, it emits transition radiation - X-ray photons whose *yield*
-depends on the Lorentz factor `gamma`, not on velocity. This is the crucial
-distinction: `beta` saturates at 1 and stops discriminating, while `gamma = E/m`
-continues to grow, so a TRD keeps separating species long after TOF and dE/dx have
-failed.
-
-Because yield per interface is tiny, a TRD stacks many radiator foils or fibre layers
-followed by an X-ray-absorbing gas chamber (typically xenon-based, for photoelectric absorption of
-TR X-rays, which are soft (2-40 keV for `gamma = 10^3`, PDG) and radiator dependent). The signal is a *statistical excess* of
-high-energy deposits in some layers on top of ordinary ionization - not a distinct
-signature in any single layer. That has two direct consequences:
-
-- **Identification is inherently a likelihood problem across layers**, not a cut on one
-  measurement. Estimators include the total energy per module, the number of clusters
-  above an optimal threshold, a likelihood ratio from per-layer amplitude (or
-  amplitude-versus-drift-time) distributions, and neural networks; most experiments use a
-  likelihood, and a neural network or a higher-dimensional likelihood gives more
-  rejection (PDG RPP 2025, sec. 35.6.5). Whatever the estimator, the
-  per-layer response distributions are the calibration, and they must be measured from
-  data control samples, not taken from simulation alone.
-- **Performance is quoted as the rejection of the heavier species (1 / its efficiency) at a
-  fixed electron efficiency** (PDG RPP 2025, sec. 35.6.5 and Fig. 35.18, uses 90 %), and it is
-  strongly `gamma`-dependent. Transition-radiation yield turns on near `gamma ~ 10^3`
-  (the exact onset and saturation depend on the radiator). A TRD separates electrons
-  from a heavier species - pions (`e/pi`, the usual collider figure) or protons (the
-  usual cosmic-ray case, helped by the ~1836 mass ratio) - over the momentum band where
-  the electron is above the onset and the heavier species is below it, and loses power
-  once the heavier species' `gamma` also crosses the onset (at `gamma = 10^3`, about
-  140 GeV/c for pions and 940 GeV/c for protons). State the
-  momentum band, the working-point efficiency, and the rejection factor together - one
-  without the others is uninterpretable.
-
-Transition radiation is emitted at very small angles and its energy deposit is
-superimposed on the particle's own ionization in the same chamber, so a TRD's
-`gamma`-dependent signal and its dE/dx signal are *correlated*, not independent
-measurements. Combining them as if independent overstates the separation.
+Transition radiation (X-rays emitted when a relativistic charged particle crosses interfaces of different dielectric
+constant) depends on the Lorentz factor `gamma`, not on velocity: `beta` saturates at 1, while `gamma = E/m` keeps
+growing, so a TRD keeps separating species after TOF and dE/dx have stopped. The signal is a statistical excess of
+large deposits over many radiator-detector layers, so identification is a likelihood (or a neural network) across
+layers with per-layer responses measured on data control samples (PDG RPP 2025, sec. 35.6.5). Performance is the
+rejection of the heavier species (1 / its efficiency) at a stated electron efficiency (90 % by convention), versus
+momentum: it holds while the electron is above the TR onset and the heavier species below it. TR is absorbed in the
+same gas as the particle's ionization, so the TRD signal and its dE/dx are correlated; combining them as
+independent overstates the separation. Emission and radiators, X-ray absorption, the time profile, clusters and
+tracklets, estimators, calibration and reporting are in
+[transition radiation detectors](transition-radiation-detectors.md).
 
 ## Ring-imaging Cherenkov detectors (RICH)
 
