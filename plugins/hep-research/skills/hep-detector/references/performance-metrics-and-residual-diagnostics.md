@@ -216,13 +216,13 @@ tail fraction, and coverage across phase space, not just the core width.
 
 ### Resolution models and widths
 
-A resolution is a model or an estimator; name it. Common choices (general method):
+A resolution is a model or an estimator; name it, and quote the core and the tails separately. The parametric
+shapes (single- and double-sided Crystal Ball and the correlation of their tail parameters, Gaussian plus pedestal,
+core-plus-tail time PDFs, hadronic tails) and the effective sigma (`sigma_eff`, three conventions), with when
+to use each, are in [resolution shape models](resolution-shape-models.md). Other common choices (general method):
 
-- **Double-sided Crystal Ball**: Gaussian core `sigma` with power-law tails on both sides (`alpha_L`, `n_L`,
-  `alpha_R`, `n_R`); quote the core and the tail parameters.
 - **Double Gaussian**: two widths and a fraction; define the effective width you quote (for example the fraction-
-  weighted quadrature mean, or `sigma_eff` below), since "the resolution" of a double Gaussian is otherwise ambiguous.
-- **`sigma_eff`**: half the width of the smallest interval containing 68.3% of the entries.
+  weighted quadrature mean, or `sigma_eff`), since "the resolution" of a double Gaussian is otherwise ambiguous.
 - **RMS90**: the standard deviation of the central 90% of the entries; for a Gaussian it is `0.789 sigma`, so divide by
   0.789 before comparing with a Gaussian `sigma`.
 - Uncertainties of quantile-based widths (`sigma_68`, `sigma_eff`, RMS90) come from a bootstrap, not from a Gaussian
