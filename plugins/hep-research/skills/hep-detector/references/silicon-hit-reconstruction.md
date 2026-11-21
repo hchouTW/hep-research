@@ -1,8 +1,6 @@
 # Silicon Hit Reconstruction
 
-From pixel and strip signals to hits: clustering, two-coordinate readout, hit position (centre of gravity, eta,
-head-tail, end-pixel, templates), the Lorentz shift, resolution versus angle, and nuclear charge from cluster
-charge. Sensors, radiation damage, ghosts:
+From pixel and strip signals to clusters, hits, positions, resolution and nuclear charge. Sensors, radiation damage, ghosts:
 [tracking and vertexing](tracking-and-vertexing.md#sensor-technologies),
 [silicon recap](gaseous-and-specialized-tracking-technologies.md#silicon-pixels-and-strips-recap-of-what-is-distinctive);
 thresholds and zero suppression:
@@ -56,8 +54,9 @@ Source IDs: `arxiv_<id>` is arXiv:<id> with `/` written `_`; `pdg_2025_<review>`
   (arXiv:physics/0012050 secs. 2-3, pp. 3-4): a conditions quantity.
 - **Lorentz shift of the hit** (approximate, uniform drift through the full thickness `D`; arXiv:1405.6569
   sec. 3.1.1, eq. 1): `L/2 = D tan(theta_L) / 2`.
-- **Path-length scaling of the cluster charge** (approximate, a relativistic particle well below front-end
-  saturation; arXiv:2603.25080 sec. 3.1; arXiv:1712.08011 secs. 2, 4.5): `Q ∝ Z^2 D / cos(theta)`; the charge
+- **Path-length scaling of the cluster charge** (approximate: relativistic, well below front-end saturation,
+  after the impact-position and angle correction where floating strips change the collected charge;
+  arXiv:2603.25080 sec. 3.1; arXiv:1712.08011 secs. 2, 4.5): `Q ∝ Z^2 D / cos(theta)`; the charge
   estimator is `Q cos(theta)`.
 - **Linear charge sharing** (approximate: linear electronics, a strip-network model; arXiv:1712.08011 sec. 3.2,
   eqs. 1-6): `S_i = G sum_k R_|i-k| Q_k` with `Q_k = Q_total h_k / D`, `h_k` the depth of the track under strip
@@ -76,32 +75,31 @@ Source IDs: `arxiv_<id>` is arXiv:<id> with `/` written `_`; `pdg_2025_<review>`
 | Wide strip clusters (large angle) | Head-tail; choose it by the width expected from the track angle | Threshold for the edge channels | Eta used on wide clusters; noise on the edges | FXT (arXiv:hep-ex/0212037 secs. 7, 7.1-7.3, angle rule in 7.3); COL, chosen by observed size above two strips, not by expected width (arXiv:2201.09824 sec. 8.2.2, eq. 8.9) |
 | Pixel position with a track angle | End-pixel estimator with the expected charge width | Track or vertex direction | Wrong angle before the fit; biases after irradiation | COL only (sources read) (arXiv:1405.6569 secs. 3.1.1-3.1.2; arXiv:1406.7690 sec. 2) |
 | Irradiated pixels | Simulated charge templates per angle range, chi2 to the observed profile | A sensor simulation validated per fluence | Templates from the wrong fluence; delta-ray clusters | COL only (arXiv:1405.6569 sec. 3.1.2), though not collider-specific |
-| Sensor in a magnetic field | Lorentz shift correction; `theta_L` where the mean cluster size versus angle is smallest (parabola fit), with a `B = 0` control giving zero | Angle scan with field-off data at the same angles; without them the `theta_L` check is `inconclusive` | One `theta_L` kept after bias, temperature or fluence changes | Shift correction and formula: COL (arXiv:1405.6569 secs. 3.1.1, 3.2; pdg_2025_particle-detectors-at-accelerators sec. 35.8.1.2); `theta_L` from the size minimum: FXT test beam only (arXiv:physics/0012050 sec. 2) |
+| Sensor in a magnetic field | Lorentz shift correction; `theta_L` where the mean cluster size versus angle is smallest (parabola fit), with a `B = 0` control whose minimum must be at zero within a tolerance fixed in advance, else `failed` | Angle scan with field-off data at the same angles; without them the `theta_L` check is `inconclusive` | One `theta_L` kept after bias, temperature or fluence changes | Shift correction: COL (arXiv:1405.6569 secs. 3.1.1, 3.2); `theta_L` formula: pdg_2025_particle-detectors-at-accelerators sec. 35.8.1.2; `theta_L` from the size minimum: FXT test beam only (arXiv:physics/0012050 sec. 2) |
 | Saturated channels (high `Z`) | Treat saturated channels as digital and take the geometric centre, or reject saturated seeds | Saturation threshold from charge injection or the response curve | Eta loses sensitivity when the seed sits at saturation | SPC (arXiv:1407.1657 sec. 3.1); FXT (arXiv:1705.09791 sec. 3.3; arXiv:2603.25080 sec. 5.2) |
 | Nuclear charge from one cluster | Correct the cluster charge for path length and for impact position and angle: binned tables from known-`Z` samples, a linear charge-sharing model, or a data-driven regressor (normal incidence only in the source read; add the angle as an input) | Known-`Z` reference (beam tag, other detector); angle known | Wrong impact bin biases silently; tables thin at large angle; non-linear electronics | FXT, ion beams on space-instrument ladders (arXiv:1712.08011 secs. 3.1-3.2, 4; arXiv:1705.09791 sec. 3.4 with 3.2.3; arXiv:2603.25080 secs. 3.1-3.4, `eta` dependence sec. 4.2); SPC, path-length part only, flight `Z = 1, 2` (arXiv:1712.02739 secs. 6.1-6.2) |
 | Charge from many layers | Truncated mean over layers (drop the highest values), or a per-layer likelihood | Per-layer gain equalized | Landau tail; fragments after an interaction | FXT (arXiv:2603.25080 sec. 5.1); SPC ([multisample PID](multisample-pid-and-reference-pdfs.md#control-samples-by-environment)) |
-| Hit uncertainty for the track fit | Parametrize by cluster size and expected width; scale so pulls have unit width | Simulation with true positions (arXiv:2201.09824 sec. 8.2.2); recommended here, not done in the sources read: pull widths checked in data with unbiased residuals against a tolerance fixed in advance, else rescale from data or report `failed` | Errors from the formula alone give pulls not of unit width; pulls unit in simulation only | COL only (sources read) (arXiv:1405.6569 sec. 3.2; arXiv:2201.09824 sec. 8.2.2) |
+| Hit uncertainty for the track fit | Parametrize by cluster size and expected width; scale so pulls have unit width | Simulation with true positions (arXiv:2201.09824 sec. 8.2.2); recommended here, not done in the sources read: pull widths checked in data with unbiased residuals against a tolerance fixed in advance, else rescale on one data sample and re-check on a disjoint one: `rescaled` if it passes, else `failed` | Errors from the formula alone give pulls not of unit width; pulls unit in simulation only | COL only (sources read) (arXiv:1405.6569 sec. 3.2; arXiv:2201.09824 sec. 8.2.2) |
 | Resolution in data | Unbiased residual minus the track term, versus angle and cluster size: event by event, global (median and MAD), overlap pairs, or a telescope | Track excluding the hit; scattering known | Track term underestimated; one number quoted for all angles | COL (arXiv:2209.03006 secs. 2-3); FXT (arXiv:2603.25085 secs. 4.1, 4.3); SPC (arXiv:1712.02739 sec. 6.1) |
 
 Across the rows:
 
-- **The estimator follows the expected width.** One channel: the channel centre (plus the Lorentz and
-  radiation-bias correction for pixels); small `W`: centre of gravity or eta; large `W`: head-tail or an
-  end-channel estimator (strips: one tracker selects by observed size, a proxy for `W` that floating strips and
-  high `Z` bias, by this page's inference from the examples, though that tracker has one floating strip, arXiv:2201.09824 sec. 8.2.2; pixels of two or more channels, end-pixel
-  or templates: arXiv:1405.6569 secs. 3.1.1-3.1.2).
-  `W` is the width expected from the track
-  angle (end-pixel `W` above), not the observed size, which floating strips and high `Z` widen at any angle. Eta is
+- **The estimator follows the expected width** `W` from the track angle (end-pixel `W` above), not the observed
+  size, which floating strips and high `Z` widen at any angle. One channel: the channel centre (plus the Lorentz
+  and radiation-bias correction for pixels); small `W`: centre of gravity or eta; large `W`: head-tail or an
+  end-channel estimator (pixels: end-pixel or templates, arXiv:1405.6569 secs. 3.1.1-3.1.2; one strip tracker
+  selects by observed size, a proxy that floating strips and high `Z` bias, inferred here,
+  though it has one floating strip, arXiv:2201.09824 sec. 8.2.2). Eta is
   better at small angles, head-tail at large ones (arXiv:hep-ex/0212037 sec. 7.2); measure the crossover angle.
 - **Cluster shape is a track-quality variable.** Requiring the size expected from the seed direction removes
   fake seeds (arXiv:1405.6569 sec. 4.1, p. 17); the template chi2 rejects profiles that do not fit the track
   angle (sec. 3.1.2, p. 9).
 - **Where the resolution minimum sits.** With one floating strip the resolution at normal incidence is near the
-  digital value, which one source takes as `p/(2 sqrt(12))` for readout pitch `p`; it is then expected to be best where the projected track crosses about one implant pitch, half
-  a readout pitch (derived here from the quoted minimum angles and geometry, the text saying two strip
-  pitches, not seen on the finest pitch, arXiv:2209.03006 sec. 3, Table 1), and degrades at larger angles as more channels share and dilute the
-  signal (with three floating strips it degrades from normal incidence on, see the examples, arXiv:2603.25085 sec. 4.3). Isotropic
-  fluxes fill the whole range: characterise it over the acceptance before flight
+  digital value (`p/(2 sqrt(12))` in one source); it is then expected to be best where the projected track crosses about one implant pitch, half
+  a readout pitch (derived here from the quoted angles and geometry; the text says two strip
+  pitches; not seen on the finest pitch; arXiv:2209.03006 sec. 3, Table 1), and degrades at larger angles as more
+  channels share the signal (with three floating strips from normal incidence on, arXiv:2603.25085 sec. 4.3). Characterise it
+  over the acceptance before flight
   (sec. 4.3) and in flight (arXiv:1712.02739 sec. 6.1). No source read gives the minimum without floating strips.
 - **Charge corrections need the position, the position needs the charge.** `f(eta)` depends on `Z`, and the
   charge correction depends on `eta` (arXiv:2603.25080 secs. 3.1, 4.2): iterate, or use a model that solves both
@@ -109,11 +107,11 @@ Across the rows:
 
 <!-- example: named apparatus and their numbers -->
 - CMS tracker (COL): pixel readout threshold 3200 electrons, cluster minimum 4000
-  electrons (the source's unit, no pixel noise given, a MIP about 21000); strip zero suppression at 5 times the noise, offline seeds
+  electrons (the source's unit, no pixel noise given, a MIP about 21000); strip zero suppression at 5 times the noise, or 2 if a neighbour also exceeds 2, offline seeds
   at 3, neighbours at 2, cluster at 5 times the cluster noise; strip Lorentz corrections about 10 um (TIB) and
   20 um (TOB); binary-resolution uncertainty
   (position uncertainty set to the cluster width over `sqrt(12)`, position unchanged) when the observed width is
-  at least 3.5 times the expected one and incompatible with it (arXiv:1405.6569 secs. 3.1-3.2, e-print PDF pp. 7-10, printed 5-8, the 3.5 factor on PDF page 10).
+  at least 3.5 times the expected one and incompatible with it (arXiv:1405.6569 secs. 3.1-3.2, PDF pp. 7-10; 3.5 on p. 10).
 - ATLAS pixel detector (COL): a neural-network splitter cut the measurements shared between
   tracks in jets by up to a factor of three (arXiv:1406.7690 abstract, secs. 1, 4.1 with Fig. 10).
 - ATLAS pixel test-beam assemblies (FXT, 1.4 T): `theta_L` 9.0 +- 0.4 +- 0.5 degrees unirradiated
@@ -123,7 +121,7 @@ Across the rows:
   32 um by layer and side (arXiv:2209.03006 secs. 1, 3, Tables 1, 3). Position by observed cluster size (one strip,
   two-strip centre of gravity, head-tail above two strips) and position-uncertainty scale factors from simulation
   per sensor type, side and size (arXiv:2201.09824
-  sec. 8.2.2 with eq. 8.9 and table 23, PDF pp. 160-162, e-print printed 154-156).
+  sec. 8.2.2 with eq. 8.9 and table 23, PDF pp. 160-162).
 - ZEUS MVD sensors (FXT): 120 um readout pitch with five intermediate (floating) strips, 20 um implant pitch, non-flat `dN/deta`;
   eta better below about 30 degrees, head-tail above 30-40 degrees
   (arXiv:hep-ex/0212037 abstract, secs. 1, 5.1, 7.1-7.2, pp. 2-3, 19-32).
@@ -158,9 +156,8 @@ Across the rows:
   combination of views, `ambiguous` when it may be a ghost).
   **Informative residual**: unbiased track-to-hit residual versus intercept position in
   the pitch, incidence angle and cluster size; cluster charge versus `eta`.
-- **Scaling**: binary `p/sqrt(12)` for single-channel clusters (readout pitch `p`, or `p/(2 sqrt(12))` with one
-  floating strip by one convention, while another keeps `p/sqrt(12)` with three: state the convention); charge `∝ Z^2 / cos(theta)` (relativistic, well below front-end saturation);
-  Lorentz shift `D tan(theta_L)/2`.
+- **Scaling**: binary `p/sqrt(12)` (floating-strip conventions differ: state it), charge `∝ Z^2 / cos(theta)`,
+  Lorentz shift `D tan(theta_L)/2`, each within its domain in Relations.
 - **Conventions**: readout versus implant pitch; sign and plane of the Lorentz shift; the depth at which a hit is
   quoted (mid-plane for templates); charge in ADC, electrons or MIP units.
 - **Tails**: delta rays, merged clusters, saturated channels, noisy or dead channels, sensor edges.
@@ -176,17 +173,20 @@ Across the rows:
 - **One `f(eta)` for all particles.** From the wrong `Z` or angle it biases positions and, through them, the
   charge.
 - **Resolution quoted at normal incidence only.** For isotropic fluxes the angle-averaged resolution is
-  worse than at normal incidence when the resolution grows monotonically from there (three floating strips in
-  the examples), and can be better when its minimum lies inside the acceptance (one floating strip, rule above); quote it versus angle.
+  worse than at normal incidence if the resolution grows from there (three floating strips), and
+  can be better if its minimum lies inside the acceptance (one floating strip, above); quote it versus angle.
 - **Saturation read as physics, or physics as saturation.** A flattening response at high `Z` may be front-end
-  saturation or physics (quenching, delta-ray escape); a knee at a fixed ADC level, not at a fixed `Z`, points to
-  the electronics (arXiv:1705.09791 sec. 3.3); confirm with charge injection.
+  saturation or a physics effect (none in the sources read; silicon strips show no Birks saturation,
+  arXiv:1705.09791 sec. 3.2.3); a knee at a fixed ADC level, not at a fixed `Z`, across sub-samples where the
+  same `Z` gives different signals (impact position, angle, gain), points to the electronics (sec. 3.3);
+  confirm with charge injection.
 
 ## Deliverables
 
-- Clustering thresholds in noise units (or in electrons with the noise in electrons), splitting rule, merged-cluster rate where density matters.
-- Position estimator per expected width, with `f(eta)` or template provenance (species, angle range, fluence) and
-  the Lorentz correction with its conditions.
+- Clustering thresholds in noise units, splitting rule, merged-cluster rate where density matters.
+- Position estimator per expected width, with `f(eta)` or template provenance (sensor layout, species or charge
+  range, angle range, fluence; for templates the simulation), the `f(eta)` closure status per bin, and the Lorentz
+  correction with its conditions.
 - Resolution versus incidence angle and cluster size, with the track or telescope term and how it was removed.
 - Hit uncertainty per cluster size and expected width, its pull scale factors (simulation, sensor type, side) and
   the pull widths in data from unbiased residuals, with the tolerance.
@@ -195,29 +195,28 @@ Across the rows:
 
 ## Tool hooks
 
-- **Inputs**: per-channel signals after pedestal and common mode (ADC or electrons), noise per channel, channel
-  positions and pitch (um), sensor thickness (um), track angle per view (degrees) where known, field (T), a
-  per-species `f(eta)` or charge table with its validity range, `theta_L` per view with its conditions (bias,
-  temperature, fluence) or a conditions tag, templates with their simulation, fluence and angle range, and a per-channel
-  saturation threshold (ADC), per-channel gain (ADC to
-  electrons), a bad, dead and noisy channel map, clustering and splitting thresholds (noise units), view
-  orientation and readout regions, and the hit-uncertainty parametrisation with its pull scale factors.
+- **Inputs**: per-channel signals after pedestal and common mode (ADC or electrons), noise, gain (ADC to
+  electrons), saturation threshold (ADC) and bad, dead or noisy flags; channel positions and pitch (um), thickness
+  (um), view orientation and readout regions; track angle per view (degrees) where known, field (T); per-species
+  `f(eta)` or charge tables, templates (simulation, fluence, angle range) and `theta_L` per view (bias,
+  temperature, fluence, or a conditions tag), each with its validity range; clustering and splitting thresholds
+  (noise units); the hit-uncertainty parametrisation with its pull scale factors.
 - **Outputs**: clusters with size, total charge, `eta`, position by the chosen estimator, its uncertainty, the
-  path-corrected charge, and flags.
+  path-corrected charge, and flags; 1D and 2D hits with their clusters, position, uncertainty and status.
 - **Conventions**: thresholds in noise units, or in electrons with the noise in electrons; angle from the sensor normal; Lorentz shift sign stated per view.
 - **Closure test and negative control**: in every charge range and angle bin of `f(eta)` (edges fixed in
   advance), and separately on the low- and high-edge sub-samples of each bin, on a uniform-illumination sample
   disjoint from the one that built it, with true or telescope positions and alignment fixed beforehand, the
-  largest `|mean residual - mean over intercept bins|` (a stated number of intercept bins per pitch, each with `N`
+  largest `|mean residual - mean over intercept bins|` (a stated number of intercept bins per implant pitch, at least two, each with `N`
   entries or else `inconclusive`, not skipped) must stay below a stated fraction of the corrected estimator's
-  resolution expected from simulation (not the sample's own RMS), all fixed in advance;
-  in each bin the uncorrected centre of gravity, the negative control, must fail it, and a bin where it does not, or
-  where `dN/deta` passes a flatness test fixed in advance (listed as not needing the correction), is
-  `inconclusive`, and the closure is `failed` if any bin fails, `inconclusive` if none fails and any is
-  inconclusive, and `passed` only if every bin passes.
+  resolution expected from simulation (not the sample's own RMS), all fixed in advance.
+  A bin is `failed` if the corrected estimator fails, whatever else holds; `inconclusive` if it passes and the
+  uncorrected centre of gravity (the negative control) passes too; else `passed`. Bins whose `dN/deta` passes a
+  flatness test fixed in advance are left out of the `f(eta)` closure and closed with the centre of gravity
+  against the same criterion. The closure is `failed` if any bin fails, else `inconclusive` if any is, else `passed`.
 - **Statuses**: per cluster `ok`, `single-channel`, `split`, `wide` (head-tail, end-channel or end-pixel estimator used), `saturated`, `edge`
   (bad or edge channel inside), `out-of-range` (angle or `Z` outside the table); per hit `ambiguous` (more than one view
-  combination); per check `passed`, `failed`, `inconclusive`.
+  combination); per check `passed`, `failed`, `inconclusive`, `rescaled`.
 
 ## Environment coverage
 
@@ -227,14 +226,13 @@ Across the rows:
 | Two-coordinate readout | arxiv_2209.03006 | arxiv_2603.25085, arxiv_physics_0012050 (telescopes) | arxiv_1407.1657, arxiv_1712.02739 | gap | gap | gap |
 | Centre of gravity and eta correction | arxiv_2209.03006, arxiv_2201.09824 (centre of gravity only; eta: gap) | arxiv_hep-ex_0212037, arxiv_2603.25080 | arxiv_1712.02739 (noise-weighted), arxiv_1712.08011 (eta for impact) | gap | gap | gap |
 | Head-tail and end-channel estimators | arxiv_2201.09824, arxiv_1405.6569, arxiv_1406.7690 | arxiv_hep-ex_0212037 | gap | gap | gap | gap |
-| Lorentz shift and `theta_L` | arxiv_1405.6569, pdg_2025_particle-detectors-at-accelerators (shift only) | arxiv_physics_0012050 | gap: not sought | gap | gap | gap |
+| Lorentz shift and `theta_L` | arxiv_1405.6569, pdg_2025_particle-detectors-at-accelerators (`theta_L` formula, Hall factor) | arxiv_physics_0012050 | gap: not sought | gap | gap | gap |
 | Templates | arxiv_1405.6569 | gap | gap | gap | gap | gap |
 | Cluster size and resolution versus angle | arxiv_2209.03006, arxiv_2201.09824, arxiv_1405.6569 | arxiv_physics_0012050, arxiv_2603.25085, arxiv_hep-ex_0212037 | arxiv_1712.02739 | gap | gap | gap |
 | Nuclear charge from cluster charge | gap: not sought; see [dE/dx](particle-identification.md#ionization-energy-loss-dedx) | arxiv_1705.09791, arxiv_1712.08011, arxiv_2603.25080 | arxiv_1712.02739 (path-length part, `Z = 1, 2`) | gap | gap | gap |
 
-`gap`: not found in the sources read, or, marked not sought, not looked for;
-templates were searched for and found only in COL (single
-environment). UGD, GND and NUC silicon was not surveyed.
+`gap`: not covered by the sources read (UGD, GND and NUC silicon was not surveyed); `gap: not sought`: not
+looked for in that environment. Templates were searched for and found only in COL (single environment).
 
 ## Citations
 
