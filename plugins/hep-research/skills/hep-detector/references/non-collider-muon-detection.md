@@ -7,7 +7,7 @@ events and chamber alignment with cosmic muons; NUC is a gap. Collider muon syst
 in absorbers and charge-sign quality are in [muon systems](muon-systems.md). Linked environment pages own
 their content:
 [neutrino astronomy](neutrino-astronomy.md#backgrounds) (atmospheric-muon veto, self-veto, up-going selection),
-[noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#rare-event-detectors) (protected detectors, vetoes on this page),
+[noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md#rare-event-detectors) (the protected detectors only: their muon content is on this page),
 [ground-based detection arrays](ground-based-detection-arrays.md#muon-detectors-radio-detection-and-wide-field-gamma-ray-arrays),
 [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) (albedo). The [background budget](../../hep-measurement/references/rare-event-and-neutrino-measurements.md#background-budget)
 and [post-veto live time](../../hep-measurement/references/rare-event-and-neutrino-measurements.md#exposure-and-live-time) belong to hep-measurement.
@@ -19,7 +19,8 @@ and [post-veto live time](../../hep-measurement/references/rare-event-and-neutri
   layer inefficiencies are not independent, and the bias can have either sign. In the cited measurement the
   low-threshold inefficiency comes from muons running along gaps between counters, and staggered layers make a second
   gap crossing unlikely, so the inefficiencies are anti-correlated and the directly measured `eps_3/4` exceeds the
-  extrapolation (sec. 6.2, text and Figs. 6-7, pp. 10-12).
+  extrapolation below about 75 PE down to 15 PE, agreeing at 10 PE as [Tool hooks](#tool-hooks) reads Fig. 6 (sec. 6.2,
+  text and Figs. 6-7, pp. 10-12).
   A gap shared by several layers would push the other way, so measure `eps_3/4` directly as well.
 - **Muon band in an absorber-free spectrometer** (exact kinematics for unit charge, with the band width set by the
   velocity resolution; arXiv:astro-ph/0205344, sec. 4, p. 7): `1/beta = sqrt((m_mu/R)^2 + 1)`, with `R` the
@@ -45,8 +46,8 @@ in most of the area it covers, by a space-time coincidence of at least 3 of 4 la
 p. 9), and the anticoincidence shield of a space gamma-ray telescope vetoes charged particles with
 segmented tiles, because an unsegmented shield would also fire on
 backsplash from the telescope's own showers (**self-veto** here, not the atmospheric-neutrino one linked above; SPC; arXiv:astro-ph/0702581, abstract). The
-parameters are the coverage (hermeticity, gaps), the coincidence logic, the threshold, the segmentation against
-self-veto, and the veto window.
+parameters: coverage (hermeticity, gaps), coincidence logic, threshold, segmentation against self-veto, veto
+window.
 
 <!-- example: source citation -->
 Borexino: an outer water-Cherenkov detector around the inner detector; combined veto efficiency at least 99.992%
@@ -87,7 +88,7 @@ for two outer-detector flags, both lower limits, with 95% C.L. Clopper-Pearson i
 3.2, p. 14; sec. 3.2.1, p. 15; Table 3, p. 16). The mutual efficiencies of these two flags, which
 share their PMTs, are at least 0.9997 each (lower limits, Table 3, p. 16; sec. 3.2.2, p. 16), above the direct ones and, by about 0.006
 (errors at most 10^-4), above the tests against the independent inner-detector flag, 0.9933 and 0.9935, as a
-shared-PMT correlation would make them; that flag's over-efficiency (below 0.7%, section 3.2.2, page 17) may also
+shared-PMT correlation would make them; that flag's over-efficiency (below 0.7%, sec. 3.2.2, p. 17) may also
 contribute, so the bias size is not determined. Daya Bay inner water shield
 efficiency for muons tagged by an antineutrino detector: (99.98 ± 0.01)%, confidence level not stated, the small
 apparent inefficiency being rock neutrons tagged as muons (arXiv:1407.0275, sec. 4.3, eq. 2, p. 15).
@@ -100,7 +101,7 @@ isotopes are removed by a veto on the time correlation with the crossing muon; l
 2025, sec. 36.6.5, p. 54): a veto restricted to a **cylinder around the reconstructed muon track** (arXiv:1101.3101,
 sec. 4, p. 17), or a **threefold coincidence** of muon, neutron capture and isotope decay, or a similar delayed
 coincidence (PDG RPP 2025, sec. 36.6.5, p. 55). The efficiency of a distance-to-track cut is measured on spallation
-products themselves, such as short-lived isotopes and muon-induced neutrons, and carried to other isotopes with a
+products, such as short-lived isotopes and muon-induced neutrons, and carried to other isotopes with a
 simulated systematic (arXiv:0907.0066, sec. V B, Fig. 10, pp. 8-9). Only underground sources were found, where spallation in the
 active volume is a dominant background; other environments are gaps.
 
@@ -176,7 +177,7 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 | Long-lived cosmogenics | Track cylinder; muon-neutron-decay coincidence | Muon tracking; neutron tag | Track-cut efficiency not measured; isotopes made without a detected neutron escape the coincidence | UGD |
 | Muon counting in showers | Space and time segmentation | Segment size against the expected density | Undercounting from pile-up | GND |
 | Multi-muon cosmic events in a tracker | Track matching across halves | Simulated high-multiplicity events | Double counting | COL |
-| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; an independent e+- identifier; an external proton spectrum to subtract above the rigidity where their band merges | Protons unseparated above that rigidity; residual p, e+-; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
+| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; an independent e+- identifier; an external proton spectrum, normalised to the protons below the rigidity where their band merges, subtracted above it | Protons unseparated above that rigidity; band muon efficiency not measured or simulated; residual p, e+-; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
 
 ## Distinctive but generalizable features (non-collider muons)
 
@@ -189,7 +190,7 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 - **Conventions**: efficiency per flag and combined, quoted as a lower limit when the reference purity is unknown.
 - **Tails**: corner-clipping and gap-crossing muons; showering muons; rock neutrons.
 - **Dependence**: thresholds, light yield ageing, sensor gain drift, overburden profile.
-- **Data sample**: cosmic muons themselves, beam-timed muons, spallation products.
+- **Data sample**: cosmic muons, beam-timed muons, spallation products.
 - **Transfers**: the reference-sample logic to any veto or anticoincidence; the cosmogenic veto shown only underground.
 
 ## Common misconceptions and failure modes
@@ -220,10 +221,11 @@ A veto-efficiency tool (not yet in the plugin):
   (required: only an estimate from a stated control-sample count of `m` non-muons in `M` events is measured, with
   an uncertainty at least the binomial one or, for `m = 0`, the one-sided upper limit at the confidence matching
   `Z_max`, and a bound, a simulated or assumed value, or a smaller uncertainty gives `impurity-unmeasured`, with no
-  override).
+  override, as does a measured estimate exceeded by the observed all-fail fraction, less its expected muon part, by
+  over `Z_max` combined standard errors).
 - **Outputs**: from the same pattern counts, single-layer efficiencies with intervals and their confidence level,
-  the k-of-n efficiency extrapolated under independence, the direct k-of-n efficiency, and their difference `Z` in
-  its standard errors (bootstrap over the reference muons, which both estimates share), with the `Z`
+  the k-of-n efficiency extrapolated from them under independence, the direct k-of-n efficiency, and their difference `Z` in
+  its standard errors (analytic or at least 1,000 bootstrap replicas over the reference muons, which both estimates share), with the `Z`
   that the estimated impurity alone would give (`Z_imp`), the impurity-corrected `Z_c` (difference less the
   impurity's, in standard errors that include the impurity uncertainty) and the `Z_max` used, and for a one-sided test its upper limits and their confidence level; efficiencies are fractions.
 - **Decision rule**: `independence-violated` when, in the two-sided test, `|Z_c| > Z_max` in either direction (`Z_max`
@@ -238,25 +240,28 @@ A veto-efficiency tool (not yet in the plugin):
   for 10^-3 of the muons must give the direct efficiency below the extrapolation and `independence-violated` (`Z` about -25); a
   staggered sample (each layer's inefficiency a gap part of about 0.009 that never hits two layers of one muon plus an
   independent 10^-3, about 114 direct failures) must give it above and `independence-violated` (`Z` about +41); at most 40 of 10,000 seeded independent samples may give other than exactly
-  `{ok}` at `Z_max = 3` (binomial, the impurity term negligible: a correct tool passes 99.3%, an effective 2.8 or 2.75 cut 6% or 0.5%). With the gap part alone (0.01 per layer) the direct count has no
+  `{ok}` at `Z_max = 3` (binomial, the impurity term negligible: a correct tool passes 99.3% (analytic) or 99.0% (1,000 bootstrap replicas), an effective 2.8 or 2.75 cut 6% or 0.5%). With the gap part alone (0.01 per layer) the direct count has no
   failures, and the direct-zero test must give exactly `{independence-violated, no-direct-failures}`. An independent sample with 10^-3 non-muon
   events that fail every layer, entered as 10^-3 ± 10^-4 (count 1,000 in 10^6), must give exactly `{impurity-dominated}` (`Z` and `Z_imp`
   about -24, `|Z - Z_imp|` at most 3), and the staggered sample with 5 x 10^-4 such events, entered as
   5 x 10^-4 ± 5 x 10^-5 (500 in 10^6), must give `independence-violated` and `impurity-dominated`, never `ok` (`Z` +1.6 without sampling noise,
-  seed spread ±1.0, so -0.3 to +3.6 in 95% of seeds; `Z_imp` about -19, `Z_c` about +10).
+  seed spread ±1.0, so -0.3 to +3.6 in 95% of seeds; `Z_imp` about -19, `Z_c` about +10). Entered as 0 ± 10^-7, it must
+  give `impurity-unmeasured` and `impurity-dominated`, and the shared gap with an assumed bound 10^-3 exactly
+  `{independence-violated, impurity-unmeasured}`.
 - **Impurity**: non-muon events (modelled here as failing every layer) push the direct efficiency below the
   extrapolation while the single-layer inefficiency is below 1/9 (3 of 4, from eq. 1, above it the sign reverses, which `Z_imp` carries), so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
   of the direct inefficiency is likely due to non-muon events that pass the selection (supported by simulation;
-  arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at 15-50 PE, where the direct efficiency still exceeds the extrapolation, and at 10 PE, the operating range's low end, they agree within errors (read from Fig. 6 on page 11, not in the text): impurity fully masks staggering.
-- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, two-sided test only, not with `no-failures` or `no-direct-failures`); `impurity-unmeasured` (the test
-  runs at zero impurity and at a bound, the larger of the entered bound (or value plus uncertainty) and the observed
-  all-fail fraction, which bounds non-muons failing every layer, and a status holds only if both give it, the
-  efficiencies, `Z_imp` and `Z_c` being bounds); `no-failures` (a test layer has no failed
-  muon: its upper limit at the confidence matching `Z_max` enters the extrapolation, and the layer-zero test
-  runs); `no-direct-failures` (the direct count has no failed muon, and the direct-zero test runs); `no-direct-count` (per-layer counts
+  arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at 15-50 PE, where the direct efficiency still exceeds the extrapolation, and at 10 PE, the operating range's low end, they agree within errors (read from Fig. 6, p. 11, not stated in the text): impurity fully masks staggering.
+- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, the impurity alone significant, only where the two-sided test runs, so never with `no-failures`, `no-direct-failures` or `no-direct-count`, and at the bound alone under `impurity-unmeasured`); `impurity-unmeasured` (the test
+  runs at zero impurity and at the observed all-fail fraction, which bounds non-muons failing every layer, an entered
+  bound or value being reported, not used: `ok` and `independence-violated` need both runs, the efficiencies,
+  `Z_imp` and `Z_c` are bounds, and this status alone is inconclusive); `no-failures` (a test layer has no failed
+  muon: its upper limit at the confidence matching `Z_max` enters the extrapolation, and, with a direct count,
+  the layer-zero test runs); `no-direct-failures` (the direct count has no failed muon, and the direct-zero test runs); `no-direct-count` (per-layer counts
   only: the extrapolation is given, labelled as an assumption, without `Z`). The two-sided test needs a direct
   count and no zero-failure status: with `no-direct-count`, none of `ok`, `independence-violated` or
-  `impurity-dominated` is emitted, and after a one-sided test only `independence-violated` can be.
+  `impurity-dominated` is emitted, and after a one-sided test, of these three, only `independence-violated` can be. With
+  `no-failures` and `no-direct-failures` together only the direct-zero test runs.
 
 ## Environment coverage
 
