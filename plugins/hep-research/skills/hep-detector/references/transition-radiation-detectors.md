@@ -75,7 +75,7 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
 | Drift chamber with time sampling | Slice the signal in drift time; TR arrives at the radiator-side entrance (long drift) | Calibrated drift velocity and `t0`; ion-tail cancellation | Slices treated as independent | COL (arXiv:1709.02743 secs. 2.1, 11.2); FXT (arXiv:physics/0402131 secs. 3-4) |
 | Hits on a track | Pad clusters per time bin into tracklets on a propagated seed; straw hits on an extrapolated or stand-alone track | External tracker or enough TRD layers | Hits of a secondary or neighbour; wrong path length | COL (arXiv:1709.02743 secs. 8-8.2; arXiv:1109.5925 sec. 2); SPC (arXiv:1706.10182 sec. 2); FXT (arXiv:astro-ph/0608641 sec. 4.2.5) |
 | Thick gas, full charge | Total charge or truncated mean | Many layers | Landau tail of the background | FXT (PDG detectors review sec. 35.6.5, p. 47; arXiv:1111.4188 sec. 3.2) |
-| Thin gas | Cluster counting: hits above a 5-7 keV threshold; high-threshold fraction | Threshold stable in energy | Threshold drift with gain | COL (arXiv:1109.5925 sec. 4); FXT (arXiv:astro-ph/0608641 sec. 5.1) |
+| Thin gas | Cluster counting: hits above a threshold (typically 5-7 keV; PDG detectors review sec. 35.6.5, p. 47); high-threshold fraction | Threshold stable in energy | Threshold drift with gain | COL (arXiv:1109.5925 secs. 2, 4); FXT (arXiv:astro-ph/0608641 sec. 5.1) |
 | Best separation | Layer likelihood (charge; charge and largest-cluster position; per-slice charges), neural network | References from clean samples | Correlations ignored; bins that must be non-empty cost efficiency | COL (arXiv:1709.02743 sec. 11.2); FXT (arXiv:astro-ph/0608641 sec. 5; arXiv:physics/0402131 sec. 4, pp. 3-4, charge and position); SPC (arXiv:1706.10182 sec. 3) |
 | TR plus `dE/dx` in one estimator | One likelihood per species from TR hits and a `dE/dx` measure | One reference set for both | Multiplying them as independent | COL only (arXiv:1109.5925 sec. 1); SPC correlates a separate `dE/dx` array with the TRD signal instead (arXiv:1108.4838 sec. 3.3, pp. 7-8) |
 | Simulation of the response | PAI ionization in thin gas, tuned TR generator, delta-electron escape, empirical non-linearity | Flight or beam data per species | Tails wrong without delta escape; one non-linearity for point-like conversions and spread ionization | FXT (arXiv:1111.4188 sec. 4.3.1; arXiv:astro-ph/0608641 sec. 4.3); SPC (arXiv:1706.10182 sec. 2) |
@@ -90,8 +90,8 @@ from pions stated feasible roughly at 200-700 GeV/c by one cited study, not show
 (PDG detectors review sec. 35.6.5, p. 48; arXiv:1111.4188 pp. 2, 5, secs. 1 and 2.4); collider TRDs separate hadrons
 at low momentum by truncated-mean `dE/dx` instead (arXiv:1709.02743 sec. 11.1, Fig. 40, pp. 49-50). It needs longer
 TRDs than electron identification and, at TeV where all hadrons radiate, several thresholds or the TR energy and angle
-(arXiv:1901.11265 sec. 1, pp. 3-4); TeV hadron identification at a future collider is a stated need (sec. 1, p. 3;
-arXiv:2201.07901 abstract). The Lorentz factor of nuclei is measured with TR only in balloons and space: no
+(arXiv:1901.11265 sec. 1, pp. 3-4); TeV hadron identification at modern or planned accelerators is a stated need (forward hadrons: sec. 1, p. 3;
+a future accelerator experiment: arXiv:2201.07901 abstract). The Lorentz factor of nuclei is measured with TR only in balloons and space: no
 accelerator gives heavy nuclei at the `gamma ~ 1e5` aimed at (arXiv:1111.4188 sec. 3.4.1, p. 15). Tuned radiators of
 dense materials such as Al extend the rise to `gamma ~ 1e5` with photons up to 100 keV, with Compton-scatter detection
 proposed (PDG detectors review sec. 35.6.5, p. 48); compound radiators of varied foils
@@ -181,19 +181,20 @@ Rules that hold across the rows:
 
 - Radiator type and material; for regular foils `l1`, `l2` and count; for fibre or foam the density, nominal (and any tuned)
   fibre diameter and radiator thickness; tuned equivalent `l1`, `l2`, `N_f` wherever used, with the momenta compared
-  with data, agreement measure and value at each, and validity range (outside it: onset curve or `out-of-range`);
+  with data, agreement measure and value at each, and validity range (outside it: the measured onset curve, else `out-of-range`);
   `gamma_thr`, `gamma_sat` and their formula set; gas, its xenon fraction and
   pressure; layer count and gas thickness per layer; field, rate (occupancy) and track source.
 - Estimator, its inputs (charge, threshold, slices, path length) and any requirement it imposes.
 - Rejection with its interval at a stated confidence level and signal efficiency, for a stated species pair, versus
   momentum or `gamma`, with layers on track, samples and purity, and the closure and negative-control statuses.
-- The onset curve from data, with its samples and `gamma` ranges.
+- The onset curve from data (observable, fit form), with its samples and `gamma` ranges and the `gamma` values taken
+  as the end of its rise and the start of its plateau.
 - Calibration order, conditions ranges (gain, xenon pressure, temperature) and the reference version used.
 
 ## Tool hooks
 
 - **Inputs**: per hit, layer, deposit (keV, gain-calibrated), path length (cm), optional slice charges; per track,
-  momentum or rigidity and charge; references per species, layer and momentum or `gamma` bin, with conditions range;
+  momentum or rigidity and charge, and run conditions (gain, xenon pressure, temperature); references per species, layer and momentum or `gamma` bin, with conditions range;
   per radiator `gamma_thr` and `gamma_sat` with their formula set (analytic or practical, one for both), or the
   measured onset curve with its `gamma` range.
 - **Outputs**: per track, log-likelihood ratio per hypothesis pair and layers used; per sample, signal and background
@@ -217,8 +218,9 @@ Rules that hold across the rows:
   a separation means the estimator uses momentum or mismatched references, not TR.
 - **Statuses**: per track and hypothesis `below-onset` (`gamma < gamma_thr` of the recorded set, or below the onset curve's rise),
   `TR-saturated` (`gamma > gamma_sat`, or on its plateau); `gamma` from momentum, or rigidity and charge, and the
-  hypothesis mass; per track `ok`, `insufficient-layers`, `out-of-range` (outside the references),
-  `conditions-mismatch`; per check `passed`, `failed`, `inconclusive` (too few events or too wide an interval),
+  hypothesis mass; per track `ok`, `insufficient-layers`, `conditions-mismatch` (run conditions outside the
+  references' range); per track, and per hypothesis for `gamma`-binned references, `out-of-range` (outside the
+  references, or outside the tuned radiator's validity range); per check `passed`, `failed`, `inconclusive` (too few events or too wide an interval),
   `inapplicable`.
 
 ## Environment coverage
@@ -226,7 +228,7 @@ Rules that hold across the rows:
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
 | Emission, `gamma` scaling, formation length | arxiv_1709.02743, arxiv_1702.06473 | pdg_2025_passage-of-particles-through-matter, arxiv_1111.4188 | arxiv_1108.4838 | gap | gap | gap |
-| Radiators: threshold, saturation, irregular | gap | pdg_2025_particle-detectors-at-accelerators, arxiv_1111.4188, arxiv_1901.11265, arxiv_physics_0402131 | arxiv_1706.10182, pdg_2025_particle-detectors-at-accelerators; arxiv_2201.07901 (proposal, abstract only) | gap | gap | gap |
+| Radiators: threshold, saturation, irregular | arxiv_1709.02743, arxiv_1702.06473 (irregular radiators; threshold, saturation: gap) | pdg_2025_particle-detectors-at-accelerators, arxiv_1111.4188, arxiv_1901.11265, arxiv_physics_0402131 | arxiv_1706.10182, pdg_2025_particle-detectors-at-accelerators; arxiv_2201.07901 (proposal, abstract only) | gap | gap | gap |
 | Self-absorption, Xe conversion, build-up | arxiv_1702.06473 | arxiv_1111.4188, arxiv_astro-ph_0608641, pdg_2025_particle-detectors-at-accelerators | arxiv_1706.10182 | gap | gap | gap |
 | Time profile | arxiv_1709.02743 | arxiv_physics_0402131 | gap | gap | gap | gap |
 | Clusters, tracklets, hits on track | arxiv_1709.02743, arxiv_1109.5925 | arxiv_astro-ph_0608641 | arxiv_1706.10182 | gap | gap | gap |
@@ -236,11 +238,13 @@ Rules that hold across the rows:
 | Reporting rejection versus `gamma` | arxiv_1709.02743 (Fig. 43) | arxiv_astro-ph_0608641 (Figs. 15, 20) | gap: arxiv_1706.10182 gives no efficiency | gap | gap | gap |
 | Architectures | arxiv_1111.4188 | arxiv_1111.4188 (sec. 4.4), pdg_2025_particle-detectors-at-accelerators | arxiv_1706.10182, arxiv_1111.4188 | gap | gap | gap |
 | Hadron separation | gap with TR: a stated need at TeV (arxiv_1901.11265, arxiv_2201.07901); `dE/dx`: arxiv_1709.02743 | pdg_2025_particle-detectors-at-accelerators, arxiv_1111.4188, arxiv_1901.11265 | gap | gap | gap | gap |
-| Lorentz factor of nuclei | gap: no source read applies TR to nuclei at an accelerator (arxiv_1111.4188 sec. 3.4.1: no beams at `gamma ~ 1e5`) | gap: beam tests calibrate only (arxiv_0808.1718) | arxiv_1108.4838; arxiv_0808.1718 (rise only, no TR) | gap | gap | gap |
+| Lorentz factor of nuclei | gap: no collider source read (arxiv_1111.4188 sec. 3.4.1, p. 15: no beams of heavy elements at `gamma ~ 1e5`) | gap for a measurement: beam tests calibrate (arxiv_0808.1718) or test radiators with `Z = 1` at `gamma ~ 1e5` and boron nuclei, setting not stated (arxiv_1111.4188 sec. 3.4.1, Figs. 12-13) | arxiv_1108.4838; arxiv_0808.1718 (relativistic rise; TR negligible below ~1 TeV/n, p. 11) | gap | gap | gap |
 | Silicon TR energy and angle | gap | pdg_2025_particle-detectors-at-accelerators, arxiv_1901.11265, arxiv_1111.4188 | gap: proposed (arxiv_1111.4188) | gap | gap | gap |
 
-`gap`: not found in the sources read. GND and NUC: no TRD surveyed. UGD: TRDs of arxiv_1111.4188 Table 1 (p. 14) are filed
-as its sec. 1 (p. 1) groups them, accelerator-based or astro-particle; none is called underground or neutrino there.
+`gap`: not found in the sources read. GND and NUC: no TRD surveyed. UGD and the filing of arxiv_1111.4188 Table 1 (p. 14) TRDs: as its sec. 1 (p. 1)
+groups them: accelerator-based as COL (collider, secs. 4.1-4.3, p. 17) or FXT (fixed target, sec. 4.4, p. 30)
+where the source says which, astro-particle as SPC (sec. 4.5, p. 31); none is called underground or neutrino there, and a
+row whose beam no source read states (NOMAD's) is filed in no cell.
 
 <!-- example: a listed TRD and how this page files it -->
 - NOMAD TRD: foils, Xe-CO2, 9 layers, 150 cm, pion rejection 1000 (arXiv:1111.4188 Table 1, p. 14); accelerator-based
