@@ -37,7 +37,7 @@ and the post-veto live time belong to
 
 ## Muon vetoes
 
-Underground detectors are surrounded by water, oil or other shielding and equipped with muon vetoes; light reflection
+Underground detectors are surrounded by water, oil or other shielding, with muon vetoes; light reflection
 is maximized in outer veto detectors to raise the muon detection efficiency, while minimized in the inner
 detector for reconstruction (UGD; PDG RPP 2025, sec. 36.3.1, p. 12).
 The veto must identify muons with very high efficiency and, where cosmogenic isotopes matter, also reconstruct
@@ -185,16 +185,16 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 
 ## Distinctive but generalizable features (non-collider muons)
 
-- **Topology**: one or a few muons per readout window, mostly near-vertical, rate set by depth or altitude.
+- **Topology**: one or a few muons per window, mostly near-vertical, rate set by depth or altitude.
 - **Inverse problem**: veto efficiency and cosmogenic tagging efficiency from samples that are themselves impure.
 - **Natural objects**: veto flag, muon track, delayed-coincidence candidate, muon count per counter.
 - **Informative residual**: the efficiency difference between independent reference samples, and between the
   extrapolated and direct k-of-n efficiency.
 - **Scaling**: required veto inefficiency falls with the signal rate; dead time as in [Relations](#relations).
 - **Conventions**: efficiency per flag and combined, quoted as a lower limit when the reference purity is unknown.
-- **Tails**: corner-clipping and gap-crossing muons; showering muons; neutrons from the rock.
+- **Tails**: corner-clipping and gap-crossing muons; showering muons; rock neutrons.
 - **Dependence**: thresholds, light yield ageing, sensor gain drift, overburden profile.
-- **Data sample**: the cosmic muons themselves, beam-timed muons, spallation products.
+- **Data sample**: cosmic muons themselves, beam-timed muons, spallation products.
 - **Transfers**: the reference-sample logic transfers to any veto or anticoincidence; the cosmogenic veto is shown only
   underground.
 
@@ -249,10 +249,10 @@ A veto-efficiency tool (not yet in the plugin):
   extrapolation while the single-layer inefficiency is below 1/9 (3 of 4, from eq. 1, above it the sign reverses, which `Z_imp` carries), so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
   of the direct inefficiency is likely due to non-muon events that pass the selection (supported by simulation;
   arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at 15-50 PE, where the direct efficiency still exceeds the extrapolation, and at 10 PE, the operating range's low end, they agree within errors (Fig. 6 on page 11): impurity fully masks staggering.
-- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, only when the two-sided test runs); `impurity-unmeasured` (the test
+- **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, two-sided test only, not with `no-failures`); `impurity-unmeasured` (the test
   runs at zero impurity and at the bound, a status holds only if both give it, and the efficiencies and `Z_imp` are
-  bounds); `no-failures` (a single layer has no failed
-  muon: only an upper limit on its inefficiency, which enters the extrapolation, and only a one-sided test runs: `independence-violated` when the direct inefficiency exceeds that extrapolation by more than `Z_max` standard errors); `no-direct-count` (per-layer counts
+  bounds); `no-failures` (a layer has no failed
+  muon: its upper limit at the confidence matching `Z_max` enters the extrapolation, and only a one-sided test runs: `independence-violated` when the direct inefficiency exceeds that extrapolation by more than `Z_max` standard errors); `no-direct-count` (per-layer counts
   only: the extrapolation is given, labelled as an assumption, without `Z`). With `no-direct-count`, none of
   `ok`, `independence-violated` or `impurity-dominated` is emitted, and with `no-failures` only `independence-violated` can be.
 
@@ -266,7 +266,7 @@ cell counts the environment the instrument is built for; a cited run made elsewh
 |---|---|---|---|---|---|---|
 | Muon vetoes, segmentation against self-veto | n/a: timing and vertex cuts ([muon systems](muon-systems.md#backgrounds-and-fakes)) | arxiv_2510.13798 | arxiv_astro-ph_0702581 | PDG; arxiv_1101.3101 | gap | gap |
 | Veto-efficiency measurement | n/a: as above | arxiv_2510.13798 (cosmic-ray test stand) | arxiv_astro-ph_0702581 (pre-flight, on ground) | arxiv_1101.3101; arxiv_1407.0275 | gap | gap |
-| Cosmogenic tagging | gap | gap | gap | PDG; arxiv_1101.3101; arxiv_0907.0066 | gap | gap |
+| Cosmogenic tagging (time, track vetoes) | gap | gap | gap | PDG; arxiv_1101.3101; arxiv_0907.0066 | gap | gap |
 | Muon counting | arxiv_1507.07577 | gap | gap | gap | arxiv_1703.06193 | gap |
 | Muons in absorber-free spectrometers | n/a: muon systems used | gap | arxiv_astro-ph_0205344 (ground-level run; in flight a gap) | gap | n/a: arrays have no spectrometer | gap |
 | Albedo below cutoff | n/a: orbit only | n/a: same | arxiv_astro-ph_0101559; [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff) | n/a: orbit only | n/a: same | n/a: same |
