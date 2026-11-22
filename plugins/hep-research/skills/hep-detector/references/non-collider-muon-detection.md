@@ -16,11 +16,10 @@ and [post-veto live time](../../hep-measurement/references/rare-event-and-neutri
 
 - **k-of-n layer coincidence** (exact for independent layers of equal efficiency `eps`; arXiv:2510.13798, sec. 6.2,
   eq. 1, p. 10): 3 of 4 layers give `eps_3/4 = eps^4 + 4 eps^3 (1 - eps) = 4 eps^3 - 3 eps^4`. It fails when the
-  layer inefficiencies are not independent, and the bias can have either sign. In the cited measurement the
-  low-threshold inefficiency comes from muons running along gaps between counters, and staggered layers make a second
-  gap crossing unlikely, so the inefficiencies are anti-correlated and the directly measured `eps_3/4` exceeds the
-  extrapolation below about 75 PE down to 15 PE, agreeing at 10 PE as [Tool hooks](#tool-hooks) reads Fig. 6 (sec. 6.2,
-  text and Figs. 6-7, pp. 10-12).
+  layer inefficiencies are not independent, and the bias can have either sign. Where the low-threshold
+  inefficiency comes from muons running along gaps between counters, staggered layers make a second gap crossing
+  unlikely, so the inefficiencies are anti-correlated and the directly measured `eps_3/4` exceeds the extrapolation
+  (sec. 6.2, text and Figs. 6-7, pp. 10-12; thresholds in the [Muon vetoes](#muon-vetoes) example).
   A gap shared by several layers would push the other way, so measure `eps_3/4` directly as well.
 - **Muon band in an absorber-free spectrometer** (exact kinematics for unit charge, with the band width set by the
   velocity resolution; arXiv:astro-ph/0205344, sec. 4, p. 7): `1/beta = sqrt((m_mu/R)^2 + 1)`, with `R` the
@@ -53,7 +52,11 @@ window.
 Borexino: an outer water-Cherenkov detector around the inner detector; combined veto efficiency at least 99.992%
 (arXiv:1101.3101, abstract; sec. 3.2.3, p. 17). Mu2e cosmic-ray veto: four layers of scintillation counters with
 wavelength-shifting fibres and SiPMs (arXiv:2510.13798, abstract); required 3-of-4-layer efficiency for cosmic muons as high as 99.99% in
-some critical regions (sec. 6, p. 9; overall design goal 99.99%, sec. 1, pp. 2-3). Fermi LAT anticoincidence detector: about 8.3 m^2, 89 tiles; overall efficiency,
+some critical regions (sec. 6, p. 9; overall design goal 99.99%, sec. 1, pp. 2-3); direct 3-of-4 efficiency above
+the independent-layer extrapolation below about 75 PE down to 15 PE (sec. 6.2, text and Figs. 6-7, pp. 10-12),
+agreeing within errors at 10 PE, the operating range's low end (read from Fig. 6, p. 11, not stated in the text);
+the low-threshold plateau is likely non-muon events passing the selection (supported by simulation; secs. 6.2-6.3,
+pp. 12-15). Fermi LAT anticoincidence detector: about 8.3 m^2, 89 tiles; overall efficiency,
 averaged over the detector area, for singly charged relativistic particles entering the tracker from the top or the
 four sides the shield covers, above the required 0.9997 (arXiv:astro-ph/0702581, abstract; sec. 2.1, p. 3).
 <!-- /example -->
@@ -249,9 +252,9 @@ A veto-efficiency tool (not yet in the plugin):
   give `impurity-unmeasured` and `impurity-dominated`, and the shared gap with an assumed bound 10^-3 exactly
   `{independence-violated, impurity-unmeasured}`.
 - **Impurity**: non-muon events (modelled here as failing every layer) push the direct efficiency below the
-  extrapolation while the single-layer inefficiency is below 1/9 (3 of 4, from eq. 1, above it the sign reverses, which `Z_imp` carries), so they can hide staggering or mimic a shared gap, and in the cited measurement the low-threshold plateau
-  of the direct inefficiency is likely due to non-muon events that pass the selection (supported by simulation;
-  arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15), at 15-50 PE, where the direct efficiency still exceeds the extrapolation, and at 10 PE, the operating range's low end, they agree within errors (read from Fig. 6, p. 11, not stated in the text): impurity fully masks staggering.
+  extrapolation while the single-layer inefficiency is below 1/9 (3 of 4, from eq. 1, above it the sign reverses, which `Z_imp` carries), so they can hide staggering or mimic a shared gap; in the [Muon vetoes](#muon-vetoes) example a likely non-muon plateau
+  (arXiv:2510.13798, secs. 6.2-6.3, pp. 12-15) leaves the direct efficiency above the extrapolation at intermediate
+  thresholds and equal within errors at the lowest: impurity fully masks staggering.
 - **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, the impurity alone significant, only where the two-sided test runs, so never with `no-failures`, `no-direct-failures` or `no-direct-count`, and at the bound alone under `impurity-unmeasured`); `impurity-unmeasured` (the test
   runs at zero impurity and at the observed all-fail fraction, which bounds non-muons failing every layer, an entered
   bound or value being reported, not used: `ok` and `independence-violated` need both runs, the efficiencies,
