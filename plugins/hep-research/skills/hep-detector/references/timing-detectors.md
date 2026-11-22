@@ -19,7 +19,7 @@ rare-event; GND ground-based arrays; NUC nuclear and low-energy.
 beta = L / (c t)        m^2 = p^2 (1/beta^2 - 1)      Delta t = (L/c) [ (1/beta_1) - (1/beta_2) ]
 ```
 
-`L` path length along the track (from the track fit, not the straight-line distance), `t` measured flight time
+`L` path length along the track (from the track fit, not a straight line), `t` measured flight time
 (stop minus start), `p` momentum. Two species at the same `p`: `Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` only for
 `p >> m` (both masses), so `N_sigma` falls as `1/p^2` and is lost above `p_max ≈ sqrt(L |m_1^2 - m_2^2| / (2 c
 N_sigma sigma_t))` (same approximation), set by `L`, the total resolution, the mass pair and the `N_sigma` required;
@@ -40,7 +40,7 @@ the difference falls as `1/p` ([core detector equations](core-detector-equations
 
 Leading-edge discriminator (walk corrected with amplitude or ToT, a curve per channel); constant-fraction
 discrimination (amplitude-independent to first order, at some jitter and pulse-shape sensitivity); waveform fit or
-template (best if pulse shape and noise are known). Jitter `sigma_t ≈ sigma_noise/(dV/dt)` (T2), so the slope-to-noise ratio at threshold matters: gain before the
+template (best if pulse shape and noise are known). Jitter `sigma_t ≈ sigma_noise/(dV/dt)` (T2), so slope-to-noise at threshold matters: gain before the
 dominant noise (sensor gain) helps, and the bandwidth has an optimum, since more admits more noise
 (arXiv:1704.08666 secs. 2.3.2, 3.3, pp. 11, 18; [time pickoff](front-end-electronics-and-signal-processing.md#time-pickoff)).
 
@@ -53,7 +53,7 @@ both)
 | Term | Origin | Scaling / handle |
 |---|---|---|
 | Sensor / intrinsic | single-photoelectron transit-time spread (PMT, MCP, SiPM), entering a many-photon hit about as `TTS/sqrt(N_pe)`; Landau (silicon), drift (gas) | detector design; the silicon and gas terms are irreducible per hit |
-| Photostatistics | first-photon time `tau_decay/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_decay/N_pe`; with rise time `~ sqrt(tau_rise tau_decay/N_pe)` (approximate; `tau_decay`, `tau_rise` the scintillation decay and rise times, not the dead time `tau_d` of the [glossary](detector-glossary.md)) | more photons, faster rise and decay |
+| Photostatistics | first-photon time `tau_decay/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_decay/N_pe`; with rise time `~ sqrt(tau_rise tau_decay/N_pe)` (approximate; scintillation decay and rise times, not the dead time `tau_d` of the [glossary](detector-glossary.md)) | more photons, faster rise and decay |
 | Electronics | jitter (`noise/slope`), TDC bin `/sqrt(12)` (rms over random phases; at a fixed phase it averages out only with about 0.5 bin of noise or more), uncorrected time walk (its residual after the walk curve is the Calibration term) | design, calibration ([front-end electronics](front-end-electronics-and-signal-processing.md)) |
 | Clock | distribution jitter and offsets | global part: common to all channels, not averaged, but cancels in time differences within one event; local part (per board/PLL): averages over independent boards |
 | Calibration | `t0` per channel, walk curve, cable/fiber delay | in-situ residual method |
@@ -66,7 +66,7 @@ term; the global clock stays only with an external reference, and cancels in `t 
 the same event's tracks). Averaging `N` hits reduces only the uncorrelated terms, as `1/sqrt(N)`.
 
 **Association and time windows.** A wrong track or start-time window gives late or early tails (quote core and
-tail fraction apart): [companion](event-time-and-timing-association.md).
+tail apart): [companion](event-time-and-timing-association.md).
 
 ## Timing simulation chain
 
@@ -79,8 +79,8 @@ applied:
    (p. 21), induced current by T3; or scintillation light (with quenching, T5), propagation and photosensor response.
 3. **Front end, discriminator, TDC**: amplifier response and noise, so jitter and walk (T2) arise as in data
    ([front-end calibration](front-end-calibration.md#simulation-of-the-electronics),
-   [digitization](detector-simulation.md#digitization)); ToT, if the data use it, from the measured per-channel
-   curve ([ToT](front-end-electronics-and-signal-processing.md#digitization-adc-and-tdc)).
+   [digitization](detector-simulation.md#digitization)); ToT, if the data use it, drawn from each channel's measured
+   `ToT(Q)` curve with its spread, never a generic shape ([ToT](front-end-electronics-and-signal-processing.md#digitization-adc-and-tdc)).
 4. **Calibration as in data**: light generation, PMT response, acquisition and calibration make simulated hits
    equivalent to measured ones (NUC; arXiv:2108.01384 sec. 3.1).
 5. **Validation**: simulated against test-beam pulses with the same read-out (FXT; arXiv:1704.08666 sec. 4.1, p. 20);
@@ -103,7 +103,7 @@ were simulated: a Gaussian smear of the true time has no walk, tail or rate effe
   (> 40) LGADs, better per track with several layers); **radiation damage** lowers the
   gain-layer doping, so gain and time resolution degrade with fluence and the bias must rise (single-event burnout
   limit); fill factor at
-  pad boundaries is a design issue. Levers (arXiv:1704.08666): gain-induced slew rate `∝ G/d` (T3), but a very thin sensor has
+  pad boundaries matters. Levers (arXiv:1704.08666): gain-induced slew rate `∝ G/d` (T3), but a very thin sensor has
   a large capacitance and needs more gain (sec. 2.3.4, p. 12); saturated drift and a uniform weighting field need
   implant width about equal to the pitch, both much larger than the thickness (sec. 3.2, pp. 16-17), against fine
   segmentation (sec. 4.6, p. 29). In space, front-end power per channel over a large area favours strips over
@@ -112,21 +112,21 @@ were simulated: a Gaussian smear of the true time has no walk, tail or rate effe
 - **RPC/MRPC**: stacks of narrow gas gaps between resistive glass plates; leading-edge time, ToT as the amplitude
   for slewing (COL; arXiv:1806.03825 secs. 1, 3.1, pp. 2, 6). The local flux selects the electrode: ceramic at the
   highest rates, low-resistivity glass at high rate (higher dark rate), float glass at low rate (FXT; arXiv:1807.02070 sec. 2, pp. 3, 6); cluster
-  size rises with field (p. 6). Further terms: pad-size walk, multi-pad clusters at pad edges, an asymmetric tail of
-  unsettled origin (arXiv:1806.03825 sec. 3, pp. 5-6). Construction:
+  size rises with field (p. 6). Further terms: pad-size walk, multi-pad clusters at pad edges, an asymmetric tail seen in
+  the time distribution, of unsettled origin (arXiv:1806.03825 sec. 3, pp. 5-6). Construction:
   [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md).
 - **Precision timing in trackers/calorimeters**: track or cluster times (shower time for photons, vertex time
   against pileup (COL)); the same calibration and clock discipline, plus corrections for shower depth and walk.
 - **Beam/start-time, bunch-timing, luminosity monitors (COL, FXT)**: `t_0` and bunch identification
   with beam-phase drift and bunch shapes
-  ([companion](event-time-and-timing-association.md#bunch-or-beam-bucket-assignment)); luminosity monitors:
+  ([companion](event-time-and-timing-association.md#bunch-or-beam-bucket-assignment)); luminosity:
   [triggers luminosity pileup](triggers-luminosity-pileup.md).
 
 ## Calibration and diagnostics
 
 Per-channel `t0` and walk from a common reference (laser, pulser, minimum-ionizing
 particle); the walk curve must span the amplitude range of the data: for nuclei (SPC, NUC,
-heavy-ion beams) the deposit scales as `Z^2` (the light as T5, with saturation at high `Z`), so a curve from
+heavy-ion beams) the deposit grows as `Z^2` at fixed velocity, the light less (T5) and the front end saturates, so a curve from
 minimum-ionizing particles does not transfer ([front-end electronics](front-end-electronics-and-signal-processing.md#time-pickoff)).
 Then the global offset (start time) and the distribution of the reference clock: the accelerator clock, distributed
 clocks with round trips and flashers (UGD), GPS stations (GND)
@@ -160,7 +160,7 @@ Event time and association: [companion](event-time-and-timing-association.md#met
 
 ### Distinctive but generalizable reconstruction and performance features (timing)
 
-- **Topology**: time series per hit; one scalar per channel, sometimes with waveform.
+- **Topology**: time series per hit; one scalar per channel, sometimes a waveform.
 - **Inverse problem**: `t` from a noisy pulse; degeneracy: absolute offset versus
   reference time versus path length.
 - **Natural objects**: hit, track and event start times. **Informative residual**: `t - t_pred` for a known
@@ -182,7 +182,7 @@ Event time and association: [companion](event-time-and-timing-association.md#met
 
 - **Quoting single-channel resolution as system resolution.** Correlated clock and
   reference terms do not average.
-- **Ignoring path length.** A 1 cm error on `L` matters; it comes from the track fit.
+- **Ignoring path length.** `L` comes from the track fit; 1 cm matters.
 - **Time-walk not corrected.** Looks like a momentum- or amplitude-dependent
   mass-hypothesis shift.
 - **Radiation damage treated as a static constant.** LGAD/SiPM timing evolves with
@@ -234,7 +234,7 @@ species likelihoods; demonstrated-on-synthetic-data, no quality claim).
 | Photostatistics versus `Z` | gap | arxiv_0810.3830; arxiv_hep-ex_0305074 (space counters, ion beams) | gap (beam tests of space counters only) | gap | gap | arxiv_1609.09064 (mechanism only) |
 | Neutral-particle TOF | gap | arxiv_2004.10339 | gap | gap | gap | arxiv_2505.00042 |
 
-MRPC detail exists in COL and FXT only; LGAD timing in COL and FXT, with a space proposal. Event time and
+MRPC detail exists in COL and FXT only; LGAD in COL and FXT, plus a space proposal. Event time and
 association: [companion](event-time-and-timing-association.md#environment-coverage).
 
 ## Worked examples
