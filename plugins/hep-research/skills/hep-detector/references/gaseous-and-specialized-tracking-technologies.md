@@ -14,11 +14,9 @@ a recorded gap, not a claim that no method exists.
 
 ## Silicon pixels and strips (recap of what is distinctive)
 
-**Hybrid pixels**: 2D binary or ToT-encoded hits; charge sharing among neighbors
-gives sub-pixel position by centroid or by template (charge-profile) fit; the
-**Lorentz drift** shifts and broadens clusters in a field (calibrate `theta_L`);
-merged clusters at high density; radiation damage lowers `CCE` and shifts thresholds
-and depletion voltage.
+**Hybrid pixels**: 2D binary or ToT-encoded hits; sub-pixel position from shared charge, the Lorentz
+shift and merged clusters: [silicon hit reconstruction](silicon-hit-reconstruction.md); radiation damage lowers
+`CCE` and shifts thresholds and depletion voltage.
 
 **Strips/microstrips**: 1D measurement; a 2D point needs a stereo pair, creating
 `n^2` candidate intersections for `n` hits, of which `n^2 - n` are ghosts; capacitive coupling, common-mode noise, and
@@ -31,23 +29,14 @@ smaller depleted region (less charge, more diffusion-driven sharing).
 
 ### Distinctive but generalizable reconstruction and performance features (silicon)
 
-- **Information topology**: sparse points with cluster structure.
-- **Unique inverse problem**: position from shared charge; degeneracy: ghosts
-  (strips), merged clusters (pixels).
-- **Natural objects**: cluster, hit, track seed. **Most informative residual**:
-  unbiased track-to-hit residual in the sensor's measurement direction, versus
-  incidence angle and cluster size.
-- **Scaling**: hit resolution `~ pitch/sqrt(12)` (binary, approximate) improved by charge
-  sharing; momentum and impact-parameter floors from multiple scattering and lever
-  arm ([tracking and vertexing](tracking-and-vertexing.md)).
-- **Tails**: delta rays, merged clusters, noise hits, dead/noisy channels.
-- **Dependence**: occupancy (at a collider, pileup), dose (leakage, `CCE`, threshold, Lorentz angle
-  drift), temperature. **Data sample**: the tracks the environment provides, over its incidence-angle
-  range: collision (`Z -> ll`) or cosmic-ray tracks, or a test beam before installation or flight
-  (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit efficiency and alignment;
-  overlaps and tag-and-probe for module efficiency.
-- **Transfers**: charge-sharing interpolation and template methods to any segmented
-  readout (TPC pads, fibers); does not transfer: time-of-arrival coordinates.
+The ten-item block for silicon hits (topology, inverse problem, residuals, scaling, tails, dependence,
+transfers) is in [silicon hit reconstruction](silicon-hit-reconstruction.md#distinctive-but-generalizable-features-silicon-hits).
+In short: position from shared charge, with ghosts (strips) and merged clusters (pixels) as the degeneracies;
+the unbiased track-to-hit residual versus incidence angle and cluster size as the residual; the interpolation
+transfers to any segmented readout (TPC pads, fibres). **Data sample**: the
+tracks the environment provides, over its incidence-angle range: collision (`Z -> ll`) or cosmic-ray tracks, or a
+test beam before installation or flight (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit
+efficiency and alignment; overlaps and tag-and-probe for module efficiency.
 
 ## Drift chambers and drift tubes
 

@@ -141,8 +141,8 @@ selection ("cold" gases have low diffusion).
 
 **Lorentz angle.** In crossed `E x B`, the drift direction rotates by the Lorentz angle
 `theta_L`; a pixel or strip cluster is displaced and broadened, an effect corrected in
-position reconstruction and calibrated with tracks ([tracking and vertexing](tracking-and-vertexing.md),
-[gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
+position reconstruction and calibrated with tracks or angle scans
+([silicon hit reconstruction](silicon-hit-reconstruction.md)).
 
 **Avalanche gain.** In proportional gas, `G = exp(int alpha dx)` (Townsend `alpha`);
 gain fluctuates: the single-electron gain follows a Polya distribution with relative
