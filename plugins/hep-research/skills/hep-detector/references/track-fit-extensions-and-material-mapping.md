@@ -26,7 +26,7 @@ positions come from acoustic or light-travel-time systems: [neutrino astronomy](
 | 5 | Highland: `theta_0 = 13.6 MeV/(beta c p) z sqrt(x/X0) (1 + 0.038 ln(x/X0))`, inverted for `x/X0` with the Lambert `W_0` function | approximate (Gaussian core of the projected angle; the Lynch-Dahl form with `ln(x/X0)` equals the `ln(x z^2/(X0 beta^2))` form of [E4](core-detector-equations.md) only for `z = 1`, `beta ~ 1`, as for the source's positron beam) | arXiv:2407.13721, sec. 1.1, Eqs. 1.1-1.2, p. 4 |
 | 6 | split track: `R = (k_up - k_low)/(sqrt(2) k_low)`, pull `P = (k_up - k_low)/sqrt(sigma_up^2 + sigma_low^2)`, `k = q/p_T` | exact (definitions); the `sqrt(2)` holds for two independent halves of equal resolution | arXiv:1206.4071, sec. 6.2.1, Eqs. 7-8, p. 36 |
 | 7 | unequal halves: `sigma_diff^2 = sigma_1^2 + sigma_2^2`, so `sigma_diff/sqrt(2)` is neither half | approximate (independent Gaussian halves; this page); the source corrects with simulation | arXiv:2310.12865, sec. 11.1, p. 23 |
-| 8 | split vertex: `sigma_v = sigma_G(v_1 - v_2) / sqrt(2)`, `sigma_G` the width of a single Gaussian fitted within twice the RMS of the difference | approximate (halves of equal kinematics) | arXiv:1405.6569, sec. 6.1.1, p. 50 |
+| 8 | split vertex: `sigma_v = sigma_G(v_1 - v_2) / sqrt(2)`, `sigma_G` the width of a single Gaussian fitted within twice the RMS of the distribution | approximate (halves of equal kinematics) | arXiv:1405.6569, sec. 6.1.1, p. 50 |
 | 9 | deflection `eta = 1/R`: `Delta eta_ms ∝ 1/R` (`beta ~ 1`) and `Delta eta_res = K`; the MDR is where `Delta R = R`, about `1/K` (this page) | approximate | arXiv:astro-ph/0608697, sec. 2.4, Fig. 12 and footnote, p. 17 |
 | 10 | unbiased residual (hit excluded from the fit): `sigma_res^2 ≈ sigma_hit^2 + sigma_proj^2`, larger in outer layers | approximate (independence; this page) | arXiv:1712.02739, sec. 6, p. 9; sec. 8, p. 23 |
 
@@ -100,7 +100,8 @@ alignment use: [in-situ alignment](in-situ-alignment-and-momentum-scale.md) (rel
   minimising that variation, then calibrate the overall field scale on a kinematic edge.
 - **Lever arm and tolerance.** Resolution follows the bending power along the actual path
   ([tracking](tracking-and-vertexing.md#propagation-in-a-non-uniform-field)); check the step tolerance against a
-  fine-step reference and with pulls, since a loose one biases rigidity without changing `chi2`.
+  fine-step reference and with track-parameter pulls against truth in simulation (their mean shifts), since a loose
+  one can bias rigidity with little change in `chi2` or residual pulls.
 
 <!-- example: experiment-specific illustration (CMS tracker, PAMELA, MEG II; arXiv:1405.6569, arXiv:astro-ph/0608697, arXiv:2310.12865) -->
 CMS: the simple propagator biases `p_T = 10 GeV` tracks by up to 1% at `|eta| > 1`; the map was measured to
@@ -125,9 +126,9 @@ the cavity, with ferromagnetic shielding against the stray field (p. 15). MEG II
   amount (COL; arXiv:1405.6569, sec. 2, p. 6; arXiv:1807.03289, abstract). A telescope at a low-energy beam measures
   `x/X0` maps from scattering-angle widths through the inverse of relation 5 (FXT; arXiv:2407.13721, abstract and
   secs. 4.4-4.5, pp. 18-19); scattering in the air between planes enters the uncertainty.
-- **SPC:** no source read states a material map for a space instrument; resolution and the scattering term rest on
-  pre-flight beam tests (SPC; arXiv:astro-ph/0608697, sec. 2.4, p. 17; flight-model ladders in [silicon
-  hits](silicon-hit-reconstruction.md)). Gap.
+- **SPC:** no source read states a material map for a space instrument; a permanent-magnet spectrometer takes its
+  spatial resolution and deflection error from beam tests before flight (arXiv:astro-ph/0608697, sec. 2.4, p. 17;
+  flight-model ladders: [silicon hit reconstruction](silicon-hit-reconstruction.md)). Gap.
 
 <!-- example: experiment-specific illustration (CMS tracker, Open Data Detector with ACTS, CMS Phase-2 pixel module at PSI; arXiv:1405.6569, arXiv:2106.13593, arXiv:2407.13721) -->
 CMS: simulated material accurate to better than 10% (sec. 2, p. 6). Open Data Detector: mapped and Geant4 material
@@ -225,20 +226,23 @@ but no second source was read).
 
 No script yet. A tool takes paired estimates of one quantity from two halves (`q/p` in c/GeV or positions in mm),
 their fit errors, hit counts per half, shared hits per pair and a common-constraint flag, the lever arm, field region
-and material of each half, the binning variable, and the core-fit range, truncation level, declared fraction (at most
-a stated bound), pull band, tails ratio and minimum number of pairs, all fixed before the fit. It returns
-per bin the resolution under the equal-halves assumption, the pull width with its uncertainty, the truncated RMS and,
-given simulation pairs with truth, the correction factor `sigma_truth/sigma_split` per variable and the corrected data
-resolution, with the simulated split width beside the data one (relation 7; arXiv:2310.12865, sec. 11.1,
-Tables 3-4, pp. 23-24). **Negative controls:** (a) equal halves
-drawn with known `sigma` give `sigma` within the statistical error; (b) halves of known unequal `sigma_1`, `sigma_2`
-with equal hit counts, given simulation pairs with the same inequality, must return `unequal-halves`; (c) equal hit
-counts, `sigma_2 = 1.5 sigma_1` and no simulation pairs must not return `ok`; (d) equal halves with shared hits must return `correlated-halves`. Statuses: `ok` (only with
-simulation pairs), `unequal-halves` (hit counts or simulated widths differ by more than the declared fraction, or the
-halves differ in lever arm, field region or material), `unequal-halves-untested` (no simulation pairs: equal hit
-counts do not establish equal halves), `correlated-halves` (any shared hit or common constraint), `pull-width-off`
-(outside the declared band), `tails-dominate` (truncated RMS and core width differ beyond the declared ratio) and
-`insufficient-pairs`.
+and material of each half, the binning variable, and the core-fit range, truncation level, declared fraction and
+split-width tolerance (relative to the smaller; at most 0.1, 0.2), pull band, tails ratio and minimum number
+of pairs, all fixed before the fit. It returns per bin the resolution under the equal-halves assumption, the pull
+width with its uncertainty, the truncated RMS and, given simulation pairs with truth, the correction factor
+`sigma_truth/sigma_split` per variable and the corrected data resolution, with the simulated split width beside the
+data one (relation 7; arXiv:2310.12865, sec. 11.1, Tables 3-4, pp. 23-24). **Negative controls:** (a) equal halves
+drawn with known `sigma` give `sigma` within the statistical error; (b) halves with `sigma_2 = 1.5 sigma_1` and equal
+hit counts, simulation pairs of the same inequality and both bounds at their maximum, must return `ok-corrected` with
+both `sigma` within errors; (c) (b) without simulation pairs must return `unequal-halves-untested`; (d) equal halves
+with shared hits must return `correlated-halves`; (e) (b) with simulation pairs of two `sigma_1` halves must return
+`sim-data-mismatch`. Statuses, first match wins: `insufficient-pairs`; `correlated-halves` (any shared hit or common
+constraint); `unequal-halves-untested` (no simulation pairs: equal hit counts do not establish equal halves);
+`unequal-halves` (simulated halves do not match the data ones in hit counts, lever arm, field region or material: no
+correction applies); `sim-data-mismatch` (split widths differ beyond the tolerance); `pull-width-off` (outside the
+band); `tails-dominate` (truncated RMS and core width differ beyond the ratio); `ok-corrected` (the two halves differ
+in hit counts, lever arm, field region or material, or in simulated width beyond the fraction: the corrected
+resolution is the result); `ok`. Only the last two deliver a resolution.
 
 ## Environment coverage
 
