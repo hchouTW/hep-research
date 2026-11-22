@@ -99,6 +99,9 @@ Every measurement sensitive to charge sign or to the high-rigidity spectrum shou
 state which of these constrains its charge-antisymmetric bias, and quote the resulting
 limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
 
+Sensors that tracks cannot position, such as optical modules on strings moved by sea currents or frozen into ice (UGD), are located by
+acoustic or light-travel-time systems: [neutrino astronomy](neutrino-astronomy.md#sensor-positions-and-orientations).
+
 ### Calibration standards and their pitfalls
 
 - **`E/p` with electrons**: bremsstrahlung lowers the track momentum, whose scale enters directly; use a

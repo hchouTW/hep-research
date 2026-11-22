@@ -236,7 +236,9 @@ with its natural width and final-state radiation in the line shape
 (the CMS muon momentum scale fits the Z line shape convolved with a resolution function, JINST 7 (2012) P10002,
 arXiv:1206.4071, section 6; read 2026-10-14);
 <!-- /example -->
-split a track (or a cosmic crossing the detector) into two halves and compare them; compare overlapping modules;
+split a track (or a cosmic crossing the detector) into two halves and compare them (the `sqrt(2)` and unequal-half
+corrections, split vertices, unbiased residuals and beam-test decomposition, COL, FXT and SPC: [track-fit
+extensions](track-fit-extensions-and-material-mapping.md#track-resolution-measured-in-data)); compare overlapping modules;
 at a collider (COL), for jets and missing transverse momentum, balance against a well-measured reference (dijet
 asymmetry, Z or photon plus jet) and extrapolate away the soft radiation. Without a narrow resonance or a balance
 reference: the width of a mono-energetic line from an external or internal calibration source (UGD; PDG RPP 2025,

@@ -31,6 +31,22 @@ The likelihood behind the fit (photon arrival-time densities, the optical model 
 medium, seeding, reversed-track minima, energy from the light along a track, per-event
 angular errors) is in [photon likelihood reconstruction](photon-likelihood-reconstruction.md).
 
+### Sensor positions and orientations
+
+Arrival-time reconstruction needs each optical module's position to a few tens of cm and its orientation to a few
+degrees (PDG RPP 2025, Particle detectors for non-accelerator physics, sec. 36.3.2.3, p. 20). Strings in water move
+with the currents and rotate, so positions are measured continuously rather than once: acoustic emitters on the sea
+floor and receivers on the strings give distances for triangulation, compasses and tiltmeters give heading and
+inclination, and a global `chi2` fit of a line-shape model combines both to place every module (arXiv:1202.3894,
+abstract and sec. 1, pp. 3-6). In ice, light sent from module to module and timed gives the positions (PDG, p. 20).
+The shadow of the Moon checks the absolute pointing (p. 20); the general methods are in [in-situ
+alignment](in-situ-alignment-and-momentum-scale.md#chambers-and-large-structures).
+
+<!-- example: experiment-specific illustration (ANTARES; arXiv:1202.3894) -->
+ANTARES: twelve lines about 450 m high, sea currents typically about 5 cm/s, and a required module position
+precision of about 10 cm, which corresponds to 0.5 ns of light travel time in water (sec. 1, pp. 3-4).
+<!-- /example -->
+
 ## Event topologies
 
 - **Tracks**: a charged-current muon-neutrino interaction (or a muon produced
