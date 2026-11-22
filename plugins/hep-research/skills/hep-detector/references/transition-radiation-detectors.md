@@ -206,10 +206,11 @@ Rules that hold across the rows:
 - **Outputs**: per track, log-likelihood ratio per hypothesis pair and layers used; per sample, signal and background
   efficiency with binomial intervals at a stated confidence level, and rejection versus momentum or `gamma`.
 - **Conventions**: signal efficiency fixed before the background is counted; rejection = 1 / background efficiency.
-- **Closure test**: references built on one half of the control samples; in every momentum or `gamma` bin the
-  disjoint half's signal efficiency interval must contain the target, with half-width at most a stated tolerance (for
+- **Closure test**: references built on one half of the control samples; in every momentum or `gamma` bin, at confidence level
+  `(1 - alpha)^(1 / n_bins)` (Sidak; this page's convention, no source; `alpha` and `n_bins` fixed before the test and
+  recorded), the interval on the disjoint half's signal efficiency minus the reference half's (the target) must hold 0, with half-width at most a stated tolerance (for
   example `0.25 (1 - eps_target)`; fixed before the test, at most this unless the record justifies more, and
-  reported), and its background efficiency must lie in the reference half's interval, that interval's half-width at most a stated
+  reported), and so must the interval on the two halves' background-efficiency difference, the reference half's interval half-width at most a stated
   fraction of the reference efficiency (for example 0.5, same rules), with at
   least a stated count of passing reference-half background events (for example 10); a bin short of either is `inconclusive`, and the check
   passes only if no bin fails, at most a stated share (fixed in advance, 0.3 the cap; at most this unless the record justifies more, and
@@ -219,8 +220,8 @@ Rules that hold across the rows:
   momentum-binned ones, else report `inapplicable`; electrons and muons at equal `beta gamma`,
   muons radiator-first (cosmic ones selected by flight direction, arXiv:1709.02743 p. 46), matched in angle and conditions, most probable signals agreeing, p.
   47, sec. 11): at the electron working point of that copy (version recorded), the matched muons' efficiency
-  (rejection `1 / eps_s`, not 1) minus that of disjoint electrons of the bin must have an interval holding 0, fixed
-  in advance (a simulated bremsstrahlung difference is only reported beside a failure: a momentum-using estimator
+  (rejection `1 / eps_s`, not 1) minus that of disjoint electrons of the bin must have an interval holding 0, at the
+  closure test's per-bin level (a simulated bremsstrahlung difference is only reported beside a failure: a momentum-using estimator
   reproduces it), half-widths within the closure tolerance (else `inconclusive`), bins combined as in the closure
   test; an inconclusive or `inapplicable` control is reported as not done, claiming no momentum independence; a pass covers only the copy tested;
   a separation means the estimator uses momentum or mismatched references, not TR.
