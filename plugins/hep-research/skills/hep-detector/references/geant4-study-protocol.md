@@ -269,7 +269,7 @@ option 4, 8000 events, Geant4 11.4.3; `VALIDATION.md` section GEANT4-F4, row "Mu
 records +11 % for RMS(central 98 %) divided by the earlier factor 0.8673. Dividing by 0.9346 instead divides those
 values by 1.0776 (= 0.9346 / 0.8673), so the factor 0.8673 alone made the estimate 7.8 % high: 1.115 / 1.0776 and
 1.106 / 1.0776 give +3.5 % and +2.6 %. The single-scattering tail inside the window thus widens the core by about
-3 %, against -1.5 % with the fit.
+3 %, against -1.4 % and -1.6 % with the fit.
 <!-- /example -->
 
 Point resolution is a declared input that no benchmark validates; at high rigidity it dominates the core.

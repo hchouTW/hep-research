@@ -17,6 +17,8 @@ paper (name, configuration, phase space, conditions), which are deliberately not
 here because they are experiment-specific. Prefer primary sources for technical claims;
 the textbooks are for principles.
 
+Split files (same format; apparatus sources inside example blocks): [in-situ calibration and alignment](detector-principles-bibliography-calibration.md), [particle identification reference PDFs](detector-principles-bibliography-particle-identification.md), [radiation damage and ageing](detector-principles-bibliography-radiation.md), [calorimeter cluster reconstruction](detector-principles-bibliography-calorimetry.md).
+
 ## General and cross-cutting
 
 - **Particle Data Group reviews**: S. Navas et al. (Particle Data Group), Phys. Rev. D 110 (2024) 030001, and
@@ -65,6 +67,17 @@ the textbooks are for principles.
   variant: E. Cerron Zeballos et al., "A new type of resistive plate chamber: the
   multigap RPC", Nucl. Instrum. Methods A374 (1996) 132-135,
   DOI 10.1016/0168-9002(96)00158-1.
+- <!-- example: apparatus source -->CMS Collaboration (S. Chatrchyan et al.), "Description and performance of track and primary-vertex reconstruction with the CMS tracker", JINST 9 (2014) P10009, DOI 10.1088/1748-0221/9/10/P10009 (arXiv:1405.6569v2). Read 2026-11-17 to 2026-11-21, secs. 3.1-3.2, 4.1: pixel and strip hit reconstruction, end-pixel estimator, templates.<!-- /example -->
+- <!-- example: apparatus source -->ATLAS Collaboration (G. Aad et al.), "A neural network clustering algorithm for the ATLAS silicon pixel detector", JINST 9 (2014) P09009, DOI 10.1088/1748-0221/9/09/P09009 (arXiv:1406.7690v1). Read 2026-11-17 to 2026-11-21, abstract, secs. 1, 2, 4.1: pixel clustering and splitting.<!-- /example -->
+- <!-- example: apparatus source -->R. Leboucher et al. (Belle II SVD Collaboration), "Measurement of the cluster position resolution of the Belle II Silicon Vertex Detector", Nucl. Instrum. Methods A 1033 (2022) 166746, DOI 10.1016/j.nima.2022.166746 (arXiv:2209.03006v1). Read 2026-11-17 to 2026-11-21, secs. 1-3, Tables 1-3: strip resolution versus incidence angle.<!-- /example -->
+- <!-- example: apparatus source -->K. Adamczyk et al. (Belle II SVD Collaboration), "The design, construction, operation and performance of the Belle II silicon vertex detector", JINST 17 (2022) P11042, DOI 10.1088/1748-0221/17/11/P11042 (arXiv:2201.09824v2). Read 2026-11-17 to 2026-11-21, sec. 8.2.2 with table 23: cluster position by size, uncertainty scale factors.<!-- /example -->
+- <!-- example: apparatus source -->L. A. T. Bauerdick et al. (ZEUS MVD), "Beam test of silicon strip sensors for the ZEUS micro vertex detector", Nucl. Instrum. Methods A 501 (2003) 340-358, DOI 10.1016/S0168-9002(03)00619-3 (arXiv:hep-ex/0212037v1). Read 2026-11-17 to 2026-11-21, abstract, secs. 1, 5, 7: eta correction, head-tail.<!-- /example -->
+- <!-- example: apparatus source -->M. Aleppo (for the ATLAS Pixel Collaboration), "A measurement of Lorentz angle of radiation-hard pixel sensors", Nucl. Instrum. Methods A 465 (2000) 108-111, DOI 10.1016/S0168-9002(01)00364-3 (arXiv:physics/0012050v1). Read 2026-11-17 to 2026-11-21, secs. 1-3, Table 1: Lorentz angle from the cluster-size minimum.<!-- /example -->
+- <!-- example: apparatus source -->R. Qiao et al. (DAMPE), "Charge reconstruction study of the DAMPE Silicon-Tungsten Tracker with ion beams", Nucl. Instrum. Methods A, DOI 10.1016/j.nima.2018.01.007 (arXiv:1705.09791v1). Read 2026-11-17 to 2026-11-21, secs. 3.2.3-3.4: cluster charge with ions, electronics saturation.<!-- /example -->
+- <!-- example: apparatus source -->R. Qiao et al. (DAMPE), "A new charge reconstruction algorithm for the DAMPE silicon microstrip detector", arXiv:1712.08011v1 (2017), no journal reference. Read 2026-11-17 to 2026-11-21, secs. 2-4: charge versus impact position and angle, charge-sharing model, ion test beam.<!-- /example -->
+- <!-- example: apparatus source -->A. Tykhonov et al. (DAMPE Collaboration), "Internal alignment and position resolution of the silicon tracker of DAMPE determined with orbit data", Nucl. Instrum. Methods A 893 (2018) 43-56, DOI 10.1016/j.nima.2018.02.105 (arXiv:1712.02739v2). Read 2026-11-17 to 2026-11-21, secs. 4.1, 6.1-6.2: flight clustering, splitting, path-corrected cluster charge, resolution.<!-- /example -->
+- <!-- example: apparatus source -->D. Miao et al., "A telescope system for charge and position measurement of high energy nuclei", Nucl. Instrum. Methods A, DOI 10.1016/j.nima.2026.171778 (arXiv:2603.25080v1). Read 2026-11-17 to 2026-11-21, secs. 2-6: eta versus Z, BDT charge, truncated mean.<!-- /example -->
+- <!-- example: apparatus source -->D. Miao et al., "Beam test characterization of silicon microstrip detector flight-model ladders for the AMS-02 upgrade", arXiv:2603.25085v1 (2026), no journal reference. Read 2026-11-17 to 2026-11-21, secs. 2-4.3: cluster size and resolution versus angle.<!-- /example -->
 
 ## Front-end electronics and signal processing ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md))
 
@@ -296,6 +309,14 @@ entry was matched against the Crossref record of its DOI on 2026-11-12 and read 
   in the case of the binomial", Biometrika 26 (1934) 404-413, DOI 10.1093/biomet/26.4.404; L. D. Brown, T. T. Cai and
   A. DasGupta, "Interval estimation for a binomial proportion", Statist. Sci. 16 (2001)
   101-133, DOI 10.1214/ss/1009213286. Exact and alternative binomial intervals for efficiencies.
+- J. E. Gaiser, "Charmonium spectroscopy from radiative decays of the J/psi and psi-prime", PhD thesis, Stanford
+  University (1982), report SLAC-R-255, <https://www.slac.stanford.edu/pubs/slacreports/reports02/slac-r-255.pdf>,
+  Appendix F.1. Early Crystal Ball line shape, eq. F-1 (read 2026-11-19 for
+  [resolution shape models](resolution-shape-models.md)).
+- S. Das, "A simple alternative to the Crystal Ball function", arXiv:1603.08591 (2016),
+  <https://arxiv.org/abs/1603.08591>. Crystal Ball closed form, GaussExp and ExpGaussExp (read 2026-11-19).
+- <!-- example: apparatus source --> C. Ligtenberg et al., "Performance of the GridPix detector quad", Nucl. Instrum. Methods A 956 (2020) 163331, DOI 10.1016/j.nima.2019.163331, arXiv:2001.01540v1 (read 2026-11-19/20). Gaussian plus a constant offset for test-beam residuals, background estimated with the telescope timing shifted by 1000 frames (sec. 5.8, Fig. 12). <!-- /example -->
+- <!-- example: apparatus source --> M. Aehle et al., "Performance of the electromagnetic and hadronic prototype segments of the ALICE Forward Calorimeter", JINST 19 (2024) P07006, DOI 10.1088/1748-0221/19/07/P07006, arXiv:2311.07413v2 (read 2026-11-19/21). Resolution from FWHM/2.355 of the response with fit-range and line-shape systematics (sec. 6.3, PDF pp. 48-49). <!-- /example -->
 
 ## Not listed here
 

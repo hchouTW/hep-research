@@ -5,6 +5,7 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-detector bibliography split files.** `detector-principles-bibliography-calibration.md`, `detector-principles-bibliography-particle-identification.md` and `detector-principles-bibliography-radiation.md` hold the sources of the new Stage C reference pages in the format of the annotated bibliography (25 KB already), with apparatus sources inside example blocks; the main bibliography lists them, and `event-reconstruction.md` and `detector-design-principles.md` link them.
 - **charge_confusion_rate.py, template and control modes** (sci-fixes CHARGECONF-TEMPLATE-MAXIMUM S1,
   CHARGECONF-TEMPLATE-STATUS S2, CHARGECONF-TEMPLATE-IDENTIFICATION S2, CHARGECONF-CONTROL-MC-SIGN S1; advisories
   SFA-2026-044 to SFA-2026-047; issues CHK-AT-08-01 to -04). Template mode finds the Barlow-Beeston maximum through the
@@ -278,6 +279,41 @@ Software checks establish contract consistency only, not physical validity.
   that own its noble-liquid, water/scintillator, bolometer, rare-event and air-shower/IACT/neutrino-telescope rows,
   fills two "—" cells of Table 7 with links, and says that the forward-proton, beam-monitor and luminosity rows of
   Table 9 are stated for a collider only.
+- **hep-detector: in-situ calibration methods** (Stage C unit A1). New `in-situ-calibration-methods.md` states how
+  detector constants are solved from data: unknowns, reference sample and residual; per-channel iteration, global
+  least squares with Millepede-type reduction and iterative minimisation; unconstrained modes and their external
+  constraints; convergence, bias and per-channel precision; and the methods for electromagnetic and hadronic
+  calorimeters, time-of-flight bars, gas gain and RICH optics, with their reference samples (a second RICH sample
+  is a stated gap) and an environment coverage table. New `in-situ-alignment-and-momentum-scale.md` covers track
+  and chamber alignment (Millepede-II with General Broken Lines, gradient descent with step halving, optical,
+  acoustic and photogrammetric positioning) and the momentum scale from resonances, cosmic muons or range versus
+  curvature. Both link `calibration-and-alignment.md` instead of repeating it; simulator parameter fitting is simcal
+  (hep-statistics). Named apparatus and numbers stay in example blocks.
+- **hep-detector: multisample PID and reference PDFs** (documentation only). A new reference,
+  `multisample-pid-and-reference-pdfs.md`, linked from `event-reconstruction.md`, takes over "Combining many samples"
+  from `particle-identification.md` (which keeps a summary and a link under the same heading) and adds how per-layer
+  reference PDFs are measured on control samples selected without the variable (decay, conversion and tag-and-probe
+  samples at colliders, charge- and velocity-selected flight data in space, tagged test beams and their transfer to
+  the instrument), their binning and smoothing, layer correlations and the n-layer independence test, a variable
+  number of layers, control-sample contamination, and the input format and limits of `multisample_pid.py`. Every
+  method is cited at the sections read, with named instruments and their numbers in example blocks.
+- **hep-detector: calorimeter cluster reconstruction reference.** New `calorimeter-cluster-reconstruction.md`, linked from `event-reconstruction.md`: seeded clustering on cell noise significance, graph clustering for non-projective calorimeters, splitting at local maxima with shared-cell weights, superclustering in a field, logarithmic-weight and S-curve position, depth and direction, shower shapes for electron, photon, neutral-pion and hadron separation, converted photons, cluster energy corrections, preshower, dual readout and imaging calorimeters, each with source locators, a decision table, tool hooks with a closure test and a negative control, and a technique-by-environment coverage table; named apparatus and their numbers sit in example blocks. The "Shower position, direction and shape" section of `calorimetry-ecal-hcal.md` becomes a summary with a link, and drops its inline citation of an unread source. Its sources are in the new split file `detector-principles-bibliography-calorimetry.md`.
+- **New hep-detector reference, resolution shape models** (`skills/hep-detector/references/resolution-shape-models.md`,
+  linked from event-reconstruction). Single- and double-sided Crystal Ball with their closed forms and sign
+  convention, the moments that do not exist for small `n` and the large-`n` limit behind the `alpha`-`n`
+  correlation (fix `n` or use an exponential tail), Gaussian plus pedestal with the floor fixed, or constrained
+  no more loosely than the scaled control's uncertainty, from a signal-free control scaled to the fit sample (or, for a floor flat by
+  construction, from a sideband chosen before the fit beyond the signal tail, flagged separately), core-plus-tail
+  time PDFs, hadronic and partially contained response (the tail side follows the mechanism, and a response matrix,
+  validated in data, replaces the shape when the fit fails in an energy bin), and the three effective-sigma conventions; with a
+  decision table, a rule for transferring a simulated shape to data, tool hooks with inputs, a default
+  goodness-of-fit statistic on bins fixed before the fit, also tested beyond each join at a combined size, thresholds with stated defaults and limits, status rules
+  that name every status blocking each gate and fixed-seed controls with stated sample sizes and rates, and an
+  environment coverage table. The "Resolution models and widths" section of
+  performance-metrics-and-residual-diagnostics.md now summarizes these and links to the new page.
+- **hep-detector: hadronic calorimeter reconstruction references.** New `hadronic-calorimeter-reconstruction.md` and its companion `hadronic-calorimeter-timing-and-model-validation.md`, both linked from `event-reconstruction.md`. The first covers dual-readout and software-compensation relations with their validity (weights on the hadronic-section hits, the weight set chosen by the uncorrected energy), the hadronic calibration chain (EM scale, MIP and muon equalization, test-beam response and its transfer, isolated-track `E/p`, response-matrix unfolding for shallow calorimeters), leakage, dead material and punch-through, and high-granularity hadronic calorimeters, with a tool hook for a software-compensation weight fit. The companion covers shower timing and the observables that validate hadronic physics lists, with a tool hook for a hadronic `geant4_benchmarks.py` benchmark that follows the script's grades, negative-control rules and validation conditions. Each page has a method decision table, an environment coverage table (collider, test beam, space, underground; gaps marked) and a citation list with DOIs and arXiv ids; named apparatus and their numbers sit in example blocks, and every number is located in a cited source.
+- **hep-detector: gaseous tracker distortions reference.** `gaseous-tracker-distortions.md` covers space charge in gas TPCs (ion backflow and rate scaling, density fluctuations, data-driven residual maps from external trackers, laser grids with spline maps) and, separately, in liquid-argon TPCs (primary-ion space charge from the cosmic flux and the validity bound of its first-order scaling, liquid flow, cosmic-muon face and bulk calibration, laser coverage and interpolated regions, the field map for recombination), static field and E x B distortions, the reference sources for drift velocity, t0 and maps (UV lasers, photoelectron patterns, electrode-crossing tracks, the drift-time edge), and drift-chamber time-to-distance calibration, with a decision table, tool hooks with negative controls and an environment coverage table (COL, FXT, UGD; SPC, GND and NUC recorded as gaps). The drift-chamber diagnostics paragraph of `gaseous-and-specialized-tracking-technologies.md` moved into it, leaving a summary and a link.
+- **hep-detector: silicon hit reconstruction reference.** New `silicon-hit-reconstruction.md`, linked from `event-reconstruction.md`: strip and pixel clustering with noise-unit thresholds and splitting, one- and two-view strip hits, centre of gravity and the eta correction, head-tail and end-pixel estimators chosen by the width expected from the track angle, charge templates, the Lorentz shift and its measurement from the cluster-size minimum with a field-off control, cluster size and resolution versus incidence angle (including floating-strip sensors), hit uncertainties with a pull check in data, and the nuclear charge from the cluster charge (path length, impact position, saturation, multi-layer truncated mean), each with source locators, a decision table, tool hooks with a per-bin closure test and an environment coverage table (collider, test beam, space). `tracking-and-vertexing.md`, `gaseous-and-specialized-tracking-technologies.md`, `signal-formation-and-readout.md` and `space-based-direct-detection.md` keep summaries and link to it.
 
 ## 0.70.0 (2026-11-16)
 

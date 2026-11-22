@@ -11,7 +11,9 @@ the material in
 specific to the near-Earth space environment: geomagnetic and solar effects that
 ground- and space-based measurements alike must correct for, and that have no
 collider-physics analog, plus the instrument points listed below (calorimeter
-unfolding, balloon overburden, fragmentation).
+unfolding, balloon overburden, fragmentation). Silicon tracker hits and nuclear charge from the cluster
+charge (two views per layer, resolution versus incidence angle for an isotropic flux, saturation):
+[silicon hit reconstruction](silicon-hit-reconstruction.md).
 
 <!-- example: experiment-specific illustration -->
 Example: AMS-02-class instruments (a magnetic spectrometer on a space station).
