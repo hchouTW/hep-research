@@ -145,6 +145,45 @@ criteria as above.
 
 ## Timing detectors ([timing detectors](timing-detectors.md))
 
+- <!-- example: apparatus source -->ALICE Collaboration, "Determination of the event collision time with the ALICE
+  detector at the LHC", Eur. Phys. J. Plus 132 (2017) 99, DOI 10.1140/epjp/i2017-11279-1 (arXiv v2 read). Event
+  time from the TOF tracks by chi2 over mass hypotheses, leaving out the track under test; start counter; fallback
+  to the bunch crossing (secs. 4-4.3). <!-- /example -->
+- <!-- example: apparatus source -->ANTARES Collaboration, "Time Calibration of the ANTARES Neutrino Telescope",
+  Astropart. Phys. 34 (2011) 539-549, DOI 10.1016/j.astropartphys.2010.12.004 (arXiv v1 read). Clock
+  distribution with round-trip delays and in-situ optical beacons; relative versus absolute time (secs. 1, 3,
+  4.2). <!-- /example -->
+- <!-- example: apparatus source -->D. Campana et al., "Capability of the PAMELA Time-Of-Flight to identify light
+  nuclei: results from a beam test calibration", Nucl. Instrum. Methods A 598 (2009) 696-701, DOI 10.1016/j.nima.2008.10.014
+  (arXiv v1 read). Walk correction and resolution versus charge; flight time without an external start
+  (sec. 4). <!-- /example -->
+- <!-- example: apparatus source -->E. P. Segarra et al., "The CLAS12 Backward Angle Neutron Detector (BAND)", Nucl.
+  Instrum. Methods A 978 (2020) 164356, DOI 10.1016/j.nima.2020.164356 (arXiv v1 read). Neutron time of flight per
+  path length; photon-peak offsets; out-of-time beam bunches (secs. 3.2.1-3.2.3). <!-- /example -->
+- <!-- example: apparatus source -->F. Carnesecchi (ALICE Collaboration), "Performance of the ALICE Time-Of-Flight
+  detector at the LHC", JINST 14 (2019) C06023, DOI 10.1088/1748-0221/14/06/C06023 (arXiv v1 read). MRPC time
+  budget, slewing calibration with time over threshold, track-to-hit matching window (sec. 3). <!-- /example -->
+- <!-- example: apparatus source -->I. Deppner and N. Herrmann (CBM Collaboration), "The CBM Time-of-Flight system",
+  JINST 14 (2019) C09020, DOI 10.1088/1748-0221/14/09/C09020 (arXiv v1 read). MRPC electrode glass chosen by the
+  local flux; free-streaming calibration and space-time association with reference tracks (secs. 2-2.3). <!-- /example -->
+- <!-- example: apparatus source -->J. A. Pavon-Rodriguez et al., "Characterisation of the neutron beam in the
+  n_TOF-EAR2 experimental area at CERN following the spallation target upgrade", Eur. Phys. J. A 61 (2025) 277,
+  DOI 10.1140/epja/s10050-025-01727-x (arXiv v2 read; the same title). Gamma-flash start, neutron energy with an effective
+  moderation path, simulated resolution function validated on resonances (secs. 4.1, 6). <!-- /example -->
+- <!-- example: apparatus source -->J. Mayer et al., "Classical and Machine Learning Methods for Event Reconstruction in
+  NeuLAND", Nucl. Instrum. Methods A 1013 (2021) 165666, DOI 10.1016/j.nima.2021.165666 (arXiv v1 read).
+  Digitization to the data's calibration and event building in a short time window; space-time clustering of
+  hits within an event (secs. 3.1, 3.3). <!-- /example -->
+- <!-- example: apparatus source -->M. Duranti et al., "Opportunities of Si-microstrip LGAD for next-generation space
+  detectors", J. Phys. Conf. Ser. 2374 (2022) 012046, DOI 10.1088/1742-6596/2374/1/012046 (INSPIRE 2613721). LGAD strips for space:
+  power per channel, hit times separating calorimeter backsplash (secs. 1-2). <!-- /example -->
+- <!-- example: apparatus source -->V. Bindi et al. (AMS TOF Collaboration), "The AMS-02 Time of Flight System. Final
+  Design", Proc. 28th International Cosmic Ray Conference (Tsukuba, 2003), <https://arxiv.org/abs/hep-ex/0305074v1>.
+  Up- versus down-going from the flight time; time resolution versus nuclear charge in an ion beam (secs. 2-3). <!-- /example -->
+- <!-- example: apparatus source -->W.-J. Lin et al., "Plastic scintillation detectors for precision time-of-flight
+  measurements of relativistic heavy ions", Chin. Phys. C 41 (2017) 066001, DOI 10.1088/1674-1137/41/6/066001 (arXiv
+  v1 read). Walk and position corrections of two-ended counters; scintillator thickness and photon number
+  (secs. 1, 3.1). <!-- /example -->
 - G. Pellegrini et al., "Technology developments and first measurements of Low Gain
   Avalanche Detectors (LGAD) for high energy physics applications", Nucl. Instrum.
   Methods A765 (2014) 12-16, DOI 10.1016/j.nima.2014.06.008. LGAD.
