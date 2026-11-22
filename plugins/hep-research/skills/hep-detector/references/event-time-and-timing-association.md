@@ -5,9 +5,9 @@ and directions: event-time estimators and their bias with and without a bunch cl
 assignment, track-to-hit and hit-to-event association, up- versus down-going particles, and the synchronisation of
 separated stations or modules. Not repeated here, and found in [timing detectors](timing-detectors.md) (its sections extended with this page): the
 single-hit [budget](timing-detectors.md#time-resolution-budget-single-hit), the technologies and the [timing
-simulation chain](timing-detectors.md#timing-simulation-chain) (deposit, carriers or light, front end, calibration, validation); the event-level timing window in [event
-reconstruction](event-reconstruction.md#timing-and-event-association) and pileup in [the same
-page](event-reconstruction.md#reconstruction-under-pileup); TOF PID in [particle
+simulation chain](timing-detectors.md#timing-simulation-chain) (five steps, deposit to validation); the event-level timing window in [event
+reconstruction](event-reconstruction.md#timing-and-event-association) and pileup in [its pileup
+section](event-reconstruction.md#reconstruction-under-pileup); TOF PID in [particle
 identification](particle-identification.md#time-of-flight-tof); air-shower geometry in [ground-based detection
 arrays](ground-based-detection-arrays.md#surface-array-event-reconstruction); optical-module arrays in [neutrino
 astronomy](neutrino-astronomy.md); core-plus-tail shapes of a time residual in [resolution shape
@@ -39,29 +39,31 @@ assignment below; SPC, GND and non-beam UGD instruments have none.
   detector's own tracks (E1-E2), or by both (E4), with the crossing as fallback.
 - **Self-use bias**: a track used in `t_ev` pulls `t_ev` towards its own hypothesis, so its residual is too narrow
   (E3) and its identification biased, worst at low multiplicity. Remedy: compute `t_ev` without that track, or, for
-  speed, without its group (momentum bins) (arXiv:1610.03055 sec. 4.1, pp. 6-7). The internal estimator needs at
-  least two tracks in total (sec. 5.1, p. 8), and with the leave-out two outside the tested track's group (Methods).
+  speed, without its group (momentum bins) (arXiv:1610.03055 sec. 4.1, pp. 6-7). The source states a minimum
+  of two tracks (sec. 5.1, p. 8, from sec. 4.1); with one track outside the tested track's group the `chi2` of E2 is
+  zero for every hypothesis, so this page asks for two or more outside it (Methods).
 - **Common offset**: an internal `t_ev` moves with a common offset of all channels, so the TOF cannot see it (follows
-  from E1); only an external start or a species of known `beta` constrains it.
-- **Starts other than the bunch clock** (on bunched FXT and pulsed NUC beams they give the per-bunch or per-pulse
-  time): a dedicated start counter in a free-streaming fixed-target set-up (FXT;
+  from E1); only an external reference constrains it: an external start, or a species of known `beta` timed against the bunch
+  clock (pions against the clock phase per fill: arXiv:1610.03055 sec. 3, pp. 4-5).
+- **Starts other than the bunch clock** (on bunched FXT and pulsed NUC beams the coincident particle or the gamma
+  flash gives the per-bunch or per-pulse time): a dedicated start counter in a free-streaming fixed-target set-up (FXT;
   arXiv:1807.02070 sec. 2, p. 2); the instrument's own planes (E7), so both planes' terms enter (SPC;
   arXiv:0810.3830 sec. 4, p. 9); `t_0` fitted with the geometry (E6), correlated with it (GND); a vertex time fitted
   with the track (UGD; [photon likelihood reconstruction](photon-likelihood-reconstruction.md)); the gamma flash of a pulsed source, corrected for its own flight time
-  `L0/c` (NUC; arXiv:2505.00042v2 sec. 4.1, eq. 6; time to energy by eq. 7 there, also T6 in [timing
+  `L0/c` (NUC; start and time to energy in arXiv:2505.00042v2 sec. 4.1, eqs. 6-7, also T6 of [timing
   detectors](timing-detectors.md#relations-definition-exact-unless-noted)); for a neutral particle on a bunched
   beam, a coincident charged particle traced back to the target (FXT; arXiv:2004.10339v1 secs. 3.2.1, 3.2.3).
 
-## Bunch or beam-bucket assignment
+## Bunch or beam-bucket assignment (bunched or pulsed beams)
 
-Applies only to bunched or pulsed beams, the four environments with a bunch or pulse clock: COL, bunched FXT,
-accelerator-neutrino UGD spills and pulsed NUC sources (only FXT is sourced here; the other three are gaps in the
-coverage table, not exclusions). The hit or event goes to the bucket nearest its time corrected for
+Applies in the four environments with a bunch or pulse clock: COL, bunched FXT, accelerator-neutrino UGD spills and
+pulsed NUC sources. No source here states the assignment rule (FXT gives only the out-of-time structure and the
+bunch spread), so all four are gaps in the coverage table, not exclusions. The hit or event goes to the bucket nearest its time corrected for
 the expected flight time; this needs
 a bunch spacing much larger than the total time resolution plus the flight-time spread of the species considered.
-At a collider the clock gives the nominal crossing only (arXiv:1610.03055 sec. 4, p. 5); assigning an event to a
-crossing is not sourced here (a COL gap). Out-of-time particles from other bunches appear as a periodic structure at
-the bunch spacing in the time spectrum (FXT; arXiv:2004.10339v1 sec. 3.2.1); the bunch's own time spread enters the
+At a collider the clock gives the nominal crossing only (arXiv:1610.03055 sec. 4, p. 5); no source here assigns an event
+to a crossing (a COL gap). Out-of-time particles from other bunches appear as a periodic structure at
+the bunch spacing in the time spectrum (FXT; structure only, arXiv:2004.10339v1 sec. 3.2.1); the bunch's own time spread enters the
 budget (sec. 3.2.2). Beam-phase drift and asymmetric bunch shapes are systematic inputs.
 Quote the in-time core and the out-of-time fraction separately. Without bunches (SPC, GND, non-beam UGD) there is
 nothing to assign; the ambiguities are direction and synchronisation (below).
@@ -75,7 +77,7 @@ nothing to assign; the ambiguities are direction and synchronisation (below).
 - **Reference tracks**: in a self-triggered stack, tracks from the other counters, interpolated to the counter
   under test, define efficiency (a hit close in space and time) and residuals (FXT; arXiv:1807.02070 sec. 2.3, p. 5).
 - **Hit to event**: event building from coincidences of several detectors (same, p. 5), or from all hits in a short
-  time window, meant to hold one nuclear reaction (NUC; arXiv:2108.01384v1 sec. 3.1, data flow); rejecting hits isolated in time and space as noise or afterpulses (UGD;
+  time window, meant to hold one nuclear reaction (NUC; event building, arXiv:2108.01384v1 sec. 3.1, data flow); rejecting hits isolated in time and space as noise or afterpulses (UGD;
   arXiv:astro-ph/0407044 sec. 5.3, p. 22); removing stations incompatible in time with the fitted front, with cuts
   set to keep a stated fraction of signal stations (GND; arXiv:1502.01323 sec. 11.1, p. 60).
 - **Hits to clusters within an event**: space-time clustering (E8, NUC; arXiv:2108.01384 eq. 2 in sec. 3.3,
@@ -93,9 +95,9 @@ Measure the mismatch rate in simulation against truth and in data from the tails
 - **UGD**: the direction comes from the hit-time pattern. Down-going atmospheric muons outnumber neutrino-induced
   muons by orders of magnitude near the vertical but vanish for up-going tracks, so a small mis-reconstructed fraction
   dominates an up-going sample; a zenith-dependent prior enters the reconstruction (arXiv:astro-ph/0407044
-  sec. 3.1.4, p. 11). Mis-reconstructed down-going classes (all seven of sec. 6.1, p. 23): nearly horizontal muons, muon bundles,
-  cascades, stopping muons, scattering layers, corner clippers, and uncorrelated coincident muons from two air showers
-  in one event, a hit-to-event failure.
+  sec. 3.1.4, p. 11). Mis-reconstructed down-going classes (the eight of sec. 6.1, pp. 23-24): nearly horizontal muons, muon
+  bundles, cascades, stopping muons, scattering layers, corner clippers, uncorrelated coincident muons from two air
+  showers in one event (a hit-to-event failure), and electronic artifacts (noise, cross talk) distorting the time pattern.
 - Not a timing question at COL and FXT (particles leave the vertex) or in GND arrays (showers arrive from above).
 
 ## Synchronisation of separated stations or modules
@@ -118,13 +120,13 @@ Measure the mismatch rate in simulation against truth and in data from the tails
 |---|---|---|---|---|
 | Bunch clock, no per-event time | nominal crossing (E4 fallback) | known luminous-region length | taken as the event time; dominates low multiplicity | COL |
 | Start counter | E5, or one side with the vertex | counters on both sides or a vertex | acceptance; amplitude-dependent resolution | COL, FXT |
-| Many timed tracks | E1-E2 with the track left out (E3) | two or more tracks outside the tested track's leave-out group (momentum bin), in any groups: with one, the `chi2` of E2 is zero for every hypothesis; momentum and path | self-use bias; combinatorics; one-track estimates hypothesis-ambiguous, to be flagged | COL |
+| Many timed tracks | E1-E2 with the track left out (E3) | two or more tracks outside the tested track's leave-out group (momentum bin), in any groups, and two or more in every combinatorial subsample (E2): with one, the `chi2` of E2 is zero for every hypothesis; momentum and path | self-use bias; combinatorics; with one outside, no `t_ev` for PID: fall back to E4 and record it | COL |
 | Self-timed instrument | E7 | two or more planes; track length | both planes' terms; direction error | SPC |
-| No start at all | `t_0` fitted with geometry (E6, GND); vertex time fitted with the track by photon likelihood (UGD) | more stations than fitted parameters (plane front 3, E6 sphere 4); UGD: more hit modules than track and vertex parameters | `t_0`-geometry correlation | GND, UGD |
-| Pulsed source | gamma-flash start (arXiv:2505.00042v2 sec. 4.1, eq. 6); time to energy by eq. 7 there (T6 of [timing detectors](timing-detectors.md#relations-definition-exact-unless-noted)) | prompt photons seen | the flash's own flight time `L0/c` omitted | NUC |
-| Bunched or pulsed beam | nearest bucket after flight-time correction | spacing much larger than the total time resolution plus the flight-time spread of the species | out-of-time bunches; aliased buckets | COL, FXT; NUC, UGD (unsourced: gaps) |
+| No start at all | `t_0` fitted with geometry (E6, GND); vertex time fitted with the track by the photon likelihood (UGD) | more stations than fitted parameters (plane front 3, E6 sphere 4); UGD: more hit modules than track and vertex parameters | `t_0`-geometry correlation | GND, UGD |
+| Pulsed source | gamma-flash start and time to energy (arXiv:2505.00042v2 sec. 4.1, eqs. 6-7; T6 of [timing detectors](timing-detectors.md#relations-definition-exact-unless-noted)) | prompt photons seen | the flash's own flight time `L0/c` omitted | NUC |
+| Bunched or pulsed beam | nearest bucket after flight-time correction | spacing much larger than the total time resolution plus the flight-time spread of the species | out-of-time bunches; aliased buckets | COL, FXT, NUC, UGD (rule unsourced: gaps) |
 | Track-to-hit | window and closest hit | extrapolation errors known | mismatches; multi-hit cells | COL, FXT |
-| Hit-to-event | coincidence or time window, isolation cuts, front compatibility; E8 within an event | noise rate low; cuts set to a stated signal-retention fraction, loss rate reported | signal hits removed; noise kept | NUC, FXT, UGD, GND |
+| Hit-to-event | coincidence or time window, isolation cuts, front compatibility; E8 within an event; delayed-hit times (SPC) | noise rate low; cuts set to a stated signal-retention fraction, loss rate reported | signal hits removed; noise kept | NUC, FXT, UGD, GND, SPC (simulation) |
 | Direction | sign of E7; hit-time pattern | timing over the track length | flipped charge; mis-reconstructed background | SPC, UGD |
 | Separated stations | GPS, distributed clock with round trip, flashers | offsets monitored over time | offsets drift with temperature | GND, UGD; module offsets also COL, FXT |
 
@@ -145,7 +147,7 @@ Measure the mismatch rate in simulation against truth and in data from the tails
 ## Common misconceptions and failure modes
 
 - **A track in its own event time.** Pulls too narrow, PID biased at low multiplicity (E3).
-- **A common offset calibrated against an internal event time.** It is invisible there; use an external start.
+- **A common offset calibrated against an internal event time.** It is invisible there; use an external reference.
 - **The bunch clock taken as the event time.** It is the crossing, not the collision.
 - **Out-of-time bunches fitted as a Gaussian tail.** They are periodic at the bunch spacing.
 - **Direction error rates from simulation alone** where the background exceeds the signal by orders of magnitude.
@@ -176,21 +178,22 @@ demonstrated-on-synthetic-data; synthetic constants only, no timing or PID quali
 - Negative control: hits shuffled between events must give a mismatch rate whose 95% binomial interval contains
   the chance rate predicted from hit density and window size; a positive control with planted wrong links must recover them.
 - Statuses: `computed`; `no-truth` (no truth links: the mismatch rate is still reported, as a data-driven estimate or
-  upper bound from the residual or `beta` tails, flagged as such); `failed` (window size missing, zero or negative, or extrapolation errors missing; an input error only, never a result; an empty window gives an
+  upper bound from the residual or `beta` tails, flagged as such); `failed` (an input error: window size missing, zero or negative, or no extrapolation errors; never a result; an empty window gives an
   unmatched track).
 
 ## Environment coverage
 
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
-| Event-time estimator and bias | arxiv_1610.03055; arxiv_1806.03825 | arxiv_1807.02070; arxiv_2004.10339 (neutral start) | arxiv_hep-ex_0305074; arxiv_0810.3830 | [photon likelihood reconstruction](photon-likelihood-reconstruction.md) | arxiv_1502.01323 | arxiv_2505.00042 (gamma-flash start, sec. 4.1, eq. 6) |
-| Bunch or bucket assignment | gap (applies; arxiv_1610.03055 gives the nominal crossing only, not crossing assignment) | arxiv_2004.10339 | n/a (no beam) | gap (applies to accelerator-neutrino spills; not sourced) | n/a (no beam) | gap (applies to pulsed sources; not sourced) |
+| Event-time estimator and bias | arxiv_1610.03055; arxiv_1806.03825 | arxiv_1807.02070; arxiv_2004.10339 (neutral start) | arxiv_hep-ex_0305074; arxiv_0810.3830 | [photon likelihood reconstruction](photon-likelihood-reconstruction.md) | arxiv_1502.01323 | arxiv_2505.00042 (gamma flash, sec. 4.1, eq. 6) |
+| Bunch or bucket assignment | gap (applies; arxiv_1610.03055 gives the nominal crossing only, not crossing assignment) | gap (applies; arxiv_2004.10339 gives bunch structure and spread, not assignment) | n/a (no beam) | gap (applies to accelerator-neutrino spills; not sourced) | n/a (no beam) | gap (applies to pulsed sources; not sourced) |
 | Track-to-hit, hit-to-event | arxiv_1806.03825 | arxiv_1807.02070 | inspire_2613721 (simulation) | arxiv_astro-ph_0407044 | arxiv_1502.01323 | arxiv_2108.01384 |
 | Up- versus down-going | n/a (outgoing from the vertex) | n/a (outgoing from the target) | arxiv_hep-ex_0305074; arxiv_0810.3830 | arxiv_astro-ph_0407044 | n/a (showers from above; [arrays](ground-based-detection-arrays.md)) | n/a |
-| Synchronisation of separated stations or modules | arxiv_1806.03825 (module offsets of a common clock; no separated stations) | arxiv_1807.02070 (time offsets calibrated before tracking; no separated stations) | n/a | arxiv_1012.2204 | arxiv_1502.01323 | n/a |
+| Synchronisation of separated stations or modules | arxiv_1806.03825 (offsets of one distributed clock; no separated stations) | arxiv_1807.02070 (time offsets calibrated before tracking; no separated stations) | n/a | arxiv_1012.2204 | arxiv_1502.01323 | n/a |
 
-Every technique but one has two or more sourced environments; bunch assignment, which applies in four (COL, FXT,
-UGD, NUC), is sourced in FXT only, and its other three cells are gaps.
+Every technique but bunch assignment has two or more sourced environments; bunch assignment applies in four (COL,
+FXT, UGD, NUC), and its rule is sourced in none (FXT gives only the out-of-time structure and bunch spread), so all
+four cells are gaps.
 
 ## Worked examples
 
@@ -206,7 +209,7 @@ about 80-200 ps from the bunch size; the TOF estimator is below 10 ps above 100 
 CBM: a start counter for fluxes up to 100 kHz/cm^2 (arXiv:1807.02070 sec. 2, p. 2); in a six-station cosmic stack,
 events need four or more signals and five counters define the reference track (sec. 2.3, p. 5). NeuLAND: `k` = 1.5,
 `d_bar` = 5 cm, `Delta t_max` = 1 ns (arXiv:2108.01384 sec. 3.3, eq. 2). BAND: 4 ns spikes from other beam bunches;
-bunch spread about 25 ps (arXiv:2004.10339v1 secs. 3.2.1-3.2.2); photon peak sigma = 294 ps after per-bar offsets
+bunch spread about 25 ps (arXiv:2004.10339v1 secs. 3.2.1-3.2.2); photon-peak sigma of 294 ps after per-bar offsets
 (sec. 3.2.1); neutron `delta p/p < 1.5%` for 200-600 MeV/c (abstract). LGAD proposal: thin LGADs reach 30-40 ps; pixels over
 O(10 m^2) in space would need O(nW)/channel, strips O(0.1 mW)/channel; target O(100 ps) per hit (inspire_2613721
 secs. 1-2, p. 2); 10 strip layers with 100 ps above a BGO calorimeter (sec. 2, pp. 2-3). n_TOF EAR2: about 20 m
@@ -250,15 +253,15 @@ Source IDs: `arxiv_<id>`, `inspire_<recid>`; pages are PDF page indices of the v
   Instrum. Methods A 524 (2004) 169, arXiv:astro-ph/0407044v1.
 - V. Bindi et al. (AMS TOF Collaboration), "The AMS-02 Time of Flight System. Final Design", Proc. 28th ICRC (2003),
   arXiv:hep-ex/0305074v1.
-- D. Campana et al., "Capability of the PAMELA Time-Of-Flight to identify light nuclei: results from a beam test calibration",
-  Nucl. Instrum. Methods A 598 (2009) 696, arXiv:0810.3830v1.
+- D. Campana et al., "Capability of the PAMELA Time-Of-Flight to identify light nuclei: results from a beam test calibration"
+  (title as on INSPIRE and arXiv), Nucl. Instrum. Methods A 598 (2009) 696, arXiv:0810.3830v1.
 - E. P. Segarra et al., "The CLAS12 Backward Angle Neutron Detector (BAND)", Nucl. Instrum. Methods A 978 (2020)
   164356, arXiv:2004.10339v1.
 - J. Mayer et al., "Classical and Machine Learning Methods for Event Reconstruction in NeuLAND", Nucl. Instrum.
   Methods A 1013 (2021) 165666, arXiv:2108.01384v1.
 - M. Duranti et al., "Opportunities of Si-microstrip LGAD for next-generation space detectors", J. Phys. Conf. Ser.
-  2374 (2022) 012046, DOI 10.1088/1742-6596/2374/1/012046, INSPIRE 2613721 (source ID inspire_2613721; journal version read).
+  2374 (2022) 012046, DOI 10.1088/1742-6596/2374/1/012046, inspire_2613721 (journal version read).
 - J. A. Pavon-Rodriguez et al., "Characterisation of the neutron beam in the n_TOF-EAR2 experimental area at CERN
-  following the spallation target upgrade", Eur. Phys. J. A 61 (2025) 277 (journal title differs), DOI
+  following the spallation target upgrade", Eur. Phys. J. A 61 (2025) 277, DOI
   10.1140/epja/s10050-025-01727-x, arXiv:2505.00042v2.
 <!-- /example -->
