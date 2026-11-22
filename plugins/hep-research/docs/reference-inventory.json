@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 73,
-   "bytes": 1143749,
+   "references": 74,
+   "bytes": 1184872,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1743,7 +1743,8 @@
     "skills/hep-computing/references/analysis-workflows.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/environments-and-containers.md",
-    "skills/hep-detector/references/sensor-and-gas-transport-tools.md"
+    "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
+    "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -2234,8 +2235,8 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 31053,
-   "lines": 330,
+   "bytes": 35130,
+   "lines": 369,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2251,7 +2252,7 @@
     "skills/hep-detector/references/resolution-shape-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "11d23f2fa 2026-11-21"
+   "last_commit": "1de4e71e3 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2290,6 +2291,7 @@
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-ml/references/fast-simulation-validation.md",
     "skills/hep-theory/references/event-generation.md"
    ],
@@ -2349,8 +2351,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 20504,
-   "lines": 275,
+   "bytes": 20846,
+   "lines": 276,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2365,6 +2367,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/dis-kinematic-reconstruction.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/hadronic-calorimeter-reconstruction.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/reconstruction-method-contract.md",
@@ -2375,7 +2378,20 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "8bf733c93 2026-11-21"
+   "last_commit": "1de4e71e3 2026-11-22"
+  },
+  {
+   "path": "skills/hep-detector/references/event-time-and-timing-association.md",
+   "owner": "hep-detector",
+   "bytes": 24324,
+   "lines": 268,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/timing-detectors.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "fd8a47bba 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2426,6 +2442,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
+    "skills/hep-detector/references/timing-detectors.md",
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
@@ -2576,6 +2593,7 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/extensive-air-showers.md",
     "skills/hep-detector/references/hadronic-calorimeter-reconstruction.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -2583,8 +2601,7 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/particle-identification.md",
-    "skills/hep-detector/references/resolution-shape-models.md",
-    "skills/hep-detector/references/timing-detectors.md"
+    "skills/hep-detector/references/resolution-shape-models.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "da7df3d16 2026-11-12"
@@ -2677,7 +2694,8 @@
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/gaseous-tracker-distortions.md",
-    "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md"
+    "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
+    "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "6e982c4a7 2026-11-20"
@@ -2746,6 +2764,7 @@
     "skills/hep-detector/references/detector-comparison-tables.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/multimessenger-analysis.md",
     "skills/hep-detector/references/muon-systems.md",
@@ -2754,7 +2773,6 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/resolution-shape-models.md",
-    "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-statistics/references/astroparticle-statistics.md"
    ],
    "cited_by_other_skills": [
@@ -2833,6 +2851,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/hadronic-calorimeter-reconstruction.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -2894,6 +2913,7 @@
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/ground-based-detection-arrays.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
@@ -2969,6 +2989,7 @@
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/dis-kinematic-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/response-and-forward-folding.md"
@@ -2987,7 +3008,9 @@
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md"
+    "skills/hep-detector/references/event-time-and-timing-association.md",
+    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "d39242977 2026-11-21"
@@ -3034,7 +3057,8 @@
    "cited_by": [
     "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
     "skills/hep-detector/references/detector-simulation.md",
-    "skills/hep-detector/references/gaseous-tracker-distortions.md"
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
+    "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [
     "hep-computing"
@@ -3302,6 +3326,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
+    "skills/hep-detector/references/timing-detectors.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
@@ -3417,8 +3442,8 @@
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
    "owner": "hep-detector",
-   "bytes": 12190,
-   "lines": 162,
+   "bytes": 24570,
+   "lines": 295,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-pid.md",
@@ -3427,6 +3452,7 @@
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
@@ -3436,7 +3462,7 @@
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1204d97c3 2026-11-19"
+   "last_commit": "fd8a47bba 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
@@ -6112,6 +6138,7 @@
    "skills/hep-computing/references/task-quality-checklist.md"
   ],
   "timing": [
+   "skills/hep-detector/references/event-time-and-timing-association.md",
    "skills/hep-detector/references/hadronic-calorimeter-timing-and-model-validation.md",
    "skills/hep-detector/references/timing-detectors.md"
   ],
