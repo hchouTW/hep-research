@@ -7,8 +7,11 @@ optical and radiation sensors and light-transport elements shared by most detect
 (PMT, SiPM, APD, hybrid photodetectors, microchannel plates, gaseous photon detectors,
 wavelength shifters, fibers, light guides). Physics of emission and yield is in
 [signal formation and readout](signal-formation-and-readout.md); `<plugin root>/skills/hep-detector/scripts/cherenkov_angle.py` evaluates the
-RICH design relations. Environment codes used here: UGD underground, neutrino and
-rare-event; GND ground-based cosmic-ray and gamma-ray arrays.
+RICH design relations. Ring reconstruction is in
+[Cherenkov ring reconstruction](cherenkov-ring-reconstruction.md), DIRC and TOP reconstruction in
+[DIRC and TOP reconstruction](dirc-and-time-of-propagation-reconstruction.md). Environment codes used here: COL
+collider; FXT fixed target and test beam; UGD underground, neutrino and rare-event; GND ground-based cosmic-ray and
+gamma-ray arrays.
 
 ## Cherenkov PID variants
 
@@ -29,26 +32,24 @@ arXiv:hep-ex/9805001, p. 10).
 **Differential counters.** Select a Cherenkov angle (`cos theta_C = 1/(n beta)`) with
 an optical system so that only a narrow velocity band gives light; excellent for a
 particular momentum, with the acceptance and alignment of the angular selection
-dominating the systematic.
+dominating the systematic. They exist in one environment, high-momentum beam lines (FXT), with very limited
+acceptance (pdg_2025_particle-detectors-at-accelerators sec. 35.5, p. 22); no source found one elsewhere.
+<!-- example: named apparatus -->NA62 (FXT) identifies the kaons of its beam with a differential Cherenkov
+counter, KTAG (arXiv:1809.04026 sec. 1, p. 2).<!-- /example -->
 
-**DIRC (detection of internally reflected Cherenkov light).** Light is trapped by
-total internal reflection in a solid radiator bar and carried to a photosensor array
-at the end: the ring is imaged after propagation as a pattern of hit positions,
-requiring a reconstruction of the angle from position and photon arrival time: the long
-photon paths make time a third imaging dimension in a DIRC (PDG RPP 2025, sec. 35.5;
-arXiv:hep-ex/0010068, p. 3), and **time-of-propagation (TOP)** detectors emphasize
-precision timing for the imaging itself; the time breaks degeneracies in the path. Distinctive features: **multiple photon paths** with the same detected
-position (left/right bounces, mirror-image "ambiguities") that overlap in the
-image, correction for **chromatic dispersion** through timing, and the need to calibrate
-the bar's optical quality, surface reflectivity, and the photosensor's timing. PID by a
-**timing-position likelihood** per hypothesis.
+**DIRC (detection of internally reflected Cherenkov light).** Light trapped by total internal reflection in a
+solid radiator bar is imaged after transport in position and, from the long paths, in time (PDG RPP 2025,
+sec. 35.5; arXiv:hep-ex/0010068, p. 3); **time-of-propagation (TOP)** detectors emphasize timing for the imaging
+itself. Multiple photon paths per pixel, chromatic correction by timing, the start time and the
+timing-position likelihood per hypothesis are in
+[DIRC and TOP reconstruction](dirc-and-time-of-propagation-reconstruction.md).
 
-**RICH** (imaging in a gas or aerogel radiator with mirror or proximity focusing): ring
-finding, track-photon association, likelihood PID; contributions to the per-photon
-angle resolution: emission-point (radiator thickness), chromatic (dispersion `dn/d lambda`),
-optical aberration, pixelization, and (per track) division by `sqrt(N_pe)`
-([particle identification](particle-identification.md)). Background hits from other tracks, delta rays,
-and noise enter the likelihood as a background term (often taken flat or smooth; state the model). **Radiators**: aerogel (intermediate
+**RICH** (imaging in a gas or aerogel radiator with mirror or proximity focusing): contributions to the per-photon
+angle resolution are emission point (radiator thickness), chromatic (dispersion `dn/d lambda`), optical
+aberration and pixelization, and per track division by `sqrt(N_pe)`
+([particle identification](particle-identification.md)). Ring finding, track-photon association, the likelihood
+per hypothesis and its background term are in
+[Cherenkov ring reconstruction](cherenkov-ring-reconstruction.md). **Radiators**: aerogel (intermediate
 `n`, Rayleigh scattering), gas (low `n`, high threshold, high `beta`), liquid, water,
 and ice (large volumes, optics dominated by absorption/scattering, e.g.
 [neutrino astronomy](neutrino-astronomy.md)).
@@ -138,6 +139,32 @@ pulsing (linearity, timing, monitoring of gain drift), radioactive sources and c
 muons (light yield, uniformity), and in-situ standard candles (electron/muon light
 yield in detector volume) ([calibration and alignment](calibration-and-alignment.md)). Track *monitoring
 time series* (gain versus temperature/dose) rather than a single constant.
+
+**Magnetic fields and immersion.** PMT gain changes with orientation even in the geomagnetic field; a
+high-permeability shield is often needed, while fine-mesh PMTs work in fields of 1 T or more aligned with the tube
+axis (pdg_2025_particle-detectors-at-accelerators sec. 35.2.1.1, p. 5). Large immersed arrays (UGD) wrap each tube
+or compensate the field with coils around the volume, measure the residual field at the sensor positions, pot the
+tubes against water or oil and may need covers against an implosion chain reaction
+(pdg_2025_particle-detectors-for-non-accelerator-physics sec. 36.3.1, p. 12; arXiv:1307.0162 sec. 2.3.2, p. 5).
+In a spectrometer field (COL) the sensor type is chosen for it (arXiv:2008.06251 sec. 2.2.2, p. 4). Both enter
+the per-pixel efficiency of the ring likelihood.
+<!-- example: named apparatus and their numbers -->
+Super-Kamiokande (UGD): 26 sets of coils; a 100 mG field along the dynode plate of a 20-inch PMT lowers the hit
+collection efficiency by 10%, asymmetrically; residual field 32 mG on average at 458 PMT positions, 2% in collection
+efficiency (arXiv:1307.0162 sec. 2.3.2, pp. 5-6). Belle II ARICH (COL): hybrid avalanche photodetectors for 1.5 T
+(arXiv:2008.06251 sec. 2.2.2, p. 4).
+<!-- /example -->
+
+**Night-sky background** reaches only sensors that look at the sky (GND, imaging air-Cherenkov cameras; enclosed
+detectors are dark): SiPMs tolerate moonlight but their red sensitivity raises the night-sky rate unless filtered,
+and the exposure per image is kept to a few ns against pile-up
+(pdg_2025_particle-detectors-for-non-accelerator-physics sec. 36.2.2, p. 8;
+[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md)). In a hit model it is a per-pixel background
+rate.
+<!-- example: apparatus class and its number -->
+Large-mirror imaging air-Cherenkov cameras with blue-sensitive PMTs (GND): night-sky rates of a few 100 MHz per
+pixel (pdg_2025_particle-detectors-for-non-accelerator-physics sec. 36.2.2, p. 8).
+<!-- /example -->
 
 ### Features (photosensors)
 
