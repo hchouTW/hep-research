@@ -73,7 +73,7 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
 | Detecting the photons | Xe-rich gas, thickness matched to the spectrum; build-up over thin layers | Gas purity; Xe content monitored | Argon fill loses TR; L-escape line; soft TR absorbed in the radiator | COL (arXiv:1702.06473 sec. 3.1); FXT (arXiv:astro-ph/0608641 sec. 4.3); SPC (arXiv:1706.10182 sec. 3) |
 | Architecture | Thick radiator plus 2-4 cm Xe chamber per module, or thin straws through the radiator as part of a tracker | Space, material, rate | Few thick layers: fewer samples; thin layers: soft TR lost | COL (arXiv:1111.4188 sec. 4); FXT (arXiv:1111.4188 sec. 4.4; PDG detectors review p. 46); SPC (arXiv:1706.10182 sec. 2; arXiv:1111.4188 sec. 4.5) |
 | Drift chamber with time sampling | Slice the signal in drift time; TR arrives at the radiator-side entrance (long drift) | Calibrated drift velocity and `t0`; ion-tail cancellation | Slices treated as independent | COL (arXiv:1709.02743 secs. 2.1, 11.2); FXT (arXiv:physics/0402131 secs. 3-4) |
-| Hits on a track | Pad clusters per time bin into tracklets on a propagated seed; straw hits on an extrapolated or stand-alone track | External tracker or enough TRD layers | Hits of a secondary or neighbour; wrong path length | COL (arXiv:1709.02743 secs. 8-8.2; arXiv:1109.5925 sec. 2); SPC (arXiv:1706.10182 sec. 2); FXT (arXiv:astro-ph/0608641 sec. 4.2.5) |
+| Hits on a track | Pad clusters per time bin into tracklets on a propagated seed; straw hits on a track; an extrapolated or stand-alone track in space | External tracker or enough TRD layers | Hits of a secondary or neighbour; wrong path length | COL (arXiv:1709.02743 secs. 8-8.2; arXiv:1109.5925 sec. 2); SPC (extrapolated or stand-alone: arXiv:1706.10182 sec. 2); FXT (arXiv:astro-ph/0608641 sec. 4.2.5) |
 | Thick gas, full charge | Total charge or truncated mean | Many layers | Landau tail of the background | FXT (PDG detectors review sec. 35.6.5, p. 47; arXiv:1111.4188 sec. 3.2) |
 | Thin gas | Cluster counting: hits above a threshold (typically 5-7 keV; PDG detectors review sec. 35.6.5, p. 47); high-threshold fraction | Threshold stable in energy | Threshold drift with gain | COL (arXiv:1109.5925 secs. 2, 4); FXT (arXiv:astro-ph/0608641 sec. 5.1) |
 | Best separation | Layer likelihood (charge; charge and largest-cluster position; per-slice charges), neural network | References from clean samples | Correlations ignored; bins that must be non-empty cost efficiency | COL (arXiv:1709.02743 sec. 11.2); FXT (arXiv:astro-ph/0608641 sec. 5; arXiv:physics/0402131 sec. 4, pp. 3-4, charge and position); SPC (arXiv:1706.10182 sec. 3) |
@@ -87,7 +87,7 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
 **Single-environment techniques.** Hadron separation with TR exists only in fixed-target hadron and hyperon beams:
 pions from protons and kaons up to 200 GeV/c in past detectors, pions identified in a 250 GeV hadron beam, and kaons
 from pions stated feasible roughly at 200-700 GeV/c by one cited study, not shown
-(PDG detectors review sec. 35.6.5, p. 48; arXiv:1111.4188 pp. 2, 5, secs. 1 and 2.4); collider TRDs separate hadrons
+(PDG detectors review sec. 35.6.5, p. 48; arXiv:1111.4188 pp. 2, 5, secs. 1 and 2.4); a collider TRD separates hadrons
 at low momentum by truncated-mean `dE/dx` instead (arXiv:1709.02743 sec. 11.1, Fig. 40, pp. 49-50). It needs longer
 TRDs than electron identification and, at TeV where all hadrons radiate, several thresholds or the TR energy and angle
 (arXiv:1901.11265 sec. 1, pp. 3-4); TeV hadron identification at modern or planned accelerators is a stated need (forward hadrons: sec. 1, p. 3;
@@ -113,7 +113,7 @@ Rules that hold across the rows:
   1 states no mechanism).
 - **The working point is an analysis choice.** Background efficiency depends strongly on it; 90% is the convention
   (arXiv:1111.4188 sec. 3.2, pp. 9-10). A momentum-dependent cut keeps it constant (arXiv:1709.02743 sec. 11.2, p. 51).
-- **Time bins are correlated.** Ion tails carry charge into later bins; per-bin amplitudes cannot enter a likelihood
+- **Time bins are correlated** in readouts that sample drift time. Ion tails carry charge into later bins; per-bin amplitudes cannot enter a likelihood
   as independent factors (arXiv:physics/0402131 sec. 4, p. 4; arXiv:1709.02743 sec. 8.2, p. 35): use joint
   references over slice groups (sec. 11.2, p. 51), cluster position with charge, or a network; tail cancellation
   helps (arXiv:1709.02743 sec. 8.2, p. 35).
@@ -153,7 +153,7 @@ Rules that hold across the rows:
   more xenon moved the TR appearance threshold to `gamma = 785 +- 140` (arXiv:1108.4838 sec. 3.3, p. 7).
 - CREAM-I TRD (balloon): `4 < gamma < 5e2` from the xenon relativistic rise, beam-test calibrated (arXiv:0808.1718
   sec. 2, p. 5).
-- Silicon TR set-up, CERN SPS: double-sided strips 2.2 m behind the radiator (arXiv:1901.11265 sec. 2.2, p. 7).
+- Silicon TR set-up, CERN SPS: double-sided strips (arXiv:1901.11265 sec. 1, p. 4) 2.2 m behind the radiator (sec. 2.2, p. 7).
 <!-- /example -->
 
 ## Distinctive but generalizable features (TRDs)
@@ -244,7 +244,7 @@ Rules that hold across the rows:
 `gap`: not found in the sources read. GND and NUC: no TRD surveyed. UGD and the filing of arxiv_1111.4188 Table 1 (p. 14) TRDs: as its sec. 1 (p. 1)
 groups them: accelerator-based as COL (collider, secs. 4.1-4.3, p. 17) or FXT (fixed target, sec. 4.4, p. 30)
 where the source says which, astro-particle as SPC (sec. 4.5, p. 31); none is called underground or neutrino there, and a
-row whose beam no source read states (NOMAD's) is filed in no cell.
+row whose beam no source read states is filed in no cell (example below).
 
 <!-- example: a listed TRD and how this page files it -->
 - NOMAD TRD: foils, Xe-CO2, 9 layers, 150 cm, pion rejection 1000 (arXiv:1111.4188 Table 1, p. 14); accelerator-based
