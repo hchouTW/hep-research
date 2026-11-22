@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 74,
-   "bytes": 1184872,
+   "references": 76,
+   "bytes": 1235700,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1983,6 +1983,7 @@
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calibration-residual-propagation.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/charge_confusion_rate.py"
    ],
@@ -2207,6 +2208,20 @@
    "last_commit": "11d23f2fa 2026-11-21"
   },
   {
+   "path": "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
+   "owner": "hep-detector",
+   "bytes": 6765,
+   "lines": 75,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e600ee966 2026-11-20"
+  },
+  {
    "path": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
    "owner": "hep-detector",
    "bytes": 4358,
@@ -2242,6 +2257,7 @@
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
     "skills/hep-detector/references/detector-principles-bibliography-calorimetry.md",
+    "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
     "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
     "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2249,10 +2265,11 @@
     "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/resolution-shape-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1de4e71e3 2026-11-22"
+   "last_commit": "a47c0c247 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2351,8 +2368,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 20846,
-   "lines": 276,
+   "bytes": 21397,
+   "lines": 279,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2378,7 +2395,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "1de4e71e3 2026-11-22"
+   "last_commit": "a47c0c247 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/event-time-and-timing-association.md",
@@ -2600,6 +2617,7 @@
     "skills/hep-detector/references/multisample-pid-and-reference-pdfs.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/resolution-shape-models.md"
    ],
@@ -2731,26 +2749,29 @@
   {
    "path": "skills/hep-detector/references/muon-systems.md",
    "owner": "hep-detector",
-   "bytes": 11537,
-   "lines": 163,
+   "bytes": 24564,
+   "lines": 274,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-glossary.md",
+    "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/hadronic-calorimeter-reconstruction.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "95d08cca0 2026-11-19"
+   "last_commit": "4a584b67a 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/neutrino-astronomy.md",
@@ -2769,6 +2790,7 @@
     "skills/hep-detector/references/multimessenger-analysis.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
@@ -2800,7 +2822,7 @@
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/multisample-pid-and-reference-pdfs.md",
-    "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
@@ -2810,6 +2832,20 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "81c8d4f67 2026-11-13"
+  },
+  {
+   "path": "skills/hep-detector/references/non-collider-muon-detection.md",
+   "owner": "hep-detector",
+   "bytes": 30485,
+   "lines": 321,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/muon-systems.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "2603770ae 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -3376,7 +3412,9 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/gamma-ray-imaging-and-polarimetry-reconstruction.md",
+    "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -3521,6 +3559,7 @@
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -3749,11 +3788,14 @@
    "lines": 96,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "tests/skills/hep_measurement/test_rare_event_m10.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
    "last_commit": "c4d801c42 2026-10-17"
   },
   {
@@ -5810,6 +5852,13 @@
    "shared_shingles": 17
   },
   {
+   "a": "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
+   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+   "jaccard": 0.015,
+   "containment": 0.459,
+   "shared_shingles": 17
+  },
+  {
    "a": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
    "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
    "jaccard": 0.008,
@@ -5919,6 +5968,7 @@
   ],
   "detection": [
    "skills/hep-detector/references/ground-based-detection-arrays.md",
+   "skills/hep-detector/references/non-collider-muon-detection.md",
    "skills/hep-detector/references/space-based-direct-detection.md"
   ],
   "dis": [
@@ -6025,6 +6075,11 @@
    "skills/hep-ml/references/generative-models.md",
    "skills/hep-ml/references/sequence-models.md"
   ],
+  "muon": [
+   "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
+   "skills/hep-detector/references/muon-systems.md",
+   "skills/hep-detector/references/non-collider-muon-detection.md"
+  ],
   "neutrino": [
    "skills/hep-detector/references/neutrino-astronomy.md",
    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
@@ -6129,6 +6184,7 @@
    "skills/hep-authoring/references/scientific-style.md"
   ],
   "system": [
+   "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
    "skills/hep-detector/references/detector-systems-overview.md",
    "skills/hep-detector/references/muon-systems.md",
    "skills/hep-detector/references/system-design-workflow.md"
