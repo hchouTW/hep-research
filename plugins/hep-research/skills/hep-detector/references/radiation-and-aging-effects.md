@@ -132,9 +132,9 @@ proportional chambers the ageing rate in Ar/CF4/CH4 was over 100 times higher in
 ## Radiation fields by environment
 
 - **COL.** Dose and hadron fluence depend on radius and pseudorapidity and scale with integrated luminosity;
-  the fluence comes from an event generator plus transport (Pythia8, FLUKA) as `Phi/L_int`, checked per
-  module group against leakage currents through the annealing model, FLUKA kept for the central value with a 15% uncertainty from that study, valid only at central `|z| ≈ 0` and excluding the hardness-factor uncertainty (significant, not quantified): the data show a stronger `z`-dependence,
-  FLUKA about 1.5 sigma off at `z = 0` and more at larger `|z|`, where the `Phi/L_int` fitted per module group (Fig. 3) or an uncertainty covering the difference is needed (arXiv:1905.03739, secs. 2-3.1, pp. 3-8).
+  the fluence comes from a generator plus transport (Pythia8, FLUKA) as `Phi/L_int`, checked per
+  module group against leakage currents via the annealing model: keep the transport value and uncertainty only where
+  checked, say if the hardness factor is in it, else the fitted `Phi/L_int` or a covering uncertainty (example below).
 - **SPC (low Earth orbit).** The proton/electron balance depends on shielding and spectrum (example below), so
   model trapped electrons too; solar protons and Galactic cosmic rays add little TID for that orbit and shielding (arXiv:2411.00607v2, sec. 4.1,
   p. 10). Dose depends on altitude, shielding and solar cycle (same page), from trapped-particle models (AP-8 protons,
@@ -145,14 +145,18 @@ proportional chambers the ageing rate in Ar/CF4/CH4 was over 100 times higher in
 - **UGD.** No underground damage source is cited (gap; plastic ageing of unknown cause: above); context:
   [noble liquid and neutrino detectors](noble-liquid-neutrino-and-rare-event-detectors.md).
 
-<!-- example: CMS ECAL (COL), LOFT, Fermi and GRBAlpha orbits (SPC) -->
+<!-- example: ATLAS pixel and CMS ECAL (COL), LOFT, Fermi and GRBAlpha orbits (SPC) -->
+ATLAS pixel (arXiv:1905.03739): FLUKA central value, 15% uncertainty, valid at `|z| ≈ 0` only, hardness-factor
+uncertainty (significant, not quantified) excluded; 1.5 sigma off at `z = 0`, more at larger `|z|` (Fig. 3 per
+module group; secs. 2-3.1, pp. 3-8). Its digitizer omits annealing (uncorrected, no uncertainty): at the
+state reached, its variation at `1e14` and `2e14 n_eq/cm^2` is within the field-model and trapping-constant variations (secs. 2, 4.2.3, 4.2.4, 4.5, Table 5, pp. 4-5, 20, 24).
 CMS ECAL: expected dose up to 4 kGy in the barrel and 200 kGy at |eta| = 3 after 10 years (500 fb^-1); hadron
 fluence from about `1e13` to `1e14 cm^-2`, as quoted (weighting and NIEL source not stated;
 arXiv:1306.2016, sec. 2, p. 6). LOFT: AP8-MIN via SPENVIS, 600 km and 5° worst case, behind 3.3 mm Al equivalent;
 AP8-MIN is about 7 times AP8-MAX at 1 MeV (arXiv:1503.07682, sec. 1, p. 3). Fermi: 565 km at 25.6°, about 15% of the
 time in the SAA, with science data suspended there (arXiv:1206.1896, sec. 2.2, p. 25). GRBAlpha: behind 2-2.5 mm
 PbSb, trapped protons dominate TID and TNID, electrons about 1-6% of TID (central values, 1.1-7.3% within the quoted uncertainties, computed here from `TID(p)/TID(e)`:
-1.3% at ~550 km with the solar-minimum AP-8/AE-8 models, 74 ± 14; 5.8% at ~475 km with the solar-maximum models (altitude and model changed together), 16.1 ± 3.4, as `1/(1 + ratio)`; arXiv:2411.00607v2 (GRAS), sec. 4.1, p. 10).
+1.3% at ~550 km with the solar-minimum AP-8/AE-8 models, 74 ± 14; 5.8% at ~475 km with the solar-maximum models (altitude and model changed together), 16.1 ± 3.4, as `1/(1 + ratio)`; arXiv:2411.00607v2 (GRAS), sec. 4.1, p. 10). Electron bound (1 sigma, computed here): 6.2% (solar minimum), 24% (maximum), 41% with a factor of 3.
 <!-- /example -->
 
 ## Feeding damage into conditions and simulation
@@ -163,14 +167,13 @@ PbSb, trapped protons dominate TID and TNID, electrons about 1-6% of TID (centra
    ([calibration and alignment](calibration-and-alignment.md#time-dependence-and-conditions-data)). The light
    monitor corrects each channel by the transfer relation (COL; arXiv:1306.2016, sec. 4.1, p. 10); in orbit a
    stable peak (non-interacting protons) tracks the scale, fitted in time (arXiv:1206.1896, sec. 7.3.2, p. 137).
-2. **Digitization.** Digitize with device-model fields and trapping; state whether annealing enters. One collider
-   pixel digitizer omits annealing with no correction or uncertainty: at the annealing state reached, its variation, checked at `1e14` and `2e14 n_eq/cm^2`,
-   lies within the field-model and trapping-constant variations; omit it only after that check at your fluences and annealing state (COL; arXiv:1905.03739,
-   secs. 2, 4.2.3, 4.2.4 and 4.5, Table 5, pp. 4-5, 20 and 24). General digitization:
+2. **Digitization.** Digitize with device-model fields and trapping; state whether annealing enters; omit it
+   only if its variation at your fluences and annealing state is within the field-model and trapping-constant
+   variations (COL; example above). General digitization:
    [detector simulation](detector-simulation.md#digitization).
 3. **Dose prediction.** Pre-launch, Geant4-based MULASSIS gave TID only, without electrons,
    and in orbit AE-8 and AP-8 fluences per mission segment (IRENE) go into Geant4-based GRAS for TID and TNID (SPC;
-   arXiv:2411.00607v2 (3 Apr 2025), secs. 2 and 3.2, pp. 3-4 and 7). A TID-only prediction misses displacement damage (TNID), and one without trapped electrons misses their dose: state TNID (protons dominate it in the example), and compute the electron dose or add its bounding share, with at least the factor of two above on both models (more for differential spectra), to the TID as a one-sided upward term, neglected only below the dose's own statistical and transport uncertainty (example above, at 1 sigma: 6.2% solar-minimum and 24% solar-maximum models, 41% with a factor of three, computed here).
+   arXiv:2411.00607v2 (3 Apr 2025), secs. 2 and 3.2, pp. 3-4 and 7). A TID-only prediction misses displacement damage (TNID), and one without trapped electrons misses their dose: state TNID (protons dominate it in the example), and compute the electron dose or add its bounding share, with at least the factor of two above on both models (more for differential spectra), to the TID as a one-sided upward term, neglected only below the dose's own statistical and transport uncertainty (example above).
 4. **Extrapolation.** A measured ageing trend, extrapolated, says when simulation and reconstruction must model the
    reduced response (UGD; arXiv:2207.12982, sec. 7, p. 31).
 
