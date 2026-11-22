@@ -127,8 +127,8 @@ Rules that hold across the rows:
   7 slices of about 5 mm each; LQ7D's non-empty bins cost about 40% of
   electrons (sec. 11.2, pp. 50-51). Onset fit `TR/TR_mip = 0.706 / (1 + exp(-1.85 (ln gamma - 7.80)))`, half-maximum
   at `beta gamma = 2.4e3`, onset visible above `beta gamma ~ 800` (sec. 11, eq. 2, pp. 47-48). Pion rejection at
-  1 GeV/c, p-Pb, 6 layers: about 70 (LQ1D), up to 410 with the time evolution, electron efficiency not stated in the
-  text, beside a design goal of 100 at 90% (p. 51; sec. 13, p. 65; Fig. 42, p. 52); references
+  1 GeV/c, p-Pb, 6 layers, 90% electron efficiency: about 70 (LQ1D), up to 410 with the time evolution (sec. 13,
+  p. 65; Fig. 42 right, p. 52), beside a design goal of 100 at 90% (sec. 11.2, p. 51); references
   centrality-dependent in Pb-Pb (about 15% shift, p. 51).
 - ALICE TRD prototypes, CERN PS, 1-6 GeV/c: a likelihood on charge gives pion rejection about 100 at 90% electron
   efficiency, six layers extrapolated from four measured (Figs. 4-5); charge plus
