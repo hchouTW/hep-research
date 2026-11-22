@@ -52,8 +52,9 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
   `gamma_sat ~ 3000` (PDG detectors review, p. 45).
 - **Absorption** (approximate; PDG detectors review sec. 35.6.5, p. 45): photoabsorption per atom goes as
   `Z^n / omega^3`, `n` between 4 and 5, so a low-`Z` radiator and a high-`Z` (xenon) gas. Of argon, krypton and xenon,
-  xenon absorbs best from its L edges (near 5 keV) to the krypton K edge (near 14 keV), krypton from there to the
-  xenon K edge (near 35 keV), the two close below 5 keV; xenon's absorption length is about 2 mm at 3 keV and again just above the L edges near 5 keV, 10 mm at
+  xenon absorbs best below the krypton L edges (near 1.7 keV) and from its own L edges (near 5 keV) to the krypton K
+  edge (near 14 keV), krypton from there to the xenon K edge (near 35 keV), xenon again above it (about four times
+  shorter at 100 keV), the two close between about 1.7 and 5 keV; xenon's absorption length is about 2 mm at 3 keV and again just above the L edges near 5 keV, 10 mm at
   10 keV, 30 mm at 15 keV (read off the figure; gas density not stated), the text giving about 10 mm for
   TR of 3-15 keV (arXiv:1111.4188 sec. 3.1, Fig. 4, p. 7).
 - **Layer likelihood** (exact as a definition; assumes independent layers; arXiv:1111.4188 sec. 3.2, eqs. 12-13, p. 8):
@@ -183,7 +184,7 @@ Rules that hold across the rows:
 
 - Radiator type and material; for regular foils `l1`, `l2` and count; for fibre or foam the density, nominal (and any tuned)
   fibre diameter and radiator thickness; tuned equivalent `l1`, `l2`, `N_f` wherever used, with the momenta compared
-  with data, agreement measure and value at each, and validity range (outside it: the measured onset curve, else `out-of-range`);
+  with data, agreement measure and value at each, and validity range in `gamma` per compared species (outside it: the measured onset curve, else `out-of-range`);
   `gamma_thr`, `gamma_sat` and their formula set; gas, its xenon fraction and
   pressure; layer count and gas thickness per layer; field, rate (occupancy) and track source.
 - Estimator, its inputs (charge, threshold, slices, path length) and any requirement it imposes.
@@ -198,16 +199,20 @@ Rules that hold across the rows:
 - **Inputs**: per hit, layer, deposit (keV, gain-calibrated), path length (cm), optional slice charges; per track,
   momentum or rigidity and charge, and run conditions (gain, xenon pressure, temperature); references per species, layer and momentum or `gamma` bin, with conditions range;
   per radiator `gamma_thr` and `gamma_sat` with their formula set (analytic or practical, one for both), or the
-  measured onset curve with its `gamma` range; for a tuned radiator, its equivalent `l1`, `l2`, `N_f` and validity range.
+  measured onset curve with its `gamma` range and its recorded start-of-rise and start-of-plateau `gamma`; for a tuned
+  radiator, its equivalent `l1`, `l2`, `N_f` and validity range in `gamma` (from the momenta compared and the species
+  masses), compared with the hypothesis `gamma`.
 - **Outputs**: per track, log-likelihood ratio per hypothesis pair and layers used; per sample, signal and background
   efficiency with binomial intervals at a stated confidence level, and rejection versus momentum or `gamma`.
 - **Conventions**: signal efficiency fixed before the background is counted; rejection = 1 / background efficiency.
 - **Closure test**: references built on one half of the control samples; in every momentum or `gamma` bin the
   disjoint half's signal efficiency interval must contain the target, with half-width at most a stated tolerance (for
   example `0.25 (1 - eps_target)`; fixed before the test, at most this unless the record justifies more, and
-  reported), and its background efficiency must lie in the reference half's interval, with at
+  reported), and its background efficiency must lie in the reference half's interval, that interval's half-width within a stated
+  tolerance fixed before the test, with at
   least a stated count (for example 10); a bin short of either is `inconclusive`, and the check
-  passes only if no bin fails, at most a stated share (fixed in advance, for example 0.3) is inconclusive and at
+  passes only if no bin fails, at most a stated share (fixed in advance, for example 0.3; at most this unless the record justifies more, and
+  reported) is inconclusive and at
   least one bin is conclusive; it fails if any bin fails and is inconclusive otherwise.
 - **Negative control**: two species in one `gamma` bin, scored with `gamma`-binned references (rebin a copy of
   momentum-binned ones, else report `inapplicable`; electrons and muons at equal `beta gamma`,
@@ -245,13 +250,17 @@ Rules that hold across the rows:
 
 `gap`: not found in the sources read. GND and NUC: no TRD surveyed. UGD and the filing of arxiv_1111.4188 Table 1 (p. 14) TRDs: as its sec. 1 (p. 1)
 groups them: accelerator-based as COL (collider, secs. 4.1-4.3, p. 17) or FXT (fixed target, sec. 4.4, p. 30)
-where the source says which, astro-particle as SPC (sec. 4.5, p. 31); none is called underground or neutrino there, and a
+where the source says which, astro-particle as SPC only where sec. 4.5 (pp. 31-32) puts it on a balloon or in space; none is called underground or
+neutrino there, the sec. 1 list names one more astro-particle TRD outside Table 1, setting not stated in the sources
+read and filed in no cell (example below), and a
 row whose beam no source read states is filed in no cell (example below), as is arxiv_2201.07901's TeV hadron need
 ('a future accelerator experiment', abstract: collider or fixed target not stated).
 
 <!-- example: a listed TRD and how this page files it -->
 - NOMAD TRD: foils, Xe-CO2, 9 layers, 150 cm, pion rejection 1000 (arXiv:1111.4188 Table 1, p. 14); accelerator-based
   in sec. 1 (p. 1); no source read states its beam or environment, so no UGD cell cites it.
+- MACRO TRD: in the sec. 1 (p. 1) list of astro-particle and cosmic-ray TRDs, not in Table 1; no source read states
+  its setting, so no SPC or UGD cell cites it.
 <!-- /example -->
 
 ## Citations
