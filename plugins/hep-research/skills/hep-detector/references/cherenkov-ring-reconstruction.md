@@ -49,9 +49,10 @@ arXiv:<id> (`/` as `_`); `pdg_2025_<review>` a PDG 2025 review. Pages are PDF pa
   `beta` and momentum: `Delta m/m = (Delta p/p) (+) gamma^2 (Delta beta/beta)` (arXiv:0709.2154 p. 2).
 - **Average-angle likelihood** (approximate: Gaussian average-angle distribution, resolution independent of
   species; arXiv:physics/0104033 sec. 4.3, eqs. 10-11, p. 16): in a window `theta_th +- 4 sigma_theta`,
-  `L(<theta>) = exp(-(theta_th - <theta>)^2 / (2 sigma_<theta>^2))`, `sigma_<theta> = sigma_theta / sqrt(N)`;
-  radiator likelihoods are multiplied. An empty window (`N = 0`) needs an explicit rule, for example the Poisson
-  term for zero photons given the expected yield (not in the source).
+  `L(<theta>) = exp(-(theta_th - <theta>)^2 / (2 sigma_<theta>^2))`, `sigma_<theta> = sigma_theta / sqrt(N)`,
+  defined for `N > 0`, an empty window (`N = 0`) needing an explicit rule, for example the Poisson term for zero
+  photons given the expected yield (not in the source);
+  radiator likelihoods are multiplied.
 - **Per-track resolution** (approximate; pdg_2025_particle-detectors-at-accelerators sec. 35.5, eqs. 35.11-35.12,
   p. 21): `sigma(theta_c) = <sigma(theta_i)>/sqrt(N_pe) (+) C`, `C` collecting tracking, alignment, scattering, hit
   ambiguities, random background and other tracks; `sigma(beta)/beta = tan theta_c sigma(theta_c)`. The `1/sqrt(N)`
