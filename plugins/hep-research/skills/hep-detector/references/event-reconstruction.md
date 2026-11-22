@@ -271,3 +271,4 @@ its routing table and representative cases, is in [reconstruction method contrac
 - [Hadronic calorimeter reconstruction](hadronic-calorimeter-reconstruction.md): software compensation, the hadronic calibration chain, leakage and punch-through, high-granularity HCALs
 - [Hadronic calorimeter timing and model validation](hadronic-calorimeter-timing-and-model-validation.md): shower timing and the observables that validate hadronic physics lists
 - [Gaseous tracker distortions](gaseous-tracker-distortions.md): TPC space charge and E x B distortion maps (gas TPC and LArTPC treated separately), drift-velocity and t0 references, and drift-chamber r(t) calibration
+- [Silicon hit reconstruction](silicon-hit-reconstruction.md): pixel and strip clustering, centre of gravity and eta correction, head-tail, Lorentz shift, charge templates, cluster size versus incidence angle, nuclear charge from cluster charge

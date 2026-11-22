@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 72,
-   "bytes": 1115880,
+   "references": 73,
+   "bytes": 1143749,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2189,7 +2189,7 @@
     "skills/hep-detector/references/gaseous-tracker-distortions.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "692e18d3d 2026-11-20"
+   "last_commit": "8bf733c93 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-calorimetry.md",
@@ -2234,8 +2234,8 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 27128,
-   "lines": 319,
+   "bytes": 31053,
+   "lines": 330,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2349,8 +2349,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 20259,
-   "lines": 274,
+   "bytes": 20504,
+   "lines": 275,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2375,7 +2375,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "11d23f2fa 2026-11-21"
+   "last_commit": "8bf733c93 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2451,6 +2451,7 @@
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/frontend_response.py",
@@ -2496,8 +2497,8 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 24760,
-   "lines": 378,
+   "bytes": 24207,
+   "lines": 367,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-tracking.md",
@@ -2508,14 +2509,14 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
-    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "6ae35407e 2026-11-21"
+   "last_commit": "7959054b2 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/gaseous-tracker-distortions.md",
@@ -2660,7 +2661,8 @@
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/in-situ-calibration-methods.md"
+    "skills/hep-detector/references/in-situ-calibration-methods.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9f1847f24 2026-11-20"
@@ -2702,7 +2704,8 @@
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/particle-identification.md"
+    "skills/hep-detector/references/particle-identification.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "0c50a294b 2026-11-20"
@@ -2839,6 +2842,7 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/simulation-calibration/trd.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-detector/references/timing-detectors.md",
@@ -2873,7 +2877,8 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/resolution-shape-models.md",
-    "skills/hep-detector/references/response-and-forward-folding.md"
+    "skills/hep-detector/references/response-and-forward-folding.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "ca7216697 2026-11-20"
@@ -3039,7 +3044,7 @@
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
    "owner": "hep-detector",
-   "bytes": 20362,
+   "bytes": 20286,
    "lines": 261,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3060,7 +3065,23 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "41b98d0e5 2026-11-19"
+   "last_commit": "5380f6240 2026-11-21"
+  },
+  {
+   "path": "skills/hep-detector/references/silicon-hit-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 24570,
+   "lines": 232,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/space-based-direct-detection.md",
+    "skills/hep-detector/references/tracking-and-vertexing.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "44a14cbc8 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/simulation-calibration/dirc.md",
@@ -3293,6 +3314,7 @@
    "lines": 94,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
@@ -3315,8 +3337,8 @@
   {
    "path": "skills/hep-detector/references/space-based-direct-detection.md",
    "owner": "hep-detector",
-   "bytes": 20910,
-   "lines": 273,
+   "bytes": 21127,
+   "lines": 275,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3349,7 +3371,7 @@
     "hep-measurement",
     "hep-statistics"
    ],
-   "last_commit": "c90b601b2 2026-10-22"
+   "last_commit": "5380f6240 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/system-design-workflow.md",
@@ -3419,8 +3441,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 25113,
-   "lines": 365,
+   "bytes": 24654,
+   "lines": 358,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -3445,6 +3467,7 @@
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-detector/scripts/multiple_scattering.py",
     "skills/hep-detector/scripts/tracker_resolution.py",
@@ -3453,7 +3476,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "02b75980c 2026-11-19"
+   "last_commit": "5380f6240 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -4253,6 +4276,7 @@
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
     "skills/hep-detector/references/multisample-pid-and-reference-pdfs.md",
     "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-ml/SKILL.md",
     "skills/hep-ml/references/deep-learning-guide.md",
     "skills/hep-ml/references/ml-analysis.md",
