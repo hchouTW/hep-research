@@ -19,8 +19,8 @@ background rate and the start-time source are parameters. Source IDs as in the r
 - **Transport** (exact for a flat, rectangular radiator made to optical precision;
   pdg_2025_particle-detectors-at-accelerators sec. 35.5, p. 23; arXiv:hep-ex/0010068 p. 3): reflections at the
   bar faces conserve the magnitude of the Cherenkov angle, so the photons can be imaged outside the particle's
-  path in up to three dimensions, two in space and, from the long paths, one in time. For `beta ≈ 1` some photons
-  always lie inside the total-internal-reflection limit.
+  path in up to three dimensions, two in space and, from the long paths, one in time. For `beta ≈ 1` in fused silica
+  (`n ≈ 1.47`; arXiv:hep-ex/0010068 p. 3) some photons always lie inside the total-internal-reflection limit.
 - **Per-track angle** (approximate: no correlated errors; arXiv:hep-ex/0010068 eq. 1, p. 3):
   `sigma_C,track = sigma_C,gamma / sqrt(N_pe)`; the geometric term (bar, pixel and expansion sizes) and the
   chromatic term set `sigma_C,gamma`, the photosensor transit-time spread the time resolution.
@@ -46,11 +46,11 @@ background rate and the start-time source are parameters. Source IDs as in the r
 
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
-| Pin-hole or mirror imaging through an expansion region | Per-photon angle from pixel, time and track; likelihood per hypothesis | Bar and expansion geometry, alignment; photon yield per incidence angle | Several paths reaching one pixel (the peaks of eq. 13) left unmodelled give structured background | COL (arXiv:hep-ex/0010068 p. 3); FXT (arXiv:2002.07990 sec. 3, p. 5) |
+| Pin-hole or mirror imaging through an expansion region | Per-photon angle from pixel, time and track; likelihood per hypothesis | Bar and expansion geometry, alignment; photon yield per incidence angle | Several paths reaching one pixel (the peaks of arXiv:2504.19090 eq. 13) left unmodelled give structured background (inferred; not discussed in the DIRC sources read) | COL (arXiv:hep-ex/0010068 p. 3); FXT (arXiv:2002.07990 secs. 2-3, pp. 3-6) |
 | Compact imaging, ring folded on itself | Analytic `(pixel, time)` PDF per hypothesis and path, extended likelihood | Per-tube transit-time spread and efficiency; electronics resolution; start time | `beta` from a ring radius is impossible here (arXiv:2504.19090 sec. 8.1, p. 33); wrong start time shifts all hypotheses | COL only in the sources read (arXiv:2504.19090 secs. 8.1-8.2) |
-| Background yield | Event by event from hits in modules without a track | Several modules; uniform-in-time model | Light of other tracks in the module is not uniform (inferred; not tested in the source) | COL only in the sources read (arXiv:2504.19090 sec. 8.2, p. 33) |
+| Background yield | Event by event from hits in modules without a track | Several modules; uniform-in-time model | Light of other tracks in the module is not uniform (inferred; not tested in the source) | COL only in the sources read (arXiv:2504.19090 sec. 8.2, eq. 14, pp. 33-34) |
 | Module time offsets | Maximize muon likelihoods over a per-module offset, after a pairwise least-squares start | Two-track events crossing different modules | A start-time error absorbed into module offsets (inferred) | COL only in the sources read (arXiv:2504.19090 sec. 7.3, p. 33) |
-| Chromatic dispersion | Time imaging or focusing optics correct it | Fast pixelated photosensors (multi-anode or microchannel-plate PMTs) | Uncorrected, it enters `sigma_C,gamma` (arXiv:hep-ex/0010068 p. 3) | COL only in the sources read (pdg_2025_particle-detectors-at-accelerators p. 23) |
+| Chromatic dispersion | Time imaging, focusing optics or both; in some designs this allows correcting it (pdg_2025_particle-detectors-at-accelerators p. 23) | Fast pixelated photosensors (multi-anode or microchannel-plate PMTs) | Uncorrected, it enters `sigma_C,gamma` (arXiv:hep-ex/0010068 p. 3) | COL and FXT designs listed, without saying which correct it (pdg_2025_particle-detectors-at-accelerators pp. 23-24) |
 
 <!-- example: named apparatus and their numbers -->
 - BaBar DIRC (COL): 4.9 m fused-silica bars (`n ≈ 1.473`), pin-hole imaging through 6000 l of water onto 10752
@@ -71,7 +71,8 @@ background rate and the start-time source are parameters. Source IDs as in the r
 - **Inverse problem**: species from `theta_c` and time of propagation; degeneracies: path ambiguity, start time
   versus time of flight, chromatic spread.
 - **Natural objects**: photon `(c, t)`, path hypothesis, `ln L` per hypothesis.
-  **Informative residual**: `t - t_ck` per pixel for identified tracks; per-photon angle residual per path.
+  **Informative residual**: `t - (t_ck + sum_j f_j t_TTS,j)`, the time minus the mean of the assigned convolved
+  peak of eq. 13, per pixel for identified tracks; per-photon angle residual per path.
 - **Scaling**: Relations, each within its domain.
 - **Conventions**: time origin (bunch, trigger or fitted); whether `ln P_mu(N)` is included.
 - **Tails**: late transit-time components, scattered or wrongly reflected photons, other tracks in the bar.
@@ -82,7 +83,9 @@ background rate and the start-time source are parameters. Source IDs as in the r
 
 ## Common misconceptions and failure modes
 
-- **A start time treated as known.** A biased `t0` moves every hypothesis's time PDF; it is a parameter, and with
+- **A start time treated as known.** A biased `t0` moves every hypothesis's time PDF by the same amount, mimicking a
+  time-of-flight difference, and a fitted `t0` needs track identities from another detector (dE/dx in
+  arXiv:2504.19090 sec. 8.2, p. 34); it is a parameter, and with
   a bunch clock it is found from the same likelihood ([event time](event-time-and-timing-association.md)).
 - **Ignoring path ambiguities.** Unmodelled paths are a structured background, not noise.
 - **Gaussian timing.** Transit-time spreads have late components; use the measured per-tube shape.
@@ -100,10 +103,15 @@ background rate and the start-time source are parameters. Source IDs as in the r
   ns, amplitude); start time with its source and uncertainty; window `[t_1, t_2]`.
 - **Outputs**: per track `ln L` per hypothesis, `Delta ln L`, `N_h`, `N_B`, the fitted offset if fitted;
   per photon the most likely path.
-- **Closure and negative control** (required): on identified tracks, the mean time residual of the assigned peak
-  per pixel group must lie within a tolerance fixed in advance of zero; the negative control shifts all photon
-  times by a multiple of that tolerance fixed in advance, which must fail. `failed` if the true check fails;
-  `inconclusive` below a count fixed in advance or if the control passes; else `passed`.
+- **Closure and negative control** (required): on tracks identified without the DIRC/TOP likelihood (dE/dx,
+  dimuons or kinematically identified decays), with a start time not fitted to the checked photons (an independent
+  source, or an offset fitted on a disjoint half of the tracks), the mean of `t - (t_ck + sum_j f_j t_TTS,j)` per
+  pixel group must lie within a tolerance fixed in advance of zero; the negative control, with the start time and
+  module offsets held at their unshifted values (no refit or bunch re-rounding), shifts the photon times of one
+  pixel group by `k` times that tolerance (`k > 1`, fixed in advance, below half the smallest peak spacing), which
+  must fail. A group below a count fixed in advance is `inconclusive`; otherwise `failed` if the closure fails or
+  the control passes, else `passed`; the check takes the worst group (failed, then inconclusive, then passed), and
+  `inconclusive` is not a pass.
 - **Statuses**: per track `ok`, `no-photons`, `start-time-missing`, `out-of-acceptance`; per check `passed`,
   `failed`, `inconclusive`.
 

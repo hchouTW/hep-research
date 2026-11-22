@@ -3,8 +3,8 @@
 From photon hits on a pixelated plane and a track (or none) to a Cherenkov angle, a velocity, a likelihood per
 mass hypothesis and a charge. Radiators, photosensors, threshold and differential counters:
 [Cherenkov imaging variants](cherenkov-imaging-variants-and-photosensors.md); emission and yield:
-[signal formation](signal-formation-and-readout.md); threshold, saturation, resolution budget, separation power
-and isotope mass: [particle identification](particle-identification.md#ring-imaging-cherenkov-detectors-rich);
+[signal formation](signal-formation-and-readout.md); threshold, saturation, resolution budget and isotope mass:
+[particle identification](particle-identification.md#ring-imaging-cherenkov-detectors-rich);
 DIRC and time-of-propagation counters: [DIRC and TOP reconstruction](dirc-and-time-of-propagation-reconstruction.md);
 large-volume water, ice and air-Cherenkov likelihoods (a sibling, not re-derived here):
 [photon-counting likelihood](photon-likelihood-reconstruction.md); mirror alignment and refractive index from data:
@@ -50,10 +50,11 @@ arXiv:<id> (`/` as `_`); `pdg_2025_<review>` a PDG 2025 review. Pages are PDF pa
 - **Average-angle likelihood** (approximate: Gaussian average-angle distribution, resolution independent of
   species; arXiv:physics/0104033 sec. 4.3, eqs. 10-11, p. 16): in a window `theta_th +- 4 sigma_theta`,
   `L(<theta>) = exp(-(theta_th - <theta>)^2 / (2 sigma_<theta>^2))`, `sigma_<theta> = sigma_theta / sqrt(N)`;
-  radiator likelihoods are multiplied.
+  radiator likelihoods are multiplied. An empty window (`N = 0`) needs an explicit rule, for example the Poisson
+  term for zero photons given the expected yield (not in the source).
 - **Per-track resolution** (approximate; pdg_2025_particle-detectors-at-accelerators sec. 35.5, eqs. 35.11-35.12,
   p. 21): `sigma(theta_c) = <sigma(theta_i)>/sqrt(N_pe) (+) C`, `C` collecting tracking, alignment, scattering, hit
-  ambiguities, random background and other tracks; `delta beta = tan theta_c sigma(theta_c)`. The `1/sqrt(N)`
+  ambiguities, random background and other tracks; `sigma(beta)/beta = tan theta_c sigma(theta_c)`. The `1/sqrt(N)`
   scaling holds only without correlated errors (arXiv:hep-ex/0010068 eq. 1, p. 3). A momentum-dependent width
   `sigma_PDF(p) = sqrt((A/p)^2 + B^2)`, added in quadrature to a constant pad term (arXiv:2008.06251 sec. 3.2.2,
   eq. 8, p. 9; motivated by multiple scattering).
@@ -71,17 +72,17 @@ arXiv:<id> (`/` as `_`); `pdg_2025_<review>` a PDG 2025 review. Pages are PDF pa
 
 | Situation | Method | Preconditions | Failure modes | Environments |
 |---|---|---|---|---|
-| Track known, discrete species | Per-pixel Poisson (binary) likelihood per hypothesis; ratios or `Delta ln L` | Track at the radiator, `n(lambda)`, PDF tuned on control samples of known species | Unhit pixels dropped; PDF width from another momentum; dead pixels counted as unhit | COL (arXiv:2008.06251 sec. 3; arXiv:2603.13000 sec. 2.1); FXT (arXiv:2002.07990 sec. 3, a DIRC) |
+| Track known, discrete species | Per-pixel Poisson (binary) likelihood per hypothesis; ratios or `Delta ln L` | Track at the radiator, `n(lambda)`, PDF tuned on control samples of known species | Unhit pixels dropped; PDF width from another momentum; dead pixels counted as unhit | COL (arXiv:2008.06251 sec. 3; arXiv:2603.13000 sec. 2.1); FXT, a per-track likelihood from per-photon angles, not per-pixel Poisson, a DIRC (arXiv:2002.07990 sec. 3, pp. 5-6) |
 | Continuous velocity (nuclei, isotopes) | Per-hit residual PDF, `L(theta_c)` maximized; or per-hit `beta`, then the most probable hit cluster, mean weighted by signal amplitude | Track direction gives the mean emission point; reflected branches modelled | Background fraction varies event to event (arXiv:hep-ex/0210044 abstract); mirror branches missed | SPC only in the sources read (arXiv:hep-ex/0210044 sec. 2; arXiv:0709.2154 p. 2) |
 | Sparse rings, yields varying over the acceptance | Average angle in a window per hypothesis, Gaussian likelihood | Single-photon resolution per radiator | Window width a free parameter (arXiv:physics/0104033 sec. 4.3) | FXT only in the sources read (arXiv:physics/0104033 sec. 4.3) |
 | Proximity focusing | Back-trace each hit from the mean emission point; thin radiator, expansion gap; a focusing multi-layer radiator (index rising downstream) to overlap the layers' rings | Thickness and gap known; flat detection plane | Emission-point term dominates for a thick radiator | COL (arXiv:2008.06251 sec. 2.2.1; arXiv:0805.0737 abstract); SPC (arXiv:hep-ex/0210044 sec. 1) |
 | Mirror focusing | Per-hit inverse ray tracing (iterative or quartic), not a circle fit: images on a flat plane are distorted ellipses | Mirror geometry and alignment ([in-situ calibration](in-situ-calibration-methods.md#ring-imaging-cherenkov-detectors)) | Circle fit (arXiv:physics/0104033 sec. 4.1); misaligned segments | COL (arXiv:1611.00296 p. 1); FXT (arXiv:physics/0104033 sec. 4.2) |
 | Several radiators | Each hit reconstructed under each radiator's emission point; per-radiator spectra; likelihoods multiplied. Tiled radiators side by side: the track position picks one | Index and geometry per radiator and tile | Wrong radiator hypothesis where indices are close (inferred: with very different indices it is rarely a problem, arXiv:physics/0104033 sec. 4.2); refraction at boundaries | COL (arXiv:1211.6759 sec. 2.1); FXT (arXiv:physics/0104033 secs. 4.2-4.3); SPC (arXiv:0709.2154 p. 2) |
 | Many overlapping rings | Global event likelihood: start from the most abundant species, change the one track hypothesis that most raises `ln L`, repeat; background per photodetector from the excess over expectation; iterate both | High multiplicity, ring overlap | Cost grows exponentially with the number of tracks without search shortcuts | COL only in the sources read (arXiv:1211.6759 sec. 5.1; arXiv:2603.13000 sec. 2.2): a condition (overlap), not a rule |
-| Few tracks, noise-dominated background | Local (track-by-track) likelihood with a background term | Background model | Overlaps misassigned if multiplicity grows | FXT (arXiv:physics/0104033 sec. 4.1, p. 14); COL (arXiv:2603.13000 sec. 2.2) |
+| Few tracks, noise-dominated background | Local (track-by-track) likelihood with a background term | Background model | Overlaps misassigned if multiplicity grows | Suggested in general, no environment named (arXiv:2603.13000 sec. 2.2); FXT low multiplicity simplifies association, but that likelihood has no background term (arXiv:physics/0104033 secs. 4.1, 4.3, pp. 14-16) |
 | Ring finding with a track | Track-seeded window, or a Hough transform of pad coordinates into Cherenkov-angle space | Track extrapolated to the radiator | Elliptical images at incidence; offsets of the mirror the track points to | COL (arXiv:nucl-ex/0211028 p. 5); FXT, track-seeded ring fit (arXiv:1809.04026 sec. 3.1, p. 6) |
 | Ring finding without a track | Standalone ring fit or Hough accumulator, then likelihood or local fit | Hits only; global offsets subtracted | Ghost rings from background; no species | FXT (arXiv:1809.04026 sec. 3.1, p. 6); COL (arXiv:2603.13000 sec. 2.3) |
-| Background | Track-correlated (window light, delta rays, scattered and reflected photons: a broad component) plus random (noise, dark counts, other tracks): uniform, its level from off-time hits; or a flat fraction | Readout window wider than the signal, or a fitted fraction | One flat level for all pixels when rates vary; sparse rings swamped (arXiv:physics/0104033 p. 13) | COL (arXiv:2008.06251 sec. 3.1, p. 8; arXiv:1211.6759 sec. 5.1); SPC (arXiv:hep-ex/0210044 sec. 2); FXT (arXiv:physics/0104033 sec. 4.1) |
+| Background | Track-correlated (window light, delta rays, scattered and reflected photons: a broad component) plus random (noise, dark counts, other tracks): uniform, its level from off-time hits; or a flat fraction | Readout window wider than the signal, or a fitted fraction | One flat level for all pixels when rates vary; sparse rings swamped (arXiv:physics/0104033 p. 13) | COL (arXiv:2008.06251 sec. 3.1, p. 8; arXiv:1211.6759 sec. 5.1); SPC (arXiv:hep-ex/0210044 sec. 2); FXT, the sources listed but no level model (arXiv:physics/0104033 sec. 6.2, p. 19) |
 | Charge | `Z^2` from photoelectrons near the pattern, corrected by the event's efficiency | Velocity first; visible-ring fraction above a cut | Efficiency from the average, not the event | SPC only in the sources read (arXiv:hep-ex/0210044 sec. 3; arXiv:0709.2154 p. 3); COL uses `N_h` in the likelihood, not for charge (arXiv:2008.06251 sec. 3) |
 
 Sources of the per-pixel efficiency: photosensor magnetic-field and immersion effects
@@ -118,7 +119,7 @@ as rings ([signal formation](signal-formation-and-readout.md#light-scintillation
 - **Inverse problem**: `beta` (or species, given momentum) and, from the yield, `Z`; degeneracies: emission point
   versus chromatic spread, radiator hypothesis, ring overlap, mirror branch.
 - **Natural objects**: hit, per-hit angle under a radiator hypothesis, ring candidate, track `theta_c`,
-  `ln L` per hypothesis. **Informative residual**: per-photon `theta_i - theta_h` (peak, width, background
+  `ln L` per hypothesis (discrete species) or `L(theta_c)` (continuous velocity), `Z^2` from the yield. **Informative residual**: per-photon `theta_i - theta_h` (peak, width, background
   pedestal), versus azimuth around the track (alignment) and momentum; observed versus expected photon count.
 - **Scaling**: Relations, each within its domain.
 - **Conventions**: `Delta ln L` against a stated reference hypothesis; angles in rad; whether `N_h` includes
@@ -136,7 +137,8 @@ as rings ([signal formation](signal-formation-and-readout.md#light-scintillation
 - **Fitting circles to mirror images.** Flat planes off the focal surface give distorted ellipses.
 - **`sigma_photon/sqrt(N)` alone.** Correlated terms set a floor; quote the measured per-track width.
 - **Global likelihood as the rule.** It pays where rings overlap; with noise-dominated background a local one
-  does as well (arXiv:2603.13000 sec. 2.2).
+  with a background term may do comparably well at much lower cost (arXiv:2603.13000 sec. 2.2); check it at the
+  multiplicity at hand.
 - **One average efficiency for charge.** The visible ring fraction changes from event to event.
 - **Discrete hypotheses for nuclei.** Unknown `Z` and isotopes need the velocity form.
 
@@ -151,18 +153,25 @@ as rings ([signal formation](signal-formation-and-readout.md#light-scintillation
 ## Tool hooks
 
 - **Inputs**: tracks at the radiator (position, direction, momentum, covariance); hypotheses (masses, `Z`);
-  radiators (`n(lambda)` per tile, thickness, emission-point model); optics (mirror centres, radii, alignment,
+  radiators (`n(lambda)` per tile with its temperature and pressure or monitoring dependence, thickness,
+  transmission or absorption length, emission-point model); optics (mirror centres, radii, alignment,
   planes); pixel map (position, size, live flag, efficiency); hits (pixel, photoelectrons, time and window);
   background model or rate per pixel.
 - **Outputs**: per track and radiator: `ln L` per hypothesis, `Delta ln L`, `theta_c` and `sigma`, expected and
   observed counts, background estimate, `Z^2` with `eps_tot`; per hit: angle per radiator hypothesis.
 - **Conventions**: rad; natural log; `Delta ln L = ln L_h - ln L_ref`.
-- **Closure and negative control** (required): on kinematically identified tracks disjoint from the PDF tuning
-  sample, in each momentum bin where the expected separation exceeds a value fixed in advance, the median
-  `Delta ln L(true - other)` must exceed a margin fixed in advance. The negative control reruns the bin with each
-  momentum scaled by `m_other/m_true` (same `beta` under the other hypothesis), which must fail. A bin is `failed`
-  if the true check fails; `inconclusive` below a count fixed in advance or if the control passes too; else
-  `passed`; the check takes the worst bin.
+- **Closure and negative control** (required, for each output path), on kinematically identified tracks disjoint
+  from the PDF tuning sample. Discrete hypotheses: in each momentum bin where the separation expected from the
+  measured per-track width (not from the PDF under test) exceeds a value fixed in advance, the median
+  `Delta ln L(true - h)` must exceed a margin fixed in advance for every other hypothesis `h` evaluated, the worst
+  pair deciding. The negative control reruns the bin with each momentum scaled by `m_h/m_true` (same `beta` under
+  `h`), which must fail. Velocity and charge: per bin, on nuclei selected by other detectors, the `beta` pulls
+  against `beta` from momentum and the `Z^2` peak positions must lie within margins fixed in advance; the control
+  reruns it with each momentum scaled by a factor fixed in advance, which must fail. A bin below a count fixed in
+  advance is `inconclusive`; otherwise `failed` if the check fails or the control passes, else
+  `passed`. The check takes the worst bin (failed, then inconclusive, then passed), and is `inconclusive` if no bin
+  qualifies or the qualifying bins miss the momentum range in use. Count, margins and threshold are recorded before
+  the check runs; `inconclusive` is not a pass.
 - **Statuses**: per track `ok`, `below-threshold` (no hypothesis radiates), `no-ring`, `overlap`,
   `out-of-acceptance`; per check `passed`, `failed`, `inconclusive`.
 
@@ -170,11 +179,11 @@ as rings ([signal formation](signal-formation-and-readout.md#light-scintillation
 
 | Technique | COL | FXT | SPC | UGD | GND | NUC |
 |---|---|---|---|---|---|---|
-| Per-pixel or per-hit likelihood | arxiv_2008.06251, arxiv_2603.13000 | arxiv_physics_0104033, arxiv_2002.07990 | arxiv_hep-ex_0210044, arxiv_0709.2154 | [photon-counting likelihood](photon-likelihood-reconstruction.md) | [photon-counting likelihood](photon-likelihood-reconstruction.md) | gap |
+| Per-pixel or per-hit likelihood | arxiv_2008.06251, arxiv_2603.13000 | arxiv_physics_0104033, arxiv_2002.07990 (a DIRC) | arxiv_hep-ex_0210044, arxiv_0709.2154 | [photon-counting likelihood](photon-likelihood-reconstruction.md) | [photon-counting likelihood](photon-likelihood-reconstruction.md) | gap |
 | Proximity focusing | arxiv_2008.06251, arxiv_0805.0737 | gap | arxiv_hep-ex_0210044, arxiv_0709.2154 | n/a: imaged by correlated tracking (pdg_2025_particle-detectors-at-accelerators p. 21), [photon-counting likelihood](photon-likelihood-reconstruction.md) | n/a: telescope optics, [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
-| Mirror inverse ray tracing | arxiv_1611.00296 | arxiv_physics_0104033 | gap | n/a: no mirror | [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
-| Several radiators | arxiv_1211.6759 | arxiv_physics_0104033 | arxiv_0709.2154 | n/a: one medium | n/a: one medium | gap |
-| Ring finding and association | arxiv_nucl-ex_0211028, arxiv_2603.13000 | arxiv_1809.04026, arxiv_physics_0104033 | arxiv_0709.2154 | gap | [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
+| Mirror inverse ray tracing | arxiv_1611.00296 | arxiv_physics_0104033 | arxiv_hep-ex_0210044, arxiv_0709.2154 (conical side mirror, reflected branches per hit; not a focusing mirror) | n/a: no mirror | n/a: images parametrized (moments, templates), not ring-traced; [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
+| Several radiators | arxiv_1211.6759 | arxiv_physics_0104033 | arxiv_0709.2154 (tiled only: the track picks one radiator) | gap | gap | gap |
+| Ring finding and association | arxiv_nucl-ex_0211028, arxiv_2603.13000 | arxiv_1809.04026, arxiv_physics_0104033 | arxiv_0709.2154 | [photon-counting likelihood](photon-likelihood-reconstruction.md#topologies-and-hypothesis-comparison) | [imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md) | gap |
 | Global event likelihood | arxiv_1211.6759, arxiv_2603.13000 | gap (low multiplicity simplified association in arxiv_physics_0104033) | gap | gap | gap | gap |
 | Background model | arxiv_2008.06251, arxiv_1211.6759 | arxiv_physics_0104033 | arxiv_hep-ex_0210044 | gap | pdg_2025_particle-detectors-for-non-accelerator-physics (night sky) | gap |
 | Yield and charge from yield | arxiv_2008.06251 (yield only) | gap | arxiv_hep-ex_0210044, arxiv_0709.2154 | gap | gap | gap |
@@ -190,5 +199,6 @@ Read in arXiv e-prints (PDG: 2025 review PDF, 1 December 2025 update), 2026-11-1
 split file [particle identification bibliography](detector-principles-bibliography-particle-identification.md),
 section "Cherenkov ring and DIRC reconstruction"; arXiv:1211.6759 and arXiv:1809.04026 in the
 [calibration bibliography](detector-principles-bibliography-calibration.md); arXiv:physics/0104033 in the
-[calorimetry bibliography](detector-principles-bibliography-calorimetry.md); PDG RPP 2025 in the main
+[calorimetry bibliography](detector-principles-bibliography-calorimetry.md) (its existing entry, first cited there for
+lepton identification; not duplicated); PDG RPP 2025 in the main
 [bibliography](detector-principles-bibliography.md).
