@@ -6,7 +6,7 @@ GND and NUC are gaps. Electronics damage (SEU, circuit TID):
 
 ## Relations
 
-Fluence `Phi_eq` is non-ionizing energy loss (NIEL) normalised to 1 MeV neutron damage, in
+Fluence `Phi_eq` is the particle fluence weighted by the hardness factor `kappa` (non-ionizing energy loss, NIEL, relative to 1 MeV neutrons), in
 `n_eq/cm^2`; total ionizing dose (TID) is in Gy, for any particle type (definitions; PDG RPP 2025,
 sec. 35.8.5, p. 74). Give both, with the particle spectrum they came from: NIEL scaling
 holds well for leakage current and is "moderately violated" for other effects (same page).
@@ -22,7 +22,7 @@ holds well for leakage current and is "moderately violated" for other effects (s
 | `L/L_0 ≈ exp(-D/D_c)` for plastic scintillator | approximate; `D_c` of tens of kGy at dose rates from a few `1e-3` to 10 Gy/h, larger damage at lower rate. PDG sec. 35.3.2, p. 12 |
 | `S(t)/S_0 = (R(t)/R_0)^alpha` (scintillation vs monitoring light) | approximate; `alpha` per crystal producer from an irradiated beam test, loss-independent only for small losses (no threshold given): a loss beyond the beam test's or an in-situ exponent outside its 10% spread (larger transparency and VPT loss) is `extrapolated`. arXiv:1306.2016, sec. 4.1, eq. (3), pp. 10-11, and sec. 4.1.1, pp. 12-13 |
 | `s(t) = (p_0 - p_1) + p_1 exp(-(t - t_s)/tau)` (energy-scale drift) | approximate, empirical fit to a monitored peak over three years (Fig. 73), extrapolated beyond; `t_s` is eq. (53)'s `t_0`. arXiv:1206.1896, sec. 7.3.2, eq. (53), p. 137 |
-| `R = -(1/G) dG/dQ` (% per C/cm) | definition of the gas ageing rate; **not** a predictor outside the tested conditions: ageing is not a function of `Q` alone; lower accumulation rates can age more. arXiv:hep-ex/0204005, secs. I and V.D, pp. 1 and 8 |
+| `R = -(1/G) dG/dQ` (% per C/cm per wire, or per C/cm^2 for micro-pattern gas) | definition of the gas ageing rate; **not** a predictor outside the tested conditions: ageing is not a function of `Q` alone; lower accumulation rates can age more. arXiv:hep-ex/0204005, secs. I and V.D, pp. 1 and 8 |
 | `Q_A = r_pe T f_duty G e` (integrated anode charge per area) | exact bookkeeping for a constant photoelectron rate `r_pe` (DQE × incident rate) per area, run time `T`, duty factor, gain `G`; an unspecified photon rate taken as `r_pe` bounds the photon-induced charge only: state which |
 
 ## Damage and ageing by sensor
@@ -133,13 +133,13 @@ proportional chambers Ar/CF4/CH4 aged over 100 times faster in hadron beams than
 
 - **COL.** Dose and hadron fluence depend on radius and pseudorapidity and scale with integrated luminosity;
   the fluence comes from a generator plus transport (Pythia8, FLUKA) as `Phi/L_int`, checked per
-  module group against leakage currents (annealing model): keep the transport value and uncertainty only where
-  checked and within 1 sigma (example below: 1.5 sigma), else the fitted `Phi/L_int` or a covering uncertainty, with the hardness-factor uncertainty included or covered, else marked incomplete.
+  module group against leakage currents (annealing model): in every branch include or cover the hardness-factor uncertainty, which enters both sides (prediction and `alpha`), so the check cannot test it, else mark incomplete, and keep the transport value and uncertainty only where
+  checked and within 1 sigma of the current-derived `Phi/L_int`, sigma being that measurement's uncertainty alone and below the transport uncertainty (example below: 1.5 sigma), else the fitted `Phi/L_int` or a covering uncertainty.
 - **SPC (low Earth orbit).** The proton/electron balance depends on shielding and spectrum (example below), so
   model trapped electrons too; solar-proton and Galactic cosmic-ray (GCR) TID is called negligible next to trapped protons (arXiv:2411.00607v2, sec. 4.1,
   p. 10, citing another study): bound it per mission. Dose depends on altitude, shielding and solar cycle (same page), from trapped-particle models (AP-8 protons,
   AE-8 electrons), with a factor of two quoted on AP-8 only (sec. 3.2, p. 7); its cited
-  SPENVIS page gives 2 for both, more for differential fluxes from the integral maps (SPENVIS trapped-radiation help, sec. 5.1): use 2 on both, more (3 below) for differential fluxes, stating or varying it. In AP-8, trapped protons at low altitude are more numerous in
+  SPENVIS page gives 2 for both as a widely quoted estimate, larger errors where spatial or spectral gradients are steep or time variations poorly known, more for differential fluxes from the integral maps (SPENVIS trapped-radiation help, sec. 5.1): use 2 on both as a lower estimate, varied upward where gradients are steep, and 3 for differential fluxes, this page's convention (SPENVIS gives no value, so the 3-based numbers below follow from it), each propagated as a bound or variation (item 3). In AP-8, trapped protons at low altitude are more numerous in
   AP8-MIN (arXiv:1503.07682, sec. 1, p. 3, protons only): for electrons run AE8-MIN and AE8-MAX and carry the larger, unless each segment's phase is fixed (item 3). Cutoffs:
   [space-based direct detection](space-based-direct-detection.md#geomagnetic-cutoff).
 - **UGD.** No underground damage source (gap; plastic ageing of unknown cause: above); context:
@@ -169,11 +169,11 @@ trapped protons dominate TID and TNID, electrons about 1-6% of TID (central valu
    stable peak (non-interacting protons) tracks the scale, fitted in time (arXiv:1206.1896, sec. 7.3.2, p. 137).
 2. **Digitization.** Digitize with device-model fields and trapping; state whether annealing enters; omit it
    only if its variation at your fluences and annealing state is within the field-model and trapping-constant
-   variations propagated as uncertainties, re-checked past the tested fluence or annealing (COL; example above). General digitization:
+   variations at their published sizes (not enlarged for this test) propagated as uncertainties, re-checked past the tested fluence or annealing (COL; example above). General digitization:
    [detector simulation](detector-simulation.md#digitization).
 3. **Dose prediction.** Pre-launch, MULASSIS gave TID only, without electrons,
    and in orbit AE-8 and AP-8 fluences per mission segment (IRENE) go into GRAS (both Geant4-based) for TID and TNID (SPC;
-   arXiv:2411.00607v2 (3 Apr 2025), secs. 2 and 3.2, pp. 3-4 and 7). A TID-only prediction misses displacement damage (TNID), and one without trapped electrons their dose: state TNID (protons dominate it in the example), add the electron dose, bounded with the model factor on both models (2, or 3 for differential fluxes), for this mission to the TID as a one-sided upward term, neglected only when that bound is below the dose's Monte Carlo statistical and transport-code uncertainty (model factor excluded), and likewise state solar protons and GCR or show them negligible.
+   arXiv:2411.00607v2 (3 Apr 2025), secs. 2 and 3.2, pp. 3-4 and 7). A TID-only prediction misses displacement damage (TNID), and one without trapped electrons their dose: state TNID (protons dominate it in the example), add the electron dose, bounded with the model factor on both models (2, or 3 for differential fluxes), for this mission to the TID as a one-sided upward term, neglected only when that bound is below the dose's transport-code uncertainty (Monte Carlo statistics and model factor excluded), and likewise state solar protons and GCR or show them negligible.
 4. **Extrapolation.** A measured ageing trend, extrapolated, says when simulation and reconstruction must model the
    reduced response (UGD; arXiv:2207.12982, sec. 7, p. 31).
 
@@ -196,8 +196,8 @@ trapped protons dominate TID and TNID, electrons about 1-6% of TID (central valu
 - **Inverse problem**: dose, annealing, temperature and photosensor drift from one monitored response.
 - **Natural objects**: per-channel monitored time series.
 - **Informative residual**: monitored response minus the history-based prediction.
-- **Scaling**: leakage current linear in `Phi_eq`; MCP loss per integrated charge once time-only loss is separated, gas loss
-  too only at the fixed conditions of Gaseous detectors; plastic loss exponential in dose.
+- **Scaling**: leakage current linear in `Phi_eq` at a fixed annealing state; MCP loss per integrated charge once time-only loss is separated, gas loss
+  too only at the fixed conditions of Gaseous detectors; plastic loss exponential in dose at a fixed dose rate.
 - **Conventions**: units and inputs of [Tool hooks](#tool-hooks); annealing state from per-interval temperature.
 - **Tails**: dead channels, Malter discharges, sudden breakdown at the bias limit.
 - **Dependence**: dose rate, temperature, gas flow and materials, solar cycle (SPC), luminosity (COL).
@@ -226,13 +226,13 @@ trapped protons dominate TID and TNID, electrons about 1-6% of TID (central valu
 A damage-history tool (none shipped) takes the inputs below and optionally the monitored response; it outputs per interval the predicted leakage
 current or response factor where a relation exists, else `no-predictor`. Units, all required per interval:
 fluence in `n_eq/cm^2` (silicon, LGADs, SiPMs) and crystal hadron fluence in cm^-2, weighting stated (crystals: producer's beam-test `alpha`, spread, loss), dose in Gy (those, plastics, WLS), per species expected for the orbit (SPC: trapped protons
-and electrons, solar protons and GCR unless shown negligible), each stated even when zero (absent is not zero), with spectrum and NIEL source when non-zero, depleted volume `V_i` in cm^3 (silicon, LGADs, SiPMs),
+and electrons, solar protons and GCR, with the per-mission bound when shown negligible), each stated even when zero (absent is not zero), with spectrum and NIEL source when non-zero, depleted volume `V_i` in cm^3 (silicon, LGADs, SiPMs),
 bias, full-depletion voltage in V and active thickness in um (all silicon), gain (LGADs, SiPMs: it multiplies the current), charge in C/cm^2
-(MCP-PMT, micro-pattern gas, any PMT, VPT or SiPM reading a dosed scintillator) or C/cm per wire, geometry stated, with gain, photoelectron rate and duty factor (MCP-PMT) and, for gas,
+(MCP-PMT, micro-pattern gas, any PMT, VPT or SiPM reading a dosed scintillator) or C/cm per wire, geometry stated, with gain, duty factor and rate with its kind (photoelectron, or photon as an upper bound, `missing-history` if the kind is absent) (MCP-PMT) and, for gas,
 current density, irradiated area, particle type and energy, gain, rate, mixture, flow rate and materials, time in s, temperature in K. Required negative control: a
-history whose required fluence, dose and charge are all zero returns no radiation-induced change (zero is in every relation's range), and a history with a warm-up returns the
-leakage-current annealing step. Status, first match wins: `missing-history` (an interval or required input, temperature included, is absent), `no-dose-ageing` (the response changes while cumulative required fluence, dose and charge are zero), `no-predictor` (non-zero exposure and no relation in Relations for the output, always for LGAD gain, SiPM dark rate, MCP-PMT QE versus charge, WLS fibres, crystals without a monitored response, the PMT, VPT or SiPM of a dosed scintillator, gas outside a cited test's conditions, all gas inputs above), `extrapolated` (an input or the monitored response outside a relation's
-fitted range or stated validity, such as a crystal loss beyond its beam test), `ok`, plus flags reported with any status: `bias-limit` (silicon bias/thickness at the single-event field) and `residual` (the monitored response off a prediction beyond its uncertainty, for example non-dose ageing or PMT fatigue).
+history whose required fluence, dose and charge are all zero returns no radiation-induced change (zero is in every exposure-driven relation's range, and time-only fits such as `s(t)` apply only to the detector and exposure they were fitted to, so a zero-exposure history skips them), and a history with a warm-up returns the
+leakage-current annealing step. Status, first match wins: `missing-history` (an interval or required input, temperature included, is absent), `no-dose-ageing` (the response changes while cumulative required fluence, dose and charge are zero), `no-predictor` (non-zero exposure and no relation in Relations for the output, always for LGAD gain, SiPM dark rate, MCP-PMT QE versus charge, WLS fibres, crystals without a monitored response, the PMT, VPT or SiPM of a dosed scintillator, gas ageing always (`R` is a definition, and a cited test's rate is only a reference at that test's conditions)), `extrapolated` (an input or the monitored response outside a relation's
+fitted range or stated validity, such as a crystal loss beyond its beam test), `ok`, plus flags reported with any status: `bias-limit` (silicon bias/thickness at or above a stated margin below the single-event field of about 12 V/um in Relations) and `residual` (the monitored response off a prediction beyond its uncertainty, for example non-dose ageing or PMT fatigue).
 
 ## Environment coverage
 
@@ -247,7 +247,7 @@ Cells credit the target detector's environment and mark lab, irradiation or beam
 | plastic scintillator and WLS | arxiv_1806.02129 | gap | gap | arxiv_2207.12982 | gap | gap |
 | MCP-PMT | gap (related: PDG, principle only) | arxiv_2311.16676 (lab tests) | gap | gap | gap | gap |
 | gas ageing | arxiv_hep-ex_0204005 (in situ and tests) | arxiv_hep-ex_0204005 | gap | gap | gap | gap |
-| radiation fields | arxiv_1306.2016; arxiv_1905.03739 | gap | arxiv_2411.00607; arxiv_1503.07682; arxiv_1206.1896 (exposure only) | gap (arxiv_2207.12982: no identified dose) | gap | gap |
+| radiation fields | arxiv_1306.2016; arxiv_1905.03739 | gap | arxiv_2411.00607 (simulated); arxiv_1503.07682 (design study); related, exposure only, not coverage: arxiv_1206.1896 | gap (arxiv_2207.12982: no identified dose) | gap | gap |
 | conditions and simulation | arxiv_1905.03739; arxiv_1306.2016 | gap | arxiv_1206.1896; arxiv_2411.00607 | arxiv_2207.12982 | gap | gap |
 
 ## Citations
