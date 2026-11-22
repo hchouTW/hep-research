@@ -53,8 +53,9 @@ Borexino: an outer water-Cherenkov detector around the inner detector; combined 
 (arXiv:1101.3101, abstract; sec. 3.2.3, p. 17). Mu2e cosmic-ray veto: four layers of scintillation counters with
 wavelength-shifting fibres and SiPMs (arXiv:2510.13798, abstract); required 3-of-4-layer efficiency for cosmic muons as high as 99.99% in
 some critical regions (sec. 6, p. 9; overall design goal 99.99%, sec. 1, pp. 2-3); direct 3-of-4 efficiency above
-the independent-layer extrapolation below about 75 PE down to 15 PE (sec. 6.2, text and Figs. 6-7, pp. 10-12),
-agreeing within errors at 10 PE, the operating range's low end (read from Fig. 6, p. 11, not stated in the text);
+the independent-layer extrapolation below about 75 PE (sec. 6.2, text and Figs. 6-7, pp. 10-12), beyond the
+plotted error bars down to 20 PE and within them at 10 and 15 PE, the expected operating range (read from Fig. 6,
+p. 11, not stated in the text; range in its caption);
 the low-threshold plateau is likely non-muon events passing the selection (supported by simulation; secs. 6.2-6.3,
 pp. 12-15). Fermi LAT anticoincidence detector: about 8.3 m^2, 89 tiles; overall efficiency,
 averaged over the detector area, for singly charged relativistic particles entering the tracker from the top or the
@@ -180,7 +181,7 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 | Long-lived cosmogenics | Track cylinder; muon-neutron-decay coincidence | Muon tracking; neutron tag | Track-cut efficiency not measured; isotopes made without a detected neutron escape the coincidence | UGD |
 | Muon counting in showers | Space and time segmentation | Segment size against the expected density | Undercounting from pile-up | GND |
 | Multi-muon cosmic events in a tracker | Track matching across halves | Simulated high-multiplicity events | Double counting | COL |
-| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; an independent e+- identifier; an external proton spectrum whose shape holds over the normalisation and subtraction ranges (or with its extrapolation in the subtraction systematic), normalised to the protons below the rigidity where the proton curve enters the band (criterion and resolution stated, the residual contamination there quoted), subtracted above it | Protons unseparated above that rigidity; band muon efficiency or its origin not stated; residual p, e+-; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
+| Muons in an absorber-free spectrometer | `1/beta` band versus rigidity | Time of flight and rigidity; an independent e+- identifier; an external proton spectrum whose shape holds over the normalisation and subtraction ranges (or with the shape extrapolation evaluated by a stated variation, such as the spectral-index uncertainty, and quoted as its own subtraction systematic), normalised to the protons below the rigidity where the proton curve enters the band (proton `1/beta` within the band's `n sigma(1/beta)`, the resolution model stated; the residual contamination there quoted), subtracted above it | Protons unseparated above that rigidity; band muon efficiency or its origin not stated; residual p, e+-; a corrected yield, not a pure sample; subtraction-model systematic | SPC (ground-level run; in flight a gap) |
 
 ## Distinctive but generalizable features (non-collider muons)
 
@@ -210,9 +211,9 @@ pi0 (PDG RPP 2025, sec. 36.3.1.2, p. 14).
 - The cosmogenic veto definition (window, cylinder radius, coincidence), its efficiency and its dead time, handed to
   hep-measurement for the live time and background budget.
 - For muon counters, the segmentation and the pile-up correction; for spectrometers, the `1/beta` band and its muon
-  efficiency (measured, simulated, or from the band width with the resolution model stated, as in the
-  [Muons and albedo in orbit](#muons-and-albedo-in-orbit-spc) example), each contamination (p, e+-) subtracted with the proton merge rigidity, its
-  criterion and the residual proton contamination there, the e+- identifier, the proton spectrum used, the range where its shape holds and its normalisation range, and each subtraction-model systematic, and the result
+  efficiency (measured, simulated, or from the band width with the resolution model stated; the
+  [Muons and albedo in orbit](#muons-and-albedo-in-orbit-spc) example quotes one from the width without naming a model), each contamination (p, e+-) subtracted with the proton merge rigidity, its
+  criterion and the resolution it uses, and the residual proton contamination there, the e+- identifier, the proton spectrum used, the range where its shape holds and its normalisation range, the extrapolation systematic when that range does not cover the normalisation range, and each subtraction-model systematic, and the result
   labelled a corrected yield, not a per-event selection.
 
 ## Tool hooks
@@ -225,19 +226,22 @@ A veto-efficiency tool (not yet in the plugin):
   (required: only an estimate from a stated control-sample count of `m` non-muons in `M` events is measured, with
   an uncertainty at least the binomial one or, for `m = 0`, the one-sided upper limit at the confidence matching
   `Z_max`, and a bound, a simulated or assumed value, or a smaller uncertainty gives `impurity-unmeasured`, with no
-  override, as does a measured estimate that differs from the observed all-fail fraction, less its expected muon part,
-  by over `Z_max` combined standard errors in either direction; after that check the impurity uncertainty used in `Z_c` is
-  at most the observed all-fail fraction plus `Z_max` of its standard errors, and an estimate whose uncertainty would
+  override, as does a measured estimate outside the interval the data allow, the observed all-fail fraction less its
+  expected muon part ± `Z_max` of that fraction's own standard errors (from zero to its one-sided upper limit at the
+  confidence matching `Z_max` when the all-fail count is zero); inside it the impurity uncertainty used in `Z_c` is
+  at most the interval's upper end, and an estimate whose uncertainty would
   give `ok` while adding more to the standard error of `Z_c` than the statistics do counts as unmeasured), and the basis
-  on which the non-muon events fail every layer (such as the control sample's hit patterns): without it the status
-  includes `impurity-unmeasured` and neither `ok` nor `independence-violated`.
+  on which the non-muon events fail every layer: only observed hit patterns of identified non-muons (control sample or
+  another stated sample) count, a stated, simulated or assumed basis, or `m = 0` with no observed patterns, being listed
+  as `all-fail-assumed`; without any basis the status includes `impurity-unmeasured` and neither `ok` nor `independence-violated`.
 - **Outputs**: from the same pattern counts (the direct efficiency, `Z`, `Z_imp` and `Z_c` only with a direct count and
   the two-sided test: with `no-direct-count` only the extrapolation, labelled an assumption, after a one-sided test its
   upper limits instead of `Z`, under `impurity-unmeasured` the values of both runs, as bounds), single-layer efficiencies with intervals and their confidence level,
   the k-of-n efficiency extrapolated from them under independence, the direct k-of-n efficiency, and their difference `Z` in
   its standard errors (analytic or at least 1,000 bootstrap replicas over the reference muons, which both estimates share), with the `Z`
   that the estimated impurity alone would give (`Z_imp`), the impurity-corrected `Z_c` (difference less the
-  impurity's, in standard errors that include the impurity uncertainty) and the `Z_max` used, and for a one-sided test its upper limits and their confidence level; efficiencies are fractions.
+  impurity's, in standard errors that include the impurity uncertainty as used after the cap, with the entered and used
+  estimate and uncertainty and the data interval reported) and the `Z_max` used, and for a one-sided test its upper limits and their confidence level; efficiencies are fractions.
 - **Decision rule**: `independence-violated` when, in the two-sided test, `|Z_c| > Z_max` in either direction (`Z_max`
   an input from 2 to 5, default 3, listed with the status when it is not 3), in the layer-zero test, when the direct
   inefficiency exceeds the extrapolation by more than `Z_max` standard errors, or, in the direct-zero test, when the
@@ -246,7 +250,7 @@ A veto-efficiency tool (not yet in the plugin):
   (`|Z_imp| > Z_max`), meaning that extrapolation and direct count agree, not that the layers are independent
   (a shared gap and staggering can cancel, as can staggering and non-muons not failing every layer).
 - **Negative controls** (each with 10^6 reference muons, `k = 3`, `n = 4`, `Z_max = 3`, single-layer inefficiency
-  about 0.01, impurity input 0 ± 10^-7 from a count of 0 in 10^8 unless stated, non-muons stated to fail every layer, and stated seeds): a shared gap removing layers 1 and 2 together
+  about 0.01, impurity input 0 ± 10^-7 from a count of 0 in 10^8 unless stated, the all-fail basis taken as observed, and stated seeds): a shared gap removing layers 1 and 2 together
   for 10^-3 of the muons must give the direct efficiency below the extrapolation and `independence-violated` (`Z` about -25); a
   staggered sample (each layer's inefficiency a gap part of about 0.009 that never hits two layers of one muon plus an
   independent 10^-3, about 114 direct failures) must give it above and `independence-violated` (`Z` about +41); at most 40 of 10,000 seeded independent samples may give other than exactly
@@ -260,21 +264,32 @@ A veto-efficiency tool (not yet in the plugin):
   zero-impurity `Z` exceeds 3 (the bound run alone gives it in every seed), and the shared gap with an assumed bound
   10^-3, or entered as 10^-3 ± 10^-4 (1,000 in 10^6), exactly `{independence-violated, impurity-unmeasured}`. Entered as
   0 ± 6.6 x 10^-4 (0 in 10^4, the cap applying), the shared gap must give exactly `{independence-violated}`, and a gap
-  shared by all four layers for 10^-3 of the muons exactly `{impurity-unmeasured, impurity-dominated}`.
-- **Impurity**: non-muon events are handled only if they fail every layer (others escape the bound and the
-  consistency check and shift `Z` differently: at low layer inefficiency those failing two or three layers also push the direct efficiency below
-  the extrapolation, those failing one push it above, so without the all-fail basis the tool gives `impurity-unmeasured`). All-fail events push the direct efficiency below the
-  extrapolation while the single-layer inefficiency is below 1/9 (3 of 4, from eq. 1, above it the sign reverses, which `Z_imp` carries), so they can hide staggering or mimic a shared gap; in the [Muon vetoes](#muon-vetoes) example, a plateau likely from non-muon events passing the selection
-  (arXiv:2510.13798, secs. 6.2-6.3 and simulation, pp. 11-15; its events fail the coincidence, Fig. 9 caption, p. 14, not shown to fail every layer) leaves the direct efficiency above the extrapolation at
-  intermediate thresholds and equal within errors at the lowest (read from Fig. 6, p. 11, not stated in the text): impurity can mask
-  staggering at the lowest threshold (an inference of this page, not stated in the source; the bound and the
-  consistency check would not see such events, so `ok` there would not exclude masked staggering).
+  shared by all four layers for 10^-3 of the muons exactly `{impurity-unmeasured, impurity-dominated}`; with the basis
+  only stated, the shared gap must give exactly `{independence-violated, all-fail-assumed}`. An independent sample with
+  10^-4 all-fail non-muons, entered as 10^-3 ± 10^-3 (1 in 10^3, outside the data interval), must include
+  `impurity-unmeasured` and never `independence-violated`, and one with 10^-4 non-muons failing layers 1 and 2 only,
+  entered as 10^-4 ± 10^-5 (100 in 10^6) with no all-fail basis, exactly `{impurity-unmeasured}` (zero-impurity `Z` about -3.7).
+- **Impurity**: the bound, the data interval and the consistency check see only non-muon events that fail every
+  layer. Others shift `Z` differently (at low layer inefficiency those failing two or three layers also push the direct
+  efficiency below the extrapolation, those failing one push it above) unseen by them, hence the all-fail basis of the
+  Inputs. All-fail events push the direct efficiency below the extrapolation while the single-layer inefficiency is
+  below 1/9 (3 of 4, from eq. 1; above it the sign reverses, which `Z_imp` carries), so they can hide staggering or
+  mimic a shared gap. In the [Muon vetoes](#muon-vetoes) example the low-threshold plateau, likely from non-muon events
+  passing the selection (arXiv:2510.13798, secs. 6.2-6.3 with simulation, pp. 12-15), fails the coincidence (Fig. 9
+  caption, p. 14) and is not shown to fail every layer; the direct efficiency is above the extrapolation at
+  intermediate thresholds and equal within the plotted error bars over the operating range (read from Fig. 6, p. 11,
+  not stated in the text), consistent with impurity masking staggering there (an inference of this page, not stated in
+  the source). Without a basis that these events fail every layer the tool gives `impurity-unmeasured` there and no
+  `ok`; were the basis wrongly asserted, `ok` would not exclude masked staggering, so an unobserved basis is listed as
+  `all-fail-assumed`.
 - **Statuses** (a set): `ok`; `independence-violated`; `impurity-dominated` (`|Z_imp| > Z_max`, the impurity alone significant, only where the two-sided test runs, so never with `no-failures`, `no-direct-failures` or `no-direct-count`, and at the bound alone under `impurity-unmeasured`); `impurity-unmeasured` (the test
   runs at zero impurity and at the observed all-fail fraction, which bounds non-muons failing every layer, an entered
-  bound or value being reported, not used: `ok` and `independence-violated` need both runs, the efficiencies,
+  bound or value being reported, not used: `ok` and `independence-violated` need both runs and an all-fail basis
+  (without any basis neither is emitted), the efficiencies,
   `Z_imp` and `Z_c` are bounds, and this status alone is inconclusive); `no-failures` (a test layer has no failed
-  muon: its upper limit at the confidence matching `Z_max` enters the extrapolation, and, with a direct count,
-  the layer-zero test runs); `no-direct-failures` (the direct count has no failed muon, and the direct-zero test runs); `no-direct-count` (per-layer counts
+  muon: in the extrapolation it enters at its upper limit at the confidence matching `Z_max` for the layer-zero test
+  and at zero for the direct-zero test, and, with a direct count, the layer-zero test runs); `all-fail-assumed` (the
+  all-fail basis not observed: the other statuses hold only under it); `no-direct-failures` (the direct count has no failed muon, and the direct-zero test runs); `no-direct-count` (per-layer counts
   only: the extrapolation is given, labelled as an assumption, without `Z`). The two-sided test needs a direct
   count and no zero-failure status: with `no-direct-count`, none of `ok`, `independence-violated` or
   `impurity-dominated` is emitted, and after a one-sided test, of these three, only `independence-violated` can be. With
