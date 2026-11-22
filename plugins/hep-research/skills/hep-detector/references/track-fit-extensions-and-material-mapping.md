@@ -225,24 +225,34 @@ but no second source was read).
 ## Tool hooks
 
 No script yet. A tool takes paired estimates of one quantity from two halves (`q/p` in c/GeV or positions in mm),
-their fit errors, hit counts per half, shared hits per pair and a common-constraint flag, the lever arm, field region
-and material of each half, the binning variable, and the core-fit range, truncation level, declared fraction and
-split-width tolerance (relative to the smaller; at most 0.1, 0.2), pull band, tails ratio and minimum number
-of pairs, all fixed before the fit. It returns per bin the resolution under the equal-halves assumption, the pull
-width with its uncertainty, the truncated RMS and, given simulation pairs with truth, the correction factor
-`sigma_truth/sigma_split` per variable and the corrected data resolution, with the simulated split width beside the
-data one (relation 7; arXiv:2310.12865, sec. 11.1, Tables 3-4, pp. 23-24). **Negative controls:** (a) equal halves
-drawn with known `sigma` give `sigma` within the statistical error; (b) halves with `sigma_2 = 1.5 sigma_1` and equal
-hit counts, simulation pairs of the same inequality and both bounds at their maximum, must return `ok-corrected` with
-both `sigma` within errors; (c) (b) without simulation pairs must return `unequal-halves-untested`; (d) equal halves
-with shared hits must return `correlated-halves`; (e) (b) with simulation pairs of two `sigma_1` halves must return
-`sim-data-mismatch`. Statuses, first match wins: `insufficient-pairs`; `correlated-halves` (any shared hit or common
-constraint); `unequal-halves-untested` (no simulation pairs: equal hit counts do not establish equal halves);
-`unequal-halves` (simulated halves do not match the data ones in hit counts, lever arm, field region or material: no
-correction applies); `sim-data-mismatch` (split widths differ beyond the tolerance); `pull-width-off` (outside the
-band); `tails-dominate` (truncated RMS and core width differ beyond the ratio); `ok-corrected` (the two halves differ
-in hit counts, lever arm, field region or material, or in simulated width beyond the fraction: the corrected
-resolution is the result); `ok`. Only the last two deliver a resolution.
+their fit errors, shared hits per pair, shared-seed and common-constraint flags, and the hit counts, lever arm, field
+region and material of each half, for data pairs and for simulation pairs with truth; the binning variable; and, fixed
+before the fit, the core-fit range, truncation level, declared fraction and split-width tolerance (relative to the
+smaller; at most 0.1, 0.2), correlation bound (at most 0.1), pull band (within 1 ± 0.1), tails ratio (at most 1.5) and
+minimum numbers of data and of simulation pairs (at least 200 each: a 5% error on a width); bounds are tool
+conventions. Under every status it returns per bin, as diagnostics, `sigma_diff/sqrt(2)`, the pull width with its
+uncertainty, the truncated RMS and, given simulation pairs, the factor `sigma_truth/sigma_split` per variable
+(`sigma_truth` from reconstructed minus generated values of the full simulated track), the corrected resolution of
+that sample, both split widths and, given simulated physics-sample tracks, the ratio to that sample (relation 7;
+arXiv:2310.12865, sec. 11.1, Eq. 7, Tables 3-4, pp. 23-24). **Negative controls** (fit errors equal to each half's
+`sigma`): (a) equal halves drawn with known `sigma`, with simulation pairs of the same halves and truth width `sigma`,
+must return `ok` with `sigma` within the statistical error; (b) halves with `sigma_2 = 1.5 sigma_1` and equal hit
+counts, simulation pairs of the same inequality and both bounds at their maximum, must return `ok-corrected` with the
+simulated truth width within the statistical error; (c) (a) or (b) without simulation pairs must return
+`unequal-halves-untested`; (d) equal halves with shared hits, with only a shared seed, or with only a common
+constraint must each return `correlated-halves`; (e) (b), and (b) with `sigma_2 = 1.3 sigma_1`, with simulation pairs
+of two `sigma_1` halves must return `sim-data-mismatch`; (f) equal halves with no shared hits or flags whose simulated
+half errors correlate at 0.3 must return `correlated-halves`. Statuses, first match wins: `insufficient-pairs` (data,
+or simulation pairs when given, below the minimum); `correlated-halves` (a shared hit, seed or constraint, or
+simulated half errors `v_i - v_true` correlated beyond the bound); `unequal-halves-untested` (no simulation pairs:
+equal hit counts do not establish equal halves); `unequal-halves` (simulated halves do not match the data ones in hit
+counts, lever arm, field region or material: no correction applies); `sim-data-mismatch` (split widths, or the ratio
+of the halves' mean fit errors, differ between data and simulation beyond the tolerance; an inequality neither shows
+passes, so `ok` trusts the simulated halves); `pull-width-off` (outside the band); `tails-dominate` (truncated RMS and
+core width differ beyond the ratio); `ok-corrected` (halves differ in those attributes, or in simulated width beyond
+the fraction, or the factor differs from 1 beyond its error); `ok` (equal halves, factor consistent with 1). Only the
+last two deliver a resolution, the corrected one; under other statuses the numbers are diagnostics, marked not a
+resolution.
 
 ## Environment coverage
 
@@ -263,9 +273,10 @@ resolution is the result); `ok`. Only the last two deliver a resolution.
 
 ## Citations
 
-New entries: [calibration bibliography](detector-principles-bibliography-calibration.md); the Gaussian-sum filter,
-adaptive vertex fit and common tracking software papers and two tracker papers (arXiv:1405.6569, arXiv:1712.02739):
-main [bibliography](detector-principles-bibliography.md). Pages are PDF indices of the versions read.
+New entries: [calibration bibliography](detector-principles-bibliography-calibration.md). The main
+[bibliography](detector-principles-bibliography.md) already lists the Gaussian-sum filter, adaptive vertex fit and
+common tracking software papers and two tracker papers (arXiv:1405.6569, arXiv:1712.02739); the sections read for this
+page are its locators. Pages are PDF indices of the versions read.
 
 <!-- example: source citation (read versions) -->
 The Gaussian-sum filter paper was read as its CHEP03 proceedings (arXiv:physics/0306087v1, eConf C0303241), not
