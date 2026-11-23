@@ -259,7 +259,7 @@ A veto-efficiency tool (not yet in the plugin):
   events that fail every layer, entered as 10^-3 ± 10^-4 (count 1,000 in 10^6), must give exactly `{impurity-dominated}` (`Z` and `Z_imp`
   about -24, `|Z - Z_imp|` at most 3), and the staggered sample with 5 x 10^-4 such events, entered as
   5 x 10^-4 ± 5 x 10^-5 (500 in 10^6), must give exactly `{independence-violated, impurity-dominated}` (`Z` +1.6 without sampling noise,
-  seed spread ±1.0, so -0.3 to +3.6 in 95% of seeds; `Z_imp` about -19, `Z_c` about +10). Entered as 0 ± 10^-7, it must
+  seed spread ±1.0, so -0.4 to +3.6 in 95% of seeds; `Z_imp` about -19, `Z_c` about +10). Entered as 0 ± 10^-7, it must
   give exactly `{impurity-unmeasured, impurity-dominated}`, adding `independence-violated` only in a seed whose
   zero-impurity `Z` exceeds 3 (the bound run alone gives it in every seed), and the shared gap with an assumed bound
   10^-3, or entered as 10^-3 ± 10^-4 (1,000 in 10^6), exactly `{independence-violated, impurity-unmeasured}`. Entered as
