@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 76,
-   "bytes": 1235700,
+   "references": 77,
+   "bytes": 1270964,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1865,8 +1865,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 22804,
-   "lines": 316,
+   "bytes": 22911,
+   "lines": 318,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/timing-pid/assets/timing-method-card.json",
@@ -1897,6 +1897,7 @@
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/multisample-pid-and-reference-pdfs.md",
     "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/reconstruction-method-contract.md",
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -1910,7 +1911,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "676356852 2026-11-19"
+   "last_commit": "fb981f098 2026-11-20"
   },
   {
    "path": "skills/hep-detector/references/calibration-residual-propagation.md",
@@ -1993,8 +1994,8 @@
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "hep-detector",
-   "bytes": 12944,
-   "lines": 179,
+   "bytes": 13199,
+   "lines": 182,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-pid.md",
@@ -2013,7 +2014,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "12a17d9f5 2026-11-19"
+   "last_commit": "e1aa79e78 2026-11-20"
   },
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
@@ -2119,8 +2120,8 @@
   {
    "path": "skills/hep-detector/references/detector-design-principles.md",
    "owner": "hep-detector",
-   "bytes": 5869,
-   "lines": 79,
+   "bytes": 6116,
+   "lines": 80,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -2214,6 +2215,7 @@
    "lines": 75,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/non-collider-muon-detection.md"
@@ -2224,25 +2226,26 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 4358,
-   "lines": 16,
+   "bytes": 4490,
+   "lines": 18,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "692e18d3d 2026-11-20"
+   "last_commit": "983cdd8fc 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
    "owner": "hep-detector",
-   "bytes": 308,
-   "lines": 6,
+   "bytes": 5264,
+   "lines": 59,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-design-principles.md",
-    "skills/hep-detector/references/detector-principles-bibliography.md"
+    "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "0b5919d6f 2026-11-20"
@@ -2250,7 +2253,7 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 35130,
+   "bytes": 35196,
    "lines": 369,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2266,10 +2269,11 @@
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/non-collider-muon-detection.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/resolution-shape-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a47c0c247 2026-11-22"
+   "last_commit": "983cdd8fc 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2305,6 +2309,7 @@
     "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/hadronic-calorimeter-reconstruction.md",
     "skills/hep-detector/references/hadronic-calorimeter-timing-and-model-validation.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2395,7 +2400,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "a47c0c247 2026-11-22"
+   "last_commit": "00e9d4e05 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/event-time-and-timing-association.md",
@@ -2482,6 +2487,7 @@
     "skills/hep-detector/references/front-end-calibration.md",
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/geant4-study-protocol.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2531,7 +2537,7 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 24207,
+   "bytes": 24337,
    "lines": 367,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2543,6 +2549,7 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
     "skills/hep-detector/references/timing-detectors.md"
@@ -2550,7 +2557,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "7959054b2 2026-11-22"
+   "last_commit": "4ed1d3c3e 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/gaseous-tracker-distortions.md",
@@ -2826,6 +2833,7 @@
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/tracker.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
@@ -2979,6 +2987,24 @@
     "hep-ml"
    ],
    "last_commit": "9257d7b5d 2026-10-15"
+  },
+  {
+   "path": "skills/hep-detector/references/radiation-and-aging-effects.md",
+   "owner": "hep-detector",
+   "bytes": 29449,
+   "lines": 258,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/calibration-and-alignment.md",
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/detector-design-principles.md",
+    "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+    "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/timing-detectors.md",
+    "skills/hep-detector/references/tracking-and-vertexing.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "b50282520 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/readout-digitization-and-overlay.md",
@@ -3418,6 +3444,7 @@
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/resolution-shape-models.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/hcal.md",
@@ -3480,7 +3507,7 @@
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
    "owner": "hep-detector",
-   "bytes": 24570,
+   "bytes": 24805,
    "lines": 295,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3496,17 +3523,18 @@
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/particle-identification.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/simulation-calibration/tof.md",
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "fd8a47bba 2026-11-22"
+   "last_commit": "eb0333a02 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 24654,
-   "lines": 358,
+   "bytes": 24341,
+   "lines": 355,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -3529,6 +3557,7 @@
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/particle-identification.md",
+    "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/silicon-hit-reconstruction.md",
@@ -3540,7 +3569,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "5380f6240 2026-11-21"
+   "last_commit": "4ed1d3c3e 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -5845,34 +5874,6 @@
  ],
  "overlap_pairs": [
   {
-   "a": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
-   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
-   "jaccard": 0.025,
-   "containment": 0.459,
-   "shared_shingles": 17
-  },
-  {
-   "a": "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
-   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
-   "jaccard": 0.015,
-   "containment": 0.459,
-   "shared_shingles": 17
-  },
-  {
-   "a": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
-   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
-   "jaccard": 0.008,
-   "containment": 0.459,
-   "shared_shingles": 17
-  },
-  {
-   "a": "skills/hep-detector/references/detector-principles-bibliography-calorimetry.md",
-   "b": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
-   "jaccard": 0.007,
-   "containment": 0.459,
-   "shared_shingles": 17
-  },
-  {
    "a": "skills/hep-detector/references/simulation-calibration/dirc.md",
    "b": "skills/hep-detector/references/simulation-calibration/rich.md",
    "jaccard": 0.097,
@@ -6121,6 +6122,10 @@
   "quality": [
    "skills/hep-computing/references/risk-and-quality.md",
    "skills/hep-computing/references/task-quality-checklist.md"
+  ],
+  "radiation": [
+   "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+   "skills/hep-detector/references/radiation-and-aging-effects.md"
   ],
   "readout": [
    "skills/hep-detector/references/readout-digitization-and-overlay.md",
