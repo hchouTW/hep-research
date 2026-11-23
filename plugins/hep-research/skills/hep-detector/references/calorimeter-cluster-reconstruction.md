@@ -124,7 +124,7 @@ Rules that hold across the rows:
 - ILC LumiCal prototype: best radial resolution at `W0 = 3.4` for that configuration, from simulation
   (arXiv:1812.11426 sec. 7.1, p. 9).
 - BTeV PbWO4 prototype: `sigma_x = (0.16 +- 0.06) (+) (2.80 +- 0.08)/sqrt(E)` mm (E in GeV), 3x3 crystals
-  (arXiv:hep-ex/0209055 sec. 8, eq. 3, p. 16).
+  (arXiv:hep-ex/0209055 sec. 8, eq. 3, p. 16; mm and 3x3 crystals: Fig. 15, p. 18).
 - Fermi-LAT CsI calorimeter: Pass 8's minimum-spanning-tree
   clustering separates ghost signals, with a 5 to 10% gain in effective area above about 1 GeV
   (arXiv:1303.3514 sec. 2.2.1, p. 3). Tracker energy added (arXiv:1206.1896 sec. 3.2.1, p. 41).
