@@ -158,7 +158,7 @@ uncertainty where x/X0 ≲ 1% (p. 19).
   metrics](performance-metrics-and-residual-diagnostics.md#resolution-measured-in-data).
 
 <!-- example: experiment-specific illustration (CMS muon system, MEG II, DAMPE, PAMELA; arXiv:1206.4071, arXiv:2310.12865, arXiv:1712.02739, arXiv:astro-ph/0608697) -->
-CMS: tracker-only pull widths within ±10% of unity (p. 36). MEG II: about 15% of positron tracks cross the chamber in two turns;
+CMS: tracker-only pull widths within ±10% of unity (p. 36). MEG II: about 15% of positron tracks cross the chamber in two turns (sec. 11.1, p. 22);
 the double-turn core resolution in data and the simulated (reconstructed minus generated) Michel resolution differ by
 0.02 mm in y_e and 0.43 mrad in phi_e; the same double-turn analysis on simulation is 0.10 mm and 0.55 mrad narrower
 than data, and correction factors convert double-turn widths into resolutions (Tables 3-4, pp. 23-24). DAMPE: after
