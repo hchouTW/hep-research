@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 77,
-   "bytes": 1270964,
+   "references": 82,
+   "bytes": 1385515,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1865,8 +1865,8 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 22911,
-   "lines": 318,
+   "bytes": 23165,
+   "lines": 321,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/timing-pid/assets/timing-method-card.json",
@@ -1902,6 +1902,7 @@
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/tracker.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/propagate_scale_distortion.py",
     "skills/hep-detector/scripts/stability_monitor.py",
@@ -1911,7 +1912,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "fb981f098 2026-11-20"
+   "last_commit": "628afa7c2 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/calibration-residual-propagation.md",
@@ -1994,14 +1995,16 @@
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "hep-detector",
-   "bytes": 13199,
-   "lines": 182,
+   "bytes": 15370,
+   "lines": 209,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-pid.md",
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2014,7 +2017,22 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "e1aa79e78 2026-11-20"
+   "last_commit": "31e36bb02 2026-11-23"
+  },
+  {
+   "path": "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 25386,
+   "lines": 226,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
+    "skills/hep-detector/references/event-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "0cd4a47a6 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/core-detector-equations.md",
@@ -2028,6 +2046,7 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/timing-detectors.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "tests/skills/hep_detector/test_hep_detector_audit.py",
     "tests/skills/hep_detector/test_reference_links.py"
    ],
@@ -2048,6 +2067,7 @@
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
     "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md",
     "skills/hep-measurement/assets/cosmic-ray-spectrum.example.json",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py",
@@ -2131,7 +2151,7 @@
     "skills/hep-detector/scripts/tracker_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0b5919d6f 2026-11-20"
+   "last_commit": "4c00025d0 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-glossary.md",
@@ -2183,13 +2203,15 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
    "owner": "hep-detector",
-   "bytes": 14358,
-   "lines": 101,
+   "bytes": 17831,
+   "lines": 109,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/gaseous-tracker-distortions.md"
+    "skills/hep-detector/references/gaseous-tracker-distortions.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "8bf733c93 2026-11-21"
@@ -2202,6 +2224,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calorimeter-cluster-reconstruction.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md"
    ],
@@ -2226,11 +2249,13 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 4490,
-   "lines": 18,
+   "bytes": 9320,
+   "lines": 30,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
@@ -2248,7 +2273,20 @@
     "skills/hep-detector/references/radiation-and-aging-effects.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0b5919d6f 2026-11-20"
+   "last_commit": "4c00025d0 2026-11-23"
+  },
+  {
+   "path": "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
+   "owner": "hep-detector",
+   "bytes": 6921,
+   "lines": 19,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "46fbfd253 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2258,19 +2296,23 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
     "skills/hep-detector/references/detector-principles-bibliography-calorimetry.md",
     "skills/hep-detector/references/detector-principles-bibliography-muon-systems.md",
     "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
     "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
+    "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
     "skills/hep-detector/references/detector-principles-summary.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
     "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/radiation-and-aging-effects.md",
-    "skills/hep-detector/references/resolution-shape-models.md"
+    "skills/hep-detector/references/resolution-shape-models.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "983cdd8fc 2026-11-23"
@@ -2314,6 +2356,7 @@
     "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "skills/hep-ml/references/fast-simulation-validation.md",
     "skills/hep-theory/references/event-generation.md"
    ],
@@ -2352,6 +2395,21 @@
    "last_commit": "9257d7b5d 2026-10-15"
   },
   {
+   "path": "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 14583,
+   "lines": 153,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
+    "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+    "skills/hep-detector/references/event-reconstruction.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "0cd4a47a6 2026-11-22"
+  },
+  {
    "path": "skills/hep-detector/references/dis-kinematic-reconstruction.md",
    "owner": "hep-detector",
    "bytes": 11982,
@@ -2373,8 +2431,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 21397,
-   "lines": 279,
+   "bytes": 22652,
+   "lines": 284,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/calo-cluster/assets/calo_recipe/__init__.py",
@@ -2409,6 +2467,7 @@
    "lines": 268,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/timing-detectors.md"
    ],
@@ -2529,7 +2588,9 @@
    "cited_by": [
     "skills/hep-detector/references/calorimeter-cluster-reconstruction.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
-    "skills/hep-detector/references/event-reconstruction.md"
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
+    "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "81c8d4f67 2026-11-13"
@@ -2552,7 +2613,8 @@
     "skills/hep-detector/references/radiation-and-aging-effects.md",
     "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
-    "skills/hep-detector/references/timing-detectors.md"
+    "skills/hep-detector/references/timing-detectors.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md"
    ],
    "cited_by_other_skills": [
     "hep-citations"
@@ -2610,6 +2672,7 @@
    "cited_by": [
     "skills/hep-detector/references/calorimeter-cluster-reconstruction.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2626,7 +2689,8 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/non-collider-muon-detection.md",
     "skills/hep-detector/references/particle-identification.md",
-    "skills/hep-detector/references/resolution-shape-models.md"
+    "skills/hep-detector/references/resolution-shape-models.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "da7df3d16 2026-11-12"
@@ -2669,6 +2733,7 @@
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/references/calorimeter-cluster-reconstruction.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2704,7 +2769,9 @@
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/in-situ-calibration-methods.md",
-    "skills/hep-detector/references/silicon-hit-reconstruction.md"
+    "skills/hep-detector/references/neutrino-astronomy.md",
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9f1847f24 2026-11-20"
@@ -2716,11 +2783,15 @@
    "lines": 286,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography-calibration.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/in-situ-alignment-and-momentum-scale.md",
-    "skills/hep-detector/references/timing-detectors.md"
+    "skills/hep-detector/references/timing-detectors.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "6e982c4a7 2026-11-20"
@@ -2745,10 +2816,12 @@
    "lines": 320,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/particle-identification.md",
-    "skills/hep-detector/references/silicon-hit-reconstruction.md"
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "0c50a294b 2026-11-20"
@@ -2783,10 +2856,11 @@
   {
    "path": "skills/hep-detector/references/neutrino-astronomy.md",
    "owner": "hep-detector",
-   "bytes": 10456,
-   "lines": 157,
+   "bytes": 11670,
+   "lines": 173,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
@@ -2802,12 +2876,14 @@
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/resolution-shape-models.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "skills/hep-statistics/references/astroparticle-statistics.md"
    ],
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "267d534a8 2026-10-30"
+   "last_commit": "55a3cbf19 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -2864,6 +2940,7 @@
    "cited_by": [
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/response-and-forward-folding.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "skills/hep-detector/scripts/survival_feeddown.py",
     "skills/hep-theory/references/nuclear-cross-sections.md",
     "tests/skills/hep_detector/test_f_xref_3_survival_self_feeddown.py"
@@ -2876,8 +2953,8 @@
   {
    "path": "skills/hep-detector/references/particle-identification.md",
    "owner": "hep-detector",
-   "bytes": 21366,
-   "lines": 314,
+   "bytes": 19797,
+   "lines": 288,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/timing-pid/assets/timing-method-card.json",
@@ -2888,12 +2965,14 @@
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-design-principles.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2910,6 +2989,7 @@
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md",
     "skills/hep-detector/scripts/cherenkov_angle.py",
     "skills/hep-detector/scripts/multisample_pid.py",
     "skills/hep-detector/scripts/pid_separation_power.py",
@@ -2919,18 +2999,19 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "16940b5c0 2026-11-20"
+   "last_commit": "1cf5e9857 2026-11-21"
   },
   {
    "path": "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
    "owner": "hep-detector",
-   "bytes": 21804,
-   "lines": 273,
+   "bytes": 22035,
+   "lines": 275,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calorimeter-cluster-reconstruction.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/detector-comparison-tables.md",
     "skills/hep-detector/references/detector-glossary.md",
@@ -2941,10 +3022,11 @@
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/resolution-shape-models.md",
     "skills/hep-detector/references/response-and-forward-folding.md",
-    "skills/hep-detector/references/silicon-hit-reconstruction.md"
+    "skills/hep-detector/references/silicon-hit-reconstruction.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ca7216697 2026-11-20"
+   "last_commit": "55a3cbf19 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
@@ -2955,6 +3037,7 @@
    "cited_by": [
     "adapters/photon-likelihood/assets/light_recipe/__init__.py",
     "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/event-time-and-timing-association.md",
@@ -3068,7 +3151,9 @@
    "lines": 251,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/event-time-and-timing-association.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -3130,13 +3215,14 @@
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
    "owner": "hep-detector",
-   "bytes": 20286,
-   "lines": 261,
+   "bytes": 21457,
+   "lines": 274,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
     "skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.json",
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/core-detector-equations.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -3146,12 +3232,13 @@
     "skills/hep-detector/references/gaseous-tracker-distortions.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
-    "skills/hep-detector/references/readout-digitization-and-overlay.md"
+    "skills/hep-detector/references/readout-digitization-and-overlay.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md"
    ],
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "5380f6240 2026-11-21"
+   "last_commit": "2c2cc05eb 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/silicon-hit-reconstruction.md",
@@ -3164,6 +3251,7 @@
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
@@ -3176,6 +3264,7 @@
    "lines": 83,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
@@ -3374,6 +3463,7 @@
    "lines": 86,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
     "skills/hep-detector/references/simulation-calibration/index.md",
     "tests/core/test_simcal_specialization.py"
    ],
@@ -3416,6 +3506,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/simulation-calibration/index.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md",
     "tests/core/test_simcal_specialization.py"
    ],
    "cited_by_other_skills": [],
@@ -3448,6 +3539,7 @@
     "skills/hep-detector/references/resolution-shape-models.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/simulation-calibration/hcal.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/scripts/geomagnetic_cutoff.py",
     "skills/hep-measurement/scripts/orbit_averaged_geomagnetic_cutoff.py",
@@ -3531,10 +3623,24 @@
    "last_commit": "eb0333a02 2026-11-22"
   },
   {
+   "path": "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
+   "owner": "hep-detector",
+   "bytes": 25741,
+   "lines": 286,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/tracking-and-vertexing.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e3a931347 2026-11-22"
+  },
+  {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 24341,
-   "lines": 355,
+   "bytes": 23306,
+   "lines": 333,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -3562,6 +3668,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/silicon-hit-reconstruction.md",
     "skills/hep-detector/references/threshold-and-quantum-sensor-reconstruction.md",
+    "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
     "skills/hep-detector/scripts/multiple_scattering.py",
     "skills/hep-detector/scripts/tracker_resolution.py",
     "tests/skills/hep_detector/test_hep_detector_audit.py"
@@ -3569,7 +3676,21 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "4ed1d3c3e 2026-11-22"
+   "last_commit": "628afa7c2 2026-11-23"
+  },
+  {
+   "path": "skills/hep-detector/references/transition-radiation-detectors.md",
+   "owner": "hep-detector",
+   "bytes": 29925,
+   "lines": 275,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/particle-identification.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "caa19a2c2 2026-11-22"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -4568,6 +4689,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
+    "skills/hep-detector/references/transition-radiation-detectors.md",
     "skills/hep-ml/SKILL.md",
     "skills/hep-ml/references/deep-learning-guide.md",
     "skills/hep-ml/references/ml-analysis.md",
@@ -5879,6 +6001,13 @@
    "jaccard": 0.097,
    "containment": 0.187,
    "shared_shingles": 130
+  },
+  {
+   "a": "skills/hep-detector/references/detector-principles-bibliography-particle-identification.md",
+   "b": "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
+   "jaccard": 0.073,
+   "containment": 0.157,
+   "shared_shingles": 174
   }
  ],
  "name_groups": {
@@ -5936,6 +6065,7 @@
   ],
   "cherenkov": [
    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+   "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
    "skills/hep-detector/references/imaging-atmospheric-cherenkov.md"
   ],
   "citation": [
@@ -6060,6 +6190,10 @@
    "skills/hep-citations/references/literature-lookup-recipes.md",
    "skills/hep-citations/references/literature-review.md"
   ],
+  "material": [
+   "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
+   "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
+  ],
   "measurement": [
    "skills/hep-measurement/references/cosmic-ray-measurements.md",
    "skills/hep-measurement/references/hep-measurement-guide.md",
@@ -6115,6 +6249,10 @@
    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "skills/hep-detector/references/front-end-waveform-processing.md"
   ],
+  "propagation": [
+   "skills/hep-detector/references/calibration-residual-propagation.md",
+   "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md"
+  ],
   "python": [
    "skills/hep-computing/references/python-balanced-design-guidelines.md",
    "skills/hep-computing/references/python-hep-coding-patterns.md"
@@ -6125,7 +6263,9 @@
   ],
   "radiation": [
    "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
-   "skills/hep-detector/references/radiation-and-aging-effects.md"
+   "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
+   "skills/hep-detector/references/radiation-and-aging-effects.md",
+   "skills/hep-detector/references/transition-radiation-detectors.md"
   ],
   "readout": [
    "skills/hep-detector/references/readout-digitization-and-overlay.md",
@@ -6198,6 +6338,10 @@
    "skills/hep-computing/references/task-authoring-guide.md",
    "skills/hep-computing/references/task-quality-checklist.md"
   ],
+  "time": [
+   "skills/hep-detector/references/dirc-and-time-of-propagation-reconstruction.md",
+   "skills/hep-detector/references/event-time-and-timing-association.md"
+  ],
   "timing": [
    "skills/hep-detector/references/event-time-and-timing-association.md",
    "skills/hep-detector/references/hadronic-calorimeter-timing-and-model-validation.md",
@@ -6206,6 +6350,10 @@
   "tracking": [
    "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "skills/hep-detector/references/tracking-and-vertexing.md"
+  ],
+  "transition": [
+   "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
+   "skills/hep-detector/references/transition-radiation-detectors.md"
   ],
   "validation": [
    "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
