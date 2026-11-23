@@ -61,9 +61,8 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
   `L_e = P_e / (P_e + P_pi)`, `P_k = prod_i P(E_i | k)`, with `P(E_i|k)` the
   measured per-layer spectra of identified particles.
 - **Rejection versus length** (approximate, empirical; PDG detectors review p. 47 and Fig. 35.18, p. 48, sec. 35.6.5):
-  at 90% electron efficiency, with data of 1-40 GeV rescaled to 10 GeV when possible (scatter also from beam
-  energy and analysis), the pion rejection of past TRDs grows as `5 x 10^(L/38)` for overall length
-  `L = 20-100 cm`.
+  at a fixed electron efficiency, the pion rejection grows exponentially with the overall detector length, with
+  scatter from beam energy, use of the space and analysis (the fitted form and its range: example below).
 - **Onset curve** (approximate, a fit form; arXiv:1709.02743 sec. 11, eq. 2, p. 48): the TR part of the most
   probable signal as a logistic function of `ln gamma`, added to a `dE/dx` parameterisation (eq. 1).
 
@@ -78,7 +77,7 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
 | Drift chamber with time sampling | Slice the signal in drift time; TR arrives at the radiator-side entrance (long drift) | Calibrated drift velocity and `t0`; ion-tail cancellation | Slices treated as independent | COL (arXiv:1709.02743 secs. 2.1, 11.2); FXT (arXiv:physics/0402131 secs. 3-4) |
 | Hits on a track | Pad clusters per time bin into tracklets on a propagated seed; straw hits on a track; an extrapolated or stand-alone track in space | External tracker or enough TRD layers | Hits of a secondary or neighbour; wrong path length | COL (arXiv:1709.02743 secs. 8-8.2; arXiv:1109.5925 sec. 2); SPC (extrapolated or stand-alone: arXiv:1706.10182 sec. 2); FXT (arXiv:astro-ph/0608641 sec. 4.2.5) |
 | Thick gas, full charge | Total charge or truncated mean | Many layers | Landau tail of the background | FXT (PDG detectors review sec. 35.6.5, p. 47; arXiv:1111.4188 sec. 3.2) |
-| Thin gas | Cluster counting: hits above a threshold (typically 5-7 keV; PDG detectors review sec. 35.6.5, p. 47); high-threshold fraction | Threshold stable in energy | Threshold drift with gain | COL (arXiv:1109.5925 secs. 2, 4); FXT (arXiv:astro-ph/0608641 sec. 5.1) |
+| Thin gas | Cluster counting: hits above an optimal threshold (PDG detectors review sec. 35.6.5, p. 47; values of named detectors in the examples below); high-threshold fraction | Threshold stable in energy | Threshold drift with gain | COL (arXiv:1109.5925 secs. 2, 4); FXT (arXiv:astro-ph/0608641 sec. 5.1) |
 | Best separation | Layer likelihood (charge; charge and largest-cluster position; per-slice charges), neural network | References from clean samples | Correlations ignored; bins that must be non-empty cost efficiency | COL (arXiv:1709.02743 sec. 11.2); FXT (arXiv:astro-ph/0608641 sec. 5; arXiv:physics/0402131 sec. 4, pp. 3-4, charge and position); SPC (arXiv:1706.10182 sec. 3) |
 | TR plus `dE/dx` in one estimator | One likelihood per species from TR hits and a `dE/dx` measure | One reference set for both | Multiplying them as independent | COL only (arXiv:1109.5925 sec. 1); SPC correlates a separate `dE/dx` array with the TRD signal instead (arXiv:1108.4838 sec. 3.3, pp. 7-8) |
 | Simulation of the response | PAI ionization in thin gas, tuned TR generator, delta-electron escape, empirical non-linearity | Flight or beam data per species | Tails wrong without delta escape; one non-linearity for point-like conversions and spread ionization | FXT (arXiv:1111.4188 sec. 4.3.1; arXiv:astro-ph/0608641 sec. 4.3); SPC (arXiv:1706.10182 sec. 2) |
@@ -88,8 +87,8 @@ entries in [the TR bibliography](detector-principles-bibliography-transition-rad
 | TR energy and angle | Silicon strips or pixels behind the radiator; a field deflecting the track, or about 1 m of distance, separates the photons | Low occupancy | Photon-track association | FXT only, R&D (see below) |
 
 **Single-environment techniques.** Hadron separation with TR exists only in fixed-target hadron and hyperon beams:
-pions from protons and kaons up to 200 GeV/c in past detectors, pions identified in a 250 GeV hadron beam, and kaons
-from pions stated feasible roughly at 200-700 GeV/c by one cited study, not shown
+pions from protons and kaons in past detectors, pions identified in a hadron beam, and kaons
+from pions stated feasible in a momentum window by one cited study, not shown (momenta: example below)
 (PDG detectors review sec. 35.6.5, p. 48; arXiv:1111.4188 pp. 2, 5, secs. 1 and 2.4); a collider TRD separates hadrons
 at low momentum by truncated-mean `dE/dx` instead (arXiv:1709.02743 sec. 11.1, Fig. 40, pp. 49-50). It needs longer
 TRDs than electron identification and, at TeV where all hadrons radiate, several thresholds or the TR energy and angle
@@ -156,7 +155,14 @@ Rules that hold across the rows:
   400-1500 GeV/amu is excluded;
   more xenon moved the TR appearance threshold to `gamma = 785 +- 140` (arXiv:1108.4838 sec. 3.3, p. 7).
 - CREAM-I TRD (balloon): `4 < gamma < 5e2` from the xenon relativistic rise, beam-test calibrated (arXiv:0808.1718
-  sec. 2, p. 5).
+  sec. 2, p. 5); TR negligible below ~1 TeV/n, the tube signals essentially all ionization there (p. 11).
+- TRDs of PDG detectors review Fig. 35.18 (among them NA34/HELIOS, R806, UA2, ZEUS, D0, NOMAD, ATLAS, ALICE, AMS,
+  PAMELA): at 90% electron efficiency, with data of 1-40 GeV rescaled to 10 GeV when possible, the pion rejection
+  grows as `5 x 10^(L/38)` for overall length `L = 20-100 cm` (sec. 35.6.5, p. 47; Fig. 35.18, p. 48).
+- Hadron separation, fixed-target beams: TRD prototypes with gaseous detectors separated pions from protons and kaons
+  up to 200 GeV/c (PDG detectors review p. 48, its ref. [220]; arXiv:1901.11265 sec. 1, p. 3, its refs. [12-16]);
+  pions identified in a 250 GeV hadron beam at Fermilab, and kaons from pions stated feasible roughly at
+  200-700 GeV/c, by the same cited study (arXiv:1111.4188 sec. 1, p. 2, and sec. 2.4, p. 5, its ref. [44]).
 - Silicon TR set-up, CERN SPS: double-sided strips (arXiv:1901.11265 sec. 1, p. 4) 2.2 m behind the radiator (sec. 2.2, p. 7).
 <!-- /example -->
 
@@ -247,7 +253,7 @@ Rules that hold across the rows:
 | Reporting rejection versus `gamma` | arxiv_1709.02743 (Fig. 43) | arxiv_astro-ph_0608641 (Figs. 15, 20) | gap: arxiv_1706.10182 gives no efficiency | gap | gap | gap |
 | Architectures | arxiv_1111.4188 | arxiv_1111.4188 (sec. 4.4), pdg_2025_particle-detectors-at-accelerators | arxiv_1706.10182, arxiv_1111.4188 | gap | gap | gap |
 | Hadron separation | gap with TR: a stated need at TeV (arxiv_1901.11265); `dE/dx`: arxiv_1709.02743 | pdg_2025_particle-detectors-at-accelerators, arxiv_1111.4188, arxiv_1901.11265 | gap | gap | gap | gap |
-| Lorentz factor of nuclei | gap: no collider source read (arxiv_1111.4188 sec. 3.4.1, p. 15: no beams of heavy elements at `gamma ~ 1e5`) | gap for a measurement: beam tests calibrate (arxiv_0808.1718) or test radiators with `Z = 1` at `gamma ~ 1e5` and boron nuclei, setting not stated (arxiv_1111.4188 sec. 3.4.1, Figs. 12-13) | arxiv_1108.4838; arxiv_0808.1718 (relativistic rise; TR negligible below ~1 TeV/n, p. 11) | gap | gap | gap |
+| Lorentz factor of nuclei | gap: no collider source read (arxiv_1111.4188 sec. 3.4.1, p. 15: no beams of heavy elements at `gamma ~ 1e5`) | gap for a measurement: beam tests calibrate (arxiv_0808.1718) or test radiators with `Z = 1` at `gamma ~ 1e5` and boron nuclei, setting not stated (arxiv_1111.4188 sec. 3.4.1, Figs. 12-13) | arxiv_1108.4838; arxiv_0808.1718 (relativistic rise; TR contribution: example above) | gap | gap | gap |
 | Silicon TR energy and angle | gap | pdg_2025_particle-detectors-at-accelerators, arxiv_1901.11265, arxiv_1111.4188 | gap: proposed (arxiv_1111.4188) | gap | gap | gap |
 
 `gap`: not found in the sources read. GND and NUC: no TRD surveyed. UGD and the filing of arxiv_1111.4188 Table 1 (p. 14) TRDs: as its sec. 1 (p. 1)
