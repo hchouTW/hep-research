@@ -101,8 +101,8 @@ were simulated: a Gaussian smear of the true time has no walk, tail or rate effe
 - **LGAD / ultra-fast silicon**: internal gain of order 10-50 with a thin sensor gives
   a steep, low-jitter pulse; time resolution is limited by Landau fluctuations in
   the thin depletion region and by the electronics (PDG RPP 2025 eq. 35.25, the terms of
-  T1 with an irreducible arrival-time term from non-uniform charge deposition; 15-20 ps for minimum-ionizing particles reached with thin, high-gain
-  (> 40) LGADs, better per track possible with several layers); **radiation damage** lowers the
+  T1 with an irreducible arrival-time term from non-uniform charge deposition; the best minimum-ionizing timing is reached with thin,
+  relatively high-gain LGADs, better per track possible with several layers, sec. 35.8.4, p. 73); **radiation damage** lowers the
   gain-layer doping, so gain and time resolution degrade with fluence and the bias must rise up to the single-event limit ([radiation and ageing effects](radiation-and-aging-effects.md)); fill factor at
   pad boundaries matters. Levers (arXiv:1704.08666): gain-induced slew rate `∝ G/d` (T3), but a very thin sensor has
   a large capacitance and needs more gain (sec. 2.3.4, p. 12); saturated drift and a uniform weighting field need
@@ -253,7 +253,7 @@ about 47 ps per counter if equal (sec. 2.1, p. 4).
 
 <!-- example: AMS-02 TOF and PAMELA TOF (ion-beam tests), ETF plastic TOF (IMP Lanzhou) -->
 AMS-02 TOF, SPS ion beam 2002 (beam Z = 1-82; Fig. 4 fits Z <= 25 (Birks), Z <= 10 (`sigma_t`)): `P1` = 0.0606 ns, `P2` = 0.0572 ns in `sigma_t = P1/Z + P2`;
-pair floor 57 ± 1 ps with standard electronics, about 40 ps per counter if equal (arXiv:hep-ex/0305074 sec. 3,
+pair floor 57 ± 1 ps with standard electronics, about 40 ps per counter (derived here: 57/sqrt(2) = 40.3, equal counters assumed) (arXiv:hep-ex/0305074 sec. 3,
 Fig. 4, p. 4). PAMELA TOF, GSI 2006,
 paddle S3: 146.5 ps before and 117.3 ps after walk correction for Z = 1, 118 and 114 ps for Z = 3, 50 ps and 46.5 ps
 unchanged for Z = 5 and 6 (arXiv:0810.3830 Table 2, p. 9). ETF counters (3 mm, 18O at 400 MeV/nucleon): 27 ps and 36 ps
