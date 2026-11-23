@@ -14,11 +14,9 @@ a recorded gap, not a claim that no method exists.
 
 ## Silicon pixels and strips (recap of what is distinctive)
 
-**Hybrid pixels**: 2D binary or ToT-encoded hits; charge sharing among neighbors
-gives sub-pixel position by centroid or by template (charge-profile) fit; the
-**Lorentz drift** shifts and broadens clusters in a field (calibrate `theta_L`);
-merged clusters at high density; radiation damage lowers `CCE` and shifts thresholds
-and depletion voltage.
+**Hybrid pixels**: 2D binary or ToT-encoded hits; sub-pixel position from shared charge, the Lorentz
+shift and merged clusters: [silicon hit reconstruction](silicon-hit-reconstruction.md); radiation damage lowers
+`CCE` and shifts thresholds and depletion voltage ([radiation and ageing effects](radiation-and-aging-effects.md)).
 
 **Strips/microstrips**: 1D measurement; a 2D point needs a stereo pair, creating
 `n^2` candidate intersections for `n` hits, of which `n^2 - n` are ghosts; capacitive coupling, common-mode noise, and
@@ -31,23 +29,14 @@ smaller depleted region (less charge, more diffusion-driven sharing).
 
 ### Distinctive but generalizable reconstruction and performance features (silicon)
 
-- **Information topology**: sparse points with cluster structure.
-- **Unique inverse problem**: position from shared charge; degeneracy: ghosts
-  (strips), merged clusters (pixels).
-- **Natural objects**: cluster, hit, track seed. **Most informative residual**:
-  unbiased track-to-hit residual in the sensor's measurement direction, versus
-  incidence angle and cluster size.
-- **Scaling**: hit resolution `~ pitch/sqrt(12)` (binary, approximate) improved by charge
-  sharing; momentum and impact-parameter floors from multiple scattering and lever
-  arm ([tracking and vertexing](tracking-and-vertexing.md)).
-- **Tails**: delta rays, merged clusters, noise hits, dead/noisy channels.
-- **Dependence**: occupancy (at a collider, pileup), dose (leakage, `CCE`, threshold, Lorentz angle
-  drift), temperature. **Data sample**: the tracks the environment provides, over its incidence-angle
-  range: collision (`Z -> ll`) or cosmic-ray tracks, or a test beam before installation or flight
-  (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit efficiency and alignment;
-  overlaps and tag-and-probe for module efficiency.
-- **Transfers**: charge-sharing interpolation and template methods to any segmented
-  readout (TPC pads, fibers); does not transfer: time-of-arrival coordinates.
+The ten-item block for silicon hits (topology, inverse problem, residuals, scaling, tails, dependence,
+transfers) is in [silicon hit reconstruction](silicon-hit-reconstruction.md#distinctive-but-generalizable-features-silicon-hits).
+In short: position from shared charge, with ghosts (strips) and merged clusters (pixels) as the degeneracies;
+the unbiased track-to-hit residual versus incidence angle and cluster size as the residual; the interpolation
+transfers to any segmented readout (TPC pads, fibres). **Data sample**: the
+tracks the environment provides, over its incidence-angle range: collision (`Z -> ll`) or cosmic-ray tracks, or a
+test beam before installation or flight (arXiv:1403.2286v2, sec. 1; arXiv:2603.25085v1, sec. 4.3), for hit
+efficiency and alignment; overlaps and tag-and-probe for module efficiency.
 
 ## Drift chambers and drift tubes
 
@@ -67,13 +56,9 @@ adjacent-layer staggering, by segment or track fit, or by wire signal timing.
 `(z, +-r)` circles with a two-fold ambiguity per layer), then linking segments to
 tracks.
 
-**Diagnostics.** Residual versus drift distance (the standard plot): state the residual convention
-([glossary](detector-glossary.md): signed track coordinate). In the signed coordinate a `t0` offset
-gives opposite-sign residuals for left and right passages, a drift-velocity error a residual growing
-with distance, and a wire offset the same sign on both sides; in the unsigned drift radius the `t0`
-and wire-offset patterns swap. `t0` and alignment become degenerate when one side dominates the
-track population or the geometry is fixed. Residual versus
-angle and versus amplitude reveal time walk and crossing-angle effects.
+**Diagnostics.** Residual versus drift distance, angle and amplitude separates `t0`, drift-velocity,
+wire-offset and time-walk errors; the signatures and the `r(t)` calibration are in
+[gaseous tracker distortions](gaseous-tracker-distortions.md#drift-chamber-time-to-distance-calibration).
 
 ### Distinctive but generalizable reconstruction and performance features (drift systems)
 
@@ -92,7 +77,7 @@ angle and versus amplitude reveal time walk and crossing-angle effects.
   a delta electron can deposit charge closer to the wire, so the time is early and the
   distance underestimated. Also out-of-time hits.
 - **Dependence**: rate/occupancy (space charge, deadtime), `T`/`P`/gas composition
-  (drift velocity), aging (Malter effect, deposits on wires).
+  (drift velocity), ageing (Malter effect, deposits on wires; [radiation and ageing effects](radiation-and-aging-effects.md)).
 - **Data sample**: cosmic rays and collision tracks for `r(t)` self-calibration.
 - **Transfers**: time-to-distance calibration to muon tubes, straws and TPC drift coordinates;
 time-difference coordinates (RPC strip ends, TOP) reuse the offset and velocity calibration logic; does not transfer: charge-centroid interpolation.
@@ -107,7 +92,7 @@ image and many `dE/dx` samples per track.
 **Pieces.** Diffusion (transverse `~ sqrt(L)`; reduced by `B`), gain stage
 (wires, GEM, Micromegas), **ion backflow** (positive ions drifting back distort `E`),
 **space-charge distortions** (a radially and `z`-dependent position shift), field-cage
-and `E x B` distortions, gating, and **crossing-time ambiguity**: the absolute drift
+and `E x B` distortions ([gaseous tracker distortions](gaseous-tracker-distortions.md)), gating, and **crossing-time ambiguity**: the absolute drift
 coordinate needs the start time `t_0`: an external trigger (PDG RPP 2025 sec. 35.6.4, p. 41),
 a collider's bunch crossing, or `S1` light in rare-event TPCs (sec. 36.4, p. 31); tracks
 not associated with it (pileup, cosmics) are displaced along `z`.

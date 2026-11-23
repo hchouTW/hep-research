@@ -72,3 +72,8 @@ derived by a program, not declared: see the [system design workflow](system-desi
   approximation (`tracker_resolution.py` reports both).
 - Adding material for support or cooling without carrying it into the scattering term.
 - Designing an upgrade without planning the alignment and calibration of the new configuration against the old one.
+
+## Linked pages
+
+- [References: radiation damage and ageing](detector-principles-bibliography-radiation.md): annotated sources of the radiation and ageing page
+- [Radiation and ageing effects](radiation-and-aging-effects.md): damage and ageing per sensor (silicon, LGAD, SiPM, crystals, scintillator and WLS, MCP-PMT, gas), radiation fields by environment, and feeding damage into conditions and simulation

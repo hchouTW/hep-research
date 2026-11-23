@@ -111,6 +111,19 @@ tens of detected photons per track), so `N_pe` is the dominant performance limit
 thicker or denser radiators (water Cherenkov, lead glass, quartz bars) give more
 ([particle identification](particle-identification.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md)).
 
+**Coherent radio Cherenkov (Askaryan) emission.** A shower in a dense dielectric carries a net negative charge
+excess; its electric field scales with the excess (PDG RPP 2025, sec. 36.3.3.1, p. 23) and, in the fully coherent
+regime (wavelengths longer than the shower bunch), the radiated energy with its square (arXiv:hep-ex/0011001,
+sec. I, p. 1). It dominates in dense media; in air the geomagnetic emission dominates and the Askaryan part is a
+correction below 20% (sec. 36.3.3.1, p. 23). Seen in a beam test (FXT, fixed target and test beam) and used to
+search for neutrinos in ice (UGD, underground and neutrino detectors); it is recorded by antennas, not imaged as
+rings
+([ground based detection arrays](ground-based-detection-arrays.md#radio-reconstruction) for air-shower radio,
+[neutrino astronomy](neutrino-astronomy.md)).
+<!-- example: named apparatus -->SLAC Final Focus Test Beam (FXT): bremsstrahlung photons from 28.5 GeV electrons
+in a 3.5 t silica-sand target gave sub-nanosecond pulses between 0.3 and 6 GHz, 100% linearly polarized, with field
+strengths consistent with fully coherent emission (arXiv:hep-ex/0011001 abstract, p. 1).<!-- /example -->
+
 **Transition radiation.** Emitted when a relativistic particle crosses interfaces
 between media of different dielectric constants; the yield (proportional to `z^2`)
 rises with Lorentz factor `gamma`, with an onset near `gamma ~ 10^3` and, for a foil stack,
@@ -141,8 +154,8 @@ selection ("cold" gases have low diffusion).
 
 **Lorentz angle.** In crossed `E x B`, the drift direction rotates by the Lorentz angle
 `theta_L`; a pixel or strip cluster is displaced and broadened, an effect corrected in
-position reconstruction and calibrated with tracks ([tracking and vertexing](tracking-and-vertexing.md),
-[gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
+position reconstruction and calibrated with tracks or angle scans
+([silicon hit reconstruction](silicon-hit-reconstruction.md)).
 
 **Avalanche gain.** In proportional gas, `G = exp(int alpha dx)` (Townsend `alpha`);
 gain fluctuates: the single-electron gain follows a Polya distribution with relative

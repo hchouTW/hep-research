@@ -38,7 +38,7 @@ Each source row carries its own verification date; a claim's strength never exce
 | scifix:S2108 | Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment | O. Adriani et al. (PAMELA Collaboration) | 2014 | 10.1088/0004-637X/791/2/93 | 1 | page |
 | scifix:S2109 | Measurements of cosmic-ray secondary nuclei at high energies with the first flight of the CREAM balloon-borne experiment | H. S. Ahn et al. (CREAM Collaboration) | 2008 | 10.1016/j.astropartphys.2008.07.010 | 1 | page |
 | scifix:S2110 | The ALICE Transition Radiation Detector: construction, operation, and performance | ALICE Collaboration | 2018 | 10.1016/j.nima.2017.09.028 | 1 | page |
-| scifix:S2111 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 1 | page |
+| scifix:S2111 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. (AMS TOF Collaboration) | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 1 | page |
 | scifix:S2201 | Review of Particle Physics, 36. Particle Detectors for Non-Accelerator Physics (2025 update) | Particle Data Group (S. Navas et al.) | 2025 | https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf | 1 | page |
 | scifix:S2202 | Alignment of the CMS tracker with LHC and cosmic ray data | CMS Collaboration | 2014 | 10.1088/1748-0221/9/06/P06009 | 1 | page |
 | scifix:S2203 | Electron and photon performance measurements with the ATLAS detector using the 2015-2017 LHC proton-proton collision data | ATLAS Collaboration | 2019 | 10.1088/1748-0221/14/12/P12006 | 1 | page |
@@ -56,7 +56,7 @@ Each source row carries its own verification date; a claim's strength never exce
 | scifix:S2306 | Beam Test Characterization of Silicon Microstrip Detector Flight-Model Ladders for the AMS-02 Upgrade | D. Miao et al. | 2026 | https://arxiv.org/abs/2603.25085v1 | 1 | page |
 | scifix:S2307 | Pulse processing routines for neutron time-of-flight data | P. Žugec et al. | 2016 | 10.1016/j.nima.2015.12.054 | 1 | page |
 | scifix:S2308 | Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment | O. Adriani et al. (PAMELA) | 2014 | 10.1088/0004-637X/791/2/93 | 1 | page |
-| scifix:S2309 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 1 | page |
+| scifix:S2309 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. (AMS TOF Collaboration) | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 1 | page |
 | scifix:S2310 | Energy calibration and resolution of the CMS electromagnetic calorimeter in pp collisions at sqrt(s) = 7 TeV | CMS Collaboration | 2013 | 10.1088/1748-0221/8/09/P09009 | 1 | page |
 | scifix:S2311 | Energy flow in a hadronic cascade: Application to hadron calorimetry | D. E. Groom | 2007 | 10.1016/j.nima.2006.11.070 | 1 | page |
 | scifix:S2312 | Direct detection of a break in the teraelectronvolt cosmic-ray spectrum of electrons and positrons | G. Ambrosi et al. (DAMPE) | 2017 | 10.1038/nature24475 | 1 | page |
@@ -73,7 +73,7 @@ Each source row carries its own verification date; a claim's strength never exce
 | scifix:S2411 | Performance of the LHCb RICH detector at the LHC | M. Adinolfi et al. (LHCb RICH) | 2013 | https://arxiv.org/abs/1211.6759v2 | 1 | page |
 | scifix:S2412 | DIRC, the Particle Identification System for BABAR | J. Schwiening | 2000 | https://arxiv.org/abs/hep-ex/0010068v1 | 2 | page |
 | scifix:S2413 | The GlueX DIRC Program | A. Ali et al. (GlueX) | 2020 | https://arxiv.org/abs/2002.07990v1 | 2 | page |
-| scifix:S2414 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 2 | page |
+| scifix:S2414 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. (AMS TOF Collaboration) | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 2 | page |
 | scifix:S2415 | Classical and Machine Learning Methods for Event Reconstruction in NeuLAND | J. Mayer et al. | 2021 | https://arxiv.org/abs/2108.01384v1 | 1 | page |
 | scifix:S2416 | Calibration of the Super-Kamiokande Detector | K. Abe et al. (Super-Kamiokande) | 2014 | https://arxiv.org/abs/1307.0162v2 | 1 | page |
 | scifix:S2417 | Characterisation of the neutron beam in the n_TOF-EAR2 experimental area at CERN following the spallation target upgrade | J. A. Pavon-Rodriguez et al. (n_TOF) | 2025 | https://arxiv.org/abs/2505.00042v2 | 1 | page |
@@ -86,7 +86,7 @@ Each source row carries its own verification date; a claim's strength never exce
 | scifix:S2507 | Alignment of the CMS tracker with LHC and cosmic ray data | CMS Collaboration | 2014 | https://arxiv.org/abs/1403.2286v2 | 1 | full-text |
 | scifix:S2508 | Energy flow in a hadronic cascade: Application to hadron calorimetry | D.E. Groom | 2007 | https://arxiv.org/abs/physics/0605164v4 | 1 | full-text |
 | scifix:S2509 | Lifetime and performance of the very latest microchannel-plate photomultipliers | D. Miehling et al. | 2023 | https://arxiv.org/abs/2311.16676v1 | 1 | full-text |
-| scifix:S2510 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 1 | full-text |
+| scifix:S2510 | The AMS-02 Time of Flight System. Final Design | V. Bindi et al. (AMS TOF Collaboration) | 2003 | https://arxiv.org/abs/hep-ex/0305074v1 | 1 | full-text |
 | scifix:S2511 | Characterisation of the neutron beam in the n_TOF-EAR2 experimental area at CERN following the spallation target upgrade | J.A. Pavon-Rodriguez et al. | 2025 | https://arxiv.org/abs/2505.00042v2 | 1 | full-text |
 | scifix:S2512 | Energy calibration and resolution of the CMS electromagnetic calorimeter in pp collisions at sqrt(s) = 7 TeV | CMS Collaboration | 2013 | https://arxiv.org/abs/1306.2016v2 | 1 | full-text |
 | scifix:S2513 | A Parameterized Energy Correction Method for Electromagnetic Showers in BGO-ECAL of DAMPE | C. Yue et al. | 2017 | https://arxiv.org/abs/1703.02821v2 | 1 | full-text |

@@ -257,3 +257,27 @@ its routing table and representative cases, is in [reconstruction method contrac
   with the pileup reweighting applied to simulation.
 - Confirmation that a rerun reproduces the same output (no ordering or threading
   dependence).
+
+## Linked pages
+
+- [References: in-situ calibration and alignment](detector-principles-bibliography-calibration.md): annotated sources of the in-situ calibration and alignment pages
+- [References: particle identification reference PDFs](detector-principles-bibliography-particle-identification.md): annotated sources of the multisample PID and reference-PDF page
+- [in-situ calibration methods](in-situ-calibration-methods.md): detector constants from data: unknowns, reference samples and residuals; per-channel iteration, global least squares and Millepede-type solvers; unconstrained modes, convergence, bias and per-channel precision; ECAL, HCAL, TOF, gas-gain and RICH instances (simcal is hep-statistics')
+- [in-situ alignment and momentum scale](in-situ-alignment-and-momentum-scale.md): track and chamber alignment from data (Millepede-II with General Broken Lines, iterative chi2, optical, acoustic and photogrammetric positioning) and the momentum scale from resonances, cosmic muons or range versus curvature
+- [Multisample PID and reference PDFs](multisample-pid-and-reference-pdfs.md): combining many samples of one particle (charge from many dE/dx layers, per-layer log-likelihood ratio), per-layer reference PDFs from control samples (COL V0, conversions, tag-and-probe; SPC charge- and velocity-selected flight data; FXT tagged beams), binning, layer correlations, and the multisample_pid.py input format
+- [Calorimeter cluster reconstruction](calorimeter-cluster-reconstruction.md): clustering, cluster position and direction, shower shapes for electron, photon and neutral-pion separation, converted photons, cluster energy corrections, preshower, dual readout and high-granularity imaging
+- [References: calorimeter cluster reconstruction](detector-principles-bibliography-calorimetry.md): annotated sources of the calorimeter cluster reconstruction page
+- [Resolution shape models](resolution-shape-models.md): Crystal Ball and double-sided Crystal Ball (alpha-n correlation), Gaussian plus pedestal, core-plus-tail time PDF, hadronic or partially contained response, effective sigma, and when to use each.
+- [Hadronic calorimeter reconstruction](hadronic-calorimeter-reconstruction.md): software compensation, the hadronic calibration chain, leakage and punch-through, high-granularity HCALs
+- [Hadronic calorimeter timing and model validation](hadronic-calorimeter-timing-and-model-validation.md): shower timing and the observables that validate hadronic physics lists
+- [Gaseous tracker distortions](gaseous-tracker-distortions.md): TPC space charge and E x B distortion maps (gas TPC and LArTPC treated separately), drift-velocity and t0 references, and drift-chamber r(t) calibration
+- [Silicon hit reconstruction](silicon-hit-reconstruction.md): pixel and strip clustering, centre of gravity and eta correction, head-tail, Lorentz shift, charge templates, cluster size versus incidence angle, nuclear charge from cluster charge
+- [Event time and timing association](event-time-and-timing-association.md): event-time (start-time) estimators and their self-use bias with and without a bunch clock, bunch or beam-bucket assignment, track-to-hit and hit-to-event association in space and time, up- versus down-going discrimination, and synchronisation of separated stations
+- [Muon systems](muon-systems.md): muon chambers and the muon reconstruction chain, muon types, chamber alignment and momentum scale, energy loss in iron and other absorbers, and charge-sign quality
+- [Non-collider muon detection](non-collider-muon-detection.md): muon vetoes and veto-efficiency measurement, cosmogenic tagging, muon counting in air-shower arrays, and muons and albedo in orbit
+- [References: muon systems](detector-principles-bibliography-muon-systems.md): annotated sources of the muon systems and non-collider muon detection pages
+- [Transition radiation detectors](transition-radiation-detectors.md): TR emission and radiators, X-ray absorption, signal time profile, clusters and tracklets, identification estimators, response calibration, and reporting rejection versus gamma; hadron separation, the Lorentz factor of nuclei and silicon TR detection
+- [References: transition radiation detectors](detector-principles-bibliography-transition-radiation.md): annotated sources of the transition radiation detectors page
+- [Cherenkov ring reconstruction](cherenkov-ring-reconstruction.md): per-photon likelihood under mass or velocity hypotheses, proximity-focused, mirror-focused and multi-radiator RICH, ring finding, track association, global event likelihood and background
+- [DIRC and time-of-propagation reconstruction](dirc-and-time-of-propagation-reconstruction.md): total-internal-reflection imaging in (pixel, time), photon-path peaks, analytic time PDFs, track-free background, start time as a parameter
+- [Track-fit extensions and material mapping](track-fit-extensions-and-material-mapping.md): Gaussian-sum and annealing filters, broken lines, propagation in non-uniform fields (including permanent magnets), material maps for the fit, and track resolution measured in data

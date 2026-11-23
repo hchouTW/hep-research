@@ -17,6 +17,8 @@ paper (name, configuration, phase space, conditions), which are deliberately not
 here because they are experiment-specific. Prefer primary sources for technical claims;
 the textbooks are for principles.
 
+Split files (same format; apparatus sources inside example blocks): [in-situ calibration and alignment](detector-principles-bibliography-calibration.md), [particle identification reference PDFs](detector-principles-bibliography-particle-identification.md), [radiation damage and ageing](detector-principles-bibliography-radiation.md), [calorimeter cluster reconstruction](detector-principles-bibliography-calorimetry.md), [muon systems](detector-principles-bibliography-muon-systems.md), [transition radiation](detector-principles-bibliography-transition-radiation.md).
+
 ## General and cross-cutting
 
 - **Particle Data Group reviews**: S. Navas et al. (Particle Data Group), Phys. Rev. D 110 (2024) 030001, and
@@ -65,6 +67,17 @@ the textbooks are for principles.
   variant: E. Cerron Zeballos et al., "A new type of resistive plate chamber: the
   multigap RPC", Nucl. Instrum. Methods A374 (1996) 132-135,
   DOI 10.1016/0168-9002(96)00158-1.
+- <!-- example: apparatus source -->CMS Collaboration (S. Chatrchyan et al.), "Description and performance of track and primary-vertex reconstruction with the CMS tracker", JINST 9 (2014) P10009, DOI 10.1088/1748-0221/9/10/P10009 (arXiv:1405.6569v2). Read 2026-11-17 to 2026-11-21, secs. 3.1-3.2, 4.1: pixel and strip hit reconstruction, end-pixel estimator, templates.<!-- /example -->
+- <!-- example: apparatus source -->ATLAS Collaboration (G. Aad et al.), "A neural network clustering algorithm for the ATLAS silicon pixel detector", JINST 9 (2014) P09009, DOI 10.1088/1748-0221/9/09/P09009 (arXiv:1406.7690v1). Read 2026-11-17 to 2026-11-21, abstract, secs. 1, 2, 4.1: pixel clustering and splitting.<!-- /example -->
+- <!-- example: apparatus source -->R. Leboucher et al. (Belle II SVD Collaboration), "Measurement of the cluster position resolution of the Belle II Silicon Vertex Detector", Nucl. Instrum. Methods A 1033 (2022) 166746, DOI 10.1016/j.nima.2022.166746 (arXiv:2209.03006v1). Read 2026-11-17 to 2026-11-21, secs. 1-3, Tables 1-3: strip resolution versus incidence angle.<!-- /example -->
+- <!-- example: apparatus source -->K. Adamczyk et al. (Belle II SVD Collaboration), "The design, construction, operation and performance of the Belle II silicon vertex detector", JINST 17 (2022) P11042, DOI 10.1088/1748-0221/17/11/P11042 (arXiv:2201.09824v2). Read 2026-11-17 to 2026-11-21, sec. 8.2.2 with table 23: cluster position by size, uncertainty scale factors.<!-- /example -->
+- <!-- example: apparatus source -->L. A. T. Bauerdick et al. (ZEUS MVD), "Beam test of silicon strip sensors for the ZEUS micro vertex detector", Nucl. Instrum. Methods A 501 (2003) 340-358, DOI 10.1016/S0168-9002(03)00619-3 (arXiv:hep-ex/0212037v1). Read 2026-11-17 to 2026-11-21, abstract, secs. 1, 5, 7: eta correction, head-tail.<!-- /example -->
+- <!-- example: apparatus source -->M. Aleppo (for the ATLAS Pixel Collaboration), "A measurement of Lorentz angle of radiation-hard pixel sensors", Nucl. Instrum. Methods A 465 (2000) 108-111, DOI 10.1016/S0168-9002(01)00364-3 (arXiv:physics/0012050v1). Read 2026-11-17 to 2026-11-21, secs. 1-3, Table 1: Lorentz angle from the cluster-size minimum.<!-- /example -->
+- <!-- example: apparatus source -->R. Qiao et al. (DAMPE), "Charge reconstruction study of the DAMPE Silicon-Tungsten Tracker with ion beams", Nucl. Instrum. Methods A, DOI 10.1016/j.nima.2018.01.007 (arXiv:1705.09791v1). Read 2026-11-17 to 2026-11-21, secs. 3.2.3-3.4: cluster charge with ions, electronics saturation.<!-- /example -->
+- <!-- example: apparatus source -->R. Qiao et al. (DAMPE), "A new charge reconstruction algorithm for the DAMPE silicon microstrip detector", arXiv:1712.08011v1 (2017), no journal reference. Read 2026-11-17 to 2026-11-21, secs. 2-4: charge versus impact position and angle, charge-sharing model, ion test beam.<!-- /example -->
+- <!-- example: apparatus source -->A. Tykhonov et al. (DAMPE Collaboration), "Internal alignment and position resolution of the silicon tracker of DAMPE determined with orbit data", Nucl. Instrum. Methods A 893 (2018) 43-56, DOI 10.1016/j.nima.2018.02.105 (arXiv:1712.02739v2). Read 2026-11-17 to 2026-11-21, secs. 4.1, 6.1-6.2: flight clustering, splitting, path-corrected cluster charge, resolution.<!-- /example -->
+- <!-- example: apparatus source -->D. Miao et al., "A telescope system for charge and position measurement of high energy nuclei", Nucl. Instrum. Methods A, DOI 10.1016/j.nima.2026.171778 (arXiv:2603.25080v1). Read 2026-11-17 to 2026-11-21, secs. 2-6: eta versus Z, BDT charge, truncated mean.<!-- /example -->
+- <!-- example: apparatus source -->D. Miao et al., "Beam test characterization of silicon microstrip detector flight-model ladders for the AMS-02 upgrade", arXiv:2603.25085v1 (2026), no journal reference. Read 2026-11-17 to 2026-11-21, secs. 2-4.3: cluster size and resolution versus angle.<!-- /example -->
 
 ## Front-end electronics and signal processing ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md))
 
@@ -132,6 +145,45 @@ criteria as above.
 
 ## Timing detectors ([timing detectors](timing-detectors.md))
 
+- <!-- example: apparatus source -->ALICE Collaboration, "Determination of the event collision time with the ALICE
+  detector at the LHC", Eur. Phys. J. Plus 132 (2017) 99, DOI 10.1140/epjp/i2017-11279-1 (arXiv v2 read). Event
+  time from the TOF tracks by chi2 over mass hypotheses, leaving out the track under test; start counter; fallback
+  to the bunch crossing (secs. 4-4.3). <!-- /example -->
+- <!-- example: apparatus source -->ANTARES Collaboration, "Time Calibration of the ANTARES Neutrino Telescope",
+  Astropart. Phys. 34 (2011) 539-549, DOI 10.1016/j.astropartphys.2010.12.004 (arXiv v1 read). Clock
+  distribution with round-trip delays and in-situ optical beacons; relative versus absolute time (secs. 1, 3,
+  4.2). <!-- /example -->
+- <!-- example: apparatus source -->D. Campana et al., "Capability of the PAMELA Time-Of-Flight to identify light
+  nuclei: results from a beam test calibration", Nucl. Instrum. Methods A 598 (2009) 696-701, DOI 10.1016/j.nima.2008.10.014
+  (arXiv v1 read). Walk correction and resolution versus charge; flight time without an external start
+  (sec. 4). <!-- /example -->
+- <!-- example: apparatus source -->E. P. Segarra et al., "The CLAS12 Backward Angle Neutron Detector (BAND)", Nucl.
+  Instrum. Methods A 978 (2020) 164356, DOI 10.1016/j.nima.2020.164356 (arXiv v1 read). Neutron time of flight per
+  path length; photon-peak offsets; out-of-time beam bunches (secs. 3.2.1-3.2.3). <!-- /example -->
+- <!-- example: apparatus source -->F. Carnesecchi (ALICE Collaboration), "Performance of the ALICE Time-Of-Flight
+  detector at the LHC", JINST 14 (2019) C06023, DOI 10.1088/1748-0221/14/06/C06023 (arXiv v1 read). MRPC time
+  budget, slewing calibration with time over threshold, track-to-hit matching window (sec. 3). <!-- /example -->
+- <!-- example: apparatus source -->I. Deppner and N. Herrmann (CBM Collaboration), "The CBM Time-of-Flight system",
+  JINST 14 (2019) C09020, DOI 10.1088/1748-0221/14/09/C09020 (arXiv v1 read). MRPC electrode glass chosen by the
+  local flux; free-streaming calibration and space-time association with reference tracks (secs. 2-2.3). <!-- /example -->
+- <!-- example: apparatus source -->J. A. Pavon-Rodriguez et al., "Characterisation of the neutron beam in the
+  n_TOF-EAR2 experimental area at CERN following the spallation target upgrade", Eur. Phys. J. A 61 (2025) 277,
+  DOI 10.1140/epja/s10050-025-01727-x (arXiv v2 read; the same title). Gamma-flash start, neutron energy with an effective
+  moderation path, simulated resolution function validated on resonances (secs. 4.1, 6). <!-- /example -->
+- <!-- example: apparatus source -->J. Mayer et al., "Classical and Machine Learning Methods for Event Reconstruction in
+  NeuLAND", Nucl. Instrum. Methods A 1013 (2021) 165666, DOI 10.1016/j.nima.2021.165666 (arXiv v1 read).
+  Digitization to the data's calibration and event building in a short time window; space-time clustering of
+  hits within an event (secs. 3.1, 3.3). <!-- /example -->
+- <!-- example: apparatus source -->M. Duranti et al., "Opportunities of Si-microstrip LGAD for next-generation space
+  detectors", J. Phys. Conf. Ser. 2374 (2022) 012046, DOI 10.1088/1742-6596/2374/1/012046 (INSPIRE 2613721). LGAD strips for space:
+  power per channel, hit times separating calorimeter backsplash (secs. 1-2). <!-- /example -->
+- <!-- example: apparatus source -->V. Bindi et al. (AMS TOF Collaboration), "The AMS-02 Time of Flight System. Final
+  Design", Proc. 28th International Cosmic Ray Conference (Tsukuba, 2003), <https://arxiv.org/abs/hep-ex/0305074v1>.
+  Up- versus down-going from the flight time; time resolution versus nuclear charge in an ion beam (secs. 2-3). <!-- /example -->
+- <!-- example: apparatus source -->W.-J. Lin et al., "Plastic scintillation detectors for precision time-of-flight
+  measurements of relativistic heavy ions", Chin. Phys. C 41 (2017) 066001, DOI 10.1088/1674-1137/41/6/066001 (arXiv
+  v1 read). Walk and position corrections of two-ended counters; scintillator thickness and photon number
+  (secs. 1, 3.1). <!-- /example -->
 - G. Pellegrini et al., "Technology developments and first measurements of Low Gain
   Avalanche Detectors (LGAD) for high energy physics applications", Nucl. Instrum.
   Methods A765 (2014) 12-16, DOI 10.1016/j.nima.2014.06.008. LGAD.
@@ -296,6 +348,14 @@ entry was matched against the Crossref record of its DOI on 2026-11-12 and read 
   in the case of the binomial", Biometrika 26 (1934) 404-413, DOI 10.1093/biomet/26.4.404; L. D. Brown, T. T. Cai and
   A. DasGupta, "Interval estimation for a binomial proportion", Statist. Sci. 16 (2001)
   101-133, DOI 10.1214/ss/1009213286. Exact and alternative binomial intervals for efficiencies.
+- J. E. Gaiser, "Charmonium spectroscopy from radiative decays of the J/psi and psi-prime", PhD thesis, Stanford
+  University (1982), report SLAC-R-255, <https://www.slac.stanford.edu/pubs/slacreports/reports02/slac-r-255.pdf>,
+  Appendix F.1. Early Crystal Ball line shape, eq. F-1 (read 2026-11-19 for
+  [resolution shape models](resolution-shape-models.md)).
+- S. Das, "A simple alternative to the Crystal Ball function", arXiv:1603.08591 (2016),
+  <https://arxiv.org/abs/1603.08591>. Crystal Ball closed form, GaussExp and ExpGaussExp (read 2026-11-19).
+- <!-- example: apparatus source --> C. Ligtenberg et al., "Performance of the GridPix detector quad", Nucl. Instrum. Methods A 956 (2020) 163331, DOI 10.1016/j.nima.2019.163331, arXiv:2001.01540v1 (read 2026-11-19/20). Gaussian plus a constant offset for test-beam residuals, background estimated with the telescope timing shifted by 1000 frames (sec. 5.8, Fig. 12). <!-- /example -->
+- <!-- example: apparatus source --> M. Aehle et al., "Performance of the electromagnetic and hadronic prototype segments of the ALICE Forward Calorimeter", JINST 19 (2024) P07006, DOI 10.1088/1748-0221/19/07/P07006, arXiv:2311.07413v2 (read 2026-11-19/21). Resolution from FWHM/2.355 of the response with fit-range and line-shape systematics (sec. 6.3, PDF pp. 48-49). <!-- /example -->
 
 ## Not listed here
 
