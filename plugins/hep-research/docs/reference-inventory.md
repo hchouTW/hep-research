@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-authoring | 49 | 359 | 0 |
 | hep-citations | 11 | 84 | 0 |
 | hep-computing | 41 | 405 | 0 |
-| hep-detector | 82 | 1386 | 0 |
+| hep-detector | 82 | 1387 | 0 |
 | hep-measurement | 12 | 125 | 0 |
 | hep-ml | 43 | 208 | 0 |
 | hep-review | 10 | 34 | 0 |
@@ -216,10 +216,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 7 | - | 9257d7b5d 2026-10-15 |
 | `calibration-and-alignment.md` | hep-detector | 23.2 | yes | 39 | hep-computing | 628afa7c2 2026-11-23 |
 | `calibration-residual-propagation.md` | hep-detector | 2.7 | no | 5 | - | 676356852 2026-11-19 |
-| `calorimeter-cluster-reconstruction.md` | hep-detector | 24.6 | no | 3 | - | bc97d57f8 2026-11-20 |
+| `calorimeter-cluster-reconstruction.md` | hep-detector | 24.6 | no | 3 | - | 814a7c19c 2026-11-23 |
 | `calorimetry-ecal-hcal.md` | hep-detector | 18.9 | yes | 19 | - | 705960c07 2026-11-20 |
 | `charge-confusion.md` | hep-detector | 13.6 | yes | 7 | - | d4db6a954 2026-11-18 |
-| `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 15.4 | no | 14 | hep-citations | 31e36bb02 2026-11-23 |
+| `cherenkov-imaging-variants-and-photosensors.md` | hep-detector | 15.2 | no | 14 | hep-citations | 41c7572e9 2026-11-23 |
 | `cherenkov-ring-reconstruction.md` | hep-detector | 25.4 | no | 4 | - | 0cd4a47a6 2026-11-22 |
 | `core-detector-equations.md` | hep-detector | 11.3 | no | 8 | - | 69a051d88 2026-11-19 |
 | `cosmic-ray-spectrum-and-composition.md` | hep-detector | 11.7 | no | 14 | hep-citations, hep-measurement, hep-statistics | ebb581365 2026-10-19 |
@@ -229,19 +229,19 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-design-principles.md` | hep-detector | 6.1 | yes | 5 | - | 4c00025d0 2026-11-23 |
 | `detector-glossary.md` | hep-detector | 6.1 | no | 6 | - | 229f4b462 2026-11-19 |
 | `detector-measurement-framework.md` | hep-detector | 15.3 | yes | 16 | hep-citations, hep-measurement | 229f4b462 2026-11-19 |
-| `detector-principles-bibliography-calibration.md` | hep-detector | 17.8 | no | 5 | - | 8bf733c93 2026-11-21 |
+| `detector-principles-bibliography-calibration.md` | hep-detector | 17.8 | no | 5 | - | 31f4ec2cc 2026-11-23 |
 | `detector-principles-bibliography-calorimetry.md` | hep-detector | 14.1 | no | 4 | - | 11d23f2fa 2026-11-21 |
 | `detector-principles-bibliography-muon-systems.md` | hep-detector | 6.8 | no | 4 | - | e600ee966 2026-11-20 |
-| `detector-principles-bibliography-particle-identification.md` | hep-detector | 9.3 | no | 4 | - | 983cdd8fc 2026-11-23 |
+| `detector-principles-bibliography-particle-identification.md` | hep-detector | 9.3 | no | 4 | - | 31f4ec2cc 2026-11-23 |
 | `detector-principles-bibliography-radiation.md` | hep-detector | 5.3 | no | 3 | - | 4c00025d0 2026-11-23 |
-| `detector-principles-bibliography-transition-radiation.md` | hep-detector | 6.9 | no | 2 | - | 46fbfd253 2026-11-21 |
-| `detector-principles-bibliography.md` | hep-detector | 35.2 | no | 18 | - | 983cdd8fc 2026-11-23 |
+| `detector-principles-bibliography-transition-radiation.md` | hep-detector | 6.9 | no | 3 | - | 31f4ec2cc 2026-11-23 |
+| `detector-principles-bibliography.md` | hep-detector | 35.3 | no | 18 | - | 50ff5856d 2026-11-23 |
 | `detector-principles-summary.md` | hep-detector | 14.5 | yes | 5 | - | a635b6398 2026-11-19 |
 | `detector-simulation.md` | hep-detector | 15.2 | yes | 19 | hep-ml, hep-theory | e661b3fde 2026-11-13 |
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 15 | hep-measurement | 9257d7b5d 2026-10-15 |
 | `dirc-and-time-of-propagation-reconstruction.md` | hep-detector | 14.6 | no | 4 | - | 0cd4a47a6 2026-11-22 |
 | `dis-kinematic-reconstruction.md` | hep-detector | 12.0 | no | 6 | hep-theory | 28ad9ffa2 2026-11-12 |
-| `event-reconstruction.md` | hep-detector | 22.7 | no | 19 | hep-computing | 00e9d4e05 2026-11-22 |
+| `event-reconstruction.md` | hep-detector | 22.7 | no | 19 | hep-computing | 31f4ec2cc 2026-11-23 |
 | `event-time-and-timing-association.md` | hep-detector | 24.3 | no | 3 | - | fd8a47bba 2026-11-22 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 13 | hep-citations | af7ad3bbf 2026-10-21 |
 | `frequency-and-scan-encoded-spectroscopy-reconstruction.md` | hep-detector | 24.6 | no | 2 | - | 81c8d4f67 2026-11-13 |
@@ -263,13 +263,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `muon-systems.md` | hep-detector | 24.6 | no | 14 | hep-citations | 4a584b67a 2026-11-21 |
 | `neutrino-astronomy.md` | hep-detector | 11.7 | no | 19 | hep-statistics | 55a3cbf19 2026-11-22 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | hep-detector | 24.5 | no | 21 | - | 81c8d4f67 2026-11-13 |
-| `non-collider-muon-detection.md` | hep-detector | 30.5 | no | 3 | - | 2603770ae 2026-11-22 |
+| `non-collider-muon-detection.md` | hep-detector | 30.5 | no | 3 | - | 784bc53ab 2026-11-23 |
 | `nuclear-interactions-in-detector-material.md` | hep-detector | 6.2 | yes | 6 | hep-theory | c7cdc6dfc 2026-11-19 |
 | `particle-identification.md` | hep-detector | 19.8 | yes | 38 | hep-measurement | 1cf5e9857 2026-11-21 |
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 22.0 | no | 16 | - | 55a3cbf19 2026-11-22 |
 | `photon-likelihood-reconstruction.md` | hep-detector | 18.2 | yes | 12 | - | 56c5fd5bd 2026-11-19 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5d 2026-10-15 |
-| `radiation-and-aging-effects.md` | hep-detector | 29.4 | no | 7 | - | b50282520 2026-11-22 |
+| `radiation-and-aging-effects.md` | hep-detector | 29.6 | no | 7 | - | c19fc0ab4 2026-11-23 |
 | `readout-digitization-and-overlay.md` | hep-detector | 9.6 | no | 4 | - | e2957da10 2026-10-25 |
 | `reconstruction-method-contract.md` | hep-detector | 11.2 | no | 1 | - | e49501f26 2026-11-19 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 11.6 | yes | 15 | hep-computing | 5e3b104ef 2026-10-29 |
@@ -291,10 +291,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `system-design-workflow.md` | hep-detector | 30.6 | no | 5 | - | bbeb133f9 2026-10-25 |
 | `threshold-and-quantum-sensor-reconstruction.md` | hep-detector | 19.1 | no | 1 | - | 9359950e2 2026-11-12 |
 | `timestream-to-map-reconstruction.md` | hep-detector | 7.4 | no | 2 | - | 9359950e2 2026-11-12 |
-| `timing-detectors.md` | hep-detector | 24.8 | no | 15 | - | eb0333a02 2026-11-22 |
-| `track-fit-extensions-and-material-mapping.md` | hep-detector | 25.7 | no | 3 | - | e3a931347 2026-11-22 |
+| `timing-detectors.md` | hep-detector | 24.9 | no | 15 | - | 5e311eea5 2026-11-23 |
+| `track-fit-extensions-and-material-mapping.md` | hep-detector | 25.8 | no | 3 | - | c4f27c00f 2026-11-23 |
 | `tracking-and-vertexing.md` | hep-detector | 23.3 | yes | 29 | hep-citations | 628afa7c2 2026-11-23 |
-| `transition-radiation-detectors.md` | hep-detector | 29.9 | no | 3 | - | caa19a2c2 2026-11-22 |
+| `transition-radiation-detectors.md` | hep-detector | 30.8 | no | 3 | - | 80698276b 2026-11-23 |
 | `triggers-luminosity-pileup.md` | hep-detector | 16.5 | yes | 17 | - | a1267715b 2026-10-25 |
 | `analysis-design.md` | hep-measurement | 16.4 | yes | 19 | hep-computing, hep-detector | 16214af17 2026-10-26 |
 | `analysis-validation.md` | hep-measurement | 4.4 | yes | 6 | hep-computing, hep-detector | 9257d7b5d 2026-10-15 |

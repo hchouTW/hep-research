@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 82,
-   "bytes": 1385515,
+   "bytes": 1386629,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1933,7 +1933,7 @@
   {
    "path": "skills/hep-detector/references/calorimeter-cluster-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 24567,
+   "bytes": 24604,
    "lines": 238,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1942,7 +1942,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bc97d57f8 2026-11-20"
+   "last_commit": "814a7c19c 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -1995,8 +1995,8 @@
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "hep-detector",
-   "bytes": 15370,
-   "lines": 209,
+   "bytes": 15204,
+   "lines": 206,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/eic/modules/detector/epic-pid.md",
@@ -2017,7 +2017,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "31e36bb02 2026-11-23"
+   "last_commit": "41c7572e9 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/cherenkov-ring-reconstruction.md",
@@ -2214,7 +2214,7 @@
     "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "8bf733c93 2026-11-21"
+   "last_commit": "31f4ec2cc 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-calorimetry.md",
@@ -2259,7 +2259,7 @@
     "skills/hep-detector/references/event-reconstruction.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "983cdd8fc 2026-11-23"
+   "last_commit": "31f4ec2cc 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography-radiation.md",
@@ -2282,16 +2282,17 @@
    "lines": 19,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/transition-radiation-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "46fbfd253 2026-11-21"
+   "last_commit": "31f4ec2cc 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 35196,
+   "bytes": 35278,
    "lines": 369,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2315,7 +2316,7 @@
     "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "983cdd8fc 2026-11-23"
+   "last_commit": "50ff5856d 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2458,7 +2459,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "00e9d4e05 2026-11-22"
+   "last_commit": "31f4ec2cc 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/event-time-and-timing-association.md",
@@ -2929,7 +2930,7 @@
     "skills/hep-detector/references/muon-systems.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2603770ae 2026-11-22"
+   "last_commit": "784bc53ab 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -3074,7 +3075,7 @@
   {
    "path": "skills/hep-detector/references/radiation-and-aging-effects.md",
    "owner": "hep-detector",
-   "bytes": 29449,
+   "bytes": 29636,
    "lines": 258,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3087,7 +3088,7 @@
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b50282520 2026-11-22"
+   "last_commit": "c19fc0ab4 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/readout-digitization-and-overlay.md",
@@ -3599,7 +3600,7 @@
   {
    "path": "skills/hep-detector/references/timing-detectors.md",
    "owner": "hep-detector",
-   "bytes": 24805,
+   "bytes": 24874,
    "lines": 295,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3620,12 +3621,12 @@
     "skills/hep-detector/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "eb0333a02 2026-11-22"
+   "last_commit": "5e311eea5 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/track-fit-extensions-and-material-mapping.md",
    "owner": "hep-detector",
-   "bytes": 25741,
+   "bytes": 25760,
    "lines": 286,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3634,7 +3635,7 @@
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e3a931347 2026-11-22"
+   "last_commit": "c4f27c00f 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
@@ -3681,8 +3682,8 @@
   {
    "path": "skills/hep-detector/references/transition-radiation-detectors.md",
    "owner": "hep-detector",
-   "bytes": 29925,
-   "lines": 275,
+   "bytes": 30811,
+   "lines": 281,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-principles-bibliography-transition-radiation.md",
@@ -3690,7 +3691,7 @@
     "skills/hep-detector/references/particle-identification.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "caa19a2c2 2026-11-22"
+   "last_commit": "80698276b 2026-11-23"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
