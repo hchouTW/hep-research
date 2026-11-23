@@ -143,7 +143,7 @@ yield in detector volume) ([calibration and alignment](calibration-and-alignment
 time series* (gain versus temperature/dose) rather than a single constant.
 
 **Magnetic fields and immersion.** PMT gain changes with orientation even in the geomagnetic field; a
-high-permeability shield is often needed, while fine-mesh PMTs work in fields of 1 T or more aligned with the tube
+high-permeability shield is often needed, while fine-mesh PMTs work in strong fields aligned with the tube
 axis (pdg_2025_particle-detectors-at-accelerators sec. 35.2.1.1, p. 5). Large immersed arrays (UGD) wrap each tube
 or compensate the field with coils around the volume, measure the residual field at the sensor positions, pot the
 tubes against water or oil and may need covers against an implosion chain reaction
@@ -161,12 +161,9 @@ efficiency (arXiv:1307.0162 sec. 2.3.2, pp. 5-6). Belle II ARICH (COL): hybrid a
 detectors are dark): SiPMs tolerate moonlight but their red sensitivity raises the night-sky rate unless filtered,
 and the exposure per image is kept to a few ns against pile-up
 (pdg_2025_particle-detectors-for-non-accelerator-physics sec. 36.2.2, p. 8;
-[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md)). In a hit model it is a per-pixel background
+[imaging atmospheric Cherenkov](imaging-atmospheric-cherenkov.md)). Even with blue-sensitive PMTs behind large
+mirrors the night-sky rate per pixel stays high (same page). In a hit model it is a per-pixel background
 rate.
-<!-- example: apparatus class and its number -->
-Large-mirror imaging air-Cherenkov cameras with blue-sensitive PMTs (GND): night-sky rates of a few 100 MHz per
-pixel (pdg_2025_particle-detectors-for-non-accelerator-physics sec. 36.2.2, p. 8).
-<!-- /example -->
 
 ### Features (photosensors)
 
