@@ -89,14 +89,16 @@ of the efficiency definition. Four families are common in hit-based trackers:
   layer by layer; the filter's predicted covariance sets the search window, the search
   branches on every compatible hit and branches are pruned on fit quality. It suits dense
   silicon trackers. A track whose seed layers miss a hit is lost unless several seed
-  layer combinations are used, and the cost grows with branching (a common implementation:
-  Ai et al., Comput. Softw. Big Sci. 6 (2022) 8).
+  layer combinations are used, and the cost grows with branching (COL: Ai et al., Comput. Softw. Big Sci. 6 (2022) 8,
+  arXiv:2106.13593, sec. 3.9, p. 14; SPC Kalman track following: arXiv:1206.1896, sec. 3.2.2, p. 42, arXiv:1712.02739,
+  sec. 4.2, p. 5).
 - **Global transforms (Hough, Legendre and relatives).** Each hit maps to a curve in
   track-parameter space, and tracks are peaks where curves intersect; the Legendre form
   uses lines tangent to drift circles. Missing hits matter little, which suits drift
   chambers and uniformly sampled geometries. The trajectory family is assumed (a line, or
   a circle through a known origin), so displaced, kinked and looping tracks fall outside
-  it; the binning limits the resolution, and high occupancy gives fake peaks.
+  it; the binning limits the resolution, and high occupancy gives fake peaks (COL drift chamber:
+  arXiv:2412.14687, sec. 3.2, p. 4; FXT straight segments in showers: arXiv:1702.08082, sec. 2.1, pp. 5-6).
 - **Cellular automaton and segment linking.** Short segments between neighbouring layers
   are connected when compatible and evolved into the longest consistent chains. It is
   local and parallel; the compatibility cuts must allow for scattering at low momentum.
@@ -157,50 +159,25 @@ Several points routinely cause trouble:
 - **Fitting quality varies across the detector.** Efficiency and resolution must be
   quoted differentially in the relevant variables, not integrated.
 
-Three variants of the fit address specific failures of the plain filter:
-
-- **Global `chi^2` and broken lines.** All hits are fitted at once, with offsets at the thin
-  scatterers as explicit parameters and kinks defined by triplets of scatterers (general
-  broken lines: Kleinwort, Nucl. Instrum. Methods A 673 (2012) 107). That paper shows the
-  equivalence with a Kalman filter for one filtering step, and uses the fit for track-based
-  alignment and calibration with Millepede-II.
-- **Deterministic annealing filter.** Each hit carries an assignment weight computed from
-  its residual and iterated with a decreasing temperature, so outliers and the wrong side
-  of a left-right ambiguity are down-weighted rather than cut.
-- **Gaussian-sum filter.** The bremsstrahlung energy-loss distribution is approximated by
-  a mixture of Gaussians propagated as parallel components (Adam et al., J. Phys. G 31
-  (2005) N9). The number of components is reduced by merging at each step, a tunable
-  approximation. The estimate is a mixture, so state whether its mean or its mode is
-  used; the two differ in the low-momentum tail.
+Three variants address specific failures of the plain filter: the **broken-lines global fit** (kinks at thin
+scatterers, the input to Millepede-II alignment; Kleinwort, Nucl. Instrum. Methods A 673 (2012) 107), the
+**deterministic annealing filter** (residual-based hit weights, for outliers and left-right ambiguities) and the
+**Gaussian-sum filter** (bremsstrahlung as a Gaussian mixture; state whether its mean or mode is used). Detail,
+sources and environments: [track-fit extensions](track-fit-extensions-and-material-mapping.md).
 
 **Check:** The fitter (filter and smoother, global or broken-lines fit, annealing, Gaussian
 sum) is named for each particle type, with how outliers are handled.
 
 ## Propagation in a non-uniform field
 
-The fit transports the track state and its covariance between measurement surfaces. In a
-uniform field the helix is analytic; in a non-uniform field (fringe fields, dipoles and
-permanent magnets with strong gradients, layers partly outside the field) the equation of
-motion is integrated numerically, usually with an adaptive-step Runge-Kutta method, and
-the transport Jacobian is integrated with it or computed numerically. Consequences:
-
-- **The field map is a nuisance parameter.** A scale error in the map is a rigidity scale
-  error; a shape error gives a bias that depends on rigidity and on the path. The map's
-  version, its measurement or model source, and (for permanent magnets) its temperature
-  dependence belong in the conditions record.
-- **The lever arm is the bending power along the actual path.** The fitted parameter is
-  `q/p` at a reference surface, and resolution follows the field weighted by the
-  measurement lever arm along the path (the sagitta-like double integral of `B` when the
-  measurements lie inside the field; `int B dl` with the lever arm of the outer planes when
-  they lie outside it), not
-  `int B dl` alone; tracks crossing a region of weak bending power have worse resolution
-  at the same rigidity, so quote resolution against the path through the field, not only
-  against rigidity.
-- **Step size and tolerance are reconstruction parameters.** Validate them against a
-  fine-step reference propagation and with pulls; a tolerance that is too loose produces
-  a rigidity bias with no visible effect on `chi^2`.
-- Energy loss and scattering are applied along the steps with the mass hypothesis, as for
-  the uniform case above.
+In a uniform field the helix is analytic; in a non-uniform one (fringe fields, dipoles, permanent magnets, layers
+partly outside the field) the motion and the transport Jacobian are integrated numerically, usually with an
+adaptive-step Runge-Kutta method. The field map is a measured condition whose scale is a rigidity scale and whose
+shape error biases by rigidity and path. The lever arm is the bending power along the actual path (the sagitta-like
+double integral of `B` when the measurements lie inside the field; `int B dl` with the lever arm of the outer planes
+when they lie outside it), not `int B dl` alone, so quote resolution against the path through the field. Step
+tolerance, field-map alignment and scale, and material along the steps: [track-fit
+extensions](track-fit-extensions-and-material-mapping.md#propagation-in-non-uniform-fields).
 
 **Check:** For a non-uniform field, the field-map version and source, the propagation
 method and its tolerance are recorded, and resolution is quoted against the bending power
@@ -304,7 +281,8 @@ liquid-argon TPC images vertices are found in pattern recognition together with 
 all candidate tracks, removes the least compatible, refits, and repeats for the next
 vertex. Adaptive fitting gives each track a weight from its compatibility, recomputed
 with a decreasing annealing temperature, which makes the fit robust against mis-assigned
-tracks (Waltenberger, Frühwirth and Vanlaer, J. Phys. G 34 (2007) N343); in a multi-vertex
+tracks (J. Phys. G 34 (2007) N343; sourced for COL only; space pair-conversion vertices:
+[gamma-ray imaging](gamma-ray-imaging-and-polarimetry-reconstruction.md#pair-conversion-gamma-ray-telescopes)); in a multi-vertex
 fit several vertices compete for the same tracks. The failures are merged nearby vertices,
 split vertices and fake vertices from secondary interactions; timing separates vertices
 that are close in space. Vertex efficiency, merging rate and fake rate depend on vertex
