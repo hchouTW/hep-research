@@ -1,6 +1,6 @@
 # References: particle identification reference PDFs
 
-A split file of the annotated [bibliography](detector-principles-bibliography.md), in the same citation format: the sources of `multisample-pid-and-reference-pdfs.md`. Entries that name an experiment or apparatus sit inside example blocks.
+A split file of the annotated [bibliography](detector-principles-bibliography.md), in the same citation format: the sources of `multisample-pid-and-reference-pdfs.md`, `cherenkov-ring-reconstruction.md` and `dirc-and-time-of-propagation-reconstruction.md`. Entries that name an experiment or apparatus sit inside example blocks.
 
 ## Particle identification reference PDFs and control samples
 
@@ -13,3 +13,5 @@ A split file of the annotated [bibliography](detector-principles-bibliography.md
 - <!-- example: source citations -->Y. Asaoka et al., Development of a Large-Area Aerogel Cherenkov Counter Onboard BESS, Nucl. Instrum. Methods A 416 (1998) 236, DOI 10.1016/S0168-9002(98)00772-4 (arXiv:hep-ex/9805001v1). Read 2026-11-20, sec. 3.1: charge-sign selected muons as the beta ~ 1 reference and velocity-selected below-threshold protons (sea-level cosmic rays). <!-- /example -->
 - <!-- example: source citations -->O. Adriani et al. (PAMELA Collaboration), Measurement of boron and carbon fluxes in cosmic rays with the PAMELA experiment, Astrophys. J. 791 (2014) 93, DOI 10.1088/0004-637X/791/2/93 (arXiv:1407.1657v1). Read 2026-11-20, secs. 3.2-3.3: contamination checked with independently selected samples; beta-dependent charge selection in the TOF. <!-- /example -->
 - <!-- example: source citations -->H. S. Ahn et al. (CREAM Collaboration), Measurements of cosmic-ray secondary nuclei at high energies with the first flight of the CREAM balloon-borne experiment, Astropart. Phys. 30 (2008) 133, DOI 10.1016/j.astropartphys.2008.07.010 (arXiv:0808.1718v1). Read 2026-11-20, sec. 4.2: Cherenkov-selected near-minimum-ionizing nuclei as the TRD reference response. <!-- /example -->
+
+## Cherenkov ring and DIRC reconstruction
