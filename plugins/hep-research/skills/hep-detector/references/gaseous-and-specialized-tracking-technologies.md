@@ -16,7 +16,7 @@ a recorded gap, not a claim that no method exists.
 
 **Hybrid pixels**: 2D binary or ToT-encoded hits; sub-pixel position from shared charge, the Lorentz
 shift and merged clusters: [silicon hit reconstruction](silicon-hit-reconstruction.md); radiation damage lowers
-`CCE` and shifts thresholds and depletion voltage.
+`CCE` and shifts thresholds and depletion voltage ([radiation and ageing effects](radiation-and-aging-effects.md)).
 
 **Strips/microstrips**: 1D measurement; a 2D point needs a stereo pair, creating
 `n^2` candidate intersections for `n` hits, of which `n^2 - n` are ghosts; capacitive coupling, common-mode noise, and
@@ -77,7 +77,7 @@ wire-offset and time-walk errors; the signatures and the `r(t)` calibration are 
   a delta electron can deposit charge closer to the wire, so the time is early and the
   distance underestimated. Also out-of-time hits.
 - **Dependence**: rate/occupancy (space charge, deadtime), `T`/`P`/gas composition
-  (drift velocity), aging (Malter effect, deposits on wires).
+  (drift velocity), ageing (Malter effect, deposits on wires; [radiation and ageing effects](radiation-and-aging-effects.md)).
 - **Data sample**: cosmic rays and collision tracks for `r(t)` self-calibration.
 - **Transfers**: time-to-distance calibration to muon tubes, straws and TPC drift coordinates;
 time-difference coordinates (RPC strip ends, TOP) reuse the offset and velocity calibration logic; does not transfer: charge-centroid interpolation.

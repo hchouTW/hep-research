@@ -103,13 +103,13 @@ were simulated: a Gaussian smear of the true time has no walk, tail or rate effe
   the thin depletion region and by the electronics (PDG RPP 2025 eq. 35.25, the terms of
   T1 with an irreducible arrival-time term from non-uniform charge deposition; 15-20 ps for minimum-ionizing particles reached with thin, high-gain
   (> 40) LGADs, better per track possible with several layers); **radiation damage** lowers the
-  gain-layer doping, so gain and time resolution degrade with fluence and the bias must rise; fill factor at
+  gain-layer doping, so gain and time resolution degrade with fluence and the bias must rise up to the single-event limit ([radiation and ageing effects](radiation-and-aging-effects.md)); fill factor at
   pad boundaries matters. Levers (arXiv:1704.08666): gain-induced slew rate `∝ G/d` (T3), but a very thin sensor has
   a large capacitance and needs more gain (sec. 2.3.4, p. 12); saturated drift and a uniform weighting field need
   implant width about equal to the pitch, both much larger than the thickness (sec. 3.2, pp. 16-17), against fine
   segmentation (sec. 4.6, p. 29). In space, front-end power per channel over a large area favours strips over
   pixels; LGAD strips are a proposal there (SPC; inspire_2613721 sec. 1, p. 2).
-- **MCP timing detectors**: fast rise, small transit-time spread; aging with extracted charge and ion feedback.
+- **MCP timing detectors**: fast rise, small transit-time spread; aging with extracted charge and ion feedback ([radiation and ageing effects](radiation-and-aging-effects.md)).
 - **RPC/MRPC**: stacks of narrow gas gaps between resistive glass plates; leading-edge time, ToT as the amplitude
   for slewing (COL; arXiv:1806.03825 secs. 1, 3.1, pp. 2, 6). The local flux selects the electrode: ceramic at the
   highest rates, low-resistivity glass at high rate (higher dark rate), float glass at low rate (FXT; arXiv:1807.02070 sec. 2, pp. 3, 6); cluster
@@ -182,7 +182,7 @@ arXiv:0810.3830 sec. 4, Table 2, pp. 8-9). The same photon-number mechanism make
 - **Time-walk not corrected.** Looks like a momentum- or amplitude-dependent
   mass-hypothesis shift.
 - **Radiation damage treated as a static constant.** LGAD/SiPM timing evolves with
-  dose and operating point.
+  dose, annealing and operating point ([radiation and ageing effects](radiation-and-aging-effects.md)).
 - **Clock offsets look like PID or alignment problems.** Check run-by-run/fill-by-fill
   offsets first ([case studies](detector-case-studies-and-checklists.md)).
 - **One resolution for all charges.** Photostatistics and walk change with `Z`; a light-ion value does not hold for

@@ -120,7 +120,8 @@ limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
   at fixed path length (angle bins) or correct with the Landau-Vavilov-Bichsel thickness dependence.
 - **Intercalibration** (COL): pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
   absolute scale still needs a reference.
-- **Hadronic calorimeters**: `E/p` of isolated single hadrons, biased by the isolation cut itself.
+- **Hadronic calorimeters**: `E/p` of isolated single hadrons; check that the isolation cut does not bias `E/p` for the
+  isolation you use.
 
 ## Adding a tracking layer to a running detector
 
@@ -164,7 +165,8 @@ experiment's own sources (the installation and commissioning dates), not from a 
 
 ## Time dependence and conditions data
 
-Detectors change: gains drift with temperature, sensors accumulate radiation damage,
+Detectors change: gains drift with temperature, sensors accumulate radiation damage
+([radiation and ageing effects](radiation-and-aging-effects.md)),
 gas composition and pressure vary, channels die, and alignment moves with thermal
 cycles and magnet ramps. Calibration constants are therefore time-dependent payloads
 indexed by run or by a finer interval-of-validity, and this creates its own set of
