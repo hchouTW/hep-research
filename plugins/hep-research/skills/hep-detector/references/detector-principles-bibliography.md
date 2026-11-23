@@ -17,7 +17,7 @@ paper (name, configuration, phase space, conditions), which are deliberately not
 here because they are experiment-specific. Prefer primary sources for technical claims;
 the textbooks are for principles.
 
-Split files (same format; apparatus sources inside example blocks): [in-situ calibration and alignment](detector-principles-bibliography-calibration.md), [particle identification reference PDFs](detector-principles-bibliography-particle-identification.md), [radiation damage and ageing](detector-principles-bibliography-radiation.md), [calorimeter cluster reconstruction](detector-principles-bibliography-calorimetry.md), [muon systems](detector-principles-bibliography-muon-systems.md).
+Split files (same format; apparatus sources inside example blocks): [in-situ calibration and alignment](detector-principles-bibliography-calibration.md), [particle identification reference PDFs](detector-principles-bibliography-particle-identification.md), [radiation damage and ageing](detector-principles-bibliography-radiation.md), [calorimeter cluster reconstruction](detector-principles-bibliography-calorimetry.md), [muon systems](detector-principles-bibliography-muon-systems.md), [transition radiation](detector-principles-bibliography-transition-radiation.md).
 
 ## General and cross-cutting
 
